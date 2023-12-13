@@ -29,7 +29,7 @@ class Fireball(Calculator):
             self.initialize(self.atoms)
 
         # Check if energy needed
-        if 'energy' in properties:
+        if ('energy' in properties) or ('energies' in properties):
             # Computation energy
             print("Computing energies") # Example
             self.energies = np.random.randn(len(atoms))
