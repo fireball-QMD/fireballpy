@@ -21,6 +21,30 @@ class Fireball(Calculator):
         print(f"Loading Fdata for atoms {self._num_unique}") # Example
         self._loaded_fdata.append("fdata1.dat")
 
+    def _calculate_energies(self, atoms):
+        # Computation energy
+        print("Computing energies") # Example
+        self.energies = np.random.randn(len(atoms))
+        self.energy = np.sum(self.energies)
+        
+        # Save energy
+        self.results['energy'] = self.energy
+        self.results['energies'] = self.energies
+        self.results['free_energy'] = self.energy
+
+    def _calculate_forces(self, atoms):
+        # Requisite energies
+        if 'energies' not in self.results:
+            warnings.warn("Energies not computed. Computing energies", UserWarning)
+            self._calculate_energies(atoms)
+        
+        # Computation forces
+        print("Computing forces") # Example
+        self.forces = np.random.randn(len(atoms))
+
+        # Save forces
+        self.results['forces'] = self.forces
+
     def calculate(self, atoms=None, properties=['energy'], system_changes=all_changes):
         Calculator.calculate(self, atoms, properties, system_changes)
             
@@ -30,28 +54,11 @@ class Fireball(Calculator):
 
         # Check if energy needed
         if ('energy' in properties) or ('energies' in properties):
-            # Computation energy
-            print("Computing energies") # Example
-            self.energies = np.random.randn(len(atoms))
-            self.energy = np.sum(self.energies)
-            
-            # Save energy
-            self.results['energy'] = self.energy
-            self.results['energies'] = self.energies
-            self.results['free_energy'] = self.energy
+            self._calculate_energies(atoms)
 
         # Check if forces needed
         if 'forces' in properties:
-            # Requisite energies
-            if 'energies' not in self.results:
-                raise CalculatorSetupError("Energies must be computed before forces")
-            
-            # Computation forces
-            print("Computing forces") # Example
-            self.forces = np.random.randn(len(atoms))
-
-            # Save forces
-            self.results['forces'] = self.forces
+            self._calculate_forces(atoms)
 
     def initialize(self, atoms):
         self.numbers = atoms.get_atomic_numbers()
