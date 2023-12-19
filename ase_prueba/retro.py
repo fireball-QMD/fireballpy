@@ -21,26 +21,13 @@ def read_bas(filename: NameOrFile):
     while bas[-1] == '\n':
         bas = bas[:-1]
 
-    if len(bas) == (int(bas[0]) + 2):
-        xyz = bas
-    elif len(bas) == (int(bas[0]) + 1):
-        xyz = [bas[0], "no comment\n"]
-        for line in bas[1:]:
-            xyz.append(line)
-    else:
+    if len(bas) != (int(bas[0]) + 1):
         raise ValueError(f"{filename} is not a valid .bas file")
+    xyz = [bas[0].rstrip(), "no comment"]
+        
+    sp = '     '
+    for i, line in enumerate(bas[1:]):
+        sline = line.split()
+        xyz.append(z_to_symbol[sline[0]].rjust(3) + sp + sp.join([f'{float(s):10.5f}' for s in sline[1:]]))
 
-    for i, line in enumerate(xyz[2:]):
-        sline = line.split(' ')
-        for j, c in enumerate(sline):
-            if c == '':
-                sline[j] = ' '
-                continue
-            try:
-                atomz = str(int(c))
-                sline[j] = z_to_symbol[atomz]
-            except ValueError:
-                pass
-        xyz[i+2] = ''.join(sline)
-
-    return read(StringIO(''.join(xyz)), format='xyz')
+    return read(StringIO('\n'.join(xyz)), format='xyz')
