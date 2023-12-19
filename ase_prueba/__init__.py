@@ -10,15 +10,14 @@ the pure Fortran version
 
 __all__ = [
     'Fireball',
-    'read_bas'
+    'retro'
 ]
 
-__version__ = 'dev_0.0.1'
+__version__ = 'dev0.0.1'
 
 from ase.calculators.calculator import register_calculator_class
 
 from .fireball import Fireball
-from .retro import read_bas
 
 # Register the calculator as available for ASE
 register_calculator_class("fireball", Fireball)
