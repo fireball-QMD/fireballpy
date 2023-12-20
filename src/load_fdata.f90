@@ -5,13 +5,42 @@ subroutine load_fdata()
 
   implicit none
   real, dimension (:,:), allocatable :: rcutoff_temp
+  integer :: in1
+  integer :: ispec
+  integer :: issh
+  integer :: nsh_max_temp
+  integer :: nshPP_max_temp
 
   open (unit = 12, file = trim(fdataLocation)//'/info.dat', status = 'old')
-  read (12,*) 
+  read (12,*)
   read (12,*) nspecies
 
-  ! TODO read and calculate nsh_max, now is 6 calculate also nssPP_max
+  ! TODO read and calculate nsh_max, now is 6 calculate also nshPP_max
   ! TODO lsshPP nsh_max maybe diferent
+  ! DONE by Carlos PLEASE CHECK
+  do ispec = 1, nspecies
+    do in1 = 1, 5
+      read (12,*)
+    end do !in1
+    read (12,*) nsh_max_temp
+    read (12,*)
+    read (12,*) nshPP_max_temp
+    do in1 = 1, 8
+      read (12,*)
+    end do !in1
+    if (nsh_max_temp .gt. nsh_max) then
+      nsh_max = nsh_max_temp
+    endif
+    if (nshPP_max_temp .gt. nshPP_max) then
+      nshPP_max = nshPP_max_temp
+    endif
+  end do
+
+  ! Not sure if they can be different
+  nsh_max = max(nsh_max, nshPP_max)
+  !========================================
+
+  close(unit = 12) !close info.dat
 
   allocate (rcutoff_temp (nsh_max, nspecies))
 
@@ -31,6 +60,10 @@ subroutine load_fdata()
   allocate (wavefxn (nsh_max, nspecies))
   allocate (napot (0:nsh_max, nspecies))
 
+  open (unit = 12, file = trim(fdataLocation)//'/info.dat', status = 'old')
+  read (12,*)
+  read (12,*)
+
   do ispec = 1, nspecies
     read (12,*)
     read (12,*)
@@ -49,7 +82,7 @@ subroutine load_fdata()
     read (12,*) (lsshPP(issh,ispec), issh = 1, nsshPP(ispec))
     read (12,*) rc_PP(ispec)
     read (12,*) (Qneutral(issh,ispec), issh = 1, nssh(ispec))
-    read (12,*) (cutoff(issh,ispec), issh = 1, nssh(ispec))
+    read (12,*) (rcutoff_temp(issh,ispec), issh = 1, nssh(ispec))
     do issh = 1, nssh(ispec)
      rcutoff(ispec, issh) = rcutoff_temp(issh,ispec)*abohr
     end do
@@ -70,7 +103,7 @@ subroutine load_fdata()
       write (*,308) (lsshPP(issh,ispec), issh = 1, nsshPP(ispec))
       write (*,314) rc_PP(ispec)
       write (*,309) (Qneutral(issh,ispec), issh = 1, nssh(ispec))
-      write (*,310) (cutoff(issh,ispec), issh = 1, nssh(ispec))
+      write (*,310) (rcutoff_temp(issh,ispec), issh = 1, nssh(ispec))
       write (*,311) (wavefxn(issh,ispec), issh = 1, nssh(ispec))
       write (*,312) (napot(issh,ispec), issh = 0, nssh(ispec))
       write (*,313) etotatom(ispec)
@@ -78,8 +111,10 @@ subroutine load_fdata()
     endif !debug
   end do !ispec
    
-  close(unit = 12) !close info.dat     
+  close(unit = 12) !close info.dat
 
+  ! isorpmax = maxval(nssh)
+  ! isorpmax_xc = maxval(nssh)
   isorpmax = 0
   do in1 = 1, nspecies
     isorpmax = max(isorpmax,nssh(in1))
