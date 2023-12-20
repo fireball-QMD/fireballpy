@@ -80,6 +80,23 @@ subroutine load_fdata()
    
   close(unit = 12) !close info.dat     
 
+  isorpmax = 0
+  do in1 = 1, nspecies
+    isorpmax = max(isorpmax,nssh(in1))
+  end do
+  isorpmax_xc = 0
+  do in1 = 1, nspecies
+    isorpmax_xc = max(isorpmax_xc,nssh(in1))
+  end do
+
+  call make_munu (nspecies)
+  call make_munuPP (nspecies)
+  call make_munuS (nspecies)
+  call make_munuDipY (nspecies)
+  call make_munuDipX (nspecies)
+
+
+
   ! Procedure progs/READFILES/readdata_mcweda.f90
   ! one-center
   call read_1c (nspecies, itheory, itheory_xc, ispin, ioff2c(7))
