@@ -1,2 +1,8 @@
+# Core modules (mandatory) for JupyterLite
+jupyterlite-core==0.2.1
+jupyterlab~=4.0.9
+notebook~=7.0.6
+
+# Python libraries
 numpy==1.26.2
 ase==3.22.1
