@@ -19,5 +19,11 @@ module M_fdata
   character (len=25), dimension (:,:), allocatable :: wavefxn
   character (len=25), dimension (:,:), allocatable :: napot
    
-
+  integer :: itheory = 1 !DOGS 
+  integer :: itheory_xc = 2 !McWEDA
+  integer :: ispin = 0
+  integer ioff2c (1:24)
+ 
+  !idipole, icluster, siempre lee interaccion 10 y 11
+ 
 end module M_fdata
