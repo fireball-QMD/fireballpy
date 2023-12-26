@@ -6,9 +6,11 @@ enable_language(Fortran)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 
+set(BLA_VENDOR Intel10_64lp)
+find_package(BLAS)
+
 # Compilar programa en Fortran
 add_executable(pyreball ${CMAKE_SOURCE_DIR}/src/pyreball.f90 
-                        ${CMAKE_SOURCE_DIR}/src/suma.f90
                         ${CMAKE_SOURCE_DIR}/src/variables.f90
                         )
 
