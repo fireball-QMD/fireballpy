@@ -9,3 +9,6 @@ rm -fr *.mod
 ./test.x
 echo "python"
 python3 dia.py
+rm -fr test.x
+
+

@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import numpy as np
 
 def read_complex_matrix(filename):

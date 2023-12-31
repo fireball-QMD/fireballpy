@@ -1,12 +1,11 @@
 here=$(pwd)
 rm -fr build
-rm -fr bin
-mkdir build bin 
+mkdir build  
 cd build
 cmake ..
 make
 cd $here
 cd test
-./pyreball
+../build/pyreball
 cd ..
 

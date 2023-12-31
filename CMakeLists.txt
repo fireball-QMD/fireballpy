@@ -1,18 +1,24 @@
 cmake_minimum_required(VERSION 3.0)
 
-project(pyreball)
+set(ENV{FC} "ifort")
 
-enable_language(Fortran)
-
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
+project(pyreball Fortran)
 
 set(BLA_VENDOR Intel10_64lp)
-find_package(BLAS)
+#set(MKLROOT "/opt/intel/oneapi/mkl/latest")
+set(PATH_INCL ${MKLROOT}/include)
+set(PATH_MKL ${MKLROOT}/lib/intel64)
+set(MKL_FLAGS "-mkl")
 
 # Compilar programa en Fortran
 add_executable(pyreball ${CMAKE_SOURCE_DIR}/src/pyreball.f90 
+                        ${CMAKE_SOURCE_DIR}/src/diagonalize_matrix.f90
                         ${CMAKE_SOURCE_DIR}/src/variables.f90
                         )
+
+#target_include_directories(pyreball PRIVATE ${MKL_INCL})
+target_link_libraries(pyreball PRIVATE ${MKL_PATH}  ${MKL_FLAGS})
+
 
 #add_custom_command(OUTPUT ${CMAKE_SOURCE_DIR}/src/fortran_suma.so
 #                   COMMAND f2py -c ${CMAKE_SOURCE_DIR}/src/suma.f90
