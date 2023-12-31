@@ -1,14 +1,27 @@
 cmake_minimum_required(VERSION 3.0)
 
-set(ENV{FC} "ifort")
+#set(ENV{FC} "ifort")
+
+# Verificar si ifort está instalado
+find_program(IFORT_EXECUTABLE ifort)
+
+# Establecer la variable de entorno FC dependiendo del resultado
+if(IFORT_EXECUTABLE)
+    set(ENV{FC} "ifort")
+    set(PATH_INCL ${MKLROOT}/include)
+    set(PATH_MKL ${MKLROOT}/lib/intel64)
+else()
+    message(STATUS "ifort no encontrado. Usando gfortran.")
+    find_program(GFORTRAN_EXECUTABLE gfortran)
+    if(GFORTRAN_EXECUTABLE)
+        set(ENV{FC} "gfortran")
+    else()
+        message(FATAL_ERROR "No se encontró ni ifort ni gfortran. Imposible compilar.")
+    endif()
+endif()
+
 
 project(pyreball Fortran)
-
-set(BLA_VENDOR Intel10_64lp)
-#set(MKLROOT "/opt/intel/oneapi/mkl/latest")
-set(PATH_INCL ${MKLROOT}/include)
-set(PATH_MKL ${MKLROOT}/lib/intel64)
-set(MKL_FLAGS "-mkl")
 
 # Compilar programa en Fortran
 add_executable(pyreball ${CMAKE_SOURCE_DIR}/src/pyreball.f90 
@@ -16,9 +29,15 @@ add_executable(pyreball ${CMAKE_SOURCE_DIR}/src/pyreball.f90
                         ${CMAKE_SOURCE_DIR}/src/variables.f90
                         )
 
-#target_include_directories(pyreball PRIVATE ${MKL_INCL})
-target_link_libraries(pyreball PRIVATE ${MKL_PATH}  ${MKL_FLAGS})
-
+if(IFORT_EXECUTABLE)
+  #target_include_directories(pyreball PRIVATE ${MKL_INCL})
+  set(FLAGS "-mkl")
+  target_link_libraries(pyreball PRIVATE ${MKL_PATH}  ${FLAGS})
+endif()
+if(GFORTRAN_EXECUTABLE)
+  set(FLAGS "-llapack -lblas")
+  target_link_libraries(pyreball PRIVATE ${FLAGS})
+endif()
 
 #add_custom_command(OUTPUT ${CMAKE_SOURCE_DIR}/src/fortran_suma.so
 #                   COMMAND f2py -c ${CMAKE_SOURCE_DIR}/src/suma.f90

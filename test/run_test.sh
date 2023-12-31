@@ -10,5 +10,7 @@ rm -fr *.mod
 echo "python"
 python3 dia.py
 rm -fr test.x
-
+gfortran -o test.x ../src/variables.f90 ../src/pyreball.f90 ../src/diagonalize_matrix.f90 -llapack -lblas 
+./test.x  
+rm -fr *mod test.x
 
