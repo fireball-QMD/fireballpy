@@ -29,10 +29,62 @@ module M_fdata
   character (len=25), dimension (:,:), allocatable :: wavefxn
   character (len=25), dimension (:,:), allocatable :: napot
 
+  ! Maximum number of two-center matrix elements: (calculated in make_munu.f90)
+  ! Examples: s ==> 1, sp^3 ==>  6, ss*p^3p*^3 ==> 24, sp^3d^5 ==> 39
+
   integer :: ME2c_max
   integer :: ME2cPP_max
   integer :: ME2cDipY_max
   integer :: ME2cDipX_max
+
+  ! Maximum number of three-center matrix elements: (calculated in make_munu.f90)
+  ! Examples: s ==> 1, sp^3 ==> 10, ss*p^3p*^3 ==> 40, sp^3d^5 ==> 45
+  integer :: ME3c_max
+
+  ! Maximum number of two and three-center matrix elements in spherical density
+  ! approximation (OLSXC) (calculated in make_munuS.f90)
+  ! Examples: s ==> 1, sp^3 ==> 4, sp^3d^5 ==> 9
+  integer :: MES_max
+
+  integer, dimension (:, :), allocatable :: index_max2c
+  integer, dimension (:, :), allocatable :: index_max2cDipY
+  integer, dimension (:, :), allocatable :: index_max2cDipX
+  integer, dimension (:, :), allocatable :: index_max3c
+
+  integer, dimension (:, :, :), allocatable :: mu
+  integer, dimension (:, :, :), allocatable :: nu
+  integer, dimension (:, :, :), allocatable :: mvalue
+  integer, dimension (:), allocatable :: num_orb
+
+  integer, dimension (:, :, :), allocatable :: muDipY
+  integer, dimension (:, :, :), allocatable :: nuDipY
+  integer, dimension (:, :, :), allocatable :: muDipX
+  integer, dimension (:, :, :), allocatable :: nuDipX
+
+
+  ! These variables are specifically for the Kleinmann-Bylander pseudo-potentials
+  integer, dimension (:, :), allocatable :: index_maxPP
+  integer, dimension (:, :, :), allocatable :: muPP
+  integer, dimension (:, :, :), allocatable :: nuPP
+  integer, dimension (:), allocatable :: num_orbPP
+
+
+  ! These variables are specifically for spherical density approximation 
+  ! used in OLSXC method
+  integer, dimension (:, :), allocatable :: index_maxS
+  integer, dimension (:, :, :), allocatable :: muS
+  integer, dimension (:, :, :), allocatable :: nuS
+  integer, dimension (:, :, :), allocatable :: mvalueS
+
+
+  ! new Intra-atomic Dipole: One-center case (for the time being)
+  integer, dimension(:,:), allocatable :: muR
+  integer, dimension(:,:), allocatable :: nuR
+  integer, dimension(:,:), allocatable :: alphaR
+  integer, dimension(:,:), allocatable :: betaR
+  real, dimension(:,:), allocatable :: IR
+  integer, dimension(:), allocatable :: Nlines_vdip1c
+
  
   !TODO idipole, icluster, siempre lee interaccion 10 y 11
 
