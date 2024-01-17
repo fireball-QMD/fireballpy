@@ -122,8 +122,8 @@
  
 ! Allocate and initialize arrays
         if(interaction .eq. 1) then
-         allocate (xintegral_2c (ME2c_max, nfofx, interactions2c_max,        &
-     &                           nspecies, nspecies))
+         write(*,*),ME2c_max, nfofx, interactions2c_max,nspecies, nspecies
+         allocate (xintegral_2c (ME2c_max, nfofx, interactions2c_max,nspecies, nspecies))
          allocate (z2cmax (interactions2c_max, nspecies, nspecies))
          allocate (numz2c (interactions2c_max, nspecies, nspecies))
          xintegral_2c = 0.0d0
@@ -259,8 +259,7 @@
      &       num_nonzero = index_maxS(in1,in2)
            if (interaction .eq. 23) num_nonzero = index_maxS(in1,in2)
           
-           call readdata_2c (interaction, iounit, num_nonzero, numz, zmax,   &
-     &                       itype, in1, in2)
+           call readdata_2c (interaction, iounit, num_nonzero, numz, zmax,itype, in1, in2)
 
            close (unit = iounit)
           end do

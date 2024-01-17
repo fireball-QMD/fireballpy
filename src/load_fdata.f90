@@ -11,6 +11,7 @@ subroutine load_fdata()
   integer :: nsh_max_temp
   integer :: nshPP_max_temp
   integer :: interaction
+  integer :: icount, isorp,ideriv
 
   open (unit = 12, file = trim(fdataLocation)//'/info.dat', status = 'old')
   read (12,*)
@@ -62,6 +63,7 @@ subroutine load_fdata()
   allocate (napot (0:nsh_max, nspecies))
   
   allocate (nsu(nspecies))
+  nsu=0 !AQUI
 
   open (unit = 12, file = trim(fdataLocation)//'/info.dat', status = 'old')
   read (12,*)
@@ -127,6 +129,101 @@ subroutine load_fdata()
     isorpmax_xc = max(isorpmax_xc,nssh(in1))
   end do
 
+
+
+        ideriv_max = 0
+        if (itheory .eq. 1) ideriv_max = 6
+
+! Set up the index field ind2c:
+        icount = 0
+        ind2c = 0
+        icount = icount + 1
+        ind2c(1,0) = icount
+        do isorp = 0, isorpmax
+         icount = icount + 1
+         ind2c(2,isorp) = icount
+        end do
+        do isorp = 0, isorpmax
+         icount = icount + 1
+         ind2c(3,isorp) = icount
+        end do
+        do isorp = 0, isorpmax
+         icount = icount + 1
+         ind2c(4,isorp) = icount
+        end do
+        icount = icount + 1
+        ind2c(5,0) = icount
+        do ideriv = 0, 4
+         icount = icount + 1
+         ind2c(6,ideriv) = icount
+        end do
+        do ideriv = 0, 4
+         icount = icount + 1
+         ind2c(7,ideriv) = icount
+        end do
+        do ideriv = 0, 4
+         icount = icount + 1
+         ind2c(8,ideriv) = icount
+        end do
+        icount = icount + 1
+        ind2c(9,0) = icount
+        icount = icount + 1
+        ind2c(10,0) = icount
+        icount = icount + 1
+        ind2c(11,0) = icount
+        icount = icount + 1
+        ind2c(12,0) = icount
+        icount = icount + 1
+        ind2c(13,0) = icount
+        icount = icount + 1
+        ind2c(14,0) = icount
+        if (itheory_xc .eq. 1 .or. itheory_xc .eq. 2 .or. itheory_xc .eq. 4 ) then
+         if (itheory_xc .eq. 4) then 
+          icount = icount + 1
+          ind2c(14,0) = icount
+         end if !end if itheory_xc .eq. 4
+         do isorp = 1, isorpmax_xc
+          icount = icount + 1
+          ind2c(15,isorp) = icount
+         end do
+         do isorp = 1, isorpmax_xc
+          icount = icount + 1
+          ind2c(16,isorp) = icount
+         end do
+         do isorp = 1, isorpmax_xc
+          icount = icount + 1
+          ind2c(17,isorp) = icount
+         end do
+         do isorp = 1, isorpmax_xc
+          icount = icount + 1
+          ind2c(18,isorp) = icount
+         end do
+         do isorp = 1, isorpmax_xc
+          icount = icount + 1
+          ind2c(19,isorp) = icount
+         end do
+         do isorp = 1, isorpmax_xc
+          icount = icount + 1
+          ind2c(20,isorp) = icount
+         end do
+         do isorp = 1, isorpmax_xc
+          icount = icount + 1
+          ind2c(21,isorp) = icount
+         end do
+         do isorp = 1, isorpmax_xc
+          icount = icount + 1
+          ind2c(22,isorp) = icount
+         end do
+         icount = icount + 1
+         ind2c(23,0) = icount
+!dani.JOM.jel-fr-end
+         
+
+        end if
+        interactions2c_max = icount
+
+
+
   call make_munu ()
   call make_munuPP ()
   call make_munuS ()
@@ -138,7 +235,6 @@ subroutine load_fdata()
   ! Procedure progs/READFILES/readdata_mcweda.f90
   ! one-center
 
-  !AQUI
   call read_1c ()
 
   ! two-center
@@ -157,6 +253,7 @@ subroutine load_fdata()
   call read_3c (interaction)
   interaction = 4   ! den3 (3c - OLSXC) - spherical average density
   call read_3c (interaction)
+
 
   ! Set up some tables for the 2d interpolator
   call setterp_2d ()

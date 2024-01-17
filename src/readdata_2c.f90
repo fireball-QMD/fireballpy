@@ -22,8 +22,6 @@
         integer ipoint
         integer integral
  
-        real :: xoff = 1.0d0 !ya no vale...
- 
         real, dimension (ME2c_max, nfofx) :: gstore
  
 ! Allocate Arrays
@@ -31,7 +29,6 @@
  
 ! Procedure
 ! ===========================================================================
-! This set to zero unset elements (see 'diagnostics.input')
         
 
         if (interaction .ne. 8) then
@@ -40,13 +37,13 @@
          end do
          do ipoint = 1, numz
           do integral = 1, num_nonzero
-            xintegral_2c(integral,ipoint,itype,in1,in2) =  gstore(integral,ipoint)*xoff
+            xintegral_2c(integral,ipoint,itype,in1,in2) =  gstore(integral,ipoint)
           end do
          end do
         else
          do ipoint = 1, numz
           read (iounit,*) gstore(1,ipoint)
-          xintegral_2c(1,ipoint,itype,in1,in2) = gstore(1,ipoint)*xoff
+          xintegral_2c(1,ipoint,itype,in1,in2) = gstore(1,ipoint)
          end do
         end if
 ! Deallocate Arrays
