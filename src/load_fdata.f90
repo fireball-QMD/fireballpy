@@ -10,6 +10,7 @@ subroutine load_fdata()
   integer :: issh
   integer :: nsh_max_temp
   integer :: nshPP_max_temp
+  integer :: interaction
 
   open (unit = 12, file = trim(fdataLocation)//'/info.dat', status = 'old')
   read (12,*)
@@ -59,6 +60,8 @@ subroutine load_fdata()
   allocate (Qneutral (nsh_max, nspecies))
   allocate (wavefxn (nsh_max, nspecies))
   allocate (napot (0:nsh_max, nspecies))
+  
+  allocate (nsu(nspecies))
 
   open (unit = 12, file = trim(fdataLocation)//'/info.dat', status = 'old')
   read (12,*)
@@ -124,37 +127,39 @@ subroutine load_fdata()
     isorpmax_xc = max(isorpmax_xc,nssh(in1))
   end do
 
-  call make_munu (nspecies)
-  call make_munuPP (nspecies)
-  call make_munuS (nspecies)
-  call make_munuDipY (nspecies)
-  call make_munuDipX (nspecies)
+  call make_munu ()
+  call make_munuPP ()
+  call make_munuS ()
+  call make_munuDipY ()
+  call make_munuDipX ()
 
 
 
   ! Procedure progs/READFILES/readdata_mcweda.f90
   ! one-center
-  call read_1c (nspecies, itheory, itheory_xc, ispin, ioff2c(7))
+
+  !AQUI
+  call read_1c ()
 
   ! two-center
   do interaction = 1, 13
-    call read_2c (interaction, nspecies, itheory, ioff2c(interaction), nzx)
+    call read_2c (interaction)
   end do
  
   ! Spherical OLSXC exchange-correlation
   do interaction = 15, 23
-    call read_2c (interaction, nspecies, itheory, ioff2c(interaction), nzx)
+    call read_2c (interaction)
   end do
 
   interaction = 1   ! bcna
-  call read_3c (interaction, nspecies, ioff3c(interaction), itheory, nzx)
+  call read_3c (interaction)
   interaction = 3   ! den3 (3c - OLSXC) - average density
-  call read_3c (interaction, nspecies, ioff3c(interaction), itheory, nzx)
+  call read_3c (interaction)
   interaction = 4   ! den3 (3c - OLSXC) - spherical average density
-  call read_3c (interaction, nspecies, ioff3c(interaction), itheory, nzx)
+  call read_3c (interaction)
 
   ! Set up some tables for the 2d interpolator
-  call setterp_2d (nspecies, itheory_xc, itheory)
+  call setterp_2d ()
 
 ! Deallocate Arrays
 ! ===========================================================================

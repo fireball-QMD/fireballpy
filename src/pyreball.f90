@@ -1,8 +1,13 @@
 program pyreball
 
-    use variables    
+    !use variables    
+    use M_fdata
     
-    call diagonalize_matrix()
+    fdatalocation='/home/dani/FB/git/create/coutput'
+    call load_fdata()
+
+    
+    !call diagonalize_matrix()
 
 end program pyreball
 

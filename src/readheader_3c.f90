@@ -1,79 +1,15 @@
-! copyright info:
-!
-!                             @Copyright 2005
-!                     Fireball Enterprise Center, BYU
-! Brigham Young University - James P. Lewis, Chair
-! Arizona State University - Otto F. Sankey
-! Universidad de Madrid - Jose Ortega
-! Institute of Physics, Czech Republic - Pavel Jelinek
-
-! Other contributors, past and present:
-! Auburn University - Jian Jun Dong
-! Arizona State University - Gary B. Adams
-! Arizona State University - Kevin Schmidt
-! Arizona State University - John Tomfohr
-! Lawrence Livermore National Laboratory - Kurt Glaesemann
-! Motorola, Physical Sciences Research Labs - Alex Demkov
-! Motorola, Physical Sciences Research Labs - Jun Wang
-! Ohio University - Dave Drabold
-! University of Regensburg - Juergen Fritsch
-
-!
-! fireball-qmd is a free (GPLv3) open project.
-
-! This program is free software: you can redistribute it and/or modify
-! it under the terms of the GNU General Public License as published by
-! the Free Software Foundation, either version 3 of the License, or
-! (at your option) any later version.
-!
-! This program is distributed in the hope that it will be useful,
-! but WITHOUT ANY WARRANTY; without even the implied warranty of
-! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-! GNU General Public License for more details.
-!
-! You should have received a copy of the GNU General Public License
-! along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-
 ! readheader_3c.f90
 ! Program Description
 ! ===========================================================================
 !       Read the header of the 3-center data files.
 !
 ! ===========================================================================
-! Code rewritten by:
-! Kurt R. Glaesemann
-! Henry Eyring Center for Theoretical Chemistry
-! Department of Chemistry
-! University of Utah
-! 315 S. 1400 E.
-! Salt Lake City, UT 84112-0850
-! FAX 801-581-4353
-! Office telephone 801-585-1078
-! ===========================================================================
-!
-! Program Declaration
-! ===========================================================================
         subroutine readheader_3c (iounit, numx, numy, xmax, ymax)
-        use dimensions
+        use M_fdata
         implicit none
- 
-! Argument Declaration and Description
-! ===========================================================================
-! Input
         integer, intent (in) :: iounit
- 
-! Output
-! ymax, numy: bond charge distances grid
-! xmax, numx: neutral atom distances grid
         integer, intent (out) :: numx, numy
         real, intent (out) :: xmax, ymax
- 
-! Local Parameters and Data Declaration
-! ===========================================================================
- 
-! Local Variable Declaration and Description
-! ===========================================================================
         integer iline
         integer nucZ1, nucZ2, nucZ3, nr, ntheta_in, nphi2
         real rc1a, rc2a, rc3a

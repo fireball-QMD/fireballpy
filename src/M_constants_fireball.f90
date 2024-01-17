@@ -46,12 +46,6 @@ real, parameter :: kb = 8.617343693082104d-5! 1.380662d-23 J/K * 6.24150974*10^1
 ! We generally use -5 which puts 3 points on each side of where you are
 ! interpolating.  Total number of points=abs(norder1)+1.
          integer, parameter :: norder1 = -5
-! If we do one big 100+ point spline the we just build it once
-! This gives continous f, f', f'', but not f'''.  All higher derivatives are 
-! continous since they are zero.
-!         logical, parameter :: superspline = .false.
-         logical, parameter :: superspline = .true.
-
 ! What method do we use to interpolate 2-D grids
          integer, parameter :: D2intMeth = 1 ! 1 -> polynomials x then y
                                              ! All other methods sucked and were deleted

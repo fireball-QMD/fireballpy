@@ -1,40 +1,3 @@
-! copyright info:
-!
-!                             @Copyright 2005
-!                     Fireball Enterprise Center, BYU
-! Brigham Young University - James P. Lewis, Chair
-! Arizona State University - Otto F. Sankey
-! Universidad de Madrid - Jose Ortega
-! Institute of Physics, Czech Republic - Pavel Jelinek
-
-! Other contributors, past and present:
-! Auburn University - Jian Jun Dong
-! Arizona State University - Gary B. Adams
-! Arizona State University - Kevin Schmidt
-! Arizona State University - John Tomfohr
-! Lawrence Livermore National Laboratory - Kurt Glaesemann
-! Motorola, Physical Sciences Research Labs - Alex Demkov
-! Motorola, Physical Sciences Research Labs - Jun Wang
-! Ohio University - Dave Drabold
-! University of Regensburg - Juergen Fritsch
-
-!
-! fireball-qmd is a free (GPLv3) open project.
-
-! This program is free software: you can redistribute it and/or modify
-! it under the terms of the GNU General Public License as published by
-! the Free Software Foundation, either version 3 of the License, or
-! (at your option) any later version.
-!
-! This program is distributed in the hope that it will be useful,
-! but WITHOUT ANY WARRANTY; without even the implied warranty of
-! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-! GNU General Public License for more details.
-!
-! You should have received a copy of the GNU General Public License
-! along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-
 ! readdata_2c.f90
 ! Program Description
 ! ===========================================================================
@@ -46,49 +9,20 @@
 ! for a given interaction, and a given pair of atoms are numz and num_nonzero.
 !
 ! ===========================================================================
-! Code written by:
-! James P. Lewis
-! Department of Physics and Astronomy
-! Brigham Young University
-! N233 ESC P.O. Box
-! Provo, UT 84602-4658
-! FAX (801) 422-2265
-! Office Telephone (801) 422-7444
-! ===========================================================================
-!
-! Program Declaration
-! ===========================================================================
-        subroutine readdata_2c (interaction, iounit, num_nonzero, numz, zmax,&
-     &                          itype, in1, in2, ioff2c)
-        use dimensions
-        use integrals
-        use interactions
-        use constants_fireball
+        subroutine readdata_2c (interaction, iounit, num_nonzero, numz, zmax, itype, in1, in2)
+        use M_fdata
         implicit none
- 
-! Argument Declaration and Description
-! ===========================================================================
-! Input
         integer, intent (in) :: in1, in2
         integer, intent (in) :: interaction
-        integer, intent (in) :: ioff2c
         integer, intent (in) :: iounit
         integer, intent (in) :: itype
         integer, intent (in) :: num_nonzero
         integer, intent (in) :: numz
         real, intent (in) :: zmax
- 
-! Output is xintegral_2c
- 
-! Local Parameters and Data Declaration
-! ===========================================================================
- 
-! Local Variable Declaration and Description
-! ===========================================================================
         integer ipoint
         integer integral
  
-        real xoff
+        real :: xoff = 1.0d0 !ya no vale...
  
         real, dimension (ME2c_max, nfofx) :: gstore
  
@@ -100,7 +34,6 @@
 ! This set to zero unset elements (see 'diagnostics.input')
         
 
-        xoff = real(ioff2c)
         if (interaction .ne. 8) then
          do ipoint = 1, numz
           read (iounit,*) (gstore(integral,ipoint), integral = 1, num_nonzero)

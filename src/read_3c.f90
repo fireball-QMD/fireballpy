@@ -1,40 +1,3 @@
-! copyright info:
-!
-!                             @Copyright 2005
-!                     Fireball Enterprise Center, BYU
-! Brigham Young University - James P. Lewis, Chair
-! Arizona State University - Otto F. Sankey
-! Universidad de Madrid - Jose Ortega
-! Institute of Physics, Czech Republic - Pavel Jelinek
-
-! Other contributors, past and present:
-! Auburn University - Jian Jun Dong
-! Arizona State University - Gary B. Adams
-! Arizona State University - Kevin Schmidt
-! Arizona State University - John Tomfohr
-! Lawrence Livermore National Laboratory - Kurt Glaesemann
-! Motorola, Physical Sciences Research Labs - Alex Demkov
-! Motorola, Physical Sciences Research Labs - Jun Wang
-! Ohio University - Dave Drabold
-! University of Regensburg - Juergen Fritsch
-
-!
-! fireball-qmd is a free (GPLv3) open project.
-
-! This program is free software: you can redistribute it and/or modify
-! it under the terms of the GNU General Public License as published by
-! the Free Software Foundation, either version 3 of the License, or
-! (at your option) any later version.
-!
-! This program is distributed in the hope that it will be useful,
-! but WITHOUT ANY WARRANTY; without even the implied warranty of
-! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-! GNU General Public License for more details.
-!
-! You should have received a copy of the GNU General Public License
-! along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-
 ! read_3c.f90
 ! Program Description
 ! ===========================================================================
@@ -58,39 +21,10 @@
 !               3           isorp        den3
 !               
 ! ===========================================================================
-! Code written by:
-! James P. Lewis
-! Department of Physics and Astronomy
-! Brigham Young University
-! N233 ESC P.O. Box 24658
-! Provo, UT 84602-4658
-! FAX (801) 422-2265
-! Office Telephone (801) 422-7444
-! ===========================================================================
-!
-! Program Declaration
-! ===========================================================================
-        subroutine read_3c (interaction, nspecies, ioff, itheory, nzx)
-        use dimensions
-        use integrals
-        use interactions
+        subroutine read_3c (interaction)
+        use M_fdata
         implicit none
- 
-! Argument Declaration and Description
-! ===========================================================================
-! Input
-        integer, intent (in) :: ioff
         integer, intent (in) :: interaction
-        integer, intent (in) :: itheory
-        integer, intent (in) :: nspecies
- 
-        integer, intent (in), dimension (nspecies) :: nzx
-
-! Local Parameters and Data Declaration
-! ===========================================================================
- 
-! Local Variable Declaration and Description
-! ===========================================================================
         integer iounit
         integer in1, in2, in3
         integer index
@@ -103,14 +37,14 @@
         real xmax
         real ymax
 
-        character (len=200) append_string
+        !character (len=200) append_string
         character (len=200) extension
         character (len=200) filename
         character (len=200) root
         character (len=200) root1
         character (len=200) root2
  
-        external append_string
+        !external append_string
 
 ! Allocate Arrays
 ! ===========================================================================
@@ -314,93 +248,30 @@
 ! We have to specify the atoms, the exact interaction type, and the number of 
 ! the expansion coefficient.
              if (interaction .eq. 1) then
-              if (itheta .eq. 1)                                             &
-     &         call readdata_3c (iounit, numx, numy, index_max3c(in1,in2),   &
-     &                           isorp, isorpmax, index, ioff, nspecies,     &
-     &                           bcna_01)
-              if (itheta .eq. 2)                                             &
-     &         call readdata_3c (iounit, numx, numy, index_max3c(in1,in2),   &
-     &                           isorp, isorpmax, index, ioff, nspecies,     & 
-     &                           bcna_02)
-              if (itheta .eq. 3)                                             &
-     &         call readdata_3c (iounit, numx, numy, index_max3c(in1,in2),   &
-     &                           isorp, isorpmax, index, ioff, nspecies,     &
-     &                           bcna_03)
-              if (itheta .eq. 4)                                             &
-     &         call readdata_3c (iounit, numx, numy, index_max3c(in1,in2),   &
-     &                           isorp, isorpmax, index, ioff, nspecies,     &
-     &                           bcna_04)
-              if (itheta .eq. 5)                                             &
-     &         call readdata_3c (iounit, numx, numy, index_max3c(in1,in2),   &
-     &                           isorp, isorpmax, index, ioff, nspecies,     &
-     &                           bcna_05)
+              if (itheta .eq. 1) call readdata_3c (iounit, numx, numy, index_max3c(in1,in2),isorp,isorpmax,  index,  bcna_01)
+              if (itheta .eq. 2) call readdata_3c (iounit, numx, numy, index_max3c(in1,in2),isorp,isorpmax,  index,  bcna_02)
+              if (itheta .eq. 3) call readdata_3c (iounit, numx, numy, index_max3c(in1,in2),isorp,isorpmax,  index,  bcna_03)
+              if (itheta .eq. 4) call readdata_3c (iounit, numx, numy, index_max3c(in1,in2),isorp,isorpmax,  index,  bcna_04)
+              if (itheta .eq. 5) call readdata_3c (iounit, numx, numy, index_max3c(in1,in2),isorp,isorpmax,  index,  bcna_05)
              else if (interaction .eq. 2 ) then
-              if (itheta .eq. 1)                                             &
-     &         call readdata_3c (iounit, numx, numy, index_max3c(in1,in2),   &
-     &                           isorp, ideriv_max, index, ioff, nspecies,   &
-     &                           xc3c_01)
-              if (itheta .eq. 2)                                             &
-     &         call readdata_3c (iounit, numx, numy, index_max3c(in1,in2),   &
-     &                           isorp, ideriv_max, index, ioff, nspecies,   &
-     &                           xc3c_02)
-              if (itheta .eq. 3)                                             &
-     &         call readdata_3c (iounit, numx, numy, index_max3c(in1,in2),   &
-     &                           isorp, ideriv_max, index, ioff, nspecies,   &
-     &                           xc3c_03)
-              if (itheta .eq. 4)                                             &
-     &         call readdata_3c (iounit, numx, numy, index_max3c(in1,in2),   &
-     &                           isorp, ideriv_max, index, ioff, nspecies,   &
-     &                           xc3c_04)
-              if (itheta .eq. 5)                                             &
-     &         call readdata_3c (iounit, numx, numy, index_max3c(in1,in2),   &
-     &                           isorp, ideriv_max, index, ioff, nspecies,   &
-     &                           xc3c_05)
+              if (itheta .eq. 1) call readdata_3c (iounit, numx, numy, index_max3c(in1,in2),isorp,ideriv_max,index,  xc3c_01)
+              if (itheta .eq. 2) call readdata_3c (iounit, numx, numy, index_max3c(in1,in2),isorp,ideriv_max,index,  xc3c_02)
+              if (itheta .eq. 3) call readdata_3c (iounit, numx, numy, index_max3c(in1,in2),isorp,ideriv_max,index,  xc3c_03)
+              if (itheta .eq. 4) call readdata_3c (iounit, numx, numy, index_max3c(in1,in2),isorp,ideriv_max,index,  xc3c_04)
+              if (itheta .eq. 5) call readdata_3c (iounit, numx, numy, index_max3c(in1,in2),isorp,ideriv_max,index,  xc3c_05)
              else if (interaction .eq. 3) then
 
-              if (itheta .eq. 1)                                             &
-     &         call readdata_3c (iounit, numx, numy, index_max3c(in1,in2),   &
-     &                           isorp, isorpmax_xc, index, ioff, nspecies,  &
-     &                           den3_01)
-              if (itheta .eq. 2)                                             &
-     &         call readdata_3c (iounit, numx, numy, index_max3c(in1,in2),   &
-     &                           isorp, isorpmax_xc, index, ioff, nspecies,  &
-     &                           den3_02)
-              if (itheta .eq. 3)                                             &
-     &         call readdata_3c (iounit, numx, numy, index_max3c(in1,in2),   &
-     &                           isorp, isorpmax_xc, index, ioff, nspecies,  &
-     &                           den3_03)
-              if (itheta .eq. 4)                                             &
-     &         call readdata_3c (iounit, numx, numy, index_max3c(in1,in2),   &
-     &                           isorp, isorpmax_xc, index, ioff, nspecies,  &
-     &                           den3_04)
-              if (itheta .eq. 5)                                             &
-     &         call readdata_3c (iounit, numx, numy, index_max3c(in1,in2),   &
-     &                           isorp, isorpmax_xc, index, ioff, nspecies,  &
-     &                           den3_05)
-
+              if (itheta .eq. 1) call readdata_3c (iounit, numx, numy, index_max3c(in1,in2),isorp,isorpmax_xc, index, den3_01)
+              if (itheta .eq. 2) call readdata_3c (iounit, numx, numy, index_max3c(in1,in2),isorp,isorpmax_xc, index, den3_02)
+              if (itheta .eq. 3) call readdata_3c (iounit, numx, numy, index_max3c(in1,in2),isorp,isorpmax_xc, index, den3_03)
+              if (itheta .eq. 4) call readdata_3c (iounit, numx, numy, index_max3c(in1,in2),isorp,isorpmax_xc, index, den3_04)
+              if (itheta .eq. 5) call readdata_3c (iounit, numx, numy, index_max3c(in1,in2),isorp,isorpmax_xc, index, den3_05)
              else if (interaction .eq. 4) then 
-              if (itheta .eq. 1)                                             &
-     &         call readdata_3c (iounit, numx, numy, index_maxS(in1,in2),    &
-     &                           isorp, isorpmax_xc, index, ioff, nspecies,  &
-     &                           den3S_01)
-              if (itheta .eq. 2)                                             &
-     &         call readdata_3c (iounit, numx, numy, index_maxS(in1,in2),    &
-     &                           isorp, isorpmax_xc, index, ioff, nspecies,  &
-     &                           den3S_02)
-              if (itheta .eq. 3)                                             &
-     &         call readdata_3c (iounit, numx, numy, index_maxS(in1,in2),    &
-     &                           isorp, isorpmax_xc, index, ioff, nspecies,  &
-     &                           den3S_03)
-              if (itheta .eq. 4)                                             &
-     &         call readdata_3c (iounit, numx, numy, index_maxS(in1,in2),    &
-     &                           isorp, isorpmax_xc, index, ioff, nspecies,  &
-     &                           den3S_04)
-              if (itheta .eq. 5)                                             &
-     &         call readdata_3c (iounit, numx, numy, index_maxS(in1,in2),    &
-     &                           isorp, isorpmax_xc, index, ioff, nspecies,  &
-     &                           den3S_05)
-
-
+              if (itheta .eq. 1) call readdata_3c (iounit, numx, numy, index_maxS(in1,in2), isorp,isorpmax_xc,index, den3S_01)
+              if (itheta .eq. 2) call readdata_3c (iounit, numx, numy, index_maxS(in1,in2), isorp,isorpmax_xc,index, den3S_02)
+              if (itheta .eq. 3) call readdata_3c (iounit, numx, numy, index_maxS(in1,in2), isorp,isorpmax_xc,index, den3S_03)
+              if (itheta .eq. 4) call readdata_3c (iounit, numx, numy, index_maxS(in1,in2), isorp,isorpmax_xc,index, den3S_04)
+              if (itheta .eq. 5) call readdata_3c (iounit, numx, numy, index_maxS(in1,in2), isorp,isorpmax_xc,index, den3S_05)
              end if
              close (iounit)
             end do   !  interaction subtype

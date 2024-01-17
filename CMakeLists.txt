@@ -20,25 +20,40 @@ else()
     endif()
 endif()
 
-
 project(pyreball Fortran)
 
 # Compilar programa en Fortran
-add_executable(pyreball ${CMAKE_SOURCE_DIR}/src/pyreball.f90 
-                        ${CMAKE_SOURCE_DIR}/src/diagonalize_matrix.f90
-                        ${CMAKE_SOURCE_DIR}/src/variables.f90
+add_executable(pyreball ${CMAKE_SOURCE_DIR}/src/M_constants_fireball.f90
+                        ${CMAKE_SOURCE_DIR}/src/M_fdata.f90 
+                        ${CMAKE_SOURCE_DIR}/src/make_munuDipX.f90 
+                        ${CMAKE_SOURCE_DIR}/src/make_munu.f90 
+                        ${CMAKE_SOURCE_DIR}/src/make_munuS.f90
+                        ${CMAKE_SOURCE_DIR}/src/make_munuDipY.f90
+                        ${CMAKE_SOURCE_DIR}/src/make_munuPP.f90
+                        ${CMAKE_SOURCE_DIR}/src/read_1c.f90
+                        ${CMAKE_SOURCE_DIR}/src/readheader_2c.f90
+                        ${CMAKE_SOURCE_DIR}/src/readdata_2c.f90
+                        ${CMAKE_SOURCE_DIR}/src/read_2c.f90
+                        ${CMAKE_SOURCE_DIR}/src/read_3c.f90
+                        ${CMAKE_SOURCE_DIR}/src/readdata_3c.f90
+                        ${CMAKE_SOURCE_DIR}/src/readheader_3c.f90
+                        ${CMAKE_SOURCE_DIR}/src/setterp_2d.f90
+                        ${CMAKE_SOURCE_DIR}/src/load_fdata.f90
+                        ${CMAKE_SOURCE_DIR}/src/pyreball.f90
                         )
+                        #${CMAKE_SOURCE_DIR}/src/diagonalize_matrix.f90
+                        #${CMAKE_SOURCE_DIR}/src/variables.f90
+                        #)
 
-if(IFORT_EXECUTABLE)
-  #target_include_directories(pyreball PRIVATE ${MKL_INCL})
-  set(FLAGS "-mkl")
-  target_link_libraries(pyreball PRIVATE ${MKL_PATH}  ${FLAGS})
-endif()
-if(GFORTRAN_EXECUTABLE)
-  set(FLAGS "-llapack -lblas")
-  target_link_libraries(pyreball PRIVATE ${FLAGS})
-endif()
-
+#if(IFORT_EXECUTABLE)
+#  set(FLAGS "-mkl")
+#  target_link_libraries(pyreball PRIVATE ${MKL_PATH}  ${FLAGS})
+#endif()
+#if(GFORTRAN_EXECUTABLE)
+#  set(FLAGS "-llapack -lblas")
+#  target_link_libraries(pyreball PRIVATE ${FLAGS})
+#endif()
+#
 #add_custom_command(OUTPUT ${CMAKE_SOURCE_DIR}/src/fortran_suma.so
 #                   COMMAND f2py -c ${CMAKE_SOURCE_DIR}/src/suma.f90
 #                   ${CMAKE_SOURCE_DIR}/src/variables.f90 

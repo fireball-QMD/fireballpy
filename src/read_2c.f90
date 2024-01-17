@@ -1,40 +1,3 @@
-! copyright info:
-!
-!                             @Copyright 2005
-!                     Fireball Enterprise Center, BYU
-! Brigham Young University - James P. Lewis, Chair
-! Arizona State University - Otto F. Sankey
-! Universidad de Madrid - Jose Ortega
-! Institute of Physics, Czech Republic - Pavel Jelinek
-
-! Other contributors, past and present:
-! Auburn University - Jian Jun Dong
-! Arizona State University - Gary B. Adams
-! Arizona State University - Kevin Schmidt
-! Arizona State University - John Tomfohr
-! Lawrence Livermore National Laboratory - Kurt Glaesemann
-! Motorola, Physical Sciences Research Labs - Alex Demkov
-! Motorola, Physical Sciences Research Labs - Jun Wang
-! Ohio University - Dave Drabold
-! University of Regensburg - Juergen Fritsch
-
-!
-! fireball-qmd is a free (GPLv3) open project.
-
-! This program is free software: you can redistribute it and/or modify
-! it under the terms of the GNU General Public License as published by
-! the Free Software Foundation, either version 3 of the License, or
-! (at your option) any later version.
-!
-! This program is distributed in the hope that it will be useful,
-! but WITHOUT ANY WARRANTY; without even the implied warranty of
-! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-! GNU General Public License for more details.
-!
-! You should have received a copy of the GNU General Public License
-! along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-
 ! read_2c.f90
 ! Program Description
 ! ===========================================================================
@@ -109,42 +72,13 @@
 ! --> But isn't that a waste of memory which makes fireball run more slowly?
 !
 ! ===========================================================================
-! Code rewritten by:
-! James P. Lewis
-! Department of Physics and Astronomy
-! Brigham Young University
-! N233 ESC P.O. Box 24658
-! Provo, UT 84602-4658
-! FAX (801) 422-2265
-! Office Telephone (801) 422-7444
-! ===========================================================================
-!
 ! Program Declaration
 ! ===========================================================================
-        subroutine read_2c (interaction, nspecies, itheory, ioff2c, nzx)
-        use dimensions
-        use integrals
-        use interactions
-        use constants_fireball
+        subroutine read_2c (interaction)
+        use M_fdata
         implicit none
- 
-! Argument Declaration and Description
-! ===========================================================================
-! Input
+
         integer, intent (in) :: interaction
-        integer, intent (in) :: ioff2c
-        integer, intent (in) :: itheory
-        integer, intent (in) :: nspecies
- 
-        integer, intent (in), dimension (nspecies) :: nzx
-        
-! Output is in module integrals
- 
-! Local Parameters and Data Declaration
-! ===========================================================================
- 
-! Local Variable Declaration and Description
-! ===========================================================================
         integer in1
         integer in2
         integer initype
@@ -169,13 +103,13 @@
 ! you will have 2 (L=0, 1 and sometimes 2 (D)).
         real, dimension (nsh_max) :: cl_pseudo
  
-        character (len = 200) append_string
+        !character (len = 200) append_string
         character (len = 200) extension
         character (len = 200) filename
         character (len = 200) root
         character (len = 200) root_isorp
  
-        external append_string
+        !external append_string
 
  
 ! Procedure
@@ -193,11 +127,6 @@
          allocate (z2cmax (interactions2c_max, nspecies, nspecies))
          allocate (numz2c (interactions2c_max, nspecies, nspecies))
          xintegral_2c = 0.0d0
-         if (superspline) then
-          allocate (splineint_2c(1:4, ME2c_max, nfofx, interactions2c_max,   &
-     &                           nspecies, nspecies))
-          splineint_2c = 0.0d0
-         end if
         end if
         iounit = 71
 
@@ -331,7 +260,7 @@
            if (interaction .eq. 23) num_nonzero = index_maxS(in1,in2)
           
            call readdata_2c (interaction, iounit, num_nonzero, numz, zmax,   &
-     &                       itype, in1, in2, ioff2c)
+     &                       itype, in1, in2)
 
            close (unit = iounit)
           end do

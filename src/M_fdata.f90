@@ -5,7 +5,6 @@ module M_fdata
   integer :: itheory_xc = 2 !McWEDA
   integer :: ispin = 0
   integer :: ideriv_max = 6
-  integer ioff2c (1:24)
   integer :: nsh_max = 0
   integer :: nshPP_max = 0
 
@@ -165,5 +164,38 @@ module M_fdata
   real, dimension (:, :, :, :), allocatable :: dnuxc1c
   real, dimension (:, :, :, :, :), allocatable :: d2nuxc1c
   ! end jel-der
+
+
+! AQUI 
+  integer, dimension (:), allocatable :: nsu
+  integer :: V_intra_dip = 1 ! hacer fdata con vdip_onecenter ? 
+  integer, parameter :: nfofx = 207
+  integer :: interactions2c_max = 24 !ojo antes estaba en initbasics ufff
+  integer, parameter :: numXmax = 31
+  integer, parameter :: numYmax = 31
+  integer, parameter :: ntheta = 5
+
+  contains
+    function append_string (filename, extension)
+    implicit none
+    character (len = 200) append_string
+    character (len = 200) filename
+    character (len = 200) extension
+    integer lenx
+    integer leny
+    integer len_trim
+    lenx = len_trim(filename)
+    if (lenx .eq. 0) then
+      append_string = ' '
+    else
+      leny = len_trim(extension)
+      if (leny .eq. 0) then
+        append_string = filename(1:lenx)
+      else
+        append_string = filename(1:lenx)//extension(1:leny)
+      end if
+    end if
+    return
+    end
 
 end module M_fdata
