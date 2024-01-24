@@ -241,7 +241,9 @@ subroutine load_fdata()
   do interaction = 1, 13
     call read_2c (interaction)
   end do
- 
+
+  ! interaction = 14 NAC TODO ixczw = 1  
+
   ! Spherical OLSXC exchange-correlation
   do interaction = 15, 23
     call read_2c (interaction)

@@ -25,19 +25,19 @@ project(pyreball Fortran)
 # Compilar programa en Fortran
 add_executable(pyreball ${CMAKE_SOURCE_DIR}/src/M_constants_fireball.f90
                         ${CMAKE_SOURCE_DIR}/src/M_fdata.f90 
-                        ${CMAKE_SOURCE_DIR}/src/make_munuDipX.f90 
-                        ${CMAKE_SOURCE_DIR}/src/make_munu.f90 
-                        ${CMAKE_SOURCE_DIR}/src/make_munuS.f90
-                        ${CMAKE_SOURCE_DIR}/src/make_munuDipY.f90
-                        ${CMAKE_SOURCE_DIR}/src/make_munuPP.f90
-                        ${CMAKE_SOURCE_DIR}/src/read_1c.f90
-                        ${CMAKE_SOURCE_DIR}/src/readheader_2c.f90
-                        ${CMAKE_SOURCE_DIR}/src/readdata_2c.f90
-                        ${CMAKE_SOURCE_DIR}/src/read_2c.f90
-                        ${CMAKE_SOURCE_DIR}/src/read_3c.f90
-                        ${CMAKE_SOURCE_DIR}/src/readdata_3c.f90
-                        ${CMAKE_SOURCE_DIR}/src/readheader_3c.f90
-                        ${CMAKE_SOURCE_DIR}/src/setterp_2d.f90
+                        ${CMAKE_SOURCE_DIR}/src/LOADFDATA/make_munuDipX.f90 
+                        ${CMAKE_SOURCE_DIR}/src/LOADFDATA/make_munu.f90 
+                        ${CMAKE_SOURCE_DIR}/src/LOADFDATA/make_munuS.f90
+                        ${CMAKE_SOURCE_DIR}/src/LOADFDATA/make_munuDipY.f90
+                        ${CMAKE_SOURCE_DIR}/src/LOADFDATA/make_munuPP.f90
+                        ${CMAKE_SOURCE_DIR}/src/LOADFDATA/read_1c.f90
+                        ${CMAKE_SOURCE_DIR}/src/LOADFDATA/readheader_2c.f90
+                        ${CMAKE_SOURCE_DIR}/src/LOADFDATA/readdata_2c.f90
+                        ${CMAKE_SOURCE_DIR}/src/LOADFDATA/read_2c.f90
+                        ${CMAKE_SOURCE_DIR}/src/LOADFDATA/read_3c.f90
+                        ${CMAKE_SOURCE_DIR}/src/LOADFDATA/readdata_3c.f90
+                        ${CMAKE_SOURCE_DIR}/src/LOADFDATA/readheader_3c.f90
+                        ${CMAKE_SOURCE_DIR}/src/LOADFDATA/setterp_2d.f90
                         ${CMAKE_SOURCE_DIR}/src/load_fdata.f90
                         ${CMAKE_SOURCE_DIR}/src/pyreball.f90
                         )

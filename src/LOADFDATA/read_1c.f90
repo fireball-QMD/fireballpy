@@ -170,7 +170,6 @@ subroutine read_1c ()
       read(36,*) muR(iline,in1), nuR(iline,in1), alphaR(iline,in1), betaR(iline,in1), IR(iline,in1)
     end do !end do iline = 1,Nlines_vdip1c
     close(36)
-    write(*,*) 'segun Diego : Alles gut bisher' !Ankais
     end do !end do in1 = 1,nspecies
   end if ! if (V_intra_dip .eq. 1)
 
