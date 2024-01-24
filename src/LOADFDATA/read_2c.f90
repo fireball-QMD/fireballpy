@@ -122,7 +122,7 @@
  
 ! Allocate and initialize arrays
         if(interaction .eq. 1) then
-         write(*,*),ME2c_max, nfofx, interactions2c_max,nspecies, nspecies
+         write(*,*)ME2c_max, nfofx, interactions2c_max,nspecies, nspecies
          allocate (xintegral_2c (ME2c_max, nfofx, interactions2c_max,nspecies, nspecies))
          allocate (z2cmax (interactions2c_max, nspecies, nspecies))
          allocate (numz2c (interactions2c_max, nspecies, nspecies))

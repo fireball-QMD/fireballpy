@@ -14,7 +14,7 @@ subroutine read_1c ()
   integer iline
   integer Nlines_vdip1c_max
   integer trash
-  integer in1, in2
+  integer in1
   integer ins
   integer issh
   integer isorp
@@ -67,7 +67,7 @@ subroutine read_1c ()
       do issh = 1, numsh
         read (36,*) (nuxc1c(in1,issh,jssh),jssh=1,numsh)
       end do
-      ! exc1c0(in2) = exc1c0(in2)
+      ! exc1c0(in1) = exc1c0(in1)
       do issh = 1, numsh
         do jssh = 1, numsh
           nuxc1c(in1,issh,jssh) = nuxc1c(in1,issh,jssh)
@@ -89,13 +89,14 @@ subroutine read_1c ()
         read (36,100) message
       end do
       read (36,*) itype, numsh, kkssh
+ 
       do kssh = 1, nssh(in1)
         do issh = 1, numsh
-          read (36,*) (dnuxc1c(in2,issh,jssh,kssh),jssh=1,numsh)
+          read (36,*) (dnuxc1c(in1,issh,jssh,kssh),jssh=1,numsh)
         end do
         do issh = 1, numsh
           do jssh = 1, numsh
-            dnuxc1c(in2,issh,jssh,kssh) = dnuxc1c(in2,issh,jssh,kssh)
+            dnuxc1c(in1,issh,jssh,kssh) = dnuxc1c(in1,issh,jssh,kssh)
           end do
         end do
       end do ! do kssh
@@ -116,11 +117,11 @@ subroutine read_1c ()
       read (36,*) itype, numsh, kkssh
       do kssh = 1, nssh(in1)
         do issh = 1, numsh
-          read (36,*) (dexc1c(in2,issh,jssh,kssh),jssh=1,numsh)
+          read (36,*) (dexc1c(in1,issh,jssh,kssh),jssh=1,numsh)
         end do
         do issh = 1, numsh
           do jssh = 1, numsh
-            dexc1c(in2,issh,jssh,kssh) = dexc1c(in2,issh,jssh,kssh)
+            dexc1c(in1,issh,jssh,kssh) = dexc1c(in1,issh,jssh,kssh)
           end do
         end do
       end do ! do kssh
@@ -129,7 +130,6 @@ subroutine read_1c ()
 
     if (itheory_xc .eq. 4) then
     end if !end if itheory_xc .eq. 4
-  
   end if ! if(itheory_xc.eq.2 .or. itheory_xc .eq. 4) 
 
   !+++++++++++++++++++++++++++++++NEW JUNE 2019+++++++++++++++++++++++++++

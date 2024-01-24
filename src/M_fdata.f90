@@ -5,9 +5,10 @@ module M_fdata
   integer :: itheory_xc = 2 !McWEDA
   integer :: ispin = 0
   integer :: ideriv_max = 6
-  integer :: nsh_max = 0
-  integer :: nshPP_max = 0
 
+  integer :: nsh_max = 0
+  integer :: nshPP_max = 0 
+ 
   integer isorpmax
   integer isorpmax_xc
 
