@@ -4,7 +4,7 @@ from os.path import splitext
 from ase.io import read
 from ase.io.formats import NameOrFile
 
-from ._zsymbol import z_to_symbol
+from mendeleev import element
 
 def read_bas(filename: NameOrFile):
 
@@ -28,6 +28,7 @@ def read_bas(filename: NameOrFile):
     sp = '     '
     for i, line in enumerate(bas[1:]):
         sline = line.split()
-        xyz.append(z_to_symbol[sline[0]].rjust(3) + sp + sp.join([f'{float(s):10.5f}' for s in sline[1:]]))
+        elem = element[sline[0]]
+        xyz.append(elem.symbol.rjust(3) + sp + sp.join([f'{float(s):10.5f}' for s in sline[1:]]))
 
     return read(StringIO('\n'.join(xyz)), format='xyz')

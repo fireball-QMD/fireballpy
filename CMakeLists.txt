@@ -38,7 +38,7 @@ add_executable(pyreball ${CMAKE_SOURCE_DIR}/src/M_constants_fireball.f90
                         ${CMAKE_SOURCE_DIR}/src/LOADFDATA/readdata_3c.f90
                         ${CMAKE_SOURCE_DIR}/src/LOADFDATA/readheader_3c.f90
                         ${CMAKE_SOURCE_DIR}/src/LOADFDATA/setterp_2d.f90
-                        ${CMAKE_SOURCE_DIR}/src/load_fdata.f90
+                        ${CMAKE_SOURCE_DIR}/src/LOADFDATA/load_fdata.f90
                         ${CMAKE_SOURCE_DIR}/src/pyreball.f90
                         )
                         #${CMAKE_SOURCE_DIR}/src/diagonalize_matrix.f90
