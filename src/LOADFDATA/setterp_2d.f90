@@ -35,23 +35,23 @@
             hy_bcna(isorp,index) = (y3cmax_bcna(isorp,index) - ymin)         &
      &                            /(numy3c_bcna(isorp,index) - 1)
            end do
-           if (itheory .ne. 3) then 
-            if(itheory_xc .eq. 0) then
-              do isorp = 0, ideriv_max
-                 hx_xc3c(isorp,index) = (x3cmax_xc3c(isorp,index) - xmin)  &
-     &                            /real(numx3c_xc3c(isorp,index) - 1)
-                 hy_xc3c(isorp,index) = (y3cmax_xc3c(isorp,index) - ymin)  &
-     &                            /real(numy3c_xc3c(isorp,index) - 1)
-              end do
-            else if(itheory_xc .ne. 3) then
+           !if (itheory .ne. 3) then 
+            !if(itheory_xc .eq. 0) then
+              !do isorp = 0, ideriv_max
+                 !hx_xc3c(isorp,index) = (x3cmax_xc3c(isorp,index) - xmin)  &
+     !&                            /real(numx3c_xc3c(isorp,index) - 1)
+                 !hy_xc3c(isorp,index) = (y3cmax_xc3c(isorp,index) - ymin)  &
+     !&                            /real(numy3c_xc3c(isorp,index) - 1)
+              !end do
+            !else if(itheory_xc .ne. 3) then
               do isorp = 1, isorpmax_xc
                  hx_den3(isorp,index) = (x3cmax_den3(isorp,index) - xmin)   &
      &                            /real(numx3c_den3(isorp,index) - 1)
                  hy_den3(isorp,index) = (y3cmax_den3(isorp,index) - ymin)   &
      &                            /real(numy3c_den3(isorp,index) - 1)
               end do
-            end if
-           endif
+            !end if
+           !endif
 
           end do   ! end do in3
          end do  ! end do in2 

@@ -184,7 +184,8 @@
           if (interaction .eq. 21) isub2c = nssh(in2)
           if (interaction .eq. 22) isub2c = nssh(in2)
 
-          if (itheory .eq. 1) maxtype = isub2c
+          !if (itheory .eq. 1) maxtype = isub2c
+          maxtype = isub2c
         ! Harris case for average density
       if (interaction .ge. 15 .and. interaction .le. 22) maxtype = isub2c 
           do isorp = initype, maxtype

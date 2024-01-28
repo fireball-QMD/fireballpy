@@ -172,10 +172,10 @@
 ! xc-stuff, or the different contributions for the neutral atom potential stuff)
            maxtype = 0
            mintype = 0
-           if (itheory .eq. 1) then
+           !if (itheory .eq. 1) then
             if (interaction .eq. 1) maxtype = nssh(in3)
             if (interaction .eq. 2) maxtype = ideriv_max
-           end if
+           !end if
 ! Average density: we need loop over all orbitals on ialp atoms           
            if (interaction .eq. 3 .or. interaction .eq. 4) then 
               maxtype = nssh(in3)

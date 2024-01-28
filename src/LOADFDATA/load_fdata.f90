@@ -118,21 +118,17 @@ subroutine load_fdata()
    
   close(unit = 12) !close info.dat
 
-  ! isorpmax = maxval(nssh)
-  ! isorpmax_xc = maxval(nssh)
   isorpmax = 0
-  do in1 = 1, nspecies
-    isorpmax = max(isorpmax,nssh(in1))
-  end do
   isorpmax_xc = 0
   do in1 = 1, nspecies
+    isorpmax = max(isorpmax,nssh(in1))
     isorpmax_xc = max(isorpmax_xc,nssh(in1))
   end do
 
 
 
-        ideriv_max = 0
-        if (itheory .eq. 1) ideriv_max = 6
+        !ideriv_max = 0
+        !if (itheory .eq. 1) ideriv_max = 6
 
 ! Set up the index field ind2c:
         icount = 0
@@ -177,11 +173,11 @@ subroutine load_fdata()
         ind2c(13,0) = icount
         icount = icount + 1
         ind2c(14,0) = icount
-        if (itheory_xc .eq. 1 .or. itheory_xc .eq. 2 .or. itheory_xc .eq. 4 ) then
-         if (itheory_xc .eq. 4) then 
-          icount = icount + 1
-          ind2c(14,0) = icount
-         end if !end if itheory_xc .eq. 4
+        !if (itheory_xc .eq. 1 .or. itheory_xc .eq. 2 .or. itheory_xc .eq. 4 ) then
+         !if (itheory_xc .eq. 4) then 
+          !icount = icount + 1
+          !ind2c(14,0) = icount
+         !end if !end if itheory_xc .eq. 4
          do isorp = 1, isorpmax_xc
           icount = icount + 1
           ind2c(15,isorp) = icount
@@ -219,7 +215,7 @@ subroutine load_fdata()
 !dani.JOM.jel-fr-end
          
 
-        end if
+        !end if
         interactions2c_max = icount
 
 

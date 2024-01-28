@@ -40,7 +40,7 @@ subroutine read_1c ()
   !*******************************************************************
   !          M c W E D A   E X C H A N G E - C O R R E L A T I O N
   !******************************************************************* 
-  if (itheory_xc .eq. 2 .or. itheory_xc .eq. 4) then 
+  !if (itheory_xc .eq. 2 .or. itheory_xc .eq. 4) then 
   
     allocate(exc1c0 (nspecies,nsh_max,nsh_max))
     allocate(nuxc1c (nspecies,nsh_max,nsh_max))
@@ -128,9 +128,9 @@ subroutine read_1c ()
       close(36)
     end do !in1 .. nspecies
 
-    if (itheory_xc .eq. 4) then
-    end if !end if itheory_xc .eq. 4
-  end if ! if(itheory_xc.eq.2 .or. itheory_xc .eq. 4) 
+    !if (itheory_xc .eq. 4) then
+    !end if !end if itheory_xc .eq. 4
+  !end if ! if(itheory_xc.eq.2 .or. itheory_xc .eq. 4) 
 
   !+++++++++++++++++++++++++++++++NEW JUNE 2019+++++++++++++++++++++++++++
   !.........................Vip 1c...........................................
