@@ -23,7 +23,7 @@ endif()
 project(pyreball Fortran)
 
 # Compilar programa en Fortran
-add_executable(pyreball ${CMAKE_SOURCE_DIR}/src/M_constants_fireball.f90
+add_executable(pyreball ${CMAKE_SOURCE_DIR}/src/M_constants.f90
                         ${CMAKE_SOURCE_DIR}/src/M_fdata.f90 
                         ${CMAKE_SOURCE_DIR}/src/LOADFDATA/make_munuDipX.f90 
                         ${CMAKE_SOURCE_DIR}/src/LOADFDATA/make_munu.f90 
