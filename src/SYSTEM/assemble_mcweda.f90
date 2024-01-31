@@ -62,9 +62,9 @@ subroutine assemble_mcweda ()
   ! assemble_2c ONLY does 2c terms. No 3c terms allowed. See assemble_3c
   ! and trescentros for 3c terms.
   if (Kscf .eq. 1) then
-    !AQUI
     call assemble_sVNL (iforce)
-    call assemble_2c (nprocs, iforce, iordern, ioff2c)
+    call assemble_2c (iforce)
+    !AQUI
     call assemble_2c_PP (nprocs, iforce, iordern)
   end if ! end if of Kscf = 1
 

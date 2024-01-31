@@ -19,7 +19,6 @@ subroutine assemble_sVNL (iforce)
   integer mbeta
  
   real y
- 
   real, dimension (3, 3) :: eps
   real, dimension (3, 3, 3) :: deps
   real, dimension (3) :: r1
@@ -62,33 +61,25 @@ subroutine assemble_sVNL (iforce)
       isorp = 0
       interaction = 5
       call doscentrosPP (interaction, isorp, y, eps, deps, iforce, in1, in2, sVNLx, spVNLx)
-      !AQUI
-! Now write arrays sVNL and spVNL (derivatives).
-          if (ineigh .ne. matom) then
-           do inu = 1, num_orbPP(in2)
-            do imu = 1, num_orb(in1)
-             sVNL(imu,inu,ineigh,iatom) = sVNLx(imu,inu)
-             if (iforce .eq. 1) then
+      ! Now write arrays sVNL and spVNL (derivatives).
+      if (ineigh .ne. matom) then
+        do inu = 1, num_orbPP(in2)
+          do imu = 1, num_orb(in1)
+            sVNL(imu,inu,ineigh,iatom) = sVNLx(imu,inu)
+            if (iforce .eq. 1) then
               spVNL(:,imu,inu,ineigh,iatom) = spVNLx(:,imu,inu)
-             end if
-            end do
-           end do
-          else
-           do inu = 1, num_orbPP(in2)
-            do imu = 1, num_orb(in1)
-             sVNL(imu,inu,ineigh,iatom) = sVNLx(imu,inu)
-             spVNL(:,imu,inu,ineigh,iatom) = 0.0d0
-            end do
-           end do
-          end if
-
-! End loop over iatom and its neighbors - jatom.
-         end do
+            end if
+          end do
         end do
- 
- 
-! Format Statements
-! ===========================================================================
- 
-        return
-      end subroutine assemble_sVNL
+      else
+        do inu = 1, num_orbPP(in2)
+          do imu = 1, num_orb(in1)
+            sVNL(imu,inu,ineigh,iatom) = sVNLx(imu,inu)
+            spVNL(:,imu,inu,ineigh,iatom) = 0.0d0
+          end do
+        end do
+      end if
+    end do !ineigh
+  end do !iatom
+  return
+end subroutine assemble_sVNL
