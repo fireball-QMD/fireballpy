@@ -8,7 +8,7 @@
 subroutine interpolate_1d (interaction, isub, in1, in2, non2c, ioption, xin, yout, dfdx)
   use M_system
   use M_fdata
-  use M_constants_fireball
+  use M_constants
   implicit none
 
   integer, intent(in) :: interaction

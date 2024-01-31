@@ -7,6 +7,7 @@ program pyreball
     fdatalocation='/home/dani/Fdata_HC-new'
     call load_fdata()
 
+    call getenergy()
     
     !call diagonalize_matrix()
 

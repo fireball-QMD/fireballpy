@@ -32,7 +32,7 @@
 subroutine assemble_usr (iforce)
   use M_system
   use M_fdata
-  use M_constants_fireball
+  use M_constants
   implicit none
   integer, intent (in) :: iforce
  

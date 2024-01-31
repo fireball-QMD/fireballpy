@@ -25,6 +25,8 @@ project(pyreball Fortran)
 # Compilar programa en Fortran
 add_executable(pyreball ${CMAKE_SOURCE_DIR}/src/M_constants.f90
                         ${CMAKE_SOURCE_DIR}/src/M_fdata.f90 
+                        ${CMAKE_SOURCE_DIR}/src/M_system.f90
+ 
                         ${CMAKE_SOURCE_DIR}/src/LOADFDATA/make_munuDipX.f90 
                         ${CMAKE_SOURCE_DIR}/src/LOADFDATA/make_munu.f90 
                         ${CMAKE_SOURCE_DIR}/src/LOADFDATA/make_munuS.f90
@@ -39,6 +41,15 @@ add_executable(pyreball ${CMAKE_SOURCE_DIR}/src/M_constants.f90
                         ${CMAKE_SOURCE_DIR}/src/LOADFDATA/readheader_3c.f90
                         ${CMAKE_SOURCE_DIR}/src/LOADFDATA/setterp_2d.f90
                         ${CMAKE_SOURCE_DIR}/src/LOADFDATA/load_fdata.f90
+ 
+                        ${CMAKE_SOURCE_DIR}/src/SYSTEM/getenergy.f90                  
+                        ${CMAKE_SOURCE_DIR}/src/SYSTEM/get_ewald.f90                  
+                        ${CMAKE_SOURCE_DIR}/src/SYSTEM/assemble_usr.f90 
+                        ${CMAKE_SOURCE_DIR}/src/SYSTEM/interpolate_1d.f90
+                        ${CMAKE_SOURCE_DIR}/src/SYSTEM/recoverC.f90
+                        #${CMAKE_SOURCE_DIR}/src/SYSTEM/scf_loop.f90
+               
+                        #${CMAKE_SOURCE_DIR}/src/load_fdata.f90
                         ${CMAKE_SOURCE_DIR}/src/pyreball.f90
                         )
                         #${CMAKE_SOURCE_DIR}/src/diagonalize_matrix.f90

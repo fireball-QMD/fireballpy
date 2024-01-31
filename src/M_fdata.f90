@@ -2,8 +2,8 @@ module M_fdata
 
     logical :: debug = .True. ! Tendremos q borrarla
 
-    !integer :: itheory = 1 !DOGS 
-    !integer :: itheory_xc = 2 !McWEDA
+    integer :: itheory = 1 !DOGS 
+    integer :: itheory_xc = 2 !McWEDA
     !integer :: ispin = 0
     integer :: ideriv_max = 6
 

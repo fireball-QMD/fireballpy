@@ -11,7 +11,6 @@ subroutine load_system ()
   close (unit = 69)
 
   call allocate_system()
-
   open (unit = 69, file = 'input.xyz', status = 'old')
   read (69, *) natoms
   read (69,*)
