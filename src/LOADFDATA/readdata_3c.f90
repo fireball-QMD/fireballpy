@@ -18,7 +18,7 @@ subroutine readdata_3c (iounit, numx, numy, num_nonzero, isorp, maxtype, index, 
     integer, intent (in) :: num_nonzero
     integer, intent (in) :: numx, numy 
 
-    real, intent (out), dimension (numXmax, numYmax, ME3c_max, 0:maxtype, nspecies**3) :: xintegral
+    real, intent (inout), dimension (numXmax, numYmax, ME3c_max, 0:maxtype, nspecies**3) :: xintegral
     !real, intent (inout), dimension (:,:,:,:,:) :: xintegral
 
     ! Local Parameters and Data Declaration
@@ -35,6 +35,7 @@ subroutine readdata_3c (iounit, numx, numy, num_nonzero, isorp, maxtype, index, 
     integer maxmax
     real, external :: factorial
 
+    write(*,*) 'xintegral', xintegral
     ! Procedure
     ! ===========================================================================
     do jpoint = 1, numy
