@@ -11,11 +11,7 @@ subroutine diag_k ( )
   allocate (eigen_k (norbitals, nkpoints))
   do ikpoint = 1, nkpoints
     k_temp(:) = special_k(:,ikpoint)
-    !AQUI
     call kspace (Kscf, iqout, icluster,ikpoint, k_temp, nkpoints )
-    if (ikpoint .eq. 1) then
-      if (iwrteigen .eq. 1) write (19,*) nkpoints, norbitals_new
-    end if
   end do ! do ikpoint
   return
 end subroutine diag_k
