@@ -30,12 +30,13 @@
 !       dewald = ewald forces
 !
 ! ===========================================================================
-subroutine get_ewald (iforce)
+subroutine get_ewald (iforce, icluster)
   use M_system
   use M_fdata
   use M_constants
   implicit none
   integer, intent (in) :: iforce  
+  integer, intent (in) :: icluster  
  
   ! ========================================
   integer iatom
