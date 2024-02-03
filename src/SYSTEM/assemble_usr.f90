@@ -1,41 +1,8 @@
-! ===========================================================================
-!       This routine computes the two-center contribution to the total
-! energy. This routine program computes the terms u0(iatom,ineigh) and
-! uee00(iatom) for the short ranged potential, usr = u0 - uee. Here iatom
-! is a basis atom in the central cell and ineigh is the ineigh'th neighbor
-! to iatom, also the long rangeed contribution is calculated (the
-! information comes from ewald.f). The results are converted to eV energy
-! units.
- 
-! This routine computes derivatives only if iforce = 1. This routine also
-! computes the force derivative with respect to ratom of the short-ranged
-! energy per cell, thus dusr(3,iatom) = - d/d(ratom(3,iatom)) usr.
-! Here ratom is the basis atom position in the central cell. The minus sign
-! makes it force-like.
-!
-! The u0 interaction is:
-! -1/2 * int(slash) d3r  (n(nuclear)*vion(r) + n0 * vh0),
-! where n(nuclear) is the nuclear charge density, vion the local ion
-! potential, n0 the neutral atom charge density, and vh0
-! the hartree potential due to neutral atoms.
-!
-! This routine also computes the xc double counting correction. First, we
-! get the data for the atoms in1, in2 at r1,r2. This call will return five
-! values: one for the neutral pair, and four with some predetermined charge
-! transfer (dq of the charged shell for xc, set in CREATOR: e.g., Si.inc).
-! We then interpolate for the current charge distribution of the pair.
-! We calculate:
-!   (n1+n2)*(exc(1+2)-muxc(1+2)) - n1*(exc(1)-xcmu(1))
-!                                - n2*(exc(2)-xcmu(2))
-!
-! ===========================================================================
-subroutine assemble_usr (iforce)
+subroutine assemble_usr ()
   use M_system
   use M_fdata
   use M_constants
   implicit none
-  integer, intent (in) :: iforce
- 
   integer iatom
   integer ideriv
   integer in1, in2
@@ -116,7 +83,7 @@ subroutine assemble_usr (iforce)
       interaction = 12
       ideriv = 0
       do index = 1, index_coulomb
-        call interpolate_1d (interaction, ideriv, in1, in2, index, iforce, distance, slist(index), dslist(index))
+        call interpolate_1d (interaction, ideriv, in1, in2, index, distance, slist(index), dslist(index))
       end do
  
       ! We have the data, it is stored in the following way: v(1,1), v(1,2),

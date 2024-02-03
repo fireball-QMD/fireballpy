@@ -7,54 +7,66 @@ find_program(IFORT_EXECUTABLE ifort)
 
 # Establecer la variable de entorno FC dependiendo del resultado
 if(IFORT_EXECUTABLE)
-    set(ENV{FC} "ifort")
-    set(PATH_INCL ${MKLROOT}/include)
-    set(PATH_MKL ${MKLROOT}/lib/intel64)
+  set(ENV{FC} "ifort")
+  set(PATH_INCL ${MKLROOT}/include)
+  set(PATH_MKL ${MKLROOT}/lib/intel64)
 else()
-    message(STATUS "ifort no encontrado. Usando gfortran.")
-    find_program(GFORTRAN_EXECUTABLE gfortran)
-    if(GFORTRAN_EXECUTABLE)
-        set(ENV{FC} "gfortran")
-    else()
-        message(FATAL_ERROR "No se encontró ni ifort ni gfortran. Imposible compilar.")
-    endif()
+  message(STATUS "ifort no encontrado. Usando gfortran.")
+  find_program(GFORTRAN_EXECUTABLE gfortran)
+  if(GFORTRAN_EXECUTABLE)
+    set(ENV{FC} "gfortran")
+  else()
+    message(FATAL_ERROR "No se encontró ni ifort ni gfortran. Imposible compilar.")
+  endif()
 endif()
 
 project(pyreball Fortran)
 
 # Compilar programa en Fortran
-add_executable(pyreball ${CMAKE_SOURCE_DIR}/src/M_constants.f90
-                        ${CMAKE_SOURCE_DIR}/src/M_fdata.f90 
-                        ${CMAKE_SOURCE_DIR}/src/M_system.f90
+add_executable( pyreball 
+  ${CMAKE_SOURCE_DIR}/src/M_constants.f90
+  ${CMAKE_SOURCE_DIR}/src/M_fdata.f90 
+  ${CMAKE_SOURCE_DIR}/src/M_system.f90
  
-                        ${CMAKE_SOURCE_DIR}/src/LOADFDATA/make_munuDipX.f90 
-                        ${CMAKE_SOURCE_DIR}/src/LOADFDATA/make_munu.f90 
-                        ${CMAKE_SOURCE_DIR}/src/LOADFDATA/make_munuS.f90
-                        ${CMAKE_SOURCE_DIR}/src/LOADFDATA/make_munuDipY.f90
-                        ${CMAKE_SOURCE_DIR}/src/LOADFDATA/make_munuPP.f90
-                        ${CMAKE_SOURCE_DIR}/src/LOADFDATA/read_1c.f90
-                        ${CMAKE_SOURCE_DIR}/src/LOADFDATA/readheader_2c.f90
-                        ${CMAKE_SOURCE_DIR}/src/LOADFDATA/readdata_2c.f90
-                        ${CMAKE_SOURCE_DIR}/src/LOADFDATA/read_2c.f90
-                        ${CMAKE_SOURCE_DIR}/src/LOADFDATA/read_3c.f90
-                        ${CMAKE_SOURCE_DIR}/src/LOADFDATA/readdata_3c.f90
-                        ${CMAKE_SOURCE_DIR}/src/LOADFDATA/readheader_3c.f90
-                        ${CMAKE_SOURCE_DIR}/src/LOADFDATA/setterp_2d.f90
-                        ${CMAKE_SOURCE_DIR}/src/LOADFDATA/load_fdata.f90
+  ${CMAKE_SOURCE_DIR}/src/LOADFDATA/make_munuDipX.f90 
+  ${CMAKE_SOURCE_DIR}/src/LOADFDATA/make_munu.f90 
+  ${CMAKE_SOURCE_DIR}/src/LOADFDATA/make_munuS.f90
+  ${CMAKE_SOURCE_DIR}/src/LOADFDATA/make_munuDipY.f90
+  ${CMAKE_SOURCE_DIR}/src/LOADFDATA/make_munuPP.f90
+  ${CMAKE_SOURCE_DIR}/src/LOADFDATA/read_1c.f90
+  ${CMAKE_SOURCE_DIR}/src/LOADFDATA/readheader_2c.f90
+  ${CMAKE_SOURCE_DIR}/src/LOADFDATA/readdata_2c.f90
+  ${CMAKE_SOURCE_DIR}/src/LOADFDATA/read_2c.f90
+  ${CMAKE_SOURCE_DIR}/src/LOADFDATA/read_3c.f90
+  ${CMAKE_SOURCE_DIR}/src/LOADFDATA/readdata_3c.f90
+  ${CMAKE_SOURCE_DIR}/src/LOADFDATA/readheader_3c.f90
+  ${CMAKE_SOURCE_DIR}/src/LOADFDATA/setterp_2d.f90
+  ${CMAKE_SOURCE_DIR}/src/LOADFDATA/load_fdata.f90
  
-                        ${CMAKE_SOURCE_DIR}/src/SYSTEM/getenergy.f90                  
-                        ${CMAKE_SOURCE_DIR}/src/SYSTEM/get_ewald.f90                  
-                        ${CMAKE_SOURCE_DIR}/src/SYSTEM/assemble_usr.f90 
-                        ${CMAKE_SOURCE_DIR}/src/SYSTEM/interpolate_1d.f90
-                        ${CMAKE_SOURCE_DIR}/src/SYSTEM/recoverC.f90
-                        #${CMAKE_SOURCE_DIR}/src/SYSTEM/scf_loop.f90
-               
-                        #${CMAKE_SOURCE_DIR}/src/load_fdata.f90
-                        ${CMAKE_SOURCE_DIR}/src/pyreball.f90
-                        )
-                        #${CMAKE_SOURCE_DIR}/src/diagonalize_matrix.f90
-                        #${CMAKE_SOURCE_DIR}/src/variables.f90
-                        #)
+  ${CMAKE_SOURCE_DIR}/src/SYSTEM/getenergy.f90                  
+  ${CMAKE_SOURCE_DIR}/src/SYSTEM/get_ewald.f90                  
+  ${CMAKE_SOURCE_DIR}/src/SYSTEM/assemble_usr.f90 
+  ${CMAKE_SOURCE_DIR}/src/SYSTEM/interpolate_1d.f90
+  ${CMAKE_SOURCE_DIR}/src/SYSTEM/recoverC.f90
+  ${CMAKE_SOURCE_DIR}/src/SYSTEM/assemble_mcweda.f90
+  ${CMAKE_SOURCE_DIR}/src/SYSTEM/assemble_olsxc_1c.f90
+  ${CMAKE_SOURCE_DIR}/src/SYSTEM/unocentros.f90
+  ${CMAKE_SOURCE_DIR}/src/SYSTEM/assemble_olsxc_on.f90
+  ${CMAKE_SOURCE_DIR}/src/SYSTEM/assemble_olsxc_off.f90
+  ${CMAKE_SOURCE_DIR}/src/SYSTEM/average_ca_rho.f90
+  ${CMAKE_SOURCE_DIR}/src/SYSTEM/assemble_ca_2c.f90
+  ${CMAKE_SOURCE_DIR}/src/SYSTEM/assemble_ca_3c.f90
+  ${CMAKE_SOURCE_DIR}/src/SYSTEM/assemble_lr.f90
+  ${CMAKE_SOURCE_DIR}/src/SYSTEM/buildh.f90
+  ${CMAKE_SOURCE_DIR}/src/SYSTEM/assemble_ca_3c_dip.f90
+  
+ # ${CMAKE_SOURCE_DIR}/src/SYSTEM/scf_loop.f90
+             
+  ${CMAKE_SOURCE_DIR}/src/pyreball.f90
+  )
+  #${CMAKE_SOURCE_DIR}/src/diagonalize_matrix.f90
+  #${CMAKE_SOURCE_DIR}/src/variables.f90
+  #)
 
 #if(IFORT_EXECUTABLE)
 #  set(FLAGS "-mkl")

@@ -1,8 +1,7 @@
-subroutine buildh (itestrange,testrange)
+subroutine buildh ()
   use M_system
+  use m_fdata, only: num_orb, V_intra_dip 
   implicit none
-  integer, intent (in) :: itestrange
-  real, intent (in) :: testrange
   integer katom
   integer iatom
   integer iatomstart
@@ -39,6 +38,7 @@ subroutine buildh (itestrange,testrange)
       end do
       do inu = 1, num_orb(in2)
         do imu = 1, num_orb(in1)
+          !AQUI  ewaldqmmm
           h_mat(imu,inu,ineigh,iatom) = h_mat(imu,inu,ineigh,iatom)  + vca(imu,inu,ineigh,iatom) + vxc_ca(imu,inu,ineigh,iatom) + ewaldlr(imu,inu,ineigh,iatom) - ewaldsr(imu,inu,ineigh,iatom) + ewaldqmmm(imu,inu,ineigh,iatom)
         end do ! do imu
       end do ! do inu

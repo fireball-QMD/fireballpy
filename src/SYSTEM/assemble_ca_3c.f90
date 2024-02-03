@@ -1,20 +1,8 @@
-  subroutine assemble_ca_3c (nprocs, iordern, igauss)
-  use charges
-  use configuration
-  use constants_fireball
-  use dimensions
-  use interactions
-  use neighbor_map
-  use gaussG
-  use options, only : iqout
-  use scf, only : Kscf
-
+subroutine assemble_ca_3c ()
+  use M_system
+  use M_fdata, only: nssh, Qneutral, rcutoff, lssh, num_orb, isorpmax, nspecies
+  use M_constants, only: eq2
   implicit none
- 
-  integer, intent (in) :: igauss
-  integer, intent (in) :: iordern
-  integer, intent (in) :: nprocs
- 
   integer ialp
   integer iatom
   integer ibeta
@@ -213,9 +201,6 @@
           dxn = (Qin(isorp,ialp) - Qneutral(isorp,indna))
           do inu = 1, num_orb(in2)
             do imu = 1, num_orb(in1)
-              if (igauss .eq. 1) then
-                bccax(imu,inu) = bccax(imu,inu) +  smatG(imu,inu,mneigh,iatom)/R_na(isorp,indna)
-              end if
               bcca(imu,inu) = bcca(imu,inu) + bccax(imu,inu)*dxn
               if (Kscf .eq. 1) then
                 if (iqout .eq. 6) then

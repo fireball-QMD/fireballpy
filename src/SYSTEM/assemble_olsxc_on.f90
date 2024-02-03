@@ -1,20 +1,15 @@
-! ===========================================================================
-! This routine assembles the two-center exchange-correlation
-! (on-site - atom case) for the average density approximation. 
-! This subroutine could be easily incorporated in assemble_2c.f90 (JOM)
-! The double-counting xc (uxcdcc) is also calculated here.
-subroutine assemble_olsxc_on (uxcdcc)
+subroutine assemble_olsxc_on ()
   use M_system
+  use M_fdata, only: num_orb
   implicit none
-  real, intent (out) :: uxcdcc
-  integer iatom
+  integer iatom, matom
   integer imu
   integer in1, in3
   integer inu
   real, dimension (numorb_max, numorb_max) :: bcxcx
   real xc
   vxc = 0.0d0
-  if (itheory .eq. 1) vxc_ca = 0.0d0
+  vxc_ca = 0.0d0
   uxcdcc = 0.0d0
   bcxcx  = 0.0d0
   do iatom = 1, natoms

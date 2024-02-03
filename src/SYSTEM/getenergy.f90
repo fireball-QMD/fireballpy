@@ -1,13 +1,8 @@
 subroutine getenergy () !MCWEDA only
   use M_system 
   implicit none
-
-  integer :: iforce = 0 !pensar
-  ! en get_atom_indices pensar get_ewald
-
-  call get_ewald (iforce)
- 
-  call assemble_usr (iforce, uxcdcc_hf, uiiuee)
+  call get_ewald ()
+  call assemble_usr (uxcdcc_hf, uiiuee)
 
   ! to avoid confusion here we add etotxc_1c to double counting term
   ! and set etotxc_1c to zero to do not double it in final print

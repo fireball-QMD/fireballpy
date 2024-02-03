@@ -1,9 +1,9 @@
 ! This routine assembles all of the two-center and degenerate two-center interactions for DOGS.
-subroutine assemble_ca_2c (iforce)
+subroutine assemble_ca_2c ()
   use M_system
+  use M_fdata, only: nssh, num_orb, rcutoff, Qneutral, lssh
+  use M_constants, only: eq2
   implicit none
-  integer, intent (in) :: iforce
-
   integer iatom
   integer icount
   integer icount_sav
@@ -26,7 +26,6 @@ subroutine assemble_ca_2c (iforce)
   integer mbeta
   integer my_proc
   integer natomsp
- 
   real dq1
   real dq2
   real dterm_1
@@ -43,7 +42,6 @@ subroutine assemble_ca_2c (iforce)
   real stn_temp2
   real y
   real rcutoff_i
- 
   real, dimension (numorb_max, numorb_max) :: bcca
   real, dimension (3, numorb_max, numorb_max) :: bccapx
   real, dimension (numorb_max, numorb_max) :: bccax
@@ -109,8 +107,8 @@ subroutine assemble_ca_2c (iforce)
       call doscentros (interaction, isorp, iforce, in1, in2, in3, y,  eps, deps, dipx, dippx)
       do inu = 1, num_orb(in2)
         do imu = 1, num_orb(in1)
-        dip(imu,inu,ineigh,iatom) = dipx(imu,inu)
-        if (iforce .eq. 1) dipp(:,imu,inu,ineigh,iatom) = dippx(:,imu,inu)
+          dip(imu,inu,ineigh,iatom) = dipx(imu,inu)
+          if (iforce .eq. 1) dipp(:,imu,inu,ineigh,iatom) = dippx(:,imu,inu)
         end do
       end do
       dq2 = 0.0d0

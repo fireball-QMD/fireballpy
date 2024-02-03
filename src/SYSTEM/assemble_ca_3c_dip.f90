@@ -1,6 +1,7 @@
 subroutine assemble_ca_3c_dip ()
   use M_system
   use M_constants
+  use M_fdata, only: nssh, Qneutral,rcutoff, num_orb
   implicit none
   integer ialp
   integer iatom
@@ -182,13 +183,8 @@ subroutine assemble_ca_3c_dip ()
         end if    ! end if (x .lt. 1.0d-05)  
         bcca = 0.0d0
         do isorp = 1, nssh(indna)
-          if (igauss .eq. 0) then
-            interaction = 1
-            call trescentros (interaction, isorp, isorpmax, in1, in2, indna, x, y, cost, eps, bccax, nspecies)
-          end if
-          if (igauss .eq. 1) then
-            call trescentrosG_VNA_SH(isorp, in1, in2, indna, x, y, cost, eps, bccax, rcutoff)
-          end if
+          interaction = 1
+          call trescentros (interaction, isorp, isorpmax, in1, in2, indna, x, y, cost, eps, bccax, nspecies)
           dxn = (Qin(isorp,ialp) - Qneutral(isorp,indna))
           do inu = 1, num_orb(in2)
             do imu = 1, num_orb(in1)

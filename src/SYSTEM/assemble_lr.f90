@@ -1,6 +1,7 @@
 subroutine assemble_lr () 
   use M_system
   use M_constants
+  use M_fdata, only: nssh,Qneutral,num_orb
   implicit none
   integer iatom
   integer ierror

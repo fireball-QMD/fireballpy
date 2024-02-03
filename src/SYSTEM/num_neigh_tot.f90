@@ -1,8 +1,7 @@
 ! The subroutine gets total number of neighbors (normal+PP) of each atom
-subroutine num_neigh_tot (numorb_max)
+subroutine num_neigh_tot ()
   use M_system
   implicit none
-  integer, intent(in)   :: numorb_max
   integer,allocatable  :: neighb_aux(:,:)
   integer      :: iatom
   integer      :: jatom

@@ -46,358 +46,165 @@ subroutine denmat ( iqout, icluster, tempfe, ebs,  bmix, Kscf)
   logical read_occupy
   ai = cmplx(0.0d0,1.0d0)
   rhoPP = 0.0d0
-  inquire (file = 'OCCUPATION', exist = read_occupy)
-  if (read_occupy) then
-   open (unit = 22, file = 'OCCUPATION', status = 'old')
-   write (*,*) '  '
-   write (*,*) ' Reading from the OCCUPATION file! '
-   read (22,*) noccupy
-   if (noccupy .gt. norbitals) then
-    write (*,*) ' noccupy > norbitals: from OCCUPATION file. '
-    stop
-   end if
-   do imu = 1, noccupy
-    read (22,*) iband, deltae
-    eigen_k(iband,1:nkpoints) = eigen_k(iband,1:nkpoints) + deltae
-    ioccupy(imu) = iband
-   end do
-   close (unit = 22)
-   write (*,*) '  '
-   do iorbital = 1, noccupy
-    iband = ioccupy(iorbital)
-    write (*,*) '  '
-    write (*,*) ' Band # ', iband,' shifted E = ', eigen_k(iband,1)
-    write (*,*) ' ***************************************** '
-    do iatom = 1, natoms
-     in1 = imass(iatom)
-     pcharge = 0.0d0
-     do ineigh = 1, neighn(iatom)
+  !AQUI  inquire (file = 'OCCUPATION', exist = read_occupy)
+
+  !Get the Fermi energy. 
+  call fermie (norbitals, ztot, eigen_k, efermi, ioccupy_k, foccupy)
+  do iatom = 1, natoms
+    in1 = imass(iatom)
+    do ineigh = 1, neighn(iatom)
       mbeta = neigh_b(ineigh,iatom)
       jatom = neigh_j(ineigh,iatom)
       in2 = imass(jatom)
       vec = xl(:,mbeta) + ratom(:,jatom) - ratom(:,iatom)
       do ikpoint = 1, nkpoints
-       dot = special_k(1,ikpoint)*vec(1) + special_k(2,ikpoint)*vec(2) &
-     &           + special_k(3,ikpoint)*vec(3)
-       phase = cmplx(cos(dot),sin(dot))*weight_k(ikpoint)
-       if (icluster .ne. 1) then
-        do imu = 1, num_orb(in1)
-         mmu = imu + degelec(iatom)
-         step1 = phase*(bbnkre(mmu,iband,ikpoint)          &
-     &      - ai*bbnkim(mmu,iband,ikpoint))
-         do inu = 1, num_orb(in2)
-    nnu = inu + degelec(jatom)
-    step2 = step1*(bbnkre(nnu,iband,ikpoint)         &
-     &       + ai*bbnkim(nnu,iband,ikpoint))
-    gutr = real(step2)
-    pcharge = pcharge + gutr*s_mat(imu,inu,ineigh,iatom)
-         end do
-        end do
-       else
-        do imu = 1, num_orb(in1)
-         mmu = imu + degelec(iatom)
-         step1 = phase*bbnkre(mmu,iband,ikpoint)
-         do inu = 1, num_orb(in2)
-    nnu = inu + degelec(jatom)
-    step2 = step1*bbnkre(nnu,iband,ikpoint)
-    gutr = real(step2)
-    pcharge = pcharge + gutr*s_mat(imu,inu,ineigh,iatom)
-         end do
-        end do
-       end if
-      end do
-     end do
-     !write (*,100) iband, iatom, pcharge
-    end do
-   end do
-  end if
-  call fermie (norbitals, ztot, eigen_k, efermi, ioccupy_k, foccupy)
-  if (iwrtefermi .eq. 1) then
-   write (*,*) '  '
-   write (*,*) ' We write out the occupancies of the levels  '
-   write (*,*) ' ----- ioccupy_k, from the subroutine fermie '
-   do ikpoint = 1, nkpoints
-    write (*,*) '  '
-    write (*,*) ' ------ fermi ioccupy_k for k-point = ', ikpoint
-    do iband = 1, norbitals_new
-     write (*,200) iband, ioccupy_k(iband,ikpoint)
-    end do
-   end do
-   write (*,*) '  '
-   write (*,*) 'We write out the electron fraction in each level '
-   write (*,*) ' ------ from the subroutine fermie. '
-   do ikpoint = 1, nkpoints
-    write (*,*) '  '
-    write (*,*) ' ------ fermi foccupy for k-point = ', ikpoint
-    do iband = 1, norbitals_new
-     write (*,201) iband, foccupy(iband,ikpoint)
-    end do
-   end do
-   write (*,*) '  '
-  end if
-  do iatom = 1, natoms
-   in1 = imass(iatom)
-   do ineigh = 1, neighn(iatom)
-    mbeta = neigh_b(ineigh,iatom)
-    jatom = neigh_j(ineigh,iatom)
-    in2 = imass(jatom)
-    vec = xl(:,mbeta) + ratom(:,jatom) - ratom(:,iatom)
-    do ikpoint = 1, nkpoints
-     dot = special_k(1,ikpoint)*vec(1) + special_k(2,ikpoint)*vec(2)   &
-     &               + special_k(3,ikpoint)*vec(3)
-     phasex = cmplx(cos(dot),sin(dot))*weight_k(ikpoint)*spin
-     if (icluster .ne. 1) then
-      do iband = 1, norbitals_new
-       if (ioccupy_k(iband,ikpoint) .ne. 0) then
-        phase = phasex*foccupy(iband,ikpoint)
-        do imu = 1, num_orb(in1)
-         mmu = imu + degelec(iatom)
-         step1 = phase*(bbnkre(mmu,iband,ikpoint)          &
-     &      - ai*bbnkim(mmu,iband,ikpoint))
-         do inu = 1, num_orb(in2)
-    nnu = inu + degelec(jatom)
-    step2 = step1*(bbnkre(nnu,iband,ikpoint)         &
-     &       + ai*bbnkim(nnu,iband,ikpoint))
-    gutr = real(step2)
-    rho(imu,inu,ineigh,iatom) = rho(imu,inu,ineigh,iatom) + gutr
-    cape(imu,inu,ineigh,iatom) =         &
-     &     cape(imu,inu,ineigh,iatom) + eigen_k(iband,ikpoint)*gutr
-         end do
-        end do
-       end if
-      end do
-     else
-      do iband = 1, norbitals_new
-       if (ioccupy_k(iband,ikpoint) .ne. 0) then
-        phase = phasex*foccupy(iband,ikpoint)
-        do imu = 1, num_orb(in1)
-         mmu = imu + degelec(iatom)
-         step1 = phase*bbnkre(mmu,iband,ikpoint)
-         do inu = 1, num_orb(in2)
-    nnu = inu + degelec(jatom)
-    step2 = step1*bbnkre(nnu,iband,ikpoint)
-    gutr = real(step2)
-    rho(imu,inu,ineigh,iatom) = rho(imu,inu,ineigh,iatom) + gutr
-    cape(imu,inu,ineigh,iatom) =         &
-     &     cape(imu,inu,ineigh,iatom) + eigen_k(iband,ikpoint)*gutr
-         end do
-        end do
-       end if
-      end do
-     end if
-    end do
-   end do
-  end do
-  do iatom = 1, natoms
-   in1 = imass(iatom)
-   do ineigh = 1, neighPPn(iatom)
-    mbeta = neighPP_b(ineigh,iatom)
-    jatom = neighPP_j(ineigh,iatom)
-    in2 = imass(jatom)
-    vec = xl(:,mbeta) + ratom(:,jatom) - ratom(:,iatom)
-    do ikpoint = 1, nkpoints
-     dot = special_k(1,ikpoint)*vec(1) + special_k(2,ikpoint)*vec(2)   &
-     &               + special_k(3,ikpoint)*vec(3)
-     phasex = cmplx(cos(dot),sin(dot))*weight_k(ikpoint)*spin
-     if (icluster .ne. 1) then
-      do iband = 1, norbitals_new
-       if (ioccupy_k(iband,ikpoint) .ne. 0) then
-        phase = phasex*foccupy(iband,ikpoint)
-        do imu = 1, num_orb(in1)
-         mmu = imu + degelec(iatom)
-         step1 = phase*(bbnkre(mmu,iband,ikpoint)          &
-     &      - ai*bbnkim(mmu,iband,ikpoint))
-         do inu = 1, num_orb(in2)
-    nnu = inu + degelec(jatom)
-    step2 = step1*(bbnkre(nnu,iband,ikpoint)         &
-     &       + ai*bbnkim(nnu,iband,ikpoint))
-    gutr = real(step2)
-    rhoPP(imu,inu,ineigh,iatom) = rhoPP(imu,inu,ineigh,iatom) &
-     &        + gutr
-         end do
-        end do
-       end if
-      end do
-     else
-      do iband = 1, norbitals_new
-       if (ioccupy_k(iband,ikpoint) .ne. 0) then
-        phase = phasex*foccupy(iband,ikpoint)
-        do imu = 1, num_orb(in1)
-         mmu = imu + degelec(iatom)
-         step1 = phase*bbnkre(mmu,iband,ikpoint)
-         do inu = 1, num_orb(in2)
-    nnu = inu + degelec(jatom)
-    step2 = step1*bbnkre(nnu,iband,ikpoint)
-    gutr = real(step2)
-    rhoPP(imu,inu,ineigh,iatom) = rhoPP(imu,inu,ineigh,iatom) &
-     &        + gutr
-         end do
-        end do
-       end if
-      end do
-     end if
-    end do
-   end do
-  end do
-  if (ifixcharge .eq. 1) then
-    do iatom = 1, natoms
-     in1 = imass(iatom)
-     if (iqout .eq. 1 .or. iqout .eq. 3) QLowdin_TOT(iatom) = 0.0d0
-     if (iqout .eq. 2 .or. iqout .eq. 4) QMulliken_TOT(iatom) = 0.0d0
-     do issh = 1, nssh(in1)
-      Qout(issh,iatom) = Qin(issh,iatom)
-      if (iqout .eq. 1 .or. iqout .eq. 3) then
-        QLowdin_TOT(iatom) =  QLowdin_TOT(iatom) +Qin(issh,iatom)
-      end if
-      if (iqout .eq. 2 .or. iqout .eq. 4) then
-        QMulliken_TOT(iatom) = QMulliken_TOT(iatom) +Qin(issh,iatom)
-      end if
-     end do
-    end do
-  else !ifixcharge
-    if (iqout .eq. 1 .or. iqout .eq. 3) then
-     Qout = 0.0d0
-     QLowdin_TOT = 0.0d0
-     call LOWDIN_CHARGES(ioccupy_k,foccupy)
-    end if !iqout = 1,3
-    if (iqout .eq. 2) then
-     Qout = 0.0d0
-     QMulliken_TOT = 0.0d0
-     call MULLIKEN_CHARGES()
-    end if !iqout = 2
-    ! GAP ENRIQUE-FF
-    if ((igap.eq.1).or.(igap.eq.2)) then
-      call buildnij(ioccupy_k,foccupy, bmix, Kscf)
-    end if
-    if (igap .eq. 2 ) then
-      call koopman(natoms,nkpoints,ratom,ioccupy_k,foccupy)
-    end if
-    ! end GAP ENRIQUE-FF
-    if (iqout .eq. 4) then
-      Qout = 0.0d0               
-      QMulliken_TOT = 0.0d0 
-      call MULLIKEN_DIPOLE_CHARGES()
-    end if !iqout = 4
-    !if (iqout .eq. 5)  call charges_L2(Kscf,0) !DIAGONAL CHARGES     
-    if (iqout .eq. 6) then
-      call STATIONARY_CHARGES()
-    end if !iqout = 6
-    if (iqout .eq. 7) then
-      Qout = 0.0d0               
-      QMulliken_TOT = 0.0d0 
-      call MULLIKEN_DIPOLE_CHARGES()
-      if (iwrtcharges .eq. 4) then
-        call load_partial_charges()
-        call write_partial_charges('PCHARGES_IN')
-      end if
-      call Dipole_proyection()
-      do iatom = 1, natoms
-        in1 = imass(iatom)
-        QoutTot(iatom) = 0.0d0
-        do imu = 1,nssh(in1)
-    QoutTot(iatom) = QoutTot(iatom)+Qout(imu,iatom)
-        end do ! end do imu
-      end do !end do iatom = 1,natoms
-      do iatom = 1, natoms
-        in1 = imass(iatom)
-        do imu = 1,nssh(in1)
-    Qout(imu,iatom) = (dq_DP(iatom)/QoutTot(iatom))*Qout(imu,iatom) + Qout(imu,iatom)
-        end do ! end do imu
-      end do !end do iatom = 1,natoms
-    end if !iqout = 7
-    if (iwrtcharges .eq. 4) then
-      call load_partial_charges()
-      call write_partial_charges('PCHARGES_OUT')
-    end if
-  end if !ifixcharge
-  if (iwrtpop .eq. 1) then
-   open (unit = 34, file = 'populations.dat', status = 'unknown')
-   write (34,*) ' # Charge localizations (per level): '
-   do iband = 1,  norbitals_new
-    pqmu = 0.0d0
-    do ikpoint = 1, nkpoints
-     if ((eigen_k(iband, ikpoint) .gt. Epop_L) .and. (eigen_k(iband, ikpoint) .lt. Epop_U)) then 
-      do iatom = 1, natoms
-       in1 = imass(iatom)
-       do ineigh = 1, neighn(iatom)
-        mbeta = neigh_b(ineigh,iatom)
-        jatom = neigh_j(ineigh,iatom)
-        in2 = imass(jatom)
-        vec = xl(:,mbeta) + ratom(:,jatom) - ratom(:,iatom)
-        dot = special_k(1,ikpoint)*vec(1) + special_k(2,ikpoint)*vec(2)  &
-     &              + special_k(3,ikpoint)*vec(3)
-        phase = cmplx(cos(dot),sin(dot))*weight_k(ikpoint)
+        dot = special_k(1,ikpoint)*vec(1) + special_k(2,ikpoint)*vec(2) + special_k(3,ikpoint)*vec(3)
+        phasex = cmplx(cos(dot),sin(dot))*weight_k(ikpoint)*spin
         if (icluster .ne. 1) then
-         do imu = 1, num_orb(in1)
-    mmu = imu + degelec(iatom)
-    step1 = phase*(bbnkre(mmu,iband,ikpoint)           &
-     &          - ai*bbnkim(mmu,iband,ikpoint))
-    do inu = 1, num_orb(in2)
-     nnu = inu + degelec(jatom)
-     step2 = step1*(bbnkre(nnu,iband,ikpoint)          &
-     &           + ai*bbnkim(nnu,iband,ikpoint))
-     gutr = real(step2)
-     pqmu(iatom) = pqmu(iatom) + gutr*s_mat(imu,inu,ineigh,iatom)
-    end do  ! inu
-         end do ! imu
-        else ! icluster
-         do imu = 1, num_orb(in1)
-    mmu = imu + degelec(iatom)
-    step1 = phase*bbnkre(mmu,iband,ikpoint)
-    do inu = 1, num_orb(in2)
-     nnu = inu + degelec(jatom)
-     step2 = step1*bbnkre(nnu,iband,ikpoint)
-     gutr = real(step2)
-     pqmu(iatom) = pqmu(iatom) + gutr*s_mat(imu,inu,ineigh,iatom)
-    end do ! inu
-         end do ! imu
-        end if ! icluster
-       end do  ! ineigh     
-      end do ! iatom
-      checksum = 0.0d0
-      do iatom = 1, natoms
-       checksum = checksum + pqmu(iatom)*log(abs(pqmu(iatom)))
+          do iband = 1, norbitals_new
+            if (ioccupy_k(iband,ikpoint) .ne. 0) then
+              phase = phasex*foccupy(iband,ikpoint)
+              do imu = 1, num_orb(in1)
+                mmu = imu + degelec(iatom)
+                step1 = phase*(bbnkre(mmu,iband,ikpoint) - ai*bbnkim(mmu,iband,ikpoint))
+                do inu = 1, num_orb(in2)
+                  nnu = inu + degelec(jatom)
+                  step2 = step1*(bbnkre(nnu,iband,ikpoint) + ai*bbnkim(nnu,iband,ikpoint))
+                  gutr = real(step2)
+                  rho(imu,inu,ineigh,iatom) = rho(imu,inu,ineigh,iatom) + gutr
+                  cape(imu,inu,ineigh,iatom) = cape(imu,inu,ineigh,iatom) + eigen_k(iband,ikpoint)*gutr
+                end do
+              end do
+            end if
+          end do
+        else
+          do iband = 1, norbitals_new
+            if (ioccupy_k(iband,ikpoint) .ne. 0) then
+              phase = phasex*foccupy(iband,ikpoint)
+              do imu = 1, num_orb(in1)
+                mmu = imu + degelec(iatom)
+                step1 = phase*bbnkre(mmu,iband,ikpoint)
+                do inu = 1, num_orb(in2)
+                  nnu = inu + degelec(jatom)
+                  step2 = step1*bbnkre(nnu,iband,ikpoint)
+                  gutr = real(step2)
+                  rho(imu,inu,ineigh,iatom) = rho(imu,inu,ineigh,iatom) + gutr
+                  cape(imu,inu,ineigh,iatom) = cape(imu,inu,ineigh,iatom) + eigen_k(iband,ikpoint)*gutr
+                end do
+              end do
+            end if
+          end do
+        end if
       end do
-      Wmu = exp(-1.0d0*checksum)
-      write (34,301) iband,eigen_k(iband,ikpoint),Wmu 
-     end if ! eigen_k
-    end do  ! ikpoint 
-   end do ! iband
-   close (unit = 34)
-  end if ! end if of iwrt_pop = 1
+    end do
+  end do
+
+  do iatom = 1, natoms
+    in1 = imass(iatom)
+    do ineigh = 1, neighPPn(iatom)
+      mbeta = neighPP_b(ineigh,iatom)
+      jatom = neighPP_j(ineigh,iatom)
+      in2 = imass(jatom)
+      vec = xl(:,mbeta) + ratom(:,jatom) - ratom(:,iatom)
+      do ikpoint = 1, nkpoints
+        dot = special_k(1,ikpoint)*vec(1) + special_k(2,ikpoint)*vec(2)  + special_k(3,ikpoint)*vec(3)
+        phasex = cmplx(cos(dot),sin(dot))*weight_k(ikpoint)*spin
+        if (icluster .ne. 1) then
+          do iband = 1, norbitals_new
+            if (ioccupy_k(iband,ikpoint) .ne. 0) then
+              phase = phasex*foccupy(iband,ikpoint)
+              do imu = 1, num_orb(in1)
+                mmu = imu + degelec(iatom)
+                step1 = phase*(bbnkre(mmu,iband,ikpoint) - ai*bbnkim(mmu,iband,ikpoint))
+                do inu = 1, num_orb(in2)
+                  nnu = inu + degelec(jatom)
+                  step2 = step1*(bbnkre(nnu,iband,ikpoint)  + ai*bbnkim(nnu,iband,ikpoint))
+                  gutr = real(step2)
+                  rhoPP(imu,inu,ineigh,iatom) = rhoPP(imu,inu,ineigh,iatom) + gutr
+                end do
+              end do
+            end if
+          end do
+        else
+          do iband = 1, norbitals_new
+            if (ioccupy_k(iband,ikpoint) .ne. 0) then
+              phase = phasex*foccupy(iband,ikpoint)
+              do imu = 1, num_orb(in1)
+                mmu = imu + degelec(iatom)
+                step1 = phase*bbnkre(mmu,iband,ikpoint)
+                do inu = 1, num_orb(in2)
+                  nnu = inu + degelec(jatom)
+                  step2 = step1*bbnkre(nnu,iband,ikpoint)
+                  gutr = real(step2)
+                  rhoPP(imu,inu,ineigh,iatom) = rhoPP(imu,inu,ineigh,iatom)  + gutr
+                end do
+              end do
+            end if
+          end do
+        end if
+      end do
+    end do
+  end do
+
+  if (iqout .eq. 1 .or. iqout .eq. 3) then
+    Qout = 0.0d0
+    QLowdin_TOT = 0.0d0
+    call LOWDIN_CHARGES(ioccupy_k,foccupy)
+  end if !iqout = 1,3
+  if (iqout .eq. 2) then
+    Qout = 0.0d0
+    QMulliken_TOT = 0.0d0
+    call MULLIKEN_CHARGES()
+  end if !iqout = 2
+  if (iqout .eq. 4) then
+    Qout = 0.0d0                        
+    QMulliken_TOT = 0.0d0 
+    call MULLIKEN_DIPOLE_CHARGES()
+  end if !iqout = 4
+  if (iqout .eq. 6) then
+    call STATIONARY_CHARGES()
+  end if !iqout = 6
+  if (iqout .eq. 7) then
+    Qout = 0.0d0                        
+    QMulliken_TOT = 0.0d0 
+    call MULLIKEN_DIPOLE_CHARGES()
+    call Dipole_proyection()
+    do iatom = 1, natoms
+      in1 = imass(iatom)
+      QoutTot(iatom) = 0.0d0
+      do imu = 1,nssh(in1)
+        QoutTot(iatom) = QoutTot(iatom)+Qout(imu,iatom)
+      end do ! end do imu
+    end do !end do iatom = 1,natoms
+    do iatom = 1, natoms
+      in1 = imass(iatom)
+      do imu = 1,nssh(in1)
+        Qout(imu,iatom) = (dq_DP(iatom)/QoutTot(iatom))*Qout(imu,iatom) + Qout(imu,iatom)
+      end do ! end do imu
+    end do !end do iatom = 1,natoms
+  end if !iqout = 7
   ebs = 0.0d0
   ztest = 0.0d0
   do ikpoint = 1, nkpoints
-   do iorbital = 1, norbitals_new
-    if (ioccupy_k(iorbital,ikpoint) .eq. 1) then
-     ebs = ebs + weight_k(ikpoint)*spin*eigen_k(iorbital,ikpoint)      &
-     &     *foccupy(iorbital,ikpoint)
-     ztest = ztest + weight_k(ikpoint)*spin*foccupy(iorbital,ikpoint)
-    end if
-   end do
+    do iorbital = 1, norbitals_new
+      if (ioccupy_k(iorbital,ikpoint) .eq. 1) then
+       ebs = ebs + weight_k(ikpoint)*spin*eigen_k(iorbital,ikpoint)*foccupy(iorbital,ikpoint)
+       ztest = ztest + weight_k(ikpoint)*spin*foccupy(iorbital,ikpoint)
+      end if
+    end do
   end do
   if (abs(ztest - ztot) .gt. 1.0d-02) then
-   write (*,*) ' *************** error *************** '
-   write (*,*) ' ztest = ', ztest, ' ztot = ', ztot
-   write (*,*) ' In denmat.f - ztest .ne. ztot! '
-   stop
+    write (*,*) ' *************** error *************** '
+    write (*,*) ' ztest = ', ztest, ' ztot = ', ztot
+    write (*,*) ' In denmat.f - ztest .ne. ztot! '
+    stop
   end if
-100     format (2x, 2i4, f8.4)
-200     format (' Band n = ', i4, ' k-points: ioccupy = ', i2)
-201     format (' Band n = ', i4, ' foccupy = ', f18.8)
-300     format (2x, ' This is band number: ',2x, i6)
-301     format (2x, i8, 2f16.8)
-800     format (2x,4i3,f12.6)
   return
-      end subroutine denmat
-      subroutine LOWDIN_CHARGES(ioccupy_k,foccupy)
-  use charges
-  use options
-  use density
-  use configuration
-  use interactions
-  use kpoints
-  use constants_fireball
+end subroutine denmat
+
+subroutine LOWDIN_CHARGES(ioccupy_k,foccupy)
+  use M_system
+  use M_constants
   implicit none
   integer iatom
   integer ikpoint
@@ -413,90 +220,81 @@ subroutine denmat ( iqout, icluster, tempfe, ebs,  bmix, Kscf)
   Qout = 0.0d0
   QLowdin_TOT = 0.0d0
   do iatom = 1, natoms
-   in1 = imass(iatom)
-   do ikpoint = 1, nkpoints
-     aux1 = weight_k(ikpoint)*spin
-     do iorbital = 1, norbitals
-      if (ioccupy_k(iorbital,ikpoint) .eq. 1) then
-       aux2 = aux1*foccupy(iorbital,ikpoint)
-       imu = 0
-       do issh = 1, nssh(in1)
-        do mqn = 1, 2*lssh(issh,in1) + 1
-         imu = imu + 1
-         mmu = imu + degelec(iatom)
-         if (icluster .ne. 1) then
-    aux3 = aux2*(blowre(mmu,iorbital,ikpoint)**2     &
-     &      + blowim(mmu,iorbital,ikpoint)**2)
-         else
-    aux3 = aux2*blowre(mmu,iorbital,ikpoint)**2
-         end if
-         Qout(issh,iatom) = Qout(issh,iatom) + aux3
-         QLowdin_TOT(iatom) = QLowdin_TOT(iatom) + aux3
-        end do
-       end do
-      end if
-     end do !kpoints
-    end do
-   end do !atoms
-       end subroutine LOWDIN_CHARGES 
-      subroutine MULLIKEN_CHARGES()           
-  use charges                 
-  use configuration
-  use interactions
-  use neighbor_map
-  use kpoints
-  use density
-  implicit none
-  integer iatom               
-  integer ikpoint             
-  integer imu, inu            
-  integer in1, in2            
-  integer issh, jssh
-  integer ineigh ,jatom,jneigh            
-  integer noccupy   
-  integer mqn                 
-  real, dimension (numorb_max, natoms) :: QMulliken
-  QMulliken = 0.0d0                
-  do iatom = 1, natoms
     in1 = imass(iatom)
-    do ineigh = 1, neighn(iatom)
-      jatom = neigh_j(ineigh,iatom)
-      in2 = imass(jatom)
-      jneigh = neigh_back(iatom,ineigh)
-      do imu = 1, num_orb(in1)
-        do inu = 1, num_orb(in2)
-    QMulliken(imu,iatom) = QMulliken(imu,iatom)        &
-     &    + 0.5d0*(rho(imu,inu,ineigh,iatom)*s_mat(imu,inu,ineigh,iatom) &
-     &    + rho(inu,imu,jneigh,jatom)*s_mat(inu,imu,jneigh,jatom))
-        end do
-      end do
-    end do !ineig
-    imu = 0
-    do issh = 1, nssh(in1)
-      do mqn = 1, 2*lssh(issh,in1) + 1
-        imu = imu + 1
-        Qout(issh,iatom) = Qout(issh,iatom) + QMulliken(imu,iatom)
-      end do
-      QMulliken_TOT(iatom) = QMulliken_TOT(iatom) + Qout(issh,iatom)
+    do ikpoint = 1, nkpoints
+       aux1 = weight_k(ikpoint)*spin
+       do iorbital = 1, norbitals
+         if (ioccupy_k(iorbital,ikpoint) .eq. 1) then
+          aux2 = aux1*foccupy(iorbital,ikpoint)
+          imu = 0
+          do issh = 1, nssh(in1)
+            do mqn = 1, 2*lssh(issh,in1) + 1
+              imu = imu + 1
+              mmu = imu + degelec(iatom)
+              if (icluster .ne. 1) then
+                aux3 = aux2*(blowre(mmu,iorbital,ikpoint)**2  + blowim(mmu,iorbital,ikpoint)**2)
+              else
+                aux3 = aux2*blowre(mmu,iorbital,ikpoint)**2
+              end if
+              Qout(issh,iatom) = Qout(issh,iatom) + aux3
+              QLowdin_TOT(iatom) = QLowdin_TOT(iatom) + aux3
+            end do
+          end do
+        end if
+      end do !kpoints
     end do
-  end do   !atoms
-      end subroutine MULLIKEN_CHARGES 
-      subroutine MULLIKEN_DIPOLE_CHARGES()            
-  use charges                 
-  use configuration
-  use interactions
-  use kpoints
-  use neighbor_map
-  use density
+  end do !atoms
+end subroutine LOWDIN_CHARGES 
+
+subroutine MULLIKEN_CHARGES()                
+  use M_system
+  use M_constants
   implicit none
-  integer iatom               
-  integer ikpoint             
-  integer imu, inu            
-  integer in1, in2            
+  integer iatom                        
+  integer ikpoint                    
+  integer imu, inu                   
+  integer in1, in2                   
   integer issh, jssh
-  integer ineigh , jatom,jneigh               
-  integer noccupy   
-  integer mqn                 
+  integer ineigh ,jatom,jneigh                   
+  integer noccupy    
+  integer mqn                          
+  real, dimension (numorb_max, natoms) :: QMulliken
+  QMulliken = 0.0d0                         
+  do iatom = 1, natoms
+      in1 = imass(iatom)
+      do ineigh = 1, neighn(iatom)
+         jatom = neigh_j(ineigh,iatom)
+         in2 = imass(jatom)
+         jneigh = neigh_back(iatom,ineigh)
+         do imu = 1, num_orb(in1)
+            do inu = 1, num_orb(in2)
+              QMulliken(imu,iatom) = QMulliken(imu,iatom)+ 0.5d0*(rho(imu,inu,ineigh,iatom)*s_mat(imu,inu,ineigh,iatom) + rho(inu,imu,jneigh,jatom)*s_mat(inu,imu,jneigh,jatom))
+            end do
+         end do
+      end do !ineig
+      imu = 0
+      do issh = 1, nssh(in1)
+         do mqn = 1, 2*lssh(issh,in1) + 1
+            imu = imu + 1
+            Qout(issh,iatom) = Qout(issh,iatom) + QMulliken(imu,iatom)
+         end do
+         QMulliken_TOT(iatom) = QMulliken_TOT(iatom) + Qout(issh,iatom)
+      end do
+  end do    !atoms
+end subroutine MULLIKEN_CHARGES 
+
+subroutine MULLIKEN_DIPOLE_CHARGES()                   
+  use M_system
+  use M_constants
+  implicit none
+  integer iatom                        
+  integer ikpoint                    
+  integer imu, inu                   
+  integer in1, in2                   
+  integer issh, jssh
+  integer ineigh , jatom,jneigh                        
+  integer noccupy    
+  integer mqn                          
   real y
   real, dimension (numorb_max, natoms) :: QMulliken
   real, dimension (3) :: vec, r1, r2, r21
@@ -505,71 +303,65 @@ subroutine denmat ( iqout, icluster, tempfe, ebs,  bmix, Kscf)
     in1 = imass(iatom)
     r1(:) = ratom(:,iatom)
     do ineigh = 1, neighn(iatom)
-      jatom = neigh_j(ineigh,iatom)
-      in2 = imass(jatom)
-      r2(:) = ratom(:,jatom)
-      ! Find r21 = vector pointing from r1 to r2, the two ends of the
-      ! bondcharge, and the bc distance, y
-      r21(:) = r2(:) - r1(:)
-      y = sqrt(r21(1)*r21(1) + r21(2)*r21(2) + r21(3)*r21(3))
-      jneigh = neigh_back(iatom,ineigh)
-      do imu = 1, num_orb(in1)
-        do inu = 1, num_orb(in2)
-    QMulliken(imu,iatom) = QMulliken(imu,iatom)        &
-     &    + 0.5d0*(rho(imu,inu,ineigh,iatom)*s_mat(imu,inu,ineigh,iatom) &
-     &    + rho(inu,imu,jneigh,jatom)*s_mat(inu,imu,jneigh,jatom))
+       jatom = neigh_j(ineigh,iatom)
+       in2 = imass(jatom)
+       r2(:) = ratom(:,jatom)
+       ! Find r21 = vector pointing from r1 to r2, the two ends of the
+       ! bondcharge, and the bc distance, y
+       r21(:) = r2(:) - r1(:)
+       y = sqrt(r21(1)*r21(1) + r21(2)*r21(2) + r21(3)*r21(3))
+       jneigh = neigh_back(iatom,ineigh)
+       do imu = 1, num_orb(in1)
+          do inu = 1, num_orb(in2)
+            QMulliken(imu,iatom) = QMulliken(imu,iatom) + 0.5d0*(rho(imu,inu,ineigh,iatom)*s_mat(imu,inu,ineigh,iatom) + rho(inu,imu,jneigh,jatom)*s_mat(inu,imu,jneigh,jatom))
+          end do
+       end do
+       ! dipole correction. Only if the two atoms are different
+       if (y .gt. 1.0d-05) then
+          do imu = 1, num_orb(in1)
+            do inu = 1, num_orb(in2)
+              QMulliken(imu,iatom) = QMulliken(imu,iatom)+ (-rho(imu,inu,ineigh,iatom)*dip(imu,inu,ineigh,iatom)+ rho(inu,imu,jneigh,jatom)*dip(inu,imu,jneigh,jatom))/y
+            end do
+          end do
+        end if !end if y .gt. 1.0d-05)
+      end do !ineig 
+      imu = 0
+      do issh = 1, nssh(in1)
+        do mqn = 1, 2*lssh(issh,in1) + 1
+          imu = imu + 1
+          Qout(issh,iatom) = Qout(issh,iatom) + QMulliken(imu,iatom)
         end do
+        QMulliken_TOT(iatom) = QMulliken_TOT(iatom) +Qout(issh,iatom)
       end do
-      ! dipole correction. Only if the two atoms are different
-      if (y .gt. 1.0d-05) then
-        do imu = 1, num_orb(in1)
-    do inu = 1, num_orb(in2)
-      QMulliken(imu,iatom) = QMulliken(imu,iatom)+        &
-     &        (-rho(imu,inu,ineigh,iatom)*dip(imu,inu,ineigh,iatom)   &
-     &        + rho(inu,imu,jneigh,jatom)*dip(inu,imu,jneigh,jatom))/y
-    end do
-        end do
-      end if !end if y .gt. 1.0d-05)
-    end do !ineig 
-    imu = 0
-    do issh = 1, nssh(in1)
-      do mqn = 1, 2*lssh(issh,in1) + 1
-        imu = imu + 1
-        Qout(issh,iatom) = Qout(issh,iatom) + QMulliken(imu,iatom)
-      end do
-      QMulliken_TOT(iatom) = QMulliken_TOT(iatom) +Qout(issh,iatom)
-    end do
     !Check whether there are negative charges and correct
     !If there's more than one shell whose charge is negative, more work is
     !needed, but that'd be quite pathological a situation...
     do issh = 1, nssh(in1)
       if( Qout(issh,iatom) .lt. 0 .and. nssh(in1) .gt. 1 ) then
         do jssh = 1,nssh(in1)
-    if ( jssh .ne. issh ) then
-      Qout(jssh,iatom) = Qout(jssh,iatom) + Qout(issh,iatom)/(nssh(in1)-1)
-       end if !end if jssh .ne. issh 
-    end do !end if jssh = 1,nssh(in1)
-    Qout(issh,iatom) = 0.0d0         
-       end if !end if  Qout(issh,iatom) .lt. 0
+          if ( jssh .ne. issh ) then
+            Qout(jssh,iatom) = Qout(jssh,iatom) + Qout(issh,iatom)/(nssh(in1)-1)
+          end if !end if jssh .ne. issh 
+        end do !end if jssh = 1,nssh(in1)
+        Qout(issh,iatom) = 0.0d0              
+      end if !end if  Qout(issh,iatom) .lt. 0
     end do !end do issh = 1, nssh(in1)
   end do !iatoms
-      end subroutine MULLIKEN_DIPOLE_CHARGES  
-      subroutine STATIONARY_CHARGES()            
-  use charges
-  use neighbor_map                 
-  use configuration
-  use interactions
-  use kpoints
-  use density
+end subroutine MULLIKEN_DIPOLE_CHARGES  
+
+
+subroutine STATIONARY_CHARGES()                   
+  use M_system
+  use M_constants
   implicit none
-  integer iatom               
-  integer ikpoint             
-  integer imu,inu            
+  integer iatom                        
+  integer ikpoint                    
+  integer imu,inu                   
   integer in1, in2
-  integer issh, jssh                
+  integer issh, jssh                         
   integer ineigh, jatom
   integer mbeta
-  integer noccupy             
+  integer noccupy                    
   integer mqn
   real,dimension(nssh_tot,nssh_tot) :: A
   real,dimension(nssh_tot) :: c, SQ ! carga
@@ -590,35 +382,32 @@ subroutine denmat ( iqout, icluster, tempfe, ebs,  bmix, Kscf)
       beta = 0
       do iatom = 1, natoms
         in1 = imass(iatom)
-        matom = neigh_self(iatom)        
+        matom = neigh_self(iatom)            
         inumorb = 1 ! counter for number of orbitals in atom iatom
         do issh1 = 1, nssh(in1)
-    beta = beta + 1 ! transform to one index
-    ! Spherical approximation to matrix elements:
-    l = lssh(issh1,in1)
-    auxgS = 0.0d0
-    ! define mu_min and mu_max: the orbitals
-    ! indices associated to the shell issh1
-    mu_min = inumorb
-    mu_max = mu_min+2*l
-    do imu = mu_min, mu_max 
-      auxgS =  auxgS  +  gvhxc(imu,imu,issh,ialp,matom,iatom)
-    end do ! end do imu = mu_min, mu_max 
-    auxgS = auxgS/(2*l+1)  ! 4*pi??
-    !M(alpha,beta) =  auxgS !gvhxcs(issh1,issh,iatom,ialp)       
-    A(alpha,beta) = auxgS 
-    inumorb = inumorb + 2*l+1
+          beta = beta + 1 ! transform to one index
+          ! Spherical approximation to matrix elements:
+          l = lssh(issh1,in1)
+          auxgS = 0.0d0
+          mu_min = inumorb
+          mu_max = mu_min+2*l
+          do imu = mu_min, mu_max 
+            auxgS =  auxgS  +  gvhxc(imu,imu,issh,ialp,matom,iatom)
+          end do ! end do imu = mu_min, mu_max 
+          auxgS = auxgS/(2*l+1)  ! 4*pi??
+          !M(alpha,beta) =  auxgS !gvhxcs(issh1,issh,iatom,ialp)          
+          A(alpha,beta) = auxgS 
+          inumorb = inumorb + 2*l+1
         end do ! end do issh1
         do ineigh = 1, neighn(iatom)
-    mbeta = neigh_b(ineigh,iatom)
-    jatom = neigh_j(ineigh,iatom)
-    in2 = imass(jatom) 
-    do imu = 1, num_orb(in1)
-      do inu = 1, num_orb(in2)
-        c(alpha) = c(alpha) + &
-       &      rho(imu,inu,ineigh,iatom)*gvhxc(imu,inu,issh,ialp,ineigh,iatom)
-      end do ! end do inu
-    end do ! end do imu
+          mbeta = neigh_b(ineigh,iatom)
+          jatom = neigh_j(ineigh,iatom)
+          in2 = imass(jatom) 
+          do imu = 1, num_orb(in1)
+            do inu = 1, num_orb(in2)
+              c(alpha) = c(alpha) + rho(imu,inu,ineigh,iatom)*gvhxc(imu,inu,issh,ialp,ineigh,iatom)
+            end do ! end do inu
+          end do ! end do imu
         end do ! end do ineigh
       end do ! end do iatom
     end do ! end do issh
@@ -637,52 +426,45 @@ subroutine denmat ( iqout, icluster, tempfe, ebs,  bmix, Kscf)
   Ntot = 0.0
   do iatom = 1, natoms
     in1 = imass(iatom)
-      do issh = 1, nssh(in1)
-        alpha = alpha + 1
-        SQ(alpha) = Qin(issh,iatom)
-        LB(alpha) = 0.00
-        if ( lssh(issh,in1) .eq. 0 ) then 
-    UB(alpha) = 2.00
-    nalpha(alpha) = 1.00 
-        end if
-        if ( lssh(issh,in1) .eq. 1 ) then
-    UB(alpha) = 6.00
-    nalpha(alpha) = 3.00 
-        end if
-        if ( lssh(issh,in1) .eq. 2 ) then
-    UB(alpha) = 10.00
-    nalpha(alpha) = 5.00 
-        end if 
-        !descomentar para anular UB y nalpha
-        !UB(alpha) = 100.00
-        !nalpha(alpha) = 1.00
-        Ntot = Ntot + Qin(issh,iatom)     
-      end do ! end do issh
-    end do ! end do iatom
-   print*,''
-   print*,"============  step_size  ============================="
-   print*,'Qtot =',Ntot
-   !write(*,'(A6,<nssh_tot>F7.3,A3)')'Qin = (/ ',(SQ(alpha),alpha = 1, nssh_tot),' /)'
-   call step_size(nssh_tot,A,c,SQ, LB, UB, nalpha) !,,LB,UB) B(1,alpha
-   Ntot=0
-   do alpha = 1, nssh_tot
-     Ntot = Ntot + SQ(alpha)
-   end do
-   !write(*,'(A6,<nssh_tot>F7.3,A3)')'Qout =(/ ',(SQ(alpha),alpha = 1, nssh_tot),' /)'
-   print*,'Qtot(out) =',Ntot
-   diff_err=Ep2(SQ,A,c,nssh_tot,nalpha)
-   print*,'err step_size   =',diff_err
-   alpha = 0 
-   do iatom = 1, natoms
-     in1 = imass(iatom)
-     do issh = 1, nssh(in1)
-       alpha = alpha + 1
-       Qout(issh,iatom) = SQ(alpha) 
-     end do ! end do issh
-   end do ! end do iatom
-      end subroutine STATIONARY_CHARGES
-      !==============================================================
-      subroutine step_size(nssh_tot,A,c,Q,LB,UB,nalpha) !,LB,UB,nstep)
+    do issh = 1, nssh(in1)
+      alpha = alpha + 1
+      SQ(alpha) = Qin(issh,iatom)
+      LB(alpha) = 0.00
+      if ( lssh(issh,in1) .eq. 0 ) then 
+        UB(alpha) = 2.00
+        nalpha(alpha) = 1.00 
+      end if
+      if ( lssh(issh,in1) .eq. 1 ) then
+        UB(alpha) = 6.00
+        nalpha(alpha) = 3.00 
+      end if
+      if ( lssh(issh,in1) .eq. 2 ) then
+        UB(alpha) = 10.00
+        nalpha(alpha) = 5.00 
+      end if 
+      !descomentar para anular UB y nalpha
+      !UB(alpha) = 100.00
+      !nalpha(alpha) = 1.00
+      Ntot = Ntot + Qin(issh,iatom)       
+    end do ! end do issh
+  end do ! end do iatom
+  call step_size(nssh_tot,A,c,SQ, LB, UB, nalpha) !,,LB,UB) B(1,alpha
+  Ntot=0
+  do alpha = 1, nssh_tot
+    Ntot = Ntot + SQ(alpha)
+  end do
+  diff_err=Ep2(SQ,A,c,nssh_tot,nalpha)
+  alpha = 0 
+  do iatom = 1, natoms
+    in1 = imass(iatom)
+    do issh = 1, nssh(in1)
+      alpha = alpha + 1
+      Qout(issh,iatom) = SQ(alpha) 
+    end do ! end do issh
+  end do ! end do iatom
+end subroutine STATIONARY_CHARGES
+
+subroutine step_size(nssh_tot,A,c,Q,LB,UB,nalpha) !,LB,UB,nstep)
   integer, intent(in) :: nssh_tot
   real,intent(in),dimension(nssh_tot,nssh_tot) :: A
   real,intent(in),dimension(nssh_tot) :: c
@@ -703,130 +485,118 @@ subroutine denmat ( iqout, icluster, tempfe, ebs,  bmix, Kscf)
   Q0=Q
   F=0
   do i=1,nssh_tot
-    do j=1, nssh_tot
-      do k=1, nssh_tot
-         F(i,j)=F(i,j)+2*A(k,i)*nalpha(k)*A(k,j)
+      do j=1, nssh_tot
+         do k=1, nssh_tot
+              F(i,j)=F(i,j)+2*A(k,i)*nalpha(k)*A(k,j)
+         end do
       end do
-    end do
   end do
   fc=0
   do i=1,nssh_tot
-    do j=1, nssh_tot
-      fc(i)=fc(i)-2*c(j)*nalpha(j)*A(j,i)
-    end do
+      do j=1, nssh_tot
+         fc(i)=fc(i)-2*c(j)*nalpha(j)*A(j,i)
+      end do
   end do
   nstep=0
   diff_err=100.0
   do while (diff_err > tol_err ) ! .and. nstep .lt. nstepmax) 
-    nstep=nstep+1
-    ! proyectamos en plano Qtot = cte
-    g=0.00
-    do i=1,nssh_tot
-      do j=1, nssh_tot
-        g(i)=g(i)-F(i,j)*Q(j)
+      nstep=nstep+1
+      ! proyectamos en plano Qtot = cte
+      g=0.00
+      do i=1,nssh_tot
+         do j=1, nssh_tot
+            g(i)=g(i)-F(i,j)*Q(j)
+         end do
+         g(i)=g(i)-fc(i)
       end do
-      g(i)=g(i)-fc(i)
-    end do
-    g0=0.00
-    do i=1,nssh_tot
-        g0=g0+g(i)
-    end do
-    g0=g0/nssh_tot
-    do i=1,nssh_tot
-      g(i)=g(i)-g0
-    end do
-    !proyectamos en las componentes q<0
-    do i=1,nssh_tot
-      if((Q0(i) < LB(i)+tol .and. g(i) < 0.00 ) .or. (Q0(i) > UB(i)-tol .and. g(i) > 0.00 )) then
-        nceros=nceros+1
-        g(i)=0.00
-        cero(i)=.True.
+      g0=0.00
+      do i=1,nssh_tot
+            g0=g0+g(i)
+      end do
+      g0=g0/nssh_tot
+      do i=1,nssh_tot
+         g(i)=g(i)-g0
+      end do
+      !proyectamos en las componentes q<0
+      do i=1,nssh_tot
+         if((Q0(i) < LB(i)+tol .and. g(i) < 0.00 ) .or. (Q0(i) > UB(i)-tol .and. g(i) > 0.00 )) then
+            nceros=nceros+1
+            g(i)=0.00
+            cero(i)=.True.
+         else
+            cero(i)=.False.
+            g0=g0+g(i)
+         end if
+      end do
+      igualceros=.False.
+      do while (igualceros .eqv. .False.)
+         call getceros(nssh_tot,Q0,g,LB,UB,tol,cero,igualceros)
+      end do
+      nceros=0
+      g0=0.00
+      do i=1,nssh_tot
+         if(cero(i) .eqv. .True.) then
+            nceros=nceros+1
+            g(i)=0.00
+         else
+            g0=g0+g(i)
+         end if
+      end do
+      g0=g0/(nssh_tot-nceros)
+      do i=1,nssh_tot
+         if (cero(i) .eqv. .False.) then
+            g(i)=g(i)-g0
+         else
+            g(i)=0.00
+         end if
+      end do
+      gmod=0.00
+      do i=1,nssh_tot
+         gmod=gmod+g(i)**2
+      end do
+      gmod=gmod**0.5
+      qmod=0.00
+      do i=1,nssh_tot
+         qmod=qmod+Q(i)**2
+      end do
+      qmod=qmod**0.5
+      dq=qmod/gmod
+      !obtenemos el min
+      x=get_min_parabola(-dq,0,dq,Ep2(Q0-dq*g,A,c,nssh_tot,nalpha),Ep2(Q0,A,c,nssh_tot,nalpha),Ep2(Q0+dq*g,A,c,nssh_tot,nalpha))
+      Q=Q0+x*g
+      diff_err=Ep2(Q0,A,c,nssh_tot,nalpha)-Ep2(Q,A,c,nssh_tot,nalpha)
+      dqmax=1.0E+10
+      k=0
+      do i=1,nssh_tot
+         if(cero(i) .eqv. .False.) then  !ojo !!!!
+            if(Q(i) < LB(i)) then
+      if (dqmax > -Q0(i)/g(i)) then
+         dqmax=-Q0(i)/g(i)
+         k=k+1
+      end if
+            end if
+            if(Q(i) > UB(i)) then
+      if (dqmax > (UB(i)-Q0(i))/g(i)) then
+         dqmax=(UB(i)-Q0(i))/g(i)
+         k=k+1
+      end if
+            end if
+         end if
+      end do
+      if(k .eq.0 ) then
+         Q=Q
       else
-        cero(i)=.False.
-        g0=g0+g(i)
+         Q=Q0+dqmax*g
       end if
-    end do
-    igualceros=.False.
-    do while (igualceros .eqv. .False.)
-      call getceros(nssh_tot,Q0,g,LB,UB,tol,cero,igualceros)
-    end do
-    nceros=0
-    g0=0.00
-    do i=1,nssh_tot
-      if(cero(i) .eqv. .True.) then
-        nceros=nceros+1
-        g(i)=0.00
-      else
-        g0=g0+g(i)
-      end if
-    end do
-    g0=g0/(nssh_tot-nceros)
-    do i=1,nssh_tot
-      if (cero(i) .eqv. .False.) then
-        g(i)=g(i)-g0
-      else
-        g(i)=0.00
-      end if
-    end do
-    gmod=0.00
-    do i=1,nssh_tot
-      gmod=gmod+g(i)**2
-    end do
-    gmod=gmod**0.5
-    qmod=0.00
-    do i=1,nssh_tot
-      qmod=qmod+Q(i)**2
-    end do
-    qmod=qmod**0.5
-    dq=qmod/gmod
-    !obtenemos el min
-    x=get_min_parabola(-dq,0,dq,Ep2(Q0-dq*g,A,c,nssh_tot,nalpha),Ep2(Q0,A,c,nssh_tot,nalpha),Ep2(Q0+dq*g,A,c,nssh_tot,nalpha))
-    Q=Q0+x*g
-    diff_err=Ep2(Q0,A,c,nssh_tot,nalpha)-Ep2(Q,A,c,nssh_tot,nalpha)
-    dqmax=1.0E+10
-    k=0
-    do i=1,nssh_tot
-      if(cero(i) .eqv. .False.) then  !ojo !!!!
-        if(Q(i) < LB(i)) then
-    if (dqmax > -Q0(i)/g(i)) then
-      dqmax=-Q0(i)/g(i)
-      k=k+1
-    end if
-        end if
-        if(Q(i) > UB(i)) then
-    if (dqmax > (UB(i)-Q0(i))/g(i)) then
-      dqmax=(UB(i)-Q0(i))/g(i)
-      k=k+1
-    end if
-        end if
-      end if
-    end do
-    if(k .eq.0 ) then
-      Q=Q
-    else
-      Q=Q0+dqmax*g
-    end if
-    Q0=Q
-    !write(*,'(A6,<nssh_tot>F7.3,A3)')'g     = (/ ',(g(i),i = 1, nssh_tot),' /)'
+      Q0=Q
   end do
   aux=0
   do i = 1, nssh_tot
-    aux=aux+Q(i)
+      aux=aux+Q(i)
   end do
-  print*,'nstep = ',nstep
-  !write(*,'(A6,<nssh_tot>L7,A3)')'ceros =(/ ',(cero(i),i = 1, nssh_tot),' /)'
-  !do i = 1, nssh_tot
-  ! print*,g(i),cero(i),Q(i),dqmax,k,x
-  !end do
-  !print*,'diff err = ',diff_err,';  nstep    =',nstep,'; dqmax =',dqmax
-  !print*,'Qtot     =',aux,' ;  n ceros  =',nceros,'; err   =',Ep2(Q,A,c,nssh_tot)
-  !if ( nstep .eq. nstepmax ) then
-  !print*,'*************** stop nstepmax *************************'
-  !stop
-  !end if
-      end
-      !=============================================
-      real function Ep2(q,A,c,nssh_tot,nalpha)
+end
+
+real function Ep2(q,A,c,nssh_tot,nalpha)
   integer, intent(in) :: nssh_tot
   real,intent(in),dimension(nssh_tot,nssh_tot) :: A
   real,intent(in),dimension(nssh_tot) :: q,c,nalpha
@@ -835,16 +605,18 @@ subroutine denmat ( iqout, icluster, tempfe, ebs,  bmix, Kscf)
   !Ep=(Aq-c)**2
   Ep2=0.00
   do i = 1, nssh_tot
-    aux=0.00
-    do j = 1, nssh_tot
-      aux=aux+A(i,j)*q(j)
-    end do
-    aux=aux-c(i)
-    aux=aux**2*nalpha(i)
-    Ep2=Ep2+aux
+      aux=0.00
+      do j = 1, nssh_tot
+         aux=aux+A(i,j)*q(j)
+      end do
+      aux=aux-c(i)
+      aux=aux**2*nalpha(i)
+      Ep2=Ep2+aux
   end do
-      end function Ep2
-      subroutine getceros(nssh_tot,Q0,g,LB,UB,tol,cero,igualceros)
+end function Ep2
+
+
+subroutine getceros(nssh_tot,Q0,g,LB,UB,tol,cero,igualceros)
   integer, intent(in) :: nssh_tot
   real, intent(in) :: tol
   real,intent(in),dimension(nssh_tot) :: Q0
@@ -862,35 +634,34 @@ subroutine denmat ( iqout, icluster, tempfe, ebs,  bmix, Kscf)
   !write(*,'(A6,<nssh_tot>F12.3,A3)')'g0=(/ ',(gaux(i),i = 1, nssh_tot),' /)'
   !write(*,'(A6,<nssh_tot>F12.3,A3)')'Q0=(/ ',(Q0(i),i = 1, nssh_tot),' /)'
   do i=1,nssh_tot
-    if(cero(i) .eqv. .True.) then
-      nceros=nceros+1
-      gaux(i)=0.00
-    else
-      g0=g0+g(i)
-    end if
+      if(cero(i) .eqv. .True.) then
+         nceros=nceros+1
+         gaux(i)=0.00
+      else
+         g0=g0+g(i)
+      end if
   end do
   g0=g0/(nssh_tot-nceros)
   do i=1,nssh_tot
-    if (cero(i) .eqv. .False.) then
-      gaux(i)=gaux(i)-g0
-    else
-      gaux(i)=0.00
-    end if
+      if (cero(i) .eqv. .False.) then
+         gaux(i)=gaux(i)-g0
+      else
+         gaux(i)=0.00
+      end if
   end do
   igualceros=.True.
   do i=1,nssh_tot
-    if(cero(i)  .eqv. .False.)then
-      if((Q0(i) < LB(i)+tol .and. gaux(i) < 0.00 ) .or. (Q0(i) > UB(i)-tol .and. gaux(i) > 0.00 )) then
-        nceros=nceros+1
-        cero(i)=.True.
-        igualceros=.False.
+      if(cero(i)  .eqv. .False.)then
+         if((Q0(i) < LB(i)+tol .and. gaux(i) < 0.00 ) .or. (Q0(i) > UB(i)-tol .and. gaux(i) > 0.00 )) then
+            nceros=nceros+1
+            cero(i)=.True.
+            igualceros=.False.
+         end if
       end if
-    end if
   end do
-  !write(*,'(A6,<nssh_tot>L)')'cein =(/ ',(cero(i),i = 1, nssh_tot),' /)'
-  !print*,'igualceros=',igualceros
-      end subroutine getceros
-      subroutine dipole_proyection()
+end subroutine getceros
+
+subroutine dipole_proyection()
   use charges
   use outputs, only : iwrtdipole
   use density
@@ -912,10 +683,10 @@ subroutine denmat ( iqout, icluster, tempfe, ebs,  bmix, Kscf)
   integer issh
   integer jatom
   integer mbeta
-  real    Qtot, Qtot1, Qtot2
+  real      Qtot, Qtot1, Qtot2
   real, dimension(3) :: r1,r2,Rbc,u21
   real, dimension(3) :: rmedio, raux
-  real    w_suma  
+  real      w_suma  
   real, dimension(3,3) :: bwrr, bwrr_inv, u_bwrr, ut_bwrr, v_bwrr, vt_bwrr, zero_bwrr
   real, dimension (natoms) :: c_k
   real, dimension (neigh_max) :: w_k
@@ -942,12 +713,12 @@ subroutine denmat ( iqout, icluster, tempfe, ebs,  bmix, Kscf)
     end do
     dip_x = dip_x+Qtot*ratom(1,iatom)
     dip_y = dip_y+Qtot*ratom(2,iatom)
-    dip_z = dip_z+Qtot*ratom(3,iatom)    
+    dip_z = dip_z+Qtot*ratom(3,iatom)      
   enddo !end do iatom = 1,natoms
-  dip_tot    = sqrt (dip_x**2 + dip_y**2 + dip_z**2 )   
-  dipQin_x   = dip_x
-  dipQin_y   = dip_y
-  dipQin_z   = dip_z
+  dip_tot      = sqrt (dip_x**2 + dip_y**2 + dip_z**2 )    
+  dipQin_x    = dip_x
+  dipQin_y    = dip_y
+  dipQin_z    = dip_z
   dipQin_tot = dip_tot
   dip_x = 0.0d0
   dip_y = 0.0d0
@@ -956,40 +727,40 @@ subroutine denmat ( iqout, icluster, tempfe, ebs,  bmix, Kscf)
     in1 = imass(iatom)
     r1(:) = ratom(:,iatom)
     do issh = 1,nssh(in1)
-      Qtot = Qtot+Qin(issh,iatom)
+     Qtot = Qtot+Qin(issh,iatom)
     end do !end do issh = 1,nssh(in1)
     dip_x = dip_x-Q0_TOT(iatom)*r1(1)
-    dip_y = dip_y-Q0_TOT(iatom)*r1(2)   
+    dip_y = dip_y-Q0_TOT(iatom)*r1(2)    
     dip_z = dip_z-Q0_TOT(iatom)*r1(3)
   end do !end do iatom = 1,natoms
   do iatom = 1, natoms
     in1 = imass(iatom)
-    r1(:) = ratom(:,iatom)   
+    r1(:) = ratom(:,iatom)    
     do ineigh = 1,neighn(iatom)
       mbeta = neigh_b(ineigh,iatom)
       jatom = neigh_j(ineigh,iatom)
       r2(:) = ratom(:,jatom) + xl(:,mbeta)
-      in2 = imass(jatom)    
+      in2 = imass(jatom)      
       Rbc(:)=(r1(:)+r2(:))/2.0d0
       u21(:)=(r2(:)-r1(:))/(sqrt((r2(1)-r1(1))**2+(r2(2)-r1(2))**2+(r2(3)-r1(3))**2))
       do imu = 1,num_orb(in1)
         do inu = 1,num_orb(in2)
-    dip_x = dip_x + rho(imu,inu,ineigh,iatom)*(dipc(1,imu,inu,ineigh,iatom) + Rbc(1)*s_mat(imu,inu,ineigh,iatom))
-    dip_y = dip_y + rho(imu,inu,ineigh,iatom)*(dipc(2,imu,inu,ineigh,iatom) + Rbc(2)*s_mat(imu,inu,ineigh,iatom))
-    dip_z = dip_z + rho(imu,inu,ineigh,iatom)*(dipc(3,imu,inu,ineigh,iatom) + Rbc(3)*s_mat(imu,inu,ineigh,iatom))
+          dip_x = dip_x + rho(imu,inu,ineigh,iatom)*(dipc(1,imu,inu,ineigh,iatom) + Rbc(1)*s_mat(imu,inu,ineigh,iatom))
+          dip_y = dip_y + rho(imu,inu,ineigh,iatom)*(dipc(2,imu,inu,ineigh,iatom) + Rbc(2)*s_mat(imu,inu,ineigh,iatom))
+          dip_z = dip_z + rho(imu,inu,ineigh,iatom)*(dipc(3,imu,inu,ineigh,iatom) + Rbc(3)*s_mat(imu,inu,ineigh,iatom))
         end do !end do inu
-     end do !end do imu
+      end do !end do imu
     end do !end ineigh = 1,natoms
   end do ! end do iatom = 1,natoms
   dip_tot = sqrt (dip_x**2 + dip_y**2 + dip_z**2 )
-  dipTot_x   = dip_x
-  dipTot_y   = dip_y
-  dipTot_z   = dip_z
+  dipTot_x    = dip_x
+  dipTot_y    = dip_y
+  dipTot_z    = dip_z
   dipTot_tot = dip_tot
   ! write the intraatomic dipole
   dip_x = 0.0d0
   dip_y = 0.0d0
-  dip_z = 0.0d0    
+  dip_z = 0.0d0      
   do iatom = 1, natoms
     in1 = imass(iatom)
     r1(:) = ratom(:,iatom)
@@ -1002,19 +773,19 @@ subroutine denmat ( iqout, icluster, tempfe, ebs,  bmix, Kscf)
       u21(:)=(r2(:)-r1(:))/(sqrt((r2(1)-r1(1))**2+(r2(2)-r1(2))**2+(r2(3)-r1(3))**2))
       do imu = 1,num_orb(in1)
         do inu = 1,num_orb(in2)
-    if ((iatom .eq. jatom) .and. (imu .ne. inu)) then
-      dip_x = dip_x + rho(imu,inu,ineigh,iatom)*(dipc(1,imu,inu,ineigh,iatom) + Rbc(1)*s_mat(imu,inu,ineigh,iatom))
-      dip_y = dip_y + rho(imu,inu,ineigh,iatom)*(dipc(2,imu,inu,ineigh,iatom) + Rbc(2)*s_mat(imu,inu,ineigh,iatom))
-      dip_z = dip_z + rho(imu,inu,ineigh,iatom)*(dipc(3,imu,inu,ineigh,iatom) + Rbc(3)*s_mat(imu,inu,ineigh,iatom))
-    end if !end if
+          if ((iatom .eq. jatom) .and. (imu .ne. inu)) then
+            dip_x = dip_x + rho(imu,inu,ineigh,iatom)*(dipc(1,imu,inu,ineigh,iatom) + Rbc(1)*s_mat(imu,inu,ineigh,iatom))
+            dip_y = dip_y + rho(imu,inu,ineigh,iatom)*(dipc(2,imu,inu,ineigh,iatom) + Rbc(2)*s_mat(imu,inu,ineigh,iatom))
+            dip_z = dip_z + rho(imu,inu,ineigh,iatom)*(dipc(3,imu,inu,ineigh,iatom) + Rbc(3)*s_mat(imu,inu,ineigh,iatom))
+          end if !end if
         end do !end do inu
       end do !end do imu
     end do !end ineigh = 1,natoms
   end do ! end do iatom = 1,natoms
   dip_tot = sqrt (dip_x**2 + dip_y**2 + dip_z**2 )
-  dipIntra_x   = dip_x
-  dipIntra_y   = dip_y
-  dipIntra_z   = dip_z
+  dipIntra_x    = dip_x
+  dipIntra_y    = dip_y
+  dipIntra_z    = dip_z
   dipIntra_tot = dip_tot
   !DIP RES = DIP_TOT - PROY
   dip_res_x = 0.0d0
@@ -1025,7 +796,7 @@ subroutine denmat ( iqout, icluster, tempfe, ebs,  bmix, Kscf)
     dip_res_y = 0.0d0
     dip_res_z = 0.0d0
     in1 = imass(iatom)
-    r1(:) = ratom(:,iatom)   
+    r1(:) = ratom(:,iatom)    
     do ineigh = 1,neighn(iatom)
       mbeta = neigh_b(ineigh,iatom)
       jatom = neigh_j(ineigh,iatom)
@@ -1034,13 +805,13 @@ subroutine denmat ( iqout, icluster, tempfe, ebs,  bmix, Kscf)
       Rbc(:)=(r1(:)+r2(:))/2.0d0
       do imu = 1,num_orb(in1)
         do inu = 1,num_orb(in2)
-    if (iatom .ne. jatom) then !.or. imu .eq. inu) then
-      u21(:)=(r2(:)-r1(:))/(sqrt((r2(1)-r1(1))**2+(r2(2)-r1(2))**2+(r2(3)-r1(3))**2))
-      dip_proy = dipc(1,imu,inu,ineigh,iatom)*u21(1) + dipc(2,imu,inu,ineigh,iatom)*u21(2) + dipc(3,imu,inu,ineigh,iatom)*u21(3)
-      dip_res_x = dip_res_x + rho(imu,inu,ineigh,iatom)*(dipc(1,imu,inu,ineigh,iatom) - dip_proy*u21(1))
-      dip_res_y = dip_res_y + rho(imu,inu,ineigh,iatom)*(dipc(2,imu,inu,ineigh,iatom) - dip_proy*u21(2))
-      dip_res_z = dip_res_z + rho(imu,inu,ineigh,iatom)*(dipc(3,imu,inu,ineigh,iatom) - dip_proy*u21(3))
-    end if !end if
+          if (iatom .ne. jatom) then !.or. imu .eq. inu) then
+            u21(:)=(r2(:)-r1(:))/(sqrt((r2(1)-r1(1))**2+(r2(2)-r1(2))**2+(r2(3)-r1(3))**2))
+            dip_proy = dipc(1,imu,inu,ineigh,iatom)*u21(1) + dipc(2,imu,inu,ineigh,iatom)*u21(2) + dipc(3,imu,inu,ineigh,iatom)*u21(3)
+            dip_res_x = dip_res_x + rho(imu,inu,ineigh,iatom)*(dipc(1,imu,inu,ineigh,iatom) - dip_proy*u21(1))
+            dip_res_y = dip_res_y + rho(imu,inu,ineigh,iatom)*(dipc(2,imu,inu,ineigh,iatom) - dip_proy*u21(2))
+            dip_res_z = dip_res_z + rho(imu,inu,ineigh,iatom)*(dipc(3,imu,inu,ineigh,iatom) - dip_proy*u21(3))
+          end if !end if
         end do !end do inu
       end do !end do imu
     end do !end ineigh = 1,natoms
@@ -1077,9 +848,9 @@ subroutine denmat ( iqout, icluster, tempfe, ebs,  bmix, Kscf)
     do imu = 1,num_orb(in1)
       do inu = 1,num_orb(in2)
         if ( (imu .ne. inu)) then
-    dip_x = dip_x + rho(imu,inu,ineigh,iatom)*(dipc(1,imu,inu,ineigh,iatom) + Rbc(1)*s_mat(imu,inu,ineigh,iatom))
-    dip_y = dip_y + rho(imu,inu,ineigh,iatom)*(dipc(2,imu,inu,ineigh,iatom) + Rbc(2)*s_mat(imu,inu,ineigh,iatom))
-    dip_z = dip_z + rho(imu,inu,ineigh,iatom)*(dipc(3,imu,inu,ineigh,iatom) + Rbc(3)*s_mat(imu,inu,ineigh,iatom))
+          dip_x = dip_x + rho(imu,inu,ineigh,iatom)*(dipc(1,imu,inu,ineigh,iatom) + Rbc(1)*s_mat(imu,inu,ineigh,iatom))
+          dip_y = dip_y + rho(imu,inu,ineigh,iatom)*(dipc(2,imu,inu,ineigh,iatom) + Rbc(2)*s_mat(imu,inu,ineigh,iatom))
+          dip_z = dip_z + rho(imu,inu,ineigh,iatom)*(dipc(3,imu,inu,ineigh,iatom) + Rbc(3)*s_mat(imu,inu,ineigh,iatom))
         end if !end if
       end do !end do inu
     end do !end do imu
@@ -1112,7 +883,7 @@ subroutine denmat ( iqout, icluster, tempfe, ebs,  bmix, Kscf)
       in2 = imass(jatom)
       do imu = 1,3 !xyz
         do inu = 1,3 !xyz
-     bwrr(inu,imu) = bwrr(inu,imu) + w_k(ineigh)*r2(imu)*(r2(inu)-rmedio(inu))
+          bwrr(inu,imu) = bwrr(inu,imu) + w_k(ineigh)*r2(imu)*(r2(inu)-rmedio(inu))
         enddo !inu
       enddo !imu
     end do !end ineigh = 1,natoms
@@ -1165,13 +936,14 @@ subroutine denmat ( iqout, icluster, tempfe, ebs,  bmix, Kscf)
     dip_y = dip_y+Qtot*ratom(2,iatom)
     dip_z = dip_z+Qtot*ratom(3,iatom)
   end do !end do iatom = 1,natoms
-  dip_tot = sqrt (dip_x**2 + dip_y**2 + dip_z**2 )   
-  dipQout_x   = dip_x
-  dipQout_y   = dip_y
-  dipQout_z   = dip_z
+  dip_tot = sqrt (dip_x**2 + dip_y**2 + dip_z**2 )    
+  dipQout_x    = dip_x
+  dipQout_y    = dip_y
+  dipQout_z    = dip_z
   dipQout_tot = dip_tot
-      end subroutine dipole_proyection
-      real function get_min_parabola(x1,x2,x3,y1,y2,y3)
+end subroutine dipole_proyection
+  
+real function get_min_parabola(x1,x2,x3,y1,y2,y3)
   real,intent(in) :: x1,x2,x3,y1,y2,y3
   real a,b,c
   b=(y2-y3)-(y1-y2)*(x2**2-x3**2)/(x1**2-x2**2)
@@ -1180,5 +952,5 @@ subroutine denmat ( iqout, icluster, tempfe, ebs,  bmix, Kscf)
   c=y1-a*x1**2-b*x1
   get_min_parabola=-b/(2*a)
   ! print*,a,'*x**2+',b,'*x+',c
-      end function get_min_parabola
+end function get_min_parabola
 

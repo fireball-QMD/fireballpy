@@ -3,6 +3,7 @@
 ! ===========================================================================
 subroutine assemble_mcweda ()
   use M_system
+  use M_fdata, only: V_intra_dip
   implicit none
   integer iatom
   integer jatom
@@ -12,11 +13,11 @@ subroutine assemble_mcweda ()
 
   if (Kscf .eq. 1) then
     call initneighbors ()
-    call num_neigh_tot (numorb_max)
+    call num_neigh_tot ()
     call backnay ()
-    call neighbors_pairs(icluster)
-    call common_neighbors (icluster)
-    call common_neighborsPP (icluster)
+    call neighbors_pairs()
+    call common_neighbors ()
+    call common_neighborsPP ()
   end if ! end if (Kscf .eq. 1)
 
   ! ewald energy
@@ -42,22 +43,22 @@ subroutine assemble_mcweda ()
   end do
 
   ! assemble_1c
-  call assemble_olsxc_1c (natoms, itheory, iforce)
+  call assemble_olsxc_1c ()
 
-  if (V_intra_dip .eq. 1) call assemble_1c_vdip (iforce)
+  if (V_intra_dip .eq. 1) call assemble_1c_vdip ()
 
   !  ----------------- assemble_2c ------------------------
   if (Kscf .eq. 1) then
-    call assemble_sVNL (iforce)
-    call assemble_2c (iforce)
-    call assemble_2c_PP (nprocs, iforce, iordern)
+    call assemble_sVNL ()
+    call assemble_2c ()
+    call assemble_2c_PP ()
   end if ! end if of Kscf = 1
 
-  call average_ca_rho (Kscf, iforce)
+  call average_ca_rho (Kscf)
   call assemble_olsxc_on (uxcdcc_ols)
   call assemble_olsxc_off ()
-  if (idipole .eq. 0) call assemble_ca_2c (iforce)
-  if (idipole .eq. 1) call assemble_ca_2c_dip (iforce)
+  if (idipole .eq. 0) call assemble_ca_2c ()
+  if (idipole .eq. 1) call assemble_ca_2c_dip ()
   
   !-------------------- assemble_3c -------------------------
   if (Kscf .eq. 1) then
@@ -77,7 +78,7 @@ subroutine assemble_mcweda ()
   if (idipole .eq. 1) call assemble_lr_dip ()
 
   !Build H
-  call buildh (itestrange, testrange)
+  call buildh ()
   return
 end subroutine assemble_mcweda
 

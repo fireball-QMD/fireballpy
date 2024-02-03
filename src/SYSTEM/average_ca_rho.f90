@@ -1,11 +1,8 @@
 ! This routine calculates the average densities with charge transfer.
-subroutine average_ca_rho (Kscf, iforce)
-  use iM_system
+subroutine average_ca_rho ()
+  use M_system
+  use M_fdata, only: nssh, num_orb, isorpmax, nspecies, nsh_max
   implicit none
-  ! Input
-  integer, intent (in) :: iforce
-  integer, intent (in) :: Kscf
-
   integer iatom
   integer iatomstart
   integer ibeta
@@ -20,7 +17,7 @@ subroutine average_ca_rho (Kscf, iforce)
   integer interaction
   integer interaction0
   integer inu
-  integer isorp
+  integer isorp, ialp
   integer issh
   integer jatom
   integer jneigh
@@ -283,7 +280,7 @@ subroutine average_ca_rho (Kscf, iforce)
     end do   ! end do neigh_comn(ialp)
   end do    ! end do ialp
   !      T W O - C E N T E R   P A R T
-  do iatom = 1, ntaoms
+  do iatom = 1, natoms
     r1(:) = ratom(:,iatom)
     in1 = imass(iatom)
     do ineigh = 1, neighn(iatom)
@@ -386,25 +383,6 @@ subroutine average_ca_rho (Kscf, iforce)
             rho_modified=rhom_3c(issh,jssh,ineigh,iatom)/sm(issh,jssh)
             arho_off(issh,jssh,ineigh,iatom) =  arho_off(issh,jssh,ineigh,iatom)  + rhom_2c(issh,jssh)/sm(issh,jssh) + rho_modified
             arhop_off(:,issh,jssh,ineigh,iatom) = arhop_off(:,issh,jssh,ineigh,iatom) + (rhomp_2c(:,issh,jssh)*sm(issh,jssh) - rhom_2c(issh,jssh)*spm(:,issh,jssh)) /(sm(issh,jssh)*sm(issh,jssh))
-            if (igauss .eq. 1) then
-              if (abs(sm(issh,jssh)) .lt. xc_overtol) then
-                if (sm(issh,jssh) .gt. 0.0d0) then
-                  sm(issh,jssh) =  xc_overtol
-                else
-                  sm(issh,jssh) =  -1.0d0*xc_overtol
-                endif
-              endif
-              arho_off(issh,jssh,ineigh,iatom) =  arho_off(issh,jssh,ineigh,iatom) + rhom_2c(issh,jssh)/sm(issh,jssh)
-              if (abs(smGS(issh,jssh)) .lt. xc_overtolG) then
-                if (sm(issh,jssh) .gt. 0.0d0) then
-                  sm(issh,jssh) =  xc_overtolG
-                else
-                  sm(issh,jssh) =  -1.0d0*xc_overtolG
-                endif
-              endif
-              rho_modified = rhom_3c(issh,jssh,ineigh,iatom)/smGS(issh,jssh)
-              arho_off(issh,jssh,ineigh,iatom) = arho_off(issh,jssh,ineigh,iatom) + rho_modified
-            end if
           end do   ! end do jssh
         end do   ! end do issh
       end if

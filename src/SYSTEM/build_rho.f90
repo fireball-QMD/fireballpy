@@ -7,7 +7,6 @@ subroutine build_rho ()
   rho = 0.0d0
   cape = 0.0d0
   if (tempfe .le. 50.0d0) tempfe = 50.0d0 ! Can't be zero
-  !AQUI
   call denmat (iqout, icluster,tempfe, ebs, bmix, Kscf)
   call mixer (natoms, itheory, ifixcharge, iwrtcharges)
   flag_es = 0 
