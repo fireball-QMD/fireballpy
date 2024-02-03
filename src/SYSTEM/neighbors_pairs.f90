@@ -1,17 +1,11 @@
-subroutine neighbors_pairs (icluster)
+subroutine neighbors_pairs ()
   use M_system
   implicit none
-  integer, intent (in) :: icluster
   integer :: num_pairs
   integer :: iatom
   integer :: ineigh
   integer :: jatom
   integer :: jneigh
-
-  !CAREFUL!!   For the time being, this subroutine only works with icluster = 1.
-  !It must be extended to work on periodic systems!
-  !Create list of pairs of neighbors without repetitions: SYMMETRIC FIREBALL,
-  !APRIL 2018
   num_pairs = 0
   if (icluster .eq. 1) then
     do iatom = 1,natoms
@@ -30,9 +24,5 @@ subroutine neighbors_pairs (icluster)
   else  !if icluster .eq. 1
   end if !end if icluster .eq. 1
   tot_pairs = num_pairs    !tot_pairs stores the total number of non-repeated
-  !pairs of neighbors
-  !End of creating list of pairs of neighbors without repetitions: SYMMETRIC
-  !FIREBALL,
-  !APRIL 2018
   return 
 end

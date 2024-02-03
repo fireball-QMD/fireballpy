@@ -197,7 +197,7 @@ subroutine assemble_ca_3c ()
         bcca = 0.0d0
         do isorp = 1, nssh(indna)
           interaction = 1
-          call trescentros (interaction, isorp, isorpmax, in1, in2,    indna, x, y, cost, eps, bccax, nspecies)
+          call trescentros (interaction, isorp, isorpmax, in1, in2,    indna, x, y, cost, eps, bccax)
           dxn = (Qin(isorp,ialp) - Qneutral(isorp,indna))
           do inu = 1, num_orb(in2)
             do imu = 1, num_orb(in1)

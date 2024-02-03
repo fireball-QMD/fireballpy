@@ -1,7 +1,7 @@
 ! This routine assembles all of the two-center and degenerate two-center interactions.
-subroutine assemble_2c (iforce)
+subroutine assemble_2c ()
   use M_system
-  integer, intent (in) :: iforce
+  use M_fdata, only: num_orb
   integer iatom
   integer iatomstart
   integer ierror
@@ -60,12 +60,8 @@ subroutine assemble_2c (iforce)
       jatom = neigh_j(ineigh,iatom)
       r2(:) = ratom(:,jatom) + xl(:,mbeta)
       in2 = imass(jatom)
- 
-      ! Find r21 = vector pointing from r1 to r2, the two ends of the bondcharge.
-      ! This gives us the distance dbc (or y value in the 2D grid).
       r21(:) = r2(:) - r1(:)
       y = sqrt(r21(1)*r21(1) + r21(2)*r21(2) + r21(3)*r21(3))
-      ! Find the unit vector in sigma direction.
       if (y .lt. 1.0d-05) then
         sighat(1) = 0.0d0
         sighat(2) = 0.0d0
@@ -79,14 +75,6 @@ subroutine assemble_2c (iforce)
  
       ! CALL DOSCENTROS AND GET S AND T
       ! ****************************************************************************
-      ! The derivatives are tpx and spx, where p means derivative and x means crytal
-      ! coordinates. The derivatives are:  d/d(b1) <phi(r-b1) ! O ! phi(r-b2)>
-      ! where O = 1 (for overlap), or T.  The derivative is a vector in crystal
-      ! coordinates and is stored in tp(ix,imu,inu,iatom,ineigh). The subroutine
-      ! returns the derivative for just that one value of iatom and ineigh, and the
-      ! result is returned in the arguement list, tpx(3,4,4) or spx(3,4,4).  The
-      ! derivatives are computed only if iforce = 1 !
-      ! For these interactions, there are no subtypes and isorp = 0
       isorp = 0
       interaction = 1
       in3 = in2
@@ -109,9 +97,6 @@ subroutine assemble_2c (iforce)
         end do
       end do
 
-      ! Sometimes while running diagnostics, we may want to turn off the overlap.
-      ! We certainly do not want all of the overlap interactions to be zero, but
-      ! instead we would want the unity matrix.
       if (ineigh .eq. matom) then
         do inu = 1, num_orb(in2)
           do imu = 1, num_orb(in2)
@@ -121,11 +106,6 @@ subroutine assemble_2c (iforce)
         end do
       end if
 
-      ! CALL DOSCENTROS AND GET VNA FOR ATOM CASE
-      ! The vna 2 centers are: ontop (L), ontop (R), and atm.
-      ! First, do vna_atom case. Here we compute <i | v(j) | i> matrix elements.
-      ! If r1 = r2, then this is a case where the two wavefunctions are at the
-      ! same site, but the potential vna is at a different site (atm case).
       isorp = 0
       kforce = 1           ! don't calculate forces here
       interaction = 4
@@ -141,12 +121,9 @@ subroutine assemble_2c (iforce)
 
       ! CALL DOSCENTROS AND GET VNA FOR ONTOP CASE
       ! ****************************************************************************
-      ! if r1 .ne. r2, then this is a case where the potential is located
-      ! at one of the sites of a wavefunction (ontop case).
       if (iatom .eq. jatom .and. mbeta .eq. 0) then
         ! Do nothing here - special case. Interaction already calculated in atm case.
       else
-        ! For the vna_ontopl case, the potential is in the first atom (iatom): Neutral atom piece
         isorp = 0
         interaction = 2
         in3 = in2
@@ -198,7 +175,7 @@ subroutine assemble_2c (iforce)
         isorp = 0
         interaction = 10
         in3 = in2
-        call doscentrosDipY (interaction, isorp, iforce, in1, in2, in3, y, eps, deps, dipx, dippx)
+        call doscentrosDipY (interaction, isorp, in1, in2, in3, y, eps, deps, dipx, dippx)
         do inu = 1, num_orb(in2)
           do imu = 1, num_orb(in1)
             dipcm(2,imu,inu) = dipx(imu,inu)
@@ -210,30 +187,18 @@ subroutine assemble_2c (iforce)
         isorp = 0
         interaction = 11
         in3 = in2
-        call doscentrosDipX (interaction, isorp, iforce, in1, in2, in3, y, eps, deps, dipx, dippx)
+        call doscentrosDipX (interaction, isorp, in1, in2, in3, y, eps, deps, dipx, dippx)
         do inu = 1, num_orb(in2)
           do imu = 1, num_orb(in1)
             dipcm(1,imu,inu) = dipx(imu,inu)
             if (iforce .eq. 1) dippcm(:,1,imu,inu)  = dippx(:,imu,inu)
           end do
         end do
-
-        ! Rotate dipole vector to finally obtain dipole-vector in crystal coordinates 
-        !(2-nd rotation; the orbitals are already rotated in "doscentros")
         do ix = 1, 3
           do iy = 1, 3
             dipc(ix,:,:,ineigh,iatom) = dipc(ix,:,:,ineigh,iatom) + eps(ix,iy) *dipcm(iy,:,:)
           enddo
         enddo
-
-        !  DERIVATIVES: Compute dippc from dippcm, eps and deps. First index (ix): x,y,z:
-        !  derivation coordinate. Second index: component of the dipole (X,Y,Z). third
-        !  e.g. dippc(2,3,:,:,:,:) means the derivative with respect to y of the z-component of
-        !  the dipole vector;
-        !  fourth indexes: mu,nu orbitals.  
-        !  The final value is dippc.
-        !  dippcm from "doscentros" is an intermediate value in which the orbitals are rotated 
-        !  but not the dipole-vector 
         do ix = 1,3
           do iy = 1,3
             do iz = 1,3

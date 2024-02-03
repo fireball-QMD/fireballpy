@@ -13,6 +13,7 @@
 ! 
 subroutine build_ca_olsxc_on (in1, iatom, bcxcx, xc)
   use M_system
+  use M_fdata, only: nssh, num_orb,lssh,nsh_max
   implicit none
   integer, intent (in) :: in1
   integer, intent (in) :: iatom

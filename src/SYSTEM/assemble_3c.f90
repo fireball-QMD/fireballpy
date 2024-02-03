@@ -1,6 +1,7 @@
 subroutine assemble_3c ()
   use M_system
   use M_constants
+  use M_fdata, only: isorpmax,nspecies, num_orb
   implicit none
 
   integer ialp
@@ -89,11 +90,7 @@ subroutine assemble_3c ()
         ! CALL TRESCENTROS FOR NEUTRAL ATOM PIECE
         isorp = 0
         interaction = 1
-        if (igauss .eq. 0) then
-          call trescentros (interaction, isorp, isorpmax, in1, in2, indna, x, y, cost, eps, bcnax, nspecies)
-        else 
-          call trescentrosG_VNA (in1, in2, indna, x, y, cost, eps, bcnax, rcutoff)
-        end if
+        call trescentros (interaction, isorp, isorpmax, in1, in2, indna, x, y, cost, eps, bcnax)
         do inu = 1, num_orb(in2)
           do imu = 1, num_orb(in1)
             vna(imu,inu,mneigh,iatom) = vna(imu,inu,mneigh,iatom) + bcnax(imu,inu)*eq2

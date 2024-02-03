@@ -2,12 +2,10 @@
 ! This routine assembles all of the one-center exchange-correlation
 ! interactions. The results are stored in vxc_1c and etotxc_1c.
 ! ===========================================================================
-subroutine assemble_1c_vdip (iforce)
-  use M_fdata
+subroutine assemble_1c_vdip ()
+  use M_system
+  use M_constants, only: eq2
   implicit none
- 
-  integer, intent(in) :: iforce
- 
   integer iatom
   integer imu, inu, ialpha, ibeta
   integer in1

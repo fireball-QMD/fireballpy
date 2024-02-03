@@ -1,11 +1,9 @@
-subroutine kspace ( Kscf, iqout, icluster, ikpoint, sks, nkpoints)
+!AQUI ufff
+subroutine kspace ( ikpoint, sks)
   use M_system
+  use M_fdata, only: num_orb, Qneutral
   implicit none
-  integer, intent (in) :: icluster
   integer, intent (in) :: ikpoint
-  integer, intent (in) :: iqout
-  integer, intent (in) :: Kscf
-  integer, intent (in) :: nkpoints
   real, intent (in), dimension (3) :: sks
   real*8, parameter :: overtol = 1.0d-4
   integer iatom
@@ -124,48 +122,47 @@ subroutine kspace ( Kscf, iqout, icluster, ikpoint, sks, nkpoints)
     deallocate (work)
     allocate(work(lwork))
     call dsyev ('V', 'U', norbitals, zzzz, norbitals, slam, work,lwork, info )
-  end if
-  if (info .ne. 0) call diag_error (info, 0)
-  mineig = 0
-  do imu = 1, norbitals
-    if (slam(imu) .lt. overtol) mineig = imu
-  end do
-  mineig = mineig + 1
-  norbitals_new = norbitals + 1 - mineig
-  if (norbitals_new .ne. norbitals) then
-    write (*,*) ' Linear dependence encountered in basis set. '
-    if(ishort .eq. 1) then    ! Don't print out again if done above
-      write (*,*) '      The overlap eigenvalues: '
-    else          ! They asked for extra printout
-      write(*,*) ' Eigenvectors that correspond to eigenvalues'
-      do imu = 1, mineig - 1
-        write(*,*) ' eigenvector',imu
-        do jmu = 1, norbitals
-          write(*,*) jmu,' ',zzzz(jmu,imu)
+    if (info .ne. 0) call diag_error (info, 0)
+    mineig = 0
+    do imu = 1, norbitals
+      if (slam(imu) .lt. overtol) mineig = imu
+    end do
+    mineig = mineig + 1
+    norbitals_new = norbitals + 1 - mineig
+    if (norbitals_new .ne. norbitals) then
+      write (*,*) ' Linear dependence encountered in basis set. '
+      if(ishort .eq. 1) then    ! Don't print out again if done above
+        write (*,*) '      The overlap eigenvalues: '
+      else          ! They asked for extra printout
+        write(*,*) ' Eigenvectors that correspond to eigenvalues'
+        do imu = 1, mineig - 1
+          write(*,*) ' eigenvector',imu
+          do jmu = 1, norbitals
+            write(*,*) jmu,' ',zzzz(jmu,imu)
+          end do
         end do
+      end if
+      do imu = mineig, norbitals
+        jmu = imu - mineig + 1
+        zzzz(:,jmu) = zzzz(:,imu)
+        slam(jmu) = slam(imu)
       end do
     end if
-    do imu = mineig, norbitals
-      jmu = imu - mineig + 1
-      zzzz(:,jmu) = zzzz(:,imu)
-      slam(jmu) = slam(imu)
+    do imu = 1, norbitals_new
+      sqlami = slam(imu)**(-0.25d0)
+      zzzz(:,imu) = zzzz(:,imu)*sqlami
     end do
-  end if
-  do imu = 1, norbitals_new
-    sqlami = slam(imu)**(-0.25d0)
-    zzzz(:,imu) = zzzz(:,imu)*sqlami
-  end do
-  call dgemm ('N', 'C', norbitals, norbitals, norbitals_new, a1, zzzz, norbitals, zzzz, norbitals, a0, xxxx, norbitals)
-  if (iqout .eq. 3) then
-    do imu=1, norbitals
-      xxxx(imu,:)=xxxx(imu,:)*ww(imu)
+    call dgemm ('N', 'C', norbitals, norbitals, norbitals_new, a1, zzzz, norbitals, zzzz, norbitals, a0, xxxx, norbitals)
+    if (iqout .eq. 3) then
+      do imu=1, norbitals
+        xxxx(imu,:)=xxxx(imu,:)*ww(imu)
+      end do
+    endif
+    do inu = 1, norbitals
+      do imu = 1, norbitals
+        sm12_save(imu,inu) = xxxx(imu,inu)
+      end do
     end do
-  endif
-  do inu = 1, norbitals
-    do imu = 1, norbitals
-     sm12_save(imu,inu) = xxxx(imu,inu)
-    end do
-  end do
   else ! (if Kscf .eq. 1 .and iqout .ne. 3)
     xxxx(:,:) = sm12_save(:,:)
   end if

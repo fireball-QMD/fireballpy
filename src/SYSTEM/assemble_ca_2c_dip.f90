@@ -1,8 +1,9 @@
 ! This routine assembles all of the two-center and degenerate two-center interactions for DOGS.
-subroutine assemble_ca_2c_dip (iforce)
+subroutine assemble_ca_2c_dip ()
   use M_system
+  use M_fdata, only: nssh,rcutoff,Qneutral,num_orb
+  use m_constants, only: eq2
   implicit none
-  integer, intent (in) :: iforce
   integer iatom
   integer iatomstart
   integer icount
@@ -66,7 +67,7 @@ subroutine assemble_ca_2c_dip (iforce)
     gvhxc = 0.0d0
   end if ! end if Kscf .eq. 1
 
-  do iatom = 1,ntaoms
+  do iatom = 1,natoms
     matom = neigh_self(iatom)
     r1(:) = ratom(:,iatom)
     in1 = imass(iatom)

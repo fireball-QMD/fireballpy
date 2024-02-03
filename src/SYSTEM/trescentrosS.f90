@@ -1,12 +1,12 @@
-subroutine trescentrosS ( isorp, maxtype, in1, in2, indna, x, y, cost, eps, bcnax, nspecies)
+subroutine trescentrosS ( isorp, maxtype, in1, in2, indna, x, y, cost, eps, bcnax)
   use M_system
+  use M_fdata
   implicit none
   integer, intent (in) :: in1
   integer, intent (in) :: in2
   integer, intent (in) :: indna
   integer, intent (in) :: isorp
   integer, intent (in) :: maxtype
-  integer, intent (in) :: nspecies
   real, intent (in) :: cost
   real, intent (in) :: x
   real, intent (in) :: y

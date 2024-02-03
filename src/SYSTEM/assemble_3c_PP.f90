@@ -1,5 +1,6 @@
 subroutine assemble_3c_PP ()
   use M_system
+  use M_fdata, only: num_orb, num_orbPP 
   implicit none
   integer ialp
   integer iatom
@@ -65,7 +66,8 @@ subroutine assemble_3c_PP ()
           do imu = 1, num_orb(in1)
             vnl(imu,inu,mneigh,iatom) =  vnl(imu,inu,mneigh,iatom) + bcnlx(imu,inu)
           end do ! do imu
-       end do ! do inu
+        end do ! do inu
+      end if
     end do ! do ineigh
   end do ! do ialp
   return

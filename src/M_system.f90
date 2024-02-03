@@ -10,6 +10,7 @@ module M_system
   integer :: max_scf_iterations = 200
   real, parameter ::  xc_overtol = 5.0d-5
   real, parameter :: smt_elect = 0.8d0 ! Ewald and electrostatic
+  integer, parameter :: ithetamax = 5
 
   integer :: natoms
   real, dimension (:, :), allocatable :: ratom
@@ -44,6 +45,18 @@ module M_system
   real ::  Umuxc_1c
   real, dimension (:, :, :, :), allocatable :: vxc_1c
 
+  !--diag--
+  real, dimension (:, :, :), allocatable :: blowre
+  real, dimension (:, :, :), allocatable :: bbnkre
+  real, dimension (:, :, :), allocatable :: blowim
+  real, dimension (:, :, :), allocatable :: bbnkim
+  real, dimension (:, :), allocatable :: eigen_k
+  real, dimension (:, :), allocatable :: special_k
+  integer :: norbitals
+  integer :: norbitals_new
+  integer :: nkpoints  
+  integer, dimension (:), allocatable :: getiatom
+ 
   ! -- EWALD--
   real, dimension (:, :), allocatable :: ewald
   real, dimension (:, :, :), allocatable :: dewald
@@ -86,7 +99,24 @@ module M_system
   integer, dimension (:), allocatable :: neighPPn
   integer, dimension (:, :), allocatable :: neighPP_b
   integer, dimension (:, :), allocatable :: neighPP_j
-  
+  integer :: tot_pairs
+  real, dimension (:, :, :, :), allocatable :: sVNL
+  real, dimension (:, :, :, :, :), allocatable :: spVNL
+  real, dimension (:, :, :, :, :), allocatable :: sp_mat
+  real, dimension (:, :, :, :, :), allocatable :: tp_mat
+  real, dimension (:, :, :), allocatable :: dipcm
+  real, dimension (:, :, :, :), allocatable :: dippcm
+  real, dimension (:, :, :, :, :, :), allocatable :: dippc
+  real, dimension(3,3) :: eps2  
+  real, dimension (:, :, :, :), allocatable :: vnl
+  integer, dimension (:), allocatable :: neighPP_comn
+  integer, dimension (:, :), allocatable :: neighPP_comm
+  integer, dimension (:, :, :), allocatable :: neighPP_comj
+  integer, dimension (:, :, :), allocatable :: neighPP_comb 
+  integer,allocatable   :: neighj_aux(:,:)
+  integer :: neighPP_max 
+  integer :: num_neig_maxtot
+ 
   !CHARGES
   real, dimension (:, :), allocatable :: Qin
   real, dimension (:), allocatable :: Qinmixer
@@ -106,6 +136,7 @@ module M_system
   !interaccions
   real, dimension (:, :, :, :), allocatable :: vxc
   real, dimension (:, :, :, :), allocatable :: vxc_ca
+  real, dimension (:, :, :, :), allocatable :: rho
   real, dimension (:, :, :, :), allocatable :: rho_off
   real, dimension (:, :, :, :), allocatable :: rhoij_off
   real, dimension (:, :, :, :), allocatable :: s_mat 
@@ -131,7 +162,19 @@ module M_system
   real, dimension (:, :, :, :), allocatable :: vna
   real, dimension (:, :, :, :), allocatable :: ewaldqmmm
   real, dimension (:,:,:), allocatable :: Vdip_1c
+  integer, dimension(:), allocatable :: Nlines_vdip1c
   real, dimension (:, :, :, :, :), allocatable :: dipc
+  integer, dimension(:,:), allocatable :: muR
+  integer, dimension(:,:), allocatable :: nuR
+  integer, dimension(:,:), allocatable :: alphaR
+  integer, dimension(:,:), allocatable :: betaR
+  real, dimension(:,:), allocatable :: IR
+  real, dimension(:,:,:,:), allocatable   :: hr_box
+  integer, dimension (:, :), allocatable :: index_max2cDipY
+  integer, dimension (:, :), allocatable :: index_max2cDipX
+  integer :: ME2cDipY_max
+  integer :: ME2cDipX_max
+  real, dimension (:, :), allocatable :: cl_PP
 
   real, allocatable, dimension(:,:) :: Fv   
   real, allocatable, dimension(:,:) :: Xv    

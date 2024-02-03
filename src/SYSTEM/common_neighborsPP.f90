@@ -1,25 +1,6 @@
-! ===========================================================================
-!  Given atom ialp, we find pairs of atoms that are common neighbors
-! of atom ialp. Note that on atom ialp is placed VNL.
-!
-! Find all common neighbors (Pseudopotential) of atom alpha 
-! (we call its i value ialp). Atom alpha is in the central cell, and 
-! the common neighbors are at l-vector-sub-i,i and l-vector-sub-j,j
-!
-! Note:
-! You should remember that in counting the common neighbors, we do not include
-! any pairs in which one or both of the atoms is ontop atom ialp. Thus we are 
-! keeping only third party common neighbors.
-!
-! ncomnPP(ialp) = num =total # of common neighbors to atom (0,ialp)
-! ncomjPP(ialp,mneigh,1) = iatom value for mneigh'th pair of common neighbors
-! ncomjPP(ialp,mneigh,2) = jatom value for mneigh'th pair of common neighbors
-! ncombPP(ialp,mneigh,1) = mbeta-sub-iatom value for m'th pair of common neigh
-! ncombPP(ialp,mneigh,2) = mbeta-sub-jatom value for m'th pair of common neigh
-subroutine common_neighborsPP (icluster )
+subroutine common_neighborsPP ()
   use M_system
   implicit none
-  integer, intent (in) :: icluster
   integer ialp
   integer iatom
   integer ibeta

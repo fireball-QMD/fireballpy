@@ -6,7 +6,7 @@ program pyreball
     fdatalocation='/home/dani/FB/git/create/coutput'
     fdatalocation='/home/dani/Fdata_HC-new'
     call load_fdata()
-
+    call scf_loop()
     call getenergy()
     
     !call diagonalize_matrix()

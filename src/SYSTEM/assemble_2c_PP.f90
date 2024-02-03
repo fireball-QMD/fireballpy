@@ -1,9 +1,8 @@
 ! This routine assembles all of the two-center and degenerate two-center interactions.
-subroutine assemble_2c_PP (iforce)
-  use M_sytem
+subroutine assemble_2c_PP ()
+  use M_system
+  use M_fdata, only: num_orb, num_orbPP
   implicit none
-  ! Input
-  integer, intent (in) :: iforce
   integer iatom
   integer iatomstart
   integer ierror
@@ -28,7 +27,7 @@ subroutine assemble_2c_PP (iforce)
 
   vnl = 0.0d0
 
-  do iatom = 1, ntaoms
+  do iatom = 1, natoms
     matom = neighPP_self(iatom)
     in1 = imass(iatom)
     do ineigh = 1, nPPn(iatom)    !  <==== loop over i's neighbors
@@ -55,7 +54,7 @@ subroutine assemble_2c_PP (iforce)
     enddo   ! do ineigh
   enddo   ! do iatom
   ! ASSEMBLE VNL ONTOP LEFT CASE   <phi_i|Psi_i><Psi_i|phi_j>
-  do iatom = 1, ntaoms
+  do iatom = 1, natoms
     matom = neighPP_self(iatom)
     in1 = imass(iatom)
     do ineigh = 1, nPPxn(iatom) 
@@ -96,7 +95,7 @@ subroutine assemble_2c_PP (iforce)
   enddo   ! do iatom
 
   ! ASSEMBLE VNL ONTOP RIGHT CASE   <phi_i|Psi_j><Psi_j|phi_j>
-  do iatom = 1, ntaoms
+  do iatom = 1, natoms
     matom = neighPP_self(iatom)
     in1 = imass(iatom)
     do ineigh = 1, nPPn(iatom) 

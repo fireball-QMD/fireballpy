@@ -23,6 +23,7 @@
 ! ===========================================================================
 subroutine rotatePP(in1,in2,eps,mmatrix,xmatrix)
  use M_system
+ use M_fdata, only: nssh,lssh,nsshPP,lsshPP
  implicit none
  integer, intent(in) :: in1
  integer, intent(in) :: in2
