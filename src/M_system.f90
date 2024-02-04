@@ -17,6 +17,7 @@ module M_system
   integer, dimension (:), allocatable :: degelec
   integer, dimension (:), allocatable :: imass
   character (len = 2), dimension (:), allocatable:: symbol
+  character (len = 2), dimension (:), allocatable :: symbolA
   integer :: mbeta_max  
   integer neigh_max
 
@@ -44,7 +45,9 @@ module M_system
   real :: Uexc_1c
   real ::  Umuxc_1c
   real, dimension (:, :, :, :), allocatable :: vxc_1c
-
+  !Charges
+  real, dimension(:), allocatable  :: Q0_TOT
+ 
   !--diag--
   real, dimension (:, :, :), allocatable :: blowre
   real, dimension (:, :, :), allocatable :: bbnkre
@@ -56,7 +59,30 @@ module M_system
   integer :: norbitals_new
   integer :: nkpoints  
   integer, dimension (:), allocatable :: getiatom
- 
+  integer, dimension (:,:),allocatable :: ioccupy_k !AQUI pensar allo en denmat
+  integer, dimension (:), allocatable :: ioccupy   !AQUI
+  real, dimension (:,:), allocatable :: foccupy !AQUI
+  
+  !scf
+  integer, parameter ::  idmix = 6
+  real, dimension (:, :, :, :), allocatable :: cape
+  real :: tempfe
+  real :: bmix
+  real :: sigma
+  real :: sigmaold
+  real :: sigmatol
+  logical ::  scf_achieved
+  real, dimension (:, :, :), allocatable :: blowre_o
+  real, dimension (:, :, :), allocatable :: bbnkre_o  
+  integer :: flag_es
+  real, dimension (:, :, :, :), allocatable :: rhoPP
+  real :: ztot
+  real, dimension (:), allocatable :: weight_k
+  integer ::  nssh_tot
+  integer :: ialgmix
+  real, dimension (:), allocatable :: mwe
+  real, dimension (:), allocatable :: drwe
+
   ! -- EWALD--
   real, dimension (:, :), allocatable :: ewald
   real, dimension (:, :, :), allocatable :: dewald

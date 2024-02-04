@@ -1,14 +1,8 @@
-subroutine denmat ( iqout, icluster, tempfe, ebs,  bmix, Kscf)
+subroutine denmat ()
   use M_system
   use M_constants
+  use M_fdata, only: num_orb,nssh,lssh
   implicit none
-  integer, intent (in) :: icluster
-  integer, intent (in) :: iqout
-  integer, intent (in) :: bmix
-  integer, intent (in) :: Kscf
-  integer, intent (in) :: igap
-  real, intent (in) :: tempfe
-  real, intent (out) :: ebs
   integer iatom
   integer iband
   integer ikpoint
@@ -26,8 +20,6 @@ subroutine denmat ( iqout, icluster, tempfe, ebs,  bmix, Kscf)
   integer nnu
   integer :: info, lwork
   integer, dimension(100) :: work
-  integer, dimension (norbitals) :: ioccupy
-  integer, dimension (norbitals, nkpoints) :: ioccupy_k
   real aux1, aux2, aux3
   real deltae
   real dot
@@ -36,7 +28,6 @@ subroutine denmat ( iqout, icluster, tempfe, ebs,  bmix, Kscf)
   real ztest
   real checksum
   real Wmu
-  real, dimension (norbitals, nkpoints) :: foccupy
   real, dimension (natoms) :: pqmu
   real, dimension (natoms) :: QoutTot
   real, dimension (3) :: vec
@@ -49,7 +40,7 @@ subroutine denmat ( iqout, icluster, tempfe, ebs,  bmix, Kscf)
   !AQUI  inquire (file = 'OCCUPATION', exist = read_occupy)
 
   !Get the Fermi energy. 
-  call fermie (norbitals, ztot, eigen_k, efermi, ioccupy_k, foccupy)
+  call fermie ()
   do iatom = 1, natoms
     in1 = imass(iatom)
     do ineigh = 1, neighn(iatom)
@@ -149,7 +140,7 @@ subroutine denmat ( iqout, icluster, tempfe, ebs,  bmix, Kscf)
   if (iqout .eq. 1 .or. iqout .eq. 3) then
     Qout = 0.0d0
     QLowdin_TOT = 0.0d0
-    call LOWDIN_CHARGES(ioccupy_k,foccupy)
+    call LOWDIN_CHARGES()
   end if !iqout = 1,3
   if (iqout .eq. 2) then
     Qout = 0.0d0
@@ -202,9 +193,10 @@ subroutine denmat ( iqout, icluster, tempfe, ebs,  bmix, Kscf)
   return
 end subroutine denmat
 
-subroutine LOWDIN_CHARGES(ioccupy_k,foccupy)
+subroutine LOWDIN_CHARGES()
   use M_system
   use M_constants
+  use M_fdata, only: num_orb,nssh,lssh
   implicit none
   integer iatom
   integer ikpoint
@@ -215,8 +207,6 @@ subroutine LOWDIN_CHARGES(ioccupy_k,foccupy)
   integer mqn
   integer iorbital
   real aux1, aux2, aux3
-  integer,intent(in), dimension (norbitals, nkpoints) :: ioccupy_k
-  real,intent(in), dimension (norbitals, nkpoints) :: foccupy
   Qout = 0.0d0
   QLowdin_TOT = 0.0d0
   do iatom = 1, natoms
@@ -249,6 +239,7 @@ end subroutine LOWDIN_CHARGES
 subroutine MULLIKEN_CHARGES()                
   use M_system
   use M_constants
+  use M_fdata, only: num_orb,nssh,lssh
   implicit none
   integer iatom                        
   integer ikpoint                    
@@ -286,6 +277,7 @@ end subroutine MULLIKEN_CHARGES
 subroutine MULLIKEN_DIPOLE_CHARGES()                   
   use M_system
   use M_constants
+  use M_fdata, only: num_orb,nssh,lssh
   implicit none
   integer iatom                        
   integer ikpoint                    
@@ -353,6 +345,7 @@ end subroutine MULLIKEN_DIPOLE_CHARGES
 subroutine STATIONARY_CHARGES()                   
   use M_system
   use M_constants
+  use M_fdata, only: num_orb,nssh,lssh
   implicit none
   integer iatom                        
   integer ikpoint                    
@@ -662,19 +655,12 @@ subroutine getceros(nssh_tot,Q0,g,LB,UB,tol,cero,igualceros)
 end subroutine getceros
 
 subroutine dipole_proyection()
-  use charges
-  use outputs, only : iwrtdipole
-  use density
-  use interactions
-  use neighbor_map  
-  use configuration, only : ratom, xl, natoms
+  use M_system
+  use M_constants
+  use M_fdata, only: num_orb,nssh,lssh,Qneutral
   implicit none
-  ! Local Parameters and Data Declaration
-  ! ===========================================================================
   real, parameter ::  Debye = 0.208194
   real, parameter ::  klambda = 1.0
-  ! Local Variable Declaration and Description
-  ! ===========================================================================
   integer iatom
   integer imu
   integer in1, in2

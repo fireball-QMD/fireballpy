@@ -1,8 +1,9 @@
 subroutine allocate_system ()
-  use M_system  
-
-  integer :: iatom, jatom, mbeta, num_neigh, in1,imu,ini2,
-  real :: rcutoff_i,distance2,range2
+  use M_system 
+  use M_fdata, only: nssh, rcutoff, rc_PP
+  implicit none
+  integer :: iatom, jatom, mbeta, num_neigh, in1,imu,in2
+  real :: rcutoff_j, rcutoff_i, distance2, range2
 
   allocate (ratom (3, natoms))
   allocate (degelec (natoms))
@@ -37,6 +38,7 @@ subroutine allocate_system ()
         if (distance2 .le. range2) num_neigh = num_neigh + 1
       end do
     end do
+  end do
 
   neigh_max = max(neigh_max, num_neigh)
 
@@ -107,7 +109,6 @@ subroutine allocate_system ()
   allocate (neighn (natoms))
   allocate (neigh_comb (2, neigh_max**2, natoms))
   allocate (neigh_comj (2, neigh_max**2, natoms))
-  if (itheory_xc .eq. 4) allocate (neigh_com_ng (2, neigh_max**2, natoms))
   allocate (neigh_comm (neigh_max**2, natoms))
   allocate (neigh_comn (natoms))
   allocate (neigh_back (natoms, neigh_max))
@@ -127,7 +128,6 @@ subroutine allocate_system ()
   allocate (neigh_pair_a2 (neigh_max*natoms))
   allocate (neigh_pair_n1 (neigh_max*natoms))
   allocate (neigh_pair_n2 (neigh_max*natoms))
-  if (itheory_xc .eq. 4) allocate (neigh_com_ng (2, neigh_max**2, natoms))
   allocate (neigh_comm (neigh_max**2, natoms))
   allocate (neigh_comn (natoms))
   allocate (neigh_back (natoms, neigh_max))
@@ -164,6 +164,12 @@ subroutine allocate_system ()
   allocate (neighb_tot (neigh_max+neighPP_max, natoms))
   allocate (neighn_tot (natoms))
 
+
+  write(*,*)norbitals, nkpoints,'<--------'
+  allocate(ioccupy(norbitals))
+  allocate(ioccupy_k (norbitals, nkpoints))
+  allocate(foccupy (norbitals, nkpoints))
+  allocate (eigen_k (norbitals, nkpoints))
 ! call allocate_f (natoms, neigh_max, neighPP_max, numorb_max, nsh_max, itheory, itheory_xc )
 ! call allocate_h (natoms, neigh_max, neighPP_max, itheory, itheory_xc,
 !call allocate_rho (natoms, neigh_max, neighPP_max, numorb_max,       

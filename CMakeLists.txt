@@ -46,7 +46,15 @@ add_executable( pyreball
   ${CMAKE_SOURCE_DIR}/src/LOADFDATA/setterp_2d.f90
   ${CMAKE_SOURCE_DIR}/src/LOADFDATA/load_fdata.f90
  
-
+  ${CMAKE_SOURCE_DIR}/src/SYSTEM/load_system.f90
+  ${CMAKE_SOURCE_DIR}/src/SYSTEM/allocate_system.f90
+  ${CMAKE_SOURCE_DIR}/src/SYSTEM/anderson.f90
+  ${CMAKE_SOURCE_DIR}/src/SYSTEM/broyden.f90
+  ${CMAKE_SOURCE_DIR}/src/SYSTEM/louie.f90
+  ${CMAKE_SOURCE_DIR}/src/SYSTEM/pulay.f90
+  ${CMAKE_SOURCE_DIR}/src/SYSTEM/mixer.f90
+  ${CMAKE_SOURCE_DIR}/src/SYSTEM/fermie.f90
+  ${CMAKE_SOURCE_DIR}/src/SYSTEM/denmat.f90
   ${CMAKE_SOURCE_DIR}/src/SYSTEM/build_rho.f90
   ${CMAKE_SOURCE_DIR}/src/SYSTEM/kspace_withnok.f90
   ${CMAKE_SOURCE_DIR}/src/SYSTEM/diag_k.f90 

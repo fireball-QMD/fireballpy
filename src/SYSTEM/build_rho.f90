@@ -7,8 +7,8 @@ subroutine build_rho ()
   rho = 0.0d0
   cape = 0.0d0
   if (tempfe .le. 50.0d0) tempfe = 50.0d0 ! Can't be zero
-  call denmat (iqout, icluster,tempfe, ebs, bmix, Kscf)
-  call mixer (natoms, itheory, ifixcharge, iwrtcharges)
+  call denmat ()
+  call mixer ()
   flag_es = 0 
   if (sigma .lt. sigmatol) then
     scf_achieved = .true.
