@@ -1,16 +1,15 @@
 import warnings
-from typing import Set
+from typing import Set, Optional
 
 import numpy as np
-from mendeleev import element
 
 from ase import Atoms
 from ase.calculators.calculator import (Calculator,
                                         all_changes)
 
-from _infodat import *
+from infodat import InfoDat, default_infodat
 
-import _fireball
+import _fireball as _fb
 
 
 class Fireball(Calculator):
@@ -21,8 +20,9 @@ class Fireball(Calculator):
 
     ignored_changes = ['initial_magmoms']
 
-    def __init__(self, **kwargs):
+    def __init__(self, infodat: Optional[InfoDat]=None, **kwargs):
         Calculator.__init__(self, **kwargs)
+        self._infodat = infodat if infodat is not None else default_infodat
         self._numbers = set()  # Keep track of our atoms
 
     # For this to work we need to remove all the info.dat stuff from
@@ -30,58 +30,32 @@ class Fireball(Calculator):
     # which contains the allocation along with the deallocation if it was
     # allocated before
     def _load_infodat(self, numbers: Set[int]) -> None:
-        _fireball.fdata.nspecies = len(numbers)
-        _fireball.fdata.nsh_max = max(len(_shells[n]) for n in numbers)
-        _fireball.fdata.nsh_maxPP = max(len(_ps_shells[n]) for n in numbers)
-        _fireball.fdata.allocate()
+        _fb.fdata.nspecies = len(numbers)
+        _fb.fdata.nsh_max = max(self.infodat.numshells)
+        _fb.fdata.nsh_maxPP = max(self.infodat.numshellsPP)
+        _fb.fdata.allocate()
 
         for i, n in enumerate(numbers):
-            el = element(n)
-            _fireball.fdata.symbolA[i] = el.symbol
-            _fireball.fdata.nzx[i] = el.atomic_number
-            _fireball.fdata.smass[i] = el.atomic_weight
-            _fireball.fdata.rc_PP[i] = _cutoffs[n][0]
-            _fireball.fdata.etotatom[i] = 0.0
+            _fb.fdata.symbolA[i] = self.infodat.elements[n].symbol
+            _fb.fdata.nzx[i] = n
+            _fb.fdata.smass[i] = self.infodat.elements[n].atomic_weight
+            _fb.fdata.rc_PP[i] = self.infodat.cutoffPP[n]
+            _fb.fdata.etotatom[i] = self.infodat.energy[n]
 
-            _fireball.fdata.nsshPP[i] = len(_ps_shells[n])
-            for j in range(_fireball.fdata.nsshPP[i]):
-                _fireball.fdata.lsshPP[j, i] = _ps_shells[n][j]
-            _fireball.fdata.nssh[i] = len(_shells[n])
-            for j in range(_fireball.fdata.nssh[i]):
-                _fireball.fdata.lssh[j, i] = _shells[n][j]
-                _fireball.fdata.Qneutral[j, i] = _cutoffs[n][1][0, j]
-                _fireball.fdata.rcutoff_temp[j, i] = _cutoffs[n][1][1, j] * \
-                    _fireball.constants.abohr
-                _fireball.fdata.wavefxn[j, i] = _wffiles[n][j]
-                _fireball.fdata.napot[j, i] = _nafiles[n][j]
-            _fireball.fdata.napot[-1, i] = _nafiles[n][-1]
+            _fb.fdata.nsshPP[i] = self.infodat.numshellsPP[n]
+            for j in range(self.infodat.numshellsPP[n]):
+                _fb.fdata.lsshPP[j, i] = self.infodat.shellsPP[n][j]
+            _fb.fdata.nssh[i] = self.infodat.numshells[n]
+            for j in range(self.infodat.numshells[n]):
+                _fb.fdata.lssh[j, i] = self.infodat.shells[n][j]
+                _fb.fdata.Qneutral[j, i] = self.infodat.qneutral[n][j]
+                _fb.fdata.wavefxn[j, i] = self.infodat.wffiles[n][j]
+                _fb.fdata.napot[j, i] = self.infodat.nafiles[n][j]
+            _fb.fdata.napot[-1, i] = self.infodat.nafiles[n][-1]
 
-        _fireball.fdata.isorpmax = _fireball.fdata.nssh.max()
-        _fireball.fdata.isorpmax_xc = _fireball.fdata.nssh.max()
-        _fireball.fdata.load_fdata()
-
-#    def _generate_infodat(self, numbers):
-#        with open("info.dat", "w") as f:
-#            f.write("   dani\n")
-#            f.write(f"          {numbers.size:2d}  - Number of species\n")
-#            for i, num in enumerate(numbers):
-#                elem = element(num)
-#                f.write("======================================================================\n")
-#                f.write(f"  {i:2d}          - Information for this species\n")
-#                f.write(f"  {elem.symbol}          - Element\n")
-#                f.write(f"   {num:2d}          - Nuclear Z\n")
-#                f.write(f" {elem.atomic_weight:7.3f}          - Atomic Mass\n")
-#                f.write(f"  {len(shells[num]):2d}          - Number of shells; L for each shell\n")
-#                f.write("    " + "  ".join(shells[num]) + "\n")
-#                f.write(f"  {len(ps_shells[num]):2d}          - Number of shells; L for each shell  (Pseudopotential)\n")
-#                f.write("    " + "  ".join(ps_shells[num]) + "\n")
-#                f.write(f"  {cutoffs[num][0]:5.2f} - Radial cutoffs PP\n")
-#                f.write("   " + "   ".join(cutoffs[num][1][0]) + "\n")
-#                f.write("   " + "   ".join(cutoffs[num][1][1]) + "\n")
-#                f.write("  " + "         ".join(wffiles[num]) + "\n")
-#                f.write("  " + "         ".join(nafiles[num]) + "\n")
-#                f.write("       0.00000   - Atomic energy\n")
-#                f.write("======================================================================\n")
+        _fb.fdata.isorpmax = _fb.fdata.nssh.max()
+        _fb.fdata.isorpmax_xc = _fb.fdata.nssh.max()
+        _fb.fdata.load_fdata()
 
     def _calculate_energies(self, atoms: Atoms) -> None:
         # Computation energy
