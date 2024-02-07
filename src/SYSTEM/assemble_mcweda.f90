@@ -1,30 +1,21 @@
-! ===========================================================================
-!       This routine reads the different data file.
-! ===========================================================================
 subroutine assemble_mcweda ()
   use M_system
-  use M_fdata, only: V_intra_dip
   implicit none
   integer iatom
   integer jatom
   integer ineigh
   integer mbeta
   integer kforce
-
   if (Kscf .eq. 1) then
     call initneighbors ()
     call num_neigh_tot ()
     call backnay ()
-    call neighbors_pairs()
     call common_neighbors ()
     call common_neighborsPP ()
   end if ! end if (Kscf .eq. 1)
-
-  ! ewald energy
   kforce = 0
-  call get_ewald (kforce, icluster) 
+  call get_ewald (kforce) 
 
-  ! ASSEMBLE    HAMILTONIAN
   neigh_self = -999
   do iatom = 1, natoms
     do ineigh = 1, neighn(iatom)
@@ -43,9 +34,9 @@ subroutine assemble_mcweda ()
   end do
 
   ! assemble_1c
+  write(*,*) '-----~~~=:>[XXXXXXX]>'
   call assemble_olsxc_1c ()
-
-  if (V_intra_dip .eq. 1) call assemble_1c_vdip ()
+  write(*,*) '-----~~~=:>[XXXXXXX]>'
 
   !  ----------------- assemble_2c ------------------------
   if (Kscf .eq. 1) then

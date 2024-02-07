@@ -1,17 +1,121 @@
 subroutine allocate_system ()
   use M_system 
-  use M_fdata, only: nssh, rcutoff, rc_PP
+  use M_fdata, only: nssh, rcutoff, rc_PP, nspecies, symbolA
+  use M_fdata, only: num_orb, Qneutral, lssh, nsshPP, lsshPP,  nsh_max
   implicit none
-  integer :: iatom, jatom, mbeta, num_neigh, in1,imu,in2
-  real :: rcutoff_j, rcutoff_i, distance2, range2
+  integer:: iatom
+  integer:: jatom
+  integer:: mbeta
+  integer:: num_neigh
+  integer:: in1
+  integer:: imu
+  integer:: issh
+  integer:: in2
+  integer:: ispec
+  integer:: numorb
+  integer:: numorbPP_max
+  real :: rcutoff_i
+  real :: rcutoff_j
+  real:: rcutoff_
+  real:: distance2
+  real:: range2
 
-  allocate (ratom (3, natoms))
-  allocate (degelec (natoms))
-  allocate (imass (natoms))
-  allocate (symbol (natoms))
-   
-  ! allocate_neigh  call allocate_neigh (icluster)
-  ! find_neigh_max 
+  if (.not. allocated (ratom)) allocate (ratom (3, natoms))
+  if (.not. allocated (degelec)) allocate (degelec (natoms))
+  if (.not. allocated (imass)) allocate (imass (natoms))
+  if (.not. allocated (symbol)) allocate (symbol (natoms))
+
+  allocate (nelectron(natoms))
+  allocate (Qin(nsh_max, natoms))
+  allocate (Qinmixer(nsh_max*natoms))
+  allocate (QLowdin_TOT (natoms))
+  allocate (QMulliken_TOT (natoms))
+  allocate (Qout(nsh_max, natoms))
+  allocate (Qoutmixer(nsh_max*natoms))
+  allocate (dq(nspecies))
+  allocate (Q0_TOT(natoms))
+  allocate (Q_partial(natoms))
+  allocate (dq_DP(natoms))
+
+  call initboxes (1)
+
+  ! Count the orbitals
+  norbitals = 0
+  do iatom = 1, natoms
+    in1 = imass(iatom)
+    norbitals = norbitals + num_orb(in1)
+  end do
+
+  ! Count total n of shells in the system.
+  nssh_tot = 0
+  do iatom = 1, natoms
+    in1 = imass(iatom)
+    do issh = 1, nssh(in1)
+      nssh_tot = nssh_tot + 1
+    end do
+  end do
+
+  ! Count the maximum number of orbital interactions between any given two atoms.
+  numorb_max = 0
+  do in1 = 1, nspecies
+    numorb = 0
+    do issh = 1, nssh(in1)
+      numorb = numorb + 2*lssh(issh,in1) + 1
+    end do
+    if (numorb .gt. numorb_max) numorb_max = numorb
+  end do
+
+  !initcharges 
+
+  ! Qneutral_total
+  do iatom = 1, natoms
+    Q0_TOT(iatom) = 0
+    in1 = imass(iatom)
+    do issh = 1, nssh(in1)
+      Q0_TOT(iatom) = Q0_TOT(iatom) + Qneutral(issh,in1)
+    end do
+  end do
+
+
+  ! By default the input charges are initialized to the neutral atom charges
+  Qin = 0.0d0
+  do iatom = 1, natoms
+    in1 = imass(iatom)
+    do issh = 1, nssh(in1)
+      Qin(issh,iatom) = Qneutral(issh,in1)
+    end do
+  end do
+
+
+  ztot = 0.0d0
+  nelectron = 0.0d0
+  do iatom = 1, natoms
+   in1 = imass(iatom)
+   do issh = 1, nssh(in1)
+    ztot = ztot + Qneutral(issh,in1)
+    nelectron(iatom) = nelectron(iatom) + Qneutral(issh,in1)
+   end do
+  end do
+
+  ! Calculate degelec.  We only need this once at the beginning of the simulation.
+  degelec(1) = 0
+  do iatom = 2, natoms
+    degelec(iatom) = 0
+    in1 = imass(iatom - 1)
+    degelec(iatom) = degelec(iatom - 1) + num_orb(in1)
+  end do
+  numorbPP_max = 0
+  do in1 = 1, nspecies
+    numorb = 0
+    do issh = 1, nsshPP(in1)
+      numorb = numorb + 2*lsshPP(issh,in1) + 1
+    end do
+  if (numorb .gt.  numorbPP_max) numorbPP_max = numorb
+  end do
+
+  if (numorbPP_max .gt.  numorb_max) numorb_max = numorbPP_max
+
+  
   if (icluster .eq. 1) mbeta_max = 0
   neigh_max = -99
   do iatom = 1, natoms
@@ -28,12 +132,7 @@ subroutine allocate_system ()
         do imu = 1, nssh(in2)
           if (rcutoff(in2,imu) .gt. rcutoff_j) rcutoff_j = rcutoff(in2,imu)
         end do
-
-        distance2 = (ratom(1,iatom) - (xl(1,mbeta) + ratom(1,jatom)))**2  &
-        &         + (ratom(2,iatom) - (xl(2,mbeta) + ratom(2,jatom)))**2  &
-        &         + (ratom(3,iatom) - (xl(3,mbeta) + ratom(3,jatom)))**2
-
-        ! Add a small displacement to the sum of cutoffs. 
+        distance2 = (ratom(1,iatom) - (xl(1,mbeta) + ratom(1,jatom)))**2 + (ratom(2,iatom) - (xl(2,mbeta) + ratom(2,jatom)))**2  + (ratom(3,iatom) - (xl(3,mbeta) + ratom(3,jatom)))**2
         range2 = (rcutoff_i + rcutoff_j - 0.01d0)**2
         if (distance2 .le. range2) num_neigh = num_neigh + 1
       end do
@@ -103,7 +202,6 @@ subroutine allocate_system ()
     neighPP_max = max(neighPP_max, num_neigh)
   end do
 
-
   allocate (neigh_b (neigh_max, natoms))
   allocate (neigh_j (neigh_max, natoms))
   allocate (neighn (natoms))
@@ -123,30 +221,11 @@ subroutine allocate_system ()
   allocate (nPPx_map (neighPP_max, natoms))
   allocate (nPPx_point (neighPP_max, natoms))
   allocate (nPPxn (natoms))
-  allocate (nPPx_self (natoms))
   allocate (neigh_pair_a1 (neigh_max*natoms))
   allocate (neigh_pair_a2 (neigh_max*natoms))
   allocate (neigh_pair_n1 (neigh_max*natoms))
   allocate (neigh_pair_n2 (neigh_max*natoms))
-  allocate (neigh_comm (neigh_max**2, natoms))
-  allocate (neigh_comn (natoms))
-  allocate (neigh_back (natoms, neigh_max))
-  allocate (neigh_self (natoms))
-  allocate (nPP_b (neighPP_max, natoms))
-  allocate (nPP_j (neighPP_max, natoms))
-  allocate (nPP_map (neighPP_max, natoms))
-  allocate (nPPn (natoms))
-  allocate (nPP_self (natoms))
-  allocate (nPPx_b (neighPP_max, natoms))
-  allocate (nPPx_j (neighPP_max, natoms))
-  allocate (nPPx_map (neighPP_max, natoms))
-  allocate (nPPx_point (neighPP_max, natoms))
-  allocate (nPPxn (natoms))
   allocate (nPPx_self (natoms))
-  allocate (neigh_pair_a1 (neigh_max*natoms))
-  allocate (neigh_pair_a2 (neigh_max*natoms))
-  allocate (neigh_pair_n1 (neigh_max*natoms))
-  allocate (neigh_pair_n2 (neigh_max*natoms))
 
 ! neighPP
   allocate (neighPP_b (neighPP_max**2, natoms))
@@ -163,26 +242,30 @@ subroutine allocate_system ()
   allocate (neighj_tot (neigh_max+neighPP_max, natoms))
   allocate (neighb_tot (neigh_max+neighPP_max, natoms))
   allocate (neighn_tot (natoms))
-
-
-  write(*,*)norbitals, nkpoints,'<--------'
   allocate(ioccupy(norbitals))
   allocate(ioccupy_k (norbitals, nkpoints))
   allocate(foccupy (norbitals, nkpoints))
   allocate (eigen_k (norbitals, nkpoints))
-! call allocate_f (natoms, neigh_max, neighPP_max, numorb_max, nsh_max, itheory, itheory_xc )
-! call allocate_h (natoms, neigh_max, neighPP_max, itheory, itheory_xc,
-!call allocate_rho (natoms, neigh_max, neighPP_max, numorb_max,       
 
+  
+  allocate (dewald (3, natoms, natoms))
+  allocate (fewald (3, natoms))
+  allocate (ewald (natoms, natoms))
 
-!         allocate (arho_off (nsh_max, nsh_max, neigh_max, natoms))
-!         allocate (arhoij_off (nsh_max, nsh_max, neigh_max, natoms))
-!         allocate (rho_off (numorb_max, numorb_max, neigh_max, natoms))
-!         allocate (rhoij_off (numorb_max, numorb_max, neigh_max, natoms))
-!         allocate (arho_on (nsh_max, nsh_max, natoms))
-!         allocate (arhoi_on (nsh_max, nsh_max, natoms))
-!         allocate (rho_on (numorb_max, numorb_max, natoms))
-!         allocate (rhoi_on (numorb_max, numorb_max, natoms))
+  !allocate (flrew (3, natoms))
+  !allocate (flrew_qmmm (3, natoms))
 
-        !call allocate_dos (natoms, iwrtdos, iwrthop)
+  !call allocate_f (natoms, neigh_max, neighPP_max, numorb_max, nsh_max, itheory, itheory_xc )
+  !call allocate_h (natoms, neigh_max, neighPP_max, itheory, itheory_xc,
+  !call allocate_rho (natoms, neigh_max, neighPP_max, numorb_max,       
+  !allocate (arho_off (nsh_max, nsh_max, neigh_max, natoms))
+  !allocate (arhoij_off (nsh_max, nsh_max, neigh_max, natoms))
+  !allocate (rho_off (numorb_max, numorb_max, neigh_max, natoms))
+  !allocate (rhoij_off (numorb_max, numorb_max, neigh_max, natoms))
+  !allocate (arho_on (nsh_max, nsh_max, natoms))
+  !allocate (arhoi_on (nsh_max, nsh_max, natoms))
+  !allocate (rho_on (numorb_max, numorb_max, natoms))
+  !allocate (rhoi_on (numorb_max, numorb_max, natoms))
+  !call allocate_dos (natoms, iwrtdos, iwrthop)
+
 end subroutine

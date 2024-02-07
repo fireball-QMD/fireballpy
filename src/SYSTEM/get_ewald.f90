@@ -1,11 +1,10 @@
-subroutine get_ewald ()
+subroutine get_ewald (iauxforce)
   use M_system
   use M_fdata
   use M_constants
   implicit none
+  integer, intent (in) :: iauxforce
   integer iatom
-  integer iatomstart
-  integer iiterstart
   integer ig1
   integer ig2
   integer ig3
@@ -53,8 +52,8 @@ subroutine get_ewald ()
   real, dimension (natoms) :: Q, Q0
   real, dimension (3) :: vecl
   ewald = 0.0d0
-  if (iforce .eq. 1) dewald = 0.0d0
-  if (iforce .eq. 1) fewald = 0.0d0
+  if (iauxforce .eq. 1) dewald = 0.0d0
+  if (iauxforce .eq. 1) fewald = 0.0d0
   do iatom = 1, natoms
     Q(iatom) = 0.0d0
     Q0(iatom) = 0.0d0
@@ -130,7 +129,7 @@ subroutine get_ewald ()
             QQ = Q(iatom)*Q(jatom) - Q0(iatom)*Q0(jatom)
             ewald(iatom,jatom) = ewald(iatom,jatom) + factor*cos(gdotb)
             ewald(jatom,iatom) = ewald(jatom,iatom) + factor*cos(gdotb)
-            if (iforce .eq. 1) then
+            if (iauxforce .eq. 1) then
               do ix = 1, 3
                 fewald1(ix,iatom) = fewald1(ix,iatom) + QQ*factorf*sin(gdotb)*g(ix)
               end do
@@ -150,7 +149,7 @@ subroutine get_ewald ()
     end do
   end do
  
-  if (iforce .eq. 1) fewald2 = 0.0d0
+  if (iauxforce .eq. 1) fewald2 = 0.0d0
   if (icluster .eq. 1) then
     il1mx = 0
     il2mx = 0
@@ -175,7 +174,7 @@ subroutine get_ewald ()
             ewald(jatom,iatom) = ewald(jatom,iatom) + factor*erfc(argument)/distance
             derfcdr = (2.0d0*exp(-argument**2)*kappa/sqrt(pi) + erfc(argument)/distance)/distance**2
             ! The variable fewald2 is a force-like derivative => multiply by -1.0d0
-            if (iforce .eq. 1) then
+            if (iauxforce .eq. 1) then
               do ix = 1, 3
                 fewald2(ix,iatom) = fewald2(ix,iatom) + QQ*eta(ix)*factorf*derfcdr
               end do
@@ -203,7 +202,7 @@ subroutine get_ewald ()
  
   ! gamma4 is zero!
   ! Combine ewald pieces
-  if (iforce .eq. 1) fewald = fewald1 + fewald2
+  if (iauxforce .eq. 1) fewald = fewald1 + fewald2
 
 end subroutine get_ewald
 

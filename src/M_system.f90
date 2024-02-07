@@ -17,7 +17,6 @@ module M_system
   integer, dimension (:), allocatable :: degelec
   integer, dimension (:), allocatable :: imass
   character (len = 2), dimension (:), allocatable:: symbol
-  character (len = 2), dimension (:), allocatable :: symbolA
   integer :: mbeta_max  
   integer neigh_max
 
@@ -47,7 +46,8 @@ module M_system
   real, dimension (:, :, :, :), allocatable :: vxc_1c
   !Charges
   real, dimension(:), allocatable  :: Q0_TOT
- 
+  integer, dimension (:), allocatable :: nelectron
+
   !--diag--
   real, dimension (:, :, :), allocatable :: blowre
   real, dimension (:, :, :), allocatable :: bbnkre
@@ -149,7 +149,8 @@ module M_system
   real, dimension (:, :), allocatable :: Qout
   real, dimension (:), allocatable :: Qoutmixer
   real, dimension (:), allocatable :: dq
-
+  real, dimension(:), allocatable  :: Q_partial
+  real, dimension (:, :), allocatable :: Qin_es
   real, dimension (:), allocatable :: QLowdin_TOT
   real, dimension (:), allocatable :: QMulliken_TOT
   real, allocatable, dimension(:,:) :: qaux
@@ -202,6 +203,7 @@ module M_system
   integer :: ME2cDipX_max
   real, dimension (:, :), allocatable :: cl_PP
 
+  
   real, allocatable, dimension(:,:) :: Fv   
   real, allocatable, dimension(:,:) :: Xv    
   real, allocatable, dimension(:,:) :: delF 

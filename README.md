@@ -3,6 +3,11 @@
 
 git clone https://github.com/fireball-QMD/pyreball
 
+
+Quitar V_intra_dip  AQUI
+ ! AQUI QUITAR idynmat iephc ?
+  !AQUI  ewaldqmmm dejar preguntar a Jesus
+
  progs/MODULES/interactions.f90
       integer :: ME2c_max
          integer :: ME2cPP_max

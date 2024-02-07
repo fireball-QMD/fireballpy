@@ -46,6 +46,7 @@ add_executable( pyreball
   ${CMAKE_SOURCE_DIR}/src/LOADFDATA/setterp_2d.f90
   ${CMAKE_SOURCE_DIR}/src/LOADFDATA/load_fdata.f90
  
+  ${CMAKE_SOURCE_DIR}/src/SYSTEM/initboxes.f90
   ${CMAKE_SOURCE_DIR}/src/SYSTEM/load_system.f90
   ${CMAKE_SOURCE_DIR}/src/SYSTEM/allocate_system.f90
   ${CMAKE_SOURCE_DIR}/src/SYSTEM/anderson.f90

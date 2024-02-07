@@ -80,11 +80,6 @@ subroutine fermie ()
     emin = efermi
    end if
   end do
-   !     if (cDFT_active) then
-   !      do ikpoint = 1, nkpoints
-   !       call project_eh (ioccupy_k, foccupy, ikpoint)
-   !      end do
-   !     end if 
   if (iter .gt. imax) then
    write (*,*) '  '
    write (*,*) ' ************ WARNING ******** WARNING ************* '

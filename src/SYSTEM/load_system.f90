@@ -1,19 +1,21 @@
 
 subroutine load_system ()
   use M_system
+  use M_fdata, only: symbolA, nspecies
+  implicit none
   integer iatom
   integer in1
   integer ispec
   logical zindata
-
-  open (unit = 69, file = 'input.xyz', status = 'old')
-  read (69, *) natoms
-  close (unit = 69)
-
-  call allocate_system()
+  
+  write(*,*) symbolA, nspecies
   open (unit = 69, file = 'input.xyz', status = 'old')
   read (69, *) natoms
   read (69,*)
+  allocate (ratom (3, natoms))
+  allocate (symbol (natoms))
+  allocate (imass (natoms))
+  allocate (degelec (natoms))
   do iatom = 1, natoms
    read (69,*) symbol(iatom),ratom(:,iatom)
    zindata = .false.
@@ -25,6 +27,20 @@ subroutine load_system ()
    end do
   end do
   close (unit = 69)
+
+  !Latice vectors
+  a1vec(1) = 100
+  a1vec(2) = 0
+  a1vec(3) = 0
+  a2vec(1) = 0
+  a2vec(2) = 100
+  a2vec(3) = 0
+  a3vec(1) = 0
+  a3vec(2) = 0
+  a3vec(3) = 100
+  
+
+  call allocate_system()
 
   call scf_loop ()
 

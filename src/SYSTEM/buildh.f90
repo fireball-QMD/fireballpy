@@ -43,39 +43,6 @@ subroutine buildh ()
         end do ! do imu
       end do ! do inu
     end do ! do ineigh
-    if (V_intra_dip .eq. 1) then
-      matom = neigh_self(iatom)
-      do inu = 1, num_orb(in1)
-        do imu = 1, num_orb(in1)
-          h_mat(imu,inu,matom,iatom) = h_mat(imu,inu,matom,iatom) + Vdip_1c(imu,inu,iatom)
-        end do ! do imu
-      end do ! do inu
-    end if ! if (V_intra_dip .eq. 1) 
-  end do ! do iatom
-  do iatom = 1, natoms
-    in1 = imass(iatom)
-    do ineigh = 1, neighn(iatom)
-      mbeta = neigh_b(ineigh,iatom)
-      jatom = neigh_j(ineigh,iatom)
-      in2 = imass(jatom)
-      if (itestrange .eq. 0) then
-        distance = sqrt((ratom(1,iatom) - (xl(1,mbeta) + ratom(1,jatom)))**2 + (ratom(2,iatom) - (xl(2,mbeta) + ratom(2,jatom)))**2  + (ratom(3,iatom) - (xl(3,mbeta) + ratom(3,jatom)))**2)
-        if (distance .gt. testrange) then
-          do inu = 1, num_orb(in2)
-            do imu = 1, num_orb(in1)
-              h_mat(imu,inu,ineigh,iatom) = 0.0d0
-              t_mat(imu,inu,ineigh,iatom) = 0.0d0
-              s_mat(imu,inu,ineigh,iatom) = 0.0d0
-              vna(imu,inu,ineigh,iatom) = 0.0d0
-              vxc(imu,inu,ineigh,iatom) = 0.0d0
-              ewaldlr(imu,inu,ineigh,iatom) = 0.0d0
-              ewaldsr(imu,inu,ineigh,iatom) = 0.0d0
-              ewaldqmmm(imu,inu,ineigh,iatom) = 0.0d0
-            end do
-          end do
-        end if
-      end if
-    end do ! do ineigh
   end do ! do iatom
   return
 end subroutine buildh

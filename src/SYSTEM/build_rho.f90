@@ -18,7 +18,7 @@ subroutine build_rho ()
   allocate (blowre_o(norbitals,norbitals,nkpoints))
   if (iqout .ne. 2 .and. icluster .ne. 1) deallocate (blowim)
   if (iqout .ne. 2) deallocate (blowre)
-  ! AQUI idynmat iephc ?
+  ! AQUI QUITAR idynmat iephc ?
   deallocate (eigen_k)
   if (icluster .ne. 1) deallocate (bbnkim)
   deallocate (bbnkre)
