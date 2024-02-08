@@ -197,10 +197,6 @@ module M_system
   integer, dimension(:,:), allocatable :: betaR
   real, dimension(:,:), allocatable :: IR
   real, dimension(:,:,:,:), allocatable   :: hr_box
-  integer, dimension (:, :), allocatable :: index_max2cDipY
-  integer, dimension (:, :), allocatable :: index_max2cDipX
-  integer :: ME2cDipY_max
-  integer :: ME2cDipX_max
   real, dimension (:, :), allocatable :: cl_PP
 
   

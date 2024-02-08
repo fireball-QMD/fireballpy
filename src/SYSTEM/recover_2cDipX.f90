@@ -1,6 +1,6 @@
 subroutine recover_2cDipX (in1, in2, hlist, hbox)
   use M_system
-  use M_fdata, only: num_orb, muDipX, nuDipX
+  use M_fdata, only: num_orb, muDipX, nuDipX, index_max2cDipX,ME2cDipX_max
   implicit none
   integer, intent(in) :: in1, in2
   real, intent(in) :: hlist (ME2cDipX_max)

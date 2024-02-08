@@ -51,7 +51,6 @@ subroutine unocentros (in1, iatom, exc_1c, muexc_1c, dccexc_1c, mu1xc)
       endif
     end do
   end do
-
   do issh = 1,nssh(in1)
     exc_1c = exc_1c + exc1c0(in1,issh,issh)*Qin(issh,iatom) 
     muexc_1c = muexc_1c + nuxc1c(in1,issh,issh)*Qin(issh,iatom)

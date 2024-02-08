@@ -17,7 +17,7 @@ subroutine assemble_olsxc_1c ()
   do iatom = 1, natoms
     matom = neigh_self(iatom)
     in1 = imass(iatom)
-    call unocentros (in1, iatom, iforce, exc_1c, muexc_1c,  dccexc_1c, mu1xc)
+    call unocentros (in1, iatom, exc_1c, muexc_1c,  dccexc_1c, mu1xc)
     etotxc_1c = etotxc_1c + dccexc_1c
     do imu = 1, num_orb(in1)
       do inu = 1, num_orb(in1)

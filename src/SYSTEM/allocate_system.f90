@@ -113,6 +113,10 @@ subroutine allocate_system ()
   if (numorb .gt.  numorbPP_max) numorbPP_max = numorb
   end do
 
+  allocate (getmssh(norbitals))
+  allocate (getlssh(norbitals))
+  allocate (getissh(norbitals))
+
   if (numorbPP_max .gt.  numorb_max) numorb_max = numorbPP_max
 
   
@@ -141,6 +145,7 @@ subroutine allocate_system ()
 
   neigh_max = max(neigh_max, num_neigh)
 
+ 
   ! find_neighPP_max
   if (icluster .eq. 1) mbeta_max = 0
   neighPP_max = -99
@@ -204,7 +209,6 @@ subroutine allocate_system ()
 
   allocate (neigh_b (neigh_max, natoms))
   allocate (neigh_j (neigh_max, natoms))
-  allocate (neighn (natoms))
   allocate (neigh_comb (2, neigh_max**2, natoms))
   allocate (neigh_comj (2, neigh_max**2, natoms))
   allocate (neigh_comm (neigh_max**2, natoms))
@@ -226,6 +230,9 @@ subroutine allocate_system ()
   allocate (neigh_pair_n1 (neigh_max*natoms))
   allocate (neigh_pair_n2 (neigh_max*natoms))
   allocate (nPPx_self (natoms))
+  allocate (vxc_1c (numorb_max, numorb_max, neigh_max, natoms))
+  allocate (neighn (natoms))
+  allocate (neighn_tot (natoms))
 
 ! neighPP
   allocate (neighPP_b (neighPP_max**2, natoms))
@@ -240,8 +247,10 @@ subroutine allocate_system ()
 
 ! Total neighbor list (mapping together neigh and neighPP part)
   allocate (neighj_tot (neigh_max+neighPP_max, natoms))
-  allocate (neighb_tot (neigh_max+neighPP_max, natoms))
-  allocate (neighn_tot (natoms))
+  allocate (neighb_tot (  neigh_max+neighPP_max, natoms))
+
+  
+ 
   allocate(ioccupy(norbitals))
   allocate(ioccupy_k (norbitals, nkpoints))
   allocate(foccupy (norbitals, nkpoints))
@@ -252,20 +261,30 @@ subroutine allocate_system ()
   allocate (fewald (3, natoms))
   allocate (ewald (natoms, natoms))
 
+
+  allocate (s_mat (numorb_max, numorb_max, neigh_max, natoms))
+  allocate (t_mat (numorb_max, numorb_max, neigh_max, natoms))
+  allocate (sp_mat (3, numorb_max, numorb_max, neigh_max, natoms))
+  allocate (tp_mat (3, numorb_max, numorb_max, neigh_max, natoms))
+  allocate (dipcm (3, numorb_max, numorb_max))
+  allocate (dip (numorb_max, numorb_max, neigh_max, natoms)) 
   !allocate (flrew (3, natoms))
   !allocate (flrew_qmmm (3, natoms))
 
   !call allocate_f (natoms, neigh_max, neighPP_max, numorb_max, nsh_max, itheory, itheory_xc )
   !call allocate_h (natoms, neigh_max, neighPP_max, itheory, itheory_xc,
   !call allocate_rho (natoms, neigh_max, neighPP_max, numorb_max,       
-  !allocate (arho_off (nsh_max, nsh_max, neigh_max, natoms))
-  !allocate (arhoij_off (nsh_max, nsh_max, neigh_max, natoms))
-  !allocate (rho_off (numorb_max, numorb_max, neigh_max, natoms))
-  !allocate (rhoij_off (numorb_max, numorb_max, neigh_max, natoms))
-  !allocate (arho_on (nsh_max, nsh_max, natoms))
-  !allocate (arhoi_on (nsh_max, nsh_max, natoms))
-  !allocate (rho_on (numorb_max, numorb_max, natoms))
-  !allocate (rhoi_on (numorb_max, numorb_max, natoms))
+  allocate (arho_off (nsh_max, nsh_max, neigh_max, natoms))
+  allocate (arhoij_off (nsh_max, nsh_max, neigh_max, natoms))
+  allocate (rho_off (numorb_max, numorb_max, neigh_max, natoms))
+  allocate (rhoij_off (numorb_max, numorb_max, neigh_max, natoms))
+  allocate (arho_on (nsh_max, nsh_max, natoms))
+  allocate (arhoi_on (nsh_max, nsh_max, natoms))
+  allocate (rho_on (numorb_max, numorb_max, natoms))
+  allocate (rhoi_on (numorb_max, numorb_max, natoms))
+  allocate (rhop_on (3, nsh_max, nsh_max, neigh_max, natoms))
+  allocate (arhop_on (3, nsh_max, nsh_max, neigh_max, natoms))
+  allocate (arhopij_off (3, nsh_max, nsh_max, neigh_max, natoms))
   !call allocate_dos (natoms, iwrtdos, iwrthop)
 
 end subroutine

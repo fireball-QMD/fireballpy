@@ -34,9 +34,7 @@ subroutine assemble_mcweda ()
   end do
 
   ! assemble_1c
-  write(*,*) '-----~~~=:>[XXXXXXX]>'
   call assemble_olsxc_1c ()
-  write(*,*) '-----~~~=:>[XXXXXXX]>'
 
   !  ----------------- assemble_2c ------------------------
   if (Kscf .eq. 1) then
@@ -45,11 +43,17 @@ subroutine assemble_mcweda ()
     call assemble_2c_PP ()
   end if ! end if of Kscf = 1
 
-  call average_ca_rho (Kscf)
+  call average_ca_rho ()
+  write(*,*) '-----~~~=:>[XXXXXXX]>'
   call assemble_olsxc_on (uxcdcc_ols)
+  write(*,*) '-----~~~=:>[XXXXXxxXX]>'
   call assemble_olsxc_off ()
+  write(*,*) '-----~~~=:>[XXXXXvvXX]>'
   if (idipole .eq. 0) call assemble_ca_2c ()
+  write(*,*) '-----~~~=:>[XXXXkkXXX]>'
   if (idipole .eq. 1) call assemble_ca_2c_dip ()
+  write(*,*) '-----~~~=:>[XXXXXXX]>'
+  write(*,*) '-----~~~=:>[XXXXXXX]>'
   
   !-------------------- assemble_3c -------------------------
   if (Kscf .eq. 1) then

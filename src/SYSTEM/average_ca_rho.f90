@@ -100,7 +100,6 @@ subroutine average_ca_rho ()
     do issh = 1,3
       eps(issh,issh) = 1.0d0
     enddo
-
     call doscentrosS (interaction0, isorp, iforce, in1, in2, in3, y, eps, sm, spm)
 
     do ineigh = 1, neighn(iatom) 
@@ -205,7 +204,7 @@ subroutine average_ca_rho ()
       enddo   ! do jssh
     enddo   ! do issh
   enddo   ! end do iatom
-
+ write(*,*) 'XXXX'        
   !   -----  OFF SITE PART  ------
   ! We assemble off-site density matrices
   ! <mu i| (rho_i+rho_j) | nu j>  ......  rhoij_off; arhoij_off

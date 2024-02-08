@@ -41,6 +41,8 @@ subroutine load_system ()
   
 
   call allocate_system()
+  
+  call neighbors()
 
   call scf_loop ()
 

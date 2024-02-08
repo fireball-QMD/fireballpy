@@ -8,6 +8,7 @@ find_program(IFORT_EXECUTABLE ifort)
 # Establecer la variable de entorno FC dependiendo del resultado
 if(IFORT_EXECUTABLE)
   set(ENV{FC} "ifort")
+#  set(ENV{FC} "ifort  -check all")
   set(PATH_INCL ${MKLROOT}/include)
   set(PATH_MKL ${MKLROOT}/lib/intel64)
 else()
@@ -46,6 +47,7 @@ add_executable( pyreball
   ${CMAKE_SOURCE_DIR}/src/LOADFDATA/setterp_2d.f90
   ${CMAKE_SOURCE_DIR}/src/LOADFDATA/load_fdata.f90
  
+  ${CMAKE_SOURCE_DIR}/src/SYSTEM/neighbors.f90
   ${CMAKE_SOURCE_DIR}/src/SYSTEM/initboxes.f90
   ${CMAKE_SOURCE_DIR}/src/SYSTEM/load_system.f90
   ${CMAKE_SOURCE_DIR}/src/SYSTEM/allocate_system.f90

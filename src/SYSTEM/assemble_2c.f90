@@ -133,7 +133,6 @@ subroutine assemble_2c ()
             bcna(imu,inu) = bcnax(imu,inu)
           end do
         end do
-
         ! For the vna_ontopr case, the potential is in the second atom (jatom): Neutral atom piece
         isorp = 0
         interaction = 3
