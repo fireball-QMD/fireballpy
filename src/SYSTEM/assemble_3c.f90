@@ -6,7 +6,6 @@ subroutine assemble_3c ()
 
   integer ialp
   integer iatom
-  integer iatomstart
   integer ibeta
   integer ierror
   integer imu

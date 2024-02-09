@@ -197,7 +197,6 @@ module M_system
   integer, dimension(:,:), allocatable :: betaR
   real, dimension(:,:), allocatable :: IR
   real, dimension(:,:,:,:), allocatable   :: hr_box
-  real, dimension (:, :), allocatable :: cl_PP
 
   
   real, allocatable, dimension(:,:) :: Fv   

@@ -44,16 +44,10 @@ subroutine assemble_mcweda ()
   end if ! end if of Kscf = 1
 
   call average_ca_rho ()
-  write(*,*) '-----~~~=:>[XXXXXXX]>'
-  call assemble_olsxc_on (uxcdcc_ols)
-  write(*,*) '-----~~~=:>[XXXXXxxXX]>'
+  call assemble_olsxc_on ()
   call assemble_olsxc_off ()
-  write(*,*) '-----~~~=:>[XXXXXvvXX]>'
   if (idipole .eq. 0) call assemble_ca_2c ()
-  write(*,*) '-----~~~=:>[XXXXkkXXX]>'
   if (idipole .eq. 1) call assemble_ca_2c_dip ()
-  write(*,*) '-----~~~=:>[XXXXXXX]>'
-  write(*,*) '-----~~~=:>[XXXXXXX]>'
   
   !-------------------- assemble_3c -------------------------
   if (Kscf .eq. 1) then
@@ -73,7 +67,9 @@ subroutine assemble_mcweda ()
   if (idipole .eq. 1) call assemble_lr_dip ()
 
   !Build H
+  write(*,*) '-----~~~=:>[XXXXXXX]>'
   call buildh ()
+  write(*,*) '-----~~~=:>[XXXXXXX]>'
   return
 end subroutine assemble_mcweda
 

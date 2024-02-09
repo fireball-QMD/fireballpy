@@ -4,7 +4,6 @@ subroutine assemble_3c_PP ()
   implicit none
   integer ialp
   integer iatom
-  integer iatomstart
   integer ibeta
   integer ierror
   integer imu

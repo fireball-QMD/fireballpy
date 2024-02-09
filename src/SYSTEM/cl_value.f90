@@ -1,6 +1,6 @@
 subroutine cl_value (itype, cl)
   use M_system
-  use M_fdata, only: nsshPP,lsshPP,num_orbPP
+  use M_fdata, only: nsshPP,lsshPP,num_orbPP,cl_PP
   implicit none                  
   integer, intent (in) :: itype
   real, intent (out), dimension (numorb_max) :: cl

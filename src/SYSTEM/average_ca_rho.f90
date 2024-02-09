@@ -62,6 +62,9 @@ subroutine average_ca_rho ()
   real, dimension (3, nsh_max, nsh_max) :: spmGS
   real rho_modified
 
+  rhomx=0.0d0
+  rhompx=0.0d0
+
   allocate (rhom_3c (nsh_max, nsh_max, neigh_max, natoms))
 
   if (Kscf .eq. 1) sm_mat = 0.0d0
@@ -204,7 +207,6 @@ subroutine average_ca_rho ()
       enddo   ! do jssh
     enddo   ! do issh
   enddo   ! end do iatom
- write(*,*) 'XXXX'        
   !   -----  OFF SITE PART  ------
   ! We assemble off-site density matrices
   ! <mu i| (rho_i+rho_j) | nu j>  ......  rhoij_off; arhoij_off
@@ -312,10 +314,10 @@ subroutine average_ca_rho ()
           call doscentrosS (interaction0, isorp, iforce, in1, in3, in2, y, eps, rhomm, rhompm)
           do inu = 1, num_orb(in2)
             do imu = 1, num_orb(in1)
-              rhoij_off(imu,inu,ineigh,iatom) = rhoij_off(imu,inu,ineigh,iatom)  + rhomx(imu,inu)*Qin(isorp,iatom)
-              rhopij_off(:,imu,inu,ineigh,iatom) =  rhopij_off(:,imu,inu,ineigh,iatom)   + rhompx(:,imu,inu)*Qin(isorp,iatom)
-              rho_off(imu,inu,ineigh,iatom) = rho_off(imu,inu,ineigh,iatom) + rhomx(imu,inu)*Qin(isorp,iatom)
-              rhop_off(:,imu,inu,ineigh,iatom) =  rhop_off(:,imu,inu,ineigh,iatom) + rhompx(:,imu,inu)*Qin(isorp,iatom)
+              rhoij_off(imu,inu,ineigh,iatom) = rhoij_off(imu,inu,ineigh,iatom)        + rhomx(imu,inu)*Qin(isorp,iatom)
+              rhopij_off(:,imu,inu,ineigh,iatom) =  rhopij_off(:,imu,inu,ineigh,iatom) + rhompx(:,imu,inu)*Qin(isorp,iatom)
+              rho_off(imu,inu,ineigh,iatom)      = rho_off(imu,inu,ineigh,iatom)       + rhomx(imu,inu)*Qin(isorp,iatom)
+              rhop_off(:,imu,inu,ineigh,iatom)   =  rhop_off(:,imu,inu,ineigh,iatom)   + rhompx(:,imu,inu)*Qin(isorp,iatom)
             end do
           end do
           do inu = 1, nssh(in2)
