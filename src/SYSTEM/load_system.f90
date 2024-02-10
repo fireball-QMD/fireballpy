@@ -39,6 +39,16 @@ subroutine load_system ()
   a3vec(2) = 0
   a3vec(3) = 100
   
+  !kpts cargamos Gamma solo
+  nkpoints = 1
+  allocate (special_k(3, nkpoints))
+  allocate (special_k_orig(3, nkpoints))
+  allocate (scale_k(3, nkpoints))
+  allocate (weight_k(nkpoints))
+  allocate (weight_k_orig(nkpoints))
+  special_k_orig(:,1) = 0
+  weight_k_orig(1) = 1
+  weight_k(1) = 1
 
   call allocate_system()
   

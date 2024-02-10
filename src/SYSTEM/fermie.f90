@@ -20,6 +20,7 @@ subroutine fermie ()
   ioccupy_k = 0
   foccupy = 0.0d0
   temp = tempfe/kconvert
+
   if (norbitals**2*nkpoints**2 .lt. nmax) then
    emin = eigen_k(1,1)
    emax = eigen_k(norbitals,1)
@@ -72,6 +73,7 @@ subroutine fermie ()
       end if
      end if
      qcharge = qcharge + spin*foccupy(imu,ikpoint)*weight_k(ikpoint)
+     write(*,*)'FFFFF',qcharge,foccupy(imu,ikpoint),weight_k(ikpoint)
     end do ! do imu
    end do ! do ikpoint
    if (qcharge .gt. qztot) then

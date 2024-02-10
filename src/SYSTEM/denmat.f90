@@ -39,7 +39,7 @@ subroutine denmat ()
   rhoPP = 0.0d0
   !AQUI  inquire (file = 'OCCUPATION', exist = read_occupy)
 
-  !Get the Fermi energy. 
+  !Get the Fermi energy.
   call fermie ()
   do iatom = 1, natoms
     in1 = imass(iatom)

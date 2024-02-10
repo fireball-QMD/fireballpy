@@ -66,7 +66,7 @@ module M_system
   !scf
   integer, parameter ::  idmix = 6
   real, dimension (:, :, :, :), allocatable :: cape
-  real :: tempfe
+  real :: tempfe = 100.0d0
   real :: bmix
   real :: sigma
   real :: sigmaold
@@ -218,6 +218,8 @@ module M_system
   !esto es otra peli
   ! allocate_f
   real, dimension (:, :), allocatable :: dusr
-
+  real, dimension (:, :), allocatable :: special_k_orig
+  real, dimension (:), allocatable :: weight_k_orig
+  real, dimension (:, :), allocatable :: scale_k
 
 end module
