@@ -1,7 +1,9 @@
-subroutine getenergy () !MCWEDA only
+subroutine getenergy () 
   use M_system 
   implicit none
+  write(*,*)'get_ewald'
   call get_ewald ()
+  write(*,*)'assemble_usr'
   call assemble_usr (uxcdcc_hf, uiiuee)
 
   ! to avoid confusion here we add etotxc_1c to double counting term
@@ -47,5 +49,5 @@ subroutine getenergy () !MCWEDA only
 511     format (2x, ' Cohesive Energy per atom  = ', f15.6)
 512     format (2x, '   Fermi Level = ', f15.6)
 
-        end subroutine getenergy
- 
+end subroutine getenergy
+

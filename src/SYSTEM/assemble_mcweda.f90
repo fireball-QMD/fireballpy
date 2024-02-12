@@ -67,9 +67,6 @@ subroutine assemble_mcweda ()
   if (idipole .eq. 1) call assemble_lr_dip ()
 
   !Build H
-  write(*,*) '-----~~~=:>[XXXXXXX]>'
   call buildh ()
-  write(*,*) '-----~~~=:>[XXXXXXX]>'
-  return
 end subroutine assemble_mcweda
 
