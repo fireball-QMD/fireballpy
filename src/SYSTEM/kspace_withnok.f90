@@ -103,7 +103,6 @@ subroutine kspace ( ikpoint, sks)
       end do ! do inu
     end do ! do inegh
   end do ! do iatom
-
   if (iqout .eq. 3) then
     do inu = 1, norbitals
       do imu = 1, norbitals

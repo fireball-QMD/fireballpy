@@ -266,6 +266,7 @@ subroutine allocate_system ()
   allocate (t_mat (numorb_max, numorb_max, neigh_max, natoms))
   allocate (h_mat (numorb_max, numorb_max, neigh_max, natoms))
   allocate (sp_mat (3, numorb_max, numorb_max, neigh_max, natoms))
+  allocate (spm_mat (3, nsh_max, nsh_max, neigh_max, natoms))
   allocate (tp_mat (3, numorb_max, numorb_max, neigh_max, natoms))
   allocate (dipcm (3, numorb_max, numorb_max))
   allocate (dipc (3, numorb_max, numorb_max, neigh_max, natoms))
@@ -274,7 +275,7 @@ subroutine allocate_system ()
   allocate (ewaldqmmm (numorb_max, numorb_max, neigh_max,natoms))
   !allocate (flrew (3, natoms))
   !allocate (flrew_qmmm (3, natoms))
-
+  allocate (bbnkre_o(norbitals,norbitals,nkpoints))
   !call allocate_f (natoms, neigh_max, neighPP_max, numorb_max, nsh_max, itheory, itheory_xc )
   !call allocate_h (natoms, neigh_max, neighPP_max, itheory, itheory_xc,
   !call allocate_rho (natoms, neigh_max, neighPP_max, numorb_max,       

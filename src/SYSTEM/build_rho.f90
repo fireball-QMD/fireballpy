@@ -14,14 +14,11 @@ subroutine build_rho ()
     scf_achieved = .true.
     flag_es = 1
   endif ! (sigma .lt. sigmatol)
-  allocate (bbnkre_o(norbitals,norbitals,nkpoints))
-  allocate (blowre_o(norbitals,norbitals,nkpoints))
+  !allocate (blowre_o(norbitals,norbitals,nkpoints))
   if (iqout .ne. 2 .and. icluster .ne. 1) deallocate (blowim)
   if (iqout .ne. 2) deallocate (blowre)
-  ! AQUI QUITAR idynmat iephc ?
-  deallocate (eigen_k)
+  !deallocate (eigen_k)
   if (icluster .ne. 1) deallocate (bbnkim)
   deallocate (bbnkre)
-  return
 end subroutine build_rho
 
