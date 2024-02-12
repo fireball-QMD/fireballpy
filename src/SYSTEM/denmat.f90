@@ -89,7 +89,6 @@ subroutine denmat ()
       end do
     end do
   end do
-
   do iatom = 1, natoms
     in1 = imass(iatom)
     do ineigh = 1, neighPPn(iatom)
@@ -190,5 +189,5 @@ subroutine denmat ()
     write (*,*) ' In denmat.f - ztest .ne. ztot! '
     stop
   end if
-  return
+
 end subroutine denmat

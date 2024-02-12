@@ -278,6 +278,8 @@ subroutine allocate_system ()
   !call allocate_f (natoms, neigh_max, neighPP_max, numorb_max, nsh_max, itheory, itheory_xc )
   !call allocate_h (natoms, neigh_max, neighPP_max, itheory, itheory_xc,
   !call allocate_rho (natoms, neigh_max, neighPP_max, numorb_max,       
+  allocate (rho (nsh_max, nsh_max, neigh_max, natoms))
+  allocate (cape (nsh_max, nsh_max, neigh_max, natoms))
   allocate (arho_off (nsh_max, nsh_max, neigh_max, natoms))
   allocate (arhoij_off (nsh_max, nsh_max, neigh_max, natoms))
   allocate (rho_off (numorb_max, numorb_max, neigh_max, natoms))
