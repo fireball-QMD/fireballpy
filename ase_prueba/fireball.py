@@ -9,7 +9,7 @@ from ase.calculators.calculator import (Calculator,
 
 from infodat import InfoDat, default_infodat
 
-import _fireball as _fb
+#import _fireball as _fb
 
 
 class Fireball(Calculator):
@@ -20,7 +20,7 @@ class Fireball(Calculator):
 
     ignored_changes = ['initial_magmoms']
 
-    def __init__(self, infodat: Optional[InfoDat]=None, **kwargs):
+    def __init__(self, infodat: Optional[InfoDat] = None, **kwargs):
         Calculator.__init__(self, **kwargs)
         self._infodat = infodat if infodat is not None else default_infodat
         self._numbers = set()  # Keep track of our atoms
@@ -30,32 +30,35 @@ class Fireball(Calculator):
     # which contains the allocation along with the deallocation if it was
     # allocated before
     def _load_infodat(self, numbers: Set[int]) -> None:
-        _fb.fdata.nspecies = len(numbers)
-        _fb.fdata.nsh_max = max(self.infodat.numshells)
-        _fb.fdata.nsh_maxPP = max(self.infodat.numshellsPP)
-        _fb.fdata.allocate()
-
-        for i, n in enumerate(numbers):
-            _fb.fdata.symbolA[i] = self.infodat.elements[n].symbol
-            _fb.fdata.nzx[i] = n
-            _fb.fdata.smass[i] = self.infodat.elements[n].atomic_weight
-            _fb.fdata.rc_PP[i] = self.infodat.cutoffPP[n]
-            _fb.fdata.etotatom[i] = self.infodat.energy[n]
-
-            _fb.fdata.nsshPP[i] = self.infodat.numshellsPP[n]
-            for j in range(self.infodat.numshellsPP[n]):
-                _fb.fdata.lsshPP[j, i] = self.infodat.shellsPP[n][j]
-            _fb.fdata.nssh[i] = self.infodat.numshells[n]
-            for j in range(self.infodat.numshells[n]):
-                _fb.fdata.lssh[j, i] = self.infodat.shells[n][j]
-                _fb.fdata.Qneutral[j, i] = self.infodat.qneutral[n][j]
-                _fb.fdata.wavefxn[j, i] = self.infodat.wffiles[n][j]
-                _fb.fdata.napot[j, i] = self.infodat.nafiles[n][j]
-            _fb.fdata.napot[-1, i] = self.infodat.nafiles[n][-1]
-
-        _fb.fdata.isorpmax = _fb.fdata.nssh.max()
-        _fb.fdata.isorpmax_xc = _fb.fdata.nssh.max()
-        _fb.fdata.load_fdata()
+        pass
+#        _fb.fdata.nspecies = len(numbers)
+#        _fb.fdata.nsh_max = max(self.infodat.numshells)
+#        _fb.fdata.nsh_maxPP = max(self.infodat.numshellsPP)
+#        _fb.fdata.allocate()
+#
+#        for i, n in enumerate(numbers):
+#            _fb.fdata.symbolA[i] = self.infodat.elements[n].symbol
+#            _fb.fdata.nzx[i] = n
+#            _fb.fdata.smass[i] = self.infodat.elements[n].atomic_weight
+#            _fb.fdata.rc_PP[i] = self.infodat.cutoffPP[n]
+#            _fb.fdata.etotatom[i] = self.infodat.energy[n]
+#
+#            _fb.fdata.nsshPP[i] = self.infodat.numshellsPP[n]
+#            for j in range(self.infodat.numshellsPP[n]):
+#                _fb.fdata.lsshPP[j, i] = self.infodat.shellsPP[n][j]
+#            _fb.fdata.nssh[i] = self.infodat.numshells[n]
+#            for j in range(self.infodat.numshells[n]):
+#                _fb.fdata.lssh[j, i] = self.infodat.shells[n][j]
+#                _fb.fdata.rcutoff[j, i] = self.infodat.cutoffs[n][j] * \
+#                    _fb.constants.abohr
+#                _fb.fdata.Qneutral[j, i] = self.infodat.qneutral[n][j]
+#                _fb.fdata.wavefxn[j, i] = self.infodat.wffiles[n][j]
+#                _fb.fdata.napot[j, i] = self.infodat.nafiles[n][j]
+#            _fb.fdata.napot[-1, i] = self.infodat.nafiles[n][-1]
+#
+#        _fb.fdata.isorpmax = _fb.fdata.nssh.max()
+#        _fb.fdata.isorpmax_xc = _fb.fdata.nssh.max()
+#        _fb.fdata.load_fdata()
 
     def _calculate_energies(self, atoms: Atoms) -> None:
         # Computation energy

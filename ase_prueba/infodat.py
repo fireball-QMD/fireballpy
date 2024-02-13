@@ -6,6 +6,7 @@ import json
 from mendeleev import element
 from mendeleev.models import Element
 
+
 @dataclass
 class InfoDat:
     """Class to keep all the info present in the classsical info.dat file,
@@ -15,6 +16,7 @@ class InfoDat:
     shells: Dict[int, List[int]]
     shellsPP: Dict[int, List[int]]
     cutoffPP: Dict[int, float]
+    cutoffs: Dict[int, List[float]]
     qneutral: Dict[int, List[float]]
     wffiles: Dict[int, List[str]]
     nafiles: Dict[int, List[str]]
@@ -29,6 +31,7 @@ class InfoDat:
         if not (self.shells.keys() ==
                 self.shellsPP.keys() ==
                 self.cutoffPP.keys() ==
+                self.cutoffs.keys() ==
                 self.qneutral.keys() ==
                 self.wffiles.keys() ==
                 self.nafiles.keys() ==
@@ -42,6 +45,7 @@ class InfoDat:
         numshellsPP = {}
         for num in self.numbers:
             if not (len(self.shells[num]) ==
+                    len(self.cutoffs[num]) ==
                     len(self.qneutral[num]) ==
                     len(self.wffiles[num]) ==
                     len(self.nafiles[num]) - 1):
@@ -63,7 +67,8 @@ class InfoDat:
         string = []
         for i, num in enumerate(self.numbers):
             string.append(
-                f"Specie {i+1}/{len(self.numbers)} ({self.elements[num].name}):"
+                f"Specie {i+1}/{len(self.numbers)} " +
+                f"({self.elements[num].name}):"
             )
             string.append(
                 "- Angular momentum of the shells: " +
@@ -75,6 +80,10 @@ class InfoDat:
             )
             string.append(
                 f"- Radial cutoff of the pseudopotential: {self.cutoffPP[num]}"
+            )
+            string.append(
+                "- Radial cutoffs (atomic units): " +
+                ", ".join(f"{x}" for x in self.cutoffs[num])
             )
             string.append(f"- Atomic energy: {self.energy[num]}")
             string.append(
@@ -93,6 +102,7 @@ class InfoDat:
             "shells": self.shells,
             "shellsPP": self.shellsPP,
             "cutoffPP": self.cutoffPP,
+            "cutoffs": self.cutoffs,
             "qneutral": self.qneutral,
             "wffiles": self.wffiles,
             "nafiles": self.nafiles,
@@ -110,6 +120,7 @@ class InfoDat:
         return cls(jsondict["shells"],
                    jsondict["shellsPP"],
                    jsondict["cutoffPP"],
+                   jsondict["cutoffs"],
                    jsondict["qneutral"],
                    jsondict["wffiles"],
                    jsondict["nafiles"],
@@ -133,11 +144,19 @@ default_shellsPP = {
 }
 
 default_cutoffsPP = {
-    1: 0.2,
-    6: 0.87,
-    7: 0.78,
-    8: 0.71,
+    1:  0.2,
+    6:  0.87,
+    7:  0.78,
+    8:  0.71,
     16: 1.24
+}
+
+default_cutoffs = {
+    1:  [1.0, 0.0],
+    6:  [2.0, 2.0],
+    7:  [2.0, 3.0, 0.0],
+    8:  [2.0, 4.0, 0.0],
+    16: [2.0, 4.0, 0.0]
 }
 
 default_qneutral = {
@@ -186,16 +205,17 @@ default_nafiles = {
 }
 
 default_energy = {
-    1: 0.0,
-    6: 0.0,
-    7: 0.0,
-    8: 0.0,
+    1:  0.0,
+    6:  0.0,
+    7:  0.0,
+    8:  0.0,
     16: 0.0
 }
 
 default_infodat = InfoDat(default_shells,
                           default_shellsPP,
                           default_cutoffsPP,
+                          default_cutoffs,
                           default_qneutral,
                           default_wffiles,
                           default_nafiles,
