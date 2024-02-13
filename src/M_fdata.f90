@@ -6,7 +6,6 @@ module M_fdata
     !===================================
 
     logical :: debug = .True. ! Tendremos q borrarla
-    !integer :: ispin = 0
     integer :: ideriv_max = 6
 
     ! load_fdata
@@ -172,7 +171,6 @@ module M_fdata
 
 
     ! AQUI 
-    integer, dimension (:), allocatable :: nsu
     integer :: V_intra_dip = 1 ! hacer fdata con vdip_onecenter ? 
     integer, parameter :: nfofx = 207
     integer :: interactions2c_max = 24 !ojo antes estaba en initbasics ufff
