@@ -20,26 +20,22 @@ subroutine load_fdata()
     nsh_max = 0
     nshPP_max = 0
     do ispec = 1, nspecies
-    do in1 = 1, 5
-    read (12,*)
-    end do !in1
-    read (12,*) nsh_max_temp
-    read (12,*)
-    read (12,*) nshPP_max_temp
-    do in1 = 1, 8
-    read (12,*)
-    end do !in1
-    if (nsh_max_temp .gt. nsh_max) then
-        nsh_max = nsh_max_temp
-    end if
-    if (nshPP_max_temp .gt. nshPP_max) then
-        nshPP_max = nshPP_max_temp
-    end if
+        do in1 = 1, 5
+            read (12,*)
+        end do !in1
+            read (12,*) nsh_max_temp
+            read (12,*)
+            read (12,*) nshPP_max_temp
+        do in1 = 1, 8
+            read (12,*)
+        end do !in1
+        if (nsh_max_temp .gt. nsh_max) then
+            nsh_max = nsh_max_temp
+        end if
+        if (nshPP_max_temp .gt. nshPP_max) then
+            nshPP_max = nshPP_max_temp
+        end if
     end do ! ispec
-
-    ! Not sure if they can be different
-    !nsh_max = max(nsh_max, nshPP_max)
-    !========================================
 
     close(unit = 12) !close info.dat
 
@@ -60,9 +56,6 @@ subroutine load_fdata()
     allocate (Qneutral (nsh_max, nspecies))
     allocate (wavefxn (nsh_max, nspecies))
     allocate (napot (0:nsh_max, nspecies))
-
-    allocate (nsu(nspecies))
-    nsu=0 !AQUI
 
     open (unit = 12, file = trim(fdataLocation)//'/info.dat', status = 'old')
     read (12,*)
@@ -124,12 +117,6 @@ subroutine load_fdata()
     isorpmax_xc = max(isorpmax_xc,nssh(in1))
     end do
 
-
-
-    !ideriv_max = 0
-    !if (itheory .eq. 1) ideriv_max = 6
-
-    ! Set up the index field ind2c:
     icount = 0
     ind2c = 0
     icount = icount + 1
@@ -172,11 +159,6 @@ subroutine load_fdata()
     ind2c(13,0) = icount
     icount = icount + 1
     ind2c(14,0) = icount
-    !if (itheory_xc .eq. 1 .or. itheory_xc .eq. 2 .or. itheory_xc .eq. 4 ) then
-    !if (itheory_xc .eq. 4) then 
-    !icount = icount + 1
-    !ind2c(14,0) = icount
-    !end if !end if itheory_xc .eq. 4
     do isorp = 1, isorpmax_xc
     icount = icount + 1
     ind2c(15,isorp) = icount
@@ -211,13 +193,8 @@ subroutine load_fdata()
     end do
     icount = icount + 1
     ind2c(23,0) = icount
-    !dani.JOM.jel-fr-end
 
-
-    !end if
     interactions2c_max = icount
-
-
 
     call make_munu ()
     call make_munuPP ()
@@ -225,21 +202,12 @@ subroutine load_fdata()
     call make_munuDipY ()
     call make_munuDipX ()
 
-
-
-    ! Procedure progs/READFILES/readdata_mcweda.f90
-    ! one-center
-
     call read_1c ()
 
-    ! two-center
     do interaction = 1, 13
     call read_2c (interaction)
     end do
 
-    ! interaction = 14 NAC TODO ixczw = 1  
-
-    ! Spherical OLSXC exchange-correlation
     do interaction = 15, 23
     call read_2c (interaction)
     end do
@@ -251,16 +219,10 @@ subroutine load_fdata()
     interaction = 4   ! den3 (3c - OLSXC) - spherical average density
     call read_3c (interaction)
 
-
-    ! Set up some tables for the 2d interpolator
     call setterp_2d ()
 
-    ! Deallocate Arrays
-    ! ===========================================================================
     deallocate (rcutoff_temp)
 
-    ! Format Statements
-    ! ===========================================================================
     100     format (2x, 70('='))
     101     format (2x, a25)
     102     format (2x, a2)
