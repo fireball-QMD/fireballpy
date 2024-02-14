@@ -4,7 +4,7 @@ subroutine fermie ()
   implicit none
   integer, parameter :: imax = 1000 ! maximum sc iterations
   integer, parameter :: nmax = 5000 ! cutoff for degeneracy check
-  real, parameter :: tol = 1.0d-10
+  real, parameter :: tol = 1.0d-5 ! AQUI pesar 1.0d-10
   integer ikpoint
   integer imu
   integer inu
@@ -81,7 +81,6 @@ subroutine fermie ()
       emin = efermi
     end if
   end do
-
 
   if (iter .gt. imax) then
    write (*,*) '  '

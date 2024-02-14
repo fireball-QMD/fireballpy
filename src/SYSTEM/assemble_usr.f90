@@ -83,7 +83,7 @@ subroutine assemble_usr ()
       interaction = 12
       ideriv = 0
       do index = 1, index_coulomb
-        call interpolate_1d (interaction, ideriv, in1, in2, index, distance, slist(index), dslist(index))
+        call interpolate_1d (interaction, ideriv, in1, in2, index, iforce, distance, slist(index), dslist(index))
       end do
  
       ! We have the data, it is stored in the following way: v(1,1), v(1,2),
