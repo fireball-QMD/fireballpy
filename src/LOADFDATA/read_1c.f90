@@ -139,6 +139,6 @@ subroutine read_1c ()
         end do !end do in1 = 1,nspecies
     end if ! if (V_intra_dip .eq. 1)
 
-    return
+100     format (a70)
 end subroutine read_1c
 
