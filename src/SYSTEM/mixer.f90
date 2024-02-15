@@ -36,6 +36,7 @@ subroutine mixer ()
   end do 
   select case (ialgmix)
   case (1)
+    write(*,*)'XX',bmix,sigma,Kscf,idmix,imix
     call anderson (Qoutmixer, Qinmixer, bmix, sigma, Kscf, idmix, imix )
   case (2)
     call broyden (Qoutmixer, Qinmixer, bmix, sigma, Kscf, idmix,imix )

@@ -7,7 +7,7 @@ subroutine anderson ( x_try, x_old, beta, r2, iter, max_order, nmsh)
    integer, intent(in) :: max_order ! How far back do we go to extrapolate?
    real, intent(in), dimension(nmsh) :: x_try ! potential new vector on input
    real, intent(inout), dimension(nmsh) :: x_old ! old vector in input, real new vector on output
-   real, intent(out) :: r2 ! mean-square of (x_try(i)-x_old(i))**2
+   real, intent(out) :: r2 ! mean-square of (x_try(i)-x_old(i))**2 sigma
    real, parameter :: tr2=2.0e-15  ! convergence factor, if r2<tr2, assume converged
    real, allocatable, dimension(:,:) :: a_matrix  ! Eq. 5.17
    real, allocatable, dimension(:) :: delF_F      ! <delF|F> in Eq. 5.31
@@ -50,10 +50,8 @@ subroutine anderson ( x_try, x_old, beta, r2, iter, max_order, nmsh)
          r2_sav(iter-max_order+1) = r2_sav(iter-max_order)
          Fv(:,iter-max_order+1) = Fv(:,iter-max_order)
          Xv(:,iter-max_order+1) = Xv(:,iter-max_order)
-         delX(:,iter-max_order+1) =                                        &
-   &            Xv(:,iter-max_order+2) - Xv(:,iter-max_order+1)
-         delF(:,iter-max_order+1) =                                        &
-                Fv(:,iter-max_order+2) - Fv(:,iter-max_order+1)
+         delX(:,iter-max_order+1) = Xv(:,iter-max_order+2) - Xv(:,iter-max_order+1)
+         delF(:,iter-max_order+1) = Fv(:,iter-max_order+2) - Fv(:,iter-max_order+1)
       end if
    end if
 888 allocate(a_matrix(iter-mix_order+1:iter-1,iter-mix_order+1:iter-1))
@@ -70,8 +68,7 @@ subroutine anderson ( x_try, x_old, beta, r2, iter, max_order, nmsh)
    allocate (work(lwork))
    allocate (ipiv(mix_order-1))
    info=0
-   call ssysv('U', mix_order-1, 1, a_matrix, mix_order-1, ipiv, delF_F, &
-     &                  mix_order-1, work, lwork, info )
+   call ssysv('U', mix_order-1, 1, a_matrix, mix_order-1, ipiv, delF_F, mix_order-1, work, lwork, info )
    if(info .ne. 0) then
       write (*,*) ' Error in Anderson, info =',info
       if(mix_order .le. 2)stop ! if you can't solve a 2x2 something is wrong

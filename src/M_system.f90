@@ -67,11 +67,12 @@ module M_system
   integer, parameter ::  idmix = 6
   real, dimension (:, :, :, :), allocatable :: cape
   real :: tempfe = 100.0d0
-  real :: bmix
-  real :: sigma
-  real :: sigmaold
-  real :: sigmatol
-  logical ::  scf_achieved
+  real :: bmix = 0.04d0
+  real :: sigma = 0.0d0
+  real :: sigmaold = 0.0d0
+  real :: sigmatol = 1.0E-8
+  logical ::  scf_achieved = .true.
+  integer :: ialgmix = 1 !1:anderson 2:broyden 3:louie 4:pulay
   real, dimension (:, :, :), allocatable :: blowre_o
   real, dimension (:, :, :), allocatable :: bbnkre_o  
   integer :: flag_es
@@ -79,7 +80,6 @@ module M_system
   real :: ztot
   real, dimension (:), allocatable :: weight_k
   integer ::  nssh_tot
-  integer :: ialgmix
   real, dimension (:), allocatable :: mwe
   real, dimension (:), allocatable :: drwe
 
