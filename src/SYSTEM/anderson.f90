@@ -68,7 +68,7 @@ subroutine anderson ( x_try, x_old, beta, r2, iter, max_order, nmsh)
    allocate (work(lwork))
    allocate (ipiv(mix_order-1))
    info=0
-   call ssysv('U', mix_order-1, 1, a_matrix, mix_order-1, ipiv, delF_F, mix_order-1, work, lwork, info )
+   call dsysv('U', mix_order-1, 1, a_matrix, mix_order-1, ipiv, delF_F, mix_order-1, work, lwork, info )
    if(info .ne. 0) then
       write (*,*) ' Error in Anderson, info =',info
       if(mix_order .le. 2)stop ! if you can't solve a 2x2 something is wrong

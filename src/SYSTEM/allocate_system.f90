@@ -5,10 +5,13 @@ subroutine allocate_system ()
   implicit none
   integer:: iatom
   integer:: jatom
+  integer:: matom
+  integer:: ineigh
+  integer:: i
   integer:: mbeta
   integer:: num_neigh
   integer:: in1
-  integer:: imu
+  integer:: imu, qmu
   integer:: issh
   integer:: in2
   integer:: ispec
@@ -37,6 +40,15 @@ subroutine allocate_system ()
   allocate (Q_partial(natoms))
   allocate (dq_DP(natoms))
 
+!  allocate (drr_na (nspecies))
+!  allocate (rr_na (max_vna_points, nspecies))
+!  allocate (vnna_spline (max_vna_points, nspecies))
+!  allocate (vnna (max_vna_points, nspecies)) !AQUI se usa ?
+!  allocate (mesh_na (nspecies))
+!  allocate (rmax_na (nspecies))
+
+
+  
   call initboxes (1)
 
   ! Count the orbitals
@@ -305,5 +317,27 @@ subroutine allocate_system ()
   allocate (vna (numorb_max, numorb_max, neigh_max, natoms))
   allocate (vnl (numorb_max, numorb_max, neighPP_max**2, natoms))
   allocate (sVNL (numorb_max, numorb_max, neighPP_max, natoms))
+
+  !initdenmat
+  rho = 0.0d0
+
+  do iatom = 1, natoms
+    in1 = imass(iatom)
+      matom = -99
+      do ineigh = 1, neighn(iatom)
+         mbeta = neigh_b(ineigh,iatom)
+         jatom = neigh_j(ineigh,iatom)
+         if (iatom .eq. jatom .and. mbeta .eq. 0) matom = ineigh
+      end do
+      imu = 1
+      do issh = 1, nssh(in1)
+         qmu = Qneutral(issh,in1) / real(2*lssh(issh,in1)+1)
+         do i = 1, (2*lssh(issh,in1)+1)
+            !rhoA(imu,iatom) = qmu
+            rho(imu,imu,matom,iatom) = qmu
+            imu = imu + 1
+         enddo
+      enddo
+   end do
 
 end subroutine

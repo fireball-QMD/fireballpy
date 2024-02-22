@@ -4,13 +4,20 @@ module M_system
   integer :: icluster = 1
   integer :: iforce = 0
   integer :: idipole = 1
-  integer :: iqout = 7
+  integer :: iqout = 2
   !======================
 
   integer :: max_scf_iterations = 200
   real, parameter ::  xc_overtol = 5.0d-5
   real, parameter :: smt_elect = 0.8d0 ! Ewald and electrostatic
   integer, parameter :: ithetamax = 5
+!  integer, parameter  :: max_vna_points = 5000
+!  real, dimension (:), allocatable ::  drr_na
+!  real, dimension (:,:), allocatable :: rr_na
+!  real, dimension (:,:), allocatable :: vnna_spline
+!  real, dimension (:,:), allocatable :: vnna
+!  integer, dimension (:), allocatable :: mesh_na
+!  real, dimension (:), allocatable :: rmax_na
 
   integer :: natoms
   real, dimension (:, :), allocatable :: ratom

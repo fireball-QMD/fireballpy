@@ -2,9 +2,9 @@
 iks=0
 idogs=1
 imcweda=1
-fdatalocation ="/home/dani/Fdata_HC-new"
+fdatalocation ="/home/dani/Fdata_HC"
 idipole = 0
-iqout = 7 
+iqout = 2 
 icluster = 1
 iquench = -1
 sigmatol = 0.00000001
