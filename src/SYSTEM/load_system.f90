@@ -7,6 +7,7 @@ subroutine load_system ()
   integer in1
   integer ispec
   logical zindata
+
   
   write(*,*) symbolA, nspecies
   open (unit = 69, file = 'input.xyz', status = 'old')

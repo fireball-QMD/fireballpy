@@ -61,6 +61,14 @@ subroutine unocentros (in1, iatom, exc_1c, muexc_1c, dccexc_1c, mu1xc)
       dccexc_1c = dccexc_1c +  ( dexc1c(in1,issh,issh,jssh) - dnuxc1c(in1,issh,issh,jssh) )*dqi(jssh)*Qin(issh,iatom)
     end do
   end do
+
+  write(*,*) 'XXX unocentros exc_1c',exc_1c
+  write(*,*) 'XXX unocentros muexc_1c',muexc_1c
+  write(*,*) 'XXX unocentros dccexc_1c',dccexc_1c
+  write(*,*) 'XXX unocentros mu1xc',mu1xc
+  write(*,*) 'XXX unocentros nuxc1c',nuxc1c
+  write(*,*) 'XXX unocentros dnuxc1c',nuxc1c
+
   return
 end subroutine unocentros
 

@@ -201,6 +201,7 @@ subroutine kspace ( ikpoint, sks)
   endif
   deallocate (work)
   deallocate (iwork)
+  write(*,*) 'XXX kspace_withno kbbnkre =' ,bbnkre
   return
 end 
 

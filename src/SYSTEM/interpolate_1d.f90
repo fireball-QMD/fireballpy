@@ -1,54 +1,22 @@
-! ===========================================================================
-! interpolate_1d uses interpolation to find the value of
-! f(x) for any x, given an array of equally spaced points for f(x)
-! For polynomial interpolation see Mathews and Walker, p.329
-! If norder is negative, then use cubic splines instead
-! If doing "superspline" then order is irrelevent
-! ===========================================================================
-subroutine interpolate_1d (interaction, isub, in1, in2, non2c, ioption, xin, yout, dfdx)
+ subroutine interpolate_1d (interaction, isub, in1, in2, non2c, ioption, xin, yout, dfdx)
   use M_system
-  use M_fdata
   use M_constants
+  use M_fdata, only: ind2c, numz2c, z2cmax, xintegral_2c, splineint_2c, nfofx
   implicit none
-
   integer, intent(in) :: interaction
   integer, intent(in) :: isub
   integer, intent(in) :: in1
   integer, intent(in) :: in2
   integer, intent(in) :: non2c
   integer, intent(in) :: ioption   ! Derivative or not?
-
-  real, intent(in)  :: xin         ! x
-  real, intent(out) :: yout        ! F(x)
-  real, intent(out) :: dfdx        ! dF/dx
- 
-  ! Local Parameters and Data Declaration
-  ! ===========================================================================
-  ! tol=tolerance (may be needed to avoid roundoff error in the calling program)
-  ! if xin > xmax but within, say, .001% of xmax then ignore
-   
-  logical, parameter :: superspline = .false.
-
+  real, intent(in)  :: xin   ! x
+  real, intent(out) :: yout  ! F(x)
+  real, intent(out) :: dfdx  ! dF/dx
   real, parameter :: tol=1.0d-5
   real, parameter :: e6t=.166666667d0
   real, parameter :: e24t=.04166666667d0
   real, parameter :: e5t=.2d0
   real, parameter :: e2t5=.4d0
-
-  ! Local Variable Declaration and Description
-  ! ===========================================================================
-  !               interaction  subtypes   index
-  !      overlap       1          0          1
-  !      vna on        2          0..9       2..11   (2  + isorp)
-  !      vna atm       3          0..9       12..21  (12 + isorp)
-  !      vxc on        4          0..4       22..26
-  !      vxc atm       5          0..4       27..31
-  !      xccorr        6          0..4       32..36
-  !      vnl atm / on  7          0          37
-  !
-  !      declared by the index field ind2c !!!!!!!
-  !
-  ! -------------------------------------------------------------
   integer i
   integer ileft, imid, iright
   integer iprod, isum
@@ -57,7 +25,6 @@ subroutine interpolate_1d (interaction, isub, in1, in2, non2c, ioption, xin, you
   integer nn
   integer nnum
   integer norder
- 
   real h
   real xmax
   real, parameter :: xmin = 0.0d0
@@ -72,25 +39,17 @@ subroutine interpolate_1d (interaction, isub, in1, in2, non2c, ioption, xin, you
   real, dimension (5) :: bb
   real, dimension (nfofx) :: pdenom
   real, dimension (nfofx) :: xx
- 
-  ! Cubic spline variables
   integer iam
   real, dimension (0:nfofx) :: a, b, c, d
   real, dimension (0:nfofx) :: alpha
   real, dimension (0:nfofx) :: L
-  real, dimension (0:nfofx) :: musp  
+  real, dimension (0:nfofx) :: mu
   real, dimension (0:nfofx) :: Z
-
-  ! Superspline variables
   real aaa, bbb, ccc, ddd
- 
   jxx = ind2c(interaction,isub)
   nnum = numz2c(jxx,in1,in2)
-
   xmax = z2cmax(jxx,in1,in2)
-  ! note : the points must be equally spaced and start at 0
   h = (xmax - xmin)/(nnum - 1)
-
   if (xin .lt. xmin) then
     write (*,*) ' xin, xmin = ', xin, xmin
     write (*,*) '  error in intrp1d : xin < xmin'
@@ -104,56 +63,45 @@ subroutine interpolate_1d (interaction, isub, in1, in2, non2c, ioption, xin, you
     end if
     xxp = xmax - xmin
   else if (xin .eq. xmin) then
-    if(superspline) then
-      yout = splineint_2c(1,non2c,1,jxx,in1,in2)
-      if (ioption .eq. 1) dfdx = 0
-    else
+!    if(superspline) then
+!      yout = splineint_2c(1,non2c,1,jxx,in1,in2)
+!      if (ioption .eq. 1) dfdx = 0
+!    else
       yout = xintegral_2c(non2c,1,jxx,in1,in2)
       if (ioption .eq. 1) dfdx = 0
-    end if
+!    end if
     return  
   else
     xxp = xin - xmin
   end if
-
-  ! note : imid is the point to the left (code assumes this)
   imid = int(xxp/h) + 1
   if (imid .gt. nnum) imid=nnum ! If we have gone off of the end
-
-  ! Superspline
-  if (superspline) go to 4321
+!  if (superspline) go to 4321
   norder=abs(norder1)
   if(norder .eq. 0 .or. norder+1 .gt. nnum)then
     write(*,*) ' norder1 is chosen wrong in interpolate_1d'
     write(*,*) ' norder=',norder1,' and must be at least +/- 1'
     stop
   end if
-
-  !       Special cases for norder=3 or 5 polynomials
-  !
   if(norder1 .eq. 3) go to 93
   if(norder1 .eq. 5) go to 96
-  ! now find starting and ending points for the interpolation
   if(mod(norder+1,2).eq.0)then
-    ileft=imid-((norder-1)/2)
-    iright=imid+((norder+1)/2)
+     ileft=imid-((norder-1)/2)
+     iright=imid+((norder+1)/2)
   else
-    ileft=imid-(norder/2)
-    iright=imid+(norder/2)
+     ileft=imid-(norder/2)
+     iright=imid+(norder/2)
   endif
   if(ileft.lt.1)then
-    ileft=1
-    iright=norder+1
+     ileft=1
+     iright=norder+1
   elseif(iright.gt.nnum)then
-    ileft=nnum-norder
-    iright=nnum
+     ileft=nnum-norder
+     iright=nnum
   endif
-
-  ! If norder is negative, then use cubic splines
   if(norder1 .lt. 0) goto 111
-  !       now interpolate with polynomials of order norder ************
   do i=ileft,iright
-    xx(i)=(i-1)*h
+   xx(i)=(i-1)*h
   end do
   sum=0.0e0
   do isum=ileft,iright
@@ -169,54 +117,29 @@ subroutine interpolate_1d (interaction, isub, in1, in2, non2c, ioption, xin, you
     sum=sum+xintegral_2c(non2c,isum,jxx,in1,in2)*prod
   end do
   yout=sum
-    dfdx=0.0e0
+  dfdx=0.0e0
   if(ioption.ne.1) return
-  !
-  ! ioption=1 so find the value of dfdx
-  !
-  ! this subroutine uses an equation for dfdx found by
-  !   taking the derivative of the interpolation polynomial.
-  !
-  !   dfdx = sum  f(xi) * (prod(1/(xi-xj))) * sum2(i)
-  !         i=1,n         j=1,n
-  !                       j.ne.i
-  ! where
-  !
-  !   sum2(i) = sum      prod     ( x - xk )
-  !           j=1,n    k=1,n
-  !           j.ne.i   k.ne.j
-  !                    k.ne.i
-  !
-  ! where n = number of points = norder+1
-  !
   sumx=0.0e0
   do 1208 i=ileft,iright
-    xsumoverj=0.0e0
-    do 1308 j=ileft,iright
+   xsumoverj=0.0e0
+   do 1308 j=ileft,iright
     if(j.eq.i)goto 1308
     xprod=1.0e0
     do 1408 k=ileft,iright
-      if(k.eq.j)goto 1408
-      if(k.eq.i)goto 1408
-      xprod=xprod*(xxp-xx(k))
-      1408 continue
-      xsumoverj=xsumoverj+xprod
-      1308 continue
-      sumx=sumx+xintegral_2c(non2c,i,jxx,in1,in2)*pdenom(i)*xsumoverj
-  1208    continue
+     if(k.eq.j)goto 1408
+     if(k.eq.i)goto 1408
+     xprod=xprod*(xxp-xx(k))
+1408      continue
+    xsumoverj=xsumoverj+xprod
+1308     continue
+   sumx=sumx+xintegral_2c(non2c,i,jxx,in1,in2)*pdenom(i)*xsumoverj
+1208    continue
   dfdx=sumx
   return
- 
-  !
-  !       norder=3 *********************************************************
-  !
- 
   93    continue
- 
   if(imid .lt. 2) imid=2
   nn=nnum-2
   if(imid .gt. nn) imid=nn
- 
   ftp=xintegral_2c(non2c,imid-1,jxx,in1,in2)
   f1m1=ftp
   f1m2=ftp*2
@@ -228,7 +151,6 @@ subroutine interpolate_1d (interaction, isub, in1, in2, non2c, ioption, xin, you
   ftp=xintegral_2c(non2c,imid+1,jxx,in1,in2)
   f1p3=ftp*3
   f1p6=ftp*6
- 
   f2p1=xintegral_2c(non2c,imid+2,jxx,in1,in2)
   bb(3)=-f1m1+f0p3-f1p3+f2p1
   bb(2)=f1m3-f0p6+f1p3
@@ -246,17 +168,12 @@ subroutine interpolate_1d (interaction, isub, in1, in2, non2c, ioption, xin, you
   dfdx=e6t*prodd/h
   return
   96    continue
-
-!       norder=5 *******************************************************
- 
   if(imid .lt. 3) imid=3
   nn=nnum-3
   if(imid .gt. nn) imid=nn
- 
   ftp=xintegral_2c(non2c,imid-2,jxx,in1,in2)
   f2m1=ftp
   f2m3=ftp*3
- 
   ftp=xintegral_2c(non2c,imid-1,jxx,in1,in2)
   f1m1=ftp
   f1m4=4*ftp
@@ -298,71 +215,46 @@ subroutine interpolate_1d (interaction, isub, in1, in2, non2c, ioption, xin, you
   end do
   yout=e24t*prod+f0p1
   dfdx=e24t*prodd/h
-
   return
-
-  111    continue
-
-  !
-  !       Cubic splines:  "natural" splines with f''(x)=0 at end points *********
-  !
-
+ 111    continue
   do i=0,norder
     a(i)=xintegral_2c(non2c,i+ileft,jxx,in1,in2)
   end do
-
   do i=1,norder-1
     alpha(i)=3.0d0*(a(i+1)-2*a(i)+a(i-1))/h
   end do
-
   L(0)=1
-  musp(0)=0
+  mu(0)=0
   Z(0)=0
   c(0)=0
   do i=1,norder-1
-    L(i)=(4.0d0-musp(i-1))*h
-    musp(i)=h/L(i)
+    L(i)=(4.0d0-mu(i-1))*h
+    mu(i)=h/L(i)
     Z(i)=(alpha(i)-h*Z(i-1))/L(i)
   end do
   L(norder)=1
-  musp(norder)=0
+  mu(norder)=0
   Z(norder)=0
   c(norder)=0
-
-  !       Do not go off of the end
   if(imid .eq. nnum)imid=nnum-1
-  !       What curve section do we use?
   iam=imid-ileft
-
-  !       Don't need 0 to iam-1
   do j=norder-1,iam,-1
-    c(j)=z(j)-musp(j)*c(j+1)
+    c(j)=z(j)-mu(j)*c(j+1)
     b(j)=(a(j+1)-a(j))/h-h*(c(j+1)+2.0d0*c(j))/3.0d0
     d(j)=(c(j+1)-c(j))/(3.0d0*h)
   end do
-
   xxp=xxp-(imid-1)*h
-
   yout=a(iam)+b(iam)*xxp+c(iam)*xxp**2+d(iam)*xxp**3
   if (ioption .eq. 1) dfdx=b(iam)+2.0d0*c(iam)*xxp+3.0d0*d(iam)*xxp**2
-  !       d2fdx2=2.0d0*c(iam)+6.0d0*d(iam)*xxp
-
   return
-
-  4321   continue
-
-  !
-  ! Cubic splines:  One big "super spline"
-  !
+ 4321   continue
   aaa=splineint_2c(1,non2c,imid,jxx,in1,in2)
   bbb=splineint_2c(2,non2c,imid,jxx,in1,in2)
   ccc=splineint_2c(3,non2c,imid,jxx,in1,in2)
   ddd=splineint_2c(4,non2c,imid,jxx,in1,in2)
   xxp=xxp-(imid-1)*h
-
   if(ioption .eq. 1) dfdx=bbb+2.0d0*ccc*xxp+3.0d0*ddd*xxp**2
   yout=aaa+bbb*xxp+ccc*xxp**2+ddd*xxp**3
-  !       d2fdx2=2.0d0*ccc+6.0d0*ddd*xxp
-
   return
-  end
+end
+

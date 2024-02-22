@@ -41,6 +41,9 @@ subroutine denmat ()
 
   !Get the Fermi energy.
   call fermie ()
+  
+  write(*,*)'XXX efermi',efermi
+ 
   do iatom = 1, natoms
     in1 = imass(iatom)
     do ineigh = 1, neighn(iatom)
@@ -140,20 +143,24 @@ subroutine denmat ()
     Qout = 0.0d0
     QLowdin_TOT = 0.0d0
     call LOWDIN_CHARGES()
-  end if !iqout = 1,3
+  end if 
+
   if (iqout .eq. 2) then
     Qout = 0.0d0
     QMulliken_TOT = 0.0d0
     call MULLIKEN_CHARGES()
-  end if !iqout = 2
+  end if 
+
   if (iqout .eq. 4) then
     Qout = 0.0d0                        
     QMulliken_TOT = 0.0d0 
     call MULLIKEN_DIPOLE_CHARGES()
-  end if !iqout = 4
+  end if 
+
   if (iqout .eq. 6) then
     call STATIONARY_CHARGES()
-  end if !iqout = 6
+  end if 
+
   if (iqout .eq. 7) then
     Qout = 0.0d0                        
     QMulliken_TOT = 0.0d0 
@@ -164,15 +171,16 @@ subroutine denmat ()
       QoutTot(iatom) = 0.0d0
       do imu = 1,nssh(in1)
         QoutTot(iatom) = QoutTot(iatom)+Qout(imu,iatom)
-      end do ! end do imu
-    end do !end do iatom = 1,natoms
+      end do 
+    end do 
     do iatom = 1, natoms
       in1 = imass(iatom)
       do imu = 1,nssh(in1)
         Qout(imu,iatom) = (dq_DP(iatom)/QoutTot(iatom))*Qout(imu,iatom) + Qout(imu,iatom)
-      end do ! end do imu
-    end do !end do iatom = 1,natoms
-  end if !iqout = 7
+      end do 
+    end do 
+  end if 
+
   ebs = 0.0d0
   ztest = 0.0d0
   do ikpoint = 1, nkpoints
