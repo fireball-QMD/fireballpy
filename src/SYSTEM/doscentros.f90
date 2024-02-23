@@ -42,9 +42,7 @@ subroutine doscentros (interaction, isub, iforceaux, in1, in2, in3, distance, ep
   end do
   call recover_2c (in1, in3, slist, sm)
   call recover_2c (in1, in3, dslist, spm)
-  write(*,*)'XXX sm doscentros',sm
   call rotate_fb (in1, in3, eps, sm, sx)
-  write(*,*)'XXX sx doscentros',interaction,sx
   if (iforceaux .eq. 1) then
    eta(:) = eps(:,3)
    do inu = 1, num_orb(in3)

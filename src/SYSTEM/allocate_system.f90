@@ -352,6 +352,5 @@ subroutine allocate_system ()
       end do
     end do
   end do
-  write(*,*)'XXX allocate_system rho', rho
 
 end subroutine

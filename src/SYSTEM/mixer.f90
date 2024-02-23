@@ -78,6 +78,5 @@ subroutine mixer ()
       zcheck = zcheck + Qin(issh,iatom)
     end do
   end do
-  return
 end subroutine mixer
 

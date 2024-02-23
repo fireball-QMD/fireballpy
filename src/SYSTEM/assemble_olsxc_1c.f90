@@ -25,7 +25,5 @@ subroutine assemble_olsxc_1c ()
       end do
     end do
   end do
-write(*,*)'XXX assemble_olsxc_1c vxc_1c',vxc_1c
-write(*,*)'XXX assemble_olsxc_1c mu1xc',mu1xc
 end subroutine assemble_olsxc_1c
 

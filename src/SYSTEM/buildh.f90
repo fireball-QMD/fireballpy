@@ -25,7 +25,6 @@ subroutine buildh ()
   integer jatom0
   integer ineigh0
   integer mbeta0
-  write(*,*)'XXX in buildh vna',vna
   do iatom = 1, natoms
     in1 = imass(iatom)
     do ineigh = 1, neighn(iatom)
@@ -39,17 +38,11 @@ subroutine buildh ()
       end do
       do inu = 1, num_orb(in2)
         do imu = 1, num_orb(in1)
-          !AQUI  ewaldqmmm
           h_mat(imu,inu,ineigh,iatom) = h_mat(imu,inu,ineigh,iatom)  + vca(imu,inu,ineigh,iatom) + vxc_ca(imu,inu,ineigh,iatom) + ewaldlr(imu,inu,ineigh,iatom) - ewaldsr(imu,inu,ineigh,iatom) + ewaldqmmm(imu,inu,ineigh,iatom)
-        end do ! do imu
-      end do ! do inu
-    end do ! do ineigh
-  end do ! do iatom
-  write(*,*)'XXX buildh vna',vna
-  write(*,*)'XXX buildh vxc',vxc
-  write(*,*)'XXX buildh vxc_ca',vxc_ca
-  write(*,*)'XXX buildh vxc_1c',vxc_1c
-  write(*,*)'XXX buildh t_mat',t_mat
-  write(*,*)'XXX buildh h_mat',h_mat
+          !AQUI  ewaldqmmm
+        end do 
+      end do 
+    end do 
+  end do 
 end subroutine buildh
 

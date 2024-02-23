@@ -38,12 +38,8 @@ subroutine denmat ()
   ai = cmplx(0.0d0,1.0d0)
   rhoPP = 0.0d0
   !AQUI  inquire (file = 'OCCUPATION', exist = read_occupy)
-
   !Get the Fermi energy.
   call fermie ()
-  
-  write(*,*)'XXX efermi',efermi
- 
   do iatom = 1, natoms
     in1 = imass(iatom)
     do ineigh = 1, neighn(iatom)
