@@ -16,7 +16,7 @@ import fireballpy
 project = 'FireballPy'
 copyright = '2024, José Ortega Mateo, Linda Angela Zotti, Jesús Ignacio Mendieta Moreno, Daniel González Trabada, Jorge Vega Martín, Carlos Roldán Piñero'
 author = 'José Ortega Mateo, Linda Angela Zotti, Jesús Ignacio Mendieta Moreno, Daniel González Trabada, Jorge Vega Martín, Carlos Roldán Piñero'
-release = 'dev0.0.1'
+release = '0.0.1'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

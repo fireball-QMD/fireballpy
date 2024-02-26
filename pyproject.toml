@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "fireballpy"
-version = "dev0.0.1"
+version = "0.0.1"
 authors = [
   { name="José Ortega Mateo", email="jose.ortega@uam.es" },
   { name="Linda Angela Zotti", email="linda.zotti@uam.es" },

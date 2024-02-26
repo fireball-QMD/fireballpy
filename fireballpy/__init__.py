@@ -16,7 +16,7 @@ __all__ = [
     'retro'
 ]
 
-__version__ = 'dev0.0.1'
+__version__ = '0.0.1'
 
 from ase.calculators.calculator import register_calculator_class
 
