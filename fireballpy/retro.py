@@ -6,13 +6,31 @@ from ase.io.formats import NameOrFile
 
 from mendeleev import element
 
-from infodat import InfoDat
+from .infodat import InfoDat
+
 
 def read_bas(filename: NameOrFile):
+    """Reads molecule in .bas format
+
+    Internally this converts the bas file into a IOStream of a xyz file
+
+    Parameters
+    ----------
+    filename : str or IOStream
+        Either the name of the file or a ``IOStream`` with the file.
+        Note that the latter is yet not implemented and will raise
+        a ``NotImplementedError``.
+
+    Raises
+    ------
+    NotImplementedError
+        If ``filename`` is not a string
+    """
 
     # Not yet implemented load from IO
     if not isinstance(filename, str):
-        raise NotImplementedError("Loading from other than a file path is not yet implemented")
+        raise NotImplementedError("Loading from other than a file path \
+                is not yet implemented")
 
     if isinstance(filename, str) and (splitext(filename)[1] != '.bas'):
         raise ValueError(f"{filename} is not a .bas file")
@@ -26,17 +44,26 @@ def read_bas(filename: NameOrFile):
     if len(bas) != (int(bas[0]) + 1):
         raise ValueError(f"{filename} is not a valid .bas file")
     xyz = [bas[0].rstrip(), "no comment"]
-        
+
     sp = '     '
     for i, line in enumerate(bas[1:]):
         sline = line.split()
         elem = element[sline[0]]
-        xyz.append(elem.symbol.rjust(3) + sp + sp.join([f'{float(s):10.5f}' for s in sline[1:]]))
+        xyz.append(elem.symbol.rjust(3) + sp +
+                   sp.join([f'{float(s):10.5f}' for s in sline[1:]]))
 
     return read(StringIO('\n'.join(xyz)), format='xyz')
 
 
 def write_infodat(infodat: InfoDat) -> None:
+    """Writes an InfoDat in the old info.dat format
+
+    Parameters
+    ----------
+    infodat : InfoDat
+        InfoDat to be printed into info.dat file
+    """
+
     string = []
     string.append("   pyreball info.dat")
     string.append(f"  {len(infodat.numbers):2d}\t\t - Number of species")
@@ -85,7 +112,11 @@ def write_infodat(infodat: InfoDat) -> None:
         with open("info.dat", "w") as fp:
             fp.write("\n".join(string))
 
+
 def read_infodat() -> InfoDat:
+    """Loads a legacy info.dat and returns a new InfoDat object
+    """
+
     with open("info.dat", "r") as fp:
         dat = fp.readlines()
 
@@ -98,19 +129,27 @@ def read_infodat() -> InfoDat:
     wffiles = {}
     nafiles = {}
     energy = {}
-    
+
     for i in range(nsp):
         ii = 16*i + 5
         n = int(dat[ii].split("-")[0])
-        shells[n] = [int(x) for x in filter(lambda y: y, dat[ii+3][:-1].split(" "))]
-        shellsPP[n] = [int(x) for x in filter(lambda y: y, dat[ii+5][:-1].split(" "))]
+        shells[n] = [
+            int(x) for x in filter(lambda y: y, dat[ii+3][:-1].split(" "))
+        ]
+        shellsPP[n] = [
+            int(x) for x in filter(lambda y: y, dat[ii+5][:-1].split(" "))
+        ]
         cutoffsPP[n] = float(dat[ii+6].split("-")[0])
-        cutoffs[n] = [float(x) for x in filter(lambda y: y, dat[ii+7][:-1].split(" "))]
-        qneutral[n] = [float(x) for x in filter(lambda y: y, dat[ii+8][:-1].split(" "))]
+        cutoffs[n] = [
+            float(x) for x in filter(lambda y: y, dat[ii+7][:-1].split(" "))
+        ]
+        qneutral[n] = [
+            float(x) for x in filter(lambda y: y, dat[ii+8][:-1].split(" "))
+        ]
         wffiles[n] = list(filter(lambda y: y, dat[ii+9][:-1].split(" ")))
         nafiles[n] = list(filter(lambda y: y, dat[ii+10][:-1].split(" ")))
         energy[n] = float(dat[ii+11].split("-")[0])
-        
+
     return InfoDat(shells,
                    shellsPP,
                    cutoffsPP,
@@ -119,4 +158,3 @@ def read_infodat() -> InfoDat:
                    wffiles,
                    nafiles,
                    energy)
-

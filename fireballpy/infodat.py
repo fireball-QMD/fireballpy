@@ -2,6 +2,7 @@ from typing import Dict, List, Self
 from dataclasses import dataclass, field
 from os.path import splitext
 import json
+import tomllib
 
 from mendeleev import element
 from mendeleev.models import Element
@@ -97,8 +98,61 @@ class InfoDat:
             string.append("")
         return "\n".join(string[:-1])
 
+    @classmethod
+    def load(cls, filename: str) -> Self:
+        """Load the information of a InfoDat from a .json file or a .toml file.
+
+        Parameters
+        ----------
+        filename : str
+            Name of the file from where InfoDat will be loaded. It must be
+            either a .json file or a .toml file
+
+        Raises
+        ------
+        ValueError
+            If the file extension is neither .json nor .toml
+        """
+        ext = splitext(filename)[1]
+        if ext == ".json":
+            with open(filename, "w") as fp:
+                infodict = json.load(fp)
+        elif ext == ".toml":
+            with open(filename, "w") as fp:
+                infodict = tomllib.load(fp)
+        else:
+            raise ValueError(f"File extension expected to be either .json or \
+                    .toml. Found {ext}")
+        return cls(infodict["shells"],
+                   infodict["shellsPP"],
+                   infodict["cutoffPP"],
+                   infodict["cutoffs"],
+                   infodict["qneutral"],
+                   infodict["wffiles"],
+                   infodict["nafiles"],
+                   infodict["energy"])
+
     def save(self, filename: str) -> None:
-        jsondict = {
+        """Save the information of this InfoDat into a .json file or
+        a .toml file.
+
+        In general a JSON file is recomended for solely storage purposes for
+        its cross-compatibility and fast parse. On the other hand, TOML is
+        highly recomended if some manual modification is planned
+
+        Parameters
+        ----------
+        filename : str
+            Name of the file where InfoDat will be saved. It must be either a
+            .json file or a .toml file
+
+        Raises
+        ------
+        ValueError
+            If the file extension is neither .json nor .toml
+        """
+
+        infodict = {
             "shells": self.shells,
             "shellsPP": self.shellsPP,
             "cutoffPP": self.cutoffPP,
@@ -108,23 +162,16 @@ class InfoDat:
             "nafiles": self.nafiles,
             "energy": self.energy
         }
-        if splitext(filename)[1] != ".json":
-            filename += ".json"
-        with open(filename, "w") as fp:
-            json.dump(jsondict, fp)
-
-    @classmethod
-    def load(cls, filename: str) -> Self:
-        with open(filename) as fp:
-            jsondict = json.load(fp)
-        return cls(jsondict["shells"],
-                   jsondict["shellsPP"],
-                   jsondict["cutoffPP"],
-                   jsondict["cutoffs"],
-                   jsondict["qneutral"],
-                   jsondict["wffiles"],
-                   jsondict["nafiles"],
-                   jsondict["energy"])
+        ext = splitext(filename)[1]
+        if ext == ".json":
+            with open(filename, "w") as fp:
+                json.dump(infodict, fp)
+        elif ext == ".toml":
+            with open(filename, "w") as fp:
+                tomllib.dump(infodict, fp)
+        else:
+            raise ValueError(f"File extension expected to be either .json or \
+                    .toml. Found {ext}")
 
 
 default_shells = {

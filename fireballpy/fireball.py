@@ -7,13 +7,35 @@ from ase import Atoms
 from ase.calculators.calculator import (Calculator,
                                         all_changes)
 
-from infodat import InfoDat, default_infodat
+from .infodat import InfoDat, default_infodat
 
 #import _fireball as _fb
 
 
 class Fireball(Calculator):
     """Python implementation of Fireball QM/MM code.
+
+    Out of the box supports molecules containing H, C, N, O and S.
+
+    Parameters
+    ----------
+    infodat : InfoDat, default: default_infodat
+        InfoDat object with the information of the base functions for
+        the different species in the molecule. By default an InfoDat
+        containing H, C, N, O and S is assumed. More information
+        `here <https://fireball-qmd.github.io/fireball.html>`_.
+
+    Notes
+    -----
+    If you use this code in a publication please cite us. [1]_
+
+    .. [1] Advances and applications in the FIREBALL ab initio tight-binding
+       molecular-dynamics formalism.
+       James P. Lewis, Pavel Jelínek, José Ortega, Alexander A. Demkov,
+       Daniel G. Trabada, Barry Haycock , Hao Wang, Gary Adams,
+       John K. Tomfohr , Enrique Abad, Hong Wang, and David A. Drabold.
+       Phys. Status Solidi B 248, No. 9, 1989-2007 (2011)
+       DOI 10.1002/pssb.201147259
     """
 
     implemented_properties = ['energy', 'energies', 'forces']
