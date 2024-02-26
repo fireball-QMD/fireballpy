@@ -7,7 +7,8 @@ find_program(IFORT_EXECUTABLE ifort)
 
 # Establecer la variable de entorno FC dependiendo del resultado
 if(IFORT_EXECUTABLE)
-  set(ENV{FC} "ifort -r8")
+  set(FFLAGS "-O3 -r8  -fno-alias -unroll -fPIC")
+  set(ENV{FC} "ifort ${FFLAGS}")
 #  set(ENV{FC} "ifort  -check all")
   set(PATH_INCL ${MKLROOT}/include)
   set(PATH_MKL ${MKLROOT}/lib/intel64)

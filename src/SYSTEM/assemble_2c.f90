@@ -2,6 +2,7 @@
 subroutine assemble_2c ()
   use M_system
   use M_fdata, only: num_orb
+  use M_constants
   integer iatom
   integer iatomstart
   integer ierror
@@ -111,14 +112,11 @@ subroutine assemble_2c ()
       interaction = 4
       in3 = in1
       call doscentros (interaction, isorp, kforce, in1, in2, in3, y, eps, deps, bcnax, bcnapx)
- 
       do inu = 1, num_orb(in3)
         do imu = 1, num_orb(in1)
           vna(imu,inu,matom,iatom) =  vna(imu,inu,matom,iatom) + bcnax(imu,inu)*eq2
         end do
       end do
-
-
       ! CALL DOSCENTROS AND GET VNA FOR ONTOP CASE
       ! ****************************************************************************
       if (iatom .eq. jatom .and. mbeta .eq. 0) then

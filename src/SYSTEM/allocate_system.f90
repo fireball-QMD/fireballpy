@@ -7,7 +7,7 @@ subroutine allocate_system ()
   integer:: jatom
   integer:: matom
   integer:: ineigh
-  integer:: i
+  integer:: i,iorb
   integer:: mbeta
   integer:: num_neigh
   integer:: in1
@@ -128,6 +128,7 @@ subroutine allocate_system ()
   allocate (getmssh(norbitals))
   allocate (getlssh(norbitals))
   allocate (getissh(norbitals))
+  allocate (getiatom(norbitals))
 
   if (numorbPP_max .gt.  numorb_max) numorb_max = numorbPP_max
 
@@ -323,21 +324,33 @@ subroutine allocate_system ()
 
   do iatom = 1, natoms
     in1 = imass(iatom)
-      matom = -99
-      do ineigh = 1, neighn(iatom)
-         mbeta = neigh_b(ineigh,iatom)
-         jatom = neigh_j(ineigh,iatom)
-         if (iatom .eq. jatom .and. mbeta .eq. 0) matom = ineigh
-      end do
-      imu = 1
-      do issh = 1, nssh(in1)
-         qmu = Qneutral(issh,in1) / real(2*lssh(issh,in1)+1)
-         do i = 1, (2*lssh(issh,in1)+1)
-            !rhoA(imu,iatom) = qmu
-            rho(imu,imu,matom,iatom) = qmu
-            imu = imu + 1
-         enddo
+    matom = -99
+    do ineigh = 1, neighn(iatom)
+      mbeta = neigh_b(ineigh,iatom)
+      jatom = neigh_j(ineigh,iatom)
+      if (iatom .eq. jatom .and. mbeta .eq. 0) matom = ineigh
+    end do
+    imu = 1
+    do issh = 1, nssh(in1)
+      qmu = Qneutral(issh,in1) / real(2*lssh(issh,in1)+1)
+      do i = 1, (2*lssh(issh,in1)+1)
+        !rhoA(imu,iatom) = qmu
+        rho(imu,imu,matom,iatom) = qmu
+        imu = imu + 1
       enddo
-   end do
+    enddo
+  end do
+
+  imu=0
+  do iatom=1,natoms
+    do issh=1,nssh(imass(iatom))
+      do iorb = 1, 2*lssh(issh,imass(iatom))+1 
+        imu=imu+1
+        getissh(imu)=issh
+        getlssh(imu)=lssh(issh,imass(iatom))
+        getiatom(imu)=iatom
+      end do
+    end do
+  end do
 
 end subroutine

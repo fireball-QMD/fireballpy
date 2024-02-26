@@ -38,12 +38,11 @@ subroutine buildh ()
       end do
       do inu = 1, num_orb(in2)
         do imu = 1, num_orb(in1)
-          !AQUI  ewaldqmmm
           h_mat(imu,inu,ineigh,iatom) = h_mat(imu,inu,ineigh,iatom)  + vca(imu,inu,ineigh,iatom) + vxc_ca(imu,inu,ineigh,iatom) + ewaldlr(imu,inu,ineigh,iatom) - ewaldsr(imu,inu,ineigh,iatom) + ewaldqmmm(imu,inu,ineigh,iatom)
-        end do ! do imu
-      end do ! do inu
-    end do ! do ineigh
-  end do ! do iatom
-  return
+          !AQUI  ewaldqmmm
+        end do 
+      end do 
+    end do 
+  end do 
 end subroutine buildh
 
