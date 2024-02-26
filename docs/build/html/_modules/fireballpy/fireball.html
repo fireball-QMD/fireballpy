@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>fireballpy.fireball &mdash; FireballPy dev0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=1113f1d7"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../_static/design-tabs.js?v=36754332"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            FireballPy
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../start.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference.html">API reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">FireballPy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">fireballpy.fireball</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for fireballpy.fireball</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Optional</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">ase</span> <span class="kn">import</span> <span class="n">Atoms</span>
+<span class="kn">from</span> <span class="nn">ase.calculators.calculator</span> <span class="kn">import</span> <span class="p">(</span><span class="n">Calculator</span><span class="p">,</span>
+                                        <span class="n">all_changes</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">.infodat</span> <span class="kn">import</span> <span class="n">InfoDat</span><span class="p">,</span> <span class="n">default_infodat</span>
+
+<span class="c1">#import _fireball as _fb</span>
+
+
+<div class="viewcode-block" id="Fireball">
+<a class="viewcode-back" href="../../generated/fireballpy.Fireball.html#fireballpy.Fireball">[docs]</a>
+<span class="k">class</span> <span class="nc">Fireball</span><span class="p">(</span><span class="n">Calculator</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Python implementation of Fireball QM/MM code.</span>
+
+<span class="sd">    Out of the box supports molecules containing H, C, N, O and S.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    infodat : InfoDat, default: default_infodat</span>
+<span class="sd">        InfoDat object with the information of the base functions for</span>
+<span class="sd">        the different species in the molecule. By default an InfoDat</span>
+<span class="sd">        containing H, C, N, O and S is assumed. More information</span>
+<span class="sd">        `here &lt;https://fireball-qmd.github.io/fireball.html&gt;`_.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    If you use this code in a publication please cite us. [1]_</span>
+
+<span class="sd">    .. [1] Advances and applications in the FIREBALL ab initio tight-binding</span>
+<span class="sd">       molecular-dynamics formalism.</span>
+<span class="sd">       James P. Lewis, Pavel Jelínek, José Ortega, Alexander A. Demkov,</span>
+<span class="sd">       Daniel G. Trabada, Barry Haycock , Hao Wang, Gary Adams,</span>
+<span class="sd">       John K. Tomfohr , Enrique Abad, Hong Wang, and David A. Drabold.</span>
+<span class="sd">       Phys. Status Solidi B 248, No. 9, 1989-2007 (2011)</span>
+<span class="sd">       DOI 10.1002/pssb.201147259</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">implemented_properties</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;energy&#39;</span><span class="p">,</span> <span class="s1">&#39;energies&#39;</span><span class="p">,</span> <span class="s1">&#39;forces&#39;</span><span class="p">]</span>
+
+    <span class="n">ignored_changes</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;initial_magmoms&#39;</span><span class="p">]</span>
+
+<div class="viewcode-block" id="Fireball.__init__">
+<a class="viewcode-back" href="../../generated/fireballpy.Fireball.html#fireballpy.Fireball.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">infodat</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">InfoDat</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">Calculator</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_infodat</span> <span class="o">=</span> <span class="n">infodat</span> <span class="k">if</span> <span class="n">infodat</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">default_infodat</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_numbers</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>  <span class="c1"># Keep track of our atoms</span></div>
+
+
+    <span class="c1"># For this to work we need to remove all the info.dat stuff from</span>
+    <span class="c1"># load_fdata and isolate the allocate in a new file called allocate.f90</span>
+    <span class="c1"># which contains the allocation along with the deallocation if it was</span>
+    <span class="c1"># allocated before</span>
+    <span class="k">def</span> <span class="nf">_load_infodat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">numbers</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">pass</span>
+<span class="c1">#        _fb.fdata.nspecies = len(numbers)</span>
+<span class="c1">#        _fb.fdata.nsh_max = max(self.infodat.numshells)</span>
+<span class="c1">#        _fb.fdata.nsh_maxPP = max(self.infodat.numshellsPP)</span>
+<span class="c1">#        _fb.fdata.allocate()</span>
+<span class="c1">#</span>
+<span class="c1">#        for i, n in enumerate(numbers):</span>
+<span class="c1">#            _fb.fdata.symbolA[i] = self.infodat.elements[n].symbol</span>
+<span class="c1">#            _fb.fdata.nzx[i] = n</span>
+<span class="c1">#            _fb.fdata.smass[i] = self.infodat.elements[n].atomic_weight</span>
+<span class="c1">#            _fb.fdata.rc_PP[i] = self.infodat.cutoffPP[n]</span>
+<span class="c1">#            _fb.fdata.etotatom[i] = self.infodat.energy[n]</span>
+<span class="c1">#</span>
+<span class="c1">#            _fb.fdata.nsshPP[i] = self.infodat.numshellsPP[n]</span>
+<span class="c1">#            for j in range(self.infodat.numshellsPP[n]):</span>
+<span class="c1">#                _fb.fdata.lsshPP[j, i] = self.infodat.shellsPP[n][j]</span>
+<span class="c1">#            _fb.fdata.nssh[i] = self.infodat.numshells[n]</span>
+<span class="c1">#            for j in range(self.infodat.numshells[n]):</span>
+<span class="c1">#                _fb.fdata.lssh[j, i] = self.infodat.shells[n][j]</span>
+<span class="c1">#                _fb.fdata.rcutoff[j, i] = self.infodat.cutoffs[n][j] * \</span>
+<span class="c1">#                    _fb.constants.abohr</span>
+<span class="c1">#                _fb.fdata.Qneutral[j, i] = self.infodat.qneutral[n][j]</span>
+<span class="c1">#                _fb.fdata.wavefxn[j, i] = self.infodat.wffiles[n][j]</span>
+<span class="c1">#                _fb.fdata.napot[j, i] = self.infodat.nafiles[n][j]</span>
+<span class="c1">#            _fb.fdata.napot[-1, i] = self.infodat.nafiles[n][-1]</span>
+<span class="c1">#</span>
+<span class="c1">#        _fb.fdata.isorpmax = _fb.fdata.nssh.max()</span>
+<span class="c1">#        _fb.fdata.isorpmax_xc = _fb.fdata.nssh.max()</span>
+<span class="c1">#        _fb.fdata.load_fdata()</span>
+
+    <span class="k">def</span> <span class="nf">_calculate_energies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">:</span> <span class="n">Atoms</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Computation energy</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Computing energies&quot;</span><span class="p">)</span>  <span class="c1"># Example</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">energies</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">atoms</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">energy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">energies</span><span class="p">)</span>
+
+        <span class="c1"># Save energy</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;energy&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;energies&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">energies</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;free_energy&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy</span>
+
+    <span class="k">def</span> <span class="nf">_calculate_forces</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">:</span> <span class="n">Atoms</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Requisite energies</span>
+        <span class="k">if</span> <span class="s1">&#39;energies&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Energies not computed. Computing energies&quot;</span><span class="p">,</span>
+                          <span class="ne">UserWarning</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_energies</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span>
+
+        <span class="c1"># Computation forces</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Computing forces&quot;</span><span class="p">)</span>  <span class="c1"># Example</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">forces</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">atoms</span><span class="p">))</span>
+
+        <span class="c1"># Save forces</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;forces&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">forces</span>
+
+    <span class="k">def</span> <span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;energy&#39;</span><span class="p">],</span>
+                  <span class="n">system_changes</span><span class="o">=</span><span class="n">all_changes</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+
+        <span class="n">Calculator</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">,</span> <span class="n">properties</span><span class="p">,</span> <span class="n">system_changes</span><span class="p">)</span>
+
+        <span class="c1"># If the atoms change load needed Fdata and allocate memory</span>
+        <span class="k">if</span> <span class="s1">&#39;numbers&#39;</span> <span class="ow">in</span> <span class="n">system_changes</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">)</span>
+
+        <span class="c1"># Check if energy needed</span>
+        <span class="k">if</span> <span class="p">(</span><span class="s1">&#39;energy&#39;</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="s1">&#39;energies&#39;</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_energies</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span>
+
+        <span class="c1"># Check if forces needed</span>
+        <span class="k">if</span> <span class="s1">&#39;forces&#39;</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_forces</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">:</span> <span class="n">Atoms</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">numbers</span> <span class="o">=</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_atomic_numbers</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">set</span><span class="p">(</span><span class="n">numbers</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_numbers</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_numbers</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">numbers</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_load_infodat</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_numbers</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">energies</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">atoms</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">forces</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">atoms</span><span class="p">),</span> <span class="mi">3</span><span class="p">))</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, José Ortega Mateo, Linda Angela Zotti, Jesús Ignacio Mendieta Moreno, Daniel González Trabada, Jorge Vega Martín, Carlos Roldán Piñero.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
