@@ -82,7 +82,6 @@ module M_system
   integer :: ialgmix = 1 !1:anderson 2:broyden 3:louie 4:pulay
   real, dimension (:, :, :), allocatable :: blowre_o
   real, dimension (:, :, :), allocatable :: bbnkre_o  
-  integer :: flag_es
   real, dimension (:, :, :, :), allocatable :: rhoPP
   real :: ztot
   real, dimension (:), allocatable :: weight_k

@@ -183,6 +183,7 @@ subroutine denmat ()
     do iorbital = 1, norbitals_new
       if (ioccupy_k(iorbital,ikpoint) .eq. 1) then
        ebs = ebs + weight_k(ikpoint)*spin*eigen_k(iorbital,ikpoint)*foccupy(iorbital,ikpoint)
+       write(*,*)'XXXX denmat', ebs, eigen_k(iorbital,ikpoint)
        ztest = ztest + weight_k(ikpoint)*spin*foccupy(iorbital,ikpoint)
       end if
     end do

@@ -149,8 +149,11 @@ add_executable( pyreball
   #)
 
 if(IFORT_EXECUTABLE)
-  set(FLAGS "-mkl")
-  target_link_libraries(pyreball PRIVATE ${MKL_PATH}  ${FLAGS})
+  #set(FLAGS "-mkl")
+  set(MKL_FLAGS "-lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lpthread -lm")
+  set(MKLROOT "/opt/intel/oneapi/mkl/latest")
+  set(MKL_PATH "${MKLROOT}/lib/intel64/")
+  target_link_libraries(pyreball PRIVATE ${MKL_PATH} ${MKL_FLAGS})
 endif()
 #if(GFORTRAN_EXECUTABLE)
 #  set(FLAGS "-llapack -lblas")

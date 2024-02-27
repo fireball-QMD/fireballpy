@@ -3,7 +3,7 @@ subroutine load_system ()
   use M_system
   use M_fdata, only: symbolA, nspecies
   implicit none
-  integer iatom
+  integer iatom, ikpoint
   integer in1
   integer ispec
   logical zindata
@@ -50,6 +50,11 @@ subroutine load_system ()
   special_k_orig(:,1) = 0
   weight_k_orig(1) = 1
   weight_k(1) = 1
+
+  do ikpoint = 1, nkpoints
+    special_k(:,ikpoint) = special_k_orig(:,ikpoint)
+    weight_k(ikpoint) = weight_k_orig(ikpoint)
+  end do
 
   call allocate_system()
   

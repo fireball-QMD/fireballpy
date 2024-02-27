@@ -38,7 +38,7 @@ subroutine kspace ( ikpoint, sks)
   magnitude = sqrt(sks(1)**2 + sks(2)**2 + sks(3)**3)
   if (magnitude .gt. 1.0d-3) then
     write (*,*) ' gamma point, the complex version of LAPACK is needed.'
-    write (*,*) ' We must stop here! '
+    write (*,*) ' We must stop here! ',sks
     stop
   end if
   a0 = 0.0d0
@@ -182,6 +182,7 @@ subroutine kspace ( ikpoint, sks)
   call dsyev ('V', 'U', norbitals, yyyy, norbitals, eigen, work, lwork, info )
   if (info .ne. 0) call diag_error (info, 0)
   eigen_k(1:norbitals,ikpoint) = eigen(:)
+  write(*,*)'XXXXX eigen_K',eigen_k
   if (iqout .ne. 2) blowre(:,:,ikpoint) = real(yyyy(:,:))
   if (iqout .ne. 2 .and. icluster .ne. 1) blowim(:,:,ikpoint) = 0
   call dsymm ( 'L', 'U', norbitals, norbitals, a1, xxxx, norbitals, yyyy, norbitals, a0, zzzz, norbitals )
