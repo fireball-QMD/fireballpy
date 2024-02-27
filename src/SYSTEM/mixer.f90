@@ -78,5 +78,7 @@ subroutine mixer ()
       zcheck = zcheck + Qin(issh,iatom)
     end do
   end do
+  write (*,*)'XXX mixer', sigma, sigmatol, Kscf
+  
 end subroutine mixer
 

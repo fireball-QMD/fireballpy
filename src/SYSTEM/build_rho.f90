@@ -19,5 +19,8 @@ subroutine build_rho ()
   !deallocate (eigen_k)
   if (icluster .ne. 1) deallocate (bbnkim)
   deallocate (bbnkre)
+
+  write (*,*) 'XXX build_rho ',sigma, scf_achieved
+
 end subroutine build_rho
 
