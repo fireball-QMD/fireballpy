@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>fireballpy.Fireball &mdash; FireballPy dev0.0.1 documentation</title>
+  <title>fireballpy.Fireball &mdash; FireballPy 0.0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
@@ -16,13 +16,14 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=1113f1d7"></script>
+        <script src="../_static/documentation_options.js?v=d45e8c67"></script>
         <script src="../_static/doctools.js?v=888ff710"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script src="../_static/design-tabs.js?v=36754332"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="fireballpy.InfoDat" href="fireballpy.InfoDat.html" />
     <link rel="prev" title="FireballPy API reference" href="../reference.html" /> 
 </head>
 
@@ -48,13 +49,14 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../start.html">Getting started</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../reference.html">API reference</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">fireballpy.Fireball</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#fireballpy.Fireball"><code class="docutils literal notranslate"><span class="pre">Fireball</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#fireballpy.Fireball.__init__"><code class="docutils literal notranslate"><span class="pre">Fireball.__init__()</span></code></a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../reference.html#fireball">Fireball</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">fireballpy.Fireball</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#fireballpy.Fireball"><code class="docutils literal notranslate"><span class="pre">Fireball</span></code></a></li>
 </ul>
 </li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="../reference.html#infodat">InfoDat</a></li>
 </ul>
 </li>
 </ul>
@@ -88,7 +90,7 @@
 <h1>fireballpy.Fireball<a class="headerlink" href="#fireballpy-fireball" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="fireballpy.Fireball">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fireballpy.</span></span><span class="sig-name descname"><span class="pre">Fireball</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">infodat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">InfoDat</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fireballpy/fireball.html#Fireball"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fireballpy.Fireball" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fireballpy.</span></span><span class="sig-name descname"><span class="pre">Fireball</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">infodat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="fireballpy.InfoDat.html#fireballpy.InfoDat" title="fireballpy.infodat.InfoDat"><span class="pre">InfoDat</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fireballpy/fireball.html#Fireball"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fireballpy.Fireball" title="Link to this definition"></a></dt>
 <dd><p>Python implementation of Fireball QM/MM code.</p>
 <p>Out of the box supports molecules containing H, C, N, O and S.</p>
 <dl class="field-list simple">
@@ -216,7 +218,7 @@ DOI 10.1002/pssb.201147259</p>
 </table>
 <dl class="py method">
 <dt class="sig sig-object py" id="fireballpy.Fireball.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">infodat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">InfoDat</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fireballpy/fireball.html#Fireball.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fireballpy.Fireball.__init__" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">infodat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="fireballpy.InfoDat.html#fireballpy.InfoDat" title="fireballpy.infodat.InfoDat"><span class="pre">InfoDat</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fireballpy/fireball.html#Fireball.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fireballpy.Fireball.__init__" title="Link to this definition"></a></dt>
 <dd><p>Basic calculator implementation.</p>
 <dl class="simple">
 <dt>restart: str</dt><dd><p>Prefix for restart file.  May contain a directory. Default
@@ -363,6 +365,7 @@ unit-cell updated from file.</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="../reference.html" class="btn btn-neutral float-left" title="FireballPy API reference" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="fireballpy.InfoDat.html" class="btn btn-neutral float-right" title="fireballpy.InfoDat" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
