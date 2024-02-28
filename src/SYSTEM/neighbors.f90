@@ -29,7 +29,6 @@ subroutine neighbors ()
         if (distance2 .le. range2) then
           if (distance2 .lt. 0.7d0 .and. distance .gt. 1.0d-4 .and.iatom .ne. jatom) then
             write (*,*) ' WARNING - atoms dangerously close! '
-            write (*,*) ' iatom, jatom, distance = ', iatom, jatom, distance
           end if
           num_neigh = num_neigh + 1
           neigh_j(num_neigh,iatom) = jatom

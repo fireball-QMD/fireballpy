@@ -10,9 +10,8 @@ subroutine assemble_mcweda ()
 
     call neighbors()
     call neighborsPP()
-
-    call initneighbors ()
     call num_neigh_tot ()
+    call initneighbors ()
     call backnay ()
     call neighbors_pairs()
     call common_neighbors ()
