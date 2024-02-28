@@ -119,7 +119,8 @@ add_executable( pyreball
   ${CMAKE_SOURCE_DIR}/src/SYSTEM/mpairnay.f90
   ${CMAKE_SOURCE_DIR}/src/SYSTEM/rotated.f90
   ${CMAKE_SOURCE_DIR}/src/SYSTEM/rotate.f90
-  ${CMAKE_SOURCE_DIR}/src/SYSTEM/common_neighbors.f90
+  ${CMAKE_SOURCE_DIR}/src/SYSTEM/neighbors.f90
+  ${CMAKE_SOURCE_DIR}/src/SYSTEM/neighborsPP.f90
   ${CMAKE_SOURCE_DIR}/src/SYSTEM/recover_S.f90
   ${CMAKE_SOURCE_DIR}/src/SYSTEM/recover_2c.f90
   ${CMAKE_SOURCE_DIR}/src/SYSTEM/interpolate_2d.f90

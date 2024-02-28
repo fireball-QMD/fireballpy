@@ -15,10 +15,8 @@ subroutine num_neigh_tot ()
   integer      :: mbeta
   integer      :: mbetaPP
 
-  if ( allocated (neighj_tot)) then
-    deallocate (neighj_tot)
-    deallocate (neighb_tot)
-  endif
+  if ( allocated (neighj_tot)) deallocate (neighj_tot)
+  if ( allocated (neighb_tot)) deallocate (neighb_tot)
   if ( allocated (hr_box)) deallocate (hr_box)
   ! JOM-warning : these allocations seem arbitrary. we should improve
   allocate (neighj_aux(neigh_max+neighPP_max**2,natoms))

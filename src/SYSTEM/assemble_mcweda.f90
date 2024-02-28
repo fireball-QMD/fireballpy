@@ -7,9 +7,14 @@ subroutine assemble_mcweda ()
   integer mbeta
   integer kforce
   if (Kscf .eq. 1) then
+
+    call neighbors()
+    call neighborsPP()
+
     call initneighbors ()
     call num_neigh_tot ()
     call backnay ()
+    call neighbors_pairs()
     call common_neighbors ()
     call common_neighborsPP ()
   end if ! end if (Kscf .eq. 1)

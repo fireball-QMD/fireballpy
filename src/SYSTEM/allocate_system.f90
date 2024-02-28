@@ -293,6 +293,7 @@ subroutine allocate_system ()
   !call allocate_h (natoms, neigh_max, neighPP_max, itheory, itheory_xc,
   !call allocate_rho (natoms, neigh_max, neighPP_max, numorb_max,       
   allocate (rho (nsh_max, nsh_max, neigh_max, natoms))
+  allocate (rhoPP (numorb_max, numorb_max, neighPP_max**2, natoms))
   allocate (cape (nsh_max, nsh_max, neigh_max, natoms))
   allocate (arho_off (nsh_max, nsh_max, neigh_max, natoms))
   allocate (arhoij_off (nsh_max, nsh_max, neigh_max, natoms))
@@ -318,6 +319,8 @@ subroutine allocate_system ()
   allocate (vna (numorb_max, numorb_max, neigh_max, natoms))
   allocate (vnl (numorb_max, numorb_max, neighPP_max**2, natoms))
   allocate (sVNL (numorb_max, numorb_max, neighPP_max, natoms))
+
+  call neighbors() 
 
   !initdenmat
   rho = 0.0d0
