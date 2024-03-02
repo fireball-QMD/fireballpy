@@ -1,6 +1,7 @@
 
 subroutine load_system ()
   use M_system
+  use M_constants!solo para ini const
   use M_fdata, only: symbolA, nspecies
   implicit none
   integer iatom, ikpoint
@@ -8,7 +9,19 @@ subroutine load_system ()
   integer ispec
   logical zindata
 
-  
+  !inicializamos constantes
+      delk = 0.0d0
+    delk(1,1) = 1.0d0
+    delk(2,2) = 1.0d0
+    delk(3,3) = 1.0d0
+    xlevi = 0.0d0
+    xlevi(1,2,3) = 1.0d0
+    xlevi(1,3,2) = -1.0d0
+    xlevi(3,1,2) = 1.0d0
+    xlevi(3,2,1) = -1.0d0
+    xlevi(2,3,1) = 1.0d0
+    xlevi(2,1,3) = -1.0d0
+
   write(*,*) symbolA, nspecies
   open (unit = 69, file = 'input.xyz', status = 'old')
   read (69, *) natoms

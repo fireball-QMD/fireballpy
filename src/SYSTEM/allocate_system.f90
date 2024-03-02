@@ -352,6 +352,7 @@ subroutine allocate_system ()
         getissh(imu)=issh
         getlssh(imu)=lssh(issh,imass(iatom))
         getiatom(imu)=iatom
+        getmssh(imu)=iorb 
       end do
     end do
   end do

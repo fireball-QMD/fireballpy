@@ -98,15 +98,6 @@ subroutine assemble_2c ()
         end do
       end do
 
-      if (ineigh .eq. matom) then
-        do inu = 1, num_orb(in2)
-          do imu = 1, num_orb(in2)
-            s_mat(imu,inu,ineigh,iatom) = 0.0d0
-          end do
-          s_mat(inu,inu,ineigh,iatom) = 1.0d0
-        end do
-      end if
-
       isorp = 0
       kforce = 1           ! don't calculate forces here
       interaction = 4
