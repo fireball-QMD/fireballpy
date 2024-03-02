@@ -34,6 +34,13 @@ subroutine read_1c ()
     allocate(dnuxc1c (nspecies,nsh_max,nsh_max,nsh_max))
     allocate(d2nuxc1c (nspecies,nsh_max,nsh_max,nsh_max,nsh_max))
 
+    exc1c0=0.0d0
+    nuxc1c=0.0d0
+    dexc1c=0.0d0
+    d2exc1c=0.0d0
+    dnuxc1c=0.0d0
+    d2nuxc1c=0.0d0
+
     do in1 = 1, nspecies
         write (auxz,'(i2.2)') nzx(in1)
         root = trim(fdataLocation)//'/xc1c_dqi.'//auxz//'.dat'
@@ -49,12 +56,6 @@ subroutine read_1c ()
         do issh = 1, numsh
             read (36,*) (nuxc1c(in1,issh,jssh),jssh=1,numsh)
         end do
-        do issh = 1, numsh
-            do jssh = 1, numsh
-                nuxc1c(in1,issh,jssh) = nuxc1c(in1,issh,jssh)
-                exc1c0(in1,issh,jssh) = exc1c0(in1,issh,jssh)
-            end do
-        end do
         close(36)
     end do !in1 .. nspecies
 
@@ -66,19 +67,13 @@ subroutine read_1c ()
             read (36,100) message
         end do
         read (36,*) itype, numsh, kkssh
-
         do kssh = 1, nssh(in1)
             do issh = 1, numsh
                 read (36,*) (dnuxc1c(in1,issh,jssh,kssh),jssh=1,numsh)
             end do
-            do issh = 1, numsh
-                do jssh = 1, numsh
-                    dnuxc1c(in1,issh,jssh,kssh) = dnuxc1c(in1,issh,jssh,kssh)
-                end do
-            end do
-        end do ! do kssh
+        end do 
         close(36)
-    end do !in1 .. nspecies
+    end do 
 
     do in1 = 1, nspecies
         write (auxz,'(i2.2)') nzx(in1)
@@ -92,14 +87,9 @@ subroutine read_1c ()
             do issh = 1, numsh
                 read (36,*) (dexc1c(in1,issh,jssh,kssh),jssh=1,numsh)
             end do
-            do issh = 1, numsh
-                do jssh = 1, numsh
-                    dexc1c(in1,issh,jssh,kssh) = dexc1c(in1,issh,jssh,kssh)
-                end do
-            end do
-        end do ! do kssh
+        end do 
         close(36)
-    end do !in1 .. nspecies
+    end do 
 
     if (V_intra_dip .eq. 1) then
         allocate(Nlines_vdip1c(nspecies))
