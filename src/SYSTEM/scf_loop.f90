@@ -31,7 +31,7 @@ subroutine scf_loop ()
     write(*,*) 'XXX  numorb_max =',numorb_max
     write(*,*) 'XXX  nspecies,nsh_max,nsh_max',nspecies,nsh_max,nsh_max
 
-
+    stop
 
     Kscf = Kscf + 1
   end do
