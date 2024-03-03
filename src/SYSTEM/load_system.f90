@@ -9,19 +9,6 @@ subroutine load_system ()
   integer ispec
   logical zindata
 
-  !inicializamos constantes
-      delk = 0.0d0
-    delk(1,1) = 1.0d0
-    delk(2,2) = 1.0d0
-    delk(3,3) = 1.0d0
-    xlevi = 0.0d0
-    xlevi(1,2,3) = 1.0d0
-    xlevi(1,3,2) = -1.0d0
-    xlevi(3,1,2) = 1.0d0
-    xlevi(3,2,1) = -1.0d0
-    xlevi(2,3,1) = 1.0d0
-    xlevi(2,1,3) = -1.0d0
-
   write(*,*) symbolA, nspecies
   open (unit = 69, file = 'input.xyz', status = 'old')
   read (69, *) natoms
@@ -29,7 +16,6 @@ subroutine load_system ()
   allocate (ratom (3, natoms))
   allocate (symbol (natoms))
   allocate (imass (natoms))
-  allocate (degelec (natoms))
   do iatom = 1, natoms
    read (69,*) symbol(iatom),ratom(:,iatom)
    zindata = .false.
@@ -68,7 +54,6 @@ subroutine load_system ()
     special_k(:,ikpoint) = special_k_orig(:,ikpoint)
     weight_k(ikpoint) = weight_k_orig(ikpoint)
   end do
-
   call allocate_system()
   
   call scf_loop ()

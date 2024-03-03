@@ -1,3 +1,5 @@
+! This routine computes the non-local pseudopotential matrix element ppx(mu,nu)
+! The range of neighbours could/should be different for  3-center pseudopotential matrix elements than for neutral-coulomb contributions.  This could/should be taken into account in the future
 subroutine doscentrosPP (interaction, isub, distance, eps, deps, iauxforce, in1, in2, sx, spx)
   use M_system
   use M_fdata, only: index_maxPP,num_orb,num_orbpp,ME2cPP_max

@@ -1,6 +1,6 @@
 subroutine buildh ()
   use M_system
-  use m_fdata, only: num_orb, V_intra_dip 
+  use m_fdata, only: num_orb 
   implicit none
   integer katom
   integer iatom

@@ -1,3 +1,4 @@
+! This routine assembles all of the one-center exchange-interactions. The results are stored in vxc_1c and etotxc_1c
 subroutine assemble_olsxc_1c ()
   use M_system
   use M_fdata, only: num_orb

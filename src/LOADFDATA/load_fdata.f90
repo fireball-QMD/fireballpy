@@ -36,7 +36,6 @@ subroutine load_fdata()
             nshPP_max = nshPP_max_temp
         end if
     end do ! ispec
-
     close(unit = 12) !close info.dat
 
     allocate (rcutoff_temp (nsh_max, nspecies))

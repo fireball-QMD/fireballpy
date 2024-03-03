@@ -1,6 +1,4 @@
-! ===========================================================================
 ! This routine assembles all of the two-center sVNL (separable pseudopotential) interactions.
-! ===========================================================================
 subroutine assemble_sVNL ()
   use M_system
   use M_fdata, only: num_orbPP, num_orb
@@ -81,5 +79,4 @@ subroutine assemble_sVNL ()
       end if
     end do !ineigh
   end do !iatom
-  return
 end subroutine assemble_sVNL

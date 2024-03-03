@@ -16,6 +16,7 @@ subroutine assemble_mcweda ()
     call neighbors_pairs()
     call common_neighbors ()
     call common_neighborsPP ()
+
   end if ! end if (Kscf .eq. 1)
   kforce = 0
   call get_ewald (kforce) 

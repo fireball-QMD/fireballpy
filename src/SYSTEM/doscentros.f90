@@ -1,3 +1,11 @@
+! This subroutine calculates the (two-center) matrix elements (mu,nu).
+! There used to be five different routines that did this for all of the
+! two-center interactions - doscentros.f, dosxcatm.f, dosxcontop.f,
+! dosenatm.f, and dosenontop.f.  These have now all been reduced to one
+! routine in order to make Fireball more lean.
+!
+! This routine also calculates the derivative with respect to the
+! position of the orbital of the BRA.
 subroutine doscentros (interaction, isub, iforceaux, in1, in2, in3, distance, eps, deps, sx, spx)
   use M_system
   use M_fdata, only: index_max2c,num_orb,ME2c_max

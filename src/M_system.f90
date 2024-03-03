@@ -46,8 +46,8 @@ module M_system
   real :: dxcv
   real :: dc_v_intra_dip_1c
   integer :: Kscf  
-  integer :: itestrange !AQUI pensar
-  integer :: testrange !AQUI pensar
+!  integer :: itestrange !AQUI pensar
+!  integer :: testrange !AQUI pensar
   real :: Uexc_1c
   real ::  Umuxc_1c
   real, dimension (:, :, :, :), allocatable :: vxc_1c

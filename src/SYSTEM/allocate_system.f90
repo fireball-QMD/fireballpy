@@ -24,10 +24,10 @@ subroutine allocate_system ()
   real:: range2
 
   if (.not. allocated (ratom)) allocate (ratom (3, natoms))
-  if (.not. allocated (degelec)) allocate (degelec (natoms))
   if (.not. allocated (imass)) allocate (imass (natoms))
   if (.not. allocated (symbol)) allocate (symbol (natoms))
 
+  allocate (degelec (natoms))
   allocate (nelectron(natoms))
   allocate (Qin(nsh_max, natoms))
   allocate (Qinmixer(nsh_max*natoms))
@@ -40,16 +40,7 @@ subroutine allocate_system ()
   allocate (Q_partial(natoms))
   allocate (dq_DP(natoms))
 
-!  allocate (drr_na (nspecies))
-!  allocate (rr_na (max_vna_points, nspecies))
-!  allocate (vnna_spline (max_vna_points, nspecies))
-!  allocate (vnna (max_vna_points, nspecies)) !AQUI se usa ?
-!  allocate (mesh_na (nspecies))
-!  allocate (rmax_na (nspecies))
-
-
-  
-  call initboxes (1)
+  call initboxes ()
 
   ! Count the orbitals
   norbitals = 0
@@ -109,7 +100,7 @@ subroutine allocate_system ()
    end do
   end do
 
-  ! Calculate degelec.  We only need this once at the beginning of the simulation.
+  ! Calculate degelec. 
   degelec(1) = 0
   do iatom = 2, natoms
     degelec(iatom) = 0
@@ -124,15 +115,29 @@ subroutine allocate_system ()
     end do
   if (numorb .gt.  numorbPP_max) numorbPP_max = numorb
   end do
+  if (numorbPP_max .gt.  numorb_max) numorb_max = numorbPP_max
 
   allocate (getmssh(norbitals))
   allocate (getlssh(norbitals))
   allocate (getissh(norbitals))
   allocate (getiatom(norbitals))
+ 
 
-  if (numorbPP_max .gt.  numorb_max) numorb_max = numorbPP_max
+             
+  imu=0
+  do iatom=1,natoms
+    do issh=1,nssh(imass(iatom))
+      do iorb = 1, 2*lssh(issh,imass(iatom))+1 
+        imu=imu+1
+        getissh(imu)=issh
+        getlssh(imu)=lssh(issh,imass(iatom))
+        getiatom(imu)=iatom
+        getmssh(imu)=iorb 
+      end do
+   end do
+  end do
 
-  
+ 
   if (icluster .eq. 1) mbeta_max = 0
   neigh_max = -99
   do iatom = 1, natoms
@@ -175,7 +180,6 @@ subroutine allocate_system ()
       do jatom = 1, natoms
         in2 = imass(jatom)
         rcutoff_j = rc_PP(in2)
-        ! Find the distance from (mbeta,jatom) to (0,iatom)
         distance2 = (ratom(1,iatom) - (xl(1,mbeta) + ratom(1,jatom)))**2  &
         &         + (ratom(2,iatom) - (xl(2,mbeta) + ratom(2,jatom)))**2  &
         &         + (ratom(3,iatom) - (xl(3,mbeta) + ratom(3,jatom)))**2
@@ -319,42 +323,6 @@ subroutine allocate_system ()
   allocate (vna (numorb_max, numorb_max, neigh_max, natoms))
   allocate (vnl (numorb_max, numorb_max, neighPP_max**2, natoms))
   allocate (sVNL (numorb_max, numorb_max, neighPP_max, natoms))
-
-  call neighbors() 
-
-  !initdenmat
-  rho = 0.0d0
-
-  do iatom = 1, natoms
-    in1 = imass(iatom)
-    matom = -99
-    do ineigh = 1, neighn(iatom)
-      mbeta = neigh_b(ineigh,iatom)
-      jatom = neigh_j(ineigh,iatom)
-      if (iatom .eq. jatom .and. mbeta .eq. 0) matom = ineigh
-    end do
-    imu = 1
-    do issh = 1, nssh(in1)
-      qmu = Qneutral(issh,in1) / real(2*lssh(issh,in1)+1)
-      do i = 1, (2*lssh(issh,in1)+1)
-        !rhoA(imu,iatom) = qmu
-        rho(imu,imu,matom,iatom) = qmu
-        imu = imu + 1
-      enddo
-    enddo
-  end do
-
-  imu=0
-  do iatom=1,natoms
-    do issh=1,nssh(imass(iatom))
-      do iorb = 1, 2*lssh(issh,imass(iatom))+1 
-        imu=imu+1
-        getissh(imu)=issh
-        getlssh(imu)=lssh(issh,imass(iatom))
-        getiatom(imu)=iatom
-        getmssh(imu)=iorb 
-      end do
-    end do
-  end do
+  allocate (spVNL (3, numorb_max, numorb_max, neighPP_max, natoms))
 
 end subroutine
