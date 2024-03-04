@@ -43,6 +43,25 @@ subroutine buildh ()
         end do 
       end do 
     end do 
-  end do 
+  end do
+
+  do iatom = 1, natoms
+    in1 = imass(iatom)
+    do ineigh = 1, neighn(iatom)
+      mbeta = neigh_b(ineigh,iatom)
+      jatom = neigh_j(ineigh,iatom)
+      in2 = imass(jatom)
+      do inu = 1, num_orb(in2)
+        do imu = 1, num_orb(in1)
+          print*,'XXXH',h_mat(imu,inu,ineigh,iatom),imu,inu,ineigh,iatom 
+          print*,'XXXT',t_mat(imu,inu,ineigh,iatom),imu,inu,ineigh,iatom 
+          print*,'XXXS',s_mat(imu,inu,ineigh,iatom),imu,inu,ineigh,iatom 
+          print*,'XXXVCA',vca(imu,inu,ineigh,iatom),imu,inu,ineigh,iatom 
+          print*,'XXXVXC',vxc(imu,inu,ineigh,iatom),imu,inu,ineigh,iatom 
+        enddo
+      enddo
+    enddo
+  enddo
+ 
 end subroutine buildh
 

@@ -32,11 +32,11 @@ subroutine neighbors ()
           end if
           num_neigh = num_neigh + 1
           neigh_j(num_neigh,iatom) = jatom
-          neigh_b(num_neigh,iatom) = mbeta
+          neigh_b(num_neigh,iatom) = mbeta          
         end if
       end do
    end do
    neighn(iatom) = num_neigh
- end do
+ end do                                   
 end subroutine
 

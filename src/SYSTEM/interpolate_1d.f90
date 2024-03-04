@@ -1,7 +1,7 @@
  subroutine interpolate_1d (interaction, isub, in1, in2, non2c, ioption, xin, yout, dfdx)
   use M_system
   use M_constants
-  use M_fdata, only: ind2c, numz2c, z2cmax, xintegral_2c, splineint_2c, nfofx
+  use M_fdata, only: ind2c, numz2c, z2cmax, xintegral_2c, nfofx
   implicit none
   integer, intent(in) :: interaction
   integer, intent(in) :: isub
@@ -63,20 +63,14 @@
     end if
     xxp = xmax - xmin
   else if (xin .eq. xmin) then
-!    if(superspline) then
-!      yout = splineint_2c(1,non2c,1,jxx,in1,in2)
-!      if (ioption .eq. 1) dfdx = 0
-!    else
-      yout = xintegral_2c(non2c,1,jxx,in1,in2)
-      if (ioption .eq. 1) dfdx = 0
-!    end if
+    yout = xintegral_2c(non2c,1,jxx,in1,in2)
+    if (ioption .eq. 1) dfdx = 0
     return  
   else
     xxp = xin - xmin
   end if
   imid = int(xxp/h) + 1
   if (imid .gt. nnum) imid=nnum ! If we have gone off of the end
-!  if (superspline) go to 4321
   norder=abs(norder1)
   if(norder .eq. 0 .or. norder+1 .gt. nnum)then
     write(*,*) ' norder1 is chosen wrong in interpolate_1d'
@@ -246,15 +240,6 @@
   xxp=xxp-(imid-1)*h
   yout=a(iam)+b(iam)*xxp+c(iam)*xxp**2+d(iam)*xxp**3
   if (ioption .eq. 1) dfdx=b(iam)+2.0d0*c(iam)*xxp+3.0d0*d(iam)*xxp**2
-  return
- 4321   continue
-  aaa=splineint_2c(1,non2c,imid,jxx,in1,in2)
-  bbb=splineint_2c(2,non2c,imid,jxx,in1,in2)
-  ccc=splineint_2c(3,non2c,imid,jxx,in1,in2)
-  ddd=splineint_2c(4,non2c,imid,jxx,in1,in2)
-  xxp=xxp-(imid-1)*h
-  if(ioption .eq. 1) dfdx=bbb+2.0d0*ccc*xxp+3.0d0*ddd*xxp**2
-  yout=aaa+bbb*xxp+ccc*xxp**2+ddd*xxp**3
   return
 end
 

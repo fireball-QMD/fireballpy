@@ -35,11 +35,8 @@ subroutine assemble_sVNL ()
       jatom = nPP_j(ineigh,iatom)
       r2(:) = ratom(:,jatom) + xl(:,mbeta)
       in2 = imass(jatom)
-      ! Find r21 = vector pointing from r1 to r2, the two ends of the bondcharge.
-      ! This gives us the distance dbc (or y value in the 2D grid).
       r21(:) = r2(:) - r1(:)
       y = sqrt(r21(1)*r21(1) + r21(2)*r21(2) + r21(3)*r21(3))
-      ! Find the unit vector in sigma direction.
       if (y .lt. 1.0d-05) then
         sighat(1) = 0.0d0
         sighat(2) = 0.0d0
@@ -51,15 +48,9 @@ subroutine assemble_sVNL ()
       call epsilon (r2, sighat, eps)
       call deps2cent (r1, r2, eps, deps)
     
-      ! CALL DOSCENTROS AND GET VNL TERMS - sVNLx and spVNLx IN CRYSTAL COORDINATES.
-      ! SET-UP sVNL and spVNL THE NEIGHBOR STORING ARRAYS.
-      ! ****************************************************************************
-      ! Call doscentros and get 2-center "overlap" interactions of VNL.
-      ! That is we get <phi_i | VNL_j>. We treat it just like an overlap.
       isorp = 0
       interaction = 5
       call doscentrosPP (interaction, isorp, y, eps, deps, iforce, in1, in2, sVNLx, spVNLx)
-      ! Now write arrays sVNL and spVNL (derivatives).
       if (ineigh .ne. matom) then
         do inu = 1, num_orbPP(in2)
           do imu = 1, num_orb(in1)
@@ -77,6 +68,16 @@ subroutine assemble_sVNL ()
           end do
         end do
       end if
+
+      do imu = 1, num_orb(in1)
+        print*,'XXX sVNLx', (sVNLx(imu,inu),inu = 1, num_orbPP(in2) )
+      end do
+      print*,'XXXORB', num_orb(in1),num_orb(in2),num_orbPP(in1),num_orbPP(in2)
+      do imu = 1, num_orb(in1)
+        print*,'XXX ',imu,inu,ineigh,iatom,matom
+        print*,'XXX sVNL', (sVNL(imu,inu,ineigh,iatom),inu = 1, num_orbPP(in2) )
+      end do
+
     end do !ineigh
   end do !iatom
 end subroutine assemble_sVNL
