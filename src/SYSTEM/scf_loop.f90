@@ -23,6 +23,12 @@ subroutine scf_loop ()
     call assemble_mcweda ()
     call diag_k ()
     call build_rho ()
+    print*,'XXX index_max2cDipY',index_max2cDipY
+    print*,'XXX index_max2cDipX',index_max2cDipX
+    print*,'XXX index_max2c',index_max2c
+    print*,'XXX index_maxS',index_maxS
+    print*,'XXX index_max2c',index_max2c
+    print*,'XXX index_maxPP',index_maxPP
 
     write(*,*)'========== Qout ====== Kscf = ',Kscf
     do iatom = 1, natoms

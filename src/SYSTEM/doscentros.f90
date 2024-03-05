@@ -44,13 +44,16 @@ subroutine doscentros (interaction, isub, iforceaux, in1, in2, in3, distance, ep
   do index = 1, index_max2c(in1,in3)
    if ( switch ) then
     call interpolate_1d (interaction, isub, in1, in2, index, iforceaux, distance, slist(index), dslist(index))
+  if(interaction .eq. 1) print*,'XXX2Cl',slist(index),index
    else
     call interpolate_1d (interaction, isub, in1, in3, index, iforceaux, distance, slist(index), dslist(index))
    end if
   end do
   call recover_2c (in1, in3, slist, sm)
+  if(interaction .eq. 1) print*,'XXX2C',sm
   call recover_2c (in1, in3, dslist, spm)
   call rotate_fb (in1, in3, eps, sm, sx)
+  if(interaction .eq. 1) print*,'XXX2Cout',sx
   if (iforceaux .eq. 1) then
    eta(:) = eps(:,3)
    do inu = 1, num_orb(in3)
@@ -61,6 +64,7 @@ subroutine doscentros (interaction, isub, iforceaux, in1, in2, in3, distance, ep
     end do
    end do
    call rotated (in1, in3, eps, deps, sm, spmx, spx)
+  if(interaction .eq. 1) print*,'XXX2CRout',sm
   end if
   return
 end subroutine doscentros

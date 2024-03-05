@@ -31,6 +31,7 @@ subroutine readdata_2c (interaction, iounit, num_nonzero, numz, zmax, itype, in1
     do ipoint = 1, numz
       read (iounit,*) gstore(1,ipoint)
       xintegral_2c(1,ipoint,itype,in1,in2) = gstore(1,ipoint)
+      print*,'XXXRD2C',xintegral_2c(1,ipoint,itype,in1,in2)
     end do
   end if
   return

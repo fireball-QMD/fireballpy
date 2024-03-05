@@ -89,6 +89,7 @@ subroutine assemble_2c ()
       ! Write s and t to appropriate arrays
       do inu = 1, num_orb(in2)
         do imu = 1, num_orb(in1)
+          print*,'XXXSX',sx(imu,inu),imu,inu,ineigh,iatom
           s_mat(imu,inu,ineigh,iatom) = sx(imu,inu)
           t_mat(imu,inu,ineigh,iatom) = tx(imu,inu)
           if (iforce .eq. 1) then

@@ -49,6 +49,7 @@ add_executable( pyreball
   ${CMAKE_SOURCE_DIR}/src/LOADFDATA/load_fdata.f90
  
 
+  ${CMAKE_SOURCE_DIR}/src/SYSTEM/initamat.f90 
   ${CMAKE_SOURCE_DIR}/src/SYSTEM/dipole_proyection.f90
   ${CMAKE_SOURCE_DIR}/src/SYSTEM/stationary_charges.f90
   ${CMAKE_SOURCE_DIR}/src/SYSTEM/mulliken_charges.f90

@@ -325,4 +325,6 @@ subroutine allocate_system ()
   allocate (sVNL (numorb_max, numorb_max, neighPP_max, natoms))
   allocate (spVNL (3, numorb_max, numorb_max, neighPP_max, natoms))
 
+  call initamat()
+
 end subroutine
