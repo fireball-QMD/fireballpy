@@ -1,4 +1,4 @@
-name: Build and Deploy JupyterLite
+name: Build and deploy JupyterLite
 
 on:
   push:
