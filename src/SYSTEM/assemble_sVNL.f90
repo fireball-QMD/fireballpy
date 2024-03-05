@@ -68,16 +68,6 @@ subroutine assemble_sVNL ()
           end do
         end do
       end if
-
-      do imu = 1, num_orb(in1)
-        print*,'XXX sVNLx', (sVNLx(imu,inu),inu = 1, num_orbPP(in2) )
-      end do
-      print*,'XXXORB', num_orb(in1),num_orb(in2),num_orbPP(in1),num_orbPP(in2)
-      do imu = 1, num_orb(in1)
-        print*,'XXX ',imu,inu,ineigh,iatom,matom
-        print*,'XXX sVNL', (sVNL(imu,inu,ineigh,iatom),inu = 1, num_orbPP(in2) )
-      end do
-
     end do !ineigh
   end do !iatom
 end subroutine assemble_sVNL

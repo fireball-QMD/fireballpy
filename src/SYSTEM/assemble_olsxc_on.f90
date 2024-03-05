@@ -16,7 +16,7 @@ subroutine assemble_olsxc_on ()
     matom = neigh_self(iatom)
     in1 = imass(iatom)
     call build_ca_olsxc_on (in1, iatom, bcxcx, xc)
-    uxcdcc = uxcdcc + xc
+    uxcdcc_ols = uxcdcc_ols + xc
     in3 = in1
     do inu = 1, num_orb(in3)
       do imu = 1, num_orb(in1)

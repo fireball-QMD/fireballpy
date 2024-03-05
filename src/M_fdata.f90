@@ -171,7 +171,6 @@ module M_fdata
 
 
     ! AQUI 
-    integer :: V_intra_dip = 1 ! hacer fdata con vdip_onecenter ? 
     integer, parameter :: nfofx = 207
     integer :: interactions2c_max = 24 !ojo antes estaba en initbasics ufff
     integer, parameter :: numXmax = 31

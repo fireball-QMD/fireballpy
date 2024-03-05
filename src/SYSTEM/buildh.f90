@@ -53,11 +53,6 @@ subroutine buildh ()
       in2 = imass(jatom)
       do inu = 1, num_orb(in2)
         do imu = 1, num_orb(in1)
-          print*,'XXXH',h_mat(imu,inu,ineigh,iatom),imu,inu,ineigh,iatom 
-          print*,'XXXT',t_mat(imu,inu,ineigh,iatom),imu,inu,ineigh,iatom 
-          print*,'XXXS',s_mat(imu,inu,ineigh,iatom),imu,inu,ineigh,iatom 
-          print*,'XXXVCA',vca(imu,inu,ineigh,iatom),imu,inu,ineigh,iatom 
-          print*,'XXXVXC',vxc(imu,inu,ineigh,iatom),imu,inu,ineigh,iatom 
         enddo
       enddo
     enddo

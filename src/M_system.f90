@@ -4,7 +4,7 @@ module M_system
   integer :: icluster = 1
   integer :: iforce = 0
   integer :: idipole = 1
-  integer :: iqout = 2
+  integer :: iqout = 1
   !======================
 
   integer :: max_scf_iterations = 200
@@ -36,7 +36,6 @@ module M_system
   real :: etotold, etotnew
   real :: etotper
   real :: atomic_energy, efermi
-  real :: uxcdcc_hf
   real :: uiiuee
   real :: uxcdcc
   real :: uxcdcc_ols

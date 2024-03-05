@@ -37,12 +37,8 @@ subroutine doscentrosPP (interaction, isub, distance, eps, deps, iauxforce, in1,
     call interpolate_1d (interaction, isub, in1, in2, index, iauxforce, distance, pplist(index), dpplist(index))
   end do
   call recover_PP (in1, in2, pplist, sm)
-  print*,'XXXsm',sm
   call recover_PP (in1, in2, dpplist, spm)
   call rotatePP (in1, in2, eps, sm, sx)
-  print*,'XXXeps',in1, in2, eps
-  print*,'XXX2sx',sx
-  print*,'XXXdpplist',dpplist
   if (iauxforce .eq. 1) then
     eta(:) = eps(:,3)
     do imu = 1, num_orb(in1)

@@ -91,44 +91,6 @@ subroutine read_1c ()
         close(36)
     end do 
 
-    if (V_intra_dip .eq. 1) then
-        allocate(Nlines_vdip1c(nspecies))
-        Nlines_vdip1c_max=0
-        root = trim(fdataLocation)//'/vdip_onecenter'
-        do in1 = 1,nspecies
-            write (extension,'(''_'',i2.2)') in1
-            filename = append_string (root,extension)
-            open (unit = 36, file = filename, status = 'unknown')
-            read(36,*) Nlines_vdip1c(in1)
-            if (Nlines_vdip1c(in1) .gt. Nlines_vdip1c_max) then
-                Nlines_vdip1c_max=Nlines_vdip1c(in1)
-            end if
-            close(36)
-        end do !end do in1
-
-        allocate(muR(Nlines_vdip1c_max,nspecies))
-        allocate(nuR(Nlines_vdip1c_max,nspecies))
-        allocate(alphaR(Nlines_vdip1c_max,nspecies))
-        allocate(betaR(Nlines_vdip1c_max,nspecies))
-        allocate(IR(Nlines_vdip1c_max,nspecies))
-        muR    = 0.0d0
-        nuR    = 0.0d0
-        alphaR = 0.0d0
-        betaR  = 0.0d0
-        IR     = 0.0d0
-
-        do in1 = 1,nspecies
-            write (extension,'(''_'',i2.2)') in1
-            filename = append_string (root,extension)
-            open (unit = 36, file = filename, status = 'unknown')
-            read(36,*) trash
-            do iline = 1,Nlines_vdip1c(in1)
-                read(36,*) muR(iline,in1), nuR(iline,in1), alphaR(iline,in1), betaR(iline,in1), IR(iline,in1)
-            end do !end do iline = 1,Nlines_vdip1c
-            close(36)
-        end do !end do in1 = 1,nspecies
-    end if ! if (V_intra_dip .eq. 1)
-
 100     format (a70)
 end subroutine read_1c
 
