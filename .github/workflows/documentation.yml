@@ -13,7 +13,7 @@ jobs:
       - uses: actions/setup-python@v3
       - name: Install dependencies
         run: |
-          pip install ase sphinx sphinx_rtd_theme numpydoc sphinx_design
+          pip install ase mendeleev sphinx sphinx_rtd_theme numpydoc sphinx_design
       - name: Sphinx build
         run: |
           sphinx-build docs/source docs/build
