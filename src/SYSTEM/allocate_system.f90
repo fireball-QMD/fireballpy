@@ -1,5 +1,6 @@
 subroutine allocate_system ()
   use M_system 
+  use M_constants
   use M_fdata, only: nssh, rcutoff, rc_PP, nspecies, symbolA
   use M_fdata, only: num_orb, Qneutral, lssh, nsshPP, lsshPP,  nsh_max
   implicit none
@@ -326,5 +327,20 @@ subroutine allocate_system ()
   allocate (spVNL (3, numorb_max, numorb_max, neighPP_max, natoms))
 
   call initamat()
+  
+  
+
+  scf_achieved = .false.
+  delk = 0.0d0
+  delk(1,1) = 1.0d0
+  delk(2,2) = 1.0d0
+  delk(3,3) = 1.0d0
+  xlevi = 0.0d0
+  xlevi(1,2,3) = 1.0d0
+  xlevi(1,3,2) = -1.0d0
+  xlevi(3,1,2) = 1.0d0
+  xlevi(3,2,1) = -1.0d0
+  xlevi(2,3,1) = 1.0d0
+  xlevi(2,1,3) = -1.0d0
 
 end subroutine

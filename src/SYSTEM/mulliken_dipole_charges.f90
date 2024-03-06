@@ -63,20 +63,4 @@ subroutine MULLIKEN_DIPOLE_CHARGES()
       end if !end if  Qout(issh,iatom) .lt. 0
     end do !end do issh = 1, nssh(in1)
   end do !iatoms
-
-
-  write(*,*)'=========='
-  do iatom = 1, natoms
-    in1 = imass(iatom)
-    write (*,'(2x, 10f14.8)') (Qin(issh,iatom), issh = 1, nssh(in1))
-  end do
-  write(*,*)'......'
-
-  do iatom = 1, natoms
-    in1 = imass(iatom)
-    write (*,'(2x, 10f14.8)') (Qout(issh,iatom), issh = 1, nssh(in1))
-  end do
-
-
-
 end subroutine MULLIKEN_DIPOLE_CHARGES  
