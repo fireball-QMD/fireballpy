@@ -1,6 +1,6 @@
 subroutine mixer ()
   use M_system
-  use M_fdata, only: nssh
+  use M_fdata, only: nssh, nsh_max
   implicit none
   integer iatom
   integer in1
@@ -13,6 +13,8 @@ subroutine mixer ()
   real zouttot
   dqrms = 0
   dqmax = -99
+  Qinmixer=0.0d0
+  Qoutmixer=0.0d0
   do iatom = 1, natoms
     in1 = imass(iatom)
     do issh = 1, nssh(in1)
@@ -33,7 +35,9 @@ subroutine mixer ()
        drwe(imix) = 1.0d0
       endif
     end do
-  end do 
+  end do
+  print*,'XXXmixQoutmixer',  Qoutmixer
+  print*,'XXXmixQinmixer',  Qinmixer
   select case (ialgmix)
   case (1)
     call anderson (Qoutmixer, Qinmixer, bmix, sigma, Kscf, idmix, imix )
@@ -44,6 +48,8 @@ subroutine mixer ()
   case (4)
     call pulay (Qoutmixer, Qinmixer, bmix, sigma, Kscf, idmix, imix )
   end select !ialgmix
+  print*,'XXXmixoutQoutmixer',  Qoutmixer
+  print*,'XXXmixoutQinmixer',  Qinmixer
   if (Kscf .gt. 1) then
     if (sigma .lt. sigmaold) then
       sigmaold = sigma
@@ -78,6 +84,6 @@ subroutine mixer ()
       zcheck = zcheck + Qin(issh,iatom)
     end do
   end do
-  
+  print*,'XXXmix..Qin.',Qin
 end subroutine mixer
 

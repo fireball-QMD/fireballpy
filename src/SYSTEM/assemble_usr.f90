@@ -94,8 +94,7 @@ subroutine assemble_usr ()
      if (itheory .eq. 1) then
       do issh = 1, nssh(in1)
        do jssh = 1, nssh(in2)
-        u0(iatom,ineigh) = u0(iatom,ineigh) +         &
-     &    Qin(issh,iatom)*Qin(jssh,jatom)*coulomb(issh,jssh)
+        u0(iatom,ineigh) = u0(iatom,ineigh) + Qin(issh,iatom)*Qin(jssh,jatom)*coulomb(issh,jssh)
        end do
       end do
      else if (itheory .eq. 0 .or. itheory .eq. 2) then

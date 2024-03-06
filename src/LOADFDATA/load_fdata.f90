@@ -38,6 +38,10 @@ subroutine load_fdata()
     end do ! ispec
     close(unit = 12) !close info.dat
 
+    !AQUI pensar, Qinmixer(imix) = Qin(issh,iatom) en miser, (Qinmixer(nsh_max*natoms))
+    nsh_max = 6
+
+
     allocate (rcutoff_temp (nsh_max, nspecies))
 
     allocate (nzx (nspecies))

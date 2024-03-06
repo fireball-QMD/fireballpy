@@ -4,7 +4,7 @@ module M_system
   integer :: icluster = 1
   integer :: iforce = 0
   integer :: idipole = 1
-  integer :: iqout = 2
+  integer :: iqout = 1
   !======================
 
   integer :: max_scf_iterations = 200
