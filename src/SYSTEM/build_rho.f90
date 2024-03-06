@@ -7,7 +7,7 @@ subroutine build_rho ()
   cape = 0.0d0
   if (tempfe .le. 50.0d0) tempfe = 50.0d0 ! Can't be zero
   call denmat ()
-print*,'============================'
+  print*,'============================'
      do iatom = 1, natoms
       in1 = imass(iatom)
       write (*,'(2x, 10f14.8)') (Qin(issh,iatom), issh = 1, nssh(in1))
@@ -21,8 +21,5 @@ print*,'============================'
   !deallocate (eigen_k)
   if (icluster .ne. 1) deallocate (bbnkim)
   deallocate (bbnkre)
-
-  write (*,*) 'XXX build_rho sigma scf_achieved',sigma, scf_achieved
-
 end subroutine build_rho
 

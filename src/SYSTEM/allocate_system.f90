@@ -292,13 +292,13 @@ subroutine allocate_system ()
   allocate (ewaldqmmm (numorb_max, numorb_max, neigh_max,natoms))
   !allocate (flrew (3, natoms))
   !allocate (flrew_qmmm (3, natoms))
-  allocate (bbnkre_o(norbitals,norbitals,nkpoints))
-  !call allocate_f (natoms, neigh_max, neighPP_max, numorb_max, nsh_max, itheory, itheory_xc )
-  !call allocate_h (natoms, neigh_max, neighPP_max, itheory, itheory_xc,
-  !call allocate_rho (natoms, neigh_max, neighPP_max, numorb_max,       
-  allocate (rho (nsh_max, nsh_max, neigh_max, natoms))
+  allocate (cape (numorb_max, numorb_max, neigh_max, natoms))
+
+  allocate (rho (numorb_max, numorb_max, neigh_max, natoms))
   allocate (rhoPP (numorb_max, numorb_max, neighPP_max**2, natoms))
-  allocate (cape (nsh_max, nsh_max, neigh_max, natoms))
+
+
+  allocate (bbnkre_o(norbitals,norbitals,nkpoints))
   allocate (arho_off (nsh_max, nsh_max, neigh_max, natoms))
   allocate (arhoij_off (nsh_max, nsh_max, neigh_max, natoms))
   allocate (rho_off (numorb_max, numorb_max, neigh_max, natoms))

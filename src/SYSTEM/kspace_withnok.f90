@@ -55,9 +55,7 @@ subroutine kspace ( ikpoint, sks)
   allocate (iwork(liwork))
   lwork = 1
   allocate(work(lwork))
-  if (.not. allocated(sm12_save)) then
-    allocate (sm12_save(norbitals,norbitals))
-  end if
+  if (.not. allocated(sm12_save))  allocate (sm12_save(norbitals,norbitals))
   zzzz = a0
   yyyy = a0
   xxxx = a0
@@ -87,9 +85,10 @@ subroutine kspace ( ikpoint, sks)
           jmu = imu + degelec(iatom)
           zzzz(jmu,jnu) = zzzz(jmu,jnu) + s_mat(imu,inu,ineigh,iatom)
           yyyy(jmu,jnu) = yyyy(jmu,jnu) + h_mat(imu,inu,ineigh,iatom)
-        end do ! do imu
-      end do ! do inu
-    end do ! do ineigh
+        end do 
+      end do 
+    end do
+ 
     do ineigh = 1, neighPPn(iatom)
       mbeta = neighPP_b(ineigh,iatom)
       jatom = neighPP_j(ineigh,iatom)
@@ -98,11 +97,13 @@ subroutine kspace ( ikpoint, sks)
         jnu = inu + degelec(jatom)
         do imu = 1, num_orb(in1)
           jmu = imu + degelec(iatom)
-          yyyy(jmu,jnu) = yyyy(jmu,jnu) + vnl(imu,inu,ineigh,iatom)
-        end do ! do imu
-      end do ! do inu
-    end do ! do inegh
+          yyyy(jmu,jnu) = yyyy(jmu,jnu) + vnl(imu,inu,ineigh,iatom) 
+        end do 
+      end do 
+    end do
+
   end do ! do iatom
+
   if (iqout .eq. 3) then
     do inu = 1, norbitals
       do imu = 1, norbitals
@@ -114,7 +115,8 @@ subroutine kspace ( ikpoint, sks)
         zzzz(inu,imu) = zzzz(inu,imu)*ww(inu)*ww(imu)
       end do
     end do
-  endif  ! end if (iqout .eq. 3)
+  endif 
+
   if (Kscf .eq. 1 .or. iqout .eq. 3) then
     call dsyev ('V', 'U', norbitals, zzzz, norbitals, slam, work, -1, info)
     lwork = work(1)

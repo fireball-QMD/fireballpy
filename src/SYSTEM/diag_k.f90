@@ -11,6 +11,6 @@ subroutine diag_k ( )
   do ikpoint = 1, nkpoints
     k_temp(:) = special_k(:,ikpoint)
     call kspace (ikpoint, k_temp )
-  end do ! do ikpoint
+  end do 
 end subroutine diag_k
 

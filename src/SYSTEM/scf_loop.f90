@@ -26,6 +26,7 @@ subroutine scf_loop ()
 
     call build_rho ()
 
+     write(*,*) 'XXX sigma scf_achieved',sigma, scf_achieved
      do iatom = 1, natoms
       in1 = imass(iatom)
       write (*,'(2x, 10f14.8)') (Qin(issh,iatom), issh = 1, nssh(in1))
@@ -36,8 +37,6 @@ subroutine scf_loop ()
       in1 = imass(iatom)
       write (*,'(2x, 10f14.8)') (Qout(issh,iatom), issh = 1, nssh(in1))
     end do
-call getenergy()
-stop
     Kscf = Kscf + 1
   end do
 end subroutine scf_loop

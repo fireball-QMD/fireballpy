@@ -22,7 +22,6 @@ subroutine MULLIKEN_CHARGES()
          do imu = 1, num_orb(in1)
             do inu = 1, num_orb(in2)
               QMulliken(imu,iatom) = QMulliken(imu,iatom)+ 0.5d0*(rho(imu,inu,ineigh,iatom)*s_mat(imu,inu,ineigh,iatom) + rho(inu,imu,jneigh,jatom)*s_mat(inu,imu,jneigh,jatom))
- print*,'XXXrho',rho(inu,imu,jneigh,jatom),inu,imu
             end do
          end do
       end do !ineig
