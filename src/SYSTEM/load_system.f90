@@ -58,7 +58,7 @@ subroutine load_system ()
   call allocate_system()
   
   call scf_loop ()
-  
+
   call getenergy ()
 
   ! call postscf () cuando queramos hacer DOS

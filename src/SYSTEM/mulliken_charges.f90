@@ -33,5 +33,5 @@ subroutine MULLIKEN_CHARGES()
      end do
      QMulliken_TOT(iatom) = QMulliken_TOT(iatom) + Qout(issh,iatom)
    end do
- end do  !atoms
+ end do  
 end subroutine MULLIKEN_CHARGES 

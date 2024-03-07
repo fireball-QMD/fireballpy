@@ -93,7 +93,6 @@ add_executable( pyreball
   ${CMAKE_SOURCE_DIR}/src/SYSTEM/assemble_sVNL.f90
   ${CMAKE_SOURCE_DIR}/src/SYSTEM/assemble_2c.f90
   ${CMAKE_SOURCE_DIR}/src/SYSTEM/assemble_2c_PP.f90
-  ${CMAKE_SOURCE_DIR}/src/SYSTEM/assemble_1c_vdip.f90
   ${CMAKE_SOURCE_DIR}/src/SYSTEM/assemble_3c_PP.f90
   ${CMAKE_SOURCE_DIR}/src/SYSTEM/initneighbors.f90
   ${CMAKE_SOURCE_DIR}/src/SYSTEM/num_neigh_tot.f90

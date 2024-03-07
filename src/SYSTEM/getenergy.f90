@@ -1,6 +1,7 @@
 subroutine getenergy () 
   use M_system 
   implicit none
+  print*,'XXX'
   call get_ewald ()
   call assemble_usr ()
   ! to avoid confusion here we add etotxc_1c to double counting term

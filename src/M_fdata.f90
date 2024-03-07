@@ -86,7 +86,6 @@ module M_fdata
     integer, dimension(:,:), allocatable :: alphaR
     integer, dimension(:,:), allocatable :: betaR
     real, dimension(:,:), allocatable :: IR
-    integer, dimension(:), allocatable :: Nlines_vdip1c
 
 
     !TODO idipole, icluster, siempre lee interaccion 10 y 11

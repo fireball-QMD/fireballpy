@@ -4,7 +4,7 @@ module M_system
   integer :: icluster = 1
   integer :: iforce = 0
   integer :: idipole = 1
-  integer :: iqout = 1
+  integer :: iqout = 2
   !======================
 
   integer :: max_scf_iterations = 200
@@ -193,8 +193,6 @@ module M_system
   real, dimension (:, :, :, :), allocatable :: t_mat
   real, dimension (:, :, :, :), allocatable :: vna
   real, dimension (:, :, :, :), allocatable :: ewaldqmmm
-  real, dimension (:,:,:), allocatable :: Vdip_1c
-  integer, dimension(:), allocatable :: Nlines_vdip1c
   real, dimension (:, :, :, :, :), allocatable :: dipc
   integer, dimension(:,:), allocatable :: muR
   integer, dimension(:,:), allocatable :: nuR

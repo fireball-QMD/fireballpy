@@ -26,9 +26,6 @@ subroutine scf_loop ()
       in1 = imass(iatom)
       write (*,'(2x, 10f14.8)') (Qout(issh,iatom), issh = 1, nssh(in1))
     end do
-
- !   call getenergy()
-if(Kscf .eq. 2)  stop
     
     Kscf = Kscf + 1
   end do
