@@ -1,8 +1,9 @@
 subroutine getenergy () 
   use M_system 
+  use M_fdata, only : nssh
   implicit none
-  print*,'get_ewald'
-  
+  integer :: iatom, issh
+
   call get_ewald ()
   
   call assemble_usr ()
@@ -29,6 +30,12 @@ subroutine getenergy ()
 
   etotold = etotnew
   etotnew = etotper
+
+  write(*,*)'========== Qout ======'
+  do iatom = 1, natoms
+    write (*,'(2x, 10f14.8)') (Qout(issh,iatom), issh = 1, nssh(imass(iatom)))
+  end do
+
 
   ! Format Statements
   ! =======================================================

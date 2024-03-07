@@ -1,7 +1,4 @@
-! ===========================================================================
-! This subroutine takes a 1D list of integrals and generates a 2x2 
-! array with respect to the shells.
-! ===========================================================================
+! This subroutine takes a 1D list of integrals and generates a 2x2 array with respect to the shells.
 subroutine recoverC (n1, n2, hlist, dhlist, hbox, dhbox)
   use M_fdata
   use M_system
@@ -17,14 +14,9 @@ subroutine recoverC (n1, n2, hlist, dhlist, hbox, dhbox)
   integer ii
   integer kk
  
-  ! The algorithm is simply to go along the vector, and fill in the first row 
-  ! of a matrix. Once the nssh(2) elements are absorbed, we increment the row 
-  ! index ii by one, and reset the column index kk back to one.
   ii = 1
   kk = 0
 
-  ! Loop over all the non-zero integrals for this interaction:
-  ! n1 = number of shells on atom 1, and n2 = number of shells on atom2.
   indexcoulomb = n1*n2
   do index = 1, indexcoulomb
     kk = kk + 1
