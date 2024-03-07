@@ -10,7 +10,7 @@ subroutine assemble_olsxc_on ()
   real xc
   vxc = 0.0d0
   vxc_ca = 0.0d0
-  uxcdcc = 0.0d0
+  uxcdcc_ols = 0.0d0
   bcxcx  = 0.0d0
   do iatom = 1, natoms
     matom = neigh_self(iatom)
@@ -24,5 +24,4 @@ subroutine assemble_olsxc_on ()
       end do
     end do
   end do 
-  return
 end subroutine assemble_olsxc_on

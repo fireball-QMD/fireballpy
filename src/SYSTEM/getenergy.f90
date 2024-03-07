@@ -1,15 +1,14 @@
 subroutine getenergy () 
   use M_system 
   implicit none
-  print*,'XXX'
+  print*,'get_ewald'
+  
   call get_ewald ()
+  
   call assemble_usr ()
-  ! to avoid confusion here we add etotxc_1c to double counting term
-  ! and set etotxc_1c to zero to do not double it in final print
+ 
   uxcdcc = uxcdcc_ols + etotxc_1c 
-  etotxc_1c = 0.0d0
-
-  etot = ebs + uiiuee + uxcdcc + etotxc_1c
+  etot = ebs + uiiuee + uxcdcc
   etot = etot + eqmmm
   etotper = etot/natoms
 
