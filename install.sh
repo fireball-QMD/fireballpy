@@ -6,6 +6,6 @@ cmake ..
 make
 cd $here
 cd test
-../build/pyreball
+../build/fireballpy.x
 cd ..
 

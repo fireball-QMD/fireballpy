@@ -51,6 +51,7 @@ subroutine assemble_mcweda ()
   call average_ca_rho ()
   call assemble_olsxc_on ()
   call assemble_olsxc_off ()
+
   if (idipole .eq. 0) call assemble_ca_2c ()
   if (idipole .eq. 1) call assemble_ca_2c_dip ()
   

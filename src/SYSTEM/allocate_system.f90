@@ -1,8 +1,10 @@
 subroutine allocate_system ()
   use M_system 
   use M_constants
-  use M_fdata, only: nssh, rcutoff, rc_PP, nspecies, symbolA
+  use M_fdata, only: nssh, rcutoff, rc_PP, nspecies, symbolA ,isorpmax
   use M_fdata, only: num_orb, Qneutral, lssh, nsshPP, lsshPP,  nsh_max
+  use M_fdata, only: ME3c_max,ideriv_max,numXmax,numYmax
+  use M_fdata, only: numy3c_xc3c
   implicit none
   integer:: iatom
   integer:: jatom
@@ -59,7 +61,6 @@ subroutine allocate_system ()
     end do
   end do
 
-  ! Count the maximum number of orbital interactions between any given two atoms.
   numorb_max = 0
   do in1 = 1, nspecies
     numorb = 0
@@ -69,7 +70,6 @@ subroutine allocate_system ()
     if (numorb .gt. numorb_max) numorb_max = numorb
   end do
 
-  !initcharges 
 
   ! Qneutral_total
   do iatom = 1, natoms
@@ -208,20 +208,15 @@ subroutine allocate_system ()
         do imu = 1, nssh(in2)
           if (rcutoff(in2,imu) .gt. rcutoff_j) rcutoff_j = rcutoff(in2,imu)
         end do
-        ! Find the distance from (mbeta,jatom) to (0,iatom)
         distance2 = (ratom(1,iatom) - (xl(1,mbeta) + ratom(1,jatom)))**2  &
         &         + (ratom(2,iatom) - (xl(2,mbeta) + ratom(2,jatom)))**2  &
         &         + (ratom(3,iatom) - (xl(3,mbeta) + ratom(3,jatom)))**2
-        
-        ! Add a small displacement to the sum of cutoffs. 
         range2 = (rcutoff_i + rcutoff_j - 0.01d0)**2
         if (distance2 .le. range2) then
           num_neigh = num_neigh + 1
         end if
       end do
     end do
-
-    ! Maximum number of neighbors thus far.
     neighPP_max = max(neighPP_max, num_neigh)
   end do
 
@@ -284,20 +279,21 @@ subroutine allocate_system ()
   allocate (t_mat (numorb_max, numorb_max, neigh_max, natoms))
   allocate (h_mat (numorb_max, numorb_max, neigh_max, natoms))
   allocate (sp_mat (3, numorb_max, numorb_max, neigh_max, natoms))
-  allocate (spm_mat (3, nsh_max, nsh_max, neigh_max, natoms))
   allocate (tp_mat (3, numorb_max, numorb_max, neigh_max, natoms))
   allocate (dipcm (3, numorb_max, numorb_max))
   allocate (dipc (3, numorb_max, numorb_max, neigh_max, natoms))
   allocate (dip (numorb_max, numorb_max, neigh_max, natoms)) 
+  allocate (dippcm (3, 3, numorb_max, numorb_max))
+  allocate (dippc (3, 3, numorb_max, numorb_max, neigh_max, natoms))
+  allocate (spm_mat (3, nsh_max, nsh_max, neigh_max, natoms))
   allocate (sm_mat (nsh_max, nsh_max, neigh_max, natoms))
   allocate (ewaldqmmm (numorb_max, numorb_max, neigh_max,natoms))
-  !allocate (flrew (3, natoms))
-  !allocate (flrew_qmmm (3, natoms))
   allocate (cape (numorb_max, numorb_max, neigh_max, natoms))
 
   allocate (rho (numorb_max, numorb_max, neigh_max, natoms))
   allocate (rhoPP (numorb_max, numorb_max, neighPP_max**2, natoms))
-
+  allocate (dusr (3, natoms))
+  
 
   allocate (bbnkre_o(norbitals,norbitals,nkpoints))
   allocate (arho_off (nsh_max, nsh_max, neigh_max, natoms))
@@ -314,7 +310,6 @@ subroutine allocate_system ()
   allocate (rhopij_off (3, numorb_max, numorb_max, neigh_max, natoms))
   allocate (rhop_off (3, numorb_max, numorb_max, neigh_max, natoms))
   allocate (arhop_off (3, nsh_max, nsh_max, neigh_max, natoms))
-  !call allocate_dos (natoms, iwrtdos, iwrthop)
   allocate (vxc_ca (numorb_max, numorb_max, neigh_max, natoms))
   allocate (vxc (numorb_max, numorb_max, neigh_max, natoms))
   allocate (vca (numorb_max, numorb_max, neigh_max, natoms))
@@ -343,4 +338,36 @@ subroutine allocate_system ()
   xlevi(2,3,1) = 1.0d0
   xlevi(2,1,3) = -1.0d0
 
+  allocate (fana (3, neigh_max, natoms))
+  allocate (fotna (3, neigh_max, natoms)) 
+  allocate (ft (3, natoms))
+  allocate (fanl (3, neighPP_max, natoms))
+  allocate (fotnl (3, neighPP_max, natoms))
+  allocate (dxcdcc (3, neigh_max, natoms)) 
+  allocate (faxc_ca (3, neigh_max, natoms)) 
+  allocate (faxc (3, neigh_max, natoms))
+  allocate (fotxc_ca (3, neigh_max, natoms))
+  allocate (fotxc (3, neigh_max, natoms))
+  allocate (faca (3, neigh_max, natoms))  
+  allocate (fotca (3, neigh_max, natoms))
+  allocate (f3naa (3, natoms))  
+  allocate (f3nab (3, natoms))  
+  allocate (f3nac (3, natoms))
+  allocate (f3nla (3, natoms))  
+  allocate (f3nlb (3, natoms))  
+  allocate (f3nlc (3, natoms))
+  allocate (f3caa (3, natoms))
+  allocate (f3cab (3, natoms))
+  allocate (f3cac (3, natoms))
+  allocate (flrew (3, natoms))
+  allocate (f3xca (3, natoms))
+  allocate (f3xcc (3, natoms))
+  allocate (f3xcb (3, natoms))
+  allocate (f3xca_ca (3, natoms))
+  allocate (f3xcb_ca (3, natoms))
+  allocate (f3xcc_ca (3, natoms))
+  allocate (flrew_qmmm (3, natoms))
+  allocate (fro (3, natoms))
+  allocate (ftot (3, natoms))
+  allocate (dxcv (3, natoms))  
 end subroutine

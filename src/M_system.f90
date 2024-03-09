@@ -2,7 +2,7 @@ module M_system
 
   !=======================
   integer :: icluster = 1
-  integer :: iforce = 0
+  integer :: iforce = 1
   integer :: idipole = 1
   integer :: iqout = 2
   !======================
@@ -42,7 +42,6 @@ module M_system
   real :: etotxc_1c
   real :: ebs
   real :: eqmmm
-  real :: dxcv
   real :: dc_v_intra_dip_1c
   integer :: Kscf  
 !  integer :: itestrange !AQUI pensar
@@ -218,11 +217,32 @@ module M_system
   real, dimension (3) :: a2vec
   real, dimension (3) :: a3vec
 
-  !esto es otra peli
   ! allocate_f
+  real, dimension (:, :, :), allocatable :: fotnl
+  real, dimension (:, :, :), allocatable :: fanl
+  real, dimension (:, :, :), allocatable :: fotna
+  real, dimension (:, :, :), allocatable :: fana
+  real, dimension (:, :, :), allocatable :: faxc 
+  real, dimension (:, :, :), allocatable :: faxc_ca 
+  real, dimension (:, :, :), allocatable :: dxcdcc
+  real, dimension (:, :), allocatable :: ft
   real, dimension (:, :), allocatable :: dusr
   real, dimension (:, :), allocatable :: special_k_orig
   real, dimension (:), allocatable :: weight_k_orig
   real, dimension (:, :), allocatable :: scale_k
+  real, dimension (:, :, :), allocatable :: fotxc 
+  real, dimension (:, :, :), allocatable :: fotxc_ca
+  real, dimension (:, :, :), allocatable :: faca 
+  real, dimension (:, :, :), allocatable :: fotca
+  real, dimension (:, :), allocatable :: f3naa, f3nab, f3nac
+  real, dimension (:, :), allocatable :: f3nla, f3nlb, f3nlc
+  real, dimension (:, :), allocatable :: f3caa, f3cab, f3cac
+  real, dimension (:, :), allocatable :: flrew
+  real, dimension (:, :), allocatable :: f3xca_ca, f3xcb_ca, f3xcc_ca
+  real, dimension (:, :), allocatable :: f3xca, f3xcb, f3xcc
+  real, dimension (:, :), allocatable :: flrew_qmmm
+  real, dimension (:, :), allocatable :: fro
+  real, dimension (:, :), allocatable :: ftot
+  real, dimension (:, :), allocatable :: dxcv
 
 end module

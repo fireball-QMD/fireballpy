@@ -22,10 +22,10 @@ else()
   endif()
 endif()
 
-project(pyreball Fortran)
+project(fireballpy Fortran)
 
 # Compilar programa en Fortran
-add_executable( pyreball 
+add_executable( fireballpy.x 
  
 
   ${CMAKE_SOURCE_DIR}/src/M_constants.f90
@@ -48,7 +48,25 @@ add_executable( pyreball
   ${CMAKE_SOURCE_DIR}/src/LOADFDATA/setterp_2d.f90
   ${CMAKE_SOURCE_DIR}/src/LOADFDATA/load_fdata.f90
  
-
+  ${CMAKE_SOURCE_DIR}/src/SYSTEM/getforces.f90  
+  ${CMAKE_SOURCE_DIR}/src/SYSTEM/mpairnay.f90   
+  ${CMAKE_SOURCE_DIR}/src/SYSTEM/Dassemble_2c.f90
+  ${CMAKE_SOURCE_DIR}/src/SYSTEM/Dassemble_2c_PP.f90    
+  ${CMAKE_SOURCE_DIR}/src/SYSTEM/Dassemble_ca_olsxc_on.f90    
+  ${CMAKE_SOURCE_DIR}/src/SYSTEM/Dassemble_ca_olsxc_2c.f90    
+  ${CMAKE_SOURCE_DIR}/src/SYSTEM/Dassemble_ca_2c.f90    
+  ${CMAKE_SOURCE_DIR}/src/SYSTEM/Dassemble_ca_2c_dip.f90    
+  ${CMAKE_SOURCE_DIR}/src/SYSTEM/Dassemble_3c.f90    
+  ${CMAKE_SOURCE_DIR}/src/SYSTEM/Dassemble_3c_PP.f90    
+  ${CMAKE_SOURCE_DIR}/src/SYSTEM/Dassemble_ca_3c.f90    
+  ${CMAKE_SOURCE_DIR}/src/SYSTEM/Dassemble_ca_3c_dip.f90   
+  ${CMAKE_SOURCE_DIR}/src/SYSTEM/Dassemble_lr.f90   
+  ${CMAKE_SOURCE_DIR}/src/SYSTEM/Dassemble_lr_dip.f90   
+  ${CMAKE_SOURCE_DIR}/src/SYSTEM/Dassemble_ca_olsxc_3c.f90   
+  ${CMAKE_SOURCE_DIR}/src/SYSTEM/assemble_F.f90   
+  ${CMAKE_SOURCE_DIR}/src/SYSTEM/Dtrescentros.f90   
+  ${CMAKE_SOURCE_DIR}/src/SYSTEM/DtrescentrosS.f90   
+  ${CMAKE_SOURCE_DIR}/src/SYSTEM/deps3center.f90   
   ${CMAKE_SOURCE_DIR}/src/SYSTEM/initamat.f90 
   ${CMAKE_SOURCE_DIR}/src/SYSTEM/dipole_proyection.f90
   ${CMAKE_SOURCE_DIR}/src/SYSTEM/stationary_charges.f90
@@ -143,7 +161,7 @@ add_executable( pyreball
   
  # ${CMAKE_SOURCE_DIR}/src/SYSTEM/scf_loop.f90
              
-  ${CMAKE_SOURCE_DIR}/src/pyreball.f90
+  ${CMAKE_SOURCE_DIR}/src/fireballpy.f90
   )
   #${CMAKE_SOURCE_DIR}/src/diagonalize_matrix.f90
   #${CMAKE_SOURCE_DIR}/src/variables.f90
@@ -154,7 +172,7 @@ if(IFORT_EXECUTABLE)
   set(MKL_FLAGS "-lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lpthread -lm")
   set(MKLROOT "/opt/intel/oneapi/mkl/latest")
   set(MKL_PATH "${MKLROOT}/lib/intel64/")
-  target_link_libraries(pyreball PRIVATE ${MKL_PATH} ${MKL_FLAGS})
+  target_link_libraries(fireballpy.x PRIVATE ${MKL_PATH} ${MKL_FLAGS})
 endif()
 #if(GFORTRAN_EXECUTABLE)
 #  set(FLAGS "-llapack -lblas")

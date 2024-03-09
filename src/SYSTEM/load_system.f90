@@ -54,7 +54,7 @@ subroutine load_system ()
     special_k(:,ikpoint) = special_k_orig(:,ikpoint)
     weight_k(ikpoint) = weight_k_orig(ikpoint)
   end do
-  
+
   call allocate_system()
   
   call scf_loop ()
@@ -62,7 +62,7 @@ subroutine load_system ()
   call getenergy ()
 
   ! call postscf () cuando queramos hacer DOS
-  ! call getforces()
+  call getforces()
 end subroutine
 
 

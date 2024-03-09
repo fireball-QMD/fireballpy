@@ -44,5 +44,5 @@ integer function mpairnay (iatom, jatom, rdiff)
    stop
   end if
   return
-      end function mpairnay
+end function mpairnay
 
