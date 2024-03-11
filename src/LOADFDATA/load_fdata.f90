@@ -42,6 +42,8 @@ subroutine load_fdata()
     nsh_max = 6
 
 
+
+
     allocate (rcutoff_temp (nsh_max, nspecies))
 
     allocate (nzx (nspecies))

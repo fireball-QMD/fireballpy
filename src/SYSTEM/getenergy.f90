@@ -4,7 +4,7 @@ subroutine getenergy ()
   implicit none
   integer :: iatom, issh
 
-  call get_ewald ()
+  call get_ewald (iforce)
   
   call assemble_usr ()
  

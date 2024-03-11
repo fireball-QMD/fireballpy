@@ -41,7 +41,9 @@ subroutine assemble_usr ()
   real, dimension (natoms, neigh_max) :: u0
   real, dimension (natoms) :: uee00
   dusr = 0.0d0
+  dxcv = 0.0d0
   u0 = 0.0d0
+
   do iatom = 1, natoms
     Q(iatom) = 0.0d0
     Q0(iatom) = 0.0d0
@@ -51,6 +53,7 @@ subroutine assemble_usr ()
       Q0(iatom) = Q0(iatom) + Qneutral(issh,in1)
     end do
   end do
+
   do iatom = 1, natoms
     r1(:) = ratom(:,iatom)
     in1 = imass(iatom)
@@ -75,7 +78,9 @@ subroutine assemble_usr ()
       end do
       n1 = nssh(in1)
       n2 = nssh(in2)
+
       call recoverC (n1, n2, slist, dslist, coulomb, coulombD)
+
       if (iatom .eq. jatom .and. mbeta .eq. 0) then
         uee00(iatom) = 0.0d0
         do issh = 1, nssh(in1)
@@ -88,19 +93,11 @@ subroutine assemble_usr ()
         corksr(iatom,ineigh) = 0.0d0
       else
         u0(iatom,ineigh) = 0.0d0
-        if (itheory .eq. 1) then
-          do issh = 1, nssh(in1)
-            do jssh = 1, nssh(in2)
-              u0(iatom,ineigh) = u0(iatom,ineigh) + Qin(issh,iatom)*Qin(jssh,jatom)*coulomb(issh,jssh)
-            end do
+        do issh = 1, nssh(in1)
+          do jssh = 1, nssh(in2)
+            u0(iatom,ineigh) = u0(iatom,ineigh) + Qin(issh,iatom)*Qin(jssh,jatom)*coulomb(issh,jssh)
           end do
-        else if (itheory .eq. 0 .or. itheory .eq. 2) then
-          do issh = 1, nssh(in1)
-            do jssh = 1, nssh(in2)
-              u0(iatom,ineigh) = u0(iatom,ineigh) + Qneutral(issh,in1)*Qneutral(jssh,in2)*coulomb(issh,jssh)
-            end do
-          end do
-        end if
+        end do
         u0(iatom,ineigh)=(eq2/2.0d0)*(Zi*Zj/distance-u0(iatom,ineigh))
         corksr(iatom,ineigh) = - (eq2/2.0d0)*QQ/distance
         if (iforce .eq. 1) then
@@ -116,6 +113,7 @@ subroutine assemble_usr ()
           dcorksr(:) = - eta(:)*(eq2/2.0d0)*QQ/distance**2
           dusr(:,iatom) = dusr(:,iatom) - dcorksr(:)
           dusr(:,jatom) = dusr(:,jatom) + dcorksr(:)
+
         end if ! forces
       end if ! (iatom .eq. jatom)
     end do
@@ -123,7 +121,9 @@ subroutine assemble_usr ()
 
   do iatom = 1, natoms
     dusr(:,iatom) = dusr(:,iatom) - (eq2/2.0d0)*fewald(:,iatom)
+print*,'XXXFEW',fewald(:,iatom)
   end do
+
   u0tot = 0.0d0
   ue0tot = 0.0d0
   do iatom = 1, natoms
@@ -131,7 +131,7 @@ subroutine assemble_usr ()
     do ineigh = 1, neighn(iatom)
       u0tot = u0tot + u0(iatom,ineigh)
       u0tot = u0tot + corksr(iatom,ineigh)
-    end do
+    end do                                     
   end do
   eklr = 0.0d0
   do iatom = 1, natoms

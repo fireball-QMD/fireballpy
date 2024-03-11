@@ -53,6 +53,7 @@ subroutine get_ewald (iauxforce)
   ewald = 0.0d0
   if (iauxforce .eq. 1) dewald = 0.0d0
   if (iauxforce .eq. 1) fewald = 0.0d0
+       print*,'XXXfewald0', fewald1,fewald2
   do iatom = 1, natoms
    Q(iatom) = 0.0d0
    Q0(iatom) = 0.0d0
@@ -102,7 +103,7 @@ subroutine get_ewald (iauxforce)
    ig1mx = 0
    ig2mx = 0
    ig3mx = 0
-  end if
+  end if !AQUI pensar quitar
   do ig1 = -ig1mx, ig1mx
    do ig2 = -ig2mx, ig2mx
     do ig3 = -ig3mx, ig3mx
@@ -159,12 +160,15 @@ subroutine get_ewald (iauxforce)
        vecl(:) = il1*a1vec(:) + il2*a2vec(:) + il3*a3vec(:)
        eta(:) = vecl(:) + ratom(:,iatom) - ratom(:,jatom)
        distance = sqrt(eta(1)**2 + eta(2)**2 + eta(3)**2)
+print*,'XXXCCCCC',distance,iauxforce,QQ
        if (distance .gt. 0.0001d0) then
         argument = kappa*distance
         ewald(iatom,jatom) =  ewald(iatom,jatom) + factor*erfc(argument)/distance
         ewald(jatom,iatom) =  ewald(jatom,iatom) + factor*erfc(argument)/distance
         derfcdr = (2.0d0*exp(-argument**2)*kappa/sqrt(pi) + erfc(argument)/distance)/distance**2
         if (iauxforce .eq. 1) then
+print*,'XXXCCCCCgdotb', eta,factorf,derfcdr
+
          do ix = 1, 3
           fewald2(ix,iatom) =  fewald2(ix,iatom) + QQ*eta(ix)*factorf*derfcdr
          end do
@@ -187,6 +191,8 @@ subroutine get_ewald (iauxforce)
   do iatom = 1, natoms
    ewald(iatom,iatom) = ewald(iatom,iatom) - 2.0d0*kappa/sqrt(pi)
   end do
+
+       print*,'XXXfewald', fewald1,fewald2
   if (iauxforce .eq. 1) fewald = fewald1 + fewald2
   return
 end subroutine get_ewald

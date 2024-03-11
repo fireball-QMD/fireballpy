@@ -16,10 +16,9 @@ subroutine assemble_mcweda ()
     call neighbors_pairs()
     call common_neighbors ()
     call common_neighborsPP ()
-
+    kforce = 0
+    call get_ewald (kforce) 
   end if ! end if (Kscf .eq. 1)
-  kforce = 0
-  call get_ewald (kforce) 
 
   neigh_self = -999
   do iatom = 1, natoms

@@ -154,26 +154,29 @@ subroutine average_ca_rho ()
         interaction = 17
         interaction0 = 22
         in3 = in1
+        print*,'XXXAVrhop_on0',rhop_on
         do isorp = 1, nssh(in2)
           call doscentros (interaction, isorp, iforce, in1, in2, in3, y, eps, deps, rhomx, rhompx)
           call doscentrosS (interaction0, isorp, iforce, in1, in2, in3, y, eps, rhomm, rhompm)
           do inu = 1, num_orb(in1)
             do imu = 1, num_orb(in3)
-              ! scf onsite density term
               rho_on(imu,inu,iatom) = rho_on(imu,inu,iatom) + rhomx(imu,inu)*Qin(isorp,jatom)
               rho_2c(imu,inu) = rho_2c(imu,inu) + rhomx(imu,inu)*Qin(isorp,jatom)
-              ! scf onsite derivative of density term
               rhop_on(:,imu,inu,ineigh,iatom) = rhop_on(:,imu,inu,ineigh,iatom) + rhompx(:,imu,inu)*Qin(isorp,jatom)
-            end do   ! do imu
-          end do   ! do inu
+        print*,'XXXAVrhompx',rhompx(:,imu,inu)
+        print*,'XXXAVQ',Qin(isorp,jatom)
+        print*,'XXXAVrhop_on',rhop_on(:,imu,inu,ineigh,iatom)
+        print*,'XXXAVkrhop_on',imu,inu,ineigh,iatom
+            end do 
+          end do 
           ! spherical symetric
           do inu = 1, nssh(in1)
             do imu = 1, nssh(in3)
               rhom_2c(imu,inu) = rhom_2c(imu,inu) + rhomm(imu,inu)*Qin(isorp,jatom)
               rhomp_2c(:,imu,inu) = rhomp_2c(:,imu,inu) +  rhompm(:,imu,inu)*Qin(isorp,jatom)
-            end do   ! endo imu
-          end do   ! enddo inu
-        end do   ! endo do isorp
+            end do   
+          end do   
+        end do   !isorp
       end if   ! end if (iatom.eq.jatom)
       ! Now assemble the derivative average density using the density pieces from above.
       do issh = 1,nssh(in1)
@@ -384,12 +387,11 @@ subroutine average_ca_rho ()
             rho_modified=rhom_3c(issh,jssh,ineigh,iatom)/sm(issh,jssh)
             arho_off(issh,jssh,ineigh,iatom) =  arho_off(issh,jssh,ineigh,iatom)  + rhom_2c(issh,jssh)/sm(issh,jssh) + rho_modified
             arhop_off(:,issh,jssh,ineigh,iatom) = arhop_off(:,issh,jssh,ineigh,iatom) + (rhomp_2c(:,issh,jssh)*sm(issh,jssh) - rhom_2c(issh,jssh)*spm(:,issh,jssh)) /(sm(issh,jssh)*sm(issh,jssh))
-          end do   ! end do jssh
-        end do   ! end do issh
+          end do   
+        end do   
       end if
     end do   ! do ineigh
   end do    ! do iatom
 
   deallocate (rhom_3c)
-  return
 end subroutine average_ca_rho
