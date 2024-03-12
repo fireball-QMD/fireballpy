@@ -10,3 +10,9 @@ jupyterlite-pyodide-kernel==0.2.0
 numpy==1.26.2
 ase==3.22.1
 mendeleev==0.15.0
+
+# Sphinx build
+sphinx
+sphinx_rtd_theme
+numpydoc
+sphinx_design
