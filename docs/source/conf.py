@@ -9,7 +9,7 @@
 import os
 import sys
 sys.path.insert(0, os.path.abspath('..'))
-sys.path.insert(0, os.path.abspath('../..'))
+sys.path.insert(0, os.path.abspath(os.path.join('..', '..')))
 
 import fireballpy
 
@@ -42,4 +42,4 @@ source_suffix = '.rst'
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = 'sphinx_rtd_theme'
-html_static_path = ['_static', '../../jupyter']
+html_static_path = ['_static', os.path.join('..', '..', 'jupyter')]
