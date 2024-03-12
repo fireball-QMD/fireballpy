@@ -4,7 +4,6 @@ subroutine average_ca_rho ()
   use M_fdata, only: nssh, num_orb, isorpmax, nspecies, nsh_max
   implicit none
   integer iatom
-  integer iatomstart
   integer ibeta
   integer ierror
   integer imu
@@ -154,7 +153,6 @@ subroutine average_ca_rho ()
         interaction = 17
         interaction0 = 22
         in3 = in1
-        print*,'XXXAVrhop_on0',rhop_on
         do isorp = 1, nssh(in2)
           call doscentros (interaction, isorp, iforce, in1, in2, in3, y, eps, deps, rhomx, rhompx)
           call doscentrosS (interaction0, isorp, iforce, in1, in2, in3, y, eps, rhomm, rhompm)
@@ -163,10 +161,6 @@ subroutine average_ca_rho ()
               rho_on(imu,inu,iatom) = rho_on(imu,inu,iatom) + rhomx(imu,inu)*Qin(isorp,jatom)
               rho_2c(imu,inu) = rho_2c(imu,inu) + rhomx(imu,inu)*Qin(isorp,jatom)
               rhop_on(:,imu,inu,ineigh,iatom) = rhop_on(:,imu,inu,ineigh,iatom) + rhompx(:,imu,inu)*Qin(isorp,jatom)
-        print*,'XXXAVrhompx',rhompx(:,imu,inu)
-        print*,'XXXAVQ',Qin(isorp,jatom)
-        print*,'XXXAVrhop_on',rhop_on(:,imu,inu,ineigh,iatom)
-        print*,'XXXAVkrhop_on',imu,inu,ineigh,iatom
             end do 
           end do 
           ! spherical symetric

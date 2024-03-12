@@ -3,7 +3,7 @@ module M_system
   !=======================
   integer :: icluster = 1
   integer :: iforce = 1
-  integer :: idipole = 1
+  integer :: idipole = 1 !AQUI  creo que para 0 no funciona quitar ???
   integer :: iqout = 2
   !======================
 

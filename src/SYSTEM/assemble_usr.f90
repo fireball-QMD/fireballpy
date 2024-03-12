@@ -121,7 +121,6 @@ subroutine assemble_usr ()
 
   do iatom = 1, natoms
     dusr(:,iatom) = dusr(:,iatom) - (eq2/2.0d0)*fewald(:,iatom)
-print*,'XXXFEW',fewald(:,iatom)
   end do
 
   u0tot = 0.0d0

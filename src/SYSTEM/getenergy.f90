@@ -27,14 +27,8 @@ subroutine getenergy ()
   write (*,*) '  '
   write (*,511) (etot - atomic_energy)/natoms
   write (*,*) ' ----------------------------------------------------- '
-
   etotold = etotnew
   etotnew = etotper
-
-  write(*,*)'========== Qout ======'
-  do iatom = 1, natoms
-    write (*,'(2x, 10f14.8)') (Qout(issh,iatom), issh = 1, nssh(imass(iatom)))
-  end do
 
 
   ! Format Statements

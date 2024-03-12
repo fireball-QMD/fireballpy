@@ -36,6 +36,7 @@ subroutine mixer ()
       endif
     end do
   end do
+
   select case (ialgmix)
   case (1)
     call anderson (Qoutmixer, Qinmixer, bmix, sigma, Kscf, idmix, imix )

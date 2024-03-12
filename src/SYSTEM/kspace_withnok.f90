@@ -88,7 +88,6 @@ subroutine kspace ( ikpoint, sks)
         end do 
       end do 
     end do
- 
     do ineigh = 1, neighPPn(iatom)
       mbeta = neighPP_b(ineigh,iatom)
       jatom = neighPP_j(ineigh,iatom)

@@ -5,7 +5,6 @@ subroutine assemble_ca_3c_dip ()
   implicit none
   integer ialp
   integer iatom
-  integer iatomstart
   integer ibeta
   integer icount
   integer icount_sav
@@ -99,7 +98,7 @@ subroutine assemble_ca_3c_dip ()
       call deps2cent (r1, r2, eps, deps)
     end do
   end do
-  do ialp = iatomstart, iatomstart - 1 + natomsp
+  do ialp = 1, natoms
     rna(:) = ratom(:,ialp)
     indna = imass(ialp)
     dq3 = 0.0d0
@@ -211,6 +210,5 @@ subroutine assemble_ca_3c_dip ()
   deallocate (spmG)
   deallocate (smatG)
   deallocate (spmatG)
-  return
 end
 

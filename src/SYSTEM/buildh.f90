@@ -4,7 +4,6 @@ subroutine buildh ()
   implicit none
   integer katom
   integer iatom
-  integer iatomstart
   integer ierror
   integer imu
   integer in1
@@ -45,18 +44,6 @@ subroutine buildh ()
     end do 
   end do
 
-  do iatom = 1, natoms
-    in1 = imass(iatom)
-    do ineigh = 1, neighn(iatom)
-      mbeta = neigh_b(ineigh,iatom)
-      jatom = neigh_j(ineigh,iatom)
-      in2 = imass(jatom)
-      do inu = 1, num_orb(in2)
-        do imu = 1, num_orb(in1)
-        enddo
-      enddo
-    enddo
-  enddo
  
 end subroutine buildh
 

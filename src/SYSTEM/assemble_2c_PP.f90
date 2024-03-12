@@ -4,7 +4,6 @@ subroutine assemble_2c_PP ()
   use M_fdata, only: num_orb, num_orbPP
   implicit none
   integer iatom
-  integer iatomstart
   integer ierror
   integer imu
   integer in1

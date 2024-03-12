@@ -14,7 +14,6 @@ subroutine common_neighborsPP ()
   integer kbeta
   integer kneigh
   integer num_neigh
-  integer iatomstart, natomsp
   integer mbeta
 
   real  distance

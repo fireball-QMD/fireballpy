@@ -23,7 +23,6 @@ subroutine neighborsPP ()
   integer iatom
   integer ineigh
   integer ibeta
-  integer iatomstart
   integer imu
   integer in1
   integer in2

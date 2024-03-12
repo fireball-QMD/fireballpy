@@ -4,7 +4,6 @@ subroutine assemble_2c ()
   use M_fdata, only: num_orb
   use M_constants
   integer iatom
-  integer iatomstart
   integer ierror
   integer imu
   integer in1

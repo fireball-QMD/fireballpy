@@ -5,7 +5,6 @@ subroutine assemble_ca_2c_dip ()
   use m_constants, only: eq2
   implicit none
   integer iatom
-  integer iatomstart
   integer icount
   integer icount_sav
   integer ierror
