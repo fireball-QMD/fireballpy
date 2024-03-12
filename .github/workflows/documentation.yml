@@ -1,4 +1,4 @@
-name: Build and deploy JupyterLite
+name: Build and deploy the documentation and JupyterLite
 
 on:
   push:
@@ -18,17 +18,23 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
-      - name: Install the dependencies
+      - name: Install the dependencies for JupyterLite
         run: |
           python -m pip install -r requirements.txt
       - name: Build the JupyterLite site
         run: |
           cp -r fireballpy examples
-          jupyter lite build --contents examples --output-dir dist
+          jupyter lite build --contents examples --output-dir jupyter
+      - name: Install the dependencies for the documentation
+        run: |
+          pip install sphinx sphinx_rtd_theme numpydoc sphinx_design
+      - name: Build the documentation with Sphinx
+        run: |
+          make html -C docs
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./dist
+          path: ./docs/build
 
   deploy:
     needs: build
