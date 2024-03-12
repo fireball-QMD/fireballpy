@@ -22,7 +22,6 @@ subroutine get_ewald (iauxforce)
   integer issh
   integer ix
   integer jatom
-  integer natomsp
   integer niters
   integer nitersp
   real argument

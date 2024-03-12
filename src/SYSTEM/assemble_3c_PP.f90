@@ -22,7 +22,6 @@ subroutine assemble_3c_PP ()
   integer m32
   integer mneigh
   integer my_proc
-  integer natomsp
   integer ncc
  
   integer, external :: mpairnay

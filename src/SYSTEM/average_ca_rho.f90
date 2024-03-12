@@ -27,7 +27,6 @@ subroutine average_ca_rho ()
   integer mneigh
   integer my_proc
   integer n1
-  integer natomsp
 
   real cost
   real x

@@ -14,7 +14,6 @@ subroutine assemble_lr ()
   integer jatom
   integer mbeta
   integer my_proc
-  integer natomsp
   integer katom
   integer in3
   real distance12

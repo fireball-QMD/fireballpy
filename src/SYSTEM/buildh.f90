@@ -14,7 +14,6 @@ subroutine buildh ()
   integer jatom
   integer mbeta
   integer my_proc
-  integer natomsp
   real distance
   real, dimension (numorb_max, numorb_max) :: htemp
   real, dimension (numorb_max, numorb_max) :: stemp

@@ -18,7 +18,6 @@ subroutine assemble_2c_PP ()
   integer mbeta
   integer mneigh_self
   integer my_proc
-  integer natomsp
   integer ncc
  
   real, dimension (numorb_max) :: cl

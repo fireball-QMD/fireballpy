@@ -19,7 +19,6 @@ subroutine assemble_2c ()
   integer mbeta
   integer mneigh_self
   integer my_proc
-  integer natomsp
   integer ix
   integer iy
   integer iz

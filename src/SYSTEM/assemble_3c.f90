@@ -22,7 +22,6 @@ subroutine assemble_3c ()
   integer jssh
   integer mneigh
   integer my_proc
-  integer natomsp
   integer jneigh       
 
   real cost

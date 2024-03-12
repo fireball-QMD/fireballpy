@@ -14,7 +14,6 @@ subroutine assemble_olsxc_off ()
   integer kforce
   integer matom
   integer mbeta
-  integer natomsp
 
   real  y 
   real dxn

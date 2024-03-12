@@ -34,7 +34,6 @@ subroutine neighborsPP ()
   integer kbeta
   integer ialp
   integer mbeta
-  integer natomsp
   integer num_neigh
   real distance
   real distance2

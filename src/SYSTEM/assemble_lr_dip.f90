@@ -14,7 +14,6 @@ subroutine assemble_lr_dip ()
   integer jatom
   integer mbeta
   integer my_proc
-  integer natomsp
   integer ialp
   integer inalp
   integer jneigh
