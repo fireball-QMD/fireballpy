@@ -9,7 +9,6 @@ subroutine load_system ()
   integer ispec
   logical zindata
 
-  write(*,*) symbolA, nspecies
   open (unit = 69, file = 'input.bas', status = 'old')
   read (69, *) natoms
   allocate (ratom (3, natoms))
@@ -63,6 +62,7 @@ subroutine load_system ()
 
   ! call postscf () cuando queramos hacer DOS
   if (iforce .eq. 1) call getforces()
+
 end subroutine
 
 

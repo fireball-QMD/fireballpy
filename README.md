@@ -13,7 +13,19 @@ Clone the repository to your computer:
 
 ------------------------
 
-Quitar V_intra_dip  AQUI
- ! AQUI QUITAR idynmat iephc ?
-  !AQUI  ewaldqmmm dejar preguntar a Jesus
-quedarse con la mejor autoconsistencia Kscf AQUI 
+Obtener la base:
+
+- wget -r  http://fireball.ftmc.uam.es/create/coutput
+
+Documentación:
+
+- https://fireballpy.github.io/fireballpy.html
+
+------------------------
+
+Pensar:
+
+-  Quitar idynmat iephc ?
+-  Quitar ewaldqmmm 
+-  Quedarse con la mejor autoconsistencia
+-  Diagonalizar en base fb  

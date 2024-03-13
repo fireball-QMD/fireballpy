@@ -61,7 +61,9 @@ subroutine load_fdata()
     allocate (Qneutral (nsh_max, nspecies))
     allocate (wavefxn (nsh_max, nspecies))
     allocate (napot (0:nsh_max, nspecies))
-
+   
+    
+    print*,'Read ',trim(fdataLocation)//'/info.dat'
     open (unit = 12, file = trim(fdataLocation)//'/info.dat', status = 'old')
     read (12,*)
     read (12,*)
@@ -69,7 +71,7 @@ subroutine load_fdata()
     do ispec = 1, nspecies
     read (12,*)
     read (12,*)
-    read (12,102) symbolA(ispec)
+    read (12,'(2x, a2)') symbolA(ispec)
     read (12,*) nzx(ispec)
     read (12,*) smass(ispec)
     read (12,*) nssh(ispec)
@@ -88,29 +90,11 @@ subroutine load_fdata()
     do issh = 1, nssh(ispec)
     rcutoff(ispec, issh) = rcutoff_temp(issh,ispec)*abohr
     end do
-    read (12,103) (wavefxn(issh,ispec), issh = 1, nssh(ispec))
-    read (12,103) (napot(issh,ispec), issh = 0, nssh(ispec))
+    read (12,'(9(2x,a25))') (wavefxn(issh,ispec), issh = 1, nssh(ispec))
+    read (12,'(9(2x,a25))') (napot(issh,ispec), issh = 0, nssh(ispec))
     read (12,*) etotatom(ispec)
     read (12,*)
-    ! Jesus borrrrraaaaa..
-    if (debug)  then
-        write (*,100)
-        write (*,301) ispec
-        write (*,302) symbolA(ispec)
-        write (*,303) nzx(ispec)
-        write (*,304) smass(ispec)
-        write (*,305) nssh(ispec)
-        write (*,306) (lssh(issh,ispec), issh = 1, nssh(ispec))
-        write (*,307) nsshPP(ispec)
-        write (*,308) (lsshPP(issh,ispec), issh = 1, nsshPP(ispec))
-        write (*,314) rc_PP(ispec)
-        write (*,309) (Qneutral(issh,ispec), issh = 1, nssh(ispec))
-        write (*,310) (rcutoff_temp(issh,ispec), issh = 1, nssh(ispec))
-        write (*,311) (wavefxn(issh,ispec), issh = 1, nssh(ispec))
-        write (*,312) (napot(issh,ispec), issh = 0, nssh(ispec))
-        write (*,313) etotatom(ispec)
-        write (*,100)
-    end if !debug
+    write (*,'(a,i2,a,a2,a,i2,a,i2)') 'spec = ',ispec,'; ele = ',symbolA(ispec),'; Z = ',nzx(ispec), '; nssh = ',nssh(ispec)
     end do !ispec
 
     close(unit = 12) !close info.dat
@@ -228,24 +212,4 @@ subroutine load_fdata()
 
     deallocate (rcutoff_temp)
 
-    100     format (2x, 70('='))
-    101     format (2x, a25)
-    102     format (2x, a2)
-    103     format (9(2x,a25))
-    301     format (2x, i2, ' - Information for this species ')
-    302     format (2x, a2, ' - Element ')
-    303     format (2x, i3, ' - Nuclear Z ')
-    304     format (2x, f7.3, ' - Atomic Mass ')
-    305     format (2x, i2, ' - Number of shells ')
-    306     format (2x, 8(2x,i1), ' - L; quantum number for each shell ')
-    307     format (2x, i2, ' - Number of shells (Pseudopotential) ')
-    308     format (2x, 8(2x,i1), ' - L; quantum number for each shell ')
-    309     format (2x, 8(2x,f5.2), ' - Occupation numbers ')
-    310     format (2x, 8(2x,f5.2), ' - Radial cutoffs ')
-    311     format (2x, 9(2x,a25), ' - Wavefunction files ')
-    312     format (2x, 9(2x,a25), ' - (Non)-neutral atom potentials ')
-    313     format (2x, f12.4, ' - Atomic energy ')
-    314     format (2x, f12.4, ' - Radial cutoffs (Pseudopotential) ')
-
-    return
 end subroutine load_fdata
