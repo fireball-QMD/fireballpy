@@ -22,8 +22,6 @@ subroutine scf_loop ()
       write (*,'(2x, 10f14.8)') (Qout(issh,iatom), issh = 1, nssh(in1))
     end do
     write(*,'(A,F20.6,A,I4,A,F12.10,A,L1)') 'EBS = ',ebs,'; Kscf =',Kscf,'; sigma =',sigma,'; scf_achieved =',scf_achieved
-!    if(Kscf.eq.2) stop
-!    call getenergy()
     Kscf = Kscf + 1
   end do
 end subroutine scf_loop
