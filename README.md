@@ -15,7 +15,7 @@ Clone the repository to your computer:
 
 Obtener la base:
 
-- wget -r  http://fireball.ftmc.uam.es/create/coutput
+    wget -r  http://fireball.ftmc.uam.es/create/coutput
 
 Documentación:
 
