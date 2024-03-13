@@ -2,27 +2,27 @@
 subroutine load_system ()
   use M_system
   use M_constants!solo para ini const
-  use M_fdata, only: symbolA, nspecies
+  use M_fdata, only: symbolA, nspecies,nzx
   implicit none
   integer iatom, ikpoint
-  integer in1
+  integer in1, nucz
   integer ispec
   logical zindata
 
   write(*,*) symbolA, nspecies
-  open (unit = 69, file = 'input.xyz', status = 'old')
+  open (unit = 69, file = 'input.bas', status = 'old')
   read (69, *) natoms
-  read (69,*)
   allocate (ratom (3, natoms))
   allocate (symbol (natoms))
   allocate (imass (natoms))
   do iatom = 1, natoms
-   read (69,*) symbol(iatom),ratom(:,iatom)
+   read (69,*) nucz,ratom(:,iatom)
    zindata = .false.
    do ispec = 1, nspecies
-     if (trim(symbol(iatom)) .eq. symbolA(ispec)) then
+     if ( nucz .eq. nzx(ispec)) then
        zindata = .true.
        imass(iatom) = ispec
+       symbol(iatom)=symbolA(ispec)
      end if
    end do
   end do
@@ -62,7 +62,7 @@ subroutine load_system ()
   call getenergy ()
 
   ! call postscf () cuando queramos hacer DOS
-  call getforces()
+  if (iforce .eq. 1) call getforces()
 end subroutine
 
 

@@ -326,9 +326,6 @@ subroutine allocate_system ()
 
   call initamat()
   
-  
-
-  scf_achieved = .false.
   delk = 0.0d0
   delk(1,1) = 1.0d0
   delk(2,2) = 1.0d0
