@@ -54,7 +54,7 @@ subroutine mixer ()
   else
     sigmaold = sigma
   end if
-  if (sigma .lt. sigmatol) scf_achieved = .true.
+  if (sigma .lt. sigmatol) scf_achieved = .true. !AQUI pensar duplicado esta en build_rho.f90
   if (.not. scf_achieved) then
     imix = 0
     do iatom = 1, natoms
