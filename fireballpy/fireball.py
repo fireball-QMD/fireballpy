@@ -9,7 +9,7 @@ from ase.calculators.calculator import (Calculator,
 
 from .infodat import InfoDat, default_infodat
 
-#import _fireball as _fb
+# import _fireball as _fb
 
 
 class Fireball(Calculator):
