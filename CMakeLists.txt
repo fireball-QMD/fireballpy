@@ -48,6 +48,8 @@ add_executable( fireballpy.x
   ${CMAKE_SOURCE_DIR}/src/LOADFDATA/setterp_2d.f90
   ${CMAKE_SOURCE_DIR}/src/LOADFDATA/load_fdata.f90
  
+  ${CMAKE_SOURCE_DIR}/src/SYSTEM/kspace_gamma.f90
+  ${CMAKE_SOURCE_DIR}/src/SYSTEM/kspace_double.f90
   ${CMAKE_SOURCE_DIR}/src/SYSTEM/getforces.f90  
   ${CMAKE_SOURCE_DIR}/src/SYSTEM/mpairnay.f90   
   ${CMAKE_SOURCE_DIR}/src/SYSTEM/Dassemble_2c.f90
@@ -75,7 +77,6 @@ add_executable( fireballpy.x
   ${CMAKE_SOURCE_DIR}/src/SYSTEM/lowdin_charges.f90
   ${CMAKE_SOURCE_DIR}/src/SYSTEM/neighbors.f90
   ${CMAKE_SOURCE_DIR}/src/SYSTEM/initboxes.f90
-  ${CMAKE_SOURCE_DIR}/src/SYSTEM/load_system.f90
   ${CMAKE_SOURCE_DIR}/src/SYSTEM/allocate_system.f90
   ${CMAKE_SOURCE_DIR}/src/SYSTEM/anderson.f90
   ${CMAKE_SOURCE_DIR}/src/SYSTEM/broyden.f90
@@ -85,7 +86,6 @@ add_executable( fireballpy.x
   ${CMAKE_SOURCE_DIR}/src/SYSTEM/fermie.f90
   ${CMAKE_SOURCE_DIR}/src/SYSTEM/denmat.f90
   ${CMAKE_SOURCE_DIR}/src/SYSTEM/build_rho.f90
-  ${CMAKE_SOURCE_DIR}/src/SYSTEM/kspace_withnok.f90
   ${CMAKE_SOURCE_DIR}/src/SYSTEM/diag_k.f90 
   ${CMAKE_SOURCE_DIR}/src/SYSTEM/diag_error.f90 
   ${CMAKE_SOURCE_DIR}/src/SYSTEM/scf_loop.f90 

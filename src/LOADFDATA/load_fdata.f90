@@ -39,7 +39,7 @@ subroutine load_fdata()
     close(unit = 12) !close info.dat
 
     !AQUI pensar, Qinmixer(imix) = Qin(issh,iatom) en miser, (Qinmixer(nsh_max*natoms))
-    nsh_max = 6
+    !nsh_max = 6 !AQUI
 
 
 
@@ -63,7 +63,6 @@ subroutine load_fdata()
     allocate (napot (0:nsh_max, nspecies))
    
     
-    print*,'Read ',trim(fdataLocation)//'/info.dat'
     open (unit = 12, file = trim(fdataLocation)//'/info.dat', status = 'old')
     read (12,*)
     read (12,*)
@@ -94,7 +93,6 @@ subroutine load_fdata()
     read (12,'(9(2x,a25))') (napot(issh,ispec), issh = 0, nssh(ispec))
     read (12,*) etotatom(ispec)
     read (12,*)
-    write (*,'(a,i2,a,a2,a,i2,a,i2)') 'spec = ',ispec,'; ele = ',symbolA(ispec),'; Z = ',nzx(ispec), '; nssh = ',nssh(ispec)
     end do !ispec
 
     close(unit = 12) !close info.dat

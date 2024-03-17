@@ -59,8 +59,8 @@ subroutine assemble_mcweda ()
     call assemble_3c ()
     call assemble_3c_PP ()
     !if (iqmmm .eq.1 ) then
-    !  if (idipole .eq. 0) call assemble_qmmm (nprocs, iordern)
-    !  if (idipole .eq. 1) call assemble_qmmm_dip (nprocs, iordern)
+    !  if (idipole .eq. 0) call assemble_qmmm ()
+    !  if (idipole .eq. 1) call assemble_qmmm_dip ()
     !else
     !  eqmmm = 0.0d0
     !  ewaldqmmm = 0.0d0

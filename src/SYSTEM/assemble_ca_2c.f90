@@ -24,7 +24,6 @@ subroutine assemble_ca_2c ()
   integer kforce
   integer matom
   integer mbeta
-  integer my_proc
   real dq1
   real dq2
   real dterm_1

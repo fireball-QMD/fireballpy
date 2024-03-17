@@ -50,8 +50,8 @@ subroutine anderson ( x_try, x_old, beta, r2, iter, max_order, nmsh)
       r2_sav(iter-max_order+1) = r2_sav(iter-max_order)
       Fv(:,iter-max_order+1) = Fv(:,iter-max_order)
       Xv(:,iter-max_order+1) = Xv(:,iter-max_order)
-      delX(:,iter-max_order+1) = Xv(:,iter-max_order+2) - Xv(:,iter-max_order+1)
-      delF(:,iter-max_order+1) = Fv(:,iter-max_order+2) - Fv(:,iter-max_order+1)
+      delX(:,iter-max_order+1) =  Xv(:,iter-max_order+2) - Xv(:,iter-max_order+1)
+      delF(:,iter-max_order+1) =  Fv(:,iter-max_order+2) - Fv(:,iter-max_order+1)
     end if
   end if
 888 allocate (a_matrix(iter-mix_order+1:iter-1,iter-mix_order+1:iter-1))
@@ -68,8 +68,7 @@ subroutine anderson ( x_try, x_old, beta, r2, iter, max_order, nmsh)
   allocate (work(lwork))
   allocate (ipiv(mix_order-1))
   info = 0
-  call dsysv('U', mix_order-1, 1, a_matrix, mix_order-1, ipiv, delF_F, &
-    &            mix_order-1, work, lwork, info )
+  call dsysv('U', mix_order-1, 1, a_matrix, mix_order-1, ipiv, delF_F, mix_order-1, work, lwork, info )
   if(info .ne. 0) then
     write(*,*) ' Error in Anderson, info =',info
     if(mix_order .le. 2)stop ! if you can't solve a 2x2 something is wrong
@@ -83,5 +82,5 @@ subroutine anderson ( x_try, x_old, beta, r2, iter, max_order, nmsh)
   end do
   deallocate (delF_F,a_matrix,work,ipiv)
   return
-end subroutine anderson
+ end subroutine anderson
 

@@ -25,7 +25,6 @@ subroutine average_ca_rho ()
   integer l1
   integer mbeta
   integer mneigh
-  integer my_proc
   integer n1
 
   real cost

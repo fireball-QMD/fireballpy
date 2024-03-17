@@ -47,6 +47,7 @@ subroutine mixer ()
   case (4)
     call pulay (Qoutmixer, Qinmixer, bmix, sigma, Kscf, idmix, imix )
   end select !ialgmix
+
   if (Kscf .gt. 1) then
     if (sigma .lt. sigmaold) then
       sigmaold = sigma
@@ -54,6 +55,7 @@ subroutine mixer ()
   else
     sigmaold = sigma
   end if
+
   if (sigma .lt. sigmatol) scf_achieved = .true. !AQUI pensar duplicado esta en build_rho.f90
   if (.not. scf_achieved) then
     imix = 0

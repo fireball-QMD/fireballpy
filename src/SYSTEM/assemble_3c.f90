@@ -21,7 +21,6 @@ subroutine assemble_3c ()
   integer jbeta
   integer jssh
   integer mneigh
-  integer my_proc
   integer jneigh       
 
   real cost

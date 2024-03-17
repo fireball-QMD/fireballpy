@@ -24,7 +24,6 @@ subroutine assemble_ca_2c_dip ()
   integer kforce
   integer matom
   integer mbeta
-  integer my_proc
   integer ix
   integer iy
  

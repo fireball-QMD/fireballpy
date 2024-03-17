@@ -13,7 +13,6 @@ subroutine assemble_lr_dip ()
   integer issh
   integer jatom
   integer mbeta
-  integer my_proc
   integer ialp
   integer inalp
   integer jneigh

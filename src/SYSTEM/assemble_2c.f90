@@ -18,7 +18,6 @@ subroutine assemble_2c ()
   integer matom
   integer mbeta
   integer mneigh_self
-  integer my_proc
   integer ix
   integer iy
   integer iz

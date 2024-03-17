@@ -1,24 +1,28 @@
 module M_system
 
   !=======================
+  integer :: iforce   = 1
+  integer :: idipole  = 1 !AQUI  creo que para 0 no funciona quitar ???
+  integer :: iqout    = 2 !1:Lowdin 2:Mulliken 3:NPA 4:M-dipole :5min :6STC :7MD-pres..
+  !ifixcharge AQUI pensar
   integer :: icluster = 1
-  integer :: iforce = 1
-  integer :: idipole = 1 !AQUI  creo que para 0 no funciona quitar ???
-  integer :: iqout = 2
+  !k_points=gamma AQUI pensar
+  ! pensar lo de r=0.00 ?¿?
   !======================
 
-  integer :: max_scf_iterations = 200
-  real, parameter ::  xc_overtol = 5.0d-5
+  integer :: ialgmix  = 1 !1:anderson 2:broyden 3:louie 4:pulay
+  real, parameter :: xc_overtol = 5.0d-5
   real, parameter :: smt_elect = 0.8d0 ! Ewald and electrostatic
   integer, parameter :: ithetamax = 5
-!  integer, parameter  :: max_vna_points = 5000
-!  real, dimension (:), allocatable ::  drr_na
-!  real, dimension (:,:), allocatable :: rr_na
-!  real, dimension (:,:), allocatable :: vnna_spline
-!  real, dimension (:,:), allocatable :: vnna
-!  integer, dimension (:), allocatable :: mesh_na
-!  real, dimension (:), allocatable :: rmax_na
-
+  integer, parameter :: idmix = 6
+  integer, parameter :: max_scf_iterations = 200
+  real :: tempfe = 100.0d0
+  real :: bmix = 0.04d0
+  real :: sigma = 0.0d0
+  real :: sigmaold = 0.0d0
+  real :: sigmatol = 1.0E-8
+  logical ::  scf_achieved = .false.
+ 
   integer :: natoms
   real, dimension (:, :), allocatable :: ratom
   integer, dimension (:), allocatable :: degelec
@@ -31,6 +35,7 @@ module M_system
   integer, dimension (:), allocatable :: getmssh
   integer, dimension (:), allocatable :: getlssh
   integer, dimension (:), allocatable :: getissh
+
   ! --- ETOT ----
   real :: etot
   real :: etotold, etotnew
@@ -44,11 +49,10 @@ module M_system
   real :: eqmmm
   real :: dc_v_intra_dip_1c
   integer :: Kscf  
-!  integer :: itestrange !AQUI pensar
-!  integer :: testrange !AQUI pensar
   real :: Uexc_1c
   real ::  Umuxc_1c
   real, dimension (:, :, :, :), allocatable :: vxc_1c
+
   !Charges
   real, dimension(:), allocatable  :: Q0_TOT
   integer, dimension (:), allocatable :: nelectron
@@ -69,15 +73,7 @@ module M_system
   real, dimension (:,:), allocatable :: foccupy !AQUI
   
   !scf
-  integer, parameter ::  idmix = 6
   real, dimension (:, :, :, :), allocatable :: cape
-  real :: tempfe = 100.0d0
-  real :: bmix = 0.04d0
-  real :: sigma = 0.0d0
-  real :: sigmaold = 0.0d0
-  real :: sigmatol = 1.0E-8
-  logical ::  scf_achieved = .true.
-  integer :: ialgmix = 1 !1:anderson 2:broyden 3:louie 4:pulay
   real, dimension (:, :, :), allocatable :: blowre_o
   real, dimension (:, :, :), allocatable :: bbnkre_o  
   real, dimension (:, :, :, :), allocatable :: rhoPP
@@ -197,7 +193,6 @@ module M_system
   integer, dimension(:,:), allocatable :: nuR
   integer, dimension(:,:), allocatable :: alphaR
   integer, dimension(:,:), allocatable :: betaR
-  real, dimension(:,:), allocatable :: IR
   real, dimension(:,:,:,:), allocatable   :: hr_box
 
   

@@ -13,7 +13,6 @@ subroutine assemble_lr ()
   integer issh
   integer jatom
   integer mbeta
-  integer my_proc
   integer katom
   integer in3
   real distance12

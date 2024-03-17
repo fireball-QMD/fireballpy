@@ -27,7 +27,6 @@ subroutine assemble_ca_3c_dip ()
   integer matom
   integer mbeta
   integer mneigh
-  integer my_proc
   integer ix
   integer j
   real cost
