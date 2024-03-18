@@ -172,7 +172,6 @@ subroutine denmat ()
     do iatom = 1, natoms
       in1 = imass(iatom)
       do imu = 1,nssh(in1)              
-        print*,'XXDEN',dq_DP(iatom),QoutTot(iatom),Qout(imu,iatom) 
         Qout(imu,iatom) = (dq_DP(iatom)/QoutTot(iatom))*Qout(imu,iatom) + Qout(imu,iatom)
       end do 
     end do 

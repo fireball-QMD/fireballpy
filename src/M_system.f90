@@ -3,12 +3,14 @@ module M_system
   !=======================
   integer :: iforce   = 1
   integer :: idipole  = 1 !AQUI  creo que para 0 no funciona arreglar
-  integer :: iqout    = 2 !1:Lowdin 2:Mulliken 3:NPA 4:M-dipole :5min NO :6STC NO :7MD-pres..
+  integer :: iqout    = 7 !1:Lowdin 2:Mulliken 3:NPA 4:M-dipole :7MD-pres..
   !ifixcharge funcione
   integer :: icluster = 1 !el 0 tiene que funcionar
   ! si icluster = 0 idipole = 0
   !k_points=gamma AQUI pensar
   ! pensar lo de r=0.00 ?¿?  poner shift
+  ! pensar gamma ?
+  logical :: iqmmm = .false.
   !======================
 
   integer :: ialgmix  = 1 !1:anderson 2:broyden 3:louie 4:pulay
