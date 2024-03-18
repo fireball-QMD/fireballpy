@@ -22,13 +22,33 @@ subroutine allocate_system ()
   integer:: numorbPP_max
   real :: rcutoff_i
   real :: rcutoff_j
-  real:: rcutoff_
-  real:: distance2
-  real:: range2
+  real :: rcutoff_
+  real :: distance2
+  real :: range2
+  real :: distance
 
   if (.not. allocated (ratom)) allocate (ratom (3, natoms))
   if (.not. allocated (imass)) allocate (imass (natoms))
   if (.not. allocated (symbol)) allocate (symbol (natoms))
+
+
+  !Shift the coordinates none of the atoms fall on (0.0, 0.0, 0.0)
+  shifter(1) = 4.0d0*atan(1.0d0)    ! pi
+  shifter(2) = 1.0/exp(1.0d0)       ! 1/e
+  shifter(3) = sqrt(2.0d0)          ! square root of 2
+  ishiftO = 0
+  do iatom = 1, natoms
+    distance = ratom(1,iatom)**2 + ratom(2,iatom)**2 + ratom(3,iatom)**2
+    distance = sqrt(distance)
+    if (distance .lt. 1.0d-4) ishiftO = 1
+  end do
+
+  if (ishiftO .eq. 1) then
+    do iatom = 1, natoms
+      ratom(:,iatom) = ratom(:,iatom) + shifter
+    end do
+  end if
+ 
 
   allocate (degelec (natoms))
   allocate (nelectron(natoms))

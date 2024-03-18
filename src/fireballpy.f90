@@ -103,12 +103,12 @@ program pyreball
 
   call scf_loop ()
 
-  write(*,'(A,F20.6,A,I4,A,F12.10,A,L1)') 'EBS = ',ebs,'; Kscf =',Kscf,'; sigma =',sigma,'; scf_achieved =',scf_achieved
+  write(*,'(3x,A,I4,A,F12.10,A,L1)') 'Kscf =',Kscf,'; sigma =',sigma,'; scf_achieved =',scf_achieved
  
-  write(*,*)'========== CHARGES ====== '
+  write(*,*)'  ========== CHARGES ====== '
   do iatom = 1, natoms
     in1 = imass(iatom)
-     write (*,'(2x, 10f14.8)') (Qin(issh,iatom), issh = 1, nssh(in1))
+     write (*,'(2x, 10f10.4)') (Qin(issh,iatom), issh = 1, nssh(in1))
   end do
  
 
@@ -128,12 +128,8 @@ program pyreball
   write (*,511) (etot - atomic_energy)/natoms
   write (*,*) ' ----------------------------------------------------- '
 
-
-
-
   if (iforce .eq. 1) then
     call getforces()
-    write (*,*) '====================== '
     write (*,*) ' The grand total force (eV/A): '
     do iatom = 1, natoms
       write (*,130)  iatom, ftot(:,iatom)
