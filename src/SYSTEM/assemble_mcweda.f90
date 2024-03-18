@@ -62,8 +62,8 @@ subroutine assemble_mcweda ()
     !  if (idipole .eq. 0) call assemble_qmmm ()
     !  if (idipole .eq. 1) call assemble_qmmm_dip ()
     !else
-    !  eqmmm = 0.0d0
-    !  ewaldqmmm = 0.0d0
+      eqmmm = 0.0d0
+      ewaldqmmm = 0.0d0
     !end if
   end if
   if (idipole .eq. 0) call assemble_ca_3c ()

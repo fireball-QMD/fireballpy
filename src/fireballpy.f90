@@ -102,6 +102,7 @@ program pyreball
   call allocate_system()
 
   call scf_loop ()
+
   write(*,'(A,F20.6,A,I4,A,F12.10,A,L1)') 'EBS = ',ebs,'; Kscf =',Kscf,'; sigma =',sigma,'; scf_achieved =',scf_achieved
  
   write(*,*)'========== CHARGES ====== '

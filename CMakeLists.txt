@@ -71,7 +71,6 @@ add_executable( fireballpy.x
   ${CMAKE_SOURCE_DIR}/src/SYSTEM/deps3center.f90   
   ${CMAKE_SOURCE_DIR}/src/SYSTEM/initamat.f90 
   ${CMAKE_SOURCE_DIR}/src/SYSTEM/dipole_proyection.f90
-  ${CMAKE_SOURCE_DIR}/src/SYSTEM/stationary_charges.f90
   ${CMAKE_SOURCE_DIR}/src/SYSTEM/mulliken_charges.f90
   ${CMAKE_SOURCE_DIR}/src/SYSTEM/mulliken_dipole_charges.f90
   ${CMAKE_SOURCE_DIR}/src/SYSTEM/lowdin_charges.f90

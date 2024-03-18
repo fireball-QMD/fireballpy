@@ -35,11 +35,13 @@ subroutine denmat ()
   complex phase, phasex
   complex step1, step2
   logical read_occupy
+
   ai = cmplx(0.0d0,1.0d0)
   rhoPP = 0.0d0
   !AQUI  inquire (file = 'OCCUPATION', exist = read_occupy)
-  !Get the Fermi energy.
+
   call fermie ()
+
   do iatom = 1, natoms
     in1 = imass(iatom)
     do ineigh = 1, neighn(iatom)
@@ -88,6 +90,7 @@ subroutine denmat ()
       end do
     end do
   end do
+
   do iatom = 1, natoms
     in1 = imass(iatom)
     do ineigh = 1, neighPPn(iatom)
@@ -135,31 +138,16 @@ subroutine denmat ()
     end do
   end do
 
-  if (iqout .eq. 1 .or. iqout .eq. 3) then
-    Qout = 0.0d0
-    QLowdin_TOT = 0.0d0
-    call LOWDIN_CHARGES()
-  end if 
+  Qout = 0.0d0
+  QLowdin_TOT = 0.0d0
 
-  if (iqout .eq. 2) then
-    Qout = 0.0d0
-    QMulliken_TOT = 0.0d0
-    call MULLIKEN_CHARGES()
-  end if 
+  if (iqout .eq. 1 .or. iqout .eq. 3) call LOWDIN_CHARGES()
 
-  if (iqout .eq. 4) then
-    Qout = 0.0d0                        
-    QMulliken_TOT = 0.0d0 
-    call MULLIKEN_DIPOLE_CHARGES()
-  end if 
+  if (iqout .eq. 2) call MULLIKEN_CHARGES() 
 
-  if (iqout .eq. 6) then
-    call STATIONARY_CHARGES()
-  end if 
+  if (iqout .eq. 4) call MULLIKEN_DIPOLE_CHARGES()
 
   if (iqout .eq. 7) then
-    Qout = 0.0d0                        
-    QMulliken_TOT = 0.0d0 
     call MULLIKEN_DIPOLE_CHARGES()
     call Dipole_proyection()
     do iatom = 1, natoms
@@ -175,7 +163,7 @@ subroutine denmat ()
         Qout(imu,iatom) = (dq_DP(iatom)/QoutTot(iatom))*Qout(imu,iatom) + Qout(imu,iatom)
       end do 
     end do 
-  end if 
+  end if !7
 
   ebs = 0.0d0
   ztest = 0.0d0

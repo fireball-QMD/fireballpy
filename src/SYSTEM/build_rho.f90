@@ -9,7 +9,6 @@ subroutine build_rho ()
   call denmat ()
   call mixer ()
   if (sigma .lt. sigmatol) scf_achieved = .true.
-  if (sigma .lt. sigmatol) print*,'scf_achieved  Kscf build_rho', scf_achieved,Kscf
   !allocate (blowre_o(norbitals,norbitals,nkpoints))
   if (iqout .ne. 2 .and. icluster .ne. 1) deallocate (blowim)
   if (iqout .ne. 2) deallocate (blowre)

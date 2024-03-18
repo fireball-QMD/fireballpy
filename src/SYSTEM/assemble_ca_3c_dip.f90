@@ -168,12 +168,6 @@ subroutine assemble_ca_3c_dip ()
               emnpl(imu,inu) = dq3*sterm/x + dq3*dterm/(x*x*x)           
               emnpl_noq(imu,inu) = sterm/x + dterm/(x*x*x)           
               ewaldsr(imu,inu,mneigh,iatom) = ewaldsr(imu,inu,mneigh,iatom) + emnpl(imu,inu)*eq2
-              if (Kscf .eq. 1 .and. iqout .eq. 6) then 
-                do issh = 1, nssh(indna)
-                  gvhxc(imu,inu,issh,ialp,mneigh,iatom) =  gvhxc(imu,inu,issh,ialp,mneigh,iatom) - emnpl_noq(imu,inu)*eq2
-                  gvhxc(inu,imu,issh,ialp,jneigh,jatom) =  gvhxc(imu,inu,issh,ialp,mneigh,iatom)
-                end do ! end do issh 
-              end if ! end if Kscf .eq. 1 .and. iqout .eq. 6
               ewaldsr(inu,imu,jneigh,jatom) = ewaldsr(imu,inu,mneigh,iatom)
             end do
           end do
@@ -186,12 +180,6 @@ subroutine assemble_ca_3c_dip ()
           do inu = 1, num_orb(in2)
             do imu = 1, num_orb(in1)
               bcca(imu,inu) = bcca(imu,inu) + bccax(imu,inu)*dxn
-              if (Kscf .eq. 1) then
-                if (iqout .eq. 6) then
-                  gvhxc(imu,inu,isorp,ialp,mneigh,iatom) =  gvhxc(imu,inu,isorp,ialp,mneigh,iatom) +  (stn1*bccax(imu,inu) +  stn2*emnpl_noq(imu,inu))*eq2
-                  gvhxc(inu,imu,isorp,ialp,jneigh,jatom) =  gvhxc(imu,inu,isorp,ialp,mneigh,iatom)
-                end if ! end if iqout .eq. 6
-              end if ! end if Kscf .eq. 1
             end do
           end do
         end do ! end do of isorp loop

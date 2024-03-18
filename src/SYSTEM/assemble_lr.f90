@@ -52,15 +52,7 @@ subroutine assemble_lr ()
             dterm = 0.0d0
           endif
           ewaldlr(imu,inu,ineigh,iatom) = ewaldlr(imu,inu,ineigh,iatom)  + (sterm - dterm)*sub_ewald(iatom)*eq2  + (sterm + dterm)*sub_ewald(jatom)*eq2
-          if (Kscf .eq. 1 .and. iqout .eq. 6) then
-            do katom = 1,natoms
-              in3 = imass(katom)
-              do issh = 1, nssh(in3)
-                gvhxc(imu,inu,issh,katom,ineigh,iatom) =  gvhxc(imu,inu,issh,katom,ineigh,iatom) +  (sterm - dterm)*ewald(iatom,katom)*eq2 +  (sterm + dterm)*ewald(jatom,katom)*eq2
-              end do ! end do issh
-            end do    ! end do katom
-          end if !  end if Kscf .eq. 1 .and. iqout .eq. 6
-        end do
+       end do
       end do
     end do
   end do

@@ -185,12 +185,6 @@ subroutine assemble_ca_3c ()
             emnpl_noq(imu,inu) = ((s_mat(imu,inu,mneigh,iatom)/2.0d0)- (dip(imu,inu,mneigh,iatom)/y))/distance_13+  ((s_mat(imu,inu,mneigh,iatom)/2.0d0)+ (dip(imu,inu,mneigh,iatom)/y))/distance_23
             ewaldsr(imu,inu,mneigh,iatom) =  ewaldsr(imu,inu,mneigh,iatom) + emnpl(imu,inu)*eq2
             ewaldsr(inu,imu,jneigh,jatom)=ewaldsr(imu,inu,mneigh,iatom)
-            if (Kscf .eq. 1 .and. iqout .eq. 6) then
-              do issh = 1, nssh(indna)
-                gvhxc(imu,inu,issh,ialp,mneigh,iatom) =  gvhxc(imu,inu,issh,ialp,mneigh,iatom) - emnpl_noq(imu,inu)*eq2
-                gvhxc(inu,imu,issh,ialp,jneigh,jatom) =  gvhxc(imu,inu,issh,ialp,mneigh,iatom)
-              end do ! end do issh
-            end if ! end if Kscf .eq. 1 .and. iqout .eq. 6
           end do
         end do
         !  CALL TRESCENTROS FOR NEUTRAL ATOM PIECE
@@ -202,12 +196,6 @@ subroutine assemble_ca_3c ()
           do inu = 1, num_orb(in2)
             do imu = 1, num_orb(in1)
               bcca(imu,inu) = bcca(imu,inu) + bccax(imu,inu)*dxn
-              if (Kscf .eq. 1) then
-                if (iqout .eq. 6) then
-                  gvhxc(imu,inu,isorp,ialp,mneigh,iatom) =  gvhxc(imu,inu,isorp,ialp,mneigh,iatom) +  (stn1(imu,inu)*bccax(imu,inu) + stn2(imu,inu)*emnpl_noq(imu,inu))*eq2
-                  gvhxc(inu,imu,isorp,ialp,jneigh,jatom) =  gvhxc(imu,inu,isorp,ialp,mneigh,iatom)
-                end if ! end if iqout .eq. 6
-              end if ! end if Kscf .eq. 1
             end do
           end do
         end do ! end do of isorp loop

@@ -185,7 +185,6 @@ module M_system
   real, dimension (:, :, :, :, :), allocatable :: rhop_off
   real, dimension (:, :, :, :, :), allocatable :: rhopij_off
   real, dimension (:, :, :, :), allocatable :: vca
-  real, dimension (:,:,:,:,:,:), allocatable :: gvhxc
   real, dimension (:, :, :, :), allocatable :: ewaldlr
   real, dimension (:, :, :, :), allocatable :: h_mat
   real, dimension (:, :, :, :), allocatable :: t_mat
