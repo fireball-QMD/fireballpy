@@ -171,7 +171,8 @@ class _FData:
                                 nnz = self.ind2c[i, isorp]
 
                         xint[:nnz, :nz, self.ind2c[i, isorp], in1, in2] = \
-                            read_float_array(data, lines=nz).T
+                            read_float_array(data, lines=nz) \
+                            .transpose()[:nnz, :]
 
             self.two_center.numz = numz
             self.two_center.cl_pp = cl_pp
