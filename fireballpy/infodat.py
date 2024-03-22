@@ -14,6 +14,7 @@ class InfoDat:
     needed for the adjusting the different parameters of each specie in the
     computation
     """
+
     shells: Dict[int, List[int]]
     shellsPP: Dict[int, List[int]]
     cutoffPP: Dict[int, float]
@@ -23,6 +24,7 @@ class InfoDat:
     nafiles: Dict[int, List[str]]
     energy: Dict[int, float]
 
+    nspecies: int = field(init=False)
     numbers: List[int] = field(init=False)
     numshells: Dict[int, int] = field(init=False)
     numshellsPP: Dict[int, int] = field(init=False)
@@ -41,6 +43,7 @@ class InfoDat:
         numbers = list(self.shells.keys())
         numbers.sort()
         self.numbers = numbers
+        self.nspecies = len(numbers)
 
         numshells = {}
         numshellsPP = {}
@@ -51,9 +54,9 @@ class InfoDat:
                     len(self.wffiles[num]) ==
                     len(self.nafiles[num]) - 1):
                 raise ValueError(
-                        f"The number of items in the dictionaries do not match\
+                    f"The number of items in the dictionaries do not match\
                                 for element {num}"
-                        )
+                )
             numshells[num] = len(self.shells[num])
             numshellsPP[num] = len(self.shellsPP[num])
         self.numshells = numshells
@@ -88,12 +91,12 @@ class InfoDat:
             )
             string.append(f"- Atomic energy: {self.energy[num]}")
             string.append(
-                    "- Wavefunction files: " +
-                    ", ".join(self.wffiles[num])
+                "- Wavefunction files: " +
+                ", ".join(self.wffiles[num])
             )
             string.append(
-                    "- Potential files: " +
-                    ", ".join(self.nafiles[num])
+                "- Potential files: " +
+                ", ".join(self.nafiles[num])
             )
             string.append("")
         return "\n".join(string[:-1])
@@ -224,31 +227,31 @@ default_wffiles = {
 
 default_nafiles = {
     1:  [
-            "cinput/001_465.na0",
-            "cinput/001_465.na1",
-            "cinput/001_465.ena1"],
+        "cinput/001_465.na0",
+        "cinput/001_465.na1",
+        "cinput/001_465.ena1"],
     6:  [
-            "cinput/006_595.na0",
-            "cinput/006_595.na1",
-            "cinput/006_595.na2"
-        ],
+        "cinput/006_595.na0",
+        "cinput/006_595.na1",
+        "cinput/006_595.na2"
+    ],
     7:  [
-            "cinput/007_542.na0",
-            "cinput/007_542.na1",
-            "cinput/007_542.na2",
-            "cinput/007_462.na3"],
+        "cinput/007_542.na0",
+        "cinput/007_542.na1",
+        "cinput/007_542.na2",
+        "cinput/007_462.na3"],
     8:  [
-            "cinput/008_532.na0",
-            "cinput/008_532.na1",
-            "cinput/008_532.na2",
-            "cinput/008_532.na3"
-        ],
+        "cinput/008_532.na0",
+        "cinput/008_532.na1",
+        "cinput/008_532.na2",
+        "cinput/008_532.na3"
+    ],
     16: [
-            "cinput/016_700.na0",
-            "cinput/016_700.na1",
-            "cinput/016_700.na2",
-            "cinput/016_550.na3"
-        ]
+        "cinput/016_700.na0",
+        "cinput/016_700.na1",
+        "cinput/016_700.na2",
+        "cinput/016_550.na3"
+    ]
 }
 
 default_energy = {
