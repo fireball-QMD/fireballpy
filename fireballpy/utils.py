@@ -23,12 +23,12 @@ def _read_array(data: deque[str], dtype: str, lines: int) -> NDArray:
         case "float":
             return np.array(
                 [val.upper().replace("D", "E").split() for line in lines],
-                dtype=float
+                dtype=float, order="F"
             )
         case "int":
             return np.array(
                 [data.popleft().split() for line in lines],
-                dtype=int
+                dtype=int, order="F"
             )
         case _:
             raise ValueError(
@@ -67,6 +67,28 @@ def read_file(fpath: str, header: int = 0) -> deque[str]:
     return deque(raw)
 
 
+def read_line(data: deque[str], *dtypes: str) -> list[int | float | str]:
+    line = data.popleft().split()
+    if not dtypes:
+        dtypes = tuple("str" for _ in line)
+    if len(dtypes) != len(line):
+        raise ValueError(f"Wrong number of arguments, "
+                         f"expected {len(line) + 1} got {len(dtypes) + 1}")
+    for i, (l, t) in enumerate(zip(line, dtypes)):
+        match t:
+            case "float":
+                line[i] = float(l.upper().replace("D", "E"))
+            case "int":
+                line[i] = int(l)
+            case "str":
+                continue
+            case _:
+                raise ValueError(
+                    f"dtypes must be either 'int', 'float' or 'str'"
+                    f", got {dtypes}")
+    return line
+
+
 def read_float_array(data: deque[str], lines: int = 1) -> NDArray[float]:
     return _read_array(data, "float", lines)
 
@@ -85,3 +107,8 @@ def read_int_entry(data: deque[str], field: int = 0) -> int:
 
 def read_str_entry(data: deque[str], field: int = 0) -> str:
     return _read_entry(data, "str", field)
+
+
+def skip_lines(data: deque[str], lines: int = 1):
+    for _ in range(lines):
+        _ = data.popleft()

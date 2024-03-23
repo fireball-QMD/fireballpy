@@ -8,8 +8,10 @@ from utils import (
     alloc_float,
     alloc_int,
     load_data,
+    read_line,
     read_float_array,
     read_int_entry,
+    skip_lines
 )
 
 _NFOFX = 207  # AQUI: que demonios es esto???
@@ -43,10 +45,10 @@ _TWOCFNAMES = [
 
 @dataclass
 class _OneCenter:
-    exc1: np.ndarray[int, float]
-    nuxc: np.ndarray[int, float]
-    dexc: np.ndarray[int, float]
-    dnuxc: np.ndarray[int, float]
+    exc1: np.ndarray[int, float] = field(init=False)
+    nuxc: np.ndarray[int, float] = field(init=False)
+    dexc: np.ndarray[int, float] = field(init=False)
+    dnuxc: np.ndarray[int, float] = field(init=False)
 
 
 @dataclass
@@ -55,6 +57,17 @@ class _TwoCenter:
     cl_pp: np.ndarray[int, float] = field(init=False)
     zmax: np.ndarray[int, float] = field(init=False)
     xint: np.ndarray[int, float] = field(init=False)
+
+
+@dataclass
+class _ThreeCenter:
+    nbcna: np.ndarray[int, int] = field(init=False)
+    mbcna: np.ndarray[int, float] = field(init=False)
+    bcna: np.ndarray[int, float] = field(init=False)
+    nden: np.ndarray[int, int] = field(init=False)
+    mden: np.ndarray[int, float] = field(init=False)
+    den: np.ndarray[int, float] = field(init=False)
+    dens: np.ndarray[int, float] = field(init=False)
 
 
 @dataclass
@@ -67,6 +80,7 @@ class _FData:
 
     one_center: _OneCenter = field(init=False)
     two_center: _TwoCenter = field(init=False)
+    three_center: _ThreeCenter = field(init=False)
 
     def load_1c(self, infodat: InfoDat, fpath: str) -> None:
         # Init arrays
@@ -84,7 +98,7 @@ class _FData:
             data = load_data(join(fpath, f"xc1c_dq1.{num:02}.dat"), header=6)
             niter = read_int_entry(data, field=1)
             exc[:niter, :niter, i] = read_float_array(data, lines=niter)
-            _ = data.popleft()
+            skip_lines(data)
             nuxc[:niter, :niter, i] = read_float_array(data, lines=niter)
 
             # dexc
@@ -101,12 +115,10 @@ class _FData:
                 dnuxc[:niter, :niter, j, i] = read_float_array(
                     data, lines=niter)
 
-        self.one_center = _OneCenter(
-            exc=exc,
-            nuxc=nuxc,
-            dexc=dexc,
-            dnuxc=dnuxc,
-        )
+        self.one_center.exc = exc
+        self.one_center.nuxc = nuxc
+        self.one_center.dexc = dexc
+        self.one_center.dnuxc = dnuxc
 
         def _two_center(self, infodat: InfoDat, fpath: str) -> None:
             numz = alloc_int(self.i2c_max, self.nspecies, self.nspecies)
@@ -141,8 +153,7 @@ class _FData:
                         if i == 4:
                             npp = read_int_entry(data)
                             cl_pp[:npp, in2] = read_float_array(data)
-                        zm, nz = read_float_array(data)
-                        nz = int(round(nz))
+                        zm, nz = read_line(data, "float", "int")
                         if nz > _NFOFX:
                             raise EnvironmentError("numz > nfofx")
                         zmax[self.ind2c[i, isorp], in1, in2] = zm
@@ -178,3 +189,101 @@ class _FData:
             self.two_center.cl_pp = cl_pp
             self.two_center.zmax = zmax
             self.two_center.xint = xint
+
+    def _three_center(self, infodat: InfoDat, fpath: str) -> None:
+        self.three_center.icon = np.array(
+            [[[k + (j + i*self.nspecies)*self.nspecies + 1
+             for k in range(self.nspecies)]
+             for j in range(self.nspecies)]
+             for i in range(self.nspecies)],
+            dtype=int, order="F")
+
+        # Interactions 1
+        nbcna = alloc_int(self.isorpmax + 1, self.nspecies**3, 2)
+        mbcna = alloc_float(self.isorpmax + 1, self.nspecies**3, 2)
+        bcna = alloc_float(self.me3c_max, self.nxm, self.nym, 5,
+                           self.isorpmax + 1, self.nspecies**3)
+
+        for (in3, num3), (in2, num2), (in1, num1) in product(
+                enumerate(infodat.numbers),
+                enumerate(infodat.numbers),
+                enumerate(infodat.numbers)):
+            idx = self.three_center.icon[in1, in2, in3] - 1
+            nnz = self.three_center.im[in1, in2]
+            for isorp, it in product(
+                    range(infodat.numshells[num3] + 1),
+                    range(5)):
+                ffname = f"bcna_{it:02}_{isorp:02}"
+                ffname += f".{num1:02}.{num2:02}.{num3:02}.dat"
+                data = load_data(join(fpath, ffname), header=11)
+                ym, ny = read_line(data, "float", "int")
+                xm, nx = read_line(data, "float", "int")
+                skip_lines(data, lines=5)
+
+                mbcna[1, isorp, idx], nbcna[1, isorp, idx] = ym, ny
+                mbcna[0, isorp, idx], nbcna[0, isorp, idx] = xm, nx
+                for iy in range(ny):
+                    bcna[:nnz, :nx, iy, it, isorp, idx] = \
+                        read_float_array(data, lines=nx).transpose()[:nnz, :]
+
+        self.three_center.nbcna = nbcna
+        self.three_center.mbcna = mbcna
+        self.three_center.bcna = bcna
+
+        # Interaction 3
+        nden = alloc_int(self.isorpmax_xc + 1, self.nspecies**3, 2)
+        mden = alloc_float(self.isorpmax_xc + 1, self.nspecies**3, 2)
+        den = alloc_float(self.nxm, self.nym, self.me3c_max,
+                          self.isorpmax_xc + 1, self.nspecies**3, 5)
+
+        for (in3, num3), (in2, num2), (in1, num1) in product(
+                enumerate(infodat.numbers),
+                enumerate(infodat.numbers),
+                enumerate(infodat.numbers)):
+            idx = self.three_center.icon[in1, in2, in3] - 1
+            nnz = self.three_center.im[in1, in2]
+            for isorp, it in product(
+                    range(1, infodat.numshells[num3] + 1),
+                    range(5)):
+                ffname = f"den3_{it:02}_{isorp:02}"
+                ffname += f".{num1:02}.{num2:02}.{num3:02}.dat"
+                data = load_data(join(fpath, ffname), header=11)
+                ym, ny = read_line(data, "float", "int")
+                xm, nx = read_line(data, "float", "int")
+                skip_lines(data, lines=5)
+
+                mden[1, isorp, idx], nden[1, isorp, idx] = ym, ny
+                mden[0, isorp, idx], nden[0, isorp, idx] = xm, nx
+                for iy in range(ny):
+                    den[:nnz, :nx, iy, it, isorp, idx] = \
+                        read_float_array(data, lines=nx).transpose()[:nnz, :]
+
+        self.three_center.nden = nden
+        self.three_center.mden = mden
+        self.three_center.den = den
+
+        # Interaction 4
+        dens = alloc_float(self.nxm, self.nym, self.me3c_max,
+                           self.isorpmax_xc + 1, self.nspecies**3, 5)
+
+        for (in3, num3), (in2, num2), (in1, num1) in product(
+                enumerate(infodat.numbers),
+                enumerate(infodat.numbers),
+                enumerate(infodat.numbers)):
+            idx = self.three_center.icon[in1, in2, in3] - 1
+            nnz = self.three_center.ims[in1, in2]
+            for isorp, it in product(
+                    range(1, infodat.numshells[num3] + 1),
+                    range(5)):
+                ffname = f"deS3_{it:02}_{isorp:02}"
+                ffname += f".{num1:02}.{num2:02}.{num3:02}.dat"
+                data = load_data(join(fpath, ffname), header=11)
+                ym, ny = read_line(data, "float", "int")
+                xm, nx = read_line(data, "float", "int")
+                skip_lines(data, lines=5)
+
+                for iy in range(ny):
+                    dens[:nnz, :nx, iy, it, isorp, idx] = \
+                        read_float_array(data, lines=nx).transpose()[:nnz, :]
+
+        self.three_center.dens = dens
