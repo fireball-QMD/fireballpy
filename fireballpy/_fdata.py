@@ -63,9 +63,11 @@ class _TwoCenter:
 class _ThreeCenter:
     nbcna: np.ndarray[int, int] = field(init=False)
     mbcna: np.ndarray[int, float] = field(init=False)
+    hbcna: np.ndarray[int, float] = field(init=False)
     bcna: np.ndarray[int, float] = field(init=False)
     nden: np.ndarray[int, int] = field(init=False)
     mden: np.ndarray[int, float] = field(init=False)
+    hden: np.ndarray[int, float] = field(init=False)
     den: np.ndarray[int, float] = field(init=False)
     dens: np.ndarray[int, float] = field(init=False)
 
@@ -201,6 +203,7 @@ class _FData:
         # Interactions 1
         nbcna = alloc_int(self.isorpmax + 1, self.nspecies**3, 2)
         mbcna = alloc_float(self.isorpmax + 1, self.nspecies**3, 2)
+        hbcna = alloc_float(self.isorpmax + 1, self.nspecies**3, 2)
         bcna = alloc_float(self.me3c_max, self.nxm, self.nym, 5,
                            self.isorpmax + 1, self.nspecies**3)
 
@@ -220,19 +223,23 @@ class _FData:
                 xm, nx = read_line(data, "float", "int")
                 skip_lines(data, lines=5)
 
-                mbcna[1, isorp, idx], nbcna[1, isorp, idx] = ym, ny
                 mbcna[0, isorp, idx], nbcna[0, isorp, idx] = xm, nx
+                mbcna[1, isorp, idx], nbcna[1, isorp, idx] = ym, ny
+                hbcna[0, isorp, idx] = xm / (nx - 1)
+                hbcna[1, isorp, idx] = ym / (ny - 1)
                 for iy in range(ny):
                     bcna[:nnz, :nx, iy, it, isorp, idx] = \
                         read_float_array(data, lines=nx).transpose()[:nnz, :]
 
         self.three_center.nbcna = nbcna
         self.three_center.mbcna = mbcna
+        self.three_center.hbcna = hbcna
         self.three_center.bcna = bcna
 
         # Interaction 3
         nden = alloc_int(self.isorpmax_xc + 1, self.nspecies**3, 2)
         mden = alloc_float(self.isorpmax_xc + 1, self.nspecies**3, 2)
+        hden = alloc_float(self.isorpmax_xc + 1, self.nspecies**3, 2)
         den = alloc_float(self.nxm, self.nym, self.me3c_max,
                           self.isorpmax_xc + 1, self.nspecies**3, 5)
 
@@ -252,14 +259,17 @@ class _FData:
                 xm, nx = read_line(data, "float", "int")
                 skip_lines(data, lines=5)
 
-                mden[1, isorp, idx], nden[1, isorp, idx] = ym, ny
                 mden[0, isorp, idx], nden[0, isorp, idx] = xm, nx
+                mden[1, isorp, idx], nden[1, isorp, idx] = ym, ny
+                hden[0, isorp, idx] = xm / (nx - 1)
+                hden[1, isorp, idx] = ym / (ny - 1)
                 for iy in range(ny):
                     den[:nnz, :nx, iy, it, isorp, idx] = \
                         read_float_array(data, lines=nx).transpose()[:nnz, :]
 
         self.three_center.nden = nden
         self.three_center.mden = mden
+        self.three_center.hden = hden
         self.three_center.den = den
 
         # Interaction 4
