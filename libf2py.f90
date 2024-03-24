@@ -1,4 +1,4 @@
-program pyreball
+subroutine test
 
   use M_fdata
   use M_system
@@ -151,5 +151,5 @@ program pyreball
 511     format (2x, ' Cohesive Energy per atom  = ', f15.6)
 512     format (2x, '   Fermi Level = ', f15.6)
 
-end program pyreball
+end 
 

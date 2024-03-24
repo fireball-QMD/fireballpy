@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 3.0)
 
-#set(ENV{FC} "ifort")
-
 # Verificar si ifort está instalado
 find_program(IFORT_EXECUTABLE ifort)
 
@@ -9,9 +7,9 @@ find_program(IFORT_EXECUTABLE ifort)
 if(IFORT_EXECUTABLE)
   set(FFLAGS "-O3 -r8  -fno-alias -unroll -fPIC")
   set(ENV{FC} "ifort ${FFLAGS}")
-#  set(ENV{FC} "ifort  -check all")
-  set(PATH_INCL ${MKLROOT}/include)
-  set(PATH_MKL ${MKLROOT}/lib/intel64)
+  set(MKL_FLAGS "-lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lpthread -lm")
+  set(MKLROOT "/opt/intel/oneapi/mkl/latest")
+  set(MKL_PATH "${MKLROOT}/lib/intel64/")
 else()
   message(STATUS "ifort no encontrado. Usando gfortran.")
   find_program(GFORTRAN_EXECUTABLE gfortran)
@@ -24,14 +22,11 @@ endif()
 
 project(fireballpy Fortran)
 
-# Compilar programa en Fortran
-add_executable( fireballpy.x 
+add_library(fireballpy
  
-
   ${CMAKE_SOURCE_DIR}/src/M_constants.f90
   ${CMAKE_SOURCE_DIR}/src/M_fdata.f90 
   ${CMAKE_SOURCE_DIR}/src/M_system.f90
- 
   
   ${CMAKE_SOURCE_DIR}/src/LOADFDATA/make_munuDipX.f90 
   ${CMAKE_SOURCE_DIR}/src/LOADFDATA/make_munu.f90 
@@ -157,34 +152,8 @@ add_executable( fireballpy.x
   ${CMAKE_SOURCE_DIR}/src/SYSTEM/doscentrosDipX.f90
   ${CMAKE_SOURCE_DIR}/src/SYSTEM/doscentrosDipY.f90
   ${CMAKE_SOURCE_DIR}/src/SYSTEM/cepal.f90
-  
- # ${CMAKE_SOURCE_DIR}/src/SYSTEM/scf_loop.f90
-             
-  ${CMAKE_SOURCE_DIR}/src/fireballpy.f90
   )
-  #${CMAKE_SOURCE_DIR}/src/diagonalize_matrix.f90
-  #${CMAKE_SOURCE_DIR}/src/variables.f90
-  #)
 
 if(IFORT_EXECUTABLE)
-  #set(FLAGS "-mkl")
-  set(MKL_FLAGS "-lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lpthread -lm")
-  set(MKLROOT "/opt/intel/oneapi/mkl/latest")
-  set(MKL_PATH "${MKLROOT}/lib/intel64/")
-  target_link_libraries(fireballpy.x PRIVATE ${MKL_PATH} ${MKL_FLAGS})
+  target_link_libraries(fireballpy PUBLIC ${MKL_PATH}  ${MKL_FLAGS})
 endif()
-#if(GFORTRAN_EXECUTABLE)
-#  set(FLAGS "-llapack -lblas")
-#  target_link_libraries(pyreball PRIVATE ${FLAGS})
-#endif()
-#
-#add_custom_command(OUTPUT ${CMAKE_SOURCE_DIR}/src/fortran_suma.so
-#                   COMMAND f2py -c ${CMAKE_SOURCE_DIR}/src/suma.f90
-#                   ${CMAKE_SOURCE_DIR}/src/variables.f90 
-#                   -m ${CMAKE_SOURCE_DIR}/src/f2py.f90 --f90flags='-fPIC'
-#                   COMMAND mv ${CMAKE_SOURCE_DIR}/src/f2py ${CMAKE_SOURCE_DIR}/bin/
-#                   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/bin
-#                   COMMENT "Compilando la subrutina Fortran con f2py"
-#                   VERBATIM)
-#
-#add_custom_target(fortran_suma ALL DEPENDS ${CMAKE_SOURCE_DIR}/src/fortran_suma.so)
