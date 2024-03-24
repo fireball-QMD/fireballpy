@@ -5,4 +5,6 @@ import os
 sys.path.append("/home/dani/fireballpy/build")
 import fireballpy
 
-fireballpy.test()
+fireballpy.info()
+fireballpy.loadfdata_from_file("/home/dani/Fdata_HC-new/")
+fireballpy.loadbasformat_from_file("/home/dani/fireballpy/test/input.bas")

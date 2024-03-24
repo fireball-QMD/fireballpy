@@ -1,3 +1,59 @@
+subroutine loadfdata_from_file(fdatafile)
+  use M_fdata
+  implicit none
+  integer :: ispec
+  character(len=400),intent(in):: fdatafile
+  fdatalocation=trim(fdatafile)
+  call load_fdata()
+  do ispec = 1, nspecies
+    write (*,'(a,i2,a,a2,a,i2,a,i2)') '   spec = ',ispec,'; ele = ',symbolA(ispec),'; Z = ',nzx(ispec), '; nssh = ',nssh(ispec)        
+  end do
+end
+
+subroutine loadbasformat_from_file(basfile)
+  use M_system
+  use M_fdata, only : symbolA, nspecies, nzx 
+  implicit none
+  integer :: iatom,ispec
+  logical :: zindata
+  integer :: nucz
+  character(len=400),intent(in):: basfile
+  print*,trim(basfile)
+  open (unit = 69, file = trim(basfile), status = 'old')
+  read (69, *) natoms
+  allocate (ratom (3, natoms))
+  allocate (symbol (natoms))
+  allocate (imass (natoms))
+  do iatom = 1, natoms
+    read (69,*) nucz,ratom(:,iatom)
+    zindata = .false.
+    do ispec = 1, nspecies
+    if ( nucz .eq. nzx(ispec)) then
+      zindata = .true.
+      imass(iatom) = ispec
+      symbol(iatom)=symbolA(ispec)
+      write (*,'(3x,a2, 3(2x,f10.5))') symbol(iatom), ratom(:,iatom)
+    end if
+   end do
+  end do
+  close (unit = 69)
+end
+
+subroutine info
+  use M_fdata
+  use M_system
+  implicit none
+  print*, '- Fireballpy is a minimal version of the fireball program.'
+  print*, '  itheory     = 1 !FIX DOGS'
+  print*, '  itheory_xc  = 2 !FIX McWEDA'
+  write(*,'(3x,a12,a1,i2)') 'icluster      ','=',icluster
+  write(*,'(3x,a12,a1,i2)') 'iforce        ','=',iforce
+  write(*,'(3x,a12,a1,i2)') 'idipole       ','=',idipole
+  write(*,'(3x,a12,a1,i2)') 'iqout         ','=',iqout
+end
+
+
+
 subroutine test
 
   use M_fdata
