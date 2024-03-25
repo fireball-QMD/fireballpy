@@ -3,8 +3,18 @@
 import sys
 import os
 sys.path.append("/home/dani/fireballpy/build")
-import fireballpy
+import fireballpy as fb
 
-fireballpy.info()
-fireballpy.loadfdata_from_file("/home/dani/Fdata_HC-new/")
-fireballpy.loadbasformat_from_file("/home/dani/fireballpy/test/input.bas")
+fb.loadfdata_from_path("/home/dani/Fdata_HC-new/")
+fb.info_fdata()
+fb.loadbas_from_file("/home/dani/fireballpy/test/input.bas")
+fb.loadlvs_100()
+fb.loadkpts_gamma()
+fb.call_allocate_system()
+fb.call_scf_loop()
+fb.call_getenergy()
+fb.info_energy()
+fb.info_forces()
+
+
+
