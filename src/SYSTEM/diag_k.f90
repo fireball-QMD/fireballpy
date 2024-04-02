@@ -8,11 +8,15 @@ subroutine diag_k ( )
   if (iqout .ne. 2 .and. icluster .ne. 1) allocate (blowim (norbitals, norbitals, nkpoints))
   allocate (bbnkre (norbitals, norbitals, nkpoints))
   if (icluster .ne. 1) allocate (bbnkim (norbitals, norbitals, nkpoints))
-  
-  do ikpoint = 1, nkpoints
-    k_temp(:) = special_k(:,ikpoint)
-   call kspace_gamma (ikpoint, k_temp )
-  ! call kspace_double (ikpoint, k_temp )
-  end do 
+
+  if (gamma .eq. 1) then
+    k_temp(:) = special_k(:,1)
+    call kspace_gamma (1, k_temp )
+  else
+    do ikpoint = 1, nkpoints
+      k_temp(:) = special_k(:,ikpoint)
+      call kspace_double (ikpoint, k_temp )
+    end do 
+  end if
 end subroutine diag_k
 

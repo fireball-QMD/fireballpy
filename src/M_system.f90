@@ -8,7 +8,7 @@ module M_system
   integer :: icluster = 1 !el 0 tiene que funcionar
   ! si icluster = 0 idipole = 0
   !k_points=gamma AQUI pensar
-  ! pensar gamma ?
+  integer :: gamma = 1
   logical :: iqmmm = .false.
   !======================
 

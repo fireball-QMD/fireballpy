@@ -1,3 +1,10 @@
+subroutine set_gamma(aux)
+  use M_system, only : gamma
+  implicit none
+  integer, intent(in):: aux
+  gamma=aux
+end
+ 
 subroutine loadfdata_from_path(fdatafile)
   use M_fdata
   implicit none
@@ -112,6 +119,7 @@ subroutine rescal_structure(rescal)
   do ikpoint = 1, nkpoints
     special_k_orig(:,ikpoint)=special_k_orig(:,ikpoint)/rescal
   end do
+  print*,'Rescal atoms positions, lattice vectors and special kpoint',rescal
 end
  
 subroutine call_allocate_system()
@@ -144,6 +152,7 @@ end
   write(*,'(3x,a12,a1,i2)') 'iforce        ','=',iforce
   write(*,'(3x,a12,a1,i2)') 'idipole       ','=',idipole
   write(*,'(3x,a12,a1,i2)') 'iqout         ','=',iqout
+  write(*,'(3x,a12,a1,i2)') 'gamma         ','=',gamma
   do ispec = 1, nspecies
     write (*,'(a,i2,a,a2,a,i2,a,i2)') '   spec = ',ispec,'; ele = ',symbolA(ispec),'; Z = ',nzx(ispec), '; nssh = ',nssh(ispec)  
   end do

@@ -1,26 +1,24 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
-import numpy as np
+import sys
+import os
+sys.path.append("/home/dani/fireballpy/build")
+import fireballpy as fb
 
-def read_complex_matrix(filename):
-    with open(filename, 'r') as file:
-        lines = file.readlines()
-        n = len(lines)
-        matrix = np.zeros((n, n), dtype=np.complex128)
-        for i, line in enumerate(lines):
-            a=line.replace('(','').replace(')','').replace(',','').split()
-            #print(a[0],a[1])
-            for j in range(4):
-              real=a[0+j*2]
-              imag=a[1+j*2]
-              matrix[i, j] = complex(float(real), float(imag))
-    return matrix
+fb.loadfdata_from_path("/home/dani/Fdata_HC-new/")
+fb.info_fdata()
+
+fb.loadbas_from_file("/home/dani/fireballpy/test/dia2.bas")
+fb.loadlvs_from_file("/home/dani/fireballpy/test/dia2.lvs")
+fb.loadkpts_from_file("/home/dani/fireballpy/test/dia2.kpts")
+fb.set_gamma(1)
+fb.rescal_structure(3.569)
+
+fb.call_allocate_system()
+fb.call_scf_loop()
+fb.call_getenergy()
+fb.info_energy()
+fb.info_forces()
 
 
-file_name = 'fireball.in'
-complex_matrix = read_complex_matrix(file_name)
-eigenvalues, eigenvectors = np.linalg.eig(complex_matrix)
-print(complex_matrix)
-print("Autovalores:")
-for eigenvalue in eigenvalues:
-    print(f"{eigenvalue:.3f}")
+
