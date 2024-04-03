@@ -117,6 +117,10 @@ subroutine loadkpts_from_file(kptsfile)
     sum_weight = sum_weight + weight_k_orig(ikpoint)
   end do
   close (unit = 54)
+  do ikpoint = 1, nkpoints
+    special_k(:,ikpoint) = special_k_orig(:,ikpoint)
+    weight_k(ikpoint) = weight_k_orig(ikpoint)
+  end do
 end
  
  
@@ -133,6 +137,11 @@ subroutine rescal_structure(rescal)
   end do
   do ikpoint = 1, nkpoints
     special_k_orig(:,ikpoint)=special_k_orig(:,ikpoint)/rescal
+  end do
+
+  do ikpoint = 1, nkpoints
+    special_k(:,ikpoint) = special_k_orig(:,ikpoint)
+    weight_k(ikpoint) = weight_k_orig(ikpoint)
   end do
 !  write(*,'(3x,a12,a1,F6.3)') 'rescal         ','=',rescal
 end
