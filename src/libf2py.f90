@@ -215,14 +215,13 @@ subroutine info_forces()
   end do
 end 
  
-character(200) function info_charges()
+subroutine info_charges()
   use M_system, only : natoms, Qin, imass
   use M_fdata, only : nssh
   implicit none
   integer :: iatom, issh 
   do iatom = 1, natoms
-    write (info_charges,'(2x, 10f14.8)') (Qin(issh,iatom), issh = 1, nssh(imass(iatom)))
+    write (*,'(2x, 10f14.8)') (Qin(issh,iatom), issh = 1, nssh(imass(iatom)))
   end do
-  return 
 end
 
