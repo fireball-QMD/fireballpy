@@ -5,7 +5,6 @@ import os
 sys.path.append("/home/dani/fireballpy/build")
 sys.path.append("/home/dani/fireballpy/geometry")
 import fireballpy as fb
-from geometry import *
 
 fb.loadfdata_from_path("/home/dani/Fdata_HC-new/")
 fb.info_fdata()
