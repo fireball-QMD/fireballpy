@@ -5,6 +5,13 @@ subroutine set_gamma(aux)
   gamma=aux
 end
  
+subroutine set_icluster(aux)
+  use M_system, only : icluster
+  implicit none
+  integer, intent(in):: aux
+  icluster=aux
+end
+ 
 subroutine loadfdata_from_path(fdatafile)
   use M_fdata
   implicit none
@@ -41,6 +48,14 @@ subroutine loadbas_from_file(basfile)
   end do
   close (unit = 69)
 end
+
+subroutine print_atoms_positions()
+  use M_system
+  do iatom = 1, natoms
+    write (*,'(3x,a2, 3(2x,f10.5))') symbol(iatom), ratom(:,iatom)
+  end do
+end 
+
 
 subroutine loadlvs_100()
   use M_system
@@ -119,7 +134,7 @@ subroutine rescal_structure(rescal)
   do ikpoint = 1, nkpoints
     special_k_orig(:,ikpoint)=special_k_orig(:,ikpoint)/rescal
   end do
-  print*,'Rescal atoms positions, lattice vectors and special kpoint',rescal
+!  write(*,'(3x,a12,a1,F6.3)') 'rescal         ','=',rescal
 end
  
 subroutine call_allocate_system()
@@ -140,7 +155,15 @@ subroutine call_getenergy()
   implicit none
   call getenergy ()
 end
- subroutine info_fdata()
+
+subroutine call_getforces()
+  use M_system
+  implicit none
+  call getforces()
+end
+
+
+subroutine info_fdata()
   use M_fdata
   use M_system
   implicit none
@@ -164,12 +187,6 @@ subroutine info_energy()
   implicit none
   integer :: iatom, in1,issh
   write(*,'(3x,A,I4,A,F12.10,A,L1)') 'Kscf =',Kscf,'; sigma =',sigma,'; scf_achieved =',scf_achieved
- 
-  write(*,*)'  ========== CHARGES ====== '
-  do iatom = 1, natoms
-    in1 = imass(iatom)
-     write (*,'(2x, 10f10.4)') (Qin(issh,iatom), issh = 1, nssh(in1))
-  end do
 
   write (*,*) ' ---------- T H E  T O T A L  E N E R G Y ----------- '
   write (*,*) '  '
@@ -192,12 +209,20 @@ subroutine info_forces()
   use M_system
   implicit none
   integer :: iatom
-  call getforces()
   write (*,*) ' The grand total force (eV/A): '
   do iatom = 1, natoms
     write (*,'(2x,A,i4, A, 3e14.6)') ' iatom = ', iatom, ' ftot      = ',ftot(:,iatom)
   end do
 end 
  
-
+character(200) function info_charges()
+  use M_system, only : natoms, Qin, imass
+  use M_fdata, only : nssh
+  implicit none
+  integer :: iatom, issh 
+  do iatom = 1, natoms
+    write (info_charges,'(2x, 10f14.8)') (Qin(issh,iatom), issh = 1, nssh(imass(iatom)))
+  end do
+  return 
+end
 
