@@ -11,8 +11,6 @@ subroutine scf_loop ()
     call diag_k ()
     call build_rho ()
     Kscf = Kscf + 1
-    write(*,'(3x,A,I4,A,F12.10,A,L1)') 'XXX Kscf =',Kscf,'; sigma =',sigma,'; scf_achieved =',scf_achieved
-    write (*,'(2x,A, f15.6)') 'XXX EBS = ',ebs
   end do
 end subroutine scf_loop
  
