@@ -1,14 +1,11 @@
 &option
-basisfile= dia2.bas 
-lvsfile = dia2.lvs 
 iks=0
 idogs=1
 imcweda=1
 fdatalocation ="/home/dani/Fdata_HC-new"
-idipole = 0
-rescal=3.569
-iqout = 7 
-icluster = 0
+idipole = 1
+iqout = 1 
+icluster = 1
 iquench = -1
 sigmatol = 0.00000001
 nstepf = 1 

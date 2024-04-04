@@ -11,6 +11,20 @@ subroutine set_icluster(aux)
   integer, intent(in):: aux
   icluster=aux
 end
+
+subroutine set_idipole(aux)
+  use M_system, only : idipole
+  implicit none
+  integer, intent(in):: aux
+  idipole=aux
+end
+
+subroutine set_iqout(aux)
+  use M_system, only : iqout
+  implicit none
+  integer, intent(in):: aux
+  iqout=aux
+end
  
 subroutine loadfdata_from_path(fdatafile)
   use M_fdata
@@ -143,7 +157,7 @@ subroutine rescal_structure(rescal)
     special_k(:,ikpoint) = special_k_orig(:,ikpoint)
     weight_k(ikpoint) = weight_k_orig(ikpoint)
   end do
-!  write(*,'(3x,a12,a1,F6.3)') 'rescal         ','=',rescal
+  write(*,'(3x,a12,a1,F6.3)') 'rescal         ','=',rescal
 end
  
 subroutine call_allocate_system()
