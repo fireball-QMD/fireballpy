@@ -4,10 +4,10 @@ mkdir build
 cd build
 cmake ..
 make
-f2py3 -m fireballpy -c ../src/libf2py.f90 --fcompiler='ifort' -I. libfireballpy.a --link-lapack_opt
+f2py3 -m fireball -c ../src/libf2py.f90 --fcompiler='ifort' -I. libfireballpy.a --link-lapack_opt
 cd $here
 
 cd test
-./test.py
+./test2.py
 cd ..
 

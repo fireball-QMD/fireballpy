@@ -4,10 +4,11 @@ from typing import Set, Optional
 import numpy as np
 
 from ase import Atoms
-from ase.calculators.calculator import (Calculator,
-                                        all_changes)
+from ase.calculators.calculator import (Calculator,all_changes)
 
-# Need to change name
+import sys
+import os
+sys.path.append("/home/dani/fireballpy/build")
 import fireball as fb
 
 
@@ -46,7 +47,7 @@ class Fireball(Calculator):
         fb.loadfdata_from_path(fdata_path)
 
     def _calculate_charges(self, atoms: Atoms) -> None:
-        self.charges = fb.info_charges()
+        self.charges = fb.info_charges(len(atoms))
 
         # Save energy
         self.results['charges'] = self.charges
@@ -67,7 +68,7 @@ class Fireball(Calculator):
             self._calculate_energies(atoms)
 
         fb.call_getforces()
-        self.forces = fb.info_forces()
+        self.forces = fb.info_forces(len(atoms))
 
         # Save forces
         self.results['forces'] = self.forces
@@ -97,7 +98,8 @@ class Fireball(Calculator):
         numbers = atoms.get_atomic_numbers()
         if set(numbers) - self._numbers:
             self._numbers = set(numbers)
-            fb.set_coords(len(atoms), atoms.numbers, atoms.positions)
+            #fb.set_coords2(len(atoms), atoms.numbers, atoms.positions)
+            fb.set_coords(atoms.numbers, atoms.positions)
             fb.loadlvs_100()
             fb.loadkpts_gamma()
             fb.call_allocate_system()

@@ -34,34 +34,29 @@ subroutine loadfdata_from_path(fdatafile)
   call load_fdata()
 end
 
-subroutine loadbas_from_file(basfile)
+subroutine set_coords(naux, z, xyz)
   use M_system
   use M_fdata, only : symbolA, nspecies, nzx 
   implicit none
+  integer, intent(in) :: naux
+  integer, dimension(naux), intent(in) :: z
+  real*8, dimension(naux,3), intent(in) :: xyz
   integer :: iatom,ispec
-  logical :: zindata
-  integer :: nucz
-  character(len=400),intent(in):: basfile
-  print*,trim(basfile)
-  open (unit = 69, file = trim(basfile), status = 'old')
-  read (69, *) natoms
+  natoms=naux
   allocate (ratom (3, natoms))
   allocate (symbol (natoms))
   allocate (imass (natoms))
   do iatom = 1, natoms
-    read (69,*) nucz,ratom(:,iatom)
-    zindata = .false.
+    ratom(:, iatom) = xyz(iatom, :)
     do ispec = 1, nspecies
-    if ( nucz .eq. nzx(ispec)) then
-      zindata = .true.
-      imass(iatom) = ispec
-      symbol(iatom)=symbolA(ispec)
-      write (*,'(3x,a2, 3(2x,f10.5))') symbol(iatom), ratom(:,iatom)
-    end if
+      if ( z(iatom) .eq. nzx(ispec)) then
+        imass(iatom) = ispec
+        symbol(iatom) = symbolA(ispec)
+      end if
    end do
   end do
-  close (unit = 69)
 end
+
 
 subroutine print_atoms_positions()
   use M_system
@@ -204,10 +199,11 @@ subroutine info_fdata()
   end do
 end
  
-subroutine info_energy()
+subroutine info_energy(out_energy)
   use M_system
   use M_fdata, only : nssh
   implicit none
+  real*8, intent(out) :: out_energy
   integer :: iatom, in1,issh
   write(*,'(3x,A,I4,A,F12.10,A,L1)') 'Kscf =',Kscf,'; sigma =',sigma,'; scf_achieved =',scf_achieved
 
@@ -225,25 +221,38 @@ subroutine info_energy()
   write (*,*) '  '
   write (*,'(2x,A, f15.6)')' Cohesive Energy per atom  = ', (etot - atomic_energy)/natoms
   write (*,*) ' ----------------------------------------------------- '
+
+  out_energy = etot
 end
 
 
-subroutine info_forces()
+subroutine info_forces(naux, out_forces)
   use M_system
   implicit none
+  integer, intent(in) :: naux
+  real*8, dimension(naux, 3), intent(out) :: out_forces
   integer :: iatom
   write (*,*) ' The grand total force (eV/A): '
   do iatom = 1, natoms
+    out_forces(iatom, :) = ftot(:, iatom)
     write (*,'(2x,A,i4, A, 3e14.6)') ' iatom = ', iatom, ' ftot      = ',ftot(:,iatom)
   end do
 end 
  
-subroutine info_charges()
+subroutine info_charges(naux, out_charges)
   use M_system, only : natoms, Qin, imass
   use M_fdata, only : nssh
   implicit none
-  integer :: iatom, issh 
+  integer, intent(in) :: naux
+  real*8, dimension(naux), intent(out) :: out_charges
+  integer :: iatom, issh
+  real*8 :: out_qsum
   do iatom = 1, natoms
+    out_qsum = 0.0d0
+    do issh = 1, nssh(imass(iatom))
+      out_qsum = out_qsum + Qin(issh, iatom)
+    end do
+    out_charges(iatom) = out_qsum
     write (*,'(2x, 10f14.8)') (Qin(issh,iatom), issh = 1, nssh(imass(iatom)))
   end do
 end
