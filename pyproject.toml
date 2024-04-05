@@ -31,5 +31,4 @@ classifiers = [
 dependencies = [
   "numpy>=1.26.0",
   "ase>=3.22.0",
-  "mendeleev>=0.15.0",
 ]
