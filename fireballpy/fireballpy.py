@@ -1,4 +1,3 @@
-import fireball as fb
 import warnings
 
 import numpy as np
@@ -8,6 +7,7 @@ from ase.calculators.calculator import Calculator, all_changes
 
 import sys
 sys.path.append("/home/dani/fireballpy/build")  # This needs to be thinked
+import fireball as fb
 
 
 class Fireball(Calculator):
@@ -53,8 +53,8 @@ class Fireball(Calculator):
     def _calculate_energies(self) -> None:
         fb.call_scf_loop()
         fb.call_getenergy()
-        self.energy = fb.info_energy()
-
+        self.energy = fb.get_etot()
+        print('ETOT =',self.energy)
         # Save energy
         self.results['energy'] = self.energy
         self.results['free_energy'] = self.energy
@@ -66,7 +66,7 @@ class Fireball(Calculator):
         # Save charges
         self.results['charges'] = self.charges
 
-    def _calculate_forces(self, atoms: Atoms) -> None:
+    def _calculate_forces(self) -> None:
         self._check_compute()
         fb.call_getforces()
         self.forces = fb.info_forces(self.natoms)

@@ -25,6 +25,14 @@ subroutine set_iqout(aux)
   integer, intent(in):: aux
   iqout=aux
 end
+
+
+real function get_etot()
+  use M_system, only : etot
+  get_etot=etot
+  return
+end
+
  
 subroutine loadfdata_from_path(fdatafile)
   use M_fdata
