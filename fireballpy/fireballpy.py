@@ -34,7 +34,7 @@ class Fireball(Calculator):
        Phys. Status Solidi B 248, No. 9, 1989-2007 (2011)
        DOI 10.1002/pssb.201147259
     """
-
+                       
     implemented_properties = ['energy', 'forces', 'charges']
 
     ignored_changes = ['initial_magmoms']
@@ -59,21 +59,26 @@ class Fireball(Calculator):
 
     def _calculate_charges(self) -> None:
         self._check_compute()
-        self.charges = fb.info_charges(self.natoms)
-
+        self.charges = []
+        for iatom in range(self.natoms):
+          aux=[]
+          for issh in range(fb.get_nssh(iatom+1)):
+            aux.append(fb.get_shell_atom_charge(issh+1,iatom+1))
+          self.charges.append(aux)
         # Save charges
         self.results['charges'] = self.charges
 
     def _calculate_forces(self) -> None:
         self._check_compute()
         fb.call_getforces()
-        self.forces = fb.info_forces(self.natoms)
-
+        for iatom in range(self.natoms):
+          self.forces[iatom,0]=fb.get_atom_force(iatom+1,1)
+          self.forces[iatom,1]=fb.get_atom_force(iatom+1,2)
+          self.forces[iatom,2]=fb.get_atom_force(iatom+1,3)
         # Save forces
         self.results['forces'] = self.forces
 
-    def calculate(self, atoms=None, properties=['energy'],
-                  system_changes=all_changes) -> None:
+    def calculate(self, atoms=None, properties=['energy'], system_changes=all_changes) -> None:
 
         Calculator.calculate(self, atoms, properties, system_changes)
 
@@ -100,5 +105,5 @@ class Fireball(Calculator):
         fb.call_allocate_system()
 
         self.natoms = len(self.atoms)
-        self.charges = np.empty(self.natoms)
+        self.charges = [] 
         self.forces = np.empty((self.natoms, 3))

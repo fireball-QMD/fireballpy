@@ -27,11 +27,37 @@ subroutine set_iqout(aux)
 end
 
 
+integer function get_nssh(iaux)
+ use M_fdata, only : nssh
+ use M_system, only : imass
+ get_nssh=nssh(imass(iaux))
+ return
+end
+
 real function get_etot()
   use M_system, only : etot
   get_etot=etot
   return
 end
+
+
+real function get_atom_force(iaux,jaux)
+  use M_system, only : ftot
+  implicit none
+  integer, intent(in):: iaux
+  integer, intent(in):: jaux
+  get_atom_force = ftot(jaux,iaux)
+  return
+end function get_atom_force
+
+real function get_shell_atom_charge(iauxssh,iauxatom)
+  use M_system, only : natoms, Qin, imass
+  use M_fdata, only : nssh
+  implicit none
+  integer, intent(in):: iauxatom
+  integer, intent(in):: iauxssh
+  get_shell_atom_charge = Qin(iauxssh,iauxatom)
+end function get_shell_atom_charge
 
  
 subroutine loadfdata_from_path(fdatafile)
@@ -68,6 +94,8 @@ end
 
 subroutine print_atoms_positions()
   use M_system
+  implicit none
+  integer iatom
   do iatom = 1, natoms
     write (*,'(3x,a2, 3(2x,f10.5))') symbol(iatom), ratom(:,iatom)
   end do
@@ -233,7 +261,6 @@ subroutine info_energy(out_energy)
   out_energy = etot
 end
 
-
 subroutine info_forces(naux, out_forces)
   use M_system
   implicit none
@@ -247,21 +274,3 @@ subroutine info_forces(naux, out_forces)
   end do
 end 
  
-subroutine info_charges(naux, out_charges)
-  use M_system, only : natoms, Qin, imass
-  use M_fdata, only : nssh
-  implicit none
-  integer, intent(in) :: naux
-  real*8, dimension(naux), intent(out) :: out_charges
-  integer :: iatom, issh
-  real*8 :: out_qsum
-  do iatom = 1, natoms
-    out_qsum = 0.0d0
-    do issh = 1, nssh(imass(iatom))
-      out_qsum = out_qsum + Qin(issh, iatom)
-    end do
-    out_charges(iatom) = out_qsum
-    write (*,'(2x, 10f14.8)') (Qin(issh,iatom), issh = 1, nssh(imass(iatom)))
-  end do
-end
-
