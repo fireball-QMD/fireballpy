@@ -17,13 +17,9 @@ Obtener la base:
 
    wget --recursive --no-directories --directory-prefix=BASE  --no-clobber https://fireball.ftmc.uam.es/BASE/
 
+------------------------
+
 Documentación:
 
 - https://fireballpy.github.io
 
-------------------------
-
-Pensar:
-
--  Quedarse con la mejor autoconsistencia
--  Diagonalizar en base fb  
