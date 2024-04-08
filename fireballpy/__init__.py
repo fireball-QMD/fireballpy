@@ -19,7 +19,7 @@ __version__ = '0.0.1'
 
 from ase.calculators.calculator import register_calculator_class
 
-from .fireball import Fireball
+from .fireballpy import Fireball
 
 # Register the calculator as available for ASE
 register_calculator_class("fireball", Fireball)
