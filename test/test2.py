@@ -9,7 +9,8 @@ from ase.io import read
 
 atoms = read("/home/dani/fireballpy/test/input.xyz")
 atoms.calc = Fireball(fdata_path="/home/dani/Fdata_HC-new/")
-
+ETOT=atoms.get_potential_energy()
+print("ETOT = "+str(ETOT))
 atoms.get_charges()
 atoms.get_potential_energy()
 atoms.get_forces()

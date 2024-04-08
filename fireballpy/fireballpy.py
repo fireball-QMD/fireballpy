@@ -46,15 +46,13 @@ class Fireball(Calculator):
     # Requisite energies
     def _check_compute(self) -> None:
         if 'energy' not in self.results:
-            warnings.warn("Energies not computed. Computing energies",
-                          UserWarning)
+            warnings.warn("Energies not computed. Computing energies",UserWarning)
             self._calculate_energies()
 
     def _calculate_energies(self) -> None:
         fb.call_scf_loop()
         fb.call_getenergy()
         self.energy = fb.get_etot()
-        print('ETOT =',self.energy)
         # Save energy
         self.results['energy'] = self.energy
         self.results['free_energy'] = self.energy

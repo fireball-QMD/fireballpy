@@ -15,17 +15,15 @@ Clone the repository to your computer:
 
 Obtener la base:
 
-    wget -r -np -nH --cut-dirs=1  https://fireball.ftmc.uam.es/create/coutput/
+   wget --recursive --no-directories --directory-prefix=BASE  --no-clobber https://fireball.ftmc.uam.es/BASE/
 
 Documentación:
 
-- https://fireballpy.github.io/fireballpy.html
+- https://fireballpy.github.io
 
 ------------------------
 
 Pensar:
 
--  Quitar idynmat iephc ?
--  Quitar ewaldqmmm 
 -  Quedarse con la mejor autoconsistencia
 -  Diagonalizar en base fb  
