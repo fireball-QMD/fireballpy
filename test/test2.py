@@ -22,4 +22,4 @@ for c in charge:
 force = atoms.get_forces()
 print("------atoms.forces------------")
 for f in force:
-    print(f)
+  print(f)

@@ -118,6 +118,5 @@ class Fireball(Calculator):
         fb.loadlvs_100()
         fb.loadkpts_gamma()
         fb.call_allocate_system()
-
         self.charges = np.empty((self.natoms, self._infodat.maxshs))
         self.forces = np.empty((self.natoms, 3))

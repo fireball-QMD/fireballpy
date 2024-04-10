@@ -51,8 +51,7 @@ real function get_atom_force(iaux,jaux)
 end function get_atom_force
 
 real function get_shell_atom_charge(iauxssh,iauxatom)
-  use M_system, only : natoms, Qin, imass
-  use M_fdata, only : nssh
+  use M_system, only : Qin
   implicit none
   integer, intent(in):: iauxatom
   integer, intent(in):: iauxssh
@@ -237,10 +236,8 @@ end
  
 subroutine info_energy(out_energy)
   use M_system
-  use M_fdata, only : nssh
   implicit none
   real*8, intent(out) :: out_energy
-  integer :: iatom, in1,issh
   write(*,'(3x,A,I4,A,F12.10,A,L1)') 'Kscf =',Kscf,'; sigma =',sigma,'; scf_achieved =',scf_achieved
 
   write (*,*) ' ---------- T H E  T O T A L  E N E R G Y ----------- '
