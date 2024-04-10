@@ -7,7 +7,7 @@ import numpy as np
 from numpy.typing import NDArray
 from ase.data import atomic_masses, chemical_symbols
 
-from utils import (read_file,
+from .utils import (read_file,
                    read_float_array,
                    read_int_array,
                    read_float_entry,

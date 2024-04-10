@@ -6,11 +6,11 @@ import warnings
 import numpy as np
 from ase.calculators.calculator import Calculator, all_changes
 
-from infodat import InfoDat, default_infodat
-from fdata import download_needed
+from .infodat import InfoDat, default_infodat
+from .fdata import download_needed
 
 import sys
-sys.path.append("/home/dani/fireballpy/build")  # This needs to be thinked
+sys.path.append("../build/")  # This needs to be thinked
 import fireball as fb
 
 

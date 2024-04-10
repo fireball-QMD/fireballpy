@@ -9,7 +9,7 @@ import tempfile
 import uuid
 
 from tqdm import tqdm
-from infodat import InfoDat
+from .infodat import InfoDat
 
 ENV_FB_HOME = "FIREBALL_HOME"
 ENV_XDG_CACHE_HOME = "XDG_CACHE_HOME"
@@ -55,18 +55,18 @@ def _get_needed_files(idat: InfoDat, natoms: int) -> list[str]:
         for (i, fname) in enumerate(TWOCFNAMES):
             if i == 13:
                 continue
-            match i:
-                case 1 | 14 | 17 | 19:
-                    isub = idat.nshs[z1]
-                case 2 | 3 | 15 | 16 | 18 | 20 | 21:
-                    isub = idat.nshs[z2]
-                case 5 | 6 | 7:
-                    isub = 4
-                case _:
-                    isub = 0
+
+            if i in [1, 14, 17, 19]:
+                isub = idat.nshs[z1]
+            elif i in [2, 3, 15, 16, 18, 20, 21]:
+                isub = idat.nshs[z2]
+            elif i in [5, 6, 7]:
+                isub = 4
+            else:
+                isub = 0
 
             for isorp in range(isub + 1):
-                if (i > 13) and (i < 23) and (isorp == 0):
+                if (i > 13) and (i < 22) and (isorp == 0):
                     continue
                 needed.append((f"{fname}_{isorp:02}" if isub else fname) +
                               f".{z1:02}.{z2:02}.dat")

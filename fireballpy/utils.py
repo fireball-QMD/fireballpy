@@ -1,3 +1,4 @@
+from __future__ import annotations
 from collections import deque
 
 from numpy.typing import NDArray
@@ -5,16 +6,12 @@ import numpy as np
 
 
 def _alloc(dims: tuple[int, ...], dtype: str) -> NDArray:
-    match dtype:
-        case "float":
-            return np.zeros(dims, dtype=float, order="F")
-        case "int":
-            return np.zeros(dims, dtype=int, order="F")
-        case _:
-            raise ValueError(
-                f"dtype must be either 'int' or 'float'"
-                f"got {dtype}"
-            )
+    if dtype == "float":
+        return np.zeros(dims, dtype=float, order="F")
+    elif dtype == "int":
+        return np.zeros(dims, dtype=int, order="F")
+    else:
+        raise ValueError(f"dtype must be either 'int' or 'float' got {dtype}")
 
 
 def _read_array(data: deque[str],
@@ -22,40 +19,30 @@ def _read_array(data: deque[str],
                 lines: int,
                 width: None | int) -> NDArray:
     val = data.popleft()
-    match dtype:
-        case "float":
-            arr = np.array(
-                [val.upper().replace("D", "E").split() for _ in range(lines)],
-                dtype=float, order="F"
-            )
-        case "int":
-            arr = np.array(
-                [val.split() for _ in range(lines)],
-                dtype=int, order="F"
-            )
-        case _:
-            raise ValueError(
-                f"dtype must be either 'int' or 'float'"
-                f"got {dtype}"
-            )
+    if dtype == "float":
+        arr = np.array([val.upper().replace("D", "E").split()
+                        for _ in range(lines)],
+                       dtype=float, order="F")
+    elif dtype == "int":
+        arr = np.array([val.split() for _ in range(lines)],
+                       dtype=int, order="F")
+    else:
+        raise ValueError(f"dtype must be either 'int' or 'float' got {dtype}")
     width = arr.shape[1] if width is None else width
     return arr[:width]
 
 
 def _read_entry(data: deque[str], dtype: str, field: int) -> int | float | str:
     val = data.popleft()
-    match dtype:
-        case "float":
-            return float(val.upper().replace("D", "E").split()[field])
-        case "int":
-            return int(val.split()[field])
-        case "str":
-            return val.split()[field]
-        case _:
-            raise ValueError(
-                f"dtype must be either 'int', 'float' or 'str',"
-                f"got {dtype}"
-            )
+    if dtype == "float":
+        return float(val.upper().replace("D", "E").split()[field])
+    elif dtype == "int":
+        return int(val.split()[field])
+    elif dtype == "str":
+        return val.split()[field]
+    else:
+        raise ValueError(f"dtype must be either 'int', 'float' "
+                         f"or 'str' got {dtype}")
 
 
 def alloc_float(*size: int) -> NDArray[float]:
@@ -80,17 +67,15 @@ def read_line(data: deque[str], *dtypes: str) -> list[int | float | str]:
         raise ValueError("Wrong number of arguments, "
                          f"{len(dtypes) + 1} < {len(line) + 1}")
     for i, (l, t) in enumerate(zip(line, dtypes)):
-        match t:
-            case "float":
-                line[i] = float(l.upper().replace("D", "E"))
-            case "int":
-                line[i] = int(l)
-            case "str":
-                continue
-            case _:
-                raise ValueError(
-                    f"dtypes must be either 'int', 'float' or 'str'"
-                    f", got {dtypes}")
+        if t == "float":
+            line[i] = float(l.upper().replace("D", "E"))
+        elif t == "int":
+            line[i] = int(l)
+        elif t == "str":
+            continue
+        else:
+            raise ValueError(f"dtypes must be either 'int', 'float' "
+                             f"or 'str' got {t} at position {i}")
     return line
 
 
