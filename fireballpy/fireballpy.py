@@ -1,15 +1,17 @@
-import fireball as fb
+from __future__ import annotations
+
+import os
 import warnings
-from typing import Optional
 
 import numpy as np
 from ase.calculators.calculator import Calculator, all_changes
 
 from infodat import InfoDat, default_infodat
-from _fdata import download_needed, _get_fb_home
+from fdata import download_needed
 
 import sys
 sys.path.append("/home/dani/fireballpy/build")  # This needs to be thinked
+import fireball as fb
 
 
 class Fireball(Calculator):
@@ -42,16 +44,9 @@ class Fireball(Calculator):
 
     ignored_changes = ['initial_magmoms']
 
-    def __init__(self, fdata_path: Optional[str] = None, **kwargs):
+    def __init__(self, fdata_path: str | None = None, **kwargs):
         Calculator.__init__(self, **kwargs)
-        if fdata_path is None:
-            self._download = True
-            self._infodat = default_infodat
-            self._fdata_path = _get_fb_home()
-        else:
-            self._download = False
-            self._infodat = InfoDat.load(fdata_path)
-            self._fdata_path = fdata_path
+        self._fdata_path = fdata_path
 
     # Requisite energies
     def _check_compute(self) -> None:
@@ -109,9 +104,14 @@ class Fireball(Calculator):
             self._calculate_forces()
 
     def initialize(self) -> None:
-        if self._download:
-            self._infodat = self._infodat.select(self.atoms.numbers)
-            download_needed(self._infodat)
+        self.natoms = len(self.atoms)
+
+        if self._fdata_path is None:
+            self._infodat = default_infodat.select(self.atoms.numbers)
+            self._fdata_path = download_needed(self._infodat, self.natoms)
+        else:
+            self._infodat = InfoDat.read_ascii(os.path.join(self._fdata_path,
+                                                            "info.dat"))
 
         fb.loadfdata_from_path(self._fdata_path)
         fb.set_coords(self.atoms.numbers, self.atoms.positions)
@@ -119,6 +119,5 @@ class Fireball(Calculator):
         fb.loadkpts_gamma()
         fb.call_allocate_system()
 
-        self.natoms = len(self.atoms)
         self.charges = np.empty((self.natoms, self._infodat.maxshs))
         self.forces = np.empty((self.natoms, 3))

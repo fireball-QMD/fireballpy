@@ -15,7 +15,7 @@ authors = [
 ]
 description = "Minimalistic Fireball for Python"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.7"
 classifiers = [
     "Intended Audience :: Science/Research",
     "Operating System :: MacOS",
@@ -24,12 +24,17 @@ classifiers = [
     "Operating System :: Unix",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Topic :: Scientific/Engineering",
     "Topic :: Scientific/Engineering :: Physics"
 ]
 dependencies = [
-  "numpy>=1.26.0",
+  "numpy>=1.21.0",
   "ase>=3.22.0",
   "tqdm>=4.66.0"
 ]

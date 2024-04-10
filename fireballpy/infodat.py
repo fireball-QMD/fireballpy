@@ -72,44 +72,6 @@ class InfoDat:
             max(nshs_pp[num] for num in self.anums)
         )
 
-    @classmethod
-    def load(cls, fpath: str) -> InfoDat:
-        new_shs = {}
-        new_shs_pp = {}
-        new_rc_pp = {}
-        new_qns = {}
-        new_rcs = {}
-        new_wffs = {}
-        new_nafs = {}
-        new_eng = {}
-
-        dat = read_file(fpath, header=1)
-        nsps = read_int_entry(dat)
-        for _ in range(nsps):
-            skip_lines(dat, lines=3)
-            z = read_int_entry(dat)
-            skip_lines(dat)
-            nssh = read_int_entry(dat)
-            new_shs[z] = read_int_array(dat, width=nssh).reshape(-1,)
-            nssh_pp = read_int_entry(dat)
-            new_shs_pp[z] = read_int_array(dat, width=nssh_pp).reshape(-1,)
-            new_rc_pp[z] = read_float_entry(dat)
-            new_qns[z] = read_float_array(dat, width=nssh).reshape(-1,)
-            new_rcs[z] = read_float_array(dat, width=nssh).reshape(-1,)
-            new_wffs[z] = read_line(dat)
-            new_nafs[z] = read_line(dat)
-            new_eng[z] = read_float_entry(dat)
-            skip_lines(dat)
-
-        return cls(new_shs,
-                   new_shs_pp,
-                   new_rc_pp,
-                   new_qns,
-                   new_rcs,
-                   new_wffs,
-                   new_nafs,
-                   new_eng)
-
     def select(self, anums: NDArray[int]) -> InfoDat:
         """Get a subset with the InfoDat with only some elements
 
@@ -156,7 +118,45 @@ class InfoDat:
                        new_nafs,
                        new_eng)
 
-    def write(self, fpath: str) -> None:
+    @classmethod
+    def read_ascii(cls, fpath: str) -> InfoDat:
+        new_shs = {}
+        new_shs_pp = {}
+        new_rc_pp = {}
+        new_qns = {}
+        new_rcs = {}
+        new_wffs = {}
+        new_nafs = {}
+        new_eng = {}
+
+        dat = read_file(fpath, header=1)
+        nsps = read_int_entry(dat)
+        for _ in range(nsps):
+            skip_lines(dat, lines=3)
+            z = read_int_entry(dat)
+            skip_lines(dat)
+            nssh = read_int_entry(dat)
+            new_shs[z] = read_int_array(dat, width=nssh).reshape(-1,)
+            nssh_pp = read_int_entry(dat)
+            new_shs_pp[z] = read_int_array(dat, width=nssh_pp).reshape(-1,)
+            new_rc_pp[z] = read_float_entry(dat)
+            new_qns[z] = read_float_array(dat, width=nssh).reshape(-1,)
+            new_rcs[z] = read_float_array(dat, width=nssh).reshape(-1,)
+            new_wffs[z] = read_line(dat)
+            new_nafs[z] = read_line(dat)
+            new_eng[z] = read_float_entry(dat)
+            skip_lines(dat)
+
+        return cls(new_shs,
+                   new_shs_pp,
+                   new_rc_pp,
+                   new_qns,
+                   new_rcs,
+                   new_wffs,
+                   new_nafs,
+                   new_eng)
+
+    def write_ascii(self, fpath: str) -> None:
         """Write the contents of this class into a classsic
         info.dat file to be read by fireball
 
@@ -198,7 +198,7 @@ class InfoDat:
             fp.write("\n  ".join(info))
 
 
-default_shs = {
+_default_shs = {
     1: np.array([0], dtype=int),
     5: np.array([0, 1], dtype=int),
     6: np.array([0, 1], dtype=int),
@@ -206,7 +206,7 @@ default_shs = {
     8: np.array([0, 1], dtype=int),
 }
 
-default_shs_pp = {
+_default_shs_pp = {
     1: np.array([0], dtype=int),
     5: np.array([0, 1], dtype=int),
     6: np.array([0, 1], dtype=int),
@@ -214,7 +214,7 @@ default_shs_pp = {
     8: np.array([0, 1], dtype=int),
 }
 
-default_rc_pp = {
+_default_rc_pp = {
     1: 0.2,
     5: 1.15,
     6: 0.87,
@@ -222,7 +222,7 @@ default_rc_pp = {
     8: 0.71,
 }
 
-default_qns = {
+_default_qns = {
     1: np.array([1.0]),
     5: np.array([2.0, 1.0]),
     6: np.array([2.0, 2.0]),
@@ -230,7 +230,7 @@ default_qns = {
     8: np.array([2.0, 4.0]),
 }
 
-default_rcs = {
+_default_rcs = {
     1: np.array([5.42]),
     5: np.array([5.00, 5.00]),
     6: np.array([5.95, 5.95]),
@@ -238,7 +238,7 @@ default_rcs = {
     8: np.array([5.32, 5.32]),
 }
 
-default_wffs = {
+_default_wffs = {
     1: ["cinput/001_542.wf1"],
     5: ["cinput/005_500.wf1", "cinput/005_500.wf2"],
     6: ["cinput/006_595.wf1", "cinput/006_595.wf2"],
@@ -246,7 +246,7 @@ default_wffs = {
     8: ["cinput/008_532.wf1", "cinput/008_532.wf2"],
 }
 
-default_nafs = {
+_default_nafs = {
     1:  ["cinput/001_542.na0",
          "cinput/001_542.na1"],
     5:  ["cinput/001_500.na0",
@@ -263,7 +263,7 @@ default_nafs = {
          "cinput/008_532.na2"],
 }
 
-default_eng = {
+_default_eng = {
     1: 0.0,
     5: 0.0,
     6: 0.0,
@@ -271,11 +271,11 @@ default_eng = {
     8: 0.0,
 }
 
-default_infodat = InfoDat(default_shs,
-                          default_shs_pp,
-                          default_rc_pp,
-                          default_qns,
-                          default_rcs,
-                          default_wffs,
-                          default_nafs,
-                          default_eng)
+default_infodat = InfoDat(_default_shs,
+                          _default_shs_pp,
+                          _default_rc_pp,
+                          _default_qns,
+                          _default_rcs,
+                          _default_wffs,
+                          _default_nafs,
+                          _default_eng)

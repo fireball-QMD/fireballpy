@@ -12,6 +12,7 @@ the pure Fortran version
 
 __all__ = [
     'Fireball',
+    'InfoDat'
     'retro'
 ]
 
@@ -20,6 +21,7 @@ __version__ = '0.0.1'
 from ase.calculators.calculator import register_calculator_class
 
 from .fireballpy import Fireball
+from .infodat import InfoDat
 
 # Register the calculator as available for ASE
 register_calculator_class("fireball", Fireball)
