@@ -1,6 +1,7 @@
 from __future__ import annotations
 from itertools import product
 from urllib.request import urlopen
+from typing import Iterable
 
 import errno
 import os
@@ -9,7 +10,7 @@ import tempfile
 import uuid
 
 from tqdm import tqdm
-from .infodat import InfoDat
+from fireballpy.infodat import InfoDat
 
 ENV_FB_HOME = "FIREBALL_HOME"
 ENV_XDG_CACHE_HOME = "XDG_CACHE_HOME"
@@ -24,7 +25,7 @@ THREECFNAMES = ('bcna', 'den3', 'deS3')
 
 
 # Useful wrapper
-def _penum(it: list, rep: int = 1) -> product:
+def _penum(it: Iterable, rep: int = 1) -> product:
     return product(enumerate(it), repeat=rep)
 
 
@@ -166,3 +167,12 @@ def download_needed(idat: InfoDat, natoms: int) -> str:
     idat.write_ascii(os.path.join(fb_home, "info.dat"))
 
     return fb_home
+
+
+def get_default_infodat() -> InfoDat:
+    fb_home = _get_fb_home()
+    os.makedirs(fb_home, exist_ok=True)  # Ensure folder exists
+    download_file("https://fireball.ftmc.uam.es/BASE/info.dat",
+                  os.path.join(fb_home, "default_infodat"))
+
+    return InfoDat(os.path.join(fb_home, "default_infodat"))

@@ -1,9 +1,9 @@
 from io import StringIO
 from os.path import splitext
 
-from ase.data import chemical_symbols
-from ase.io import read
-from ase.io.formats import NameOrFile
+from ase.data import chemical_symbols  # type: ignore
+from ase.io import read  # type: ignore
+from ase.io.formats import NameOrFile  # type: ignore
 
 
 def read_bas(filename: NameOrFile):

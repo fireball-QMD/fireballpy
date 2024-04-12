@@ -14,28 +14,11 @@
    .. autosummary::
    
       ~InfoDat.__init__
-      ~InfoDat.load
-      ~InfoDat.save
+      ~InfoDat.select
+      ~InfoDat.write_ascii
    
    
 
    
-   
-   .. rubric:: Attributes
-
-   .. autosummary::
-   
-      ~InfoDat.shells
-      ~InfoDat.shellsPP
-      ~InfoDat.cutoffPP
-      ~InfoDat.cutoffs
-      ~InfoDat.qneutral
-      ~InfoDat.wffiles
-      ~InfoDat.nafiles
-      ~InfoDat.energy
-      ~InfoDat.numbers
-      ~InfoDat.numshells
-      ~InfoDat.numshellsPP
-      ~InfoDat.elements
    
    

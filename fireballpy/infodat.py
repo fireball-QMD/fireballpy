@@ -1,83 +1,71 @@
 from __future__ import annotations
-from dataclasses import dataclass, field
-
+from copy import deepcopy
 import errno
 
 import numpy as np
 from numpy.typing import NDArray
-from ase.data import atomic_masses, chemical_symbols
+from ase.data import atomic_masses, chemical_symbols  # type: ignore
 
-from .utils import (read_file,
-                   read_float_array,
-                   read_int_array,
-                   read_float_entry,
-                   read_int_entry,
-                   read_line,
-                   skip_lines)
+from ._types import integer
+from fireballpy.utils import (file_as_deque,
+                              read_integer_array,
+                              read_line,
+                              read_real_array,
+                              skip_lines,
+                              to_integer,
+                              to_real)
 
 
-@dataclass
 class InfoDat:
     """Class to keep all the info present in the classsical info.dat file,
     needed for the adjusting the different parameters of each specie in the
     computation
     """
 
-    shs: dict[int, np.ndarray[int, int]]
-    shs_pp: dict[int, np.ndarray[int, int]]
-    rc_pp: dict[int, float]
-    qns: dict[int, np.ndarray[int, float]]
-    rcs: dict[int, np.ndarray[int, float]]
-    wffs: dict[int, list[str]]
-    nafs: dict[int, list[str]]
-    eng: dict[int, float]
+    def __init__(self, file_path: str):
+        self.shs = {}
+        self.shs_pp = {}
+        self.rc_pp = {}
+        self.qns = {}
+        self.rcs = {}
+        self.wffs = {}
+        self.nafs = {}
+        self.eng = {}
 
-    nsps: int = field(init=False)
-    anums: list[int] = field(init=False)
-    nshs: dict[int, int] = field(init=False)
-    nshs_pp: dict[int, int] = field(init=False)
-    maxshs: int = field(init=False)
+        dat = file_as_deque(file_path)
+        skip_lines(dat)
+        nsps = to_integer(read_line(dat)[0])
+        for _ in range(nsps):
+            skip_lines(dat, lines=3)
+            z = to_integer(read_line(dat)[0])
+            skip_lines(dat)
+            nssh = to_integer(read_line(dat)[0])
+            self.shs[z] = read_integer_array(dat, width=int(nssh))
+            nssh_pp = to_integer(read_line(dat)[0])
+            self.shs_pp[z] = read_integer_array(dat, width=int(nssh_pp))
+            self.rc_pp[z] = to_real(read_line(dat)[0])
+            self.qns[z] = read_real_array(dat, width=int(nssh))
+            self.rcs[z] = read_real_array(dat, width=int(nssh))
+            self.wffs[z] = read_line(dat)
+            self.nafs[z] = read_line(dat)
+            self.eng[z] = to_real(read_line(dat)[0])
+            skip_lines(dat)
 
-    def __post_init__(self) -> None:
-        assert self.shs.keys() \
-            == self.shs_pp.keys() \
-            == self.rc_pp.keys() \
-            == self.qns.keys() \
-            == self.rcs.keys() \
-            == self.wffs.keys() \
-            == self.nafs.keys() \
-            == self.eng.keys(), \
-            "The keys of the dictionaries are not equal"
-        anums = list(self.shs.keys())
-        anums.sort()
-        self.anums = anums
-        self.nsps = len(anums)
-
-        nshs = {}
-        nshs_pp = {}
-        for num in self.anums:
-            assert len(self.shs[num]) \
-                == len(self.qns[num]) \
-                == len(self.rcs[num]) \
-                == len(self.wffs[num]) \
-                == len(self.nafs[num]) - 1, \
-                f"Number of items in dicts do not match for element {num}"
-            nshs[num] = len(self.shs[num])
-            nshs_pp[num] = len(self.shs_pp[num])
-        self.nshs = nshs
-        self.nshs_pp = nshs_pp
-
+        self.anums = np.sort(list(self.shs.keys()))
+        self.nsps = self.anums.size
+        self.nshs = {num: self.shs[num].size for num in self.anums}
+        self.nshs_pp = {num: self.shs_pp[num].size for num in self.anums}
         self.maxshs = max(
-            max(nshs[num] for num in self.anums),
-            max(nshs_pp[num] for num in self.anums)
+            max(self.nshs[num] for num in self.anums),
+            max(self.nshs_pp[num] for num in self.anums)
         )
 
-    def select(self, anums: NDArray[int]) -> InfoDat:
+    def select(self, anums: NDArray[integer]) -> InfoDat:
         """Get a subset with the InfoDat with only some elements
 
         Parameters
         ----------
-        anums: NDArray[int]
+        anums: NDArray[integer]
             Array with the atomic numbers to select
 
         Raises:
@@ -91,78 +79,28 @@ class InfoDat:
                 raise KeyError(errno.EINVAL,
                                f"{z} is not present in this InfoDat")
 
-        new_shs = {}
-        new_shs_pp = {}
-        new_rc_pp = {}
-        new_qns = {}
-        new_rcs = {}
-        new_wffs = {}
-        new_nafs = {}
-        new_eng = {}
-        for z in np.sort(anums):
-            new_shs[z] = self.shs[z]
-            new_shs_pp[z] = self.shs_pp[z]
-            new_rc_pp[z] = self.rc_pp[z]
-            new_qns[z] = self.qns[z]
-            new_rcs[z] = self.rcs[z]
-            new_wffs[z] = self.wffs[z]
-            new_nafs[z] = self.nafs[z]
-            new_eng[z] = self.eng[z]
+        new_infodat = deepcopy(self)
+        to_delete = set(self.anums) - set(anums)
+        dicts = ("shs", "shs_pp", "rc_pp", "qns", "rcs",
+                 "wffs", "nafs", "eng", "nshs", "nshs_pp")
+        for attr in dicts:
+            for z in to_delete:
+                getattr(new_infodat, attr).pop(z)
+        new_infodat.anums = anums
+        new_infodat.nsps = anums.size
+        new_infodat.maxshs = max(
+            max(new_infodat.nshs[num] for num in anums),
+            max(new_infodat.nshs_pp[num] for num in anums)
+        )
+        return new_infodat
 
-        return InfoDat(new_shs,
-                       new_shs_pp,
-                       new_rc_pp,
-                       new_qns,
-                       new_rcs,
-                       new_wffs,
-                       new_nafs,
-                       new_eng)
-
-    @classmethod
-    def read_ascii(cls, fpath: str) -> InfoDat:
-        new_shs = {}
-        new_shs_pp = {}
-        new_rc_pp = {}
-        new_qns = {}
-        new_rcs = {}
-        new_wffs = {}
-        new_nafs = {}
-        new_eng = {}
-
-        dat = read_file(fpath, header=1)
-        nsps = read_int_entry(dat)
-        for _ in range(nsps):
-            skip_lines(dat, lines=3)
-            z = read_int_entry(dat)
-            skip_lines(dat)
-            nssh = read_int_entry(dat)
-            new_shs[z] = read_int_array(dat, width=nssh).reshape(-1,)
-            nssh_pp = read_int_entry(dat)
-            new_shs_pp[z] = read_int_array(dat, width=nssh_pp).reshape(-1,)
-            new_rc_pp[z] = read_float_entry(dat)
-            new_qns[z] = read_float_array(dat, width=nssh).reshape(-1,)
-            new_rcs[z] = read_float_array(dat, width=nssh).reshape(-1,)
-            new_wffs[z] = read_line(dat)
-            new_nafs[z] = read_line(dat)
-            new_eng[z] = read_float_entry(dat)
-            skip_lines(dat)
-
-        return cls(new_shs,
-                   new_shs_pp,
-                   new_rc_pp,
-                   new_qns,
-                   new_rcs,
-                   new_wffs,
-                   new_nafs,
-                   new_eng)
-
-    def write_ascii(self, fpath: str) -> None:
+    def write_ascii(self, file_path: str) -> None:
         """Write the contents of this class into a classsic
         info.dat file to be read by fireball
 
         Parameters
         ----------
-        fpath : str
+        file_path : str
             Path to the file where the information will be saved
 
         Raises
@@ -194,88 +132,5 @@ class InfoDat:
                          f"  {self.eng[z]:12.5f}   - Atomic energy",
                          70*"="])
 
-        with open(fpath, "w+") as fp:
+        with open(file_path, "w+") as fp:
             fp.write("\n  ".join(info))
-
-
-_default_shs = {
-    1: np.array([0], dtype=int),
-    5: np.array([0, 1], dtype=int),
-    6: np.array([0, 1], dtype=int),
-    7: np.array([0, 1], dtype=int),
-    8: np.array([0, 1], dtype=int),
-}
-
-_default_shs_pp = {
-    1: np.array([0], dtype=int),
-    5: np.array([0, 1], dtype=int),
-    6: np.array([0, 1], dtype=int),
-    7: np.array([0, 1], dtype=int),
-    8: np.array([0, 1], dtype=int),
-}
-
-_default_rc_pp = {
-    1: 0.2,
-    5: 1.15,
-    6: 0.87,
-    7: 0.78,
-    8: 0.71,
-}
-
-_default_qns = {
-    1: np.array([1.0]),
-    5: np.array([2.0, 1.0]),
-    6: np.array([2.0, 2.0]),
-    7: np.array([2.0, 3.0]),
-    8: np.array([2.0, 4.0]),
-}
-
-_default_rcs = {
-    1: np.array([5.42]),
-    5: np.array([5.00, 5.00]),
-    6: np.array([5.95, 5.95]),
-    7: np.array([5.42, 5.42]),
-    8: np.array([5.32, 5.32]),
-}
-
-_default_wffs = {
-    1: ["cinput/001_542.wf1"],
-    5: ["cinput/005_500.wf1", "cinput/005_500.wf2"],
-    6: ["cinput/006_595.wf1", "cinput/006_595.wf2"],
-    7: ["cinput/007_542.wf1", "cinput/007_542.wf2"],
-    8: ["cinput/008_532.wf1", "cinput/008_532.wf2"],
-}
-
-_default_nafs = {
-    1:  ["cinput/001_542.na0",
-         "cinput/001_542.na1"],
-    5:  ["cinput/001_500.na0",
-         "cinput/001_500.na1",
-         "cinput/001_500.na2"],
-    6:  ["cinput/006_595.na0",
-         "cinput/006_595.na1",
-         "cinput/006_595.na2"],
-    7:  ["cinput/007_542.na0",
-         "cinput/007_542.na1",
-         "cinput/007_542.na2"],
-    8:  ["cinput/008_532.na0",
-         "cinput/008_532.na1",
-         "cinput/008_532.na2"],
-}
-
-_default_eng = {
-    1: 0.0,
-    5: 0.0,
-    6: 0.0,
-    7: 0.0,
-    8: 0.0,
-}
-
-default_infodat = InfoDat(_default_shs,
-                          _default_shs_pp,
-                          _default_rc_pp,
-                          _default_qns,
-                          _default_rcs,
-                          _default_wffs,
-                          _default_nafs,
-                          _default_eng)

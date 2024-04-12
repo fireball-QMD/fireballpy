@@ -18,10 +18,14 @@ __all__ = [
 
 __version__ = '0.0.1'
 
-from ase.calculators.calculator import register_calculator_class
+from ase.calculators.calculator import register_calculator_class  # type: ignore
 
-from .fireballpy import Fireball
-from .infodat import InfoDat
+# Expose API to the user
+from fireballpy.fireball import Fireball as Fireball
+from fireballpy.infodat import InfoDat as InfoDat
 
 # Register the calculator as available for ASE
 register_calculator_class("fireball", Fireball)
+
+# Cleanup
+del register_calculator_class

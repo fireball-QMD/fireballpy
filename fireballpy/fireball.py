@@ -1,17 +1,16 @@
 from __future__ import annotations
+from typing import Optional
 
 import os
 import warnings
 
 import numpy as np
-from ase.calculators.calculator import Calculator, all_changes
+from ase.calculators.calculator import Calculator, all_changes  # type: ignore
 
-from .infodat import InfoDat, default_infodat
-from .fdata import download_needed
+from fireballpy.infodat import InfoDat
+from fireballpy.fdata import download_needed, get_default_infodat
 
-import sys
-sys.path.append("../build/")  # This needs to be thinked
-import fireball as fb
+from ._fireball import *  # type: ignore
 
 
 class Fireball(Calculator):
@@ -44,7 +43,7 @@ class Fireball(Calculator):
 
     ignored_changes = ['initial_magmoms']
 
-    def __init__(self, fdata_path: str | None = None, **kwargs):
+    def __init__(self, fdata_path: Optional[str] = None, **kwargs):
         Calculator.__init__(self, **kwargs)
         self._fdata_path = fdata_path
 
@@ -56,28 +55,28 @@ class Fireball(Calculator):
             self._calculate_energies()
 
     def _calculate_energies(self) -> None:
-        fb.call_scf_loop()
-        fb.call_getenergy()
-        self.energy = fb.get_etot()
+        call_scf_loop()
+        call_getenergy()
+        self.energy = get_etot()
         # Save energy
         self.results['energy'] = self.energy
         self.results['free_energy'] = self.energy
 
     def _calculate_charges(self) -> None:
         for iatom in range(self.natoms):
-            for issh in range(fb.get_nssh(iatom + 1)):
-                self.charges[iatom, issh] = fb.get_shell_atom_charge(issh + 1,
-                                                                     iatom + 1)
+            for issh in range(get_nssh(iatom + 1)):
+                self.charges[iatom, issh] = \
+                    get_shell_atom_charge(issh + 1, iatom + 1)
         # Save charges
         self.results['charges'] = self.charges
 
     def _calculate_forces(self) -> None:
         self._check_compute()
-        fb.call_getforces()
+        call_getforces()
         for iatom in range(self.natoms):
-            self.forces[iatom, 0] = fb.get_atom_force(iatom+1, 1)
-            self.forces[iatom, 1] = fb.get_atom_force(iatom+1, 2)
-            self.forces[iatom, 2] = fb.get_atom_force(iatom+1, 3)
+            self.forces[iatom, 0] = get_atom_force(iatom+1, 1)
+            self.forces[iatom, 1] = get_atom_force(iatom+1, 2)
+            self.forces[iatom, 2] = get_atom_force(iatom+1, 3)
         # Save forces
         self.results['forces'] = self.forces
 
@@ -107,16 +106,16 @@ class Fireball(Calculator):
         self.natoms = len(self.atoms)
 
         if self._fdata_path is None:
+            default_infodat = get_default_infodat()
             self._infodat = default_infodat.select(self.atoms.numbers)
             self._fdata_path = download_needed(self._infodat, self.natoms)
         else:
-            self._infodat = InfoDat.read_ascii(os.path.join(self._fdata_path,
-                                                            "info.dat"))
+            self._infodat = InfoDat(os.path.join(self._fdata_path, "info.dat"))
 
-        fb.loadfdata_from_path(self._fdata_path)
-        fb.set_coords(self.atoms.numbers, self.atoms.positions)
-        fb.loadlvs_100()
-        fb.loadkpts_gamma()
-        fb.call_allocate_system()
+        loadfdata_from_path(self._fdata_path)
+        set_coords(self.atoms.numbers, self.atoms.positions)
+        loadlvs_100()
+        loadkpts_gamma()
+        call_allocate_system()
         self.charges = np.empty((self.natoms, self._infodat.maxshs))
         self.forces = np.empty((self.natoms, 3))
