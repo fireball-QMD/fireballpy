@@ -10,7 +10,18 @@ from ase.calculators.calculator import Calculator, all_changes  # type: ignore
 from fireballpy.infodat import InfoDat
 from fireballpy.fdata import download_needed, get_default_infodat
 
-from ._fireball import *  # type: ignore
+from ._fireball import (call_scf_loop,  # type: ignore
+                        call_getenergy,
+                        call_getforces,
+                        call_allocate_system,
+                        loadfdata_from_path,
+                        set_coords,
+                        loadlvs_100,
+                        loadkpts_gamma,
+                        get_etot,
+                        get_nssh,
+                        get_atom_force,
+                        get_shell_atom_charge)
 
 
 class Fireball(Calculator):
