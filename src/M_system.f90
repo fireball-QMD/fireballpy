@@ -5,15 +5,15 @@ module M_system
   integer :: iqout      = 1 ! 1:Lowdin 2:Mulliken 3:NPA 4:M-dipole :7MD-pres..
   integer :: icluster   = 1 ! 
   integer :: idipole    = 1 
-  integer :: gamma      = 1
+  integer :: igamma     = 1
   integer :: iqmmm      = 0
   integer :: ifixcharge = 0
   !========================
-  !idipole icluster gamma 
-  !1       1        1       
+  !idipole icluster igamma 
+  !1       1        1        !non periodic + only gamma kpts
   !0       1        1       
-  !0       0        0
-  !0       0        1
+  !0       0        0        !periodic + kpoints
+  !0       0        1        !periodic + only gamma kpts
 
   integer :: ialgmix  = 1 !1:anderson 2:broyden 3:louie 4:pulay
   real, parameter :: xc_overtol = 5.0d-5

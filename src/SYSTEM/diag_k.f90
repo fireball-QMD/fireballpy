@@ -7,9 +7,9 @@ subroutine diag_k ( )
   if (iqout .ne. 2) allocate (blowre (norbitals, norbitals, nkpoints))
   if (iqout .ne. 2 .and. icluster .ne. 1) allocate (blowim (norbitals, norbitals, nkpoints))
   allocate (bbnkre (norbitals, norbitals, nkpoints))
-  if (icluster .ne. 1) allocate (bbnkim (norbitals, norbitals, nkpoints))
+  if (icluster .eq. 0 .and. igamma .eq. 0) allocate (bbnkim (norbitals, norbitals, nkpoints))
 
-  if (gamma .eq. 1) then
+  if (igamma .eq. 1) then
     k_temp(:) = special_k(:,1)
     call kspace_gamma (1, k_temp )
   else
