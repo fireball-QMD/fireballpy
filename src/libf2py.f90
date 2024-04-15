@@ -1,8 +1,8 @@
-subroutine set_gamma(aux)
-  use M_system, only : gamma
+subroutine set_igamma(aux)
+  use M_system, only : igamma
   implicit none
   integer, intent(in):: aux
-  gamma=aux
+  igamma=aux
 end
  
 subroutine set_icluster(aux)
@@ -228,7 +228,7 @@ subroutine info_fdata()
   write(*,'(3x,a12,a1,i2)') 'iforce        ','=',iforce
   write(*,'(3x,a12,a1,i2)') 'idipole       ','=',idipole
   write(*,'(3x,a12,a1,i2)') 'iqout         ','=',iqout
-  write(*,'(3x,a12,a1,i2)') 'gamma         ','=',gamma
+  write(*,'(3x,a12,a1,i2)') 'igamma         ','=',igamma
   do ispec = 1, nspecies
     write (*,'(a,i2,a,a2,a,i2,a,i2)') '   spec = ',ispec,'; ele = ',symbolA(ispec),'; Z = ',nzx(ispec), '; nssh = ',nssh(ispec)  
   end do

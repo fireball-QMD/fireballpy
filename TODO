@@ -1,13 +1,13 @@
 Carlos : info.dat download, only_en_use
 Jorge: DOC, workflow, examples jupyter, only_en_use
 Jesús: qmmm, interpolate1D, spline 
-Dani: testunitarios, casos uso, ifixcharges, only_en_use, test limpiar y reconstruir
+Dani: testunitarios, casos uso, ifixcharges, only_en_use, test limpiar y reconstruir, get_fermi, eigenvalue
 José: autores
 
 
--  gamma limpiar ?
 -  Quedarse con la mejor autoconsistencia
 -  Diagonalizar en base fb
+-  Paralelo
 
 Fdata: https://pubs.acs.org/doi/10.1021/acs.jctc.9b01265
 

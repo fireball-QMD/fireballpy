@@ -2,7 +2,7 @@
 iks=0
 idogs=1
 imcweda=1
-fdatalocation ="/home/dani/Fdata_HC-new"
+fdatalocation ="/var/www/html/BASE/"
 idipole = 1
 iqout = 1 
 icluster = 1

@@ -183,7 +183,6 @@ subroutine kspace_gamma ( ikpoint, sks)
   if (info .ne. 0) call diag_error (info, 0)
   eigen_k(1:norbitals,ikpoint) = eigen(:)
   if (iqout .ne. 2) blowre(:,:,ikpoint) = real(yyyy(:,:))
-  if (iqout .ne. 2 .and. icluster .ne. 1) blowim(:,:,ikpoint) = 0
   call dsymm ( 'L', 'U', norbitals, norbitals, a1, xxxx, norbitals, yyyy, norbitals, a0, zzzz, norbitals )
   if (iqout .ne. 3) then
     call dsymm ( 'L', 'U', norbitals, norbitals, a1, xxxx, norbitals, yyyy, norbitals, a0, zzzz, norbitals )
@@ -191,7 +190,6 @@ subroutine kspace_gamma ( ikpoint, sks)
     call dgemm ( 'N', 'N', norbitals, norbitals, norbitals, a1, xxxx, norbitals, yyyy, norbitals, a0, zzzz, norbitals )
   end if
   bbnkre(:,:,ikpoint) = real(zzzz(:,:))
-  if (icluster .ne. 1) bbnkim(:,:,ikpoint) = 0
   deallocate (xxxx)
   deallocate (yyyy)
   deallocate (zzzz)
