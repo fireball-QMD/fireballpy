@@ -141,29 +141,39 @@ subroutine denmat ()
   Qout = 0.0d0
   QLowdin_TOT = 0.0d0
 
-  if (iqout .eq. 1 .or. iqout .eq. 3) call LOWDIN_CHARGES()
-
-  if (iqout .eq. 2) call MULLIKEN_CHARGES() 
-
-  if (iqout .eq. 4) call MULLIKEN_DIPOLE_CHARGES()
-
-  if (iqout .eq. 7) then
-    call MULLIKEN_DIPOLE_CHARGES()
-    call Dipole_proyection()
+  if (ifixcharge .eq. 1) then
     do iatom = 1, natoms
       in1 = imass(iatom)
-      QoutTot(iatom) = 0.0d0
-      do imu = 1,nssh(in1)
-        QoutTot(iatom) = QoutTot(iatom)+Qout(imu,iatom)
+      do issh = 1, nssh(in1)
+        Qout(issh,iatom) = Qin(issh,iatom)
+        QLowdin_TOT(iatom) = QLowdin_TOT(iatom) + Qin(issh,iatom)
+      end do
+    end do
+  else
+    if (iqout .eq. 1 .or. iqout .eq. 3) call LOWDIN_CHARGES()
+
+    if (iqout .eq. 2) call MULLIKEN_CHARGES() 
+
+    if (iqout .eq. 4) call MULLIKEN_DIPOLE_CHARGES()
+
+    if (iqout .eq. 7) then
+      call MULLIKEN_DIPOLE_CHARGES()
+      call Dipole_proyection()
+      do iatom = 1, natoms
+        in1 = imass(iatom)
+        QoutTot(iatom) = 0.0d0
+        do imu = 1,nssh(in1)
+          QoutTot(iatom) = QoutTot(iatom)+Qout(imu,iatom)
+        end do 
       end do 
-    end do 
-    do iatom = 1, natoms
-      in1 = imass(iatom)
-      do imu = 1,nssh(in1)              
-        Qout(imu,iatom) = (dq_DP(iatom)/QoutTot(iatom))*Qout(imu,iatom) + Qout(imu,iatom)
+      do iatom = 1, natoms
+        in1 = imass(iatom)
+        do imu = 1,nssh(in1)              
+          Qout(imu,iatom) = (dq_DP(iatom)/QoutTot(iatom))*Qout(imu,iatom) + Qout(imu,iatom)
+        end do 
       end do 
-    end do 
-  end if !7
+    end if !7
+  end if !ifixcharge
 
   ebs = 0.0d0
   ztest = 0.0d0
