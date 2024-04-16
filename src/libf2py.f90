@@ -66,7 +66,22 @@ subroutine loadfdata_from_path(fdatafile)
   fdatalocation=trim(fdatafile)
   call load_fdata()
 end
-
+ 
+subroutine set_cell(lvs)
+  use M_system
+  implicit none
+  real*8, dimension(3,3), intent(in) :: lvs
+  a1vec(1) = lvs(1,1)
+  a1vec(2) = lvs(1,2)
+  a1vec(3) = lvs(1,3)
+  a2vec(1) = lvs(2,1)
+  a2vec(2) = lvs(2,2)
+  a2vec(3) = lvs(2,3)
+  a3vec(1) = lvs(3,1)
+  a3vec(2) = lvs(3,2)
+  a3vec(3) = lvs(3,3)
+end
+ 
 subroutine set_coords(naux, z, xyz)
   use M_system
   use M_fdata, only : symbolA, nspecies, nzx 

@@ -44,6 +44,7 @@ add_library(fireballpy
   ${CMAKE_SOURCE_DIR}/src/LOADFDATA/setterp_2d.f90
   ${CMAKE_SOURCE_DIR}/src/LOADFDATA/load_fdata.f90
  
+  ${CMAKE_SOURCE_DIR}/src/SYSTEM/kspace_double_generalized.f90
   ${CMAKE_SOURCE_DIR}/src/SYSTEM/kspace_gamma.f90
   ${CMAKE_SOURCE_DIR}/src/SYSTEM/kspace_double.f90
   ${CMAKE_SOURCE_DIR}/src/SYSTEM/getforces.f90  

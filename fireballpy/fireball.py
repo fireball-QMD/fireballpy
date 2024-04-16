@@ -16,6 +16,7 @@ from ._fireball import (call_scf_loop,  # type: ignore
                         call_allocate_system,
                         loadfdata_from_path,
                         set_coords,
+                        set_cell,
                         loadlvs_100,
                         loadkpts_gamma,
                         get_etot,
@@ -54,9 +55,13 @@ class Fireball(Calculator):
 
     ignored_changes = ['initial_magmoms']
 
-    def __init__(self, fdata_path: Optional[str] = None, **kwargs):
+    def __init__(self,fdata_path: Optional[str] = None, igamma: int = 1, 
+                 icluster: int = 1,**kwargs):
+
         Calculator.__init__(self, **kwargs)
         self._fdata_path = fdata_path
+        self._igamma     = igamma
+        self._icluster   = icluster
 
     # Requisite energies
     def _check_compute(self) -> None:
@@ -124,9 +129,18 @@ class Fireball(Calculator):
             self._infodat = InfoDat(os.path.join(self._fdata_path, "info.dat"))
 
         loadfdata_from_path(self._fdata_path)
+
         set_coords(self.atoms.numbers, self.atoms.positions)
-        loadlvs_100()
-        loadkpts_gamma()
+
+        if self._icluster == 1:
+          loadlvs_100()
+        else:
+          set_cell(self.atoms.cell)
+
+        if self._igamma == 1:
+          loadkpts_gamma()
+
         call_allocate_system()
+
         self.charges = np.zeros((self.natoms, self._infodat.maxshs))
         self.forces = np.empty((self.natoms, 3))
