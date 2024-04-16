@@ -137,7 +137,7 @@ class Fireball(Calculator):
         else:
           set_cell(self.atoms.cell)
 
-        if self._igamma == 1:
+        if self._igamma > 0:
           loadkpts_gamma()
 
         call_allocate_system()

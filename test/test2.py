@@ -10,7 +10,7 @@ pos = atoms.get_positions()
 print("------atoms.positions--------")
 print(pos)
 
-atoms.calc = Fireball(igamma=1)
+atoms.calc = Fireball(igamma=3)
 ETOT = atoms.get_potential_energy()
 print("ETOT = "+str(ETOT))
 
