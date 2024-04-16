@@ -22,7 +22,12 @@ from ._fireball import (call_scf_loop,  # type: ignore
                         get_etot,
                         get_nssh,
                         get_atom_force,
-                        get_shell_atom_charge)
+                        get_shell_atom_charge,
+                        set_igamma,
+                        set_icluster,
+                        get_igamma,
+                        get_icluster
+                        )
 
 
 class Fireball(Calculator):
@@ -60,8 +65,8 @@ class Fireball(Calculator):
 
         Calculator.__init__(self, **kwargs)
         self._fdata_path = fdata_path
-        self._igamma     = igamma
-        self._icluster   = icluster
+        set_igamma(igamma)
+        set_icluster(icluster)
 
     # Requisite energies
     def _check_compute(self) -> None:
@@ -132,12 +137,12 @@ class Fireball(Calculator):
 
         set_coords(self.atoms.numbers, self.atoms.positions)
 
-        if self._icluster == 1:
+        if get_icluster() == 1:
           loadlvs_100()
         else:
           set_cell(self.atoms.cell)
-
-        if self._igamma > 0:
+        print("get_igamma ", get_igamma())
+        if get_igamma() > 0:
           loadkpts_gamma()
 
         call_allocate_system()

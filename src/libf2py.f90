@@ -5,13 +5,26 @@ subroutine set_igamma(aux)
   igamma=aux
 end
  
+integer function get_igamma()
+ use M_system, only : igamma
+ get_igamma=igamma
+ return
+end
+ 
 subroutine set_icluster(aux)
   use M_system, only : icluster
   implicit none
   integer, intent(in):: aux
   icluster=aux
 end
+                       
+integer function get_icluster()
+ use M_system, only : icluster
+ get_icluster=icluster
+ return
+end                  
 
+  
 subroutine set_idipole(aux)
   use M_system, only : idipole
   implicit none
