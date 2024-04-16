@@ -1,10 +1,7 @@
-rm -fr build
-meson setup build
-cd build
-ninja
-cp libfireball.a.p/*.mod .
-f2py3 -m _fireball -c ../src/libf2py.f90 -I. libfireball.a --link-lapack_opt
-mv _fireball*.so ../fireballpy/
-cd ../test
-python3 test2.py
+meson setup build --wipe
+meson compile -C build
+python -m numpy.f2py -m _fireball -c src/libf2py.f90 -Ibuild/src/libfireball.a.p -Lbuild/src -lfireball --link-lapack_opt --lower
+mv _fireball*.so fireballpy
+cd test
+python test2.py
 cd ..

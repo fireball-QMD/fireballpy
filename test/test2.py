@@ -10,7 +10,7 @@ pos = atoms.get_positions()
 print("------atoms.positions--------")
 print(pos)
 
-atoms.calc = Fireball(igamma=2)
+atoms.calc = Fireball(igamma=1)
 ETOT = atoms.get_potential_energy()
 print("ETOT = "+str(ETOT))
 
@@ -22,4 +22,4 @@ for c in charge:
 force = atoms.get_forces()
 print("------atoms.forces------------")
 for f in force:
-  print(f)
+    print(f)

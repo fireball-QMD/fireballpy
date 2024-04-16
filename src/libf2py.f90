@@ -43,6 +43,8 @@ end
 integer function get_nssh(iaux)
  use M_fdata, only : nssh
  use M_system, only : imass
+ implicit none
+ integer, intent(in):: iaux
  get_nssh=nssh(imass(iaux))
  return
 end
