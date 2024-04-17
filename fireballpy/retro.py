@@ -41,7 +41,7 @@ def read_bas(filename: NameOrFile):
     xyz = [bas[0].strip(), "no comment"]
     for i, line in enumerate(bas[1:]):
         sline = line.split()
-        elem = chemical_symbols(int(sline[0])).rjust(3).ljust(8)
+        elem = chemical_symbols[int(sline[0])].rjust(3).ljust(8)
         xyz.append(elem + (5*" ").join(f'{float(s):10.5f}' for s in sline[1:]))
 
     return read(StringIO('\n'.join(xyz)), format='xyz')

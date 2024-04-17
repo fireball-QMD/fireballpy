@@ -2,7 +2,7 @@ module M_system
 
   !========================
   integer :: iforce     = 1
-  integer :: iqout      = 1 ! 1:Lowdin 2:Mulliken 3:NPA 4:M-dipole :7MD-pres..
+  integer :: iqout      = 2 ! 1:Lowdin 2:Mulliken 3:NPA 4:M-dipole :7MD-pres..
   integer :: icluster   = 1 ! 
   integer :: idipole    = 1 
   integer :: igamma     = 1

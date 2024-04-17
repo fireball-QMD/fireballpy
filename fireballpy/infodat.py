@@ -74,7 +74,8 @@ class InfoDat:
             If ``anums`` contains an atomic number which is not present
         """
 
-        for z in anums:
+        uanums = np.unique(anums)
+        for z in uanums:
             if z not in self.anums:
                 raise KeyError(errno.EINVAL,
                                f"{z} is not present in this InfoDat")
@@ -86,11 +87,11 @@ class InfoDat:
         for attr in dicts:
             for z in to_delete:
                 getattr(new_infodat, attr).pop(z)
-        new_infodat.anums = anums
-        new_infodat.nsps = anums.size
+        new_infodat.anums = uanums
+        new_infodat.nsps = uanums.size
         new_infodat.maxshs = max(
-            max(new_infodat.nshs[num] for num in anums),
-            max(new_infodat.nshs_pp[num] for num in anums)
+            max(new_infodat.nshs[num] for num in uanums),
+            max(new_infodat.nshs_pp[num] for num in uanums)
         )
         return new_infodat
 
