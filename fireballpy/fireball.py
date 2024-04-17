@@ -26,8 +26,7 @@ from ._fireball import (call_scf_loop,  # type: ignore
                         set_igamma,
                         set_icluster,
                         get_igamma,
-                        get_icluster
-                        )
+                        get_icluster)
 
 
 class Fireball(Calculator):
@@ -60,10 +59,10 @@ class Fireball(Calculator):
 
     ignored_changes = ['initial_magmoms']
 
-    def __init__(self,fdata_path: Optional[str] = None, igamma: int = 1, 
-                 icluster: int = 1,**kwargs):
+    def __init__(self, fdata_path: Optional[str] = None, igamma: int = 1,
+                 icluster: int = 1, **kwargs):
 
-        Calculator.__init__(self, **kwargs)
+        super().__init__(**kwargs)
         self._fdata_path = fdata_path
         set_igamma(igamma)
         set_icluster(icluster)
@@ -134,16 +133,15 @@ class Fireball(Calculator):
             self._infodat = InfoDat(os.path.join(self._fdata_path, "info.dat"))
 
         loadfdata_from_path(self._fdata_path)
-
         set_coords(self.atoms.numbers, self.atoms.positions)
 
         if get_icluster() == 1:
-          loadlvs_100()
+            loadlvs_100()
         else:
-          set_cell(self.atoms.cell)
+            set_cell(self.atoms.cell)
         print("get_igamma ", get_igamma())
         if get_igamma() > 0:
-          loadkpts_gamma()
+            loadkpts_gamma()
 
         call_allocate_system()
 
