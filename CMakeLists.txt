@@ -1,24 +1,11 @@
 cmake_minimum_required(VERSION 3.0)
 
-# Verificar si ifort está instalado
-find_program(IFORT_EXECUTABLE ifort)
-
-# Establecer la variable de entorno FC dependiendo del resultado
-if(IFORT_EXECUTABLE)
-  set(FFLAGS "-O3 -r8  -fno-alias -unroll -fPIC")
-  set(ENV{FC} "ifort ${FFLAGS}")
-  set(MKL_FLAGS "-lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lpthread -lm")
-  set(MKLROOT "/opt/intel/oneapi/mkl/latest")
-  set(MKL_PATH "${MKLROOT}/lib/intel64/")
+find_program(GFORTRAN_EXECUTABLE gfortran)
+if(GFORTRAN_EXECUTABLE)
+  set(FFLAGS "-O3 -fdefault-real-8 -unroll -fPIC -ffree-line-length-512")
+  set(ENV{FC} "gfortran ${FFLAGS}")
 else()
-  message(STATUS "ifort no encontrado. Usando gfortran.")
-  find_program(GFORTRAN_EXECUTABLE gfortran)
-  if(GFORTRAN_EXECUTABLE)
-    set(FFLAGS "-O3 -fdefault-real-8 -unroll -fPIC -ffree-line-length-512")
-    set(ENV{FC} "gfortran ${FFLAGS}")
-  else()
-    message(FATAL_ERROR "No se encontró ni ifort ni gfortran. Imposible compilar.")
-  endif()
+    message(FATAL_ERROR "No se encontró gfortran. Imposible compilar.")
 endif()
 
 project(fireballpy Fortran)
@@ -44,9 +31,9 @@ add_library(fireballpy
   ${CMAKE_SOURCE_DIR}/src/LOADFDATA/setterp_2d.f90
   ${CMAKE_SOURCE_DIR}/src/LOADFDATA/load_fdata.f90
  
-  ${CMAKE_SOURCE_DIR}/src/SYSTEM/kspace_double_generalized.f90
   ${CMAKE_SOURCE_DIR}/src/SYSTEM/kspace_gamma.f90
   ${CMAKE_SOURCE_DIR}/src/SYSTEM/kspace_double.f90
+  ${CMAKE_SOURCE_DIR}/src/SYSTEM/kspace_double_generalized.f90
   ${CMAKE_SOURCE_DIR}/src/SYSTEM/getforces.f90  
   ${CMAKE_SOURCE_DIR}/src/SYSTEM/mpairnay.f90   
   ${CMAKE_SOURCE_DIR}/src/SYSTEM/Dassemble_2c.f90
@@ -156,9 +143,4 @@ add_library(fireballpy
   ${CMAKE_SOURCE_DIR}/src/SYSTEM/cepal.f90
   )
 
-if(IFORT_EXECUTABLE)
-  target_link_libraries(fireballpy PUBLIC ${MKL_PATH}  ${MKL_FLAGS})
-endif()
-if(GFORTRAN_EXECUTABLE)
-  target_link_libraries(fireballpy PUBLIC)
-endif()
+target_link_libraries(fireballpy PUBLIC)
