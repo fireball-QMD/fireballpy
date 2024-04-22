@@ -63,12 +63,14 @@ class Fireball(Calculator):
     ignored_changes = ['initial_magmoms']
 
     def __init__(self, fdata_path: Optional[str] = None, igamma: int = 1,
-                 icluster: int = 1, **kwargs):
+                 icluster: int = 1, charges: str = "Mulliken",  **kwargs):
 
         super().__init__(**kwargs)
         self._fdata_path = fdata_path
         set_igamma(igamma)
         set_icluster(icluster)
+        self.charges=charges
+
 
     # Requisite energies
     def _check_compute(self) -> None:
@@ -143,12 +145,21 @@ class Fireball(Calculator):
         else:
             set_cell(self.atoms.cell)
 
-
-        print("get_igamma ", get_igamma())
         if get_igamma() > 0:
             loadkpts_gamma()
 
-        print("get_iquot",get_iqout())
+
+        if(self.charges=="Lowdin"):
+          set_iqout(1)
+        if(self.charges=="Mulliken"):
+          set_iqout(2)
+        if(self.charges=="NPA"):
+          set_iqout(3)
+        if(self.charges=="Mulliken-dipole"):
+          set_iqout(4)
+        if(self.charges=="Mulliken-dipole-preserving"):
+          set_iqout(7)
+
          
         call_allocate_system()
 
