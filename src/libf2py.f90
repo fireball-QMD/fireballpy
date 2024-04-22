@@ -40,6 +40,13 @@ subroutine set_iqout(aux)
 end
 
 
+integer function get_iqout()
+ use M_system, only : iqout
+ get_iqout=iqout
+ return
+end
+
+
 integer function get_nssh(iaux)
  use M_fdata, only : nssh
  use M_system, only : imass

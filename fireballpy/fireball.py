@@ -18,6 +18,7 @@ from ._fireball import (call_scf_loop,  # type: ignore
                         loadfdata_from_path,
                         set_coords,
                         set_cell,
+                        set_iqout,
                         loadlvs_100,
                         loadkpts_gamma,
                         get_etot,
@@ -27,6 +28,7 @@ from ._fireball import (call_scf_loop,  # type: ignore
                         set_igamma,
                         set_icluster,
                         get_igamma,
+                        get_iqout,
                         get_icluster)
 
 
@@ -140,10 +142,14 @@ class Fireball(Calculator):
             loadlvs_100()
         else:
             set_cell(self.atoms.cell)
+
+
         print("get_igamma ", get_igamma())
         if get_igamma() > 0:
             loadkpts_gamma()
 
+        print("get_iquot",get_iqout())
+         
         call_allocate_system()
 
         self.charges = np.zeros((self.natoms, self._infodat.maxshs))

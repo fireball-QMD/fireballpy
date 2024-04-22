@@ -12,7 +12,13 @@ atoms = Atoms(symbols=['C', 'C'],
 
 atoms.set_cell([(a, a, 0), (a, 0, a), (0, a, a)])
 
-atoms.calc = Fireball(igamma=1, icluster=1)
+atoms.calc = Fireball(igamma=1, icluster=1) 
+#,charges="Mulliken")
+# Mulliken-dipole
+# NPA:
+# Lowdin
+# Mulliken-dipole-preserving
+
 ETOT = atoms.get_potential_energy()
 print("ETOT = "+str(ETOT))
 
