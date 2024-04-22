@@ -15,8 +15,37 @@ endif
 add_global_arguments(flags, language: 'fortran')
 
 # Link OpenBLAS
-blas = dependency(['openblas', 'OpenBLAS'])
-blas_dep = declare_dependency(dependencies: blas)
+blas_dep = dependency(['openblas', 'OpenBLAS'])
 
 # Build fireball
 subdir('src')
+py_mod = import('python')
+py = py_mod.find_installation(pure: false)
+py_dep = py.dependency()
+
+incdir_numpy = run_command(py,
+  ['-c', 'import numpy; print(numpy.get_include())'],
+  check : true
+).stdout().strip()
+
+incdir_f2py = run_command(py,
+    ['-c', 'import numpy.f2py; print(numpy.f2py.get_include())'],
+    check : true
+).stdout().strip()
+
+fireball_source = custom_target('fireball_module',
+  input : ['src/libf2py.f90'],  # .f so no F90 wrappers
+  output : ['_fireballmodule.c', '_fireball-f2pywrappers.f'],
+  command : [py, '-m', 'numpy.f2py', '@INPUT@', '-m', '_fireball', '--lower']
+)
+
+inc_np = include_directories(incdir_numpy, incdir_f2py)
+
+py.extension_module('_fireball',
+  ['src/libf2py.f90', fireball_source],
+  incdir_f2py / 'fortranobject.c',
+  include_directories: inc_np,
+  dependencies : [py_dep, fireball_dep],
+  install : true,
+  install_dir: '/home/carlos/Documents/fireballpy/fireballpy/'
+)
