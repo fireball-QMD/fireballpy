@@ -1,7 +1,8 @@
 fdata_folder = 'LOADFDATA'
 system_folder = 'SYSTEM'
 
-modules_srcs = ['M_constants.f90', 'M_fdata.f90', 'M_system.f90','libf2py.f90']
+#modules_srcs = ['M_constants.f90', 'M_fdata.f90', 'M_system.f90','libf2py.f90']
+modules_srcs = ['M_constants.f90', 'M_fdata.f90', 'M_system.f90']
 fdata_srcs = ['make_munuDipX.f90',
               'make_munu.f90',
               'make_munuS.f90',

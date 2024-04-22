@@ -42,14 +42,12 @@ def _get_downloaded() -> list[str]:
             if os.path.splitext(x)[1] == ".dat"]
 
 
-def _get_needed_files(idat: InfoDat, natoms: int) -> list[str]:
+def _get_needed_files(idat: InfoDat) -> list[str]:
     needed = []
 
     # One centre
     for z in idat.anums:
         needed.extend([f"{x}.{z:02}.dat" for x in ONECFNAMES])
-    if natoms == 1:
-        return needed
 
     # Two centres
     for (in1, z1), (in2, z2) in _penum(idat.anums, 2):
@@ -71,8 +69,6 @@ def _get_needed_files(idat: InfoDat, natoms: int) -> list[str]:
                     continue
                 needed.append((f"{fname}_{isorp:02}" if isub else fname) +
                               f".{z1:02}.{z2:02}.dat")
-    if natoms == 2:
-        return needed
 
     # Three centres
     for (in1, z1), (in2, z2), (in3, z3) in _penum(idat.anums, 3):
@@ -132,7 +128,7 @@ def download_file(url: str, dst: str) -> None:
             os.remove(tmp_dst)
 
 
-def download_needed(idat: InfoDat, natoms: int) -> str:
+def download_needed(idat: InfoDat) -> str:
     """Download FData files which are missing and returns
     their path
 
@@ -149,7 +145,7 @@ def download_needed(idat: InfoDat, natoms: int) -> str:
     fb_home = _get_fb_home()
     os.makedirs(fb_home, exist_ok=True)  # Ensure folder exists
 
-    needed = _get_needed_files(idat, natoms)
+    needed = _get_needed_files(idat)
     have = _get_downloaded()
 
     # Remove old info.dat

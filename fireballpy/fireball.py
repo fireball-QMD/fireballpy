@@ -2,7 +2,6 @@ from __future__ import annotations
 from typing import Optional
 
 import os
-import time  # temporal
 import warnings
 
 import numpy as np
@@ -28,7 +27,6 @@ from ._fireball import (call_scf_loop,  # type: ignore
                         set_igamma,
                         set_icluster,
                         get_igamma,
-                        get_iqout,
                         get_icluster)
 
 
@@ -62,15 +60,17 @@ class Fireball(Calculator):
 
     ignored_changes = ['initial_magmoms']
 
+    _icharge = {'Lowdin': 1, 'Mulliken': 2, 'NPA': 3,
+                'Mulliken-dipole': 4, 'Mulliken-dipole-preserving': 7}
+
     def __init__(self, fdata_path: Optional[str] = None, igamma: int = 1,
                  icluster: int = 1, charges: str = "Mulliken",  **kwargs):
 
         super().__init__(**kwargs)
         self._fdata_path = fdata_path
+        self.charges = charges
         set_igamma(igamma)
         set_icluster(icluster)
-        self.charges=charges
-
 
     # Requisite energies
     def _check_compute(self) -> None:
@@ -99,17 +99,15 @@ class Fireball(Calculator):
         self._check_compute()
         call_getforces()
         for iatom in range(self.natoms):
-            self.forces[iatom, 0] = get_atom_force(iatom+1, 1)
-            self.forces[iatom, 1] = get_atom_force(iatom+1, 2)
-            self.forces[iatom, 2] = get_atom_force(iatom+1, 3)
+            for i in range(3):
+                self.forces[iatom, i] = get_atom_force(iatom+1, i+1)
         # Save forces
         self.results['forces'] = self.forces
 
     def calculate(self, atoms=None,
                   properties=['energy'],
                   system_changes=all_changes) -> None:
-
-        Calculator.calculate(self, atoms, properties, system_changes)
+        super().calculate(atoms, properties, system_changes)
 
         # If the atoms change allocate memory
         if 'numbers' in system_changes:
@@ -133,7 +131,7 @@ class Fireball(Calculator):
         if self._fdata_path is None:
             default_infodat = get_default_infodat()
             self._infodat = default_infodat.select(self.atoms.numbers)
-            self._fdata_path = download_needed(self._infodat, self.natoms)
+            self._fdata_path = download_needed(self._infodat)
         else:
             self._infodat = InfoDat(os.path.join(self._fdata_path, "info.dat"))
 
@@ -148,19 +146,7 @@ class Fireball(Calculator):
         if get_igamma() > 0:
             loadkpts_gamma()
 
-
-        if(self.charges=="Lowdin"):
-          set_iqout(1)
-        if(self.charges=="Mulliken"):
-          set_iqout(2)
-        if(self.charges=="NPA"):
-          set_iqout(3)
-        if(self.charges=="Mulliken-dipole"):
-          set_iqout(4)
-        if(self.charges=="Mulliken-dipole-preserving"):
-          set_iqout(7)
-
-         
+        set_iqout(self._icharge[self.charges])
         call_allocate_system()
 
         self.charges = np.zeros((self.natoms, self._infodat.maxshs))

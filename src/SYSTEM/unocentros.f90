@@ -4,10 +4,10 @@ subroutine unocentros (in1, iatom, exc_1c, muexc_1c, dccexc_1c, mu1xc)
   implicit none
   integer, intent(in) :: iatom
   integer, intent(in) :: in1
-  real, intent(out) :: exc_1c  ! XC energy term of DCC
-  real, intent(out) :: muexc_1c      ! XC potential term of DCC
-  real, intent(out) :: dccexc_1c     ! XC DCC term
-  real, intent(out), dimension (numorb_max, numorb_max) :: mu1xc
+  real(8), intent(out) :: exc_1c  ! XC energy term of DCC
+  real(8), intent(out) :: muexc_1c      ! XC potential term of DCC
+  real(8), intent(out) :: dccexc_1c     ! XC DCC term
+  real(8), intent(out), dimension (numorb_max, numorb_max) :: mu1xc
   integer imu
   integer ideriv
   integer iderivmin
@@ -20,12 +20,12 @@ subroutine unocentros (in1, iatom, exc_1c, muexc_1c, dccexc_1c, mu1xc)
   integer inu
   integer jssh
   integer kssh
-  real dqhelp
-  real q_mu
-  real, dimension (0:2) :: dqfact
-  real, dimension (0:2) :: linfact
-  real, dimension (0:2) :: quadfact
-  real, dimension (nsh_max) :: dqi
+  real(8) dqhelp
+  real(8) q_mu
+  real(8), dimension (0:2) :: dqfact
+  real(8), dimension (0:2) :: linfact
+  real(8), dimension (0:2) :: quadfact
+  real(8), dimension (nsh_max) :: dqi
   integer iissh, jjssh
   exc_1c = 0.0d0
   dccexc_1c = 0.0d0

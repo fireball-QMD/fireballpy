@@ -29,43 +29,43 @@ subroutine assemble_ca_3c_dip ()
   integer mneigh
   integer ix
   integer j
-  real cost
-  real distance_13
-  real distance_23
-  real dq3
-  real dstn_temp
-  real dterm
-  real dxn
-  real rcutoff_ialp
-  real rend1
-  real rend2
-  real sterm
-  real stn_temp1
-  real stn_temp2
-  real x
-  real y
-  real rcutoff_i
-  real rcutoff_j
-  real dot_product_dipc_x
-  real, dimension (numorb_max, numorb_max) :: bcca
-  real, dimension (numorb_max, numorb_max) :: bccax
-  real, dimension (numorb_max, numorb_max) :: emnpl
-  real, dimension (numorb_max, numorb_max) :: emnpl_noq
-  real, dimension (3, 3, 3) :: deps
-  real, dimension (3, 3) :: eps
-  real, dimension (3) :: r1
-  real, dimension (3) :: r2
-  real, dimension (3) :: r21
-  real, dimension (3) :: rhat
-  real, dimension (3) :: rna
-  real, dimension (3) :: rnabc
-  real, dimension (3) :: sighat
-  real stn1
-  real stn2
-  real, dimension (:,:), allocatable :: smG
-  real, dimension (:,:,:), allocatable :: spmG
-  real, dimension (:, :, :, :), allocatable :: smatG
-  real, dimension (:, :, :, :), allocatable :: spmatG
+  real(8) cost
+  real(8) distance_13
+  real(8) distance_23
+  real(8) dq3
+  real(8) dstn_temp
+  real(8) dterm
+  real(8) dxn
+  real(8) rcutoff_ialp
+  real(8) rend1
+  real(8) rend2
+  real(8) sterm
+  real(8) stn_temp1
+  real(8) stn_temp2
+  real(8) x
+  real(8) y
+  real(8) rcutoff_i
+  real(8) rcutoff_j
+  real(8) dot_product_dipc_x
+  real(8), dimension (numorb_max, numorb_max) :: bcca
+  real(8), dimension (numorb_max, numorb_max) :: bccax
+  real(8), dimension (numorb_max, numorb_max) :: emnpl
+  real(8), dimension (numorb_max, numorb_max) :: emnpl_noq
+  real(8), dimension (3, 3, 3) :: deps
+  real(8), dimension (3, 3) :: eps
+  real(8), dimension (3) :: r1
+  real(8), dimension (3) :: r2
+  real(8), dimension (3) :: r21
+  real(8), dimension (3) :: rhat
+  real(8), dimension (3) :: rna
+  real(8), dimension (3) :: rnabc
+  real(8), dimension (3) :: sighat
+  real(8) stn1
+  real(8) stn2
+  real(8), dimension (:,:), allocatable :: smG
+  real(8), dimension (:,:,:), allocatable :: spmG
+  real(8), dimension (:, :, :, :), allocatable :: smatG
+  real(8), dimension (:, :, :, :), allocatable :: spmatG
   allocate (smG (numorb_max, numorb_max))
   allocate (spmG (3, numorb_max, numorb_max))
   allocate (smatG (numorb_max, numorb_max, neigh_max, natoms))

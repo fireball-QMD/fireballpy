@@ -21,32 +21,32 @@ subroutine Dassemble_lr_dip ()
   integer ix
   integer jneigh
   integer ipair
-  real dist13
-  real dist23
-  real distance12
-  real dq1
-  real dq2
-  real dq3
-  real dterm 
-  real x
-  real sterm
-  real, dimension(3)  :: rnabc
-  real, dimension(3)  :: r13
-  real, dimension(3)  :: r23
-  real, dimension(3)  :: r21
-  real, dimension(3)  :: ddterm
-  real, dimension(3)  :: dptermA
-  real, dimension(3)  :: dptermB
-  real, dimension(3)  :: rna
-  real, dimension (3) :: dpterm
-  real, dimension (3) :: r1
-  real, dimension (3) :: r2
-  real, dimension (3) :: rhat12
-  real, dimension (3) :: spterm
-  real, dimension (numorb_max, numorb_max) :: emnpl
-  real, dimension (3, numorb_max, numorb_max) :: demnplA
-  real, dimension (3, numorb_max, numorb_max) :: demnplB
-  real, dimension (3, numorb_max, numorb_max) :: demnplC
+  real(8) dist13
+  real(8) dist23
+  real(8) distance12
+  real(8) dq1
+  real(8) dq2
+  real(8) dq3
+  real(8) dterm 
+  real(8) x
+  real(8) sterm
+  real(8), dimension(3)  :: rnabc
+  real(8), dimension(3)  :: r13
+  real(8), dimension(3)  :: r23
+  real(8), dimension(3)  :: r21
+  real(8), dimension(3)  :: ddterm
+  real(8), dimension(3)  :: dptermA
+  real(8), dimension(3)  :: dptermB
+  real(8), dimension(3)  :: rna
+  real(8), dimension (3) :: dpterm
+  real(8), dimension (3) :: r1
+  real(8), dimension (3) :: r2
+  real(8), dimension (3) :: rhat12
+  real(8), dimension (3) :: spterm
+  real(8), dimension (numorb_max, numorb_max) :: emnpl
+  real(8), dimension (3, numorb_max, numorb_max) :: demnplA
+  real(8), dimension (3, numorb_max, numorb_max) :: demnplB
+  real(8), dimension (3, numorb_max, numorb_max) :: demnplC
   flrew = 0.0d0
   do ipair = 1,tot_pairs
     iatom = neigh_pair_a1(ipair)

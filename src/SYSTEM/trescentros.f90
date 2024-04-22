@@ -8,30 +8,30 @@ subroutine trescentros (interaction, isorp, maxtype, in1, in2, indna, x, y, cost
   integer, intent (in) :: interaction
   integer, intent (in) :: isorp
   integer, intent (in) :: maxtype
-  real, intent (in) :: cost
-  real, intent (in) :: x
-  real, intent (in) :: y
-  real, intent (in), dimension (3, 3) :: eps
-  real, intent (out), dimension (numorb_max, numorb_max) :: bcnax
+  real(8), intent (in) :: cost
+  real(8), intent (in) :: x
+  real(8), intent (in) :: y
+  real(8), intent (in), dimension (3, 3) :: eps
+  real(8), intent (out), dimension (numorb_max, numorb_max) :: bcnax
   integer imu
   integer iME
   integer index
   integer inu
   integer kforce
   integer nl
-  real argument
-  real cost2
-  real dQ_Ldx
-  real dQ_Ldy
-  real Q_L
-  real sint
+  real(8) argument
+  real(8) cost2
+  real(8) dQ_Ldx
+  real(8) dQ_Ldy
+  real(8) Q_L
+  real(8) sint
   integer nx, ny
-  real xxmax, yymax
-  real hx, hy
-  real, dimension (0:ntheta - 1, ME3c_max) :: bcnalist
-  real, dimension (numorb_max, numorb_max) :: bcnam
-  real, dimension (ME3c_max) :: hlist
-  real, dimension (0:ntheta - 1) :: p
+  real(8) xxmax, yymax
+  real(8) hx, hy
+  real(8), dimension (0:ntheta - 1, ME3c_max) :: bcnalist
+  real(8), dimension (numorb_max, numorb_max) :: bcnam
+  real(8), dimension (ME3c_max) :: hlist
+  real(8), dimension (0:ntheta - 1) :: p
   kforce = 0
   index = icon3c(in1,in2,indna)
   if (interaction .eq. 1) then

@@ -3,8 +3,8 @@ subroutine recover_2cDipY (in1, in2, hlist, hbox)
   use M_fdata, only: num_orb, muDipY, nuDipY,ME2cDipY_max,index_max2cDipY
   implicit none
   integer, intent(in) :: in1, in2
-  real, intent(in) :: hlist (ME2cDipY_max)
-  real, intent(out) :: hbox (numorb_max, numorb_max)
+  real(8), intent(in) :: hlist (ME2cDipY_max)
+  real(8), intent(out) :: hbox (numorb_max, numorb_max)
   integer imu, inu
   integer index
   do inu = 1, num_orb(in2)

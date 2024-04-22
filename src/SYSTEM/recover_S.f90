@@ -3,8 +3,8 @@ subroutine recover_S (in1, in2, hlist, hbox)
   use M_fdata, only: nssh, index_maxS, muS, nuS, MES_max, nsh_max, nsh_max
   implicit none
   integer, intent(in) :: in1, in2
-  real, intent(in) :: hlist (MES_max)
-  real, intent(out) :: hbox (nsh_max, nsh_max)
+  real(8), intent(in) :: hlist (MES_max)
+  real(8), intent(out) :: hbox (nsh_max, nsh_max)
   integer imu, inu
   integer index
   do inu = 1, nssh(in2)

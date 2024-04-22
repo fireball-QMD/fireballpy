@@ -16,15 +16,15 @@ subroutine assemble_sVNL ()
   integer matom
   integer mbeta
  
-  real y
-  real, dimension (3, 3) :: eps
-  real, dimension (3, 3, 3) :: deps
-  real, dimension (3) :: r1
-  real, dimension (3) :: r2
-  real, dimension (3) :: r21
-  real, dimension (3) :: sighat
-  real, dimension (numorb_max, numorb_max) :: sVNLx
-  real, dimension (3, numorb_max, numorb_max) :: spVNLx
+  real(8) y
+  real(8), dimension (3, 3) :: eps
+  real(8), dimension (3, 3, 3) :: deps
+  real(8), dimension (3) :: r1
+  real(8), dimension (3) :: r2
+  real(8), dimension (3) :: r21
+  real(8), dimension (3) :: sighat
+  real(8), dimension (numorb_max, numorb_max) :: sVNLx
+  real(8), dimension (3, numorb_max, numorb_max) :: spVNLx
  
   do iatom = 1, natoms 
     matom = nPP_self(iatom)

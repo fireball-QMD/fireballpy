@@ -16,22 +16,22 @@ subroutine Dassemble_lr ()
   integer jmu
   integer katom
   integer mbeta
-  real distance12
-  real dq1
-  real dq2
-  real dq3
-  real dterm
-  real sterm
-  real, dimension (3) :: dewaldlr_i
-  real, dimension (3) :: dewaldlr_j
-  real, dimension (3) :: dewaldlr_k
-  real, dimension (3) :: dpterm
-  real, dimension (3) :: r1
-  real, dimension (3) :: r2
-  real, dimension (3) :: rhat12
-  real, dimension (3) :: spterm
-  real, dimension (natoms) :: sub_ewald
-  real, dimension (3, natoms) :: sub_dewald
+  real(8) distance12
+  real(8) dq1
+  real(8) dq2
+  real(8) dq3
+  real(8) dterm
+  real(8) sterm
+  real(8), dimension (3) :: dewaldlr_i
+  real(8), dimension (3) :: dewaldlr_j
+  real(8), dimension (3) :: dewaldlr_k
+  real(8), dimension (3) :: dpterm
+  real(8), dimension (3) :: r1
+  real(8), dimension (3) :: r2
+  real(8), dimension (3) :: rhat12
+  real(8), dimension (3) :: spterm
+  real(8), dimension (natoms) :: sub_ewald
+  real(8), dimension (3, natoms) :: sub_dewald
   flrew = 0.0d0
   sub_ewald = 0.0d0
   sub_dewald = 0.0d0

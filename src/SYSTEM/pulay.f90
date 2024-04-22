@@ -2,29 +2,29 @@ subroutine pulay ( x_try, x_old, beta, r2, iter, max_order, nmsh )
   use M_system
   implicit none
   integer, intent(in) :: nmsh      ! Size of vectors being optimized
-  real, intent(in) :: beta         ! Mixing factor
+  real(8), intent(in) :: beta         ! Mixing factor
   integer, intent(in) :: iter      ! iteration number
   integer, intent(in) :: max_order ! How far back do we go to extrapolate?
-  real, intent(in), dimension(nmsh) :: x_try ! potential new vector on input
-  real, intent(inout), dimension(nmsh) :: x_old ! old vector in input, real new vector on output
-  real, intent(out) :: r2 ! mean-square of (x_try(i)-x_old(i))**2
-  real, parameter :: tr2=2.0e-15  ! convergence factor, if r2<tr2, assume converged
-  real, parameter :: A0 = 0.2d0  ! 0.2 can sometimes work better
-  real, parameter :: q0 = 1.5d0  ! in angstrom^-1
-  real, allocatable, dimension(:) :: deltaF
-  real, allocatable, dimension(:) :: deltaX
-  real, allocatable, dimension(:) :: metric   !for Eq.64
-  real, allocatable, dimension(:) :: mixcoeff !alphas in Eq.52
-  real, allocatable, dimension(:)     :: auxvec
-  real, allocatable, dimension(:)     :: auxvec2
-  real, allocatable, dimension(:,:) :: amat
-  real, allocatable, dimension(:,:) :: bmat
-  real, allocatable, dimension(:,:) :: cmat
-  real, allocatable, dimension(:,:) :: idmat
-  real renorm
-  real aux
-  real aux2
-  real norm
+  real(8), intent(in), dimension(nmsh) :: x_try ! potential new vector on input
+  real(8), intent(inout), dimension(nmsh) :: x_old ! old vector in input, real(8) new vector on output
+  real(8), intent(out) :: r2 ! mean-square of (x_try(i)-x_old(i))**2
+  real(8), parameter :: tr2=2.0e-15  ! convergence factor, if r2<tr2, assume converged
+  real(8), parameter :: A0 = 0.2d0  ! 0.2 can sometimes work better
+  real(8), parameter :: q0 = 1.5d0  ! in angstrom^-1
+  real(8), allocatable, dimension(:) :: deltaF
+  real(8), allocatable, dimension(:) :: deltaX
+  real(8), allocatable, dimension(:) :: metric   !for Eq.64
+  real(8), allocatable, dimension(:) :: mixcoeff !alphas in Eq.52
+  real(8), allocatable, dimension(:)     :: auxvec
+  real(8), allocatable, dimension(:)     :: auxvec2
+  real(8), allocatable, dimension(:,:) :: amat
+  real(8), allocatable, dimension(:,:) :: bmat
+  real(8), allocatable, dimension(:,:) :: cmat
+  real(8), allocatable, dimension(:,:) :: idmat
+  real(8) renorm
+  real(8) aux
+  real(8) aux2
+  real(8) norm
   integer i,j,k
   integer mix_order ! Actual order used min(iter,max_order)
   integer, allocatable, dimension(:) :: ipiv
@@ -103,10 +103,10 @@ subroutine pulay ( x_try, x_old, beta, r2, iter, max_order, nmsh )
 308  format (2x, ' norm of difference between betaInvH, betaH^-1 =  ', f20.4)
 242  format (2x, ' Selected method is:  ', a17)
    contains
-     real function vecnorm(vec)
-       real, intent(in), dimension(nmsh) :: vec
+     real(8) function vecnorm(vec)
+       real(8), intent(in), dimension(nmsh) :: vec
        integer i,j
-       real r
+       real(8) r
        r = 0.0d0
        do i = 1,nmsh
           r = r + vec(i)**2
@@ -114,11 +114,11 @@ subroutine pulay ( x_try, x_old, beta, r2, iter, max_order, nmsh )
        r = sqrt(r)
        vecnorm = r
      end function  vecnorm
-     real function maxnorm(mat)
-       real, intent(in), dimension(nmsh,nmsh) :: mat
+     real(8) function maxnorm(mat)
+       real(8), intent(in), dimension(nmsh,nmsh) :: mat
        integer i,j
-       real m
-       real r
+       real(8) m
+       real(8) r
        r = 0.0d0
        m = 0.0d0
        do i = 1,nmsh

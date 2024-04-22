@@ -3,8 +3,8 @@ subroutine kspace_double (ikpoint, sks)
   use M_fdata, only: num_orb, Qneutral
   implicit none
   integer, intent (in) :: ikpoint
-  real, intent (in), dimension (3) :: sks
-  real*8, parameter :: overtol = 1.0d-4
+  real(8), intent (in), dimension (3) :: sks
+  real(8), parameter :: overtol = 1.0d-4
   integer iatom
   integer imu
   integer info
@@ -19,26 +19,25 @@ subroutine kspace_double (ikpoint, sks)
   integer mineig
   integer lm
   integer issh
-  real dot
-  real*8 sqlami
-  real*8, dimension (norbitals) :: eigen
-  real*8, dimension (norbitals) :: slam
-  real, dimension (3) :: vec
-  complex*16 a0
-  complex*16 a1
-  complex*16 phase
-  complex*16, dimension (:, :), allocatable :: xxxx
-  complex*16, dimension (:, :), allocatable :: yyyy
-  complex*16, dimension (:, :), allocatable :: zzzz
-  complex*16, dimension (:, :, :), allocatable, save :: sm12_save
-  complex*16, dimension (:, :), allocatable :: ssss
-  real*8, dimension (:), allocatable :: ww
-  complex*16, allocatable, dimension (:) :: work
-  real*8, allocatable, dimension (:) :: rwork
+  real(8) dot
+  real(8) sqlami
+  real(8), dimension (norbitals) :: eigen
+  real(8), dimension (norbitals) :: slam
+  real(8), dimension (3) :: vec
+  complex(16) a0
+  complex(16) a1
+  complex(16) phase
+  complex(16), dimension (:, :), allocatable :: xxxx
+  complex(16), dimension (:, :), allocatable :: yyyy
+  complex(16), dimension (:, :), allocatable :: zzzz
+  complex(16), dimension (:, :, :), allocatable, save :: sm12_save
+  complex(16), dimension (:, :), allocatable :: ssss
+  real(8), dimension (:), allocatable :: ww
+  complex(16), allocatable, dimension (:) :: work
+  real(8), allocatable, dimension (:) :: rwork
   integer, allocatable, dimension (:) :: iwork
   integer lwork, lrwork, liwork
-
-  real diff, imcoef, recoef
+  real(8) diff, imcoef, recoef
   a0 = cmplx(0.0d0,0.0d0)
   a1 = cmplx(1.0d0,0.0d0)
   ishort = 1
@@ -209,14 +208,14 @@ subroutine kspace_double (ikpoint, sks)
   call zheev ('V', 'U', norbitals, yyyy, norbitals, eigen, work, lwork, rwork, info)
   if (info .ne. 0) call diag_error (info, 0)
   eigen_k(1:norbitals,ikpoint) = eigen(:)
-  if (iqout .ne. 2) blowre(:,:,ikpoint) = real(yyyy(:,:))
+  if (iqout .ne. 2) blowre(:,:,ikpoint) = real(yyyy(:,:), 8)
   if (iqout .ne. 2 .and. icluster .ne. 1) blowim(:,:,ikpoint) = aimag(yyyy(:,:))
   if (iqout .ne. 3) then
    call zhemm ( 'L', 'U', norbitals, norbitals, a1, xxxx, norbitals, yyyy, norbitals, a0, zzzz, norbitals )
   else
    call zgemm ( 'N', 'N', norbitals, norbitals, norbitals, a1, xxxx, norbitals, yyyy, norbitals, a0, zzzz, norbitals )
   end if
-  bbnkre(:,:,ikpoint) = real(zzzz(:,:))
+  bbnkre(:,:,ikpoint) = real(zzzz(:,:), 8)
   if (icluster .ne. 1) bbnkim(:,:,ikpoint) = aimag(zzzz(:,:))
   deallocate (xxxx)
   deallocate (yyyy)

@@ -15,31 +15,31 @@ subroutine assemble_usr ()
   integer mbeta
   integer n1, n2
   integer non2c
-  real distance
-  real dq1, dq2
-  real dqi, dqj
-  real dxc
-  real dxc00, dxc0P, dxc0M, dxcP0, dxcM0
-  real eklr
-  real qi, qj
-  real QQ
-  real u0tot
-  real ue0tot
-  real xc
-  real xc00, xc0P, xc0M, xcP0, xcM0
-  real xforce
-  real Zi, Zj
-  real, dimension (natoms, neigh_max) :: corksr
-  real, dimension (nsh_max, nsh_max) :: coulomb
-  real, dimension (nsh_max, nsh_max) :: coulombD
-  real, dimension (3) :: dcorksr
-  real, dimension (ME2c_max) :: dslist
-  real, dimension (3) :: eta
-  real, dimension (natoms) :: Q, Q0
-  real, dimension (3) :: r1, r2
-  real, dimension (ME2c_max) :: slist
-  real, dimension (natoms, neigh_max) :: u0
-  real, dimension (natoms) :: uee00
+  real(8) distance
+  real(8) dq1, dq2
+  real(8) dqi, dqj
+  real(8) dxc
+  real(8) dxc00, dxc0P, dxc0M, dxcP0, dxcM0
+  real(8) eklr
+  real(8) qi, qj
+  real(8) QQ
+  real(8) u0tot
+  real(8) ue0tot
+  real(8) xc
+  real(8) xc00, xc0P, xc0M, xcP0, xcM0
+  real(8) xforce
+  real(8) Zi, Zj
+  real(8), dimension (natoms, neigh_max) :: corksr
+  real(8), dimension (nsh_max, nsh_max) :: coulomb
+  real(8), dimension (nsh_max, nsh_max) :: coulombD
+  real(8), dimension (3) :: dcorksr
+  real(8), dimension (ME2c_max) :: dslist
+  real(8), dimension (3) :: eta
+  real(8), dimension (natoms) :: Q, Q0
+  real(8), dimension (3) :: r1, r2
+  real(8), dimension (ME2c_max) :: slist
+  real(8), dimension (natoms, neigh_max) :: u0
+  real(8), dimension (natoms) :: uee00
   dusr = 0.0d0
   dxcv = 0.0d0
   u0 = 0.0d0

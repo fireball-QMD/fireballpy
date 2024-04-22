@@ -16,10 +16,10 @@ subroutine common_neighborsPP ()
   integer num_neigh
   integer mbeta
 
-  real  distance
-  real, dimension (3) :: dvec
-  real, dimension (3) :: diff
-  real, dimension (3) :: vec1, vec2, vec3, vec
+  real(8)  distance
+  real(8), dimension (3) :: dvec
+  real(8), dimension (3) :: diff
+  real(8), dimension (3) :: vec1, vec2, vec3, vec
 
   if(icluster .eq. 1) mbeta_max = 0
   do ialp = 1, natoms

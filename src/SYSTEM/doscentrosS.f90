@@ -8,17 +8,17 @@ subroutine doscentrosS (interaction, isub, iauxforce, in1, in2, in3, distance, e
   integer, intent (in) :: in1
   integer, intent (in) :: in2
   integer, intent (in) :: in3
-  real, intent (inout) :: distance
-  real, intent (in), dimension (3, 3) :: eps
-  real, intent (out), dimension (nsh_max, nsh_max) :: sx
-  real, intent (out), dimension (3, nsh_max, nsh_max) :: spx
+  real(8), intent (inout) :: distance
+  real(8), intent (in), dimension (3, 3) :: eps
+  real(8), intent (out), dimension (nsh_max, nsh_max) :: sx
+  real(8), intent (out), dimension (3, nsh_max, nsh_max) :: spx
   integer imu
   integer inu
   integer index
-  real, dimension (3) :: eta
-  real, dimension (MES_max) :: dslist
-  real, dimension (MES_max) :: slist
-  real, dimension (nsh_max,nsh_max) :: spm
+  real(8), dimension (3) :: eta
+  real(8), dimension (MES_max) :: dslist
+  real(8), dimension (MES_max) :: slist
+  real(8), dimension (nsh_max,nsh_max) :: spm
 
   sx = 0.0d0
   if (iauxforce .eq. 1) spm = 0.0d0

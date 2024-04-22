@@ -3,8 +3,8 @@ subroutine recover_PP (in1, in2, hlist, hbox)
   use M_fdata, only: ME2c_max,num_orbPP,num_orb,index_maxPP,nuPP,muPP
   implicit none
   integer, intent(in) :: in1, in2
-  real, intent(in), dimension (ME2c_max) :: hlist
-  real, intent(out), dimension (numorb_max, numorb_max) :: hbox
+  real(8), intent(in), dimension (ME2c_max) :: hlist
+  real(8), intent(out), dimension (numorb_max, numorb_max) :: hbox
   integer imu, inu
   integer index
   do inu = 1, num_orbPP(in2)

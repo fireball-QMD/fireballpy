@@ -25,13 +25,13 @@ subroutine assemble_3c_PP ()
  
   integer, external :: mpairnay
 
-  real, dimension (numorb_max, numorb_max) :: bcnlx
-  real, dimension (numorb_max) :: cl
-  real, dimension (3) :: r1
-  real, dimension (3) :: r2
-  real, dimension (3) :: r31
-  real, dimension (3) :: r32
-  real, dimension (3) :: rna
+  real(8), dimension (numorb_max, numorb_max) :: bcnlx
+  real(8), dimension (numorb_max) :: cl
+  real(8), dimension (3) :: r1
+  real(8), dimension (3) :: r2
+  real(8), dimension (3) :: r31
+  real(8), dimension (3) :: r32
+  real(8), dimension (3) :: rna
   do ialp = 1, natoms
     rna(:) = ratom(:,ialp)
     indna = imass(ialp)

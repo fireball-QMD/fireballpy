@@ -22,22 +22,22 @@ subroutine assemble_2c ()
   integer iy
   integer iz
  
-  real y
-  real, dimension (numorb_max, numorb_max) :: bcna
-  real, dimension (3, numorb_max, numorb_max) :: bcnapx
-  real, dimension (numorb_max, numorb_max) :: bcnax
-  real, dimension (3, 3, 3) :: deps
-  real, dimension (3, 3) :: eps
-  real, dimension (3) :: r1
-  real, dimension (3) :: r2
-  real, dimension (3) :: r21
-  real, dimension (3) :: sighat
-  real, dimension (numorb_max, numorb_max) :: sx
-  real, dimension (3, numorb_max, numorb_max) :: spx
-  real, dimension (numorb_max, numorb_max) :: tx
-  real, dimension (3, numorb_max, numorb_max) :: tpx
-  real, dimension (numorb_max, numorb_max) :: dipx
-  real, dimension (3, numorb_max, numorb_max) :: dippx
+  real(8) y
+  real(8), dimension (numorb_max, numorb_max) :: bcna
+  real(8), dimension (3, numorb_max, numorb_max) :: bcnapx
+  real(8), dimension (numorb_max, numorb_max) :: bcnax
+  real(8), dimension (3, 3, 3) :: deps
+  real(8), dimension (3, 3) :: eps
+  real(8), dimension (3) :: r1
+  real(8), dimension (3) :: r2
+  real(8), dimension (3) :: r21
+  real(8), dimension (3) :: sighat
+  real(8), dimension (numorb_max, numorb_max) :: sx
+  real(8), dimension (3, numorb_max, numorb_max) :: spx
+  real(8), dimension (numorb_max, numorb_max) :: tx
+  real(8), dimension (3, numorb_max, numorb_max) :: tpx
+  real(8), dimension (numorb_max, numorb_max) :: dipx
+  real(8), dimension (3, numorb_max, numorb_max) :: dippx
 
   vna = 0.0d0
   s_mat = 0.0d0

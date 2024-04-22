@@ -7,11 +7,11 @@ subroutine trescentrosS ( isorp, maxtype, in1, in2, indna, x, y, cost, eps, bcna
   integer, intent (in) :: indna
   integer, intent (in) :: isorp
   integer, intent (in) :: maxtype
-  real, intent (in) :: cost
-  real, intent (in) :: x
-  real, intent (in) :: y
-  real, intent (in), dimension (3, 3) :: eps
-  real, intent (out), dimension (nsh_max, nsh_max) :: bcnax
+  real(8), intent (in) :: cost
+  real(8), intent (in) :: x
+  real(8), intent (in) :: y
+  real(8), intent (in), dimension (3, 3) :: eps
+  real(8), intent (out), dimension (nsh_max, nsh_max) :: bcnax
   integer imu
   integer iME
   integer index
@@ -20,19 +20,19 @@ subroutine trescentrosS ( isorp, maxtype, in1, in2, indna, x, y, cost, eps, bcna
   integer nl
   integer nx
   integer ny
-  real argument
-  real cost2
-  real dQ_Ldx
-  real dQ_Ldy
-  real Q_L
-  real sint
-  real xxmax
-  real yymax
-  real hx
-  real hy
-  real, dimension (0:ithetamax - 1, MES_max) :: bcnalist
-  real, dimension (MES_max) :: hlist
-  real, dimension (0:ithetamax - 1) :: p
+  real(8) argument
+  real(8) cost2
+  real(8) dQ_Ldx
+  real(8) dQ_Ldy
+  real(8) Q_L
+  real(8) sint
+  real(8) xxmax
+  real(8) yymax
+  real(8) hx
+  real(8) hy
+  real(8), dimension (0:ithetamax - 1, MES_max) :: bcnalist
+  real(8), dimension (MES_max) :: hlist
+  real(8), dimension (0:ithetamax - 1) :: p
   do inu = 1, nssh(in2)
     do imu = 1, nssh(in1)
       bcnax(imu,inu) = 0.0d0

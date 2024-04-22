@@ -9,20 +9,20 @@ subroutine doscentrosPP (interaction, isub, distance, eps, deps, iauxforce, in1,
   integer, intent(in) :: in2
   integer, intent(in) :: isub
   integer, intent(in) :: interaction
-  real, intent (in) :: distance
-  real, intent (in), dimension (3, 3, 3) :: deps
-  real, intent (in), dimension (3, 3) :: eps
-  real, intent(out), dimension (numorb_max, numorb_max) :: sx
-  real, intent(out), dimension (3, numorb_max, numorb_max) :: spx
+  real(8), intent (in) :: distance
+  real(8), intent (in), dimension (3, 3, 3) :: deps
+  real(8), intent (in), dimension (3, 3) :: eps
+  real(8), intent(out), dimension (numorb_max, numorb_max) :: sx
+  real(8), intent(out), dimension (3, numorb_max, numorb_max) :: spx
   integer imu
   integer inu
   integer index
-  real, dimension (ME2cPP_max) :: dpplist
-  real, dimension (3) :: eta
-  real, dimension (ME2cPP_max) :: pplist
-  real, dimension (numorb_max, numorb_max) :: sm
-  real, dimension (numorb_max, numorb_max) :: spm
-  real, dimension (3, numorb_max, numorb_max) :: spmx
+  real(8), dimension (ME2cPP_max) :: dpplist
+  real(8), dimension (3) :: eta
+  real(8), dimension (ME2cPP_max) :: pplist
+  real(8), dimension (numorb_max, numorb_max) :: sm
+  real(8), dimension (numorb_max, numorb_max) :: spm
+  real(8), dimension (3, numorb_max, numorb_max) :: spmx
   if (interaction .ne. 5 .or. isub .ne. 0) then
     write (*,*) ' interaction = ', interaction
     write (*,*) ' This routine is only for the pseudopotential '

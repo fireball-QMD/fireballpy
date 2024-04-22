@@ -20,20 +20,20 @@ subroutine denmat ()
   integer nnu
   integer :: info, lwork
   integer, dimension(100) :: work
-  real aux1, aux2, aux3
-  real deltae
-  real dot
-  real gutr
-  real pcharge
-  real ztest
-  real checksum
-  real Wmu
-  real, dimension (natoms) :: pqmu
-  real, dimension (natoms) :: QoutTot
-  real, dimension (3) :: vec
-  complex ai
-  complex phase, phasex
-  complex step1, step2
+  real(8) aux1, aux2, aux3
+  real(8) deltae
+  real(8) dot
+  real(8) gutr
+  real(8) pcharge
+  real(8) ztest
+  real(8) checksum
+  real(8) Wmu
+  real(8), dimension (natoms) :: pqmu
+  real(8), dimension (natoms) :: QoutTot
+  real(8), dimension (3) :: vec
+  complex(16) ai
+  complex(16) phase, phasex
+  complex(16) step1, step2
   logical read_occupy
 
   ai = cmplx(0.0d0,1.0d0)
@@ -62,7 +62,7 @@ subroutine denmat ()
                 do inu = 1, num_orb(in2)
                   nnu = inu + degelec(jatom)
                   step2 = step1*(bbnkre(nnu,iband,ikpoint) + ai*bbnkim(nnu,iband,ikpoint))
-                  gutr = real(step2)
+                  gutr = real(step2, 8)
                   rho(imu,inu,ineigh,iatom) = rho(imu,inu,ineigh,iatom) + gutr
                   cape(imu,inu,ineigh,iatom) = cape(imu,inu,ineigh,iatom) + eigen_k(iband,ikpoint)*gutr
                 end do
@@ -79,7 +79,7 @@ subroutine denmat ()
                 do inu = 1, num_orb(in2)
                   nnu = inu + degelec(jatom)
                   step2 = step1*bbnkre(nnu,iband,ikpoint)
-                  gutr = real(step2)
+                  gutr = real(step2, 8)
                   rho(imu,inu,ineigh,iatom) = rho(imu,inu,ineigh,iatom) + gutr
                   cape(imu,inu,ineigh,iatom) = cape(imu,inu,ineigh,iatom) + eigen_k(iband,ikpoint)*gutr
                 end do
@@ -111,7 +111,7 @@ subroutine denmat ()
                 do inu = 1, num_orb(in2)
                   nnu = inu + degelec(jatom)
                   step2 = step1*(bbnkre(nnu,iband,ikpoint)  + ai*bbnkim(nnu,iband,ikpoint))
-                  gutr = real(step2)
+                  gutr = real(step2, 8)
                   rhoPP(imu,inu,ineigh,iatom) = rhoPP(imu,inu,ineigh,iatom) + gutr
                 end do
               end do
@@ -127,7 +127,7 @@ subroutine denmat ()
                 do inu = 1, num_orb(in2)
                   nnu = inu + degelec(jatom)
                   step2 = step1*bbnkre(nnu,iband,ikpoint)
-                  gutr = real(step2)
+                  gutr = real(step2, 8)
                   rhoPP(imu,inu,ineigh,iatom) = rhoPP(imu,inu,ineigh,iatom)  + gutr
                 end do
               end do

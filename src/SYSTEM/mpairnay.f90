@@ -3,15 +3,15 @@ integer function mpairnay (iatom, jatom, rdiff)
   implicit none
   integer, intent(in) :: iatom
   integer, intent(in) :: jatom
-  real, intent(in), dimension (3) :: rdiff
+  real(8), intent(in), dimension (3) :: rdiff
   integer imatch
   integer ineigh
   integer jjatom
   integer mbeta
-  real diff
-  real, dimension (3) :: r1
-  real, dimension (3) :: r2
-  real, dimension (3) :: r21
+  real(8) diff
+  real(8), dimension (3) :: r1
+  real(8), dimension (3) :: r2
+  real(8), dimension (3) :: r21
   mpairnay = 0
   r1(:) = ratom(:,iatom)
   imatch = 0

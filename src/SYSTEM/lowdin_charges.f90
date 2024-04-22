@@ -11,7 +11,7 @@ subroutine LOWDIN_CHARGES()
   integer noccupy
   integer mqn
   integer iorbital
-  real aux1, aux2, aux3
+  real(8) aux1, aux2, aux3
   Qout = 0.0d0
   QLowdin_TOT = 0.0d0
   do iatom = 1, natoms

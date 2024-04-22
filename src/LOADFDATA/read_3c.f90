@@ -10,8 +10,8 @@ subroutine read_3c (interaction)
     integer maxtype, mintype
     integer numx, numy
     integer nz1, nz2, nz3
-    real xmax
-    real ymax
+    real(8) xmax
+    real(8) ymax
     character (len=200) extension
     character (len=200) filename
     character (len=200) root

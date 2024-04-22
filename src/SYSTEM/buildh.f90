@@ -13,10 +13,10 @@ subroutine buildh ()
   integer inu
   integer jatom
   integer mbeta
-  real distance
-  real, dimension (numorb_max, numorb_max) :: htemp
-  real, dimension (numorb_max, numorb_max) :: stemp
-  real, dimension (3) :: dvec
+  real(8) distance
+  real(8), dimension (numorb_max, numorb_max) :: htemp
+  real(8), dimension (numorb_max, numorb_max) :: stemp
+  real(8), dimension (3) :: dvec
   integer issh
   integer numorb
   integer jatom0

@@ -27,37 +27,37 @@ subroutine assemble_ca_2c_dip ()
   integer ix
   integer iy
  
-  real dq1
-  real dq2
-  real dterm
-  real dterm_1
-  real dterm_2
-  real dstn_temp
-  real dxn
-  real rcutoff_j
-  real rend
-  real rend1
-  real rend2
-  real sterm_1
-  real sterm_2
-  real y
-  real rcutoff_i
+  real(8) dq1
+  real(8) dq2
+  real(8) dterm
+  real(8) dterm_1
+  real(8) dterm_2
+  real(8) dstn_temp
+  real(8) dxn
+  real(8) rcutoff_j
+  real(8) rend
+  real(8) rend1
+  real(8) rend2
+  real(8) sterm_1
+  real(8) sterm_2
+  real(8) y
+  real(8) rcutoff_i
  
-  real, dimension (numorb_max, numorb_max) :: bcca
-  real, dimension (3, numorb_max, numorb_max) :: bccapx
-  real, dimension (numorb_max, numorb_max) :: bccax
-  real, dimension (3, 3, 3) :: deps
-  real, dimension (numorb_max, numorb_max) :: dipx
-  real, dimension (3, numorb_max, numorb_max) :: dippx
-  real, dimension (numorb_max, numorb_max) :: emnpl
-  real, dimension (numorb_max, numorb_max) :: emnpl_noq
-  real, dimension (3, 3) :: eps
-  real, dimension (3) :: r1
-  real, dimension (3) :: r2
-  real, dimension (3) :: r21
-  real, dimension (3) :: sighat
-  real stn1
-  real stn2
+  real(8), dimension (numorb_max, numorb_max) :: bcca
+  real(8), dimension (3, numorb_max, numorb_max) :: bccapx
+  real(8), dimension (numorb_max, numorb_max) :: bccax
+  real(8), dimension (3, 3, 3) :: deps
+  real(8), dimension (numorb_max, numorb_max) :: dipx
+  real(8), dimension (3, numorb_max, numorb_max) :: dippx
+  real(8), dimension (numorb_max, numorb_max) :: emnpl
+  real(8), dimension (numorb_max, numorb_max) :: emnpl_noq
+  real(8), dimension (3, 3) :: eps
+  real(8), dimension (3) :: r1
+  real(8), dimension (3) :: r2
+  real(8), dimension (3) :: r21
+  real(8), dimension (3) :: sighat
+  real(8) stn1
+  real(8) stn2
   vca = 0.0d0
   ewaldsr = 0.0d0
 

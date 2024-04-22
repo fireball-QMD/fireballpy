@@ -1,12 +1,11 @@
 project('fireballpy', 'fortran', 'c',
         version: '0.0.1',
-        license: 'GPL-3',
-        default_options: ['optimization=3'])
+        license: 'GPL-3')
 
 # Check Fortran compiler
 fc = meson.get_compiler('fortran')
 if fc.get_id() == 'gcc'
-    flags = ['-fdefault-real-8', '-unroll', '-fPIC', '-ffree-line-length-512', '-fimplicit-none']
+    flags = ['-unroll', '-fPIC', '-ffree-line-length-512', '-fimplicit-none']
 else
     error('No compiler found.')
 endif
@@ -34,7 +33,7 @@ incdir_f2py = run_command(py,
 ).stdout().strip()
 
 fireball_source = custom_target('fireball_module',
-  input : ['src/libf2py.f90'],  # .f so no F90 wrappers
+  input : ['src' / 'libf2py.f90'],
   output : ['_fireballmodule.c', '_fireball-f2pywrappers.f'],
   command : [py, '-m', 'numpy.f2py', '@INPUT@', '-m', '_fireball', '--lower']
 )
@@ -42,10 +41,10 @@ fireball_source = custom_target('fireball_module',
 inc_np = include_directories(incdir_numpy, incdir_f2py)
 
 py.extension_module('_fireball',
-  [fireball_source],
+  ['src' / 'libf2py.f90', fireball_source],
   incdir_f2py / 'fortranobject.c',
   include_directories: inc_np,
   dependencies : [py_dep, fireball_dep],
   install : true,
-  install_dir: meson.current_source_dir() + '/fireballpy/'
+  install_dir : meson.current_source_dir() / 'fireballpy'
 )

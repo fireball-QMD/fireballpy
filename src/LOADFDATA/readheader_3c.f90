@@ -3,10 +3,10 @@ subroutine readheader_3c (iounit, numx, numy, xmax, ymax)
     implicit none
     integer, intent (in) :: iounit
     integer, intent (out) :: numx, numy
-    real, intent (out) :: xmax, ymax
+    real(8), intent (out) :: xmax, ymax
     integer iline
     integer nucZ1, nucZ2, nucZ3, nr, ntheta_in, nphi2
-    real rc1a, rc2a, rc3a
+    real(8) rc1a, rc2a, rc3a
     character (len = 70) message
 
     do iline = 1, 10

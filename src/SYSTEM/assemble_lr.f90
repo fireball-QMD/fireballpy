@@ -15,13 +15,13 @@ subroutine assemble_lr ()
   integer mbeta
   integer katom
   integer in3
-  real distance12
-  real dq1
-  real dterm
-  real sterm
-  real, dimension (3) :: r1
-  real, dimension (3) :: r2
-  real, dimension (natoms) :: sub_ewald
+  real(8) distance12
+  real(8) dq1
+  real(8) dterm
+  real(8) sterm
+  real(8), dimension (3) :: r1
+  real(8), dimension (3) :: r2
+  real(8), dimension (natoms) :: sub_ewald
   ewaldlr = 0.0d0
   sub_ewald = 0.0d0
   do iatom = 1, natoms

@@ -3,8 +3,8 @@ subroutine kspace_gamma ( ikpoint, sks)
   use M_fdata, only: num_orb, Qneutral
   implicit none
   integer, intent (in) :: ikpoint
-  real, intent (in), dimension (3) :: sks
-  real*8, parameter :: overtol = 1.0d-4
+  real(8), intent (in), dimension (3) :: sks
+  real(8), parameter :: overtol = 1.0d-4
   integer iatom
   integer imu
   integer info
@@ -19,22 +19,22 @@ subroutine kspace_gamma ( ikpoint, sks)
   integer mineig
   integer lm
   integer issh
-  real sqlami
-  real*8, dimension (norbitals) :: eigen
-  real*8, dimension (norbitals) :: slam
-  real*8 a0
-  real*8 a1
-  real*8 magnitude
-  real*8, dimension (:, :), allocatable :: xxxx
-  real*8, dimension (:, :), allocatable :: yyyy
-  real*8, dimension (:, :), allocatable :: zzzz
-  real*8, dimension (:, :), allocatable, save :: sm12_save
-  real*8, dimension (:, :), allocatable :: ssss
-  real*8, dimension (:), allocatable :: ww
-  real*8, allocatable, dimension (:) :: work
+  real(8) sqlami
+  real(8), dimension (norbitals) :: eigen
+  real(8), dimension (norbitals) :: slam
+  real(8) a0
+  real(8) a1
+  real(8) magnitude
+  real(8), dimension (:, :), allocatable :: xxxx
+  real(8), dimension (:, :), allocatable :: yyyy
+  real(8), dimension (:, :), allocatable :: zzzz
+  real(8), dimension (:, :), allocatable, save :: sm12_save
+  real(8), dimension (:, :), allocatable :: ssss
+  real(8), dimension (:), allocatable :: ww
+  real(8), allocatable, dimension (:) :: work
   integer, allocatable, dimension (:) :: iwork
   integer lwork, liwork
-  magnitude = sqrt(sks(1)**2 + sks(2)**2 + sks(3)**3)
+  magnitude = sqrt(sks(1)**2 + sks(2)**2 + sks(3)**3) ! AQUI : sks(3)**3 ?
   if (magnitude .gt. 1.0d-3) then
     write (*,*) ' gamma point, the complex version of LAPACK is needed.'
     write (*,*) ' We must stop here! ',sks
@@ -182,14 +182,14 @@ subroutine kspace_gamma ( ikpoint, sks)
   call dsyev ('V', 'U', norbitals, yyyy, norbitals, eigen, work, lwork, info )
   if (info .ne. 0) call diag_error (info, 0)
   eigen_k(1:norbitals,ikpoint) = eigen(:)
-  if (iqout .ne. 2) blowre(:,:,ikpoint) = real(yyyy(:,:))
+  if (iqout .ne. 2) blowre(:,:,ikpoint) = real(yyyy(:,:), 8)
   call dsymm ( 'L', 'U', norbitals, norbitals, a1, xxxx, norbitals, yyyy, norbitals, a0, zzzz, norbitals )
   if (iqout .ne. 3) then
     call dsymm ( 'L', 'U', norbitals, norbitals, a1, xxxx, norbitals, yyyy, norbitals, a0, zzzz, norbitals )
   else
     call dgemm ( 'N', 'N', norbitals, norbitals, norbitals, a1, xxxx, norbitals, yyyy, norbitals, a0, zzzz, norbitals )
   end if
-  bbnkre(:,:,ikpoint) = real(zzzz(:,:))
+  bbnkre(:,:,ikpoint) = real(zzzz(:,:), 8)
   deallocate (xxxx)
   deallocate (yyyy)
   deallocate (zzzz)

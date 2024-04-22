@@ -92,7 +92,7 @@ end
 subroutine set_cell(lvs)
   use M_system
   implicit none
-  real*8, dimension(3,3), intent(in) :: lvs
+  real(8), dimension(3,3), intent(in) :: lvs
   a1vec(1) = lvs(1,1)
   a1vec(2) = lvs(1,2)
   a1vec(3) = lvs(1,3)
@@ -110,7 +110,7 @@ subroutine set_coords(naux, z, xyz)
   implicit none
   integer, intent(in) :: naux
   integer, dimension(naux), intent(in) :: z
-  real*8, dimension(naux,3), intent(in) :: xyz
+  real(8), dimension(naux,3), intent(in) :: xyz
   integer :: iatom,ispec
   natoms=naux
   allocate (ratom (3, natoms))
@@ -184,7 +184,7 @@ subroutine loadkpts_from_file(kptsfile)
   implicit none
   character(len=400),intent(in):: kptsfile
   integer :: ikpoint
-  real :: sum_weight
+  real(8) :: sum_weight
   open (unit = 54, file = kptsfile, status = 'old')
   read (54,*) nkpoints
   allocate (special_k(3, nkpoints))
@@ -208,7 +208,7 @@ end
 subroutine rescal_structure(rescal)
   use M_system
   implicit none
-  real,intent(in)::rescal
+  real(8), intent(in)::rescal
   integer :: iatom,ikpoint
   a1vec(:)=a1vec(:)*rescal
   a2vec(:)=a2vec(:)*rescal
@@ -274,7 +274,7 @@ end
 subroutine info_energy(out_energy)
   use M_system
   implicit none
-  real*8, intent(out) :: out_energy
+  real(8), intent(out) :: out_energy
   write(*,'(3x,A,I4,A,F12.10,A,L1)') 'Kscf =',Kscf,'; sigma =',sigma,'; scf_achieved =',scf_achieved
 
   write (*,*) ' ---------- T H E  T O T A L  E N E R G Y ----------- '
@@ -299,7 +299,7 @@ subroutine info_forces(naux, out_forces)
   use M_system
   implicit none
   integer, intent(in) :: naux
-  real*8, dimension(naux, 3), intent(out) :: out_forces
+  real(8), dimension(naux, 3), intent(out) :: out_forces
   integer :: iatom
   write (*,*) ' The grand total force (eV/A): '
   do iatom = 1, natoms

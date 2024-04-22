@@ -7,20 +7,20 @@ subroutine doscentrosDipX (interaction, isub, in1, in2, in3, distance, eps, deps
   integer, intent (in) :: in1
   integer, intent (in) :: in2
   integer, intent (in) :: in3
-  real, intent (inout) :: distance
-  real, intent (in), dimension (3, 3, 3) :: deps
-  real, intent (in), dimension (3, 3) :: eps
-  real, intent (out), dimension (numorb_max, numorb_max) :: sx
-  real, intent (out), dimension (3, numorb_max, numorb_max) :: spx
+  real(8), intent (inout) :: distance
+  real(8), intent (in), dimension (3, 3, 3) :: deps
+  real(8), intent (in), dimension (3, 3) :: eps
+  real(8), intent (out), dimension (numorb_max, numorb_max) :: sx
+  real(8), intent (out), dimension (3, numorb_max, numorb_max) :: spx
   integer imu
   integer inu
   integer index
-  real, dimension (3) :: eta
-  real, dimension (ME2cDipX_max) :: dslist
-  real, dimension (ME2cDipX_max) :: slist
-  real, dimension (numorb_max,numorb_max) :: sm
-  real, dimension (numorb_max,numorb_max) :: spm
-  real, dimension (3,numorb_max,numorb_max) :: spmx
+  real(8), dimension (3) :: eta
+  real(8), dimension (ME2cDipX_max) :: dslist
+  real(8), dimension (ME2cDipX_max) :: slist
+  real(8), dimension (numorb_max,numorb_max) :: sm
+  real(8), dimension (numorb_max,numorb_max) :: spm
+  real(8), dimension (3,numorb_max,numorb_max) :: spmx
   logical switch
   sm = 0.0d0
   sx = 0.0d0

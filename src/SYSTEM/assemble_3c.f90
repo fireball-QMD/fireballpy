@@ -23,28 +23,28 @@ subroutine assemble_3c ()
   integer mneigh
   integer jneigh       
 
-  real cost
-  real distance_13
-  real distance_23
-  real dstn_temp
-  real stn_temp1
-  real stn_temp2
-  real x
-  real y
+  real(8) cost
+  real(8) distance_13
+  real(8) distance_23
+  real(8) dstn_temp
+  real(8) stn_temp1
+  real(8) stn_temp2
+  real(8) x
+  real(8) y
 
-  real, dimension (numorb_max, numorb_max) :: bcnax
-  real, dimension (3, 3) :: eps
-  real, dimension (3) :: r1
-  real, dimension (3) :: r2
-  real, dimension (3) :: r21
-  real, dimension (3) :: r31
-  real, dimension (3) :: r32
-  real, dimension (3) :: r13
-  real, dimension (3) :: r23
-  real, dimension (3) :: rhat
-  real, dimension (3) :: rna
-  real, dimension (3) :: rnabc
-  real, dimension (3) :: sighat
+  real(8), dimension (numorb_max, numorb_max) :: bcnax
+  real(8), dimension (3, 3) :: eps
+  real(8), dimension (3) :: r1
+  real(8), dimension (3) :: r2
+  real(8), dimension (3) :: r21
+  real(8), dimension (3) :: r31
+  real(8), dimension (3) :: r32
+  real(8), dimension (3) :: r13
+  real(8), dimension (3) :: r23
+  real(8), dimension (3) :: rhat
+  real(8), dimension (3) :: rna
+  real(8), dimension (3) :: rnabc
+  real(8), dimension (3) :: sighat
   do ialp = 1, natoms
     rna(:) = ratom(:,ialp)
     indna = imass(ialp)

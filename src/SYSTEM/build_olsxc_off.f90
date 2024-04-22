@@ -6,10 +6,10 @@ subroutine build_olsxc_off (in1, in2, den1x, denx, sx, ineigh,iatom, bcxcx)
   integer, intent (in) :: in2
   integer, intent (in) :: ineigh
   integer, intent (in) :: iatom
-  real, intent (in), dimension (numorb_max, numorb_max) :: denx
-  real, intent (in), dimension (numorb_max, numorb_max) :: den1x
-  real, intent (in), dimension (numorb_max, numorb_max) :: sx
-  real, intent (out), dimension (numorb_max, numorb_max) :: bcxcx
+  real(8), intent (in), dimension (numorb_max, numorb_max) :: denx
+  real(8), intent (in), dimension (numorb_max, numorb_max) :: den1x
+  real(8), intent (in), dimension (numorb_max, numorb_max) :: sx
+  real(8), intent (out), dimension (numorb_max, numorb_max) :: bcxcx
   integer imu
   integer ind1
   integer ind2
@@ -20,16 +20,16 @@ subroutine build_olsxc_off (in1, in2, den1x, denx, sx, ineigh,iatom, bcxcx)
   integer l2
   integer n1
   integer n2
-  real dexc
-  real d2exc
-  real dmuxc
-  real d2muxc
-  real exc
-  real muxc
-  real dmuxcij
-  real muxcij
-  real, dimension (nsh_max, nsh_max) :: dens
-  real, dimension (nsh_max, nsh_max) :: densij
+  real(8) dexc
+  real(8) d2exc
+  real(8) dmuxc
+  real(8) d2muxc
+  real(8) exc
+  real(8) muxc
+  real(8) dmuxcij
+  real(8) muxcij
+  real(8), dimension (nsh_max, nsh_max) :: dens
+  real(8), dimension (nsh_max, nsh_max) :: densij
   bcxcx = 0.0d0
   do issh = 1, nssh(in1)
     do jssh = 1, nssh(in2)

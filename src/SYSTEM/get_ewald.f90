@@ -24,31 +24,31 @@ subroutine get_ewald (iauxforce)
   integer jatom
   integer niters
   integer nitersp
-  real argument
-  real derfcdr
-  real distance
-  real erfc
-  real factor
-  real factorf
-  real g1mag2, g2mag2, g3mag2
-  real gdotb
-  real gmax
-  real gmin2
-  real gsq
-  real kappa
-  real QQ
-  real r1mag2, r2mag2, r3mag2
-  real rmax
-  real rmin2
-  real stuff
-  real volcel
-  real, dimension (3) :: cvec
-  real, dimension (3) :: eta
-  real, dimension (3, natoms) :: fewald1, fewald2
-  real, dimension (3) :: g
-  real, dimension (3) :: g1, g2, g3
-  real, dimension (natoms) :: Q, Q0
-  real, dimension (3) :: vecl
+  real(8) argument
+  real(8) derfcdr
+  real(8) distance
+  real(8) erfc
+  real(8) factor
+  real(8) factorf
+  real(8) g1mag2, g2mag2, g3mag2
+  real(8) gdotb
+  real(8) gmax
+  real(8) gmin2
+  real(8) gsq
+  real(8) kappa
+  real(8) QQ
+  real(8) r1mag2, r2mag2, r3mag2
+  real(8) rmax
+  real(8) rmin2
+  real(8) stuff
+  real(8) volcel
+  real(8), dimension (3) :: cvec
+  real(8), dimension (3) :: eta
+  real(8), dimension (3, natoms) :: fewald1, fewald2
+  real(8), dimension (3) :: g
+  real(8), dimension (3) :: g1, g2, g3
+  real(8), dimension (natoms) :: Q, Q0
+  real(8), dimension (3) :: vecl
   ewald = 0.0d0
   if (iauxforce .eq. 1) dewald = 0.0d0
   if (iauxforce .eq. 1) fewald = 0.0d0
@@ -193,9 +193,9 @@ end subroutine get_ewald
 
 subroutine cross (a, b, c)
   implicit none
-  real, intent(in), dimension(3) :: a
-  real, intent(in), dimension(3) :: b
-  real, intent(out), dimension(3) :: c
+  real(8), intent(in), dimension(3) :: a
+  real(8), intent(in), dimension(3) :: b
+  real(8), intent(out), dimension(3) :: c
   c(1) = a(2)*b(3) - a(3)*b(2)
   c(2) = a(3)*b(1) - a(1)*b(3)
   c(3) = a(1)*b(2) - a(2)*b(1)

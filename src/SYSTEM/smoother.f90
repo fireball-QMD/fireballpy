@@ -1,17 +1,17 @@
 subroutine smoother (r, rend, xi, stn, dstn)
   implicit none
-  real, intent (in) :: r
-  real, intent (in) :: rend
-  real, intent (in) :: xi
-  real, intent (out) :: stn
-  real, intent (out) :: dstn
+  real(8), intent (in) :: r
+  real(8), intent (in) :: rend
+  real(8), intent (in) :: xi
+  real(8), intent (out) :: stn
+  real(8), intent (out) :: dstn
   integer, parameter :: npower = 2
   integer, parameter :: mpower = 2
   integer, parameter :: scaler = 0
   logical, parameter :: old_method = .true.
-  real frac
-  real rbegin
-  real dum
+  real(8) frac
+  real(8) rbegin
+  real(8) dum
   rbegin = xi*rend
   if (r .lt. 0.0d0) then
     write (*,*) ' r < 0 in smoother *** error! '
