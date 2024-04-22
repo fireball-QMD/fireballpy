@@ -1,5 +1,3 @@
-#!/opt/intel/oneapi/intelpython/python3.7/bin/python3.7
-
 from ase.io import read
 import sys
 sys.path.append("..")
