@@ -56,14 +56,14 @@ integer function get_nssh(iaux)
  return
 end
 
-real function get_etot()
+real(8) function get_etot()
   use M_system, only : etot
   get_etot=etot
   return
 end
 
 
-real function get_atom_force(iaux,jaux)
+real(8) function get_atom_force(iaux,jaux)
   use M_system, only : ftot
   implicit none
   integer, intent(in):: iaux
@@ -72,7 +72,7 @@ real function get_atom_force(iaux,jaux)
   return
 end function get_atom_force
 
-real function get_shell_atom_charge(iauxssh,iauxatom)
+real(8) function get_shell_atom_charge(iauxssh,iauxatom)
   use M_system, only : Qin
   implicit none
   integer, intent(in):: iauxatom

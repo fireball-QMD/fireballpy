@@ -42,10 +42,10 @@ fireball_source = custom_target('fireball_module',
 inc_np = include_directories(incdir_numpy, incdir_f2py)
 
 py.extension_module('_fireball',
-  ['src/libf2py.f90', fireball_source],
+  [fireball_source],
   incdir_f2py / 'fortranobject.c',
   include_directories: inc_np,
   dependencies : [py_dep, fireball_dep],
   install : true,
-  install_dir: '/home/carlos/Documents/fireballpy/fireballpy/'
+  install_dir: meson.current_source_dir() + '/fireballpy/'
 )
