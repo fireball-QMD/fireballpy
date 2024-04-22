@@ -3,10 +3,10 @@ from typing import Optional
 
 import os
 import warnings
-
+import math
 import numpy as np
 from ase.calculators.calculator import Calculator, all_changes  # type: ignore
-
+from ase.dft.kpoints import *
 from fireballpy.infodat import InfoDat
 from fireballpy.fdata import download_needed, get_default_infodat
 
@@ -16,17 +16,18 @@ from ._fireball import (call_scf_loop,  # type: ignore
                         call_allocate_system,
                         loadfdata_from_path,
                         set_coords,
-                        set_cell,
                         set_iqout,
-                        loadlvs_100,
-                        loadkpts_gamma,
+                        set_cell,
+                        load_cell_100,
+                        set_kpoints,
+                        load_kpoints_gamma,
+                        set_igamma,
+                        set_icluster,
+                        get_igamma,
                         get_etot,
                         get_nssh,
                         get_atom_force,
                         get_shell_atom_charge,
-                        set_igamma,
-                        set_icluster,
-                        get_igamma,
                         get_icluster)
 
 
@@ -64,13 +65,15 @@ class Fireball(Calculator):
                 'Mulliken-dipole': 4, 'Mulliken-dipole-preserving': 7}
 
     def __init__(self, fdata_path: Optional[str] = None, igamma: int = 1,
-                 icluster: int = 1, charges: str = "Mulliken",  **kwargs):
+                 icluster: int = 1, charges: str = "Mulliken", 
+                 kpts_monkhorst_pack_ind: List[int] = [1,1,1],**kwargs):
 
         super().__init__(**kwargs)
         self._fdata_path = fdata_path
         self.charges = charges
         set_igamma(igamma)
         set_icluster(icluster)
+        self.kpts_monkhorst_pack_ind=kpts_monkhorst_pack_ind
 
     # Requisite energies
     def _check_compute(self) -> None:
@@ -125,6 +128,20 @@ class Fireball(Calculator):
         if 'forces' in properties:
             self._calculate_forces()
 
+    def kpts_monkhorst_pack_fb(self):
+       kptsunitary=monkhorst_pack(self.kpts_monkhorst_pack_ind)
+       kpts_all=np.dot(kptsunitary,self.atoms.cell.reciprocal())*math.pi*2
+       aux=[]
+       for i in kpts_all:
+          poner=True
+          for j in aux:
+             if np.linalg.norm(i + np.array(j)) < 0.00001:
+                poner=False    
+          if(poner):
+             aux.append(i)
+       kpts=np.array(aux) 
+       set_kpoints(kpts)
+
     def initialize(self) -> None:
         self.natoms = len(self.atoms)
 
@@ -138,13 +155,17 @@ class Fireball(Calculator):
         loadfdata_from_path(self._fdata_path)
         set_coords(self.atoms.numbers, self.atoms.positions)
 
-        if get_icluster() == 1:
-            loadlvs_100()
+        if get_icluster() > 1:
+            load_cell_100()
         else:
             set_cell(self.atoms.cell)
 
-        if get_igamma() > 0:
-            loadkpts_gamma()
+        if get_igamma() == 1:
+            load_kpoints_gamma()
+        else:
+            self.kpts_monkhorst_pack_fb()
+        
+     
 
         set_iqout(self._icharge[self.charges])
         call_allocate_system()

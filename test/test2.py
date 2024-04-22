@@ -3,7 +3,7 @@ import sys
 sys.path.append("..")
 from fireballpy import Fireball
 
-atoms = read("input.xyz")
+atoms = read("/home/dani/TEST_fireballpy/test02/input.xyz")
 pos = atoms.get_positions()
 print("------atoms.positions--------")
 print(pos)

@@ -1,5 +1,4 @@
-#!/opt/intel/oneapi/intelpython/python3.7/bin/python3.7
-
+#!/usr/bin/python3.8
 import sys
 import os
 sys.path.append("/home/dani/fireballpy/build")

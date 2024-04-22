@@ -138,7 +138,7 @@ subroutine print_atoms_positions()
 end 
 
 
-subroutine loadlvs_100()
+subroutine load_cell_100()
   use M_system
   implicit none
   a1vec(1) = 100
@@ -162,8 +162,33 @@ subroutine loadlvs_from_file(lvsfile)
   read (72,*) a3vec(:)
   close(72)
  end                       
+
+subroutine set_kpoints(naux,kpts)
+  use M_system
+  implicit none
+  integer, intent(in) :: naux
+  real(8), dimension(naux,3), intent(in) :: kpts
+  integer :: ikpoint
+  real(8) :: sum_weight
+  nkpoints=naux
+  allocate (special_k(3, nkpoints))
+  allocate (special_k_orig(3, nkpoints))
+  allocate (scale_k(3, nkpoints))
+  allocate (weight_k(nkpoints))
+  allocate (weight_k_orig(nkpoints))
+  sum_weight = 0.0d0
+  do ikpoint = 1, nkpoints
+    special_k_orig(:,ikpoint) = kpts(ikpoint, :)
+    weight_k_orig(ikpoint) = 1.0d0/nkpoints
+    sum_weight = sum_weight + weight_k_orig(ikpoint)
+  end do
+  do ikpoint = 1, nkpoints
+    special_k(:,ikpoint) = special_k_orig(:,ikpoint)
+    weight_k(ikpoint) = weight_k_orig(ikpoint)
+  end do
+end
  
-subroutine loadkpts_gamma()
+subroutine load_kpoints_gamma()
   use M_system
   implicit none
   nkpoints = 1

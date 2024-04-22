@@ -12,7 +12,8 @@ atoms = Atoms(symbols=['C', 'C'],
 
 atoms.set_cell([(a, a, 0), (a, 0, a), (0, a, a)])
 
-atoms.calc = Fireball(igamma=1, icluster=1, charges="Lowdin") 
+atoms.calc = Fireball(igamma=0, icluster=0, charges="Mulliken",
+                      kpts_monkhorst_pack_ind=[4,4,4]) 
 
 ETOT = atoms.get_potential_energy()
 print("ETOT = "+str(ETOT))
