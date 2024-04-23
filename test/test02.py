@@ -8,11 +8,12 @@ from ase import Atoms
 a=3.569
 atoms = Atoms(symbols=['C', 'C'],
             positions=[( 0.0000, 0.0000, 0.0000),
-                       (    a/2,    a/2,    a/2)])
+                       (    a/4,    a/4,    a/4)])
 
-atoms.set_cell([(a, a, 0), (a, 0, a), (0, a, a)])
+atoms.set_cell([(a/2, a/2, 0), (a/2, 0, a/2), (0, a/2, a/2)])
 
 atoms.calc = Fireball(igamma=0, icluster=0, charges="Mulliken",
+                      idipole = 0,
                       kpts_monkhorst_pack_ind=[4,4,4]) 
 
 ETOT = atoms.get_potential_energy()

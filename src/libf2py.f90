@@ -39,6 +39,11 @@ subroutine set_iqout(aux)
   iqout=aux
 end
 
+integer function get_idipole()
+ use M_system, only : idipole
+ get_idipole=idipole
+ return
+end
 
 integer function get_iqout()
  use M_system, only : iqout

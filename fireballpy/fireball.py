@@ -22,12 +22,14 @@ from ._fireball import (call_scf_loop,  # type: ignore
                         set_kpoints,
                         load_kpoints_gamma,
                         set_igamma,
+                        set_idipole,
                         set_icluster,
                         get_igamma,
                         get_etot,
                         get_nssh,
                         get_atom_force,
                         get_shell_atom_charge,
+                        get_idipole,
                         get_icluster)
 
 
@@ -65,7 +67,7 @@ class Fireball(Calculator):
                 'Mulliken-dipole': 4, 'Mulliken-dipole-preserving': 7}
 
     def __init__(self, fdata_path: Optional[str] = None, igamma: int = 1,
-                 icluster: int = 1, charges: str = "Mulliken", 
+                 icluster: int = 1, charges: str = "Mulliken", idipole: int = 0, 
                  kpts_monkhorst_pack_ind: List[int] = [1,1,1],**kwargs):
 
         super().__init__(**kwargs)
@@ -73,6 +75,7 @@ class Fireball(Calculator):
         self.charges = charges
         set_igamma(igamma)
         set_icluster(icluster)
+        set_idipole(idipole)
         self.kpts_monkhorst_pack_ind=kpts_monkhorst_pack_ind
 
     # Requisite energies
@@ -139,7 +142,7 @@ class Fireball(Calculator):
                 poner=False    
           if(poner):
              aux.append(i)
-       kpts=np.array(aux) 
+       kpts=np.array(aux)
        set_kpoints(kpts)
 
     def initialize(self) -> None:
