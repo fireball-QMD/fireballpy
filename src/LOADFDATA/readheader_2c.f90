@@ -6,9 +6,9 @@ subroutine readheader_2c (interaction, iounit, nsh_max, numz, rc1,   &
     integer, intent (in) :: nsh_max
     integer, intent (out) :: npseudo
     integer, intent (out) :: numz
-    real(8), intent (out) :: rc1, rc2
-    real(8), intent (out) :: zmin, zmax
-    real(8), intent (out), dimension (nsh_max) :: cl_pseudo
+    real*8, intent (out) :: rc1, rc2
+    real*8, intent (out) :: zmin, zmax
+    real*8, intent (out), dimension (nsh_max) :: cl_pseudo
     integer iline
     integer issh
     integer nucz1, nucz2

@@ -24,37 +24,37 @@ subroutine assemble_ca_2c ()
   integer kforce
   integer matom
   integer mbeta
-  real(8) dq1
-  real(8) dq2
-  real(8) dterm_1
-  real(8) dterm_2
-  real(8) dstn_temp
-  real(8) dxn
-  real(8) rcutoff_j
-  real(8) rend
-  real(8) rend1
-  real(8) rend2
-  real(8) sterm_1
-  real(8) sterm_2
-  real(8) stn_temp1
-  real(8) stn_temp2
-  real(8) y
-  real(8) rcutoff_i
-  real(8), dimension (numorb_max, numorb_max) :: bcca
-  real(8), dimension (3, numorb_max, numorb_max) :: bccapx
-  real(8), dimension (numorb_max, numorb_max) :: bccax
-  real(8), dimension (3, 3, 3) :: deps
-  real(8), dimension (numorb_max, numorb_max) :: dipx
-  real(8), dimension (3, numorb_max, numorb_max) :: dippx
-  real(8), dimension (numorb_max, numorb_max) :: emnpl
-  real(8), dimension (numorb_max, numorb_max) :: emnpl_noq
-  real(8), dimension (3, 3) :: eps
-  real(8), dimension (3) :: r1
-  real(8), dimension (3) :: r2
-  real(8), dimension (3) :: r21
-  real(8), dimension (3) :: sighat
-  real(8), dimension (numorb_max, numorb_max) :: stn1
-  real(8), dimension (numorb_max, numorb_max) :: stn2
+  real*8 dq1
+  real*8 dq2
+  real*8 dterm_1
+  real*8 dterm_2
+  real*8 dstn_temp
+  real*8 dxn
+  real*8 rcutoff_j
+  real*8 rend
+  real*8 rend1
+  real*8 rend2
+  real*8 sterm_1
+  real*8 sterm_2
+  real*8 stn_temp1
+  real*8 stn_temp2
+  real*8 y
+  real*8 rcutoff_i
+  real*8, dimension (numorb_max, numorb_max) :: bcca
+  real*8, dimension (3, numorb_max, numorb_max) :: bccapx
+  real*8, dimension (numorb_max, numorb_max) :: bccax
+  real*8, dimension (3, 3, 3) :: deps
+  real*8, dimension (numorb_max, numorb_max) :: dipx
+  real*8, dimension (3, numorb_max, numorb_max) :: dippx
+  real*8, dimension (numorb_max, numorb_max) :: emnpl
+  real*8, dimension (numorb_max, numorb_max) :: emnpl_noq
+  real*8, dimension (3, 3) :: eps
+  real*8, dimension (3) :: r1
+  real*8, dimension (3) :: r2
+  real*8, dimension (3) :: r21
+  real*8, dimension (3) :: sighat
+  real*8, dimension (numorb_max, numorb_max) :: stn1
+  real*8, dimension (numorb_max, numorb_max) :: stn2
 
   vca = 0.0d0
   ewaldsr = 0.0d0

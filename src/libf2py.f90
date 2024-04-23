@@ -3,72 +3,71 @@ subroutine set_igamma(aux)
   implicit none
   integer, intent(in):: aux
   igamma=aux
-end
+end subroutine set_igamma
  
 integer function get_igamma()
- use M_system, only : igamma
- get_igamma=igamma
- return
-end
+  use M_system, only : igamma
+  get_igamma=igamma
+  return
+end function get_igamma
  
 subroutine set_icluster(aux)
   use M_system, only : icluster
   implicit none
   integer, intent(in):: aux
   icluster=aux
-end
-                       
-integer function get_icluster()
- use M_system, only : icluster
- get_icluster=icluster
- return
-end                  
+end subroutine set_icluster
 
-  
+integer function get_icluster()
+  use M_system, only : icluster
+  get_icluster=icluster
+  return
+end function get_icluster
+
 subroutine set_idipole(aux)
   use M_system, only : idipole
   implicit none
   integer, intent(in):: aux
   idipole=aux
-end
+end subroutine set_idipole
 
 subroutine set_iqout(aux)
   use M_system, only : iqout
   implicit none
   integer, intent(in):: aux
   iqout=aux
-end
+end subroutine set_iqout
 
 integer function get_idipole()
- use M_system, only : idipole
- get_idipole=idipole
- return
-end
+  use M_system, only : idipole
+  get_idipole=idipole
+  return
+end function get_idipole
 
 integer function get_iqout()
- use M_system, only : iqout
- get_iqout=iqout
- return
-end
+  use M_system, only : iqout
+  get_iqout=iqout
+  return
+end function get_iqout
 
 
 integer function get_nssh(iaux)
- use M_fdata, only : nssh
- use M_system, only : imass
- implicit none
- integer, intent(in):: iaux
- get_nssh=nssh(imass(iaux))
- return
-end
+  use M_fdata, only : nssh
+  use M_system, only : imass
+  implicit none
+  integer, intent(in):: iaux
+  get_nssh=nssh(imass(iaux))
+  return
+end function get_nssh
 
-real(8) function get_etot()
+real*8 function get_etot()
   use M_system, only : etot
   get_etot=etot
   return
-end
+end function get_etot
 
 
-real(8) function get_atom_force(iaux,jaux)
+real*8 function get_atom_force(iaux,jaux)
   use M_system, only : ftot
   implicit none
   integer, intent(in):: iaux
@@ -77,7 +76,7 @@ real(8) function get_atom_force(iaux,jaux)
   return
 end function get_atom_force
 
-real(8) function get_shell_atom_charge(iauxssh,iauxatom)
+real*8 function get_shell_atom_charge(iauxssh,iauxatom)
   use M_system, only : Qin
   implicit none
   integer, intent(in):: iauxatom
@@ -92,12 +91,12 @@ subroutine loadfdata_from_path(fdatafile)
   character(len=400),intent(in):: fdatafile
   fdatalocation=trim(fdatafile)
   call load_fdata()
-end
+end subroutine loadfdata_from_path
  
 subroutine set_cell(lvs)
   use M_system
   implicit none
-  real(8), dimension(3,3), intent(in) :: lvs
+  real*8, dimension(3,3), intent(in) :: lvs
   a1vec(1) = lvs(1,1)
   a1vec(2) = lvs(1,2)
   a1vec(3) = lvs(1,3)
@@ -107,15 +106,15 @@ subroutine set_cell(lvs)
   a3vec(1) = lvs(3,1)
   a3vec(2) = lvs(3,2)
   a3vec(3) = lvs(3,3)
-end
- 
+end subroutine set_cell
+
 subroutine set_coords(naux, z, xyz)
   use M_system
   use M_fdata, only : symbolA, nspecies, nzx 
   implicit none
   integer, intent(in) :: naux
   integer, dimension(naux), intent(in) :: z
-  real(8), dimension(naux,3), intent(in) :: xyz
+  real*8, dimension(naux,3), intent(in) :: xyz
   integer :: iatom,ispec
   natoms=naux
   allocate (ratom (3, natoms))
@@ -130,7 +129,7 @@ subroutine set_coords(naux, z, xyz)
       end if
    end do
   end do
-end
+end subroutine set_coords
 
 
 subroutine print_atoms_positions()
@@ -140,7 +139,7 @@ subroutine print_atoms_positions()
   do iatom = 1, natoms
     write (*,'(3x,a2, 3(2x,f10.5))') symbol(iatom), ratom(:,iatom)
   end do
-end 
+end subroutine print_atoms_positions
 
 
 subroutine load_cell_100()
@@ -155,7 +154,7 @@ subroutine load_cell_100()
   a3vec(1) = 0
   a3vec(2) = 0
   a3vec(3) = 100
-end
+end subroutine load_cell_100
  
 subroutine loadlvs_from_file(lvsfile)
   use M_system
@@ -166,15 +165,15 @@ subroutine loadlvs_from_file(lvsfile)
   read (72,*) a2vec(:)
   read (72,*) a3vec(:)
   close(72)
- end                       
+ end subroutine loadlvs_from_file
 
 subroutine set_kpoints(naux,kpts)
   use M_system
   implicit none
   integer, intent(in) :: naux
-  real(8), dimension(naux,3), intent(in) :: kpts
+  real*8, dimension(naux,3), intent(in) :: kpts
   integer :: ikpoint
-  real(8) :: sum_weight
+  real*8 :: sum_weight
   nkpoints=naux
   allocate (special_k(3, nkpoints))
   allocate (special_k_orig(3, nkpoints))
@@ -191,8 +190,8 @@ subroutine set_kpoints(naux,kpts)
     special_k(:,ikpoint) = special_k_orig(:,ikpoint)
     weight_k(ikpoint) = weight_k_orig(ikpoint)
   end do
-end
- 
+end subroutine set_kpoints
+
 subroutine load_kpoints_gamma()
   use M_system
   implicit none
@@ -207,14 +206,14 @@ subroutine load_kpoints_gamma()
   weight_k(1) = 1
   special_k(:,1) = special_k_orig(:,1)
   weight_k(1) = weight_k_orig(1)
-end
- 
+end subroutine load_kpoints_gamma
+
 subroutine loadkpts_from_file(kptsfile)
   use M_system
   implicit none
   character(len=400),intent(in):: kptsfile
   integer :: ikpoint
-  real(8) :: sum_weight
+  real*8 :: sum_weight
   open (unit = 54, file = kptsfile, status = 'old')
   read (54,*) nkpoints
   allocate (special_k(3, nkpoints))
@@ -232,13 +231,12 @@ subroutine loadkpts_from_file(kptsfile)
     special_k(:,ikpoint) = special_k_orig(:,ikpoint)
     weight_k(ikpoint) = weight_k_orig(ikpoint)
   end do
-end
- 
- 
+end subroutine loadkpts_from_file
+
 subroutine rescal_structure(rescal)
   use M_system
   implicit none
-  real(8), intent(in)::rescal
+  real*8, intent(in)::rescal
   integer :: iatom,ikpoint
   a1vec(:)=a1vec(:)*rescal
   a2vec(:)=a2vec(:)*rescal
@@ -255,33 +253,32 @@ subroutine rescal_structure(rescal)
     weight_k(ikpoint) = weight_k_orig(ikpoint)
   end do
   write(*,'(3x,a12,a1,F6.3)') 'rescal         ','=',rescal
-end
+end subroutine rescal_structure
  
 subroutine call_allocate_system()
   use M_system
   implicit none
   call allocate_system()
-end
+end subroutine call_allocate_system
 
  
 subroutine call_scf_loop()
   use M_system
   implicit none
   call scf_loop ()
-end
+end subroutine call_scf_loop
 
 subroutine call_getenergy()
   use M_system
   implicit none
   call getenergy ()
-end
+end subroutine call_getenergy
 
 subroutine call_getforces()
   use M_system
   implicit none
   call getforces()
-end
-
+end subroutine call_getforces
 
 subroutine info_fdata()
   use M_fdata
@@ -299,12 +296,12 @@ subroutine info_fdata()
   do ispec = 1, nspecies
     write (*,'(a,i2,a,a2,a,i2,a,i2)') '   spec = ',ispec,'; ele = ',symbolA(ispec),'; Z = ',nzx(ispec), '; nssh = ',nssh(ispec)  
   end do
-end
+end subroutine info_fdata
  
 subroutine info_energy(out_energy)
   use M_system
   implicit none
-  real(8), intent(out) :: out_energy
+  real*8, intent(out) :: out_energy
   write(*,'(3x,A,I4,A,F12.10,A,L1)') 'Kscf =',Kscf,'; sigma =',sigma,'; scf_achieved =',scf_achieved
 
   write (*,*) ' ---------- T H E  T O T A L  E N E R G Y ----------- '
@@ -323,18 +320,18 @@ subroutine info_energy(out_energy)
   write (*,*) ' ----------------------------------------------------- '
 
   out_energy = etot
-end
+end subroutine info_energy
 
 subroutine info_forces(naux, out_forces)
   use M_system
   implicit none
   integer, intent(in) :: naux
-  real(8), dimension(naux, 3), intent(out) :: out_forces
+  real*8, dimension(naux, 3), intent(out) :: out_forces
   integer :: iatom
   write (*,*) ' The grand total force (eV/A): '
   do iatom = 1, natoms
     out_forces(iatom, :) = ftot(:, iatom)
     write (*,'(2x,A,i4, A, 3e14.6)') ' iatom = ', iatom, ' ftot      = ',ftot(:,iatom)
   end do
-end 
- 
+end subroutine info_forces
+

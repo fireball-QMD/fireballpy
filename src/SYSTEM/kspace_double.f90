@@ -3,7 +3,7 @@ subroutine kspace_double (ikpoint, sks)
   use M_fdata, only: num_orb, Qneutral
   implicit none
   integer, intent (in) :: ikpoint
-  real, intent (in), dimension (3) :: sks
+  real*8, intent (in), dimension (3) :: sks
   real*8, parameter :: overtol = 1.0d-4
   integer iatom
   integer imu
@@ -19,11 +19,11 @@ subroutine kspace_double (ikpoint, sks)
   integer mineig
   integer lm
   integer issh
-  real dot
+  real*8 dot
   real*8 sqlami
   real*8, dimension (norbitals) :: eigen
   real*8, dimension (norbitals) :: slam
-  real, dimension (3) :: vec
+  real*8, dimension (3) :: vec
   complex*16 a0
   complex*16 a1
   complex*16 phase
@@ -38,9 +38,9 @@ subroutine kspace_double (ikpoint, sks)
   integer, allocatable, dimension (:) :: iwork
   integer lwork, lrwork, liwork
 
-  real diff, imcoef, recoef
-  a0 = cmplx(0.0d0,0.0d0)
-  a1 = cmplx(1.0d0,0.0d0)
+  real*8 diff, imcoef, recoef
+  a0 = dcmplx(0.0d0,0.0d0)
+  a1 = dcmplx(1.0d0,0.0d0)
   ishort = 1
   allocate (xxxx(norbitals,norbitals))
   allocate (yyyy(norbitals,norbitals))
@@ -81,7 +81,7 @@ subroutine kspace_double (ikpoint, sks)
     in2 = imass(jatom)
     vec(:) = xl(:,mbeta) + ratom(:,jatom) - ratom(:,iatom)
     dot = sks(1)*vec(1) + sks(2)*vec(2) + sks(3)*vec(3)
-    phase = cmplx(cos(dot),sin(dot))
+    phase = dcmplx(cos(dot),sin(dot))
     do inu = 1, num_orb(in2)
      jnu = inu + degelec(jatom)
      do imu = 1, num_orb(in1)
@@ -98,7 +98,7 @@ subroutine kspace_double (ikpoint, sks)
     in2 = imass(jatom)
     vec(:) = xl(:,mbeta) + ratom(:,jatom) - ratom(:,iatom)
     dot = sks(1)*vec(1) + sks(2)*vec(2) + sks(3)*vec(3)
-    phase = cmplx(cos(dot),sin(dot))
+    phase = dcmplx(cos(dot),sin(dot))
     do inu = 1, num_orb(in2)
      jnu = inu + degelec(jatom)
      do imu = 1, num_orb(in1)

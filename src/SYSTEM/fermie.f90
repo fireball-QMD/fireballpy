@@ -4,18 +4,18 @@ subroutine fermie ()
   implicit none
   integer, parameter :: imax = 1000 ! maximum sc iterations
   integer, parameter :: nmax = 5000 ! cutoff for degeneracy check
-  real(8), parameter :: tol = 1.0d-10
+  real*8, parameter :: tol = 1.0d-10
   integer ikpoint
   integer imu
   integer inu
   integer iter
   integer jkpoint
-  real(8) delta
-  real(8) emin
-  real(8) emax
-  real(8) qcharge
-  real(8) qztot
-  real(8) temp
+  real*8 delta
+  real*8 emin
+  real*8 emax
+  real*8 qcharge
+  real*8 qztot
+  real*8 temp
   qztot = ztot 
   ioccupy_k = 0
   foccupy = 0.0d0

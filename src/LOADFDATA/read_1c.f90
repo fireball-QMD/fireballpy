@@ -17,7 +17,7 @@ subroutine read_1c ()
   integer ideriv
   integer iissh, jjssh
 
-  real(8), dimension (nspecies) :: idshell
+  real*8, dimension (nspecies) :: idshell
 
   logical skip_it
 

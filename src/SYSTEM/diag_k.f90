@@ -3,7 +3,7 @@ subroutine diag_k ( )
   implicit none
   integer ikpoint
   integer imu
-  real(8), dimension (3) :: k_temp
+  real*8, dimension (3) :: k_temp
   if (iqout .ne. 2) allocate (blowre (norbitals, norbitals, nkpoints))
   if (iqout .ne. 2 .and. icluster .ne. 1) allocate (blowim (norbitals, norbitals, nkpoints))
   allocate (bbnkre (norbitals, norbitals, nkpoints))

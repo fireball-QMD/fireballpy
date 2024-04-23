@@ -7,10 +7,10 @@ subroutine assemble_olsxc_1c ()
   integer imu,inu
   integer in1
   integer matom
-  real(8) dccexc_1c
-  real(8) exc_1c
-  real(8) muexc_1c
-  real(8), dimension (numorb_max,numorb_max) :: mu1xc
+  real*8 dccexc_1c
+  real*8 exc_1c
+  real*8 muexc_1c
+  real*8, dimension (numorb_max,numorb_max) :: mu1xc
   etotxc_1c = 0.0d0
   Uexc_1c = 0.0d0
   Umuxc_1c = 0.0d0

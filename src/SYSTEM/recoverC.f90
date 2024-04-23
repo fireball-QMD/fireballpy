@@ -4,10 +4,10 @@ subroutine recoverC (n1, n2, hlist, dhlist, hbox, dhbox)
   use M_system
   implicit none
   integer, intent (in) :: n1, n2
-  real(8), intent(in), dimension (ME2c_max) :: hlist 
-  real(8), intent(in), dimension (ME2c_max) :: dhlist 
-  real(8), intent(out), dimension (nsh_max, nsh_max) :: hbox
-  real(8), intent(out), dimension (nsh_max, nsh_max) :: dhbox
+  real*8, intent(in), dimension (ME2c_max) :: hlist 
+  real*8, intent(in), dimension (ME2c_max) :: dhlist 
+  real*8, intent(out), dimension (nsh_max, nsh_max) :: hbox
+  real*8, intent(out), dimension (nsh_max, nsh_max) :: dhbox
 
   integer index
   integer indexcoulomb

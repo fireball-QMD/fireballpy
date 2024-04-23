@@ -25,20 +25,20 @@ subroutine Dassemble_ca_olsxc_on ()
   integer mbeta
   integer n1
   integer n2
-  real(8) exc
-  real(8) dexc
-  real(8) d2exc
-  real(8) d2muxc
-  real(8) dmuxc
-  real(8) muxc
-  real(8) rhoxc
-  real(8) rhoxc_av
-  real(8) y
-  real(8) q_mu
-  real(8), dimension (3, numorb_max, numorb_max) :: bcxcpx
-  real(8), dimension (numorb_max, numorb_max) :: delta
-  real(8), dimension (3) :: drhoxc
-  real(8), dimension (3) :: drhoxc_av
+  real*8 exc
+  real*8 dexc
+  real*8 d2exc
+  real*8 d2muxc
+  real*8 dmuxc
+  real*8 muxc
+  real*8 rhoxc
+  real*8 rhoxc_av
+  real*8 y
+  real*8 q_mu
+  real*8, dimension (3, numorb_max, numorb_max) :: bcxcpx
+  real*8, dimension (numorb_max, numorb_max) :: delta
+  real*8, dimension (3) :: drhoxc
+  real*8, dimension (3) :: drhoxc_av
   faxc = 0.0d0
   faxc_ca = 0.0d0
   dxcdcc  = 0.0d0

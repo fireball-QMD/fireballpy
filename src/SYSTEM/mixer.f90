@@ -6,11 +6,11 @@ subroutine mixer ()
   integer in1
   integer issh
   integer imix
-  real(8) dqrms
-  real(8) dqmax
-  real(8) renorm
-  real(8) zcheck
-  real(8) zouttot
+  real*8 dqrms
+  real*8 dqmax
+  real*8 renorm
+  real*8 zcheck
+  real*8 zouttot
   dqrms = 0
   dqmax = -99
   Qinmixer=0.0d0

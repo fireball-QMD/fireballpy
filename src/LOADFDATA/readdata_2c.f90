@@ -14,10 +14,10 @@ subroutine readdata_2c (interaction, iounit, num_nonzero, numz, zmax, itype, in1
   integer, intent (in) :: itype
   integer, intent (in) :: num_nonzero
   integer, intent (in) :: numz
-  real(8), intent (in) :: zmax
+  real*8, intent (in) :: zmax
   integer ipoint
   integer integral
-  real(8), dimension (ME2c_max, nfofx) :: gstore
+  real*8, dimension (ME2c_max, nfofx) :: gstore
   if (interaction .ne. 8) then
     do ipoint = 1, numz
       read (iounit,*) (gstore(integral,ipoint), integral = 1, num_nonzero)

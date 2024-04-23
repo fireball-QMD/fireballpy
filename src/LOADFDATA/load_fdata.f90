@@ -4,7 +4,7 @@ subroutine load_fdata()
     use M_constants
 
     implicit none
-    real(8), dimension (:,:), allocatable :: rcutoff_temp
+    real*8, dimension (:,:), allocatable :: rcutoff_temp
     integer :: in1
     integer :: ispec
     integer :: issh

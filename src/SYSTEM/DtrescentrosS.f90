@@ -7,15 +7,15 @@ subroutine DtrescentrosS (isorp, maxtype, in1, in2, indna, x, y, cost, rhat, sig
  integer, intent (in) :: indna
  integer, intent (in) :: isorp
  integer, intent (in) :: maxtype
- real(8), intent (in) :: cost
- real(8), intent (in) :: x
- real(8), intent (in) :: y
- real(8), intent (in), dimension (3) :: rhat
- real(8), intent (in), dimension (3) :: sighat
- real(8), intent (out), dimension (nsh_max, nsh_max) :: bcnax
- real(8), intent (out), dimension (3, nsh_max, nsh_max) :: f3naXa
- real(8), intent (out), dimension (3, nsh_max, nsh_max) :: f3naXb
- real(8), intent (out), dimension (3, nsh_max, nsh_max) :: f3naXc
+ real*8, intent (in) :: cost
+ real*8, intent (in) :: x
+ real*8, intent (in) :: y
+ real*8, intent (in), dimension (3) :: rhat
+ real*8, intent (in), dimension (3) :: sighat
+ real*8, intent (out), dimension (nsh_max, nsh_max) :: bcnax
+ real*8, intent (out), dimension (3, nsh_max, nsh_max) :: f3naXa
+ real*8, intent (out), dimension (3, nsh_max, nsh_max) :: f3naXb
+ real*8, intent (out), dimension (3, nsh_max, nsh_max) :: f3naXc
  integer imu
  integer iME
  integer index
@@ -25,31 +25,31 @@ subroutine DtrescentrosS (isorp, maxtype, in1, in2, indna, x, y, cost, rhat, sig
  integer nl
  integer nx
  integer ny
- real(8) amt
- real(8) argument
- real(8) bmt
- real(8) cost2
- real(8) dQ_Ldx
- real(8) dQ_Ldy
- real(8) Q_L
- real(8) sint
- real(8) xxmax
- real(8) yymax
- real(8) hx
- real(8) hy
- real(8) xinv
- real(8), dimension (0:ithetamax - 1, MES_max) :: bcnalist
- real(8), dimension (0:ithetamax - 1) :: dp
- real(8), dimension (MES_max) :: dphlist
- real(8), dimension (0:ithetamax - 1, MES_max) :: dxbcnalist
- real(8), dimension (MES_max) :: dxhlist
- real(8), dimension (0:ithetamax - 1, MES_max) :: dybcnalist
- real(8), dimension (MES_max) :: dyhlist
- real(8), dimension (3, nsh_max, nsh_max) :: f3naMa
- real(8), dimension (3, nsh_max, nsh_max) :: f3naMb
- real(8), dimension (MES_max) :: hlist
- real(8), dimension (0:ithetamax - 1) :: p
- real(8), dimension (nsh_max, nsh_max) :: temp
+ real*8 amt
+ real*8 argument
+ real*8 bmt
+ real*8 cost2
+ real*8 dQ_Ldx
+ real*8 dQ_Ldy
+ real*8 Q_L
+ real*8 sint
+ real*8 xxmax
+ real*8 yymax
+ real*8 hx
+ real*8 hy
+ real*8 xinv
+ real*8, dimension (0:ithetamax - 1, MES_max) :: bcnalist
+ real*8, dimension (0:ithetamax - 1) :: dp
+ real*8, dimension (MES_max) :: dphlist
+ real*8, dimension (0:ithetamax - 1, MES_max) :: dxbcnalist
+ real*8, dimension (MES_max) :: dxhlist
+ real*8, dimension (0:ithetamax - 1, MES_max) :: dybcnalist
+ real*8, dimension (MES_max) :: dyhlist
+ real*8, dimension (3, nsh_max, nsh_max) :: f3naMa
+ real*8, dimension (3, nsh_max, nsh_max) :: f3naMb
+ real*8, dimension (MES_max) :: hlist
+ real*8, dimension (0:ithetamax - 1) :: p
+ real*8, dimension (nsh_max, nsh_max) :: temp
  do inu = 1, nssh(in2)
    do imu = 1, nssh(in1)
      bcnax(imu,inu) = 0.0d0

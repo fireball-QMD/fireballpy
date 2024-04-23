@@ -21,23 +21,23 @@ subroutine Dassemble_3c ()
   integer jssh
   integer mneigh
   integer ialp
-  real(8) cost
-  real(8) x
-  real(8) y
-  real(8), dimension (numorb_max, numorb_max) :: bcnax
-  real(8), dimension (3, 3, 3) :: depsA
-  real(8), dimension (3, 3, 3) :: depsB
-  real(8), dimension (3, 3) :: eps
-  real(8), dimension (3, numorb_max, numorb_max) :: f3naXa
-  real(8), dimension (3, numorb_max, numorb_max) :: f3naXb
-  real(8), dimension (3, numorb_max, numorb_max) :: f3naXc
-  real(8), dimension (3) :: r1
-  real(8), dimension (3) :: r2
-  real(8), dimension (3) :: r21
-  real(8), dimension (3) :: rhat
-  real(8), dimension (3) :: rna
-  real(8), dimension (3) :: rnabc
-  real(8), dimension (3) :: sighat
+  real*8 cost
+  real*8 x
+  real*8 y
+  real*8, dimension (numorb_max, numorb_max) :: bcnax
+  real*8, dimension (3, 3, 3) :: depsA
+  real*8, dimension (3, 3, 3) :: depsB
+  real*8, dimension (3, 3) :: eps
+  real*8, dimension (3, numorb_max, numorb_max) :: f3naXa
+  real*8, dimension (3, numorb_max, numorb_max) :: f3naXb
+  real*8, dimension (3, numorb_max, numorb_max) :: f3naXc
+  real*8, dimension (3) :: r1
+  real*8, dimension (3) :: r2
+  real*8, dimension (3) :: r21
+  real*8, dimension (3) :: rhat
+  real*8, dimension (3) :: rna
+  real*8, dimension (3) :: rnabc
+  real*8, dimension (3) :: sighat
   f3naa = 0.0d0
   f3nab = 0.0d0
   f3nac = 0.0d0

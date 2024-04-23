@@ -25,29 +25,29 @@ subroutine Dassemble_ca_olsxc_2c ()
   integer matom
   integer n1
   integer n2
-  real(8) y
-  real(8) muxc
-  real(8) dmuxc
-  real(8) d2muxc
-  real(8) exc
-  real(8) dexc
-  real(8) d2exc
-  real(8) sx
-  real(8) rho_av
-  real(8) rhoin
-  real(8) dxn
-  real(8), dimension (numorb_max, numorb_max) :: bcxcx
-  real(8), dimension (3, numorb_max, numorb_max) :: bcxcpx
-  real(8), dimension (3, numorb_max, numorb_max) :: mxcb
-  real(8), dimension (3) :: rhoinp
-  real(8), dimension (3) :: rhop_av
-  real(8), dimension (3) :: spx
-  real(8), dimension (3, 3) :: eps
-  real(8), dimension (3, 3, 3) :: deps
-  real(8), dimension (3) :: r1
-  real(8), dimension (3) :: r2
-  real(8), dimension (3) :: r21
-  real(8), dimension (3) :: sighat
+  real*8 y
+  real*8 muxc
+  real*8 dmuxc
+  real*8 d2muxc
+  real*8 exc
+  real*8 dexc
+  real*8 d2exc
+  real*8 sx
+  real*8 rho_av
+  real*8 rhoin
+  real*8 dxn
+  real*8, dimension (numorb_max, numorb_max) :: bcxcx
+  real*8, dimension (3, numorb_max, numorb_max) :: bcxcpx
+  real*8, dimension (3, numorb_max, numorb_max) :: mxcb
+  real*8, dimension (3) :: rhoinp
+  real*8, dimension (3) :: rhop_av
+  real*8, dimension (3) :: spx
+  real*8, dimension (3, 3) :: eps
+  real*8, dimension (3, 3, 3) :: deps
+  real*8, dimension (3) :: r1
+  real*8, dimension (3) :: r2
+  real*8, dimension (3) :: r21
+  real*8, dimension (3) :: sighat
   fotxc = 0.0d0
   fotxc_ca = 0.0d0
   do iatom = 1, natoms

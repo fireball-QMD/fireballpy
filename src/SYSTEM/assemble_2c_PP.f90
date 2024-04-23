@@ -19,8 +19,8 @@ subroutine assemble_2c_PP ()
   integer mneigh_self
   integer ncc
  
-  real(8), dimension (numorb_max) :: cl
-  real(8), dimension (numorb_max, numorb_max) :: PPx
+  real*8, dimension (numorb_max) :: cl
+  real*8, dimension (numorb_max, numorb_max) :: PPx
 
   vnl = 0.0d0
 
@@ -101,7 +101,7 @@ subroutine assemble_2c_PP ()
       in2 = imass(jatom)
       if (iatom .eq. jatom .and. mbeta .eq. 0) then
         if (nPP_self(iatom) .ne. ineigh) then
-          write (*,*) ' Something real(8)ly wrong in assemble_2c_PP.f90 '
+          write (*,*) ' Something real*8ly wrong in assemble_2c_PP.f90 '
           write (*,*) ' iatom, jatom, mbeta = ', iatom, jatom, mbeta
           write (*,*) ' neigh_self(iatom), ineigh = ',nPP_self(iatom), ineigh  
           stop

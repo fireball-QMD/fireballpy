@@ -6,8 +6,8 @@ subroutine assemble_olsxc_on ()
   integer imu
   integer in1, in3
   integer inu
-  real(8), dimension (numorb_max, numorb_max) :: bcxcx
-  real(8) xc
+  real*8, dimension (numorb_max, numorb_max) :: bcxcx
+  real*8 xc
   vxc = 0.0d0
   vxc_ca = 0.0d0
   uxcdcc_ols = 0.0d0

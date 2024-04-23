@@ -25,62 +25,62 @@ subroutine Dassemble_ca_3c_dip ()
   integer jcount_sav
   integer jssh
   integer mneigh
-  real(8) cost
-  real(8) distance13
-  real(8) distance23
-  real(8) dq1
-  real(8) dq2
-  real(8) dq3
-  real(8) dstn_temp1
-  real(8) dstn_temp2
-  real(8) dterm
-  real(8) dxn
-  real(8) rcutoff_ialp
-  real(8) rend1
-  real(8) rend2
-  real(8) sterm
-  real(8) stn_temp1
-  real(8) stn_temp2
-  real(8) x
-  real(8) y
-  real(8) rcutoff_i
-  real(8) rcutoff_j
-  real(8), dimension (numorb_max, numorb_max) :: bcca
-  real(8), dimension (numorb_max, numorb_max) :: bccax
-  real(8), dimension (3, numorb_max, numorb_max) :: demnplA
-  real(8), dimension (3, numorb_max, numorb_max) :: demnplB
-  real(8), dimension (3, numorb_max, numorb_max) :: demnplC
-  real(8), dimension (3, 3, 3) :: depsA
-  real(8), dimension (3, 3, 3) :: depsB
-  real(8), dimension (3) :: dpterm
-  real(8) dstn1
-  real(8) dstn2
-  real(8), dimension (3) :: dstnA
-  real(8), dimension (3) :: dstnB
-  real(8), dimension (3) :: dstnC
-  real(8), dimension (numorb_max, numorb_max) :: emnpl
-  real(8), dimension (3, 3) :: eps
-  real(8), dimension (3, numorb_max, numorb_max) :: f3caXa
-  real(8), dimension (3, numorb_max, numorb_max) :: f3caXb
-  real(8), dimension (3, numorb_max, numorb_max) :: f3caXc
-  real(8), dimension (3, numorb_max, numorb_max) :: f3caXa_sorp
-  real(8), dimension (3, numorb_max, numorb_max) :: f3caXb_sorp
-  real(8), dimension (3, numorb_max, numorb_max) :: f3caXc_sorp
-  real(8), dimension (3) :: r1
-  real(8), dimension (3) :: r2
-  real(8), dimension (3) :: r21
-  real(8), dimension (3) :: rhat
-  real(8), dimension (3) :: rhatA1
-  real(8), dimension (3) :: rhatA2
-  real(8), dimension (3) :: rna
-  real(8), dimension (3) :: rnabc
-  real(8), dimension (3) :: sighat
-  real(8), dimension (3) :: spterm
-  real(8), dimension (3) :: ddterm
-  real(8), dimension (3) :: dptermA
-  real(8), dimension (3) :: dptermB
-  real(8) stn1
-  real(8) stn2
+  real*8 cost
+  real*8 distance13
+  real*8 distance23
+  real*8 dq1
+  real*8 dq2
+  real*8 dq3
+  real*8 dstn_temp1
+  real*8 dstn_temp2
+  real*8 dterm
+  real*8 dxn
+  real*8 rcutoff_ialp
+  real*8 rend1
+  real*8 rend2
+  real*8 sterm
+  real*8 stn_temp1
+  real*8 stn_temp2
+  real*8 x
+  real*8 y
+  real*8 rcutoff_i
+  real*8 rcutoff_j
+  real*8, dimension (numorb_max, numorb_max) :: bcca
+  real*8, dimension (numorb_max, numorb_max) :: bccax
+  real*8, dimension (3, numorb_max, numorb_max) :: demnplA
+  real*8, dimension (3, numorb_max, numorb_max) :: demnplB
+  real*8, dimension (3, numorb_max, numorb_max) :: demnplC
+  real*8, dimension (3, 3, 3) :: depsA
+  real*8, dimension (3, 3, 3) :: depsB
+  real*8, dimension (3) :: dpterm
+  real*8 dstn1
+  real*8 dstn2
+  real*8, dimension (3) :: dstnA
+  real*8, dimension (3) :: dstnB
+  real*8, dimension (3) :: dstnC
+  real*8, dimension (numorb_max, numorb_max) :: emnpl
+  real*8, dimension (3, 3) :: eps
+  real*8, dimension (3, numorb_max, numorb_max) :: f3caXa
+  real*8, dimension (3, numorb_max, numorb_max) :: f3caXb
+  real*8, dimension (3, numorb_max, numorb_max) :: f3caXc
+  real*8, dimension (3, numorb_max, numorb_max) :: f3caXa_sorp
+  real*8, dimension (3, numorb_max, numorb_max) :: f3caXb_sorp
+  real*8, dimension (3, numorb_max, numorb_max) :: f3caXc_sorp
+  real*8, dimension (3) :: r1
+  real*8, dimension (3) :: r2
+  real*8, dimension (3) :: r21
+  real*8, dimension (3) :: rhat
+  real*8, dimension (3) :: rhatA1
+  real*8, dimension (3) :: rhatA2
+  real*8, dimension (3) :: rna
+  real*8, dimension (3) :: rnabc
+  real*8, dimension (3) :: sighat
+  real*8, dimension (3) :: spterm
+  real*8, dimension (3) :: ddterm
+  real*8, dimension (3) :: dptermA
+  real*8, dimension (3) :: dptermB
+  real*8 stn1
+  real*8 stn2
   f3caa = 0.0d0
   f3cab = 0.0d0
   f3cac = 0.0d0

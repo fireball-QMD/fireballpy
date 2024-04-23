@@ -20,12 +20,12 @@ subroutine allocate_system ()
   integer:: ispec
   integer:: numorb
   integer:: numorbPP_max
-  real(8) :: rcutoff_i
-  real(8) :: rcutoff_j
-  real(8) :: rcutoff_
-  real(8) :: distance2
-  real(8) :: range2
-  real(8) :: distance
+  real*8 :: rcutoff_i
+  real*8 :: rcutoff_j
+  real*8 :: rcutoff_
+  real*8 :: distance2
+  real*8 :: range2
+  real*8 :: distance
 
   if (.not. allocated (ratom)) allocate (ratom (3, natoms))
   if (.not. allocated (imass)) allocate (imass (natoms))

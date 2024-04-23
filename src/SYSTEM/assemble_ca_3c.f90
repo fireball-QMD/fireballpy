@@ -28,44 +28,44 @@ subroutine assemble_ca_3c ()
   integer mbeta
   integer mneigh
  
-  real(8) cost
-  real(8) distance_13
-  real(8) distance_23
-  real(8) dq3
-  real(8) dstn_temp
-  real(8) dterm
-  real(8) dxn
-  real(8) rcutoff_ialp
-  real(8) rend1
-  real(8) rend2
-  real(8) sterm
-  real(8) stn_temp1
-  real(8) stn_temp2
-  real(8) x
-  real(8) y
-  real(8) rcutoff_i
-  real(8) rcutoff_j
+  real*8 cost
+  real*8 distance_13
+  real*8 distance_23
+  real*8 dq3
+  real*8 dstn_temp
+  real*8 dterm
+  real*8 dxn
+  real*8 rcutoff_ialp
+  real*8 rend1
+  real*8 rend2
+  real*8 sterm
+  real*8 stn_temp1
+  real*8 stn_temp2
+  real*8 x
+  real*8 y
+  real*8 rcutoff_i
+  real*8 rcutoff_j
  
-  real(8), dimension (numorb_max, numorb_max) :: bcca
-  real(8), dimension (numorb_max, numorb_max) :: bccax
-  real(8), dimension (numorb_max, numorb_max) :: emnpl
-  real(8), dimension (numorb_max, numorb_max) :: emnpl_noq
-  real(8), dimension (3, 3, 3) :: deps
-  real(8), dimension (3, 3) :: eps
-  real(8), dimension (3) :: r1
-  real(8), dimension (3) :: r2
-  real(8), dimension (3) :: r21
-  real(8), dimension (3) :: rhat
-  real(8), dimension (3) :: rna
-  real(8), dimension (3) :: rnabc
-  real(8), dimension (3) :: sighat
-  real(8), dimension (numorb_max, numorb_max) :: stn1
-  real(8), dimension (numorb_max, numorb_max) :: stn2
+  real*8, dimension (numorb_max, numorb_max) :: bcca
+  real*8, dimension (numorb_max, numorb_max) :: bccax
+  real*8, dimension (numorb_max, numorb_max) :: emnpl
+  real*8, dimension (numorb_max, numorb_max) :: emnpl_noq
+  real*8, dimension (3, 3, 3) :: deps
+  real*8, dimension (3, 3) :: eps
+  real*8, dimension (3) :: r1
+  real*8, dimension (3) :: r2
+  real*8, dimension (3) :: r21
+  real*8, dimension (3) :: rhat
+  real*8, dimension (3) :: rna
+  real*8, dimension (3) :: rnabc
+  real*8, dimension (3) :: sighat
+  real*8, dimension (numorb_max, numorb_max) :: stn1
+  real*8, dimension (numorb_max, numorb_max) :: stn2
 
-  real(8), dimension (:,:), allocatable :: smG
-  real(8), dimension (:,:,:), allocatable :: spmG
-  real(8), dimension (:, :, :, :), allocatable :: smatG
-  real(8), dimension (:, :, :, :), allocatable :: spmatG
+  real*8, dimension (:,:), allocatable :: smG
+  real*8, dimension (:,:,:), allocatable :: spmG
+  real*8, dimension (:, :, :, :), allocatable :: smatG
+  real*8, dimension (:, :, :, :), allocatable :: spmatG
          
   allocate (smG (numorb_max, numorb_max))
   allocate (spmG (3, numorb_max, numorb_max))

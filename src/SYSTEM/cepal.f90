@@ -4,34 +4,34 @@
 subroutine cepal (rh, exc, muxc, dexc, d2exc, dmuxc, d2muxc)
   use M_constants
   implicit none
-  real(8), intent (in) :: rh
-  real(8), intent (out) :: dexc
-  real(8), intent (out) :: d2exc
-  real(8), intent (out) :: dmuxc
-  real(8), intent (out) :: exc
-  real(8), intent (out) :: muxc
-  real(8), intent (out) :: d2muxc
-  real(8), parameter :: eps = 1.0d-3
-  real(8), parameter :: delta_rh = 1.0d-6
-  real(8) d2nec
-  real(8) d2nex
-  real(8) d3nec
-  real(8) d3nex
-  real(8) dec
-  real(8) ddec
-  real(8) d2dec
-  real(8) den
-  real(8) dden
-  real(8) d2den
-  real(8) d3den
-  real(8) ex
-  real(8) rho_third
-  real(8) rho
-  real(8) rhx
-  real(8) rs
-  real(8) rsl
-  real(8) sqrs
-  real(8) hartree1
+  real*8, intent (in) :: rh
+  real*8, intent (out) :: dexc
+  real*8, intent (out) :: d2exc
+  real*8, intent (out) :: dmuxc
+  real*8, intent (out) :: exc
+  real*8, intent (out) :: muxc
+  real*8, intent (out) :: d2muxc
+  real*8, parameter :: eps = 1.0d-3
+  real*8, parameter :: delta_rh = 1.0d-6
+  real*8 d2nec
+  real*8 d2nex
+  real*8 d3nec
+  real*8 d3nex
+  real*8 dec
+  real*8 ddec
+  real*8 d2dec
+  real*8 den
+  real*8 dden
+  real*8 d2den
+  real*8 d3den
+  real*8 ex
+  real*8 rho_third
+  real*8 rho
+  real*8 rhx
+  real*8 rs
+  real*8 rsl
+  real*8 sqrs
+  real*8 hartree1
  
   exc = 0.0d0
   muxc = 0.0d0

@@ -35,12 +35,12 @@ subroutine neighborsPP ()
   integer ialp
   integer mbeta
   integer num_neigh
-  real(8) distance
-  real(8) distance2
-  real(8) range2
-  real(8) rcutoff_i
-  real(8) rcutoff_j
-  real(8), dimension (3) :: vec1, vec2, vec3, vec
+  real*8 distance
+  real*8 distance2
+  real*8 range2
+  real*8 rcutoff_i
+  real*8 rcutoff_j
+  real*8, dimension (3) :: vec1, vec2, vec3, vec
   logical flag
 
   neighPP_j = 0.0d0

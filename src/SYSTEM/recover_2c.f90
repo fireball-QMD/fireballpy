@@ -3,8 +3,8 @@ subroutine recover_2c (in1, in2, hlist, hbox)
   use M_fdata, only: ME2c_max, num_orb,index_max2c,mu, num_orb,index_max2c,mu,nu
   implicit none
   integer, intent(in) :: in1, in2
-  real(8), intent(in) :: hlist (ME2c_max)
-  real(8), intent(out) :: hbox (numorb_max, numorb_max)
+  real*8, intent(in) :: hlist (ME2c_max)
+  real*8, intent(out) :: hbox (numorb_max, numorb_max)
   integer imu, inu
   integer index
   do inu = 1, num_orb(in2)

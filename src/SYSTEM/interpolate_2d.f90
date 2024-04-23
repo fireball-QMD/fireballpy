@@ -6,27 +6,27 @@ subroutine interpolate_2d (xin, yin, iauxforce, nx, ny, hx, hy, xintegral, Q_L, 
   integer, intent (in) :: iauxforce
   integer, intent(in) :: nx
   integer, intent(in) :: ny
-  real(8), intent (in) :: xin
-  real(8), intent (in) :: yin
-  real(8), intent (in) :: hx
-  real(8), intent (in) :: hy
-  real(8), intent (in), dimension (numXmax, numYmax) :: xintegral
-  real(8), intent (out) :: Q_L    ! the contibutions for a matrix element
-  real(8), intent (out) :: dQ_Ldx ! d/dx Q_L (Computed only if iauxforce = 1)
-  real(8), intent (out) :: dQ_Ldy ! d/dy Q_L (Computed only if iauxforce = 1)
-  real(8), parameter :: tiny = 1.0d-5
-  real(8), parameter :: small= 1.0d-4
+  real*8, intent (in) :: xin
+  real*8, intent (in) :: yin
+  real*8, intent (in) :: hx
+  real*8, intent (in) :: hy
+  real*8, intent (in), dimension (numXmax, numYmax) :: xintegral
+  real*8, intent (out) :: Q_L    ! the contibutions for a matrix element
+  real*8, intent (out) :: dQ_Ldx ! d/dx Q_L (Computed only if iauxforce = 1)
+  real*8, intent (out) :: dQ_Ldy ! d/dy Q_L (Computed only if iauxforce = 1)
+  real*8, parameter :: tiny = 1.0d-5
+  real*8, parameter :: small= 1.0d-4
   integer imidx, imidy
   integer k
-  real(8) f0p3, f0p6, f1m1, f1m2, f1m3, f1p3, f1p6, f2p1, flm1
-  real(8) gradtest
-  real(8) gradx, grady
-  real(8) px, py
-  real(8), parameter :: xmin = 0
-  real(8), parameter :: ymin = 0
-  real(8) bb0,bb1,bb2,bb3
-  real(8), dimension (-1:2,-1:2) :: fun
-  real(8), dimension (-1:2) :: g, gp
+  real*8 f0p3, f0p6, f1m1, f1m2, f1m3, f1p3, f1p6, f2p1, flm1
+  real*8 gradtest
+  real*8 gradx, grady
+  real*8 px, py
+  real*8, parameter :: xmin = 0
+  real*8, parameter :: ymin = 0
+  real*8 bb0,bb1,bb2,bb3
+  real*8, dimension (-1:2,-1:2) :: fun
+  real*8, dimension (-1:2) :: g, gp
   imidx = int((xin - xmin)/hx) + 1
   if (imidx .lt. 2) then
     imidx = 2

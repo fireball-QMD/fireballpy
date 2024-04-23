@@ -22,16 +22,16 @@ subroutine Dassemble_3c_PP ()
   integer mneigh
   integer ncc
   integer, external :: mpairnay
-  real(8), dimension (numorb_max, numorb_max) :: bcnlx
-  real(8), dimension (numorb_max) :: cl
-  real(8), dimension (3, numorb_max, numorb_max) :: f3nlXa
-  real(8), dimension (3, numorb_max, numorb_max) :: f3nlXb
-  real(8), dimension (3, numorb_max, numorb_max) :: f3nlXc
-  real(8), dimension (3) :: r1
-  real(8), dimension (3) :: r2
-  real(8), dimension (3) :: r31
-  real(8), dimension (3) :: r32
-  real(8), dimension (3) :: rna
+  real*8, dimension (numorb_max, numorb_max) :: bcnlx
+  real*8, dimension (numorb_max) :: cl
+  real*8, dimension (3, numorb_max, numorb_max) :: f3nlXa
+  real*8, dimension (3, numorb_max, numorb_max) :: f3nlXb
+  real*8, dimension (3, numorb_max, numorb_max) :: f3nlXc
+  real*8, dimension (3) :: r1
+  real*8, dimension (3) :: r2
+  real*8, dimension (3) :: r31
+  real*8, dimension (3) :: r32
+  real*8, dimension (3) :: rna
   f3nla = 0.0d0
   f3nlb = 0.0d0
   f3nlc = 0.0d0

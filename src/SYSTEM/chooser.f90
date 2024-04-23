@@ -1,9 +1,9 @@
         subroutine chooser (l, dmat, pmat, rmatrix)
         implicit none
         integer, intent(in) :: l
-        real(8), intent(in), dimension(5, 5) :: dmat
-        real(8), intent(in), dimension(3, 3) :: pmat
-        real(8), intent(out), dimension(5, 5) :: rmatrix
+        real*8, intent(in), dimension(5, 5) :: dmat
+        real*8, intent(in), dimension(3, 3) :: pmat
+        real*8, intent(out), dimension(5, 5) :: rmatrix
         rmatrix = 0.0d0
         if (l .eq. 0) then
          rmatrix(1,1) = 1.0d0

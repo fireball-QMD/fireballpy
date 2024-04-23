@@ -5,46 +5,55 @@ project('fireballpy', 'fortran', 'c',
 # Check Fortran compiler
 fc = meson.get_compiler('fortran')
 if fc.get_id() == 'gcc'
-    flags = ['-unroll', '-fPIC', '-ffree-line-length-512', '-fimplicit-none','-fdefault-real-8']
+    fflags = ['-unroll', '-fPIC', '-ffree-line-length-512', '-fimplicit-none', '-fdefault-real-8']
 else
     error('No compiler found.')
 endif
 
-# Set compiler flags
-add_global_arguments(flags, language: 'fortran')
-
-# Link OpenBLAS
-blas_dep = dependency(['openblas', 'OpenBLAS'])
-
-# Build fireball
-subdir('src')
+# Check python
 py_mod = import('python')
 py = py_mod.find_installation(pure: false)
 py_dep = py.dependency()
 
-incdir_numpy = run_command(py,
-  ['-c', 'import numpy; print(numpy.get_include())'],
-  check : true
-).stdout().strip()
+# Set compiler flags
+add_global_arguments(fflags, language: 'fortran')
 
-incdir_f2py = run_command(py,
-    ['-c', 'import numpy.f2py; print(numpy.f2py.get_include())'],
-    check : true
-).stdout().strip()
+# Link OpenBLAS
+blas_dep = dependency(['openblas', 'OpenBLAS'])
 
-fireball_source = custom_target('fireball_module',
-  input : ['src' / 'libf2py.f90'],
-  output : ['_fireballmodule.c', '_fireball-f2pywrappers.f'],
-  command : [py, '-m', 'numpy.f2py', '@INPUT@', '-m', '_fireball', '--lower']
+# Prepare f2py
+incdir_numpy = run_command(py, ['-c', 'import numpy; print(numpy.get_include())'],
+                           check : true).stdout().strip()
+
+incdir_f2py = run_command(py, ['-c', 'import numpy.f2py; print(numpy.f2py.get_include())'],
+                          check : true).stdout().strip()
+
+fortranobject_lib = static_library('_fortranobject',
+    incdir_f2py / 'fortranobject.c',
+    dependencies : [py_dep],
+    include_directories : [incdir_numpy, incdir_f2py]
 )
 
-inc_np = include_directories(incdir_numpy, incdir_f2py)
+fortranobject_dep = declare_dependency(
+    link_with : fortranobject_lib,
+    include_directories : [incdir_numpy, incdir_f2py]
+)
+
+# Build fireball
+subdir('src')
+
+# Generate C module and Fortran wrappers
+fireball_source = custom_target('fireball_module',
+    input : ['src' / 'libf2py.f90'], # No module hence no .f90 wrappers
+    output : ['_fireballmodule.c', '_fireball-f2pywrappers.f'],
+    command : [py, '-m', 'numpy.f2py', '@INPUT@', '-m', '_fireball', '--lower']
+)
 
 py.extension_module('_fireball',
-  ['src' / 'libf2py.f90', fireball_source],
-  incdir_f2py / 'fortranobject.c',
-  include_directories: inc_np,
-  dependencies : [py_dep, fireball_dep],
-  install : true,
-  install_dir : meson.current_source_dir() / 'fireballpy'
+    ['src' / 'libf2py.f90', fireball_source], # We use F90 so .f90 file is already included
+    fortran_args : fflags,
+    dependencies : [fortranobject_dep, blas_dep, fireball_dep],
+    link_language : 'fortran',
+    install : true,
+    install_dir : meson.current_source_dir() / 'fireballpy' # Temporal
 )

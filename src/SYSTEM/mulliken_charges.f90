@@ -11,7 +11,7 @@ subroutine MULLIKEN_CHARGES()
  integer ineigh ,jatom,jneigh          
  integer noccupy  
  integer mqn             
- real(8), dimension (numorb_max, natoms) :: QMulliken
+ real*8, dimension (numorb_max, natoms) :: QMulliken
  QMulliken = 0.0d0             
  do iatom = 1, natoms
    in1 = imass(iatom)

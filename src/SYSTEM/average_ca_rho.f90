@@ -27,37 +27,37 @@ subroutine average_ca_rho ()
   integer mneigh
   integer n1
 
-  real(8) cost
-  real(8) x
-  real(8) y
+  real*8 cost
+  real*8 x
+  real*8 y
 
-  real(8), dimension (3, 3, 3) :: deps
-  real(8), dimension (3, 3) :: eps
-  real(8), dimension (3) :: r1
-  real(8), dimension (3) :: r2
-  real(8), dimension (3) :: r21
-  real(8), dimension (3) :: rhat
+  real*8, dimension (3, 3, 3) :: deps
+  real*8, dimension (3, 3) :: eps
+  real*8, dimension (3) :: r1
+  real*8, dimension (3) :: r2
+  real*8, dimension (3) :: r21
+  real*8, dimension (3) :: rhat
   ! crystaline matrices
-  real(8), dimension (numorb_max, numorb_max) :: rho_2c
-  real(8), dimension (numorb_max, numorb_max) :: rhoi_2c
+  real*8, dimension (numorb_max, numorb_max) :: rho_2c
+  real*8, dimension (numorb_max, numorb_max) :: rhoi_2c
   ! molecular spehrical matrices
-  real(8), dimension (numorb_max, numorb_max) :: rhomx
-  real(8), dimension (3, numorb_max, numorb_max) :: rhompx
-  real(8), dimension (nsh_max, nsh_max) :: rhom_2c
-  real(8), dimension (nsh_max, nsh_max) :: rhomi_2c
-  real(8), dimension (3, nsh_max, nsh_max) :: rhomp_2c
-  real(8), dimension (:, :, :, :), allocatable :: rhom_3c
-  real(8), dimension (nsh_max, nsh_max) :: rhomm
-  real(8), dimension (3, nsh_max, nsh_max) :: rhompm
-  real(8), dimension (3) :: rnabc
-  real(8), dimension (3) :: rna
-  real(8), dimension (3) :: sighat
-  real(8), dimension (nsh_max, nsh_max) :: sm
-  real(8), dimension (3, nsh_max, nsh_max) :: spm
+  real*8, dimension (numorb_max, numorb_max) :: rhomx
+  real*8, dimension (3, numorb_max, numorb_max) :: rhompx
+  real*8, dimension (nsh_max, nsh_max) :: rhom_2c
+  real*8, dimension (nsh_max, nsh_max) :: rhomi_2c
+  real*8, dimension (3, nsh_max, nsh_max) :: rhomp_2c
+  real*8, dimension (:, :, :, :), allocatable :: rhom_3c
+  real*8, dimension (nsh_max, nsh_max) :: rhomm
+  real*8, dimension (3, nsh_max, nsh_max) :: rhompm
+  real*8, dimension (3) :: rnabc
+  real*8, dimension (3) :: rna
+  real*8, dimension (3) :: sighat
+  real*8, dimension (nsh_max, nsh_max) :: sm
+  real*8, dimension (3, nsh_max, nsh_max) :: spm
   !
-  real(8), dimension (nsh_max, nsh_max) :: smGS
-  real(8), dimension (3, nsh_max, nsh_max) :: spmGS
-  real(8) rho_modified
+  real*8, dimension (nsh_max, nsh_max) :: smGS
+  real*8, dimension (3, nsh_max, nsh_max) :: spmGS
+  real*8 rho_modified
 
   rhomx=0.0d0
   rhompx=0.0d0

@@ -1,12 +1,12 @@
 subroutine deps2cent(r1,r2,eps2,deps2)
   use M_constants
   implicit none
-  real(8), intent(in) :: r1(3),r2(3),eps2(3,3)
-  real(8), intent(out) :: deps2(3,3,3)
+  real*8, intent(in) :: r1(3),r2(3),eps2(3,3)
+  real*8, intent(out) :: deps2(3,3,3)
   integer i,ii,ix
-  real(8) r2mag2,r2mag,r1mag,denom
-  real(8) crossmag,dd,dot,term,ddinv,crossinv
-  real(8) crossa(3)
+  real*8 r2mag2,r2mag,r1mag,denom
+  real*8 crossmag,dd,dot,term,ddinv,crossinv
+  real*8 crossa(3)
   deps2=0.e0
   dd=sqrt((r2(1)-r1(1))**2+(r2(2)-r1(2))**2+(r2(3)-r1(3))**2) 
   if(dd.lt.1.0d-4)return

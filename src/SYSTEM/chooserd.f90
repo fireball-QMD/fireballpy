@@ -1,9 +1,9 @@
 subroutine chooserd (l, ddmat, dpmat, dmatrix)
   implicit none
   integer, intent (in) :: l
-  real(8), intent (in), dimension(3, 5, 5) :: ddmat
-  real(8), intent (in), dimension(3, 3, 3) :: dpmat
-  real(8), intent (out), dimension(3, 5, 5) :: dmatrix
+  real*8, intent (in), dimension(3, 5, 5) :: ddmat
+  real*8, intent (in), dimension(3, 3, 3) :: dpmat
+  real*8, intent (out), dimension(3, 5, 5) :: dmatrix
   dmatrix = 0.0d0
   if (l .eq. 0) then
   else if (l .eq. 1) then

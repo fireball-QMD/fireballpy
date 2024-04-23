@@ -16,11 +16,11 @@ subroutine read_2c (interaction)
   integer numz
   integer nzx1
   integer nzx2
-  real(8) rc1
-  real(8) rc2
-  real(8) zmax
-  real(8) zmin
-  real(8), dimension (nsh_max) :: cl_pseudo
+  real*8 rc1
+  real*8 rc2
+  real*8 zmax
+  real*8 zmin
+  real*8, dimension (nsh_max) :: cl_pseudo
   character (len = 200) extension
   character (len = 200) filename
   character (len = 200) root

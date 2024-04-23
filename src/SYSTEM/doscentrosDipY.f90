@@ -7,21 +7,21 @@ subroutine doscentrosDipY (interaction, isub, in1, in2, in3, distance, eps, deps
   integer, intent (in) :: in1
   integer, intent (in) :: in2
   integer, intent (in) :: in3
-  real(8), intent (inout) :: distance
-  real(8), intent (in), dimension (3, 3, 3) :: deps
-  real(8), intent (in), dimension (3, 3) :: eps
-  real(8), intent (out), dimension (numorb_max, numorb_max) :: sx
-  real(8), intent (out), dimension (3, numorb_max, numorb_max) :: spx
+  real*8, intent (inout) :: distance
+  real*8, intent (in), dimension (3, 3, 3) :: deps
+  real*8, intent (in), dimension (3, 3) :: eps
+  real*8, intent (out), dimension (numorb_max, numorb_max) :: sx
+  real*8, intent (out), dimension (3, numorb_max, numorb_max) :: spx
 
   integer imu
   integer inu
   integer index
-  real(8), dimension (3) :: eta
-  real(8), dimension (ME2cDipY_max) :: dslist
-  real(8), dimension (ME2cDipY_max) :: slist
-  real(8), dimension (numorb_max,numorb_max) :: sm
-  real(8), dimension (numorb_max,numorb_max) :: spm
-  real(8), dimension (3,numorb_max,numorb_max) :: spmx
+  real*8, dimension (3) :: eta
+  real*8, dimension (ME2cDipY_max) :: dslist
+  real*8, dimension (ME2cDipY_max) :: slist
+  real*8, dimension (numorb_max,numorb_max) :: sm
+  real*8, dimension (numorb_max,numorb_max) :: spm
+  real*8, dimension (3,numorb_max,numorb_max) :: spmx
   logical switch
   sm = 0.0d0
   sx = 0.0d0
