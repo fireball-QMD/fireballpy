@@ -5,7 +5,7 @@ project('fireballpy', 'fortran', 'c',
 # Check Fortran compiler
 fc = meson.get_compiler('fortran')
 if fc.get_id() == 'gcc'
-    flags = ['-unroll', '-fPIC', '-ffree-line-length-512', '-fimplicit-none']
+    flags = ['-unroll', '-fPIC', '-ffree-line-length-512', '-fimplicit-none','-fdefault-real-8']
 else
     error('No compiler found.')
 endif
