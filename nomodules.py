@@ -18,20 +18,27 @@ def get_vars_from_module(mod):
     mod_iter = get_lines(mod)
     for i, line in enumerate(mod_iter):
         try:
-            decls, vars = line.rstrip() \
-                .replace(' ', '') \
+            decls, vars = line.split('!')[0] \
+                .strip() \
                 .lower() \
-                .split('!')[0] \
                 .split('::')
         except ValueError:
             continue
+        decls = decls.replace(' ', '')
         while vars[-1] == '&':
-            nline = next(mod_iter).rstrip() \
-                .replace(' ', '') \
-                .lower() \
-                .split('!')[0]
-            vars = vars + os.linesep + nline
-        vars = [vars] if '=' in vars else vars.split(',')
+            nline = next(mod_iter).split('!')[0] \
+                .strip() \
+                .lower()
+            vars = vars + os.linesep + '  ' + nline
+        if '=' in vars:
+            try:
+                var, val = vars.split('=')
+            except ValueError:
+                raise ValueError("Two values assigned in one line"
+                                 f"in file {mod}, line {i+1}: '{line}'")
+            vars = [var.strip() + ' = ' + val.strip()]
+        else:
+            vars = vars.replace(' ', '').split(',')
         for var in vars:
             type_match = retype.findall(decls)
             if len(type_match) != 1:
