@@ -3,10 +3,9 @@ from typing import Optional
 
 import os
 import warnings
-import math
 import numpy as np
 from ase.calculators.calculator import Calculator, all_changes  # type: ignore
-from ase.dft.kpoints import *
+from ase.dft.kpoints import monkhorst_pack
 from fireballpy.infodat import InfoDat
 from fireballpy.fdata import download_needed, get_default_infodat
 
@@ -67,8 +66,9 @@ class Fireball(Calculator):
                 'Mulliken-dipole': 4, 'Mulliken-dipole-preserving': 7}
 
     def __init__(self, fdata_path: Optional[str] = None, igamma: int = 1,
-                 icluster: int = 1, charges: str = "Mulliken", idipole: int = 0, 
-                 kpts_monkhorst_pack_ind: List[int] = [1,1,1],**kwargs):
+                 icluster: int = 1, charges: str = "Mulliken",
+                 idipole: int = 0,
+                 kpts_monkhorst_pack_ind: list[int] = [1, 1, 1], **kwargs):
 
         super().__init__(**kwargs)
         self._fdata_path = fdata_path
@@ -76,7 +76,7 @@ class Fireball(Calculator):
         set_igamma(igamma)
         set_icluster(icluster)
         set_idipole(idipole)
-        self.kpts_monkhorst_pack_ind=kpts_monkhorst_pack_ind
+        self.kpts_monkhorst_pack_ind = kpts_monkhorst_pack_ind
 
     # Requisite energies
     def _check_compute(self) -> None:
@@ -132,18 +132,18 @@ class Fireball(Calculator):
             self._calculate_forces()
 
     def kpts_monkhorst_pack_fb(self):
-       kptsunitary=monkhorst_pack(self.kpts_monkhorst_pack_ind)
-       kpts_all=np.dot(kptsunitary,self.atoms.cell.reciprocal())*math.pi*2
-       aux=[]
-       for i in kpts_all:
-          poner=True
-          for j in aux:
-             if np.linalg.norm(i + np.array(j)) < 0.00001:
-                poner=False    
-          if(poner):
-             aux.append(i)
-       kpts=np.array(aux)
-       set_kpoints(kpts)
+        kptsunitary = monkhorst_pack(self.kpts_monkhorst_pack_ind)
+        kpts_all = np.dot(kptsunitary, self.atoms.cell.reciprocal())*np.pi*2
+        aux = []
+        for i in kpts_all:
+            poner = True
+            for j in aux:
+                if np.linalg.norm(i + np.array(j)) < 0.00001:
+                    poner = False
+            if (poner):
+                aux.append(i)
+        kpts = np.array(aux)
+        set_kpoints(kpts)
 
     def initialize(self) -> None:
         self.natoms = len(self.atoms)
@@ -167,8 +167,6 @@ class Fireball(Calculator):
             load_kpoints_gamma()
         else:
             self.kpts_monkhorst_pack_fb()
-        
-     
 
         set_iqout(self._icharge[self.charges])
         call_allocate_system()

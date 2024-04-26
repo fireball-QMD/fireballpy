@@ -3,8 +3,8 @@ subroutine allocate_system ()
   use M_constants
   use M_fdata, only: nssh, rcutoff, rc_PP, nspecies, symbolA ,isorpmax
   use M_fdata, only: num_orb, Qneutral, lssh, nsshPP, lsshPP,  nsh_max
-  use M_fdata, only: ME3c_max,ideriv_max,numXmax,numYmax
-  use M_fdata, only: numy3c_xc3c
+  use M_fdata, only: ME3c_max,numXmax,numYmax
+!  use M_fdata, only: numy3c_xc3c, ideriv_max
   implicit none
   integer:: iatom
   integer:: jatom

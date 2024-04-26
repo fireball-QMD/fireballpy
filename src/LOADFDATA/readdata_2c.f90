@@ -1,22 +1,9 @@
-! This routine reads the data from the 2-center integral files. When
-! read, the information is stored in the array xintegral_2c. This array
-! is the field that stores all non-vanishing matrix elements for a general
-! 2-center integral. There are maximal ME2c_max non-vanishing matrix
-! elements given on a grid of maximal nfofx data points. The exact dimensions
-! for a given interaction, and a given pair of atoms are numz and num_nonzero.
-
 subroutine readdata_2c (interaction, iounit, num_nonzero, numz, zmax, itype, in1, in2)
-  use M_fdata
+  use M_fdata, only: ME2c_max, nfofx, xintegral_2c
   implicit none
-  integer, intent (in) :: in1, in2
-  integer, intent (in) :: interaction
-  integer, intent (in) :: iounit
-  integer, intent (in) :: itype
-  integer, intent (in) :: num_nonzero
-  integer, intent (in) :: numz
+  integer, intent (in) :: in1, in2, interaction, iounit, itype, num_nonzero, numz
   real*8, intent (in) :: zmax
-  integer ipoint
-  integer integral
+  integer ipoint, integral
   real*8, dimension (ME2c_max, nfofx) :: gstore
   if (interaction .ne. 8) then
     do ipoint = 1, numz
@@ -33,5 +20,4 @@ subroutine readdata_2c (interaction, iounit, num_nonzero, numz, zmax, itype, in1
       xintegral_2c(1,ipoint,itype,in1,in2) = gstore(1,ipoint)
     end do
   end if
-  return
 end subroutine readdata_2c

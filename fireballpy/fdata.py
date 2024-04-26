@@ -34,7 +34,7 @@ def _get_fb_home() -> str:
         os.getenv(ENV_FB_HOME,
                   os.path.join(os.getenv(ENV_XDG_CACHE_HOME,
                                          DEFAULT_CACHE_DIR), "fireball"))
-    )
+    ) + os.sep
 
 
 def _get_downloaded() -> list[str]:

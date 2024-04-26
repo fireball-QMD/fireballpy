@@ -59,31 +59,31 @@ subroutine trescentros (interaction, isorp, maxtype, in1, in2, indna, x, y, cost
       call interpolate_2d (x, y, kforce, nx, ny, hx, hy, bcna_05(1,1,iME,isorp,index), Q_L, dQ_Ldx, dQ_Ldy) 
       bcnalist(4,iME) = Q_L
     end do
-  else if (interaction .eq. 2) then
-    hx = hx_xc3c(isorp,index)
-    hy = hy_xc3c(isorp,index)
-    nx = numx3c_xc3c(isorp,index)
-    ny = numy3c_xc3c(isorp,index)
-    xxmax = x3cmax_xc3c(isorp,index)
-    yymax = y3cmax_xc3c(isorp,index)
-    if (x .gt. xxmax .or. y .gt. yymax .or. x .lt. 0 .or. y .lt. 0) then
-       write (*,*) ' What the heck is going on in trescentros!!! error!!! ' 
-       write (*,*) ' x = ', x, ' Max of data = ', xxmax
-       write (*,*) ' y = ', y, ' Max of data = ', yymax
-       stop
-    end if
-    do iME = 1, index_max3c(in1,in2)
-      call interpolate_2d (x, y, kforce, nx, ny, hx, hy, xc3c_01(1,1,iME,isorp,index), Q_L, dQ_Ldx, dQ_Ldy) 
-      bcnalist(0,iME) = Q_L
-      call interpolate_2d (x, y, kforce, nx, ny, hx, hy, xc3c_02(1,1,iME,isorp,index), Q_L, dQ_Ldx, dQ_Ldy) 
-      bcnalist(1,iME) = Q_L
-      call interpolate_2d (x, y, kforce, nx, ny, hx, hy, xc3c_03(1,1,iME,isorp,index), Q_L, dQ_Ldx, dQ_Ldy) 
-      bcnalist(2,iME) = Q_L
-      call interpolate_2d (x, y, kforce, nx, ny, hx, hy, xc3c_04(1,1,iME,isorp,index), Q_L, dQ_Ldx, dQ_Ldy) 
-      bcnalist(3,iME) = Q_L
-      call interpolate_2d (x, y, kforce, nx, ny, hx, hy, xc3c_05(1,1,iME,isorp,index), Q_L, dQ_Ldx, dQ_Ldy) 
-      bcnalist(4,iME) = Q_L
-    end do
+  !else if (interaction .eq. 2) then
+  !  hx = hx_xc3c(isorp,index)
+  !  hy = hy_xc3c(isorp,index)
+  !  nx = numx3c_xc3c(isorp,index)
+  !  ny = numy3c_xc3c(isorp,index)
+  !  xxmax = x3cmax_xc3c(isorp,index)
+  !  yymax = y3cmax_xc3c(isorp,index)
+  !  if (x .gt. xxmax .or. y .gt. yymax .or. x .lt. 0 .or. y .lt. 0) then
+  !     write (*,*) ' What the heck is going on in trescentros!!! error!!! ' 
+  !     write (*,*) ' x = ', x, ' Max of data = ', xxmax
+  !     write (*,*) ' y = ', y, ' Max of data = ', yymax
+  !     stop
+  !  end if
+  !  do iME = 1, index_max3c(in1,in2)
+  !    call interpolate_2d (x, y, kforce, nx, ny, hx, hy, xc3c_01(1,1,iME,isorp,index), Q_L, dQ_Ldx, dQ_Ldy) 
+  !    bcnalist(0,iME) = Q_L
+  !    call interpolate_2d (x, y, kforce, nx, ny, hx, hy, xc3c_02(1,1,iME,isorp,index), Q_L, dQ_Ldx, dQ_Ldy) 
+  !    bcnalist(1,iME) = Q_L
+  !    call interpolate_2d (x, y, kforce, nx, ny, hx, hy, xc3c_03(1,1,iME,isorp,index), Q_L, dQ_Ldx, dQ_Ldy) 
+  !    bcnalist(2,iME) = Q_L
+  !    call interpolate_2d (x, y, kforce, nx, ny, hx, hy, xc3c_04(1,1,iME,isorp,index), Q_L, dQ_Ldx, dQ_Ldy) 
+  !    bcnalist(3,iME) = Q_L
+  !    call interpolate_2d (x, y, kforce, nx, ny, hx, hy, xc3c_05(1,1,iME,isorp,index), Q_L, dQ_Ldx, dQ_Ldy) 
+  !    bcnalist(4,iME) = Q_L
+  !  end do
   else if (interaction .eq. 3) then
     hx = hx_den3(isorp,index)
     hy = hy_den3(isorp,index)
