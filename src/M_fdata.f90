@@ -7,7 +7,9 @@ module M_fdata
   logical :: debug = .True.
   character(len=100) :: infofname = 'info.dat'
   !===================================
-
+  
+  integer :: fdata_is_load = 0 
+  
   ! info.dat variables
   integer :: nsh_max, nshPP_max, isorpmax, isorpmax_xc, nspecies
   character (len=1000) fdataLocation

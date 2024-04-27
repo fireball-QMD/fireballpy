@@ -84,12 +84,18 @@ real*8 function get_shell_atom_charge(iauxssh,iauxatom)
   get_shell_atom_charge = Qin(iauxssh,iauxatom)
 end function get_shell_atom_charge
 
- 
+integer function get_fdata_is_load()
+  use M_fdata, only : fdata_is_load
+  get_fdata_is_load = fdata_is_load
+end function get_fdata_is_load
+
+
 subroutine loadfdata_from_path(fdatafile)
   use M_fdata
   implicit none
   character(len=400),intent(in):: fdatafile
   fdatalocation=trim(fdatafile)
+  fdata_is_load = 1
   call load_fdata()
 end subroutine loadfdata_from_path
  
@@ -130,7 +136,36 @@ subroutine set_coords(naux, z, xyz)
    end do
   end do
 end subroutine set_coords
+ 
+subroutine set_coords_xyz(naux,xyz)
+  use M_system
+  implicit none
+  integer, intent(in) :: naux
+  real*8, dimension(naux,3), intent(in) :: xyz
+  integer iatom
+  real*8 distance
 
+  do iatom = 1, natoms
+    ratom(:, iatom) = xyz(iatom, :)
+  end do
+
+  ishiftO = 0
+  do iatom = 1, natoms
+    distance = ratom(1,iatom)**2 + ratom(2,iatom)**2 + ratom(3,iatom)**2
+    distance = sqrt(distance)
+    if (distance .lt. 1.0d-4) ishiftO = 1
+  end do
+
+  if (ishiftO .eq. 1) then
+    do iatom = 1, natoms
+      ratom(:,iatom) = ratom(:,iatom) + shifter
+    end do
+  end if
+
+
+end subroutine set_coords_xyz
+
+ 
 
 subroutine print_atoms_positions()
   use M_system

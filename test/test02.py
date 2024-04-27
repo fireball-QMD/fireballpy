@@ -12,7 +12,8 @@ atoms = Atoms(symbols=['C', 'C'],
 
 atoms.set_cell([(a/2, a/2, 0), (a/2, 0, a/2), (0, a/2, a/2)])
 
-atoms.calc = Fireball(igamma=0, icluster=0, charges="Mulliken",
+atoms.calc = Fireball(igamma=0, icluster=0, 
+                      charges="Mulliken-dipole-preserving",
                       idipole = 0,
                       kpts_monkhorst_pack_ind=[4,4,4]) 
 

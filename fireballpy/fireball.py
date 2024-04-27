@@ -3,9 +3,10 @@ from typing import Optional
 
 import os
 import warnings
+import math
 import numpy as np
 from ase.calculators.calculator import Calculator, all_changes  # type: ignore
-from ase.dft.kpoints import monkhorst_pack
+from ase.dft.kpoints import *
 from fireballpy.infodat import InfoDat
 from fireballpy.fdata import download_needed, get_default_infodat
 
@@ -14,12 +15,13 @@ from ._fireball import (call_scf_loop,  # type: ignore
                         call_getforces,
                         call_allocate_system,
                         loadfdata_from_path,
+                        load_cell_100,
+                        load_kpoints_gamma,
                         set_coords,
+                        set_coords_xyz,
                         set_iqout,
                         set_cell,
-                        load_cell_100,
                         set_kpoints,
-                        load_kpoints_gamma,
                         set_igamma,
                         set_idipole,
                         set_icluster,
@@ -29,7 +31,8 @@ from ._fireball import (call_scf_loop,  # type: ignore
                         get_atom_force,
                         get_shell_atom_charge,
                         get_idipole,
-                        get_icluster)
+                        get_icluster,
+                        get_fdata_is_load)
 
 
 class Fireball(Calculator):
@@ -63,12 +66,12 @@ class Fireball(Calculator):
     ignored_changes = ['initial_magmoms']
 
     _icharge = {'Lowdin': 1, 'Mulliken': 2, 'NPA': 3,
-                'Mulliken-dipole': 4, 'Mulliken-dipole-preserving': 7}
+                'Mulliken-dipole': 4, 
+                'Mulliken-dipole-preserving': 7}
 
     def __init__(self, fdata_path: Optional[str] = None, igamma: int = 1,
-                 icluster: int = 1, charges: str = "Mulliken",
-                 idipole: int = 0,
-                 kpts_monkhorst_pack_ind: list[int] = [1, 1, 1], **kwargs):
+                 icluster: int = 1, charges: str = "Mulliken", idipole: int = 0, 
+                 kpts_monkhorst_pack_ind: List[int] = [1,1,1],**kwargs):
 
         super().__init__(**kwargs)
         self._fdata_path = fdata_path
@@ -76,8 +79,7 @@ class Fireball(Calculator):
         set_igamma(igamma)
         set_icluster(icluster)
         set_idipole(idipole)
-        self.kpts_monkhorst_pack_ind = kpts_monkhorst_pack_ind
-
+        self.kpts_monkhorst_pack_ind=kpts_monkhorst_pack_ind
     # Requisite energies
     def _check_compute(self) -> None:
         if 'energy' not in self.results:
@@ -132,18 +134,18 @@ class Fireball(Calculator):
             self._calculate_forces()
 
     def kpts_monkhorst_pack_fb(self):
-        kptsunitary = monkhorst_pack(self.kpts_monkhorst_pack_ind)
-        kpts_all = np.dot(kptsunitary, self.atoms.cell.reciprocal())*np.pi*2
-        aux = []
-        for i in kpts_all:
-            poner = True
-            for j in aux:
-                if np.linalg.norm(i + np.array(j)) < 0.00001:
-                    poner = False
-            if (poner):
-                aux.append(i)
-        kpts = np.array(aux)
-        set_kpoints(kpts)
+       kptsunitary=monkhorst_pack(self.kpts_monkhorst_pack_ind)
+       kpts_all=np.dot(kptsunitary,self.atoms.cell.reciprocal())*math.pi*2
+       aux=[]
+       for i in kpts_all:
+          poner=True
+          for j in aux:
+             if np.linalg.norm(i + np.array(j)) < 0.00001:
+                poner=False    
+          if(poner):
+             aux.append(i)
+       kpts=np.array(aux)
+       set_kpoints(kpts)
 
     def initialize(self) -> None:
         self.natoms = len(self.atoms)
@@ -155,21 +157,29 @@ class Fireball(Calculator):
         else:
             self._infodat = InfoDat(os.path.join(self._fdata_path, "info.dat"))
 
-        loadfdata_from_path(self._fdata_path)
-        set_coords(self.atoms.numbers, self.atoms.positions)
-
-        if get_icluster() > 1:
-            load_cell_100()
-        else:
-            set_cell(self.atoms.cell)
-
-        if get_igamma() == 1:
-            load_kpoints_gamma()
-        else:
-            self.kpts_monkhorst_pack_fb()
-
+        #Base = list(self._infodat.shs.keys())        
+     
         set_iqout(self._icharge[self.charges])
-        call_allocate_system()
+
+        if get_fdata_is_load() == 0:
+          loadfdata_from_path(self._fdata_path)
+          set_coords(self.atoms.numbers, self.atoms.positions)
+ 
+          if get_icluster() > 1:
+            load_cell_100()
+          else:
+            set_cell(self.atoms.cell)
+        
+          if get_igamma() == 1:
+            load_kpoints_gamma()
+          else:
+            self.kpts_monkhorst_pack_fb()
+        
+          call_allocate_system()
+
+        else: 
+           print("No cargamos Fdata, ni allocateamos")
+           set_coords_xyz(self.atoms.positions)
 
         self.charges = np.zeros((self.natoms, self._infodat.maxshs))
         self.forces = np.empty((self.natoms, 3))
