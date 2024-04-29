@@ -12,23 +12,27 @@ atoms = Atoms(symbols=['C', 'C'],
 
 atoms.set_cell([(a/2, a/2, 0), (a/2, 0, a/2), (0, a/2, a/2)])
 
-atoms.calc = Fireball(igamma=0, icluster=0, 
-                      charges="Mulliken-dipole-preserving",
-                      idipole = 0,
-                      kpts_monkhorst_pack_ind=[4,4,4]) 
 
-ETOT = atoms.get_potential_energy()
-print("ETOT = "+str(ETOT))
+for C in ['Lowdin','Mulliken','NPA','Mulliken-dipole','Mulliken-dipole-preserving']:
+
+  atoms.calc = Fireball(igamma=0, 
+                        icluster=0, 
+                        charges=C,
+                        idipole = 0,
+                        kpts_monkhorst_pack_ind=[4,4,4]) 
+
+  ETOT = atoms.get_potential_energy()
+  print("ETOT = "+str(ETOT))
 
 
-charge = atoms.get_charges()
-print("------atoms.charges-----------")
-for c in charge:
+  charge = atoms.get_charges()
+  print("------atoms.charges-----------")
+  for c in charge:
     print(c)
 
-force = atoms.get_forces()
-print("------atoms.forces------------")
-for f in force:
+  force = atoms.get_forces()
+  print("------atoms.forces------------")
+  for f in force:
     print(f)
 
 
