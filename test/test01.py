@@ -16,7 +16,7 @@ atoms = Atoms(symbols=['C', 'H', 'H', 'H', 'H'],
 for C in ['Lowdin','Mulliken','NPA','Mulliken-dipole','Mulliken-dipole-preserving']:
 #for C in ['Mulliken-dipole-preserving']:
   print('-------',C,'-----------------')
-  atoms.calc = Fireball(igamma=1,icluster=1,charges=C)
+  atoms.calc = Fireball(igamma=1,icluster=1,idipole=1,charges=C)
   ETOT = atoms.get_potential_energy()
   print("ETOT = "+str(ETOT))
 

@@ -22,9 +22,10 @@ subroutine dipole_proyection()
   real*8, dimension (neigh_max) :: w_k
   real*8, dimension(3,natoms) :: intra_dip, res_dip
   real*8, dimension(3,1) :: intra_dip_aux, delta_ck
-  integer n_bwrr, lda_bwrr, info, lda, i
+  integer n_bwrr, lda_bwrr, info, lda, i, lwork
   integer, dimension(3) :: ipiv
-  real*8, dimension(3) :: lwork, s_bwrr, dummy
+  real*8, dimension(3) :: s_bwrr
+  real*8,  allocatable, dimension (:) :: dummy
   do iatom = 1, natoms
     Q0_TOT(iatom) = 0
     in1 = imass(iatom)
@@ -222,7 +223,14 @@ subroutine dipole_proyection()
     lda_bwrr = n_bwrr
     lwork = n_bwrr
     bwrr_inv = bwrr
-    call dgesvd('A', 'S', n_bwrr, n_bwrr, bwrr_inv, lda_bwrr,s_bwrr, u_bwrr, lda_bwrr, vt_bwrr, lda_bwrr, dummy, lwork, info)
+    lwork = 1
+    allocate (dummy(lwork))
+    call dgesvd('A', 'S', n_bwrr, n_bwrr, bwrr_inv, lda_bwrr, s_bwrr, u_bwrr, lda_bwrr, vt_bwrr, lda_bwrr, dummy, -1, info)
+    lwork = dummy(1)
+    deallocate(dummy)
+    allocate (dummy(lwork))
+    call dgesvd('A', 'S', n_bwrr, n_bwrr, bwrr_inv, lda_bwrr, s_bwrr, u_bwrr, lda_bwrr, vt_bwrr, lda_bwrr, dummy, lwork, info)
+    deallocate(dummy)
     zero_bwrr = 0.00
     do i = 1,3
       if (abs(s_bwrr(i)) .gt. 0.000001) then
