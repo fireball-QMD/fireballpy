@@ -1,6 +1,6 @@
 from __future__ import annotations
 from typing import Optional
-
+import time
 import os
 import warnings
 import math
@@ -156,13 +156,17 @@ class Fireball(Calculator):
             self._fdata_path = download_needed(self._infodat)
         else:
             self._infodat = InfoDat(os.path.join(self._fdata_path, "info.dat"))
-
         #Base = list(self._infodat.shs.keys())        
      
         set_iqout(self._icharge[self.charges])
 
         if get_fdata_is_load() == 0:
+          #inicio = time.time()
           loadfdata_from_path(self._fdata_path)
+          #final = time.time()
+          #tiempo_transcurrido = final - inicio
+          #print("loadfdata:", tiempo_transcurrido, "segundos")
+
           set_coords(self.atoms.numbers, self.atoms.positions)
  
           if get_icluster() > 1:

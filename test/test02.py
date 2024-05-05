@@ -13,7 +13,8 @@ atoms = Atoms(symbols=['C', 'C'],
 atoms.set_cell([(a/2, a/2, 0), (a/2, 0, a/2), (0, a/2, a/2)])
 
 
-for C in ['Lowdin','Mulliken','NPA','Mulliken-dipole','Mulliken-dipole-preserving']:
+for C in ['Mulliken']:
+#['Lowdin','Mulliken','NPA','Mulliken-dipole','Mulliken-dipole-preserving']:
 
   atoms.calc = Fireball(igamma=0, 
                         icluster=0, 

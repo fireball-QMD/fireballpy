@@ -34,7 +34,7 @@ atoms.set_cell([(3.11127, 0.00000, 0.0000),
                 (0.00000, 6.22254, 0.0000), 
                 (0.00000, 0.00000, 99.0000)])
 
-for C in ['Lowdin']: #,'Mulliken','NPA','Mulliken-dipole','Mulliken-dipole-preserving']:
+for C in ['Mulliken']: #['Lowdin','Mulliken','NPA','Mulliken-dipole','Mulliken-dipole-preserving']:
 
   atoms.calc = Fireball(igamma=0, 
                         icluster=0, 
