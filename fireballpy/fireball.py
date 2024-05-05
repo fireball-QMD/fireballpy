@@ -182,7 +182,6 @@ class Fireball(Calculator):
           call_allocate_system()
 
         else: 
-           print("No cargamos Fdata, ni allocateamos")
            set_coords_xyz(self.atoms.positions)
 
         self.charges = np.zeros((self.natoms, self._infodat.maxshs))
