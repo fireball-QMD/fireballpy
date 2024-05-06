@@ -4,8 +4,7 @@ import os
 
 retype = re.compile(
     r'(integer|real\*8|complex\*16|character\*?[\d]*\(len=[\d]+\)|logical)')
-refixeddim = re.compile(r'dimension(\((?:\d+(?::\d+)?[,\)])+)')
-reallocdim = re.compile(r'dimension(\([:,\)]+\))')
+refixeddim = re.compile(r'dimension(\([\w\d\s,-:+\*]+\))')
 recall = re.compile(r'call\s+([\w\d_]+)')
 realloc = re.compile(
     r'allocate\s*\(\s*([\w\d_]+)\s*(\([\w\d\s,-:+\*]+\))\s*\)')
@@ -23,9 +22,13 @@ def get_lines(fpath):
 
 def get_vars_from_module(mod):
     variables = {}
+    inblock = False
     mod_iter = enumerate(get_lines(mod))
     for i, line in mod_iter:
         iold = i
+        comment = '' if '!' not in line else line.split('!')[1].strip()
+        inblock = True if comment == 'f2py start inblock' else inblock
+        inblock = False if comment == 'f2py end inblock' else inblock
         uline = line.split('!')[0].strip().lower()
         if not uline or 'module' in uline:
             continue
@@ -63,7 +66,7 @@ def get_vars_from_module(mod):
                 dims = True
                 if 'allocatable' in decls:
                     alloc = True
-                    dims_match = reallocdim.search(decls).group(1)
+                    dims_match = '(' + (decls.count(':')*':,')[:-1] + ')'
                 else:
                     alloc = False
                     dims_match = refixeddim.search(decls).group(1)
@@ -71,12 +74,14 @@ def get_vars_from_module(mod):
                 dims = False
                 alloc = False
 
-            variables[var.split('=')[0].strip()] = {
-                'VALUE': var,
+            varname = var.split('=')[0].strip()
+            variables[varname] = {
+                'VALUE': var if not inblock else varname,
                 'TYPE': type_match,
                 'DIMS': dims_match if dims else dims,
                 'ALLOC': alloc,
-                'PARAM': 'parameter' in decls
+                'PARAM': 'parameter' in decls,
+                'INVAR': inblock
             }
     return variables
 
@@ -106,14 +111,18 @@ def _get_self_depends(uline, depends):
     use_match = reuse.search(uline)
     if subr_match is not None:
         vars = subr_match.group(2).replace(' ', '').split(',')
-        depends['SELF'] = vars
+        varss = list(filter(lambda x: x, vars))
+        depends['SELF'] = varss
         return True
     if use_match is not None:
         mod = use_match.group(1)
         vars = use_match.group(2).replace(' ', '').split(',')
+        varss = list(filter(lambda x: x, vars))
+        if not varss:
+            return True
         depends['MODS'].append(mod)
-        depends[mod] = vars
-        depends['TOTAL'][mod] = vars
+        depends[mod] = varss
+        depends['TOTAL'][mod] = varss
         return True
     return False
 
@@ -215,7 +224,7 @@ def _print_var(var, intent=None):
     return f"{pvar} :: {var['VALUE']}" + os.linesep
 
 
-def _print_vars(vars, parms, mod_vars, intent, invars):
+def _print_vars(vars, parms, mod_vars, intent):
     cline = ''
     for mod in mod_vars:
         for parm in parms:
@@ -225,8 +234,9 @@ def _print_vars(vars, parms, mod_vars, intent, invars):
         for var in vars:
             if var not in mod_vars[mod]:
                 continue
-            cline += _print_var(mod_vars[mod][var],
-                                'in' if var in invars else intent)
+            cline += _print_var(
+                mod_vars[mod][var],
+                'in' if mod_vars[mod][var]['INVAR'] else intent)
     return cline
 
 
@@ -253,7 +263,8 @@ def _mod_code_mods(subname, depends, mod_vars,
                         'TYPE': 'integer',
                         'DIMS': False,
                         'ALLOC': False,
-                        'PARAM': False
+                        'PARAM': False,
+                        'INVAR': False
                     }
             elif not mod_vars[mod][var]['PARAM']:
                 scalars.append(var)
@@ -303,7 +314,7 @@ def _mod_code(subname, depends, mod_vars):
     return _long_line_split(cline, 128) + os.linesep, varss, parms
 
 
-def _join_code(code, subname, depends, mod_vars, intent, invars):
+def _join_code(code, subname, depends, mod_vars, intent):
     code_lines = code.splitlines()
     for i, line in enumerate(code_lines):
         intent_match = reintent.search(line)
@@ -330,7 +341,7 @@ def _join_code(code, subname, depends, mod_vars, intent, invars):
     code = mod_code + \
         os.linesep.join(code_lines[:intent_end]) + \
         os.linesep + '  ' + \
-        _print_vars(vars, parms, mod_vars, intent, invars) \
+        _print_vars(vars, parms, mod_vars, intent) \
         .replace(os.linesep, os.linesep + '  ')[:-2] + \
         os.linesep.join(code_lines[intent_end:sub_end]) + \
         os.linesep + \
@@ -338,11 +349,9 @@ def _join_code(code, subname, depends, mod_vars, intent, invars):
     return code, vars
 
 
-def edit_file(fpath, mod_vars, depends=None, invars=None):
+def edit_file(fpath, mod_vars, depends=None):
     subname = os.path.splitext(os.path.basename(fpath))[0]
     intent = 'out' if depends is None else 'inout'
-    invars = [] if invars is None else invars
-    invars = invars if depends is None else []
     depends = {} if depends is None else depends
 
     depends[subname] = {'SELF': [], 'MODS': [], 'TOTAL': {}}
@@ -365,7 +374,7 @@ def edit_file(fpath, mod_vars, depends=None, invars=None):
             if callname in depends:
                 continue
             callpath = _assert_call_file(uline, callname, fpath, iold)
-            vars = edit_file(callpath, mod_vars, depends, invars=invars)
+            vars = edit_file(callpath, mod_vars, depends)
             _update_depends(depends, subname, callname)
             cline = f"call {callname}({', '.join(vars)})"
             code += _long_line_split(cline, 128, indent) + os.linesep
@@ -373,8 +382,7 @@ def edit_file(fpath, mod_vars, depends=None, invars=None):
         code += _long_line_split(uline, 128, indent) + os.linesep
 
     _order_depends(depends[subname], mod_vars)
-    code, vars = _join_code(
-        code, subname, depends, cmod_vars, intent, invars)
+    code, vars = _join_code(code, subname, depends, cmod_vars, intent)
     wrtpath = os.path.join(os.path.dirname(fpath), f"f2py_{subname}.f90")
     with open(wrtpath, 'w') as fp:
         fp.write(code)
@@ -382,21 +390,18 @@ def edit_file(fpath, mod_vars, depends=None, invars=None):
     return vars
 
 
-def main(modules, entries, invars):
+def main(modules, entries):
     mod_vars = {}
     for mod in modules:
         modname = os.path.splitext(os.path.basename(mod))[0].lower()
         mod_vars[modname] = get_vars_from_module(mod)
 
     for entry in entries:
-        edit_file(entry, mod_vars, invars=invars[entry])
+        edit_file(entry, mod_vars)
 
 
 if __name__ == '__main__':
     MODULES = ["parallel/src/m_fdata.f90"]
     ENTRIES = ["parallel/src/LOADFDATA/load_fdata.f90"]
-    INVARS = {
-        ENTRIES[0]: ['nspecies', 'nsh_max', 'nshpp_max',
-                     'fdatalocation', 'infofname']}
 
-    main(MODULES, ENTRIES, INVARS)
+    main(MODULES, ENTRIES)
