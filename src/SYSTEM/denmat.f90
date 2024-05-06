@@ -52,7 +52,7 @@ subroutine denmat ()
       do ikpoint = 1, nkpoints
         dot = special_k(1,ikpoint)*vec(1) + special_k(2,ikpoint)*vec(2) + special_k(3,ikpoint)*vec(3)
         phasex = dcmplx(cos(dot),sin(dot))*weight_k(ikpoint)*spin
-        if (icluster .ne. 1) then
+        if (icluster .eq. 0 .and. igamma .eq. 0) then
           do iband = 1, norbitals_new
             if (ioccupy_k(iband,ikpoint) .ne. 0) then
               phase = phasex*foccupy(iband,ikpoint)
@@ -101,7 +101,7 @@ subroutine denmat ()
       do ikpoint = 1, nkpoints
         dot = special_k(1,ikpoint)*vec(1) + special_k(2,ikpoint)*vec(2)  + special_k(3,ikpoint)*vec(3)
         phasex = dcmplx(cos(dot),sin(dot))*weight_k(ikpoint)*spin
-        if (icluster .ne. 1) then
+        if (icluster .eq. 0 .and. igamma .eq. 0) then
           do iband = 1, norbitals_new
             if (ioccupy_k(iband,ikpoint) .ne. 0) then
               phase = phasex*foccupy(iband,ikpoint)

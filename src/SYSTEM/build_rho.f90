@@ -13,7 +13,7 @@ subroutine build_rho ()
   if (iqout .ne. 2 .and. icluster .ne. 1) deallocate (blowim)
   if (iqout .ne. 2) deallocate (blowre)
   !deallocate (eigen_k)
-  if (icluster .ne. 1) deallocate (bbnkim)
+  if (icluster .eq. 0 .and. igamma .eq. 0) deallocate (bbnkim)
   deallocate (bbnkre)
 end subroutine build_rho
 

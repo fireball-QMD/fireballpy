@@ -26,7 +26,7 @@ subroutine diag_k ( )
     call kspace_double_generalized(1, k_temp )
   end if
 
-  if (igamma .eq.3) then
+  if (igamma .eq. 3) then
     k_temp(:) = special_k(:,1)
     call kspace_double(1, k_temp )
   end if

@@ -9,7 +9,7 @@ subroutine scf_loop ()
     call assemble_mcweda ()
     call diag_k ()
     call build_rho ()
-    !write(*,'(3x,A,F15.6,A,I4,A,F12.10)') 'EBS = ',ebs,' ; Kscf =',Kscf,' ; sigma =',sigma
+    write(*,'(3x,A,F15.6,A,I4,A,F12.10)') 'EBS = ',ebs,' ; Kscf =',Kscf,' ; sigma =',sigma
     Kscf = Kscf + 1
   end do
 end subroutine scf_loop

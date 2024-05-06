@@ -227,22 +227,6 @@ subroutine set_kpoints(naux,kpts)
   end do
 end subroutine set_kpoints
 
-subroutine load_kpoints_gamma()
-  use M_system
-  implicit none
-  nkpoints = 1
-  allocate (special_k(3, nkpoints))
-  allocate (special_k_orig(3, nkpoints))
-  allocate (scale_k(3, nkpoints))
-  allocate (weight_k(nkpoints))
-  allocate (weight_k_orig(nkpoints))
-  special_k_orig(:,1) = 0
-  weight_k_orig(1) = 1
-  weight_k(1) = 1
-  special_k(:,1) = special_k_orig(:,1)
-  weight_k(1) = weight_k_orig(1)
-end subroutine load_kpoints_gamma
-
 subroutine loadkpts_from_file(kptsfile)
   use M_system
   implicit none

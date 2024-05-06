@@ -16,7 +16,6 @@ from ._fireball import (call_scf_loop,  # type: ignore
                         call_allocate_system,
                         loadfdata_from_path,
                         load_cell_100,
-                        load_kpoints_gamma,
                         set_coords,
                         set_coords_xyz,
                         set_iqout,
@@ -156,6 +155,7 @@ class Fireball(Calculator):
             self._fdata_path = download_needed(self._infodat)
         else:
             self._infodat = InfoDat(os.path.join(self._fdata_path, "info.dat"))
+
         #Base = list(self._infodat.shs.keys())        
      
         set_iqout(self._icharge[self.charges])
@@ -174,11 +174,8 @@ class Fireball(Calculator):
           else:
             set_cell(self.atoms.cell)
         
-          if get_igamma() == 1:
-            load_kpoints_gamma()
-          else:
-            self.kpts_monkhorst_pack_fb()
-        
+          self.kpts_monkhorst_pack_fb()
+
           call_allocate_system()
 
         else: 
