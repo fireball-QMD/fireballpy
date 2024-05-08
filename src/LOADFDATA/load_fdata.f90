@@ -63,9 +63,9 @@ subroutine load_fdata()
     read (12,*) (lsshPP(issh,ispec), issh = 1, nsshPP(ispec))
     read (12,*) rc_PP(ispec)
     read (12,*) (Qneutral(issh,ispec), issh = 1, nssh(ispec))
-    read (12,*) (rcutoff(issh,ispec), issh = 1, nssh(ispec))
+    read (12,*) (rcutoff(ispec,issh), issh = 1, nssh(ispec))
     do issh=1,nssh(ispec)
-      rcutoff(issh,ispec) = rcutoff(issh,ispec)*abohr
+      rcutoff(ispec,issh) = rcutoff(ispec,issh)*abohr
     end do
     read (12,'(9(2x,a25))') (wavefxn(issh,ispec), issh = 1, nssh(ispec))
     read (12,'(9(2x,a25))') (napot(issh,ispec), issh = 0, nssh(ispec))
@@ -96,6 +96,8 @@ subroutine load_fdata()
   allocate (xintegral_2c (ME2c_max, nfofx, interactions2c_max,nspecies, nspecies))
   allocate (z2cmax (interactions2c_max, nspecies, nspecies))
   allocate (numz2c (interactions2c_max, nspecies, nspecies))
+  numz2c = 0
+  z2cmax = 0.0d0
   xintegral_2c = 0.0d0
   do interaction = 1, 23
     if ((interaction .ge. 2) .and. (interaction .le. 4)) then

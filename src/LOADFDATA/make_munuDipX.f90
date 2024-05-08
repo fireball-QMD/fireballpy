@@ -56,6 +56,8 @@ subroutine make_munuDipX ()
 
   allocate (muDipX (ME2cDipX_max, nspecies, nspecies))
   allocate (nuDipX (ME2cDipX_max, nspecies, nspecies))
+  muDipX = 0
+  nuDipX = 0
   do in1 = 1, nspecies
     do in2 = 1, nspecies
       index = 0

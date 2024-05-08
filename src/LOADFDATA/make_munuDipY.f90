@@ -56,6 +56,8 @@ subroutine make_munuDipY ()
   if (ME2cDipY_max .gt. ME2c_max) ME2c_max = ME2cDipY_max
   allocate (muDipY (ME2cDipY_max, nspecies, nspecies))
   allocate (nuDipY (ME2cDipY_max, nspecies, nspecies))
+  muDipY = 0
+  nuDipY = 0
   do in1 = 1, nspecies
     do in2 = 1, nspecies
       index = 0

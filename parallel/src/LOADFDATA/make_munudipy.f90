@@ -12,47 +12,8 @@ subroutine make_munuDipY ()
     end do
   end do
 
-!  ME2cDipY_max = 0
-!  do in1 = 1, nspecies
-!    do in2 = 1, nspecies
-!      index = 0
-!      do issh1 = 1, nssh(in1)
-!        l1 = lssh(issh1,in1)
-!        do issh2 = 1, nssh(in2)
-!          l2 = lssh(issh2,in2)
-!          if ( l1 .eq. 0 .and. l2 .ne. 0 ) then
-!            index = index + 1
-!          end if
-!          if ( l2 .eq. 0 .and. l1 .ne. 0 ) then
-!            index = index + 1
-!          end if
-!          if ( l1 .eq. 1 .and. l2 .ne. 0 ) then
-!            index = index + 1
-!          end if
-!          if ( l2 .eq. 1 .and. l1 .ne. 0 ) then
-!            index = index + 1
-!          end if
-!          if ( l1 .eq. 2 .and. l2 .ne. 0 ) then
-!            index = index + 1
-!            index = index + 1
-!          end if
-!          if ( l2 .eq. 2 .and. l1 .ne. 0 ) then
-!            index = index + 1
-!            index = index + 1
-!          end if
-!          if ( l1 .eq. 2 .and. l2 .ne. 0 ) then
-!            index = index + 1
-!          end if
-!          if ( l2 .eq. 2 .and. l1 .ne. 0 ) then
-!            index = index + 1
-!          end if
-!        end do
-!      end do
-!      if (index .gt. ME2cDipY_max) ME2cDipY_max = index
-!    end do
-!  end do
-!  if (ME2cDipY_max .gt. ME2c_max) ME2c_max = ME2cDipY_max
-
+  muDipY = 0
+  nuDipY = 0
   do in1 = 1, nspecies
     do in2 = 1, nspecies
       index = 0

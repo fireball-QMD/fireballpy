@@ -20,6 +20,9 @@ subroutine make_munuS ()
   allocate (muS (MES_max, nspecies, nspecies))
   allocate (mvalueS (MES_max, nspecies, nspecies))
   allocate (nuS (MES_max, nspecies, nspecies))
+  muS = 0
+  nuS = 0
+  mvalueS = 0
   do in1 = 1, nspecies
     do in2 = 1, nspecies
       index = 0

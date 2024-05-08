@@ -87,15 +87,18 @@ def get_vars_from_module(mod):
 
 
 def _prep_line(line, iter):
-    uuline = line.split('!')[0].rstrip().lower()
+    oline = line.split('!')[0].rstrip()
+    uuline = oline.lower()
     if not uuline:
-        return uuline, line.split('!')[0]
+        return uuline, oline, line.split('!')[0]
     uline = uuline.lstrip()
+    oline = oline.lstrip()
     indent = (len(uuline) - len(uline))*' '
     while uline[-1] == '&':
-        nline = next(iter)[1].split('!')[0].strip().lower()
-        uline = uline[:-1] + nline[1:]
-    return uline, indent
+        nline = next(iter)[1].split('!')[0].strip()
+        uline = uline[:-1] + nline[1:].lower()
+        oline = oline[:-1] + nline[1:]
+    return uline, oline, indent
 
 
 def _check_subname(uline, subname, fpath):
@@ -253,11 +256,15 @@ def _mod_code_mods(subname, depends, mod_vars,
                 vardims = mod_vars[mod][var]['DIMS'][1:-1]
                 dims_match = resize.findall(vardims)
                 for dims in dims_match:
-                    if dims.isnumeric() or dims in parms:
+                    if dims.isnumeric():
+                        continue
+                    if dims in mod_vars[mod]:
+                        if mod_vars[mod][dims]['PARAM']:
+                            parms.append(dims)
+                        else:
+                            scalars.append(dims)
                         continue
                     scalars.append(dims)
-                    if dims in mod_vars[mod]:
-                        continue
                     mod_vars[mod][dims] = {
                         'VALUE': dims,
                         'TYPE': 'integer',
@@ -281,8 +288,11 @@ def _mod_code_self(subname, depends, mod_vars,
             for dims in dims_match:
                 if dims.isnumeric():
                     continue
-                scalars.append(dims)
                 if dims in mod_vars[mod]:
+                    if mod_vars[mod][dims]['PARAM']:
+                        parms.append(dims)
+                    else:
+                        scalars.append(dims)
                     continue
                 mod_vars[mod][dims] = {
                     'VALUE': dims,
@@ -308,10 +318,11 @@ def _mod_code(subname, depends, mod_vars):
     scalars.sort()
     arrays.sort()
     parms.sort()
-    varss = list(filter(lambda x: x, scalars + arrays + own))
-    vars = ', '.join(varss)
+    varss = list(filter(lambda x: x, scalars + arrays))
+    owns = list(filter(lambda x: x, own))
+    vars = ', '.join(varss + owns)
     cline = f"subroutine {subname}({vars})"
-    return _long_line_split(cline, 128) + os.linesep, varss, parms
+    return _long_line_split(cline, 128) + os.linesep, varss, parms, owns
 
 
 def _join_code(code, subname, depends, mod_vars, intent):
@@ -336,7 +347,7 @@ def _join_code(code, subname, depends, mod_vars, intent):
     except NameError:
         raise ValueError(f"Subroutine {subname} was not closed")
 
-    mod_code, vars, parms = _mod_code(
+    mod_code, vars, parms, owns = _mod_code(
         subname, depends[subname], mod_vars)
     code = mod_code + \
         os.linesep.join(code_lines[:intent_end]) + \
@@ -360,7 +371,7 @@ def edit_file(fpath, mod_vars, depends=None):
     file_iter = enumerate(get_lines(fpath))
     for i, line in file_iter:
         iold = i
-        uline, indent = _prep_line(line, file_iter)
+        uline, oline, indent = _prep_line(line, file_iter)
         if not uline:
             code += line
             continue
@@ -379,7 +390,7 @@ def edit_file(fpath, mod_vars, depends=None):
             cline = f"call {callname}({', '.join(vars)})"
             code += _long_line_split(cline, 128, indent) + os.linesep
             continue
-        code += _long_line_split(uline, 128, indent) + os.linesep
+        code += _long_line_split(oline, 128, indent) + os.linesep
 
     _order_depends(depends[subname], mod_vars)
     code, vars = _join_code(code, subname, depends, cmod_vars, intent)
@@ -402,6 +413,7 @@ def main(modules, entries):
 
 if __name__ == '__main__':
     MODULES = ["parallel/src/m_fdata.f90"]
-    ENTRIES = ["parallel/src/LOADFDATA/load_fdata.f90"]
+    ENTRIES = ["parallel/src/LOADFDATA/load_fdata.f90",
+               "parallel/src/LOADFDATA/calc_me_max.f90"]
 
     main(MODULES, ENTRIES)

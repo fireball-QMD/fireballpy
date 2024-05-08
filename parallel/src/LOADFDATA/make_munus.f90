@@ -3,19 +3,9 @@ subroutine make_munuS ()
   implicit none
   integer imu, index, in1, in2, issh1, issh2, l1, l2, n1, n2
 
-!  MES_max = 0
-!  do in1 = 1, nspecies
-!    do in2 = 1, nspecies
-!      index = 0
-!      do issh1 = 1 , nssh(in1)
-!        do issh2 = 1, nssh(in2)
-!          index = index + 1
-!        end do
-!      end do
-!      if (index .gt. MES_max) MES_max = index
-!    end do
-!  end do
-
+  muS = 0
+  nuS = 0
+  mvalueS = 0
   do in1 = 1, nspecies
     do in2 = 1, nspecies
       index = 0

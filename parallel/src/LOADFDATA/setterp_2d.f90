@@ -15,6 +15,8 @@ subroutine setterp_2d ()
           hx_bcna(isorp,index) = (x3cmax_bcna(isorp,index) - xmin)/real(numx3c_bcna(isorp,index) - 1)
           hy_bcna(isorp,index) = (y3cmax_bcna(isorp,index) - ymin)/real(numy3c_bcna(isorp,index) - 1)
         end do
+        hx_den3(0,index) = 0.0d0
+        hy_den3(0,index) = 0.0d0
         do isorp = 1, nsh_max
           hx_den3(isorp,index) = (x3cmax_den3(isorp,index) - xmin)/real(numx3c_den3(isorp,index) - 1)
           hy_den3(isorp,index) = (y3cmax_den3(isorp,index) - ymin)/real(numy3c_den3(isorp,index) - 1)

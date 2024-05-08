@@ -1,6 +1,6 @@
 subroutine read_1c ()
   use M_fdata, only: nspecies, nzx, fdataLocation, onecfname, exc1c0, nuxc1c, &
-    & dnuxc1c, dexc1c, d2exc1c, d2nuxc1c, nsh_max, nssh
+    & dnuxc1c, dexc1c, nsh_max, nssh
   implicit none
   logical skip_it
   integer iline, Nlines_vdip1c_max, trash, in1, ins, issh, isorp, &
@@ -17,15 +17,13 @@ subroutine read_1c ()
   exc1c0 = 0.0d0
   nuxc1c = 0.0d0
   dexc1c = 0.0d0
-  d2exc1c = 0.0d0
   dnuxc1c = 0.0d0
-  d2nuxc1c = 0.0d0
 
   do in1 = 1, nspecies
-    write (auxz,'(''.'',i2.2)') nzx(in1)
-    root = trim(fdataLocation) // trim(onecfname(1))
-    filename = root // auxz // '.dat'
-    open (unit = 36, file = filename, status = 'old')
+    write (auxz,"(""."",i2.2)") nzx(in1)
+    root = trim(fdataLocation)//trim(onecfname(1))
+    filename = trim(root)//auxz//".dat"
+    open (unit = 36, file = filename, status = "old")
     do iline = 1, 6
       read (36,*)
     end do
@@ -41,10 +39,10 @@ subroutine read_1c ()
   end do
 
   do in1 = 1, nspecies
-    write (auxz,'(''.'',i2.2)') nzx(in1)
-    root = trim(fdataLocation) // trim(onecfname(2))
-    filename = root // auxz // '.dat'
-    open (unit = 36, file = filename, status = 'old')
+    write (auxz,"(""."",i2.2)") nzx(in1)
+    root = trim(fdataLocation)//trim(onecfname(2))
+    filename = trim(root)//auxz//".dat"
+    open (unit = 36, file = filename, status = "old")
     do iline = 1, 6
       read (36,*)
     end do
@@ -58,10 +56,10 @@ subroutine read_1c ()
   end do
 
   do in1 = 1, nspecies
-    write (auxz,'(''.'',i2.2)') nzx(in1)
-    root = trim(fdataLocation) // trim(onecfname(3))
-    filename = root // auxz // '.dat'
-    open (unit = 36, file = filename, status = 'old')
+    write (auxz,"(""."",i2.2)") nzx(in1)
+    root = trim(fdataLocation)//trim(onecfname(3))
+    filename = trim(root)//auxz//".dat"
+    open (unit = 36, file = filename, status = "old")
     do iline = 1, 6
       read (36,*)
     end do

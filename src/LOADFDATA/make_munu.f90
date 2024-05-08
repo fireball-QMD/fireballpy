@@ -78,6 +78,9 @@ subroutine make_munu ()
   allocate (mu (ME3c_max, nspecies, nspecies))
   allocate (nu (ME3c_max, nspecies, nspecies))
   allocate (mvalue (ME3c_max, nspecies, nspecies))
+  mu = 0
+  nu = 0
+  mvalue = 0
   do in1 = 1, nspecies
     do in2 = 1, nspecies
       index = 0

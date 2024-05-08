@@ -12,24 +12,8 @@ subroutine make_munuPP ()
     end do
   end do
 
-!  ME2cPP_max = 0
-!  do in1 = 1, nspecies
-!    do in2 = 1, nspecies
-!      index = 0
-!      do issh1 = 1, nssh(in1)
-!        l1 = lssh(issh1,in1)
-!        do issh2 = 1, nsshPP(in2)
-!          l2 = lsshPP(issh2,in2)
-!          do imu = -min(l1,l2), min(l1,l2)
-!            index = index + 1
-!          end do
-!        end do
-!      end do
-!      if (index .gt. ME2cPP_max) ME2cPP_max = index
-!    end do
-!  end do
-!  if (ME2cPP_max .gt. ME2c_max) ME2c_max = ME2cPP_max
-
+  muPP = 0
+  nuPP = 0
   do in1 = 1, nspecies
     do in2 = 1, nspecies
       index = 0

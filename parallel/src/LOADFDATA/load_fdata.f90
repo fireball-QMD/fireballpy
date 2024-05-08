@@ -1,41 +1,10 @@
 subroutine load_fdata()
-  use M_fdata, only: fdataLocation, infofname, nsh_max, nspecies, nzx, symbolA, &
-    & etotatom, smass, rc_PP, rcutoff, cl_PP, nssh, lssh, nsshPP, lsshPP, Qneutral, wavefxn, &
-    & napot, errno2c, errno3c, ind2c, icon3c, xintegral_2c,
+  use M_fdata, only: fdataLocation, nsh_max, nspecies, &
+    & errno2c, errno3c, ind2c, icon3c, xintegral_2c
   implicit none
-  integer :: in1, in2, in3, ispec, issh, aux, icount, isorp, &
-    & interaction, ideriv, mintype, maxtype
-  real*8, parameter :: abohr = 0.5291772109
+  integer :: in1, in2, in3, icount, isorp, interaction, mintype, maxtype
 
   !AQUI pensar, Qinmixer(imix) = Qin(issh,iatom) en miser, (Qinmixer(nsh_max*natoms))
-  rcutoff = 0.0d0
-
-  ! Load info.dat
-  open (unit = 12, file = trim(fdataLocation) // trim(infofname), status = 'old')
-  read (12,*)
-  read (12,*)
-  do ispec = 1, nspecies
-    read (12,*)
-    read (12,*)
-    read (12,'(2x, a2)') symbolA(ispec)
-    read (12,*) nzx(ispec)
-    read (12,*) smass(ispec)
-    read (12,*) nssh(ispec)
-    read (12,*) (lssh(issh,ispec), issh = 1, nssh(ispec))
-    read (12,*) nsshPP(ispec)
-    read (12,*) (lsshPP(issh,ispec), issh = 1, nsshPP(ispec))
-    read (12,*) rc_PP(ispec)
-    read (12,*) (Qneutral(issh,ispec), issh = 1, nssh(ispec))
-    read (12,*) (rcutoff(issh,ispec), issh = 1, nssh(ispec))
-    do issh=1,nssh(ispec)
-      rcutoff(issh,ispec) = rcutoff(issh,ispec)*abohr
-    end do
-    read (12,'(9(2x,a25))') (wavefxn(issh,ispec), issh = 1, nssh(ispec))
-    read (12,'(9(2x,a25))') (napot(issh,ispec), issh = 0, nssh(ispec))
-    read (12,*) etotatom(ispec)
-    read (12,*)
-  end do
-  close(12)
 
   ! Fill arrays
   call make_munu ()
@@ -51,6 +20,8 @@ subroutine load_fdata()
   icount = 0
   ind2c = 0
   errno2c = 0
+  numz2c = 0
+  z2cmax = 0.0d0
   xintegral_2c = 0.0d0
   do interaction = 1, 23
     if ((interaction .ge. 2) .and. (interaction .le. 4)) then

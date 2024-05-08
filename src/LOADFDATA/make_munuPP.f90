@@ -34,6 +34,8 @@ subroutine make_munuPP ()
 
   allocate (muPP (ME2cPP_max, nspecies, nspecies))
   allocate (nuPP (ME2cPP_max, nspecies, nspecies))
+  muPP = 0
+  nuPP = 0
   do in1 = 1, nspecies
     do in2 = 1, nspecies
       index = 0

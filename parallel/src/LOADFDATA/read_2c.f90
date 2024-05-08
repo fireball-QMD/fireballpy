@@ -32,7 +32,7 @@ subroutine read_2c (interaction)
   twocfname(21) = "denS_ontopr"
   twocfname(22) = "denS_atom  "
   twocfname(23) = "overlapS   "
-  root = trim(fdataLocation) // trim(twocfname(interaction))
+  root = trim(fdataLocation)//trim(twocfname(interaction))
   isub2c = 0
   if ((interaction .ge. 6) .and. (interaction .le. 8)) isub2c = 4
 
@@ -55,21 +55,21 @@ subroutine read_2c (interaction)
       do isorp = initype, isub2c
         root_isorp = root
         if (isub2c .ge. 1) then  
-          write (extension,'(''_'',i2.2)') isorp
-          root_isorp = trim(root) // trim(extension) !append_string (root,extension)
+          write (extension,"(""_"",i2.2)") isorp
+          root_isorp = trim(root)//trim(extension) !append_string (root,extension)
         end if
         nzx1 = nzx(in1)
         nzx2 = nzx(in2)
-        write (extension,'(''.'',i2.2,''.'',i2.2)') nzx1, nzx2
-        filename = trim(root_isorp) // trim(extension) !append_string (root_isorp, extension)
-        write (extension,'(''.dat'')')
-        filename = trim(filename) // trim(extension) !append_string (filename, extension)
-        open(iounit, file=filename, status='old')
+        write (extension,"(""."",i2.2,""."",i2.2)") nzx1, nzx2
+        filename = trim(root_isorp)//trim(extension) !append_string (root_isorp, extension)
+        write (extension,"("".dat"")")
+        filename = trim(filename)//trim(extension) !append_string (filename, extension)
+        open(iounit, file=filename, status="old")
         call readheader_2c (interaction, iounit, numz, rc1, rc2, zmin, zmax, npseudo, cl_pseudo)
         if (numz .gt. nfofx) then
-          !write (*,*) ' numz = ', numz, ' in read_2c.f90'
-          !write (*,*) ' nfofx = ',nfofx
-          !write (*,*) ' Fix this parameter and recompile! '
+          !write (*,*) " numz = ", numz, " in read_2c.f90"
+          !write (*,*) " nfofx = ",nfofx
+          !write (*,*) " Fix this parameter and recompile! "
           !stop
           errno2c = 1
           return

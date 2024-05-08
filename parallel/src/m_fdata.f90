@@ -13,18 +13,17 @@ module M_fdata
   !f2py start inblock
   integer :: nsh_max, nspecies, ME2c_max, ME2cPP_max, ME2cDipY_max, ME2cDipX_max, ME3c_max, MES_max
   character (len=1000) :: fdataLocation
-  character(len=100) :: infofname
-  !f2py end inblock
-  !===========================================
- 
-  ! info.dat variables
-  integer, dimension (nsh_max) :: nzx, nssh, nsshPP
+  integer, dimension(nspecies) :: nzx
+  integer, dimension (nsh_max) :: nssh, nsshPP
   real*8, dimension (nspecies) :: etotatom, smass, rc_PP
   character (len=2), dimension (nspecies) :: symbolA
   integer, dimension (nsh_max,nspecies) :: lssh, lsshPP
-  real*8, dimension (nspecies,nsh_max) :: rcutoff, cl_PP, Qneutral
+  real*8, dimension (nspecies,nsh_max) :: rcutoff
+  real*8, dimension (nsh_max,nspecies) :: Qneutral
   character (len=25), dimension (nsh_max,nspecies) :: wavefxn
   character (len=25), dimension (0:nsh_max,nspecies) :: napot
+  !f2py end inblock
+  !===========================================
 
   ! Maximum number of two-center matrix elements: (calculated in make_munu.f90)
   ! Examples: s ==> 1, sp^3 ==>  6, ss*p^3p*^3 ==> 24, sp^3d^5 ==> 39
@@ -63,9 +62,10 @@ module M_fdata
 
   ! One center integrals
   character (len=9), dimension (3) :: onecfname
-  real*8, dimension (nspecies,nsh_max,nsh_max) :: exc1c0, nuxc1c, d2exc1c
+  real*8, dimension (nspecies,nsh_max,nsh_max) :: exc1c0, nuxc1c
   real*8, dimension (nspecies,nsh_max,nsh_max,nsh_max) :: dexc1c, dnuxc1c
-  real*8, dimension (nspecies,nsh_max,nsh_max,nsh_max,nsh_max) :: d2nuxc1c
+  !real*8, dimension (nspecies,nsh_max,nsh_max) :: d2exc1c
+  !real*8, dimension (nspecies,nsh_max,nsh_max,nsh_max,nsh_max) :: d2nuxc1c
   !real*8, dimension (:,:), allocatable :: exc1c_0
   !real*8, dimension (:,:,:), allocatable :: xcnu1c, xcnu1cs
   !real*8, dimension (:,:,:,:), allocatable :: exc1c
@@ -77,6 +77,7 @@ module M_fdata
   integer :: interactions2c_max
   integer, dimension (1:23,0:8) :: ind2c
   integer, dimension (27+11*nsh_max,nspecies,nspecies) :: numz2c
+  real*8, dimension (nspecies,nsh_max) :: cl_PP
   real*8, dimension (27+11*nsh_max,nspecies,nspecies) :: z2cmax
   real*8, dimension (ME2c_max,nfofx,27+11*nsh_max,nspecies,nspecies) :: xintegral_2c
   !real*8, dimension (:,:,:,:,:,:), allocatable :: splineint_2c
