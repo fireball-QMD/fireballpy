@@ -11,6 +11,12 @@ José: autores
 
 Fdata: https://pubs.acs.org/doi/10.1021/acs.jctc.9b01265
 
+- ifx en meson 
+- gfortran fireball clasico
+
+
+- tesunitario.  Deallocate ? limpiar variables ?
+
 
 sigma ? ifx? real*8 ....
 tengo que desallocatar en atoms para seguir con unitarios

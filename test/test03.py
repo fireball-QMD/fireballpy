@@ -34,13 +34,13 @@ atoms.set_cell([(3.11127, 0.00000, 0.0000),
                 (0.00000, 6.22254, 0.0000), 
                 (0.00000, 0.00000, 99.0000)])
 
-for C in ['Mulliken']: #['Lowdin','Mulliken','NPA','Mulliken-dipole','Mulliken-dipole-preserving']:
+for C in ['Lowdin','Mulliken','NPA','Mulliken-dipole','Mulliken-dipole-preserving']:
 
-  atoms.calc = Fireball(igamma=0, 
+  atoms.calc = Fireball(igamma=1, 
+                        #kpts_monkhorst_pack_ind=[16,8,1],
                         icluster=0, 
                         charges=C,
-                        idipole = 0,
-                        kpts_monkhorst_pack_ind=[16,8,1]) 
+                        idipole = 0)
 
   ETOT = atoms.get_potential_energy()
   print("ETOT = "+str(ETOT))
