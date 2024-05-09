@@ -20,7 +20,7 @@ subroutine common_neighborsPP ()
   real*8, dimension (3) :: dvec
   real*8, dimension (3) :: diff
   real*8, dimension (3) :: vec1, vec2, vec3, vec
-
+  
   if(icluster .eq. 1) mbeta_max = 0
   do ialp = 1, natoms
     vec2(:) = ratom(:,ialp)

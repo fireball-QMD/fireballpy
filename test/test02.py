@@ -14,7 +14,7 @@ atoms.set_cell([(a/2, a/2, 0), (a/2, 0, a/2), (0, a/2, a/2)])
 
 atoms.write('save/test02_atoms.xyz')
 
-for iga in [1,0]:
+for iga in [0]:
   for C in ['Lowdin','Mulliken','NPA','Mulliken-dipole','Mulliken-dipole-preserving']:
 
     kpts=[1,1,1]

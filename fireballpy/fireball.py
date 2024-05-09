@@ -145,7 +145,6 @@ class Fireball(Calculator):
              aux.append(i)
        kpts=np.array(aux)
        set_kpoints(kpts)
-
     def initialize(self) -> None:
         self.natoms = len(self.atoms)
 

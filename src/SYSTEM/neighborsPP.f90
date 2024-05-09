@@ -82,7 +82,8 @@ subroutine neighborsPP ()
   end do ! do iatom
 
   ! LIST nPPx
-  ! These two lists are not identical if we have more species in the system vwith different Rc and Rc_PP
+  ! These two lists are not identical if we have more species in the system 
+  ! with different Rc and Rc_PP
   do iatom = 1, natoms
    num_neigh = 0
    in1 = imass(iatom)

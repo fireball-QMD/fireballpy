@@ -37,6 +37,7 @@ subroutine load_fdata()
   allocate (smass (nspecies))
   allocate (rc_PP (nspecies))
   allocate (rcutoff (nspecies, nsh_max)) 
+  allocate (rcutoff_temp (nsh_max, nspecies)) 
   allocate (cl_PP (0:nsh_max - 1, nspecies))
   allocate (nssh (nspecies))
   allocate (lssh (nsh_max, nspecies))
@@ -63,9 +64,9 @@ subroutine load_fdata()
     read (12,*) (lsshPP(issh,ispec), issh = 1, nsshPP(ispec))
     read (12,*) rc_PP(ispec)
     read (12,*) (Qneutral(issh,ispec), issh = 1, nssh(ispec))
-    read (12,*) (rcutoff(ispec,issh), issh = 1, nssh(ispec))
+    read (12,*) (rcutoff_temp(issh, ispec), issh = 1, nssh(ispec))
     do issh=1,nssh(ispec)
-      rcutoff(ispec,issh) = rcutoff(ispec,issh)*abohr
+      rcutoff(ispec,issh) = rcutoff_temp(issh,ispec)*abohr
     end do
     read (12,'(9(2x,a25))') (wavefxn(issh,ispec), issh = 1, nssh(ispec))
     read (12,'(9(2x,a25))') (napot(issh,ispec), issh = 0, nssh(ispec))
@@ -136,6 +137,7 @@ subroutine load_fdata()
     if (interaction .eq. 2) cycle
     call read_3c (interaction)
     if (errno3c .ne. 0) return
-  end do
+  end do                                           
   call setterp_2d ()
+  deallocate(rcutoff_temp)
 end subroutine load_fdata

@@ -8,7 +8,7 @@ from ase.io import read
 import unittest
 
 class Test(unittest.TestCase):
-  TOL=1e-2
+  TOL=1e-4
   def test01(self):
     print('test01')
     atoms = read('save/test01_atoms.xyz')

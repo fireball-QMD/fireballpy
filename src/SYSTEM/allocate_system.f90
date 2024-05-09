@@ -216,29 +216,29 @@ subroutine allocate_system ()
     neighPP_max = max(neighPP_max, num_neigh)
   end do
 
-!  do iatom = 1, natoms
-!    num_neigh = 0
-!    in1 = imass(iatom)
-!    rcutoff_i = rc_PP(in1)
-!    ! Loop over all possible neighbors (VNL atoms)
-!    do mbeta = 0, mbeta_max
-!      do jatom = 1, natoms
-!        rcutoff_j = 0.0d0
-!        in2 = imass(jatom)
-!        do imu = 1, nssh(in2)
-!          if (rcutoff(in2,imu) .gt. rcutoff_j) rcutoff_j = rcutoff(in2,imu)
-!        end do
-!        distance2 = (ratom(1,iatom) - (xl(1,mbeta) + ratom(1,jatom)))**2  &
-!        &         + (ratom(2,iatom) - (xl(2,mbeta) + ratom(2,jatom)))**2  &
-!        &         + (ratom(3,iatom) - (xl(3,mbeta) + ratom(3,jatom)))**2
-!        range2 = (rcutoff_i + rcutoff_j - 0.01d0)**2
-!        if (distance2 .le. range2) then
-!          num_neigh = num_neigh + 1
-!        end if
-!      end do
-!    end do
-!    neighPP_max = max(neighPP_max, num_neigh)
-!  end do
+  do iatom = 1, natoms
+    num_neigh = 0
+    in1 = imass(iatom)
+    rcutoff_i = rc_PP(in1)
+    ! Loop over all possible neighbors (VNL atoms)
+    do mbeta = 0, mbeta_max
+      do jatom = 1, natoms
+        rcutoff_j = 0.0d0
+        in2 = imass(jatom)
+        do imu = 1, nssh(in2)
+          if (rcutoff(in2,imu) .gt. rcutoff_j) rcutoff_j = rcutoff(in2,imu)
+        end do
+        distance2 = (ratom(1,iatom) - (xl(1,mbeta) + ratom(1,jatom)))**2  &
+        &         + (ratom(2,iatom) - (xl(2,mbeta) + ratom(2,jatom)))**2  &
+        &         + (ratom(3,iatom) - (xl(3,mbeta) + ratom(3,jatom)))**2
+        range2 = (rcutoff_i + rcutoff_j - 0.01d0)**2
+        if (distance2 .le. range2) then
+          num_neigh = num_neigh + 1
+        end if
+      end do
+    end do
+    neighPP_max = max(neighPP_max, num_neigh)
+  end do
 
   allocate (neigh_b (neigh_max, natoms))
   allocate (neigh_j (neigh_max, natoms))
