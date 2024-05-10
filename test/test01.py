@@ -36,7 +36,8 @@ for idip in [0,1]:
       print(f)
   
     print('')
-  
-    np.savez('save/test01_'+C+'_idipole_'+str(idip)+'.npz', ETOT=np.array(ETOT), charge=charge, force=force )
+
+    # Descomenta para generar el test otra vez
+    #np.savez('save/test01_'+C+'_idipole_'+str(idip)+'.npz', ETOT=np.array(ETOT), charge=charge, force=force )
 
 
