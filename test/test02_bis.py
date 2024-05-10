@@ -16,7 +16,7 @@ atoms.set_cell(cell)
 atoms.write('save/test02_atoms.xyz')
 np.savez('save/test02_cell.npz', cell=cell )
 
-for iga in [0]: #cuando allocatemos y deallo bien ...
+for iga in [1]: #cuando allocatemos y deallo bien ...
   for C in ['Lowdin','Mulliken','NPA','Mulliken-dipole','Mulliken-dipole-preserving']:
 
     kpts=[1,1,1]

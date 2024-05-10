@@ -9,18 +9,24 @@ import unittest
 
 class Test(unittest.TestCase):
   TOL=1e-4
-  def test01(self):
-    print('test01')
-    atoms = read('save/test01_atoms.xyz')
-    for idip in [0,1]:
+  def test(self):
+    test="test02"
+    atoms = read('save/'+test+'_atoms.xyz')
+    cell =  np.load('save/test02_cell.npz')
+    atoms.set_cell(cell['cell'])
+    for iga in [0]:
+      kpts_read=np.load('save/test02_kpts_igamma'+str(iga)+'.npz')
+      kpts=kpts_read['kpts']
+      print(kpts)
       for C in ['Lowdin','Mulliken','NPA','Mulliken-dipole','Mulliken-dipole-preserving']:
-        print(' idipole = ',idip,C)
+        print(' igamma = ',iga,C)
         atoms.calc = Fireball(charges = C,
-                          igamma   = 1,
-                          icluster = 1,
-                          idipole  = idip,
+                          igamma   = iga,
+                          icluster = 0,
+                          idipole  = 0,
+                          kpts_monkhorst_pack_ind=kpts
                           )
-        valor_esperado = np.load('save/test01_'+C+'_idipole_'+str(idip)+'.npz')
+        valor_esperado = np.load('save/'+test+'_'+C+'_igamma_'+str(iga)+'.npz')
         
         ETOT = atoms.get_potential_energy()
         np.testing.assert_allclose(np.array(ETOT), valor_esperado['ETOT'], atol=self.TOL)
