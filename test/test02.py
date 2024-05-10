@@ -48,5 +48,6 @@ for iga in [0]: #cuando allocatemos y deallo bien ...
  #  for f in force:
  #    print(f)
 
-    np.savez('save/test02_'+C+'_igamma_'+str(iga)+'.npz', ETOT=np.array(ETOT), charge=charge, force=force )
+#    descomenta para volver a generar el test
+#    np.savez('save/test02_'+C+'_igamma_'+str(iga)+'.npz', ETOT=np.array(ETOT), charge=charge, force=force )
 
