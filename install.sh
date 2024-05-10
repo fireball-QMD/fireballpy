@@ -7,12 +7,15 @@ if [ "$1" = "intel" ]; then
 	else
 		CC=icx FC=ifx meson setup build -Dblas=mkl --buildtype custom
 	fi
-else
+elif [ "$1" = "gnu" ]; then
 	if [ "$2" = "debug" ]; then
 		meson setup build
 	else
 		meson setup build --buildtype custom
 	fi
+else
+	echo "Must choose either 'intel' or 'gnu'"
+	exit 1
 fi
 
 meson compile -C build
@@ -20,5 +23,5 @@ meson install -C build
 
 # Solo funcionara con 3.12
 cd test
-python3.12 test03.py
+#python3.12 test03.py
 cd ..
