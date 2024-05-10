@@ -1,17 +1,24 @@
-here=$(pwd)
 rm -fr build
-mkdir build
-cd build
-cmake ..
-make
-#if command -v ifort 2>/dev/null; then
-#	f2py3 -m _fireball -c ../src/libf2py.f90 --fcompiler='ifort' -I. libfireballpy.a --link-lapack_opt
-#else
-f2py3 -m _fireball -c ../src/libf2py.f90 -I. libfireballpy.a --link-lapack_opt
-#fi
-mv _fireball*.so ../fireballpy/
-cd $here
+rm fireballpy/_fireball.*.so
 
+if [ "$1" = "intel" ]; then
+	if [ "$2" = "debug" ]; then
+		CC=icx FC=ifx meson setup build -Dblas=mkl
+	else
+		CC=icx FC=ifx meson setup build -Dblas=mkl --buildtype custom
+	fi
+else
+	if [ "$2" = "debug" ]; then
+		meson setup build
+	else
+		meson setup build --buildtype custom
+	fi
+fi
+
+meson compile -C build
+meson install -C build
+
+# Solo funcionara con 3.12
 cd test
-python3 test2.py
+python3.12 test03.py
 cd ..
