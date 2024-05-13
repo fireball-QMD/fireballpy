@@ -24,6 +24,8 @@ elif fc.get_id() in ['intel', 'intel-llvm']
   fflags += ['-r8', '-fno-alias']
   if get_option('buildtype') == 'custom'
     fflags += ['-O3', '-fp-model=fast', '-xHost']
+  else
+    fflags += ['-fp-model=strict']
   endif
 else
   error('No compiler found.')

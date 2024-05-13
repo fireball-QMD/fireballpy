@@ -10,8 +10,12 @@ subroutine build_rho ()
   call mixer ()
   if (sigma .lt. sigmatol) scf_achieved = .true.
   !allocate (blowre_o(norbitals,norbitals,nkpoints))
-  if (iqout .ne. 2 .and. icluster .ne. 1) deallocate (blowim)
-  if (iqout .ne. 2) deallocate (blowre)
+  if ((iqout .eq. 1) .or. (iqout .eq. 3)) then
+    deallocate (blowre)
+    if (igamma .eq. 0) then
+      deallocate (blowim)
+    end if
+  end if
   !deallocate (eigen_k)
   if (icluster .eq. 0 .and. igamma .eq. 0) deallocate (bbnkim)
   deallocate (bbnkre)

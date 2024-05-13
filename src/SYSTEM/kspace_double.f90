@@ -209,8 +209,12 @@ subroutine kspace_double (ikpoint, sks)
   call zheev ('V', 'U', norbitals, yyyy, norbitals, eigen, work, lwork, rwork, info)
   if (info .ne. 0) call diag_error (info, 0)
   eigen_k(1:norbitals,ikpoint) = eigen(:)
-  if (iqout .ne. 2) blowre(:,:,ikpoint) = real(yyyy(:,:))
-  if (iqout .ne. 2 .and. icluster .ne. 1) blowim(:,:,ikpoint) = aimag(yyyy(:,:))
+  if ((iqout .eq. 1) .or. (iqout .eq. 3)) then
+    blowre(:,:,ikpoint) = real(yyyy(:,:))
+    if (igamma .eq. 0) then
+      blowim(:,:,ikpoint) = aimag(yyyy(:,:))
+    end if
+  end if
   if (iqout .ne. 3) then
    call zhemm ( 'L', 'U', norbitals, norbitals, a1, xxxx, norbitals, yyyy, norbitals, a0, zzzz, norbitals )
   else

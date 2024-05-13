@@ -182,7 +182,7 @@ subroutine kspace_gamma ( ikpoint, sks)
   call dsyev ('V', 'U', norbitals, yyyy, norbitals, eigen, work, lwork, info )
   if (info .ne. 0) call diag_error (info, 0)
   eigen_k(1:norbitals,ikpoint) = eigen(:)
-  if (iqout .ne. 2) blowre(:,:,ikpoint) = real(yyyy(:,:))
+  if ((iqout .eq. 1) .or. (iqout .eq. 3)) blowre(:,:,ikpoint) = real(yyyy(:,:))
   call dsymm ( 'L', 'U', norbitals, norbitals, a1, xxxx, norbitals, yyyy, norbitals, a0, zzzz, norbitals )
   if (iqout .ne. 3) then
     call dsymm ( 'L', 'U', norbitals, norbitals, a1, xxxx, norbitals, yyyy, norbitals, a0, zzzz, norbitals )

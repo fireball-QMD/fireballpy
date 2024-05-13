@@ -26,7 +26,7 @@ subroutine LOWDIN_CHARGES()
             do mqn = 1, 2*lssh(issh,in1) + 1
               imu = imu + 1
               mmu = imu + degelec(iatom)
-              if (icluster .ne. 1) then
+              if (igamma .eq. 0) then
                 aux3 = aux2*(blowre(mmu,iorbital,ikpoint)**2  + blowim(mmu,iorbital,ikpoint)**2)
               else
                 aux3 = aux2*blowre(mmu,iorbital,ikpoint)**2
