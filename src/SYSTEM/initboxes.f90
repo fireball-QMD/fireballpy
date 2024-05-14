@@ -110,6 +110,7 @@
      end do
     end do
   mbeta_max = lbeta
+  if (allocated(xl)) deallocate(xl)
   allocate ( xl(3,0:mbeta_max) )
   do mbeta = 0,mbeta_max
     xl(:,mbeta) = xxl(1,mbeta)*a1vec(:) + xxl(2,mbeta)*a2vec(:)  + xxl(3,mbeta)*a3vec(:)

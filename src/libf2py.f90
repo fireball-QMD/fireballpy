@@ -123,6 +123,9 @@ subroutine set_coords(naux, z, xyz)
   real*8, dimension(naux,3), intent(in) :: xyz
   integer :: iatom,ispec
   natoms=naux
+  if (allocated(ratom)) deallocate(ratom)
+  if (allocated(symbol)) deallocate(symbol)
+  if (allocated(imass)) deallocate(imass)
   allocate (ratom (3, natoms))
   allocate (symbol (natoms))
   allocate (imass (natoms))
@@ -210,6 +213,11 @@ subroutine set_kpoints(naux,kpts)
   integer :: ikpoint
   real*8 :: sum_weight
   nkpoints=naux
+  if (allocated(special_k)) deallocate(special_k)
+  if (allocated(special_k_orig)) deallocate(special_k_orig)
+  if (allocated(scale_k)) deallocate(scale_k)
+  if (allocated(weight_k)) deallocate(weight_k)
+  if (allocated(weight_k_orig)) deallocate(weight_k_orig)
   allocate (special_k(3, nkpoints))
   allocate (special_k_orig(3, nkpoints))
   allocate (scale_k(3, nkpoints))
@@ -235,6 +243,11 @@ subroutine loadkpts_from_file(kptsfile)
   real*8 :: sum_weight
   open (unit = 54, file = kptsfile, status = 'old')
   read (54,*) nkpoints
+  if (allocated(special_k)) deallocate(special_k)
+  if (allocated(special_k_orig)) deallocate(special_k_orig)
+  if (allocated(scale_k)) deallocate(scale_k)
+  if (allocated(weight_k)) deallocate(weight_k)
+  if (allocated(weight_k_orig)) deallocate(weight_k_orig)
   allocate (special_k(3, nkpoints))
   allocate (special_k_orig(3, nkpoints))
   allocate (scale_k(3, nkpoints))

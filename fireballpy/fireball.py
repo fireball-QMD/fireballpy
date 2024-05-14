@@ -145,6 +145,7 @@ class Fireball(Calculator):
              aux.append(i)
        kpts=np.array(aux)
        set_kpoints(kpts)
+
     def initialize(self) -> None:
         self.natoms = len(self.atoms)
 
@@ -160,25 +161,22 @@ class Fireball(Calculator):
         set_iqout(self._icharge[self.charges])
 
         if get_fdata_is_load() == 0:
-          #inicio = time.time()
-          loadfdata_from_path(self._fdata_path)
-          #final = time.time()
-          #tiempo_transcurrido = final - inicio
-          #print("loadfdata:", tiempo_transcurrido, "segundos")
+            #inicio = time.time()
+            loadfdata_from_path(self._fdata_path)
+            #final = time.time()
+            #tiempo_transcurrido = final - inicio
+            #print("loadfdata:", tiempo_transcurrido, "segundos")
 
-          set_coords(self.atoms.numbers, self.atoms.positions)
- 
-          if get_icluster() > 1:
-            load_cell_100()
-          else:
-            set_cell(self.atoms.cell)
-        
-          self.kpts_monkhorst_pack_fb()
+        set_coords(self.atoms.numbers, self.atoms.positions)
 
-          call_allocate_system()
+        if get_icluster() > 1:
+          load_cell_100()
+        else:
+          set_cell(self.atoms.cell)
+    
+        self.kpts_monkhorst_pack_fb()
 
-        else: 
-           set_coords_xyz(self.atoms.positions)
+        call_allocate_system()
 
         self.charges = np.zeros((self.natoms, self._infodat.maxshs))
         self.forces = np.empty((self.natoms, 3))

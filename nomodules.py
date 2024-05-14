@@ -5,13 +5,13 @@ import os
 retype = re.compile(
     r'(integer|real\*8|complex\*16|character\*?[\d]*\(len=[\d]+\)|logical)')
 refixeddim = re.compile(r'dimension(\([\w\d\s,-:+\*]+\))')
-recall = re.compile(r'call\s+([\w\d_]+)')
+recall = re.compile(r'call\s+([\w\d]+)')
 realloc = re.compile(
-    r'allocate\s*\(\s*([\w\d_]+)\s*(\([\w\d\s,-:+\*]+\))\s*\)')
-resubr = re.compile(r'subroutine\s+([\w\d_]+)\s*\(([\w\d,\s_]*)\s*\)')
-reuse = re.compile(r'use\s+(m_\w+)\s*,\s*only\s*:([\w\d,\s_]*)')
+    r'allocate\s*\(\s*([\w\d]+)\s*(\([\w\d\s,-:+\*]+\))\s*\)')
+resubr = re.compile(r'subroutine\s+([\w\d]+)\s*\(([\w\d,\s]*)\s*\)')
+reuse = re.compile(r'use\s+(m_\w+)\s*,\s*only\s*:([\w\d,\s]*)')
 reintent = re.compile(r'(implicit)\s+(none)')
-resize = re.compile(r'([\w\d_]+)')
+resize = re.compile(r'([\w\d]+)')
 
 
 def get_lines(fpath):
