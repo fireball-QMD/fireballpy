@@ -41,8 +41,8 @@ for options in ['molecule','molecule_test']:
     print('')
 
 # Descomenta para generar el test otra vez
-np.savez('save/molecule_etot.npz', *ETOT) 
-np.savez('save/molecule_charges.npz', *charge) 
-np.savez('save/molecule_forces.npz', *force) 
+#np.savez('save/molecule_etot.npz', *ETOT) 
+#np.savez('save/molecule_charges.npz', *charge) 
+#np.savez('save/molecule_forces.npz', *force) 
 
 
