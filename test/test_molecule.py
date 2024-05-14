@@ -12,32 +12,37 @@ atoms = Atoms(symbols=['C', 'H', 'H', 'H', 'H'],
                        ( 0.6533, -0.6533, 0.6533),
                        ( 0.6533, 0.6533, -0.6533)])
 
-atoms.write('save/test01_atoms.xyz')
+atoms.write('save/molecule_atoms.xyz')
 
-for idip in [0,1]:
+ETOT=[]
+charge=[]
+force=[]
+
+for options in ['molecule','molecule_test']:
   for C in ['Lowdin','Mulliken','NPA','Mulliken-dipole','Mulliken-dipole-preserving']:
     print('-------',C,'-----------------')
-    atoms.calc = Fireball(charges=C,
-                          igamma   = 1,
-                          icluster = 1,
-                          idipole  = idip,
-                          )
-    ETOT = atoms.get_potential_energy()
-    print("ETOT = "+str(ETOT))
+    atoms.calc = Fireball(charges=C, options='molecule')
+    ie=atoms.get_potential_energy()
+    ETOT.append(np.array(ie))
+    print("ETOT = "+str(ie))
   
-    charge = atoms.get_charges()
+    icharge = atoms.get_charges()
+    charge.append(icharge)
     print("------atoms.charges-----------")
-    for c in charge:
+    for c in icharge:
       print(c)
   
-    force = atoms.get_forces()
+    iforce = atoms.get_forces()
+    force.append(iforce)
     print("------atoms.forces------------")
-    for f in force:
+    for f in iforce:
       print(f)
   
     print('')
 
-    # Descomenta para generar el test otra vez
-    #np.savez('save/test01_'+C+'_idipole_'+str(idip)+'.npz', ETOT=np.array(ETOT), charge=charge, force=force )
+# Descomenta para generar el test otra vez
+np.savez('save/molecule_etot.npz', *ETOT) 
+np.savez('save/molecule_charges.npz', *charge) 
+np.savez('save/molecule_forces.npz', *force) 
 
 

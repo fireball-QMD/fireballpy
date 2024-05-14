@@ -68,16 +68,34 @@ class Fireball(Calculator):
                 'Mulliken-dipole': 4, 
                 'Mulliken-dipole-preserving': 7}
 
-    def __init__(self, fdata_path: Optional[str] = None, igamma: int = 1,
-                 icluster: int = 1, charges: str = "Mulliken", idipole: int = 0, 
+    def __init__(self, fdata_path: Optional[str] = None,
+                 options: str = 'molecule', 
+                 #idipole: int = 0, 
+                 #icluster: int = 1, 
+                 #igamma: int = 1,
+                 charges: str = "Mulliken", 
                  kpts_monkhorst_pack_ind: List[int] = [1,1,1],**kwargs):
 
         super().__init__(**kwargs)
         self._fdata_path = fdata_path
         self.charges = charges
-        set_igamma(igamma)
-        set_icluster(icluster)
-        set_idipole(idipole)
+        if options == 'molecule':
+          set_idipole(1)
+          set_icluster(1)
+          set_igamma(1)
+        if options == 'molecule_test':
+          set_idipole(0)
+          set_icluster(1)
+          set_igamma(1)
+        if options == 'periodic':
+          set_idipole(0)
+          set_icluster(0)
+          set_igamma(0)
+        if options == 'periodic_gamma':
+          set_idipole(0)
+          set_icluster(0)
+          set_igamma(1)
+
         self.kpts_monkhorst_pack_ind=kpts_monkhorst_pack_ind
     # Requisite energies
     def _check_compute(self) -> None:

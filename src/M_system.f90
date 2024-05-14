@@ -9,11 +9,11 @@ module M_system
   integer :: iqmmm      = 0
   integer :: ifixcharge = 0
   !========================
-  !idipole icluster igamma 
-  !1       1        1        !non periodic + only gamma kpts
-  !0       1        1       
-  !0       0        0        !periodic + kpoints
-  !0       0        1        !periodic + only gamma kpts
+  !               idipole icluster igamma 
+  !molecule       1       1        1        !R non periodic + only gamma kpts
+  !molecule_test  0       1        1        !R solo para comparar, hasta que idipole este en sistemas periodicos
+  !periodic       0       0        0        !I periodic + kpoints
+  !periodic_gamma 0       0        1        !R periodic + only gamma kpts
 
   integer :: ialgmix  = 1 !1:anderson 2:broyden 3:louie 4:pulay
   real*8, parameter :: xc_overtol = 5.0d-5
