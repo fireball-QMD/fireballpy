@@ -23,8 +23,6 @@ atoms.set_cell([
     (3.810511, 2.200000, 0.000000)
 ])
 
-atoms.write('save/periodic_atoms.xyz')
-np.savez('save/periodic_lvs.npz', atoms.get_cell())
 
 
 ETOT=[]
@@ -56,6 +54,8 @@ for opt in ['periodic','periodic_gamma']:
     print('')
 
 # Descomenta para generar el test otra vez
+#atoms.write('save/periodic_atoms.xyz')
+#np.savez('save/periodic_lvs.npz', atoms.get_cell())
 #np.savez('save/periodic_etot.npz', *ETOT) 
 #np.savez('save/periodic_charges.npz', *charge) 
 #np.savez('save/periodic_forces.npz', *force)

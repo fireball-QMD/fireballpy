@@ -12,7 +12,6 @@ atoms = Atoms(symbols=['C', 'H', 'H', 'H', 'H'],
                        ( 0.6533, -0.6533, 0.6533),
                        ( 0.6533, 0.6533, -0.6533)])
 
-atoms.write('save/molecule_atoms.xyz')
 
 ETOT=[]
 charge=[]
@@ -41,6 +40,7 @@ for options in ['molecule','molecule_test']:
     print('')
 
 # Descomenta para generar el test otra vez
+#atoms.write('save/molecule_atoms.xyz')
 #np.savez('save/molecule_etot.npz', *ETOT) 
 #np.savez('save/molecule_charges.npz', *charge) 
 #np.savez('save/molecule_forces.npz', *force) 
