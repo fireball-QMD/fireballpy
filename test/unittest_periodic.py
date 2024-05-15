@@ -9,18 +9,19 @@ import unittest
 
 class Test(unittest.TestCase):
   TOL=1e-6
-  def test_molecule(self):
-    print('molecule')
-    valor_esperado_etot = np.load('save/molecule_etot.npz')
-    valor_esperado_charges = np.load('save/molecule_charges.npz')
-    valor_esperado_forces = np.load('save/molecule_forces.npz')
-    atoms = read('save/molecule_atoms.xyz')
+  def test_periodic(self):
+    print('periodic')
+    valor_esperado_etot = np.load('save/periodic_etot.npz')
+    valor_esperado_charges = np.load('save/periodic_charges.npz')
+    valor_esperado_forces = np.load('save/periodic_forces.npz')
+    atoms = read('save/periodic_atoms.xyz')
+    atoms.set_cell = np.load('save/periodic_lvs.npz')
     iload=0
-    for options in ['molecule','molecule_test']:
+    for opt in ['periodic','periodic_gamma']:
       for C in ['Lowdin','Mulliken','NPA','Mulliken-dipole','Mulliken-dipole-preserving']:
-        print(' options = ',options,', ',C)
-        atoms.calc = Fireball(charges=C, options='molecule')
-        
+        print(' options = ',opt,', ',C)
+        atoms.calc = Fireball(kpts_monkhorst_pack_ind=[4,4,4], options = opt , charges=C )
+
         ETOT = atoms.get_potential_energy()
         np.testing.assert_allclose(np.array(ETOT), valor_esperado_etot[f'arr_{iload}'], atol=self.TOL)
         
@@ -30,6 +31,6 @@ class Test(unittest.TestCase):
         ftot = atoms.get_forces()
         np.testing.assert_allclose(ftot, valor_esperado_forces[f'arr_{iload}'], atol=self.TOL)
         iload=iload+1 
-
+ 
 if __name__ == '__main__':
   unittest.main()

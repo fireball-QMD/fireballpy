@@ -83,20 +83,26 @@ class Fireball(Calculator):
           set_idipole(1)
           set_icluster(1)
           set_igamma(1)
+          kpts_monkhorst_pack_ind=[1,1,1]
+
         if options == 'molecule_test':
           set_idipole(0)
           set_icluster(1)
           set_igamma(1)
+
         if options == 'periodic':
           set_idipole(0)
           set_icluster(0)
           set_igamma(0)
+
         if options == 'periodic_gamma':
           set_idipole(0)
           set_icluster(0)
           set_igamma(1)
+          kpts_monkhorst_pack_ind=[1,1,1]
 
         self.kpts_monkhorst_pack_ind=kpts_monkhorst_pack_ind
+
     # Requisite energies
     def _check_compute(self) -> None:
         if 'energy' not in self.results:
@@ -152,7 +158,7 @@ class Fireball(Calculator):
 
     def kpts_monkhorst_pack_fb(self):
        kptsunitary=monkhorst_pack(self.kpts_monkhorst_pack_ind)
-       kpts_all=np.dot(kptsunitary,self.atoms.cell.reciprocal())*math.pi*2
+       kpts_all=np.dot(kptsunitary,self.atoms.cell.reciprocal().T)*math.pi*2
        aux=[]
        for i in kpts_all:
           poner=True
@@ -163,6 +169,7 @@ class Fireball(Calculator):
              aux.append(i)
        kpts=np.array(aux)
        set_kpoints(kpts)
+       #print(kpts)
 
     def initialize(self) -> None:
         self.natoms = len(self.atoms)
