@@ -7,14 +7,16 @@ from ase import Atoms
 from ase.io import read
 import unittest
 
+FILEPATH = os.path.dirname(os.path.realpath(__file__))
+
 class Test(unittest.TestCase):
   TOL=1e-6
   def test_molecule(self):
     print('molecule')
-    valor_esperado_etot = np.load('save/molecule_etot.npz')
-    valor_esperado_charges = np.load('save/molecule_charges.npz')
-    valor_esperado_forces = np.load('save/molecule_forces.npz')
-    atoms = read('save/molecule_atoms.xyz')
+    valor_esperado_etot = np.load(FILEPATH+'/save/molecule_etot.npz')
+    valor_esperado_charges = np.load(FILEPATH+'/save/molecule_charges.npz')
+    valor_esperado_forces = np.load(FILEPATH+'/save/molecule_forces.npz')
+    atoms = read(FILEPATH+'/save/molecule_atoms.xyz')
     iload=0
     for options in ['molecule','molecule_test']:
       for C in ['Lowdin','Mulliken','NPA','Mulliken-dipole','Mulliken-dipole-preserving']:

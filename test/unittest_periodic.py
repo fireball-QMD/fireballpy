@@ -7,15 +7,17 @@ from ase import Atoms
 from ase.io import read
 import unittest
 
+FILEPATH = os.path.dirname(os.path.realpath(__file__))
+
 class Test(unittest.TestCase):
   TOL=1e-6
   def test_periodic(self):
     print('periodic')
-    valor_esperado_etot = np.load('save/periodic_etot.npz')
-    valor_esperado_charges = np.load('save/periodic_charges.npz')
-    valor_esperado_forces = np.load('save/periodic_forces.npz')
-    atoms = read('save/periodic_atoms.xyz')
-    atoms.set_cell = np.load('save/periodic_lvs.npz')
+    valor_esperado_etot = np.load(FILEPATH+'/save/periodic_etot.npz')
+    valor_esperado_charges = np.load(FILEPATH+'/save/periodic_charges.npz')
+    valor_esperado_forces = np.load(FILEPATH+'/save/periodic_forces.npz')
+    atoms = read(FILEPATH+'/save/periodic_atoms.xyz')
+    atoms.set_cell = np.load(FILEPATH+'/save/periodic_lvs.npz')
     iload=0
     for opt in ['periodic','periodic_gamma']:
       for C in ['Lowdin','Mulliken','NPA','Mulliken-dipole','Mulliken-dipole-preserving']:
