@@ -21,4 +21,8 @@ fi
 meson compile -C build
 meson install -C build
 
-meson test -C build molecule periodic --verbose
+# Solo funcionara con 3.12
+cd test
+python3.12 generate_test_molecule.py
+cd ..
+>>>>>>> 1c22735505f99acd05e7c70271ba1842aafa57f5
