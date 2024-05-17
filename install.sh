@@ -25,4 +25,3 @@ meson install -C build
 cd test
 python3.12 generate_test_molecule.py
 cd ..
->>>>>>> 1c22735505f99acd05e7c70271ba1842aafa57f5

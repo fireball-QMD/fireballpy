@@ -83,3 +83,14 @@ py.extension_module('_fireball',
   install : true,
   install_dir : meson.current_source_dir() / 'fireballpy' # Temporal
 )
+
+
+# Test
+envdata = environment()
+envdata.append('PATH', meson.current_source_dir())
+test('molecule', py,
+     args : [meson.current_source_dir() / 'test' / 'unittest_molecule.py'],
+     env : envdata)
+test('periodic', py,
+     args : [meson.current_source_dir() / 'test' / 'unittest_periodic.py'],
+     env : envdata)
