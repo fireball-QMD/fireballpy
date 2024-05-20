@@ -1,12 +1,13 @@
+import numpy as np
+from ase import Atoms
+from ase.dft.kpoints import monkhorst_pack
+from ase.io import write
 import sys
-import os
 sys.path.append("..")
 from fireballpy import Fireball
-from ase import Atoms
-import numpy as np   
 
 atoms = Atoms(symbols=['Si', 'Si', 'C', 'C', 'Si', 'Si', 'C', 'C'],
-    positions = [
+              positions=[
     (2.351869, 2.637258, -1.108009),
     (3.459064, 0.714479, 1.110781),
     (1.939962, 1.123183, -2.202729),
@@ -24,40 +25,40 @@ atoms.set_cell([
 ])
 
 
+ETOT = []
+charge = []
+force = []
 
-ETOT=[]
-charge=[]
-force=[]
+kpoints = monkhorst_pack([4, 4, 4])
+for kpts in [None, kpoints]:
+    for C in ['Lowdin', 'Mulliken', 'NPA', 'Mulliken-dipole',
+              'Mulliken-dipole-preserving']:
+        print('-------', C, '-----------------')
+        # el kpts_monkhorst_pack_ind lo ignora cuando es periodic_gamm
+        atoms.calc = Fireball(charges=C, kpts=kpts)
+        atoms.get_potential_energy()
+        atoms.get_charges()
+        atoms.get_forces()
+        ie = atoms.calc.results['energy']
+        ETOT.append(np.array(ie))
+        print("ETOT = "+str(ie))
 
+        icharge = atoms.calc.results['shell_charges']
+        charge.append(icharge)
+        print("------atoms.charges-----------")
+        for c in icharge:
+            print(c)
 
-for opt in ['periodic','periodic_gamma']:
-  for C in ['Lowdin','Mulliken','NPA','Mulliken-dipole','Mulliken-dipole-preserving']:
-    print('-------',C,'-----------------')
-    #el kpts_monkhorst_pack_ind lo ignora cuando es periodic_gamm
-    atoms.calc = Fireball(kpts_monkhorst_pack_ind=[4,4,4], options = opt , charges=C )
-    ie=atoms.get_potential_energy()
-    ETOT.append(np.array(ie))
-    print("ETOT = "+str(ie))
+        iforce = atoms.calc.results['forces']
+        force.append(iforce)
+        print("------atoms.forces------------")
+        for f in iforce:
+            print(f)
 
-    icharge = atoms.get_charges()
-    charge.append(icharge)
-    print("------atoms.charges-----------")
-    for c in icharge:
-      print(c)
-
-    iforce = atoms.get_forces()
-    force.append(iforce)
-    print("------atoms.forces------------")
-    for f in iforce:
-      print(f)
-
-    print('')
+        print('')
 
 # Descomenta para generar el test otra vez
-#atoms.write('save/periodic_atoms.xyz')
-#np.savez('save/periodic_lvs.npz', atoms.get_cell())
-#np.savez('save/periodic_etot.npz', *ETOT) 
-#np.savez('save/periodic_charges.npz', *charge) 
-#np.savez('save/periodic_forces.npz', *force)
-
-
+write('save/periodic_atoms.xyz', atoms)
+np.savez('save/periodic_etot.npz', *ETOT)
+np.savez('save/periodic_charges.npz', *charge)
+np.savez('save/periodic_forces.npz', *force)

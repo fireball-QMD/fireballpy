@@ -1,38 +1,159 @@
+import unittest
+from ase.dft.kpoints import monkhorst_pack
+from ase.io import read
 import sys
 import os
 import numpy as np
 sys.path.append("..")
 from fireballpy import Fireball
-from ase import Atoms
-from ase.io import read
-import unittest
 
-FILEPATH = os.path.dirname(os.path.realpath(__file__))
 
 class Test(unittest.TestCase):
-  TOL=1e-6
-  def test_periodic(self):
-    print('periodic')
-    valor_esperado_etot = np.load(FILEPATH+'/save/periodic_etot.npz')
-    valor_esperado_charges = np.load(FILEPATH+'/save/periodic_charges.npz')
-    valor_esperado_forces = np.load(FILEPATH+'/save/periodic_forces.npz')
-    atoms = read(FILEPATH+'/save/periodic_atoms.xyz')
-    atoms.set_cell = np.load(FILEPATH+'/save/periodic_lvs.npz')
-    iload=0
-    for opt in ['periodic','periodic_gamma']:
-      for C in ['Lowdin','Mulliken','NPA','Mulliken-dipole','Mulliken-dipole-preserving']:
-        print(' options = ',opt,', ',C)
-        atoms.calc = Fireball(kpts_monkhorst_pack_ind=[4,4,4], options = opt , charges=C )
+    TOL = 1e-6
 
-        ETOT = atoms.get_potential_energy()
-        np.testing.assert_allclose(np.array(ETOT), valor_esperado_etot[f'arr_{iload}'], atol=self.TOL)
-        
-        charge = atoms.get_charges()
-        np.testing.assert_allclose(charge, valor_esperado_charges[f'arr_{iload}'], atol=self.TOL)
+    def setUp(self):
+        FILEPATH = os.path.dirname(os.path.realpath(__file__))
+        self.atoms = read(os.path.join(FILEPATH,
+                                       "save", "periodic_atoms.xyz"))
+        self.energy = np.load(os.path.join(FILEPATH,
+                                           "save", "periodic_etot.npz"))
+        self.charges = np.load(os.path.join(FILEPATH,
+                                            "save", "periodic_charges.npz"))
+        self.forces = np.load(os.path.join(FILEPATH,
+                                           "save", "periodic_forces.npz"))
+        self.gamma = monkhorst_pack([1, 1, 1])
+        self.monkhorst = monkhorst_pack([4, 4, 4])
 
-        ftot = atoms.get_forces()
-        np.testing.assert_allclose(ftot, valor_esperado_forces[f'arr_{iload}'], atol=self.TOL)
-        iload=iload+1 
- 
+    def test_lowdin_gamma(self):
+        self.atoms.calc = Fireball(charges='lowdin',
+                                   kpts=self.gamma)
+        self.atoms.get_potential_energy()
+        self.atoms.get_charges()
+        self.atoms.get_forces()
+        np.testing.assert_allclose(np.array(self.atoms.calc.results['energy']),
+                                   self.energy['arr_0'], atol=self.TOL)
+        np.testing.assert_allclose(self.atoms.calc.results['shell_charges'],
+                                   self.charges['arr_0'], atol=self.TOL)
+        np.testing.assert_allclose(self.atoms.calc.results['forces'],
+                                   self.forces['arr_0'], atol=self.TOL)
+
+    def test_mulliken_gamma(self):
+        self.atoms.calc = Fireball(charges='mulliken',
+                                   kpts=self.gamma)
+        self.atoms.get_potential_energy()
+        self.atoms.get_charges()
+        self.atoms.get_forces()
+        np.testing.assert_allclose(np.array(self.atoms.calc.results['energy']),
+                                   self.energy['arr_1'], atol=self.TOL)
+        np.testing.assert_allclose(self.atoms.calc.results['shell_charges'],
+                                   self.charges['arr_1'], atol=self.TOL)
+        np.testing.assert_allclose(self.atoms.calc.results['forces'],
+                                   self.forces['arr_1'], atol=self.TOL)
+
+    def test_npa_gamma(self):
+        self.atoms.calc = Fireball(charges='npa',
+                                   kpts=self.gamma)
+        self.atoms.get_potential_energy()
+        self.atoms.get_charges()
+        self.atoms.get_forces()
+        np.testing.assert_allclose(np.array(self.atoms.calc.results['energy']),
+                                   self.energy['arr_2'], atol=self.TOL)
+        np.testing.assert_allclose(self.atoms.calc.results['shell_charges'],
+                                   self.charges['arr_2'], atol=self.TOL)
+        np.testing.assert_allclose(self.atoms.calc.results['forces'],
+                                   self.forces['arr_2'], atol=self.TOL)
+
+    def test_mulliken_dipole_gamma(self):
+        self.atoms.calc = Fireball(charges='mulliken-dipole',
+                                   kpts=self.gamma)
+        self.atoms.get_potential_energy()
+        self.atoms.get_charges()
+        self.atoms.get_forces()
+        np.testing.assert_allclose(np.array(self.atoms.calc.results['energy']),
+                                   self.energy['arr_3'], atol=self.TOL)
+        np.testing.assert_allclose(self.atoms.calc.results['shell_charges'],
+                                   self.charges['arr_3'], atol=self.TOL)
+        np.testing.assert_allclose(self.atoms.calc.results['forces'],
+                                   self.forces['arr_3'], atol=self.TOL)
+
+    def test_mulliken_dipole_preserving_gamma(self):
+        self.atoms.calc = Fireball(charges='mulliken-dipole-preserving',
+                                   kpts=self.gamma)
+        self.atoms.get_potential_energy()
+        self.atoms.get_charges()
+        self.atoms.get_forces()
+        np.testing.assert_allclose(np.array(self.atoms.calc.results['energy']),
+                                   self.energy['arr_4'], atol=self.TOL)
+        np.testing.assert_allclose(self.atoms.calc.results['shell_charges'],
+                                   self.charges['arr_4'], atol=self.TOL)
+        np.testing.assert_allclose(self.atoms.calc.results['forces'],
+                                   self.forces['arr_4'], atol=self.TOL)
+
+    def test_lowdin_monkhorst(self):
+        self.atoms.calc = Fireball(charges='lowdin',
+                                   kpts=self.monkhorst)
+        self.atoms.get_potential_energy()
+        self.atoms.get_charges()
+        self.atoms.get_forces()
+        np.testing.assert_allclose(np.array(self.atoms.calc.results['energy']),
+                                   self.energy['arr_5'], atol=self.TOL)
+        np.testing.assert_allclose(self.atoms.calc.results['shell_charges'],
+                                   self.charges['arr_5'], atol=self.TOL)
+        np.testing.assert_allclose(self.atoms.calc.results['forces'],
+                                   self.forces['arr_5'], atol=self.TOL)
+
+    def test_mulliken_monkhorst(self):
+        self.atoms.calc = Fireball(charges='mulliken',
+                                   kpts=self.monkhorst)
+        self.atoms.get_potential_energy()
+        self.atoms.get_charges()
+        self.atoms.get_forces()
+        np.testing.assert_allclose(np.array(self.atoms.calc.results['energy']),
+                                   self.energy['arr_6'], atol=self.TOL)
+        np.testing.assert_allclose(self.atoms.calc.results['shell_charges'],
+                                   self.charges['arr_6'], atol=self.TOL)
+        np.testing.assert_allclose(self.atoms.calc.results['forces'],
+                                   self.forces['arr_6'], atol=self.TOL)
+
+    def test_npa_monkhorst(self):
+        self.atoms.calc = Fireball(charges='npa',
+                                   kpts=self.monkhorst)
+        self.atoms.get_potential_energy()
+        self.atoms.get_charges()
+        self.atoms.get_forces()
+        np.testing.assert_allclose(np.array(self.atoms.calc.results['energy']),
+                                   self.energy['arr_7'], atol=self.TOL)
+        np.testing.assert_allclose(self.atoms.calc.results['shell_charges'],
+                                   self.charges['arr_7'], atol=self.TOL)
+        np.testing.assert_allclose(self.atoms.calc.results['forces'],
+                                   self.forces['arr_7'], atol=self.TOL)
+
+    def test_mulliken_dipole_monkhorst(self):
+        self.atoms.calc = Fireball(charges='mulliken-dipole',
+                                   kpts=self.monkhorst)
+        self.atoms.get_potential_energy()
+        self.atoms.get_charges()
+        self.atoms.get_forces()
+        np.testing.assert_allclose(np.array(self.atoms.calc.results['energy']),
+                                   self.energy['arr_8'], atol=self.TOL)
+        np.testing.assert_allclose(self.atoms.calc.results['shell_charges'],
+                                   self.charges['arr_8'], atol=self.TOL)
+        np.testing.assert_allclose(self.atoms.calc.results['forces'],
+                                   self.forces['arr_8'], atol=self.TOL)
+
+    def test_mulliken_dipole_preserving_monkhorst(self):
+        self.atoms.calc = Fireball(charges='mulliken-dipole-preserving',
+                                   kpts=self.monkhorst)
+        self.atoms.get_potential_energy()
+        self.atoms.get_charges()
+        self.atoms.get_forces()
+        np.testing.assert_allclose(np.array(self.atoms.calc.results['energy']),
+                                   self.energy['arr_9'], atol=self.TOL)
+        np.testing.assert_allclose(self.atoms.calc.results['shell_charges'],
+                                   self.charges['arr_9'], atol=self.TOL)
+        np.testing.assert_allclose(self.atoms.calc.results['forces'],
+                                   self.forces['arr_9'], atol=self.TOL)
+
+
 if __name__ == '__main__':
-  unittest.main()
+    unittest.main()

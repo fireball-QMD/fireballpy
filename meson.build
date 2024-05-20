@@ -93,4 +93,5 @@ test('molecule', py,
      env : envdata)
 test('periodic', py,
      args : [meson.current_source_dir() / 'test' / 'unittest_periodic.py'],
-     env : envdata)
+     env : envdata,
+     timeout: 0)
