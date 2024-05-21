@@ -58,7 +58,7 @@ for kpts in [None, kpoints]:
         print('')
 
 # Descomenta para generar el test otra vez
-write('save/periodic_atoms.xyz', atoms)
-np.savez('save/periodic_etot.npz', *ETOT)
-np.savez('save/periodic_charges.npz', *charge)
-np.savez('save/periodic_forces.npz', *force)
+#write('save/periodic_atoms.xyz', atoms)
+#np.savez('save/periodic_etot.npz', *ETOT)
+#np.savez('save/periodic_charges.npz', *charge)
+#np.savez('save/periodic_forces.npz', *force)

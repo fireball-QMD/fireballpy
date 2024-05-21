@@ -45,7 +45,7 @@ for dipole in ['improved', 'legacy']:
         print('')
 
 # Descomenta para generar el test otra vez
-write('save/molecule_atoms.xyz', atoms)
-np.savez('save/molecule_etot.npz', *ETOT)
-np.savez('save/molecule_charges.npz', *charge)
-np.savez('save/molecule_forces.npz', *force)
+#write('save/molecule_atoms.xyz', atoms)
+#np.savez('save/molecule_etot.npz', *ETOT)
+#np.savez('save/molecule_charges.npz', *charge)
+#np.savez('save/molecule_forces.npz', *force)

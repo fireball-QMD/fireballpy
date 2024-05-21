@@ -1,11 +1,13 @@
 from __future__ import annotations
 from typing import Optional
 import os
+import math
 import warnings
 import numpy as np
 from ase.calculators.calculator import Calculator, all_changes  # type: ignore
 from fireballpy.infodat import InfoDat
 from fireballpy.fdata import download_needed, get_default_infodat
+from ase.dft.kpoints import monkhorst_pack
 
 from ._fireball import (call_scf_loop,  # type: ignore
                         call_getenergy,
@@ -165,6 +167,20 @@ class Fireball(Calculator):
         if 'forces' in properties:
             self._calculate_forces()
 
+    def kpts_monkhorst_pack_fit_cell(self):
+        kpts_all=np.dot(self.kpts,self.atoms.cell.reciprocal().T)*math.pi*2
+        aux=[]
+        for i in kpts_all:
+            poner=True
+            for j in aux:
+                if np.linalg.norm(i + np.array(j)) < 0.00001:
+                    poner=False    
+            if(poner):
+                aux.append(i)                    
+        return np.array(aux)
+        
+
+
     def initialize(self) -> None:
         self.natoms = len(self.atoms)
 
@@ -180,24 +196,25 @@ class Fireball(Calculator):
             loadfdata_from_path(self._fdata_path)
 
         set_coords(self.atoms.numbers, self.atoms.positions)
-        if self.atoms.cell.any():
+        if self.atoms.cell.any():                   #periodic and peridic_gamma
             set_idipole(0)
             set_icluster(0)
             set_cell(self.atoms.cell)
-            if self.kpts is None:
+            if self.kpts is None:                   #periodic_gamma
                 warnings.warn("K-points not provided in periodic system."
                               " Gamma point will be assumed", UserWarning)
                 set_igamma(1)
                 self.kpts = GAMMA
                 set_kpoints(self.kpts)
-            elif np.allclose(self.kpts, GAMMA):
+            elif np.allclose(self.kpts, GAMMA):     #periodic_gamma
                 set_igamma(1)
                 self.kpts = GAMMA
                 set_kpoints(self.kpts)
-            else:
+            else:                                   #periodic 
                 set_igamma(0)
-                set_kpoints(self.kpts)
-        else:
+                set_kpoints(self.kpts_monkhorst_pack_fit_cell())
+
+        else:                                       #molecule and molecule_test
             set_idipole(self._idipole)
             set_icluster(1)
             set_igamma(1)
