@@ -66,6 +66,20 @@ real*8 function get_etot()
   return
 end function get_etot
 
+integer function get_norbitals_new()
+  use M_system, only : norbitals_new
+  get_norbitals_new = norbitals_new
+  return
+end function get_norbitals_new
+
+real*8 function get_eigen(iaux,jaux)
+  use M_system, only : eigen_k !(imu,ikpoint)
+  implicit none
+  integer, intent(in):: iaux
+  integer, intent(in):: jaux
+  get_eigen = eigen_k(jaux,iaux)
+  return
+end function get_eigen
 
 real*8 function get_atom_force(iaux,jaux)
   use M_system, only : ftot
@@ -164,21 +178,9 @@ subroutine set_coords_xyz(naux,xyz)
       ratom(:,iatom) = ratom(:,iatom) + shifter
     end do
   end if
-
-
 end subroutine set_coords_xyz
 
  
-
-subroutine print_atoms_positions()
-  use M_system
-  implicit none
-  integer iatom
-  do iatom = 1, natoms
-    write (*,'(3x,a2, 3(2x,f10.5))') symbol(iatom), ratom(:,iatom)
-  end do
-end subroutine print_atoms_positions
-
 
 subroutine load_cell_100()
   use M_system
@@ -194,17 +196,6 @@ subroutine load_cell_100()
   a3vec(3) = 100
 end subroutine load_cell_100
  
-subroutine loadlvs_from_file(lvsfile)
-  use M_system
-  implicit none
-  character(len=400),intent(in):: lvsfile
-  open (unit = 72, file = trim(lvsfile), status = 'old')
-  read (72,*) a1vec(:)
-  read (72,*) a2vec(:)
-  read (72,*) a3vec(:)
-  close(72)
- end subroutine loadlvs_from_file
-
 subroutine set_kpoints(naux,kpts)
   use M_system
   implicit none
@@ -235,58 +226,6 @@ subroutine set_kpoints(naux,kpts)
   end do
 end subroutine set_kpoints
 
-subroutine loadkpts_from_file(kptsfile)
-  use M_system
-  implicit none
-  character(len=400),intent(in):: kptsfile
-  integer :: ikpoint
-  real*8 :: sum_weight
-  open (unit = 54, file = kptsfile, status = 'old')
-  read (54,*) nkpoints
-  if (allocated(special_k)) deallocate(special_k)
-  if (allocated(special_k_orig)) deallocate(special_k_orig)
-  if (allocated(scale_k)) deallocate(scale_k)
-  if (allocated(weight_k)) deallocate(weight_k)
-  if (allocated(weight_k_orig)) deallocate(weight_k_orig)
-  allocate (special_k(3, nkpoints))
-  allocate (special_k_orig(3, nkpoints))
-  allocate (scale_k(3, nkpoints))
-  allocate (weight_k(nkpoints))
-  allocate (weight_k_orig(nkpoints))
-  sum_weight = 0.0d0
-  do ikpoint = 1, nkpoints
-    read (54,*) special_k_orig(:,ikpoint), weight_k_orig(ikpoint)
-    sum_weight = sum_weight + weight_k_orig(ikpoint)
-  end do
-  close (unit = 54)
-  do ikpoint = 1, nkpoints
-    special_k(:,ikpoint) = special_k_orig(:,ikpoint)
-    weight_k(ikpoint) = weight_k_orig(ikpoint)
-  end do
-end subroutine loadkpts_from_file
-
-subroutine rescal_structure(rescal)
-  use M_system
-  implicit none
-  real*8, intent(in)::rescal
-  integer :: iatom,ikpoint
-  a1vec(:)=a1vec(:)*rescal
-  a2vec(:)=a2vec(:)*rescal
-  a3vec(:)=a3vec(:)*rescal
-  do iatom = 1, natoms
-    ratom(:,iatom)=ratom(:,iatom)*rescal
-  end do
-  do ikpoint = 1, nkpoints
-    special_k_orig(:,ikpoint)=special_k_orig(:,ikpoint)/rescal
-  end do
-
-  do ikpoint = 1, nkpoints
-    special_k(:,ikpoint) = special_k_orig(:,ikpoint)
-    weight_k(ikpoint) = weight_k_orig(ikpoint)
-  end do
-  write(*,'(3x,a12,a1,F6.3)') 'rescal         ','=',rescal
-end subroutine rescal_structure
- 
 subroutine call_allocate_system()
   use M_system
   implicit none
@@ -311,59 +250,4 @@ subroutine call_getforces()
   implicit none
   call getforces()
 end subroutine call_getforces
-
-subroutine info_fdata()
-  use M_fdata
-  use M_system
-  implicit none
-  integer :: ispec
-  print*, '- Fireballpy is a minimal version of the fireball program.'
-  print*, '  itheory     = 1 !FIX DOGS'
-  print*, '  itheory_xc  = 2 !FIX McWEDA'
-  write(*,'(3x,a12,a1,i2)') 'icluster      ','=',icluster
-  write(*,'(3x,a12,a1,i2)') 'iforce        ','=',iforce
-  write(*,'(3x,a12,a1,i2)') 'idipole       ','=',idipole
-  write(*,'(3x,a12,a1,i2)') 'iqout         ','=',iqout
-  write(*,'(3x,a12,a1,i2)') 'igamma         ','=',igamma
-  do ispec = 1, nspecies
-    write (*,'(a,i2,a,a2,a,i2,a,i2)') '   spec = ',ispec,'; ele = ',symbolA(ispec),'; Z = ',nzx(ispec), '; nssh = ',nssh(ispec)  
-  end do
-end subroutine info_fdata
- 
-subroutine info_energy(out_energy)
-  use M_system
-  implicit none
-  real*8, intent(out) :: out_energy
-  write(*,'(3x,A,I4,A,F12.10,A,L1)') 'Kscf =',Kscf,'; sigma =',sigma,'; scf_achieved =',scf_achieved
-
-  write (*,*) ' ---------- T H E  T O T A L  E N E R G Y ----------- '
-  write (*,*) '  '
-  write (*,'(2x,A, f15.6)') '           ebs = ',ebs
-  write (*,'(2x,A, f15.6)') '     uii - uee = ',uiiuee
-  write (*,'(2x,A, f15.6)') '     etotxc_1c = ',etotxc_1c
-  write (*,'(2x,A, f15.6)') '     etotxc_1c = ',uxcdcc
-  write (*,'(2x,A, f15.6)') '          ETOT = ',etot
-  write (*,'(2x,A, f15.6)') '     Etot/atom = ',etotper
-  write (*,'(2x,A, f15.6)') ' Atomic Energy = ',atomic_energy
-  write (*,'(2x,A, f15.6)') '     CohesiveE = ',etot - atomic_energy
-  write (*,'(2x,A, f15.6)') '   Fermi Level = ',efermi
-  write (*,*) '  '
-  write (*,'(2x,A, f15.6)')' Cohesive Energy per atom  = ', (etot - atomic_energy)/natoms
-  write (*,*) ' ----------------------------------------------------- '
-
-  out_energy = etot
-end subroutine info_energy
-
-subroutine info_forces(naux, out_forces)
-  use M_system
-  implicit none
-  integer, intent(in) :: naux
-  real*8, dimension(naux, 3), intent(out) :: out_forces
-  integer :: iatom
-  write (*,*) ' The grand total force (eV/A): '
-  do iatom = 1, natoms
-    out_forces(iatom, :) = ftot(:, iatom)
-    write (*,'(2x,A,i4, A, 3e14.6)') ' iatom = ', iatom, ' ftot      = ',ftot(:,iatom)
-  end do
-end subroutine info_forces
 

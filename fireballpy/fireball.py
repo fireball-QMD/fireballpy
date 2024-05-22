@@ -8,7 +8,7 @@ from ase.calculators.calculator import Calculator, all_changes  # type: ignore
 from fireballpy.infodat import InfoDat
 from fireballpy.fdata import download_needed, get_default_infodat
 from ase.dft.kpoints import monkhorst_pack
-
+import matplotlib.pyplot as plt
 from ._fireball import (call_scf_loop,  # type: ignore
                         call_getenergy,
                         call_getforces,
@@ -25,6 +25,8 @@ from ._fireball import (call_scf_loop,  # type: ignore
                         get_etot,
                         get_nssh,
                         get_atom_force,
+                        get_eigen,
+                        get_norbitals_new,
                         get_shell_atom_charge,
                         get_fdata_is_load)
 
@@ -122,6 +124,27 @@ class Fireball(Calculator):
             warnings.warn(
                 "Energies not computed. Computing energies", UserWarning)
             self._calculate_energies()
+
+    def band_structure(self):
+        self.energies = np.zeros((len(self.kpts),get_norbitals_new()))
+        for imu in range(get_norbitals_new()):
+            for ikpoint in range(len(self.kpts)):
+                self.energies[ikpoint,imu] = get_eigen(imu+1,ikpoint+1)
+
+        print(self.energies)
+
+    def plot(self):
+        plt.figure(figsize=(8, 6))
+        k = np.linspace(0, 1, len(self.kpts))
+        for band in range(self.energies.shape[1]):
+            #plt.plot(self.kpts, self.energies[:, band])
+            plt.scatter(k, self.energies[:, band])
+        
+        plt.xlabel('k-points')
+        plt.ylabel('Energy (eV)')
+        plt.title('Band Structure')
+        plt.grid(True)
+        plt.show()
 
     def _calculate_energies(self) -> None:
         call_scf_loop()
