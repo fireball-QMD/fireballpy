@@ -127,6 +127,7 @@ class Fireball(Calculator):
             self._calculate_energies()
 
     def band_structure(self, path_kpts):
+        #path_kpts=np.dot(path_kpts,self.atoms.cell.reciprocal().T)*math.pi*2
         set_kpoints(path_kpts)
         set_ifixcharge(1)
         call_scf_loop()
@@ -135,14 +136,14 @@ class Fireball(Calculator):
             for ikpoint in range(len(path_kpts)):
                 self.energies[ikpoint,imu] = get_eigen(imu+1,ikpoint+1)
 
-        print(self.energies)
+        #print(self.energies)
 
     def plot(self):
         plt.figure(figsize=(8, 6))
-        k = np.linspace(0, 1, len(self.kpts))
+        k = np.linspace(0, 1, self.energies.shape[0])
         for band in range(self.energies.shape[1]):
-            #plt.plot(self.kpts, self.energies[:, band])
-            plt.scatter(k, self.energies[:, band])
+            plt.plot(k, self.energies[:, band])
+            #plt.scatter(k, self.energies[:, band])
         
         plt.xlabel('k-points')
         plt.ylabel('Energy (eV)')

@@ -84,7 +84,7 @@ real*8 function get_eigen(iaux,jaux)
   implicit none
   integer, intent(in):: iaux
   integer, intent(in):: jaux
-  get_eigen = eigen_k(jaux,iaux)
+  get_eigen = eigen_k(iaux,jaux)
   return
 end function get_eigen
 
