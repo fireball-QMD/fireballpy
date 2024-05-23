@@ -24,6 +24,13 @@ integer function get_icluster()
   return
 end function get_icluster
 
+subroutine set_ifixcharge(aux)
+  use M_system, only : ifixcharge
+  implicit none
+  integer, intent(in):: aux
+  ifixcharge=aux
+end subroutine set_ifixcharge
+ 
 subroutine set_idipole(aux)
   use M_system, only : idipole
   implicit none

@@ -22,6 +22,7 @@ from ._fireball import (call_scf_loop,  # type: ignore
                         set_igamma,
                         set_idipole,
                         set_icluster,
+                        set_ifixcharge,
                         get_etot,
                         get_nssh,
                         get_atom_force,
@@ -125,10 +126,13 @@ class Fireball(Calculator):
                 "Energies not computed. Computing energies", UserWarning)
             self._calculate_energies()
 
-    def band_structure(self):
-        self.energies = np.zeros((len(self.kpts),get_norbitals_new()))
+    def band_structure(self, path_kpts):
+        set_kpoints(path_kpts)
+        set_ifixcharge(1)
+        call_scf_loop()
+        self.energies = np.zeros((len(path_kpts),get_norbitals_new()))
         for imu in range(get_norbitals_new()):
-            for ikpoint in range(len(self.kpts)):
+            for ikpoint in range(len(path_kpts)):
                 self.energies[ikpoint,imu] = get_eigen(imu+1,ikpoint+1)
 
         print(self.energies)
