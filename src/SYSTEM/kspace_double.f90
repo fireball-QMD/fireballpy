@@ -55,7 +55,9 @@ subroutine kspace_double (ikpoint, sks)
   lrwork = 3*norbitals - 2
   allocate (rwork(lrwork))
 
-  if (.not. allocated(sm12_save))  allocate (sm12_save(norbitals,norbitals,nkpoints))
+  !if (.not. allocated(sm12_save))  allocate (sm12_save(norbitals,norbitals,nkpoints))
+  if (allocated(sm12_save)) deallocate(sm12_save)
+  allocate (sm12_save(norbitals,norbitals,nkpoints))
   zzzz = a0
   yyyy = a0
   xxxx = a0

@@ -221,6 +221,15 @@ subroutine set_kpoints(naux,kpts)
   allocate (scale_k(3, nkpoints))
   allocate (weight_k(nkpoints))
   allocate (weight_k_orig(nkpoints))
+  if (allocated(ioccupy_k)) deallocate( ioccupy_k)
+  allocate(ioccupy_k (norbitals, nkpoints))
+  if (allocated(foccupy)) deallocate(foccupy) 
+  allocate(foccupy (norbitals, nkpoints))
+  if (allocated(eigen_k)) deallocate(eigen_k) 
+  allocate (eigen_k (norbitals, nkpoints))
+  if (allocated(bbnkre_o)) deallocate(bbnkre_o)
+  allocate (bbnkre_o(norbitals,norbitals,nkpoints))
+
   sum_weight = 0.0d0
   do ikpoint = 1, nkpoints
     special_k_orig(:,ikpoint) = kpts(ikpoint, :)
