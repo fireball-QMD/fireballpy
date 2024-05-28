@@ -204,7 +204,8 @@ class Fireball(Calculator):
             for issh in range(get_nssh(iatom + 1)):
                 self.shell_charges[iatom, issh] = \
                     get_shell_atom_charge(issh + 1, iatom + 1)
-        self.results['charges'] = np.sum(self.shell_charges, axis=1)
+        self.charges = np.sum(self.shell_charges, axis=1)
+        self.results['charges'] = self.charges
         self.results['shell_charges'] = self.shell_charges
 
     def _calculate_forces(self) -> None:
@@ -300,10 +301,12 @@ class Fireball(Calculator):
         self._set_options()
 
         call_allocate_system()
-        self.charges = np.zeros(self.natoms)
         self.forces = np.empty((self.natoms, 3))
         if self._ifixcharges == 0:
+            self.charges = np.zeros(self.natoms)
             self.shell_charges = np.zeros((self.natoms, self._infodat.maxshs))
         else:
             set_shell_atom_charge(self.shell_charges)
+            self.charges = np.sum(self.shell_charges, axis=1)
+            self.results['charges'] = self.charges
             self.results['shell_charges'] = self.shell_charges
