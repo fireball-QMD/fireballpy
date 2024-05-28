@@ -35,7 +35,7 @@ for kpts in [None, kpoints]:
               'Mulliken-dipole-preserving']:
         print('-------', C, '-----------------')
         # el kpts_monkhorst_pack_ind lo ignora cuando es periodic_gamm
-        atoms.calc = Fireball(charges=C, kpts=kpts)
+        atoms.calc = Fireball(charges_method=C, kpts=kpts)
         atoms.get_potential_energy()
         atoms.get_charges()
         atoms.get_forces()

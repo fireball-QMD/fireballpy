@@ -22,7 +22,7 @@ class Test(unittest.TestCase):
                                            "save", "molecule_forces.npz"))
 
     def test_lowdin_improved(self):
-        self.atoms.calc = Fireball(charges='lowdin',
+        self.atoms.calc = Fireball(charges_method='lowdin',
                                    dipole='improved')
         self.atoms.get_potential_energy()
         self.atoms.get_charges()
@@ -35,7 +35,7 @@ class Test(unittest.TestCase):
                                    self.forces['arr_0'], atol=self.TOL)
 
     def test_mulliken_improved(self):
-        self.atoms.calc = Fireball(charges='mulliken',
+        self.atoms.calc = Fireball(charges_method='mulliken',
                                    dipole='improved')
         self.atoms.get_potential_energy()
         self.atoms.get_charges()
@@ -48,7 +48,7 @@ class Test(unittest.TestCase):
                                    self.forces['arr_1'], atol=self.TOL)
 
     def test_npa_improved(self):
-        self.atoms.calc = Fireball(charges='npa',
+        self.atoms.calc = Fireball(charges_method='npa',
                                    dipole='improved')
         self.atoms.get_potential_energy()
         self.atoms.get_charges()
@@ -61,7 +61,7 @@ class Test(unittest.TestCase):
                                    self.forces['arr_2'], atol=self.TOL)
 
     def test_mulliken_dipole_improved(self):
-        self.atoms.calc = Fireball(charges='mulliken-dipole',
+        self.atoms.calc = Fireball(charges_method='mulliken-dipole',
                                    dipole='improved')
         self.atoms.get_potential_energy()
         self.atoms.get_charges()
@@ -74,7 +74,7 @@ class Test(unittest.TestCase):
                                    self.forces['arr_3'], atol=self.TOL)
 
     def test_mulliken_dipole_preserving_improved(self):
-        self.atoms.calc = Fireball(charges='mulliken-dipole-preserving',
+        self.atoms.calc = Fireball(charges_method='mulliken-dipole-preserving',
                                    dipole='improved')
         self.atoms.get_potential_energy()
         self.atoms.get_charges()
@@ -87,7 +87,7 @@ class Test(unittest.TestCase):
                                    self.forces['arr_4'], atol=self.TOL)
 
     def test_lowdin_legacy(self):
-        self.atoms.calc = Fireball(charges='lowdin',
+        self.atoms.calc = Fireball(charges_method='lowdin',
                                    dipole='legacy')
         self.atoms.get_potential_energy()
         self.atoms.get_charges()
@@ -100,7 +100,7 @@ class Test(unittest.TestCase):
                                    self.forces['arr_5'], atol=self.TOL)
 
     def test_mulliken_legacy(self):
-        self.atoms.calc = Fireball(charges='mulliken',
+        self.atoms.calc = Fireball(charges_method='mulliken',
                                    dipole='legacy')
         self.atoms.get_potential_energy()
         self.atoms.get_charges()
@@ -113,7 +113,7 @@ class Test(unittest.TestCase):
                                    self.forces['arr_6'], atol=self.TOL)
 
     def test_npa_legacy(self):
-        self.atoms.calc = Fireball(charges='npa',
+        self.atoms.calc = Fireball(charges_method='npa',
                                    dipole='legacy')
         self.atoms.get_potential_energy()
         self.atoms.get_charges()
@@ -126,7 +126,7 @@ class Test(unittest.TestCase):
                                    self.forces['arr_7'], atol=self.TOL)
 
     def test_mulliken_dipole_legacy(self):
-        self.atoms.calc = Fireball(charges='mulliken-dipole',
+        self.atoms.calc = Fireball(charges_method='mulliken-dipole',
                                    dipole='legacy')
         self.atoms.get_potential_energy()
         self.atoms.get_charges()
@@ -139,7 +139,7 @@ class Test(unittest.TestCase):
                                    self.forces['arr_8'], atol=self.TOL)
 
     def test_mulliken_dipole_preserving_legacy(self):
-        self.atoms.calc = Fireball(charges='mulliken-dipole-preserving',
+        self.atoms.calc = Fireball(charges_method='mulliken-dipole-preserving',
                                    dipole='legacy')
         self.atoms.get_potential_energy()
         self.atoms.get_charges()

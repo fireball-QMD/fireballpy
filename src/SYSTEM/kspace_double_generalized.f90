@@ -30,7 +30,6 @@ subroutine kspace_double_generalized (ikpoint, sks)
   complex*16, dimension (:, :), allocatable :: xxxx
   complex*16, dimension (:, :), allocatable :: yyyy
   complex*16, dimension (:, :), allocatable :: zzzz
-  complex*16, dimension (:, :, :), allocatable, save :: sm12_save
   complex*16, dimension (:, :), allocatable :: ssss
   real*8, dimension (:), allocatable :: ww
   complex*16, allocatable, dimension (:) :: work

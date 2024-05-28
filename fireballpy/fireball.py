@@ -1,7 +1,6 @@
 from __future__ import annotations
 from typing import Optional
 import os
-import math
 import warnings
 import numpy as np
 from ase.calculators.calculator import Calculator, all_changes  # type: ignore
@@ -27,13 +26,14 @@ from ._fireball import (call_scf_loop,  # type: ignore
                         get_nssh,
                         get_atom_force,
                         get_eigen,
-                        get_norbitals_new,
+                        get_norbitals_new,                     
                         get_shell_atom_charge,
+                        set_shell_atom_charge,
                         get_fdata_is_load)
 
 ICHARGE_TABLE = {'lowdin': 1, 'mulliken': 2, 'npa': 3,
-                 'mulliken-dipole': 4,
-                 'mulliken-dipole-preserving': 7}
+                 'mulliken-dipole': 4, 'md': 4,
+                 'mulliken-dipole-preserving': 7, 'mdp': 7}
 IDIPOLE_TABLE = {'improved': 1, 'legacy': 0}
 GAMMA = np.array([[0.0, 0.0, 0.0]])
 
@@ -50,12 +50,12 @@ class Fireball(Calculator):
         it will download needed precomputed FData files.
         More information
         `here <https://fireball-qmd.github.io/fireball.html>`_.
-    charges : Optional[str]
+    charges_method : Optional[str]
         How the autoconsistency in the charges will be performed.
         Options are:
         - Mulliken (default): ... [1]_
-        - Mulliken-Dipole: ... [2]_
-        - Mulliken-Dipole-Preserving: ... [3]_
+        - Mulliken-Dipole, md: ... [2]_
+        - Mulliken-Dipole-Preserving, mdp: ... [3]_
         - Lowdin: ... [4]_
         - NPA: ... [5]_
         Note: this parameter is case insensitive.
@@ -91,26 +91,31 @@ class Fireball(Calculator):
     ignored_changes = ['initial_magmoms']
 
     def __init__(self, *, fdata_path: Optional[str] = None,
-                 charges: Optional[str] = "mulliken",
+                 charges_method: Optional[str] = "mulliken",
                  dipole: Optional[str] = "improved",
                  kpts: Optional[tuple[list[float]] | list[float]] = None,
+                 shell_charges: Optional[np.ndarray] = None,
+                 ifixcharge: Optional[int] = 0, 
                  **kwargs):
 
         super().__init__(**kwargs)
         self._fdata_path = fdata_path
-        self.charges = charges.lower()
+        self.charges_method = charges_method.lower()
         self.dipole = dipole.lower()
         self.kpts = kpts
         self._check_input()
+        self.ifixcharge = ifixcharge
+        self.shell_charges=shell_charges
 
     def _check_input(self):
         # Charges
-        if self.charges not in ICHARGE_TABLE:
+        if self.charges_method not in ICHARGE_TABLE:
             raise ValueError("Parameter 'charges' must be one of "
                              "'lowdin', 'mulliken', 'npa', "
-                             "'mulliken-dipole', 'mulliken-dipole-preserving'"
+                             "'mulliken-dipole','md',"
+                             "'mulliken-dipole-preserving','mdp'"
                              f". Got {self.charges}.")
-        self._icharge = ICHARGE_TABLE[self.charges]
+        self._icharge = ICHARGE_TABLE[self.charges_method]
 
         # Dipole
         if self.dipole not in IDIPOLE_TABLE:
@@ -125,18 +130,6 @@ class Fireball(Calculator):
             warnings.warn(
                 "Energies not computed. Computing energies", UserWarning)
             self._calculate_energies()
-
-    def band_structure(self, path_kpts):
-        #path_kpts=np.dot(path_kpts,self.atoms.cell.reciprocal().T)*math.pi*2
-        set_kpoints(path_kpts)
-        set_ifixcharge(1)
-        call_scf_loop()
-        self.energies = np.zeros((len(path_kpts),get_norbitals_new()))
-        for imu in range(get_norbitals_new()):
-            for ikpoint in range(len(path_kpts)):
-                self.energies[ikpoint,imu] = get_eigen(imu+1,ikpoint+1)
-
-        #print(self.energies)
 
     def plot(self):
         plt.figure(figsize=(8, 6))
@@ -157,6 +150,11 @@ class Fireball(Calculator):
         self.energy = get_etot()
         self.results['energy'] = self.energy
         self.results['free_energy'] = self.energy
+        if self.kpts is not None:
+            self.energies = np.zeros((len(self.kpts),get_norbitals_new()))
+            for imu in range(get_norbitals_new()):
+                for ikpoint in range(len(self.kpts)):
+                    self.energies[ikpoint,imu] = get_eigen(imu+1,ikpoint+1)
 
     def _calculate_charges(self) -> None:
         for iatom in range(self.natoms):
@@ -196,7 +194,11 @@ class Fireball(Calculator):
             self._calculate_forces()
 
     def kpts_monkhorst_pack_fit_cell(self):
-        kpts_all=np.dot(self.kpts,self.atoms.cell.reciprocal().T)*math.pi*2
+        #reciprocal_lattice = 2 * np.pi * np.linalg.inv(real_lattice).T
+        #point_reciprocal = np.dot(point_real, reciprocal_lattice)
+        #kpts_all=np.dot(self.kpts,self.atoms.cell.reciprocal().T)*np.pi*2
+        reciprocal_lattice = np.linalg.inv(self.atoms.cell) #=self.atoms.cell.reciprocal().T
+        kpts_all = 2 * np.pi * np.dot(self.kpts, reciprocal_lattice)
         aux=[]
         for i in kpts_all:
             poner=True
@@ -250,6 +252,12 @@ class Fireball(Calculator):
             set_kpoints(GAMMA)
 
         call_allocate_system()
+        set_ifixcharge(self.ifixcharge)
         self.charges = np.zeros(self.natoms)
-        self.shell_charges = np.zeros((self.natoms, self._infodat.maxshs))
         self.forces = np.empty((self.natoms, 3))
+        if self.shell_charges is None:
+            self.shell_charges = np.zeros((self.natoms, self._infodat.maxshs))
+        else:
+            for iatom in range(self.natoms):
+               for issh in range(get_nssh(iatom + 1)):
+                    set_shell_atom_charge(issh + 1, iatom + 1 , self.shell_charges[iatom, issh] )

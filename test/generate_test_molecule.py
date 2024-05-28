@@ -22,7 +22,7 @@ for dipole in ['improved', 'legacy']:
     for C in ['Lowdin', 'Mulliken', 'NPA', 'Mulliken-dipole',
               'Mulliken-dipole-preserving']:
         print('-------', C, '-----------------')
-        atoms.calc = Fireball(charges=C, dipole=dipole)
+        atoms.calc = Fireball(charges_method=C, dipole=dipole)
         atoms.get_potential_energy()
         atoms.get_charges()
         atoms.get_forces()

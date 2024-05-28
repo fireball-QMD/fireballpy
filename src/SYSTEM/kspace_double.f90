@@ -30,12 +30,12 @@ subroutine kspace_double (ikpoint, sks)
   complex*16, dimension (:, :), allocatable :: xxxx
   complex*16, dimension (:, :), allocatable :: yyyy
   complex*16, dimension (:, :), allocatable :: zzzz
-  complex*16, dimension (:, :, :), allocatable, save :: sm12_save
   complex*16, dimension (:, :), allocatable :: ssss
   real*8, dimension (:), allocatable :: ww
   complex*16, allocatable, dimension (:) :: work
   real*8, allocatable, dimension (:) :: rwork
   integer, allocatable, dimension (:) :: iwork
+
   integer lwork, lrwork, liwork
 
   real*8 diff, imcoef, recoef
@@ -55,9 +55,6 @@ subroutine kspace_double (ikpoint, sks)
   lrwork = 3*norbitals - 2
   allocate (rwork(lrwork))
 
-  !if (.not. allocated(sm12_save))  allocate (sm12_save(norbitals,norbitals,nkpoints))
-  if (allocated(sm12_save)) deallocate(sm12_save)
-  allocate (sm12_save(norbitals,norbitals,nkpoints))
   zzzz = a0
   yyyy = a0
   xxxx = a0
@@ -185,11 +182,11 @@ subroutine kspace_double (ikpoint, sks)
    endif
    do inu = 1, norbitals
     do imu = 1, norbitals
-     sm12_save(imu,inu,ikpoint) = xxxx(imu,inu)
+     sm12_complex(imu,inu,ikpoint) = xxxx(imu,inu)
     end do
    end do
   else ! (if Kscf .eq. 1 .and iqout .ne. 3)
-   xxxx(:,:) = sm12_save(:,:,ikpoint)
+   xxxx(:,:) = sm12_complex(:,:,ikpoint)
   end if
   if (iqout .ne. 3) then
    call zhemm ( 'R', 'U', norbitals, norbitals, a1, xxxx, norbitals, yyyy, norbitals, a0, zzzz, norbitals )

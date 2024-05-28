@@ -97,6 +97,7 @@ real*8 function get_atom_force(iaux,jaux)
   return
 end function get_atom_force
 
+ 
 real*8 function get_shell_atom_charge(iauxssh,iauxatom)
   use M_system, only : Qin
   implicit none
@@ -104,6 +105,16 @@ real*8 function get_shell_atom_charge(iauxssh,iauxatom)
   integer, intent(in):: iauxssh
   get_shell_atom_charge = Qin(iauxssh,iauxatom)
 end function get_shell_atom_charge
+ 
+
+subroutine set_shell_atom_charge(iauxssh,iauxatom,qaux)
+  use M_system, only : Qin
+  implicit none
+  integer, intent(in):: iauxatom
+  integer, intent(in):: iauxssh
+  real*8,  intent(in):: qaux
+  Qin(iauxssh,iauxatom) = qaux
+end subroutine set_shell_atom_charge
 
 integer function get_fdata_is_load()
   use M_fdata, only : fdata_is_load
@@ -221,15 +232,6 @@ subroutine set_kpoints(naux,kpts)
   allocate (scale_k(3, nkpoints))
   allocate (weight_k(nkpoints))
   allocate (weight_k_orig(nkpoints))
-  if (allocated(ioccupy_k)) deallocate( ioccupy_k)
-  allocate(ioccupy_k (norbitals, nkpoints))
-  if (allocated(foccupy)) deallocate(foccupy) 
-  allocate(foccupy (norbitals, nkpoints))
-  if (allocated(eigen_k)) deallocate(eigen_k) 
-  allocate (eigen_k (norbitals, nkpoints))
-  if (allocated(bbnkre_o)) deallocate(bbnkre_o)
-  allocate (bbnkre_o(norbitals,norbitals,nkpoints))
-
   sum_weight = 0.0d0
   do ikpoint = 1, nkpoints
     special_k_orig(:,ikpoint) = kpts(ikpoint, :)

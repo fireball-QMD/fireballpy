@@ -25,7 +25,7 @@ class Test(unittest.TestCase):
         self.monkhorst = monkhorst_pack([4, 4, 4])
 
     def test_lowdin_gamma(self):
-        self.atoms.calc = Fireball(charges='lowdin',
+        self.atoms.calc = Fireball(charges_method='lowdin',
                                    kpts=self.gamma)
         self.atoms.get_potential_energy()
         self.atoms.get_charges()
@@ -38,7 +38,7 @@ class Test(unittest.TestCase):
                                    self.forces['arr_0'], atol=self.TOL)
 
     def test_mulliken_gamma(self):
-        self.atoms.calc = Fireball(charges='mulliken',
+        self.atoms.calc = Fireball(charges_method='mulliken',
                                    kpts=self.gamma)
         self.atoms.get_potential_energy()
         self.atoms.get_charges()
@@ -51,7 +51,7 @@ class Test(unittest.TestCase):
                                    self.forces['arr_1'], atol=self.TOL)
 
     def test_npa_gamma(self):
-        self.atoms.calc = Fireball(charges='npa',
+        self.atoms.calc = Fireball(charges_method='npa',
                                    kpts=self.gamma)
         self.atoms.get_potential_energy()
         self.atoms.get_charges()
@@ -64,7 +64,7 @@ class Test(unittest.TestCase):
                                    self.forces['arr_2'], atol=self.TOL)
 
     def test_mulliken_dipole_gamma(self):
-        self.atoms.calc = Fireball(charges='mulliken-dipole',
+        self.atoms.calc = Fireball(charges_method='mulliken-dipole',
                                    kpts=self.gamma)
         self.atoms.get_potential_energy()
         self.atoms.get_charges()
@@ -77,7 +77,7 @@ class Test(unittest.TestCase):
                                    self.forces['arr_3'], atol=self.TOL)
 
     def test_mulliken_dipole_preserving_gamma(self):
-        self.atoms.calc = Fireball(charges='mulliken-dipole-preserving',
+        self.atoms.calc = Fireball(charges_method='mulliken-dipole-preserving',
                                    kpts=self.gamma)
         self.atoms.get_potential_energy()
         self.atoms.get_charges()
@@ -90,7 +90,7 @@ class Test(unittest.TestCase):
                                    self.forces['arr_4'], atol=self.TOL)
 
     def test_lowdin_monkhorst(self):
-        self.atoms.calc = Fireball(charges='lowdin',
+        self.atoms.calc = Fireball(charges_method='lowdin',
                                    kpts=self.monkhorst)
         self.atoms.get_potential_energy()
         self.atoms.get_charges()
@@ -103,7 +103,7 @@ class Test(unittest.TestCase):
                                    self.forces['arr_5'], atol=self.TOL)
 
     def test_mulliken_monkhorst(self):
-        self.atoms.calc = Fireball(charges='mulliken',
+        self.atoms.calc = Fireball(charges_method='mulliken',
                                    kpts=self.monkhorst)
         self.atoms.get_potential_energy()
         self.atoms.get_charges()
@@ -116,7 +116,7 @@ class Test(unittest.TestCase):
                                    self.forces['arr_6'], atol=self.TOL)
 
     def test_npa_monkhorst(self):
-        self.atoms.calc = Fireball(charges='npa',
+        self.atoms.calc = Fireball(charges_method='npa',
                                    kpts=self.monkhorst)
         self.atoms.get_potential_energy()
         self.atoms.get_charges()
@@ -129,7 +129,7 @@ class Test(unittest.TestCase):
                                    self.forces['arr_7'], atol=self.TOL)
 
     def test_mulliken_dipole_monkhorst(self):
-        self.atoms.calc = Fireball(charges='mulliken-dipole',
+        self.atoms.calc = Fireball(charges_method='mulliken-dipole',
                                    kpts=self.monkhorst)
         self.atoms.get_potential_energy()
         self.atoms.get_charges()
@@ -142,7 +142,7 @@ class Test(unittest.TestCase):
                                    self.forces['arr_8'], atol=self.TOL)
 
     def test_mulliken_dipole_preserving_monkhorst(self):
-        self.atoms.calc = Fireball(charges='mulliken-dipole-preserving',
+        self.atoms.calc = Fireball(charges_method='mulliken-dipole-preserving',
                                    kpts=self.monkhorst)
         self.atoms.get_potential_energy()
         self.atoms.get_charges()

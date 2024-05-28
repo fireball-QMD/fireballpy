@@ -386,8 +386,6 @@ subroutine allocate_system ()
   allocate (dusr (3, natoms))
   
 
-  if (allocated(bbnkre_o)) deallocate(bbnkre_o)
-  allocate (bbnkre_o(norbitals,norbitals,nkpoints))
   if (allocated(arho_off)) deallocate(arho_off)
   allocate (arho_off (nsh_max, nsh_max, neigh_max, natoms))
   if (allocated(arhoij_off)) deallocate(arhoij_off)

@@ -28,7 +28,6 @@ subroutine kspace_gamma ( ikpoint, sks)
   real*8, dimension (:, :), allocatable :: xxxx
   real*8, dimension (:, :), allocatable :: yyyy
   real*8, dimension (:, :), allocatable :: zzzz
-  real*8, dimension (:, :), allocatable, save :: sm12_save
   real*8, dimension (:, :), allocatable :: ssss
   real*8, dimension (:), allocatable :: ww
   real*8, allocatable, dimension (:) :: work
@@ -54,7 +53,6 @@ subroutine kspace_gamma ( ikpoint, sks)
   allocate (iwork(liwork))
   lwork = 1
   allocate(work(lwork))
-  if (.not. allocated(sm12_save))  allocate (sm12_save(norbitals,norbitals))
   zzzz = a0
   yyyy = a0
   xxxx = a0
@@ -159,11 +157,11 @@ subroutine kspace_gamma ( ikpoint, sks)
     endif
     do inu = 1, norbitals
       do imu = 1, norbitals
-        sm12_save(imu,inu) = xxxx(imu,inu)
+        sm12_real(imu,inu) = xxxx(imu,inu)
       end do
     end do
   else ! (if Kscf .eq. 1 .and iqout .ne. 3)
-    xxxx(:,:) = sm12_save(:,:)
+    xxxx(:,:) = sm12_real(:,:)
   end if
   if (iqout .ne. 3) then
     call dsymm ( 'R', 'U', norbitals, norbitals, a1, xxxx, norbitals, yyyy, norbitals, a0, zzzz, norbitals )

@@ -288,7 +288,11 @@ subroutine allocate_system ()
   allocate(ioccupy_k (norbitals, nkpoints))
   allocate(foccupy (norbitals, nkpoints))
   allocate (eigen_k (norbitals, nkpoints))
-
+  allocate (special_k(3, nkpoints))
+  allocate (special_k_orig(3, nkpoints))
+  allocate (scale_k(3, nkpoints))
+  allocate (weight_k(nkpoints))
+  allocate (weight_k_orig(nkpoints))
   
   allocate (dewald (3, natoms, natoms))
   allocate (fewald (3, natoms))
@@ -315,7 +319,6 @@ subroutine allocate_system ()
   allocate (dusr (3, natoms))
   
 
-  allocate (bbnkre_o(norbitals,norbitals,nkpoints))
   allocate (arho_off (nsh_max, nsh_max, neigh_max, natoms))
   allocate (arhoij_off (nsh_max, nsh_max, neigh_max, natoms))
   allocate (rho_off (numorb_max, numorb_max, neigh_max, natoms))

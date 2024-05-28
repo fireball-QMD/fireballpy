@@ -69,6 +69,10 @@ module M_system
   real*8, dimension (:, :, :), allocatable :: bbnkre
   real*8, dimension (:, :, :), allocatable :: blowim
   real*8, dimension (:, :, :), allocatable :: bbnkim
+  real*8, dimension (:, :), allocatable :: sm12_real
+  complex*16, dimension (:, :, :), allocatable :: sm12_complex
+  
+
   real*8, dimension (:, :), allocatable :: eigen_k
   real*8, dimension (:, :), allocatable :: special_k
   integer :: norbitals
@@ -81,8 +85,6 @@ module M_system
   
   !scf
   real*8, dimension (:, :, :, :), allocatable :: cape
-  real*8, dimension (:, :, :), allocatable :: blowre_o
-  real*8, dimension (:, :, :), allocatable :: bbnkre_o  
   real*8, dimension (:, :, :, :), allocatable :: rhoPP
   real*8 :: ztot
   real*8, dimension (:), allocatable :: weight_k
