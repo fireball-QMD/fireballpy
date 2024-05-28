@@ -1,7 +1,7 @@
 subroutine load_fdata()
   use M_fdata, only: fdataLocation, infofname, nsh_max, nshPP_max, nspecies, nzx, symbolA, &
     & etotatom, smass, rc_PP, rcutoff, cl_PP, nssh, lssh, nsshPP, lsshPP, Qneutral, wavefxn, &
-    & napot, errno2c, errno3c, ind2c, icon3c, xintegral_2c, numz2c, z2cmax, interactions2c_max, &
+    & napot, errno2c, errno3c, ind2c, icon3c, splineint_2c, numz2c, z2cmax, interactions2c_max, &
     & isorpmax, isorpmax_xc, ME2c_max, nfofx
   implicit none
   integer :: in1, in2, in3, ispec, issh, aux, icount, isorp, &
@@ -94,12 +94,12 @@ subroutine load_fdata()
   ind2c = 0
   errno2c = 0
   interactions2c_max = 27 + 11*nsh_max
-  allocate (xintegral_2c (ME2c_max, nfofx, interactions2c_max,nspecies, nspecies))
-  allocate (z2cmax (interactions2c_max, nspecies, nspecies))
   allocate (numz2c (interactions2c_max, nspecies, nspecies))
+  allocate (z2cmax (interactions2c_max, nspecies, nspecies))
+  allocate (splineint_2c (4, ME2c_max, nfofx, interactions2c_max, nspecies, nspecies))
   numz2c = 0
   z2cmax = 0.0d0
-  xintegral_2c = 0.0d0
+  splineint_2c = 0.0d0
   do interaction = 1, 23
     if ((interaction .ge. 2) .and. (interaction .le. 4)) then
       mintype = 0

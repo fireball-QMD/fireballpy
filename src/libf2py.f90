@@ -107,13 +107,17 @@ real*8 function get_shell_atom_charge(iauxssh,iauxatom)
 end function get_shell_atom_charge
  
 
-subroutine set_shell_atom_charge(iauxssh,iauxatom,qaux)
+subroutine set_shell_atom_charge(natoms,nssh,qaux)
   use M_system, only : Qin
   implicit none
-  integer, intent(in):: iauxatom
-  integer, intent(in):: iauxssh
-  real*8,  intent(in):: qaux
-  Qin(iauxssh,iauxatom) = qaux
+  integer, intent(in):: natoms, nssh
+  real*8, dimension(natoms, nssh), intent(in):: qaux
+  integer :: iauxssh, iauxatom
+  do iauxatom=1,natoms
+    do iauxssh=1,nssh
+      Qin(iauxssh, iauxatom) = qaux(iauxatom, iauxssh)
+    end do
+  end do
 end subroutine set_shell_atom_charge
 
 integer function get_fdata_is_load()

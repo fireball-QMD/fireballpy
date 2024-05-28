@@ -31,8 +31,8 @@ force = []
 
 kpoints = monkhorst_pack([4, 4, 4])
 for kpts in [None, kpoints]:
-    for C in ['Lowdin', 'Mulliken', 'NPA', 'Mulliken-dipole',
-              'Mulliken-dipole-preserving']:
+    for C in ['Lowdin', 'Mulliken', 'NPA', 'Mulliken_dipole',
+              'Mulliken_dipole_preserving']:
         print('-------', C, '-----------------')
         # el kpts_monkhorst_pack_ind lo ignora cuando es periodic_gamm
         atoms.calc = Fireball(charges_method=C, kpts=kpts)

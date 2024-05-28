@@ -3,17 +3,17 @@ from typing import Optional
 import os
 import warnings
 import numpy as np
+from numpy.typing import ArrayLike
+import matplotlib.pyplot as plt  # type: ignore
 from ase.calculators.calculator import Calculator, all_changes  # type: ignore
 from fireballpy.infodat import InfoDat
 from fireballpy.fdata import download_needed, get_default_infodat
-from ase.dft.kpoints import monkhorst_pack
-import matplotlib.pyplot as plt
+
 from ._fireball import (call_scf_loop,  # type: ignore
                         call_getenergy,
                         call_getforces,
                         call_allocate_system,
                         loadfdata_from_path,
-                        load_cell_100,
                         set_coords,
                         set_iqout,
                         set_cell,
@@ -22,20 +22,21 @@ from ._fireball import (call_scf_loop,  # type: ignore
                         set_idipole,
                         set_icluster,
                         set_ifixcharge,
+                        set_shell_atom_charge,
                         get_etot,
                         get_nssh,
                         get_atom_force,
-                        get_eigen,
-                        get_norbitals_new,                     
                         get_shell_atom_charge,
-                        set_shell_atom_charge,
-                        get_fdata_is_load)
+                        get_fdata_is_load,
+                        get_norbitals_new,
+                        get_eigen)
 
 ICHARGE_TABLE = {'lowdin': 1, 'mulliken': 2, 'npa': 3,
-                 'mulliken-dipole': 4, 'md': 4,
-                 'mulliken-dipole-preserving': 7, 'mdp': 7}
+                 'mulliken_dipole': 4, 'mulliken_dipole_preserving': 7,
+                 'md': 4, 'mdp': 7}
 IDIPOLE_TABLE = {'improved': 1, 'legacy': 0}
 GAMMA = np.array([[0.0, 0.0, 0.0]])
+CELL100 = np.array([[100.0, 0.0, 0.0], [0.0, 100.0, 0.0], [0.0, 0.0, 100.0]])
 
 
 class Fireball(Calculator):
@@ -54,12 +55,12 @@ class Fireball(Calculator):
         How the autoconsistency in the charges will be performed.
         Options are:
         - Mulliken (default): ... [1]_
-        - Mulliken-Dipole, md: ... [2]_
-        - Mulliken-Dipole-Preserving, mdp: ... [3]_
+        - Mulliken-Dipole: ... [2]_
+        - Mulliken-Dipole-Preserving: ... [3]_
         - Lowdin: ... [4]_
         - NPA: ... [5]_
         Note: this parameter is case insensitive.
-    kpts : Optional[tuple[list[float]] | list[float]]
+    kpts : Optional[ArrayLike]
         K-points considered in the DFT computation.
         These are expressed in units of the unit cell.
         This parameter is only relevant if the Atoms object
@@ -67,11 +68,15 @@ class Fireball(Calculator):
         If the Atoms object has a defined cell and this parameter
         is absent, the Gamma point, kpts=[0.0, 0.0, 0.0],
         will be assumed.
+    kpts_units : Optional[str]
+        Units in which the k-points (if present) should be interpreted.
+        There are two options: unit cell units (default),
+        kpts_units = 'unit_cell'; and angstroms, kpts_units = 'angstroms'.
     dipole : Optional[str]
         Whether to use (dipole='improved') or not (dipole='legacy')
         the improved dipole description.
         By default this is turned on except for periodic systems as
-        it is not yet implemented.
+        it is not yet implemented and thus will be ignored.
 
     Notes
     -----
@@ -93,36 +98,85 @@ class Fireball(Calculator):
     def __init__(self, *, fdata_path: Optional[str] = None,
                  charges_method: Optional[str] = "mulliken",
                  dipole: Optional[str] = "improved",
-                 kpts: Optional[tuple[list[float]] | list[float]] = None,
-                 shell_charges: Optional[np.ndarray] = None,
-                 ifixcharge: Optional[int] = 0, 
+                 kpts: Optional[ArrayLike] = None,
+                 kpts_units: Optional[str] = "unit_cell",
+                 shell_charges: Optional[ArrayLike] = None,
                  **kwargs):
 
         super().__init__(**kwargs)
-        self._fdata_path = fdata_path
+        self.fdata_path = fdata_path
+        self._check_fdata_path()
         self.charges_method = charges_method.lower()
+        self._check_charges_method()
         self.dipole = dipole.lower()
+        self._check_dipole()
         self.kpts = kpts
-        self._check_input()
-        self.ifixcharge = ifixcharge
-        self.shell_charges=shell_charges
+        self.kpts_units = kpts_units
+        self._check_kpts()
+        self.shell_charges = shell_charges
+        self._ifixcharges = int(shell_charges is not None)
 
-    def _check_input(self):
-        # Charges
+    @staticmethod
+    def clean_kpts(kpts):
+        kpts_unique = [kpts[0, :]]
+        for k1 in kpts[1:, :]:
+            for k2 in kpts_unique:
+                if np.sum((k1 + k2)**2) < 1e-8:
+                    break
+            else:
+                kpts_unique.append(k1)
+        return np.array(kpts_unique)
+
+    def _check_fdata_path(self):
+        if self.fdata_path is None:
+            return
+        if not os.path.isfile(os.path.join(self.fdata_path, 'info.dat')):
+            raise ValueError("info.dat file not found in the specified "
+                             f"fdata path ({self.fdata_path}).")
+
+    def _check_charges_method(self):
         if self.charges_method not in ICHARGE_TABLE:
             raise ValueError("Parameter 'charges' must be one of "
-                             "'lowdin', 'mulliken', 'npa', "
-                             "'mulliken-dipole','md',"
-                             "'mulliken-dipole-preserving','mdp'"
-                             f". Got {self.charges}.")
+                             "'lowdin', 'mulliken', 'npa', mulliken_dipole/md "
+                             "or 'mulliken_dipole_preserving/mdp'. "
+                             f"Got '{self.charges_method}'.")
         self._icharge = ICHARGE_TABLE[self.charges_method]
 
-        # Dipole
+    def _check_dipole(self):
         if self.dipole not in IDIPOLE_TABLE:
             raise ValueError("Parameter 'dipole' must be either "
-                             "'improved' or 'legacy'"
-                             f". Got {self.dipole}.")
+                             "'improved' or 'legacy'. "
+                             f"Got '{self.dipole}'.")
         self._idipole = IDIPOLE_TABLE[self.dipole]
+
+    def _check_kpts(self):
+        if self.kpts_units not in ['unit_cell', 'angstroms']:
+            raise ValueError("Parameter 'kpts_units' must be either "
+                             "'unit_cell' or 'angstroms'. "
+                             f"Got '{self.kpts_units}'.")
+        if self.kpts is None:
+            return
+        self.kpts = np.array(self.kpts)
+        if self.kpts.shape[-1] != 3:
+            raise ValueError("K-points must have 3 coordinates. "
+                             f"Got {self.kpts.shape[-1]}")
+        self.kpts = self.kpts.reshape(-1, 3)
+        if self.kpts_units == 'unit_cell' and np.max(np.abs(self.kpts)) > 1.0:
+            raise ValueError("K-points is not in unit cell coordinates. "
+                             "Perhaps try with kpts_units = 'angstroms'.")
+
+    def plot(self):
+        plt.figure(figsize=(8, 6))
+        k = np.linspace(0, 1, self.shell_energies.shape[0])
+        for band in range(self.shell_energies.shape[1]):
+            plt.plot(k, self.shell_energies[:, band])
+            # plt.scatter(k, self.shell_energies[:, band])
+
+        plt.xlabel('k-points')
+        plt.ylabel('Energy (eV)')
+        plt.title('Band Structure')
+        plt.grid(True)
+        plt.show()
 
     # Requisite energies
     def _check_compute(self) -> None:
@@ -131,30 +185,19 @@ class Fireball(Calculator):
                 "Energies not computed. Computing energies", UserWarning)
             self._calculate_energies()
 
-    def plot(self):
-        plt.figure(figsize=(8, 6))
-        k = np.linspace(0, 1, self.energies.shape[0])
-        for band in range(self.energies.shape[1]):
-            plt.plot(k, self.energies[:, band])
-            #plt.scatter(k, self.energies[:, band])
-        
-        plt.xlabel('k-points')
-        plt.ylabel('Energy (eV)')
-        plt.title('Band Structure')
-        plt.grid(True)
-        plt.show()
-
     def _calculate_energies(self) -> None:
         call_scf_loop()
         call_getenergy()
         self.energy = get_etot()
         self.results['energy'] = self.energy
         self.results['free_energy'] = self.energy
-        if self.kpts is not None:
-            self.energies = np.zeros((len(self.kpts),get_norbitals_new()))
+        if not np.allclose(self._kpts, GAMMA):
+            self.shell_energies = np.zeros((self._nkpts,
+                                            get_norbitals_new()))
             for imu in range(get_norbitals_new()):
-                for ikpoint in range(len(self.kpts)):
-                    self.energies[ikpoint,imu] = get_eigen(imu+1,ikpoint+1)
+                for ik in range(self._nkpts):
+                    self.shell_energies[ik, imu] = get_eigen(imu+1, ik+1)
+            self.results['shell_energies'] = self.shell_energies
 
     def _calculate_charges(self) -> None:
         for iatom in range(self.natoms):
@@ -193,71 +236,74 @@ class Fireball(Calculator):
         if 'forces' in properties:
             self._calculate_forces()
 
-    def kpts_monkhorst_pack_fit_cell(self):
-        #reciprocal_lattice = 2 * np.pi * np.linalg.inv(real_lattice).T
-        #point_reciprocal = np.dot(point_real, reciprocal_lattice)
-        #kpts_all=np.dot(self.kpts,self.atoms.cell.reciprocal().T)*np.pi*2
-        reciprocal_lattice = np.linalg.inv(self.atoms.cell) #=self.atoms.cell.reciprocal().T
-        kpts_all = 2 * np.pi * np.dot(self.kpts, reciprocal_lattice)
-        aux=[]
-        for i in kpts_all:
-            poner=True
-            for j in aux:
-                if np.linalg.norm(i + np.array(j)) < 0.00001:
-                    poner=False    
-            if(poner):
-                aux.append(i)                    
-        return np.array(aux)
-        
+    def _initialize_infodat(self):
+        if self.fdata_path is None:
+            default_infodat = get_default_infodat()
+            try:
+                self._infodat = default_infodat.select(self.atoms.numbers)
+            except KeyError:
+                default_infodat = get_default_infodat(refresh=True)
+                self._infodat = default_infodat.select(self.atoms.numbers)
+            self.fdata_path = download_needed(self._infodat)
+        else:
+            self._infodat = InfoDat(os.path.join(self.fdata_path, 'info.dat'))
+        if get_fdata_is_load() == 0:
+            loadfdata_from_path(self.fdata_path)
 
+    def _initialize_options(self):
+        if self.atoms.cell.any():  # periodic and peridic_gamma
+            self._idipole = 0
+            self._icluster = 0
+            self._cell = self.atoms.cell.array
+            if self.kpts is None:  # periodic_gamma
+                warnings.warn("K-points not provided in periodic system."
+                              " Gamma point will be assumed", UserWarning)
+                self._igamma = 1
+                self._kpts = GAMMA
+            elif np.allclose(self.kpts, GAMMA):  # periodic_gamma
+                self._igamma = 1
+                self._kpts = GAMMA
+            else:  # periodic
+                if self.kpts_units == 'unit_cell':
+                    self._kpts = 2*np.pi*np.dot(self.kpts,
+                                                self.atoms.cell.reciprocal().T)
+                self._kpts = self.clean_kpts(self._kpts)
+                self._igamma = 0
+        else:  # molecule and molecule_test
+            self._icluster = 1
+            self._igamma = 1
+            self._kpts = GAMMA
+            self._cell = CELL100
+        self._nkpts = len(self._kpts)
+        if self._ifixcharges == 1:
+            self.shell_charges = np.array(self.shell_charges)
+            if self.shell_charges.shape != (self.natoms, self._infodat.maxshs):
+                raise ValueError("Given shell charges have incorrect shape. "
+                                 "Expected natoms x max_shells "
+                                 f"{(self.natoms, self._infodat.maxshs)}, "
+                                 f"got {self.shell_charges.shape}.")
+
+    def _set_options(self):
+        set_coords(self.atoms.numbers, self.atoms.positions)
+        set_iqout(self._icharge)
+        set_idipole(self._idipole)
+        set_icluster(self._icluster)
+        set_igamma(self._igamma)
+        set_kpoints(self._kpts)
+        set_cell(self._cell)
+        set_ifixcharge(self._ifixcharges)
 
     def initialize(self) -> None:
         self.natoms = len(self.atoms)
-
-        if self._fdata_path is None:
-            default_infodat = get_default_infodat()
-            self._infodat = default_infodat.select(self.atoms.numbers)
-            self._fdata_path = download_needed(self._infodat)
-        else:
-            self._infodat = InfoDat(os.path.join(self._fdata_path, "info.dat"))
-
-        set_iqout(self._icharge)
-        if get_fdata_is_load() == 0:
-            loadfdata_from_path(self._fdata_path)
-
-        set_coords(self.atoms.numbers, self.atoms.positions)
-        if self.atoms.cell.any():                   #periodic and peridic_gamma
-            set_idipole(0)
-            set_icluster(0)
-            set_cell(self.atoms.cell)
-            if self.kpts is None:                   #periodic_gamma
-                warnings.warn("K-points not provided in periodic system."
-                              " Gamma point will be assumed", UserWarning)
-                set_igamma(1)
-                self.kpts = GAMMA
-                set_kpoints(self.kpts)
-            elif np.allclose(self.kpts, GAMMA):     #periodic_gamma
-                set_igamma(1)
-                self.kpts = GAMMA
-                set_kpoints(self.kpts)
-            else:                                   #periodic 
-                set_igamma(0)
-                set_kpoints(self.kpts_monkhorst_pack_fit_cell())
-
-        else:                                       #molecule and molecule_test
-            set_idipole(self._idipole)
-            set_icluster(1)
-            set_igamma(1)
-            load_cell_100()
-            set_kpoints(GAMMA)
+        self._initialize_infodat()
+        self._initialize_options()
+        self._set_options()
 
         call_allocate_system()
-        set_ifixcharge(self.ifixcharge)
         self.charges = np.zeros(self.natoms)
         self.forces = np.empty((self.natoms, 3))
-        if self.shell_charges is None:
+        if self._ifixcharges == 0:
             self.shell_charges = np.zeros((self.natoms, self._infodat.maxshs))
         else:
-            for iatom in range(self.natoms):
-               for issh in range(get_nssh(iatom + 1)):
-                    set_shell_atom_charge(issh + 1, iatom + 1 , self.shell_charges[iatom, issh] )
+            set_shell_atom_charge(self.shell_charges)
+            self.results['shell_charges'] = self.shell_charges

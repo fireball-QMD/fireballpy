@@ -165,10 +165,10 @@ def download_needed(idat: InfoDat) -> str:
     return fb_home
 
 
-def get_default_infodat() -> InfoDat:
+def get_default_infodat(refresh=False) -> InfoDat:
     fb_home = _get_fb_home()
     os.makedirs(fb_home, exist_ok=True)  # Ensure folder exists
-    if not os.path.isfile(os.path.join(fb_home, "default_infodat")):
+    if refresh:
         download_file("https://fireball.ftmc.uam.es/BASE/info.dat",
                       os.path.join(fb_home, "default_infodat"))
 

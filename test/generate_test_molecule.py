@@ -19,8 +19,8 @@ charge = []
 force = []
 
 for dipole in ['improved', 'legacy']:
-    for C in ['Lowdin', 'Mulliken', 'NPA', 'Mulliken-dipole',
-              'Mulliken-dipole-preserving']:
+    for C in ['Lowdin', 'Mulliken', 'NPA', 'Mulliken_dipole',
+              'Mulliken_dipole_preserving']:
         print('-------', C, '-----------------')
         atoms.calc = Fireball(charges_method=C, dipole=dipole)
         atoms.get_potential_energy()

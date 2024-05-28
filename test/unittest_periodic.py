@@ -64,7 +64,7 @@ class Test(unittest.TestCase):
                                    self.forces['arr_2'], atol=self.TOL)
 
     def test_mulliken_dipole_gamma(self):
-        self.atoms.calc = Fireball(charges_method='mulliken-dipole',
+        self.atoms.calc = Fireball(charges_method='mulliken_dipole',
                                    kpts=self.gamma)
         self.atoms.get_potential_energy()
         self.atoms.get_charges()
@@ -77,7 +77,7 @@ class Test(unittest.TestCase):
                                    self.forces['arr_3'], atol=self.TOL)
 
     def test_mulliken_dipole_preserving_gamma(self):
-        self.atoms.calc = Fireball(charges_method='mulliken-dipole-preserving',
+        self.atoms.calc = Fireball(charges_method='mulliken_dipole_preserving',
                                    kpts=self.gamma)
         self.atoms.get_potential_energy()
         self.atoms.get_charges()
@@ -129,7 +129,7 @@ class Test(unittest.TestCase):
                                    self.forces['arr_7'], atol=self.TOL)
 
     def test_mulliken_dipole_monkhorst(self):
-        self.atoms.calc = Fireball(charges_method='mulliken-dipole',
+        self.atoms.calc = Fireball(charges_method='mulliken_dipole',
                                    kpts=self.monkhorst)
         self.atoms.get_potential_energy()
         self.atoms.get_charges()
@@ -142,7 +142,7 @@ class Test(unittest.TestCase):
                                    self.forces['arr_8'], atol=self.TOL)
 
     def test_mulliken_dipole_preserving_monkhorst(self):
-        self.atoms.calc = Fireball(charges_method='mulliken-dipole-preserving',
+        self.atoms.calc = Fireball(charges_method='mulliken_dipole_preserving',
                                    kpts=self.monkhorst)
         self.atoms.get_potential_energy()
         self.atoms.get_charges()

@@ -79,8 +79,7 @@ module M_fdata
   integer, dimension (27+11*nsh_max,nspecies,nspecies) :: numz2c
   real*8, dimension (nspecies,nsh_max) :: cl_PP
   real*8, dimension (27+11*nsh_max,nspecies,nspecies) :: z2cmax
-  real*8, dimension (ME2c_max,nfofx,27+11*nsh_max,nspecies,nspecies) :: xintegral_2c
-  !real*8, dimension (:,:,:,:,:,:), allocatable :: splineint_2c
+  real*8, dimension (4,ME2c_max,nfofx,27+11*nsh_max,nspecies,nspecies) :: splineint_2c
 
   ! Three-center integrals
   integer, parameter :: numXmax = 31 ! AQUI

@@ -1,6 +1,6 @@
 subroutine load_fdata()
   use M_fdata, only: fdataLocation, nsh_max, nspecies, &
-    & errno2c, errno3c, ind2c, icon3c, xintegral_2c
+    & errno2c, errno3c, ind2c, icon3c, splineint_2c
   implicit none
   integer :: in1, in2, in3, icount, isorp, interaction, mintype, maxtype
 
@@ -22,7 +22,7 @@ subroutine load_fdata()
   errno2c = 0
   numz2c = 0
   z2cmax = 0.0d0
-  xintegral_2c = 0.0d0
+  splineint_2c = 0.0d0
   do interaction = 1, 23
     if ((interaction .ge. 2) .and. (interaction .le. 4)) then
       mintype = 0

@@ -72,7 +72,6 @@ module M_fdata
   integer, dimension (1:23,0:8) :: ind2c
   integer, dimension (:,:,:), allocatable :: numz2c
   real*8, dimension (:,:,:), allocatable :: z2cmax
-  real*8, dimension (:,:,:,:,:), allocatable :: xintegral_2c
   real*8, dimension (:,:,:,:,:,:), allocatable :: splineint_2c
 
   ! Three-center integrals

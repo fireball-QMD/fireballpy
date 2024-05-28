@@ -62,6 +62,7 @@ subroutine read_2c (interaction)
         num_nonzero = index_max2c(in1,in2)
         if (interaction .eq. 5) num_nonzero = index_maxPP(in1,in2)
         if (interaction .eq. 4 .or. interaction .eq. 7) num_nonzero = index_max2c(in1,in1)
+        if (interaction .eq. 8) num_nonzero = 1
         if (interaction .eq. 10)  num_nonzero = index_max2cDipY(in1,in2)
         if (interaction .eq. 11)  num_nonzero = index_max2cDipX(in1,in2)
         if (interaction .eq. 17)  num_nonzero = index_max2c(in1,in1)
@@ -70,7 +71,7 @@ subroutine read_2c (interaction)
         if (interaction .eq. 20 .or. interaction .eq. 21) num_nonzero = index_maxS(in1,in2)
         if (interaction .eq. 23) num_nonzero = index_maxS(in1,in2)
 
-        call readdata_2c (interaction, iounit, num_nonzero, numz, zmax,itype, in1, in2)
+        call readdata_2c (interaction, iounit, num_nonzero, numz, zmax, itype, in1, in2)
         close(iounit)
       end do
     end do
