@@ -9,8 +9,10 @@ subroutine interpolate_2d (xin, yin, iauxforce, nx, ny, hx, hy, xintegral, Q_L, 
   integer :: ix, ixp, ixn, ixn2, iy, iyp, iyn, iyn2
   real*8 :: xmin, ymin, xmax, ymax, x, y, hxi, hyi, &
     & f00, f01, f10, f11, fx00, fx01, fx10, fx11, &
-    & fy00, fy01, fy10, fy11, fxy00, fxy01, fxy10, fxy11
-  real*8, dimension(4,4) :: coefs
+    & fy00, fy01, fy10, fy11, fxy00, fxy01, fxy10, fxy11, &
+    & c11, c12, c13, c14, c21, c22, c23, c24, &
+    & c31, c32, c33, c34, c41, c42, c43, c44, &
+    & py1, py2, py3, py4
 
   ! Initialize
   xmin = 0.0
@@ -159,25 +161,25 @@ subroutine interpolate_2d (xin, yin, iauxforce, nx, ny, hx, hy, xintegral, Q_L, 
   end if
 
   ! Coefficient matrix
-  coefs(1,1) = f00
-  coefs(1,2) = fy00
-  coefs(1,3) = -3.0*f00 + 3.0*f01 - 2.0*fy00 - fy01
-  coefs(1,4) = 2.0*f00 - 2.0*f01 + fy00 + fy01
-  coefs(2,1) = fx00
-  coefs(2,2) = fxy00
-  coefs(2,3) = -3.0*fx00 + 3.0*fx01 - 2.0*fxy00 - fxy01
-  coefs(2,4) = 2.0*fx00 - 2.0*fx01 + fxy00 + fxy01
-  coefs(3,1) = -3.0*f00 + 3.0*f10 - 2.0*fx00 - fx10
-  coefs(3,2) = -3.0*fy00 + 3.0*fy10 - 2.0*fxy00 - fxy10
-  coefs(3,3) = 9.0*f00 - 9.0*f01 + 6.0*fy00 + 3.0*fy01 - 9.0*f10 + 9.0*f11 - 6.0*fy10 - 3.0*fy11 + 6.0*fx00 &
+  c11 = f00
+  c12 = fy00
+  c13 = -3.0*f00 + 3.0*f01 - 2.0*fy00 - fy01
+  c14 = 2.0*f00 - 2.0*f01 + fy00 + fy01
+  c21 = fx00
+  c22 = fxy00
+  c23 = -3.0*fx00 + 3.0*fx01 - 2.0*fxy00 - fxy01
+  c24 = 2.0*fx00 - 2.0*fx01 + fxy00 + fxy01
+  c31 = -3.0*f00 + 3.0*f10 - 2.0*fx00 - fx10
+  c32 = -3.0*fy00 + 3.0*fy10 - 2.0*fxy00 - fxy10
+  c33 = 9.0*f00 - 9.0*f01 + 6.0*fy00 + 3.0*fy01 - 9.0*f10 + 9.0*f11 - 6.0*fy10 - 3.0*fy11 + 6.0*fx00 &
     & - 6.0*fx01 + 4.0*fxy00 + 2.0*fx01 + 3.0*fx10 - 3.0*fx11 + 2.0*fxy10 + fxy11
-  coefs(3,4) = -6.0*f00 + 6.0*f01 - 3.0*fy00 - 3.0*fy01 + 6.0*f10 - 6.0*f11 + 3.0*fy10 + 3.0*fy11 - 4.0*fx00 &
+  c34 = -6.0*f00 + 6.0*f01 - 3.0*fy00 - 3.0*fy01 + 6.0*f10 - 6.0*f11 + 3.0*fy10 + 3.0*fy11 - 4.0*fx00 &
     & + 4.0*fx01 - 2.0*fxy00 - 2.0*fx01 - 2.0*fx10 + 2.0*fx11 - fxy10 - fxy11
-  coefs(4,1) = 2.0*f00 - 2.0*f10 + fx00 + fx10
-  coefs(4,2) = 2.0*fy00 - 2.0*fy10 + fxy00 + fxy10
-  coefs(4,3) = -6.0*f00 + 6.0*f01 - 4.0*fy00 - 2.0*fy01 + 6.0*f10 - 6.0*f11 + 4.0*fy10 + 2.0*fy11 - 3.0*fx00 &
+  c41 = 2.0*f00 - 2.0*f10 + fx00 + fx10
+  c42 = 2.0*fy00 - 2.0*fy10 + fxy00 + fxy10
+  c43 = -6.0*f00 + 6.0*f01 - 4.0*fy00 - 2.0*fy01 + 6.0*f10 - 6.0*f11 + 4.0*fy10 + 2.0*fy11 - 3.0*fx00 &
     & + 3.0*fx01 - 2.0*fxy00 - fx01 - 3.0*fx10 + 3.0*fx11 - 2.0*fxy10 - fxy11
-  coefs(4,4) = 4.0*f00 - 4.0*f01 + 2.0*fy00 + 2.0*fy01 - 4.0*f10 + 4.0*f11 - 2.0*fy10 - 2.0*fy11 + 2.0*fx00 &
+  c44 = 4.0*f00 - 4.0*f01 + 2.0*fy00 + 2.0*fy01 - 4.0*f10 + 4.0*f11 - 2.0*fy10 - 2.0*fy11 + 2.0*fx00 &
     & - 2.0*fx01 + fxy00 + fx01 + 2.0*fx10 - 2.0*fx11 + fxy10 + fxy11
 
   ! Scaled variables
@@ -185,19 +187,19 @@ subroutine interpolate_2d (xin, yin, iauxforce, nx, ny, hx, hy, xintegral, Q_L, 
   y = y - real(iy - 1)
 
   ! Compute polynomial
-  Q_L =  coefs(1,1) + y*(coefs(1,2) + y*(coefs(1,3) + y*coefs(1,4))) + &
-    & x*(coefs(2,1) + y*(coefs(2,2) + y*(coefs(2,3) + y*coefs(2,4))) + &
-    & x*(coefs(3,1) + y*(coefs(3,2) + y*(coefs(3,3) + y*coefs(3,4))) + &
-    & x*(coefs(4,1) + y*(coefs(4,2) + y*(coefs(4,3) + y*coefs(4,4))))))
+  py1 = c11 + y*(c12 + y*(c13 + y*c14))
+  py2 = c21 + y*(c22 + y*(c23 + y*c24))
+  py3 = c31 + y*(c32 + y*(c33 + y*c34))
+  py4 = c41 + y*(c42 + y*(c43 + y*c44))
+  Q_L = py1 + x*(py2 + x*(py3 + x*py4))
 
   ! Compute derivatives
   if(iauxforce .eq. 1) then
-    dQ_Ldx = hxi*(coefs(2,1) + y*(coefs(2,2) + y*(coefs(2,3) + y*coefs(2,4))) + &
-      &    2.0*x*(coefs(3,1) + y*(coefs(3,2) + y*(coefs(3,3) + y*coefs(3,4))) + &
-      &    3.0*x*(coefs(4,1) + y*(coefs(4,2) + y*(coefs(4,3) + y*coefs(4,4))))))
-    dQ_Ldy = hyi*(coefs(1,2) + 2.0*y*(coefs(1,3) + 3.0*y*coefs(1,4)) + &
-      &        x*(coefs(2,2) + 2.0*y*(coefs(2,3) + 3.0*y*coefs(2,4)) + &
-      &        x*(coefs(3,2) + 2.0*y*(coefs(3,3) + 3.0*y*coefs(3,4)) + &
-      &        x*(coefs(4,2) + 2.0*y*(coefs(4,3) + 3.0*y*coefs(4,4))))))
+    dQ_Ldx = hxi*(py2 + x*(2.0*py3 + x*3.0*py4))
+    py1 = c12 + y*(2.0*c13 + y*3.0*c14)
+    py2 = c22 + y*(2.0*c23 + y*3.0*c24)
+    py3 = c32 + y*(2.0*c33 + y*3.0*c34)
+    py4 = c42 + y*(2.0*c43 + y*3.0*c44)
+    dQ_Ldy = hyi*(py1 + x*(py2 + x*(py3 + x*py4)))
   end if
 end subroutine interpolate_2d
