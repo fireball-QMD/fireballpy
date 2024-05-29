@@ -8,6 +8,8 @@ import matplotlib.pyplot as plt  # type: ignore
 from ase.calculators.calculator import Calculator, all_changes  # type: ignore
 from fireballpy.infodat import InfoDat
 from fireballpy.fdata import download_needed, get_default_infodat
+from ase.dft.kpoints import bandpath
+
 
 from ._fireball import (call_scf_loop,  # type: ignore
                         call_getenergy,
@@ -24,6 +26,7 @@ from ._fireball import (call_scf_loop,  # type: ignore
                         set_ifixcharge,
                         set_shell_atom_charge,
                         get_etot,
+                        get_efermi,
                         get_nssh,
                         get_atom_force,
                         get_shell_atom_charge,
@@ -165,18 +168,40 @@ class Fireball(Calculator):
             raise ValueError("K-points is not in unit cell coordinates. "
                              "Perhaps try with kpts_units = 'angstroms'.")
 
-    def plot(self):
-        plt.figure(figsize=(8, 6))
-        k = np.linspace(0, 1, self.shell_energies.shape[0])
-        for band in range(self.shell_energies.shape[1]):
-            plt.plot(k, self.shell_energies[:, band])
-            # plt.scatter(k, self.shell_energies[:, band])
+    def plot(self, bandpath: Optional[bandpath] = None, 
+                   emin: Optional[float] = None,
+                   emax: Optional[float] = None ):
 
-        plt.xlabel('k-points')
+        xmin=0
+        xmax=self.shell_energies.shape[0]
+
+        eigen=self.shell_energies-np.min(self.shell_energies)
+
+        if bandpath is None:
+            X = np.arange(0, xmax , 1)
+            plt.xticks([])
+            plt.grid(False)
+            plt.xlabel('k-points')
+        else:
+            X = np.arange(0, xmax, 1)
+            kpts, Blx, labels = bandpath.get_linear_kpoint_axis()
+            ticks = Blx*xmax/kpts[-1]
+            plt.xticks(ticks, labels)
+            plt.grid(True)
+
+        plt.xlim(xmin,xmax)
+        if (emin is not None and emax is not None):
+            plt.ylim(emin,emax)
+
+        for band in range(self.shell_energies.shape[1]):
+            plt.plot(X, eigen[:, band])
+        
+        plt.axhline(y=(get_efermi()-np.min(self.shell_energies)), color='b', linestyle='--', label='y = 50')
+
         plt.ylabel('Energy (eV)')
         plt.title('Band Structure')
-        plt.grid(True)
         plt.show()
+
 
     # Requisite energies
     def _check_compute(self) -> None:

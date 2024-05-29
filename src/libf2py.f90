@@ -73,6 +73,13 @@ real*8 function get_etot()
   return
 end function get_etot
 
+real*8 function get_efermi()
+  use M_system, only : efermi
+  get_efermi=efermi
+  return
+end function get_efermi
+
+
 integer function get_norbitals_new()
   use M_system, only : norbitals_new
   get_norbitals_new = norbitals_new
