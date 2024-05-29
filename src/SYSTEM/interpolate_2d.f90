@@ -8,11 +8,10 @@ subroutine interpolate_2d (xin, yin, iauxforce, nx, ny, hx, hy, xintegral, Q_L, 
   real*8, parameter :: tol = 1.0e-5
   integer :: ix, ixp, ixn, ixn2, iy, iyp, iyn, iyn2
   real*8 :: xmin, ymin, xmax, ymax, x, y, hxi, hyi, &
-    & f00, f01, f10, f11, fx00, fx01, fx10, fx11, &
-    & fy00, fy01, fy10, fy11, fxy00, fxy01, fxy10, fxy11, &
-    & c11, c12, c13, c14, c21, c22, c23, c24, &
-    & c31, c32, c33, c34, c41, c42, c43, c44, &
-    & py1, py2, py3, py4
+    & f0m1, f00, f01, f02, f1m1, f10, f11, f12, fx0m1, fx00, fx01, fx02, fx1m1, fx10, fx11, fx12, &
+    & pm1, p0, p1, p2, pxm1, px0, px1, px2, pxy0, pxy1, py0, py1, &
+    & cxm10, cxm11, cxm12, cxm13, cx00, cx01, cx02, cx03, cx10, cx11, cx12, cx13, cx20, cx21, cx22, cx23, &
+    & cy0, cy1, cy2, cy3
 
   ! Initialize
   xmin = 0.0
@@ -64,6 +63,10 @@ subroutine interpolate_2d (xin, yin, iauxforce, nx, ny, hx, hy, xintegral, Q_L, 
     iy = int(y) + 1
   end if
 
+  ! Scaled variables
+  x = x - real(ix - 1)
+  y = y - real(iy - 1)
+
   ! Precompute indices
   ixp = ix - 1
   ixn = ix + 1
@@ -72,13 +75,12 @@ subroutine interpolate_2d (xin, yin, iauxforce, nx, ny, hx, hy, xintegral, Q_L, 
   iyn = iy + 1
   iyn2 = iy + 2
 
-  ! Get necessary coefficients with care of the boundaries
-  ! f(x,y)
   f00 = xintegral(ix,iy)
   f01 = xintegral(ix,iyn)
   f10 = xintegral(ixn,iy)
   f11 = xintegral(ixn,iyn)
-  ! df(x,y)/dx
+
+  ! Compute x derivatives
   if(ix .eq. 1) then
     fx00 = xintegral(ixn,iy) - xintegral(ix,iy)
     fx01 = xintegral(ixn,iyn) - xintegral(ix,iyn)
@@ -95,111 +97,128 @@ subroutine interpolate_2d (xin, yin, iauxforce, nx, ny, hx, hy, xintegral, Q_L, 
     fx10 = 0.5*(xintegral(ixn2,iy) - xintegral(ix,iy))
     fx11 = 0.5*(xintegral(ixn2,iyn) - xintegral(ix,iyn))
   end if
-  ! df(x,y)/dy
-  if(iy .eq. 1) then
-    fy00 = xintegral(ix,iyn) - xintegral(ix,iy)
-    fy01 = 0.5*(xintegral(ix,iyn2) - xintegral(ix,iy))
-    fy10 = xintegral(ixn,iyn) - xintegral(ixn,iy)
-    fy11 = 0.5*(xintegral(ixn,iyn2) - xintegral(ixn,iy))
-  else if(iy .eq. ny-1) then
-    fy00 = 0.5*(xintegral(ix,iyn) - xintegral(ix,iyp))
-    fy01 = xintegral(ix,iyn) - xintegral(ix,iy)
-    fy10 = 0.5*(xintegral(ixn,iyn) - xintegral(ixn,iyp))
-    fy11 = xintegral(ixn,iyn) - xintegral(ixn,iy)
-  else
-    fy00 = 0.5*(xintegral(ix,iyn) - xintegral(ix,iyp))
-    fy01 = 0.5*(xintegral(ix,iyn2) - xintegral(ix,iy))
-    fy10 = 0.5*(xintegral(ixn,iyn) - xintegral(ixn,iyp))
-    fy11 = 0.5*(xintegral(ixn,iyn2) - xintegral(ixn,iy))
-  end if
-  ! d^2f(x,y)/dxdy
-  if((ix .eq. 1) .and. (iy .eq. 1)) then
-    fxy00 = xintegral(ixn,iyn) - xintegral(ix,iyn) - xintegral(ixn,iy) + xintegral(ix,iy)
-    fxy01 = 0.5*(xintegral(ixn,iyn2) - xintegral(ix,iyn2) - xintegral(ixn,iy) + xintegral(ix,iy))
-    fxy10 = 0.5*(xintegral(ixn2,iyn) - xintegral(ix,iyn) - xintegral(ixn2,iy) + xintegral(ix,iy))
-    fxy11 = 0.25*(xintegral(ixn2,iyn2) - xintegral(ix,iyn2) - xintegral(ixn2,iy) + xintegral(ix,iy))
-  else if((ix .eq. nx-1) .and. (iy .eq. ny-1)) then
-    fxy00 = 0.25*(xintegral(ixn,iyn) - xintegral(ixp,iyn) - xintegral(ixn,iyp) + xintegral(ixp,iyp))
-    fxy01 = 0.5*(xintegral(ixn,iyn) - xintegral(ixp,iyn) - xintegral(ixn,iy) + xintegral(ixp,iy))
-    fxy10 = 0.5*(xintegral(ixn,iyn) - xintegral(ix,iyn) - xintegral(ixn,iyp) + xintegral(ix,iyp))
-    fxy11 = xintegral(ixn,iyn) - xintegral(ix,iyn) - xintegral(ixn,iy) + xintegral(ix,iy)
-  else if((ix .eq. 1) .and. (iy .eq. ny-1)) then
-    fxy00 = 0.5*(xintegral(ixn,iyn) - xintegral(ix,iyn) - xintegral(ixn,iyp) + xintegral(ix,iyp))
-    fxy01 = xintegral(ixn,iyn) - xintegral(ix,iyn) - xintegral(ixn,iy) + xintegral(ix,iy)
-    fxy10 = 0.25*(xintegral(ixn2,iyn) - xintegral(ix,iyn) - xintegral(ixn2,iyp) + xintegral(ix,iyp))
-    fxy11 = 0.5*(xintegral(ixn2,iyn) - xintegral(ix,iyn) - xintegral(ixn2,iy) + xintegral(ix,iy))
-  else if((ix .eq. nx-1) .and. (iy .eq. 1)) then
-    fxy00 = 0.5*(xintegral(ixn,iyn) - xintegral(ixp,iyn) - xintegral(ixn,iy) + xintegral(ixp,iy))
-    fxy01 = 0.25*(xintegral(ixn,iyn2) - xintegral(ixp,iyn2) - xintegral(ixn,iy) + xintegral(ixp,iy))
-    fxy10 = xintegral(ixn,iyn) - xintegral(ix,iyn) - xintegral(ixn,iy) + xintegral(ix,iy)
-    fxy11 = 0.5*(xintegral(ixn,iyn2) - xintegral(ix,iyn2) - xintegral(ixn,iy) + xintegral(ix,iy))
-  else if(ix .eq. 1) then
-    fxy00 = 0.5*(xintegral(ixn,iyn) - xintegral(ix,iyn) - xintegral(ixn,iyp) + xintegral(ix,iyp))
-    fxy01 = 0.5*(xintegral(ixn,iyn2) - xintegral(ix,iyn2) - xintegral(ixn,iy)  + xintegral(ix,iy))
-    fxy10 = 0.25*(xintegral(ixn2,iyn) - xintegral(ix,iyn) - xintegral(ixn2,iyp) + xintegral(ix,iyp))
-    fxy11 = 0.25*(xintegral(ixn2,iyn2) - xintegral(ix,iyn2) - xintegral(ixn2,iy) + xintegral(ix,iy))
-  else if(iy .eq. 1) then
-    fxy00 = 0.5*(xintegral(ixn,iyn) - xintegral(ixp,iyn) - xintegral(ixn,iy) + xintegral(ixp,iy))
-    fxy01 = 0.25*(xintegral(ixn,iyn2) - xintegral(ixp,iyn2) - xintegral(ixn,iy)  + xintegral(ixp,iy))
-    fxy10 = 0.5*(xintegral(ixn2,iyn) - xintegral(ix,iyn) - xintegral(ixn2,iy) + xintegral(ix,iy))
-    fxy11 = 0.25*(xintegral(ixn2,iyn2) - xintegral(ix,iyn2) - xintegral(ixn2,iy) + xintegral(ix,iy))
-  else if(ix .eq. nx-1) then
-    fxy00 = 0.25*(xintegral(ixn,iyn) - xintegral(ixp,iyn) - xintegral(ixn,iyp) + xintegral(ixp,iyp))
-    fxy01 = 0.25*(xintegral(ixn,iyn2) - xintegral(ixp,iyn2) - xintegral(ixn,iy)  + xintegral(ixp,iy))
-    fxy10 = 0.5*(xintegral(ixn,iyn) - xintegral(ix,iyn) - xintegral(ixn,iyp) + xintegral(ix,iyp))
-    fxy11 = 0.5*(xintegral(ixn,iyn2) - xintegral(ix,iyn2) - xintegral(ixn,iy) + xintegral(ix,iy))
-  else if(iy .eq. ny-1) then
-    fxy00 = 0.25*(xintegral(ixn,iyn) - xintegral(ixp,iyn) - xintegral(ixn,iyp) + xintegral(ixp,iyp))
-    fxy01 = 0.5*(xintegral(ixn,iyn) - xintegral(ixp,iyn) - xintegral(ixn,iy)  + xintegral(ixp,iy))
-    fxy10 = 0.25*(xintegral(ixn2,iyn) - xintegral(ix,iyn) - xintegral(ixn2,iyp) + xintegral(ix,iyp))
-    fxy11 = 0.5*(xintegral(ixn2,iyn) - xintegral(ix,iyn) - xintegral(ixn2,iy) + xintegral(ix,iy))
-  else
-    fxy00 = 0.25*(xintegral(ixn,iyn) - xintegral(ixp,iyn) - xintegral(ixn,iyp) + xintegral(ixp,iyp))
-    fxy01 = 0.25*(xintegral(ixn,iyn2) - xintegral(ixp,iyn2) - xintegral(ixn,iy)  + xintegral(ixp,iy))
-    fxy10 = 0.25*(xintegral(ixn2,iyn) - xintegral(ix,iyn) - xintegral(ixn2,iyp) + xintegral(ix,iyp))
-    fxy11 = 0.25*(xintegral(ixn2,iyn2) - xintegral(ix,iyn2) - xintegral(ixn2,iy) + xintegral(ix,iy))
-  end if
 
-  ! Coefficient matrix
-  c11 = f00
-  c12 = fy00
-  c13 = -3.0*f00 + 3.0*f01 - 2.0*fy00 - fy01
-  c14 = 2.0*f00 - 2.0*f01 + fy00 + fy01
-  c21 = fx00
-  c22 = fxy00
-  c23 = -3.0*fx00 + 3.0*fx01 - 2.0*fxy00 - fxy01
-  c24 = 2.0*fx00 - 2.0*fx01 + fxy00 + fxy01
-  c31 = -3.0*f00 + 3.0*f10 - 2.0*fx00 - fx10
-  c32 = -3.0*fy00 + 3.0*fy10 - 2.0*fxy00 - fxy10
-  c33 = 9.0*f00 - 9.0*f01 + 6.0*fy00 + 3.0*fy01 - 9.0*f10 + 9.0*f11 - 6.0*fy10 - 3.0*fy11 + 6.0*fx00 &
-    & - 6.0*fx01 + 4.0*fxy00 + 2.0*fx01 + 3.0*fx10 - 3.0*fx11 + 2.0*fxy10 + fxy11
-  c34 = -6.0*f00 + 6.0*f01 - 3.0*fy00 - 3.0*fy01 + 6.0*f10 - 6.0*f11 + 3.0*fy10 + 3.0*fy11 - 4.0*fx00 &
-    & + 4.0*fx01 - 2.0*fxy00 - 2.0*fx01 - 2.0*fx10 + 2.0*fx11 - fxy10 - fxy11
-  c41 = 2.0*f00 - 2.0*f10 + fx00 + fx10
-  c42 = 2.0*fy00 - 2.0*fy10 + fxy00 + fxy10
-  c43 = -6.0*f00 + 6.0*f01 - 4.0*fy00 - 2.0*fy01 + 6.0*f10 - 6.0*f11 + 4.0*fy10 + 2.0*fy11 - 3.0*fx00 &
-    & + 3.0*fx01 - 2.0*fxy00 - fx01 - 3.0*fx10 + 3.0*fx11 - 2.0*fxy10 - fxy11
-  c44 = 4.0*f00 - 4.0*f01 + 2.0*fy00 + 2.0*fy01 - 4.0*f10 + 4.0*f11 - 2.0*fy10 - 2.0*fy11 + 2.0*fx00 &
-    & - 2.0*fx01 + fxy00 + fx01 + 2.0*fx10 - 2.0*fx11 + fxy10 + fxy11
-
-  ! Scaled variables
-  x = x - real(ix - 1)
-  y = y - real(iy - 1)
-
-  ! Compute polynomial
-  py1 = c11 + y*(c12 + y*(c13 + y*c14))
-  py2 = c21 + y*(c22 + y*(c23 + y*c24))
-  py3 = c31 + y*(c32 + y*(c33 + y*c34))
-  py4 = c41 + y*(c42 + y*(c43 + y*c44))
-  Q_L = py1 + x*(py2 + x*(py3 + x*py4))
-
-  ! Compute derivatives
+  ! Interpolate in x
+  cx00 = f00
+  cx01 = fx00
+  cx02 = -3.0*f00 + 3.0*f10 - 2.0*fx00 - fx10
+  cx03 = 2.0*f00 - 2.0*f10 + fx00 + fx10
+  cx10 = f01
+  cx11 = fx01
+  cx12 = -3.0*f01 + 3.0*f11 - 2.0*fx01 - fx11
+  cx13 = 2.0*f01 - 2.0*f11 + fx01 + fx11
+  p0 = cx00 + x*(cx01 + x*(cx02 + x*cx03))
+  p1 = cx10 + x*(cx11 + x*(cx12 + x*cx13))
   if(iauxforce .eq. 1) then
-    dQ_Ldx = hxi*(py2 + x*(2.0*py3 + x*3.0*py4))
-    py1 = c12 + y*(2.0*c13 + y*3.0*c14)
-    py2 = c22 + y*(2.0*c23 + y*3.0*c24)
-    py3 = c32 + y*(2.0*c33 + y*3.0*c34)
-    py4 = c42 + y*(2.0*c43 + y*3.0*c44)
-    dQ_Ldy = hyi*(py1 + x*(py2 + x*(py3 + x*py4)))
+    px0 = cx01 + x*(2.0*cx02 + 3.0*x*cx03)
+    px1 = cx11 + x*(2.0*cx12 + 3.0*x*cx13)
+  end if
+
+  ! Compute y derivatives
+  if(iy .eq. 1) then
+    f02 = xintegral(ix,iyn2)
+    f12 = xintegral(ixn,iyn2)
+    if(ix .eq. 1) then
+      fx02 = xintegral(ixn,iyn2) - xintegral(ix,iyn2)
+      fx12 = 0.5*(xintegral(ixn2,iyn2) - xintegral(ix,iyn2))
+    else if(ix .eq. nx-1) then
+      fx02 = 0.5*(xintegral(ixn,iyn2) - xintegral(ixp,iyn2))
+      fx12 = xintegral(ixn,iyn2) - xintegral(ix,iyn2)
+    else
+      fx02 = 0.5*(xintegral(ixn,iyn2) - xintegral(ixp,iyn2))
+      fx12 = 0.5*(xintegral(ixn2,iyn2) - xintegral(ix,iyn2))
+    end if
+    cx20 = f02
+    cx21 = fx02
+    cx22 = -3.0*f02 + 3.0*f12 - 2.0*fx02 - fx12
+    cx23 = 2.0*f02 - 2.0*f12 + fx02 + fx12
+    p2 = cx20 + x*(cx21 + x*(cx22 + x*cx23))
+    py0 = p1 - p0
+    py1 = 0.5*(p2 - p0)
+    if(iauxforce .eq. 1) then
+      px2 = cx21 + x*(2.0*cx22 + x*3.0*cx23)
+      pxy0 = px1 - px0
+      pxy1 = 0.5*(px2 - px0)
+    end if
+  else if(iy .eq. ny-1) then
+    f0m1 = xintegral(ix,iyp)
+    f1m1 = xintegral(ixn,iyp)
+    if(ix .eq. 1) then
+      fx0m1 = xintegral(ixn,iyp) - xintegral(ix,iyp)
+      fx1m1 = 0.5*(xintegral(ixn2,iyp) - xintegral(ix,iyp))
+    else if(ix .eq. nx-1) then
+      fx0m1 = 0.5*(xintegral(ixn,iyp) - xintegral(ixp,iyp))
+      fx1m1 = xintegral(ixn,iyp) - xintegral(ix,iyp)
+    else
+      fx0m1 = 0.5*(xintegral(ixn,iyp) - xintegral(ixp,iyp))
+      fx1m1 = 0.5*(xintegral(ixn2,iyp) - xintegral(ix,iyp))
+    end if
+    cxm10 = f0m1
+    cxm11 = fx0m1
+    cxm12 = -3.0*f0m1 + 3.0*f1m1 - 2.0*fx0m1 - fx1m1
+    cxm13 = 2.0*f0m1 - 2.0*f1m1 + fx0m1 + fx1m1
+    pm1 = cxm10 + x*(cxm11 + x*(cxm12 + x*cxm13))
+    py0 = 0.5*(p1 - pm1)
+    py1 = p1 - p0
+    if(iauxforce .eq. 1) then
+      pxm1 = cxm11 + x*(2.0*cxm12 + x*3.0*cxm13)
+      pxy0 = 0.5*(px1 - pxm1)
+      pxy1 = px1 - px0
+    end if
+  else
+    f0m1 = xintegral(ix,iyp)
+    f1m1 = xintegral(ixn,iyp)
+    f02 = xintegral(ix,iyn2)
+    f12 = xintegral(ixn,iyn2)
+    if(ix .eq. 1) then
+      fx0m1 = xintegral(ixn,iyp) - xintegral(ix,iyp)
+      fx1m1 = 0.5*(xintegral(ixn2,iyp) - xintegral(ix,iyp))
+      fx02 = xintegral(ixn,iyn2) - xintegral(ix,iyn2)
+      fx12 = 0.5*(xintegral(ixn2,iyn2) - xintegral(ix,iyn2))
+    else if(ix .eq. nx-1) then
+      fx0m1 = 0.5*(xintegral(ixn,iyp) - xintegral(ixp,iyp))
+      fx1m1 = xintegral(ixn,iyp) - xintegral(ix,iyp)
+      fx02 = 0.5*(xintegral(ixn,iyn2) - xintegral(ixp,iyn2))
+      fx12 = xintegral(ixn,iyn2) - xintegral(ix,iyn2)
+    else
+      fx0m1 = 0.5*(xintegral(ixn,iyp) - xintegral(ixp,iyp))
+      fx1m1 = 0.5*(xintegral(ixn2,iyp) - xintegral(ix,iyp))
+      fx02 = 0.5*(xintegral(ixn,iyn2) - xintegral(ixp,iyn2))
+      fx12 = 0.5*(xintegral(ixn2,iyn2) - xintegral(ix,iyn2))
+    end if
+    cxm10 = f0m1
+    cxm11 = fx0m1
+    cxm12 = -3.0*f0m1 + 3.0*f1m1 - 2.0*fx0m1 - fx1m1
+    cxm13 = 2.0*f0m1 - 2.0*f1m1 + fx0m1 + fx1m1
+    cx20 = f02
+    cx21 = fx02
+    cx22 = -3.0*f02 + 3.0*f12 - 2.0*fx02 - fx12
+    cx23 = 2.0*f02 - 2.0*f12 + fx02 + fx12
+    pm1 = cxm10 + x*(cxm11 + x*(cxm12 + x*cxm13))
+    pm1 = cxm10 + x*(cxm11 + x*(cxm12 + x*cxm13))
+    p2 = cx20 + x*(cx21 + x*(cx22 + x*cx23))
+    py0 = 0.5*(p1 - pm1)
+    py1 = 0.5*(p2 - p0)
+    if(iauxforce .eq. 1) then
+      pxm1 = cxm11 + x*(2.0*cxm12 + x*3.0*cxm13)
+      px2 = cx21 + x*(2.0*cx22 + x*3.0*cx23)
+      pxy0 = 0.5*(px1 - pxm1)
+      pxy1 = 0.5*(px2 - px0)
+    end if
+  end if
+
+  ! Interpolate in y
+  cy0 = p0
+  cy1 = py0
+  cy2 = -3.0*p0 + 3.0*p1 - 2.0*py0 - py1
+  cy3 = 2.0*p0 - 2.0*p1 + py0 + py1
+  Q_L = cy0 + y*(cy1 + y*(cy2 + y*cy3))
+  if(iauxforce .eq. 1) then
+    dQ_Ldy = hyi*(cy1 + y*(2.0*cy2 + y*3.0*cy3))
+    cy0 = px0
+    cy1 = pxy0
+    cy2 = -3.0*px0 + 3.0*px1 - 2.0*pxy0 - pxy1
+    cy3 = 2.0*px0 - 2.0*px1 + pxy0 + pxy1
+    dQ_Ldx = hxi*(cy0 + y*(cy1 + y*(cy2 + y*cy3)))
   end if
 end subroutine interpolate_2d
