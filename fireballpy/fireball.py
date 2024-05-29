@@ -168,6 +168,25 @@ class Fireball(Calculator):
             raise ValueError("K-points is not in unit cell coordinates. "
                              "Perhaps try with kpts_units = 'angstroms'.")
 
+    def get_k_point_weights(self):
+        w_k=np.ones(len(self.kpts))/len(self.kpts)
+        #print(w_k)
+        return w_k
+
+    def get_number_of_spins(self):
+        return 1             
+
+    def get_eigenvalues(self,kpt,spin):
+        self.spin=spin
+        index=0
+        for ik in range(len(self.kpts)):
+           if(np.linalg.norm(self.kpts[ik] - kpt ) < 0.00001):
+               index=ik  
+        return (self.shell_energies[index]-np.min(self.shell_energies)).copy()
+
+    def get_fermi_level(self):
+        return (get_efermi()-np.min(self.shell_energies))
+
     def plot(self, bandpath: Optional[bandpath] = None, 
                    emin: Optional[float] = None,
                    emax: Optional[float] = None ):
