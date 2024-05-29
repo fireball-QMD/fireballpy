@@ -28,5 +28,5 @@ atoms.get_potential_energy()
 
 
 
-atoms.calc.plot()
+atoms.calc.plot(bandpath=B,emin=0,emax=20)
 
