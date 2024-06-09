@@ -182,10 +182,10 @@ class Fireball(Calculator):
         for ik in range(len(self.kpts)):
            if(np.linalg.norm(self.kpts[ik] - kpt ) < 0.00001):
                index=ik  
-        return (self.shell_energies[index]-np.min(self.shell_energies)).copy()
+        return (self.shell_energies[index]-get_efermi()).copy()
 
     def get_fermi_level(self):
-        return (get_efermi()-np.min(self.shell_energies))
+        return 0.0
 
     def plot(self, bandpath: Optional[bandpath] = None, 
                    emin: Optional[float] = None,
@@ -194,7 +194,7 @@ class Fireball(Calculator):
         xmin=0
         xmax=self.shell_energies.shape[0]
 
-        eigen=self.shell_energies-np.min(self.shell_energies)
+        eigen=self.shell_energies-get_efermi()
 
         if bandpath is None:
             X = np.arange(0, xmax , 1)
@@ -209,13 +209,19 @@ class Fireball(Calculator):
             plt.grid(True)
 
         plt.xlim(xmin,xmax)
-        if (emin is not None and emax is not None):
-            plt.ylim(emin,emax)
+
+        if emin is None:
+           emin=np.min(self.shell_energies)-get_efermi()
+
+        if emax is None:
+           emax = np.max(self.shell_energies)-get_efermi()
+
+        plt.ylim(emin,emax)
 
         for band in range(self.shell_energies.shape[1]):
             plt.plot(X, eigen[:, band])
         
-        plt.axhline(y=(get_efermi()-np.min(self.shell_energies)), color='b', linestyle='--', label='y = 50')
+        plt.axhline(y=0.0, color='b', linestyle='--', label='y = 50')
 
         plt.ylabel('Energy (eV)')
         plt.title('Band Structure')

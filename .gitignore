@@ -5,3 +5,5 @@ bin
 build
 __pycache__ 
 *.so
+*.traj
+*.log
