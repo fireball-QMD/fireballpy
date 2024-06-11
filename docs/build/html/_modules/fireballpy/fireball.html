@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>fireballpy.fireball &mdash; FireballPy 0.0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
-      <link rel="stylesheet" type="text/css" href="../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=87e54e7c" />
 
   
   <!--[if lt IE 9]>
@@ -15,9 +15,9 @@
   
         <script src="../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=f6245a2f"></script>
-        <script src="../../_static/doctools.js?v=888ff710"></script>
-        <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
+        <script src="../../_static/documentation_options.js?v=d45e8c67"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script src="../../_static/design-tabs.js?v=36754332"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -75,23 +75,54 @@
   <h1>Source code for fireballpy.fireball</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span>
-
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
-
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">numpy.typing</span> <span class="kn">import</span> <span class="n">ArrayLike</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>  <span class="c1"># type: ignore</span>
 <span class="kn">from</span> <span class="nn">ase.calculators.calculator</span> <span class="kn">import</span> <span class="n">Calculator</span><span class="p">,</span> <span class="n">all_changes</span>  <span class="c1"># type: ignore</span>
-
 <span class="kn">from</span> <span class="nn">fireballpy.infodat</span> <span class="kn">import</span> <span class="n">InfoDat</span>
 <span class="kn">from</span> <span class="nn">fireballpy.fdata</span> <span class="kn">import</span> <span class="n">download_needed</span><span class="p">,</span> <span class="n">get_default_infodat</span>
+<span class="kn">from</span> <span class="nn">ase.dft.kpoints</span> <span class="kn">import</span> <span class="n">bandpath</span>
 
-<span class="kn">from</span> <span class="nn">._fireball</span> <span class="kn">import</span> <span class="o">*</span>  <span class="c1"># type: ignore</span>
+
+<span class="kn">from</span> <span class="nn">._fireball</span> <span class="kn">import</span> <span class="p">(</span><span class="n">call_scf_loop</span><span class="p">,</span>  <span class="c1"># type: ignore</span>
+                        <span class="n">call_getenergy</span><span class="p">,</span>
+                        <span class="n">call_getforces</span><span class="p">,</span>
+                        <span class="n">call_allocate_system</span><span class="p">,</span>
+                        <span class="n">loadfdata_from_path</span><span class="p">,</span>
+                        <span class="n">set_coords</span><span class="p">,</span>
+                        <span class="n">set_iqout</span><span class="p">,</span>
+                        <span class="n">set_cell</span><span class="p">,</span>
+                        <span class="n">set_kpoints</span><span class="p">,</span>
+                        <span class="n">set_igamma</span><span class="p">,</span>
+                        <span class="n">set_idipole</span><span class="p">,</span>
+                        <span class="n">set_icluster</span><span class="p">,</span>
+                        <span class="n">set_ifixcharge</span><span class="p">,</span>
+                        <span class="n">set_shell_atom_charge</span><span class="p">,</span>
+                        <span class="n">get_etot</span><span class="p">,</span>
+                        <span class="n">get_efermi</span><span class="p">,</span>
+                        <span class="n">get_nssh</span><span class="p">,</span>
+                        <span class="n">get_atom_force</span><span class="p">,</span>
+                        <span class="n">get_shell_atom_charge</span><span class="p">,</span>
+                        <span class="n">get_fdata_is_load</span><span class="p">,</span>
+                        <span class="n">get_norbitals_new</span><span class="p">,</span>
+                        <span class="n">get_eigen</span><span class="p">)</span>
+
+<span class="n">ICHARGE_TABLE</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;lowdin&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;mulliken&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;npa&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+                 <span class="s1">&#39;mulliken_dipole&#39;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;mulliken_dipole_preserving&#39;</span><span class="p">:</span> <span class="mi">7</span><span class="p">,</span>
+                 <span class="s1">&#39;md&#39;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;mdp&#39;</span><span class="p">:</span> <span class="mi">7</span><span class="p">}</span>
+<span class="n">IDIPOLE_TABLE</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;improved&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;legacy&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+<span class="n">GAMMA</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]])</span>
+<span class="n">CELL100</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">100.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">100.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">100.0</span><span class="p">]])</span>
 
 
-<div class="viewcode-block" id="Fireball"><a class="viewcode-back" href="../../generated/fireballpy.Fireball.html#fireballpy.Fireball">[docs]</a><span class="k">class</span> <span class="nc">Fireball</span><span class="p">(</span><span class="n">Calculator</span><span class="p">):</span>
+<div class="viewcode-block" id="Fireball">
+<a class="viewcode-back" href="../../generated/fireballpy.Fireball.html#fireballpy.Fireball">[docs]</a>
+<span class="k">class</span> <span class="nc">Fireball</span><span class="p">(</span><span class="n">Calculator</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Python implementation of Fireball QM/MM code.</span>
 
-<span class="sd">    Out of the box supports molecules containing H, B, C, N and O</span>
+<span class="sd">    Out of the box supports molecules containing H, B, C, N, O and Si</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -100,12 +131,38 @@
 <span class="sd">        it will download needed precomputed FData files.</span>
 <span class="sd">        More information</span>
 <span class="sd">        `here &lt;https://fireball-qmd.github.io/fireball.html&gt;`_.</span>
+<span class="sd">    charges_method : Optional[str]</span>
+<span class="sd">        How the autoconsistency in the charges will be performed.</span>
+<span class="sd">        Options are:</span>
+<span class="sd">        - Mulliken (default): ... [1]_</span>
+<span class="sd">        - Mulliken-Dipole: ... [2]_</span>
+<span class="sd">        - Mulliken-Dipole-Preserving: ... [3]_</span>
+<span class="sd">        - Lowdin: ... [4]_</span>
+<span class="sd">        - NPA: ... [5]_</span>
+<span class="sd">        Note: this parameter is case insensitive.</span>
+<span class="sd">    kpts : Optional[ArrayLike]</span>
+<span class="sd">        K-points considered in the DFT computation.</span>
+<span class="sd">        These are expressed in units of the unit cell.</span>
+<span class="sd">        This parameter is only relevant if the Atoms object</span>
+<span class="sd">        has a defined cell.</span>
+<span class="sd">        If the Atoms object has a defined cell and this parameter</span>
+<span class="sd">        is absent, the Gamma point, kpts=[0.0, 0.0, 0.0],</span>
+<span class="sd">        will be assumed.</span>
+<span class="sd">    kpts_units : Optional[str]</span>
+<span class="sd">        Units in which the k-points (if present) should be interpreted.</span>
+<span class="sd">        There are two options: unit cell units (default),</span>
+<span class="sd">        kpts_units = &#39;unit_cell&#39;; and angstroms, kpts_units = &#39;angstroms&#39;.</span>
+<span class="sd">    dipole : Optional[str]</span>
+<span class="sd">        Whether to use (dipole=&#39;improved&#39;) or not (dipole=&#39;legacy&#39;)</span>
+<span class="sd">        the improved dipole description.</span>
+<span class="sd">        By default this is turned on except for periodic systems as</span>
+<span class="sd">        it is not yet implemented and thus will be ignored.</span>
 
 <span class="sd">    Notes</span>
 <span class="sd">    -----</span>
-<span class="sd">    If you use this code in a publication please cite us. [1]_</span>
+<span class="sd">    If you use this code in a publication please cite us. [6]_</span>
 
-<span class="sd">    .. [1] Advances and applications in the FIREBALL ab initio tight-binding</span>
+<span class="sd">    .. [6] Advances and applications in the FIREBALL ab initio tight-binding</span>
 <span class="sd">       molecular-dynamics formalism.</span>
 <span class="sd">       James P. Lewis, Pavel Jelínek, José Ortega, Alexander A. Demkov,</span>
 <span class="sd">       Daniel G. Trabada, Barry Haycock , Hao Wang, Gary Adams,</span>
@@ -118,9 +175,138 @@
 
     <span class="n">ignored_changes</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;initial_magmoms&#39;</span><span class="p">]</span>
 
-<div class="viewcode-block" id="Fireball.__init__"><a class="viewcode-back" href="../../generated/fireballpy.Fireball.html#fireballpy.Fireball.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fdata_path</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="n">Calculator</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_fdata_path</span> <span class="o">=</span> <span class="n">fdata_path</span></div>
+<div class="viewcode-block" id="Fireball.__init__">
+<a class="viewcode-back" href="../../generated/fireballpy.Fireball.html#fireballpy.Fireball.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">fdata_path</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">charges_method</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;mulliken&quot;</span><span class="p">,</span>
+                 <span class="n">dipole</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;improved&quot;</span><span class="p">,</span>
+                 <span class="n">kpts</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">kpts_units</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;unit_cell&quot;</span><span class="p">,</span>
+                 <span class="n">shell_charges</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fdata_path</span> <span class="o">=</span> <span class="n">fdata_path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_fdata_path</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">charges_method</span> <span class="o">=</span> <span class="n">charges_method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_charges_method</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dipole</span> <span class="o">=</span> <span class="n">dipole</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_dipole</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kpts</span> <span class="o">=</span> <span class="n">kpts</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kpts_units</span> <span class="o">=</span> <span class="n">kpts_units</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_kpts</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shell_charges</span> <span class="o">=</span> <span class="n">shell_charges</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ifixcharges</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">shell_charges</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span></div>
+
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">clean_kpts</span><span class="p">(</span><span class="n">kpts</span><span class="p">):</span>
+        <span class="n">kpts_unique</span> <span class="o">=</span> <span class="p">[</span><span class="n">kpts</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]]</span>
+        <span class="k">for</span> <span class="n">k1</span> <span class="ow">in</span> <span class="n">kpts</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="p">:]:</span>
+            <span class="k">for</span> <span class="n">k2</span> <span class="ow">in</span> <span class="n">kpts_unique</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">k1</span> <span class="o">+</span> <span class="n">k2</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">1e-8</span><span class="p">:</span>
+                    <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">kpts_unique</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">k1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">kpts_unique</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_check_fdata_path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fdata_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fdata_path</span><span class="p">,</span> <span class="s1">&#39;info.dat&#39;</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;info.dat file not found in the specified &quot;</span>
+                             <span class="sa">f</span><span class="s2">&quot;fdata path (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">fdata_path</span><span class="si">}</span><span class="s2">).&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_check_charges_method</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">charges_method</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ICHARGE_TABLE</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Parameter &#39;charges&#39; must be one of &quot;</span>
+                             <span class="s2">&quot;&#39;lowdin&#39;, &#39;mulliken&#39;, &#39;npa&#39;, mulliken_dipole/md &quot;</span>
+                             <span class="s2">&quot;or &#39;mulliken_dipole_preserving/mdp&#39;. &quot;</span>
+                             <span class="sa">f</span><span class="s2">&quot;Got &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">charges_method</span><span class="si">}</span><span class="s2">&#39;.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_icharge</span> <span class="o">=</span> <span class="n">ICHARGE_TABLE</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">charges_method</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">_check_dipole</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dipole</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">IDIPOLE_TABLE</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Parameter &#39;dipole&#39; must be either &quot;</span>
+                             <span class="s2">&quot;&#39;improved&#39; or &#39;legacy&#39;. &quot;</span>
+                             <span class="sa">f</span><span class="s2">&quot;Got &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">dipole</span><span class="si">}</span><span class="s2">&#39;.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_idipole</span> <span class="o">=</span> <span class="n">IDIPOLE_TABLE</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">dipole</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">_check_kpts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">kpts_units</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;unit_cell&#39;</span><span class="p">,</span> <span class="s1">&#39;angstroms&#39;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Parameter &#39;kpts_units&#39; must be either &quot;</span>
+                             <span class="s2">&quot;&#39;unit_cell&#39; or &#39;angstroms&#39;. &quot;</span>
+                             <span class="sa">f</span><span class="s2">&quot;Got &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">kpts_units</span><span class="si">}</span><span class="s2">&#39;.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">kpts</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kpts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kpts</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">kpts</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;K-points must have 3 coordinates. &quot;</span>
+                             <span class="sa">f</span><span class="s2">&quot;Got </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">kpts</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kpts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kpts</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">kpts_units</span> <span class="o">==</span> <span class="s1">&#39;unit_cell&#39;</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kpts</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mf">1.0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;K-points is not in unit cell coordinates. &quot;</span>
+                             <span class="s2">&quot;Perhaps try with kpts_units = &#39;angstroms&#39;.&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">get_k_point_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">w_k</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kpts</span><span class="p">))</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kpts</span><span class="p">)</span>
+        <span class="c1">#print(w_k)</span>
+        <span class="k">return</span> <span class="n">w_k</span>
+
+    <span class="k">def</span> <span class="nf">get_number_of_spins</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">1</span>             
+
+    <span class="k">def</span> <span class="nf">get_eigenvalues</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">kpt</span><span class="p">,</span><span class="n">spin</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spin</span><span class="o">=</span><span class="n">spin</span>
+        <span class="n">index</span><span class="o">=</span><span class="mi">0</span>
+        <span class="k">for</span> <span class="n">ik</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kpts</span><span class="p">)):</span>
+           <span class="k">if</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kpts</span><span class="p">[</span><span class="n">ik</span><span class="p">]</span> <span class="o">-</span> <span class="n">kpt</span> <span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.00001</span><span class="p">):</span>
+               <span class="n">index</span><span class="o">=</span><span class="n">ik</span>  
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shell_energies</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">-</span><span class="n">get_efermi</span><span class="p">())</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">get_fermi_level</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mf">0.0</span>
+
+    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bandpath</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">bandpath</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> 
+                   <span class="n">emin</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                   <span class="n">emax</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="p">):</span>
+
+        <span class="n">xmin</span><span class="o">=</span><span class="mi">0</span>
+        <span class="n">xmax</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">shell_energies</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">eigen</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">shell_energies</span><span class="o">-</span><span class="n">get_efermi</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">bandpath</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">xmax</span> <span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">xticks</span><span class="p">([])</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;k-points&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">xmax</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">kpts</span><span class="p">,</span> <span class="n">Blx</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">bandpath</span><span class="o">.</span><span class="n">get_linear_kpoint_axis</span><span class="p">()</span>
+            <span class="n">ticks</span> <span class="o">=</span> <span class="n">Blx</span><span class="o">*</span><span class="n">xmax</span><span class="o">/</span><span class="n">kpts</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">xticks</span><span class="p">(</span><span class="n">ticks</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="n">xmin</span><span class="p">,</span><span class="n">xmax</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">emin</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+           <span class="n">emin</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shell_energies</span><span class="p">)</span><span class="o">-</span><span class="n">get_efermi</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">emax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+           <span class="n">emax</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shell_energies</span><span class="p">)</span><span class="o">-</span><span class="n">get_efermi</span><span class="p">()</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="n">emin</span><span class="p">,</span><span class="n">emax</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">band</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shell_energies</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">eigen</span><span class="p">[:,</span> <span class="n">band</span><span class="p">])</span>
+        
+        <span class="n">plt</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;y = 50&#39;</span><span class="p">)</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Energy (eV)&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Band Structure&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
 
     <span class="c1"># Requisite energies</span>
     <span class="k">def</span> <span class="nf">_check_compute</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -133,37 +319,44 @@
         <span class="n">call_scf_loop</span><span class="p">()</span>
         <span class="n">call_getenergy</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">energy</span> <span class="o">=</span> <span class="n">get_etot</span><span class="p">()</span>
-        <span class="c1"># Save energy</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;energy&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;free_energy&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_kpts</span><span class="p">,</span> <span class="n">GAMMA</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">shell_energies</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_nkpts</span><span class="p">,</span>
+                                            <span class="n">get_norbitals_new</span><span class="p">()))</span>
+            <span class="k">for</span> <span class="n">imu</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">get_norbitals_new</span><span class="p">()):</span>
+                <span class="k">for</span> <span class="n">ik</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_nkpts</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">shell_energies</span><span class="p">[</span><span class="n">ik</span><span class="p">,</span> <span class="n">imu</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_eigen</span><span class="p">(</span><span class="n">imu</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">ik</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;shell_energies&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shell_energies</span>
 
     <span class="k">def</span> <span class="nf">_calculate_charges</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">iatom</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">natoms</span><span class="p">):</span>
             <span class="k">for</span> <span class="n">issh</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">get_nssh</span><span class="p">(</span><span class="n">iatom</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">charges</span><span class="p">[</span><span class="n">iatom</span><span class="p">,</span> <span class="n">issh</span><span class="p">]</span> <span class="o">=</span> \
+                <span class="bp">self</span><span class="o">.</span><span class="n">shell_charges</span><span class="p">[</span><span class="n">iatom</span><span class="p">,</span> <span class="n">issh</span><span class="p">]</span> <span class="o">=</span> \
                     <span class="n">get_shell_atom_charge</span><span class="p">(</span><span class="n">issh</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">iatom</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="c1"># Save charges</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">charges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shell_charges</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;charges&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">charges</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;shell_charges&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shell_charges</span>
 
     <span class="k">def</span> <span class="nf">_calculate_forces</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_compute</span><span class="p">()</span>
         <span class="n">call_getforces</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">iatom</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">natoms</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">forces</span><span class="p">[</span><span class="n">iatom</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_atom_force</span><span class="p">(</span><span class="n">iatom</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">forces</span><span class="p">[</span><span class="n">iatom</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_atom_force</span><span class="p">(</span><span class="n">iatom</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">forces</span><span class="p">[</span><span class="n">iatom</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_atom_force</span><span class="p">(</span><span class="n">iatom</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
-        <span class="c1"># Save forces</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">forces</span><span class="p">[</span><span class="n">iatom</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_atom_force</span><span class="p">(</span><span class="n">iatom</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;forces&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">forces</span>
 
     <span class="k">def</span> <span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                   <span class="n">properties</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;energy&#39;</span><span class="p">],</span>
                   <span class="n">system_changes</span><span class="o">=</span><span class="n">all_changes</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-
-        <span class="n">Calculator</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">,</span> <span class="n">properties</span><span class="p">,</span> <span class="n">system_changes</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">properties</span><span class="p">,</span> <span class="n">system_changes</span><span class="p">)</span>
 
         <span class="c1"># If the atoms change allocate memory</span>
         <span class="k">if</span> <span class="s1">&#39;numbers&#39;</span> <span class="ow">in</span> <span class="n">system_changes</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">initialize</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="s1">&#39;positions&#39;</span> <span class="ow">in</span> <span class="n">system_changes</span><span class="p">:</span>
+            <span class="n">set_coords</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">numbers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">positions</span><span class="p">)</span>
 
         <span class="c1"># Check if charges needed</span>
         <span class="k">if</span> <span class="s1">&#39;charges&#39;</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">:</span>
@@ -177,23 +370,80 @@
         <span class="k">if</span> <span class="s1">&#39;forces&#39;</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_forces</span><span class="p">()</span>
 
+    <span class="k">def</span> <span class="nf">_initialize_infodat</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fdata_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">default_infodat</span> <span class="o">=</span> <span class="n">get_default_infodat</span><span class="p">()</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_infodat</span> <span class="o">=</span> <span class="n">default_infodat</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">numbers</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="n">default_infodat</span> <span class="o">=</span> <span class="n">get_default_infodat</span><span class="p">(</span><span class="n">refresh</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_infodat</span> <span class="o">=</span> <span class="n">default_infodat</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">numbers</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fdata_path</span> <span class="o">=</span> <span class="n">download_needed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_infodat</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_infodat</span> <span class="o">=</span> <span class="n">InfoDat</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fdata_path</span><span class="p">,</span> <span class="s1">&#39;info.dat&#39;</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">get_fdata_is_load</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">loadfdata_from_path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fdata_path</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_initialize_options</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>  <span class="c1"># periodic and peridic_gamma</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_idipole</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_icluster</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_cell</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">array</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">kpts</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># periodic_gamma</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;K-points not provided in periodic system.&quot;</span>
+                              <span class="s2">&quot; Gamma point will be assumed&quot;</span><span class="p">,</span> <span class="ne">UserWarning</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_igamma</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_kpts</span> <span class="o">=</span> <span class="n">GAMMA</span>
+            <span class="k">elif</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kpts</span><span class="p">,</span> <span class="n">GAMMA</span><span class="p">):</span>  <span class="c1"># periodic_gamma</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_igamma</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_kpts</span> <span class="o">=</span> <span class="n">GAMMA</span>
+            <span class="k">else</span><span class="p">:</span>  <span class="c1"># periodic</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">kpts_units</span> <span class="o">==</span> <span class="s1">&#39;unit_cell&#39;</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_kpts</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kpts</span><span class="p">,</span>
+                                                <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">reciprocal</span><span class="p">()</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_kpts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">clean_kpts</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_kpts</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_igamma</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># molecule and molecule_test</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_icluster</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_igamma</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_kpts</span> <span class="o">=</span> <span class="n">GAMMA</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_cell</span> <span class="o">=</span> <span class="n">CELL100</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_nkpts</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_kpts</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ifixcharges</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">shell_charges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shell_charges</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">shell_charges</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">natoms</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_infodat</span><span class="o">.</span><span class="n">maxshs</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Given shell charges have incorrect shape. &quot;</span>
+                                 <span class="s2">&quot;Expected natoms x max_shells &quot;</span>
+                                 <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">natoms</span><span class="p">,</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">_infodat</span><span class="o">.</span><span class="n">maxshs</span><span class="p">)</span><span class="si">}</span><span class="s2">, &quot;</span>
+                                 <span class="sa">f</span><span class="s2">&quot;got </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">shell_charges</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_set_options</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">set_coords</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">numbers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">positions</span><span class="p">)</span>
+        <span class="n">set_iqout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_icharge</span><span class="p">)</span>
+        <span class="n">set_idipole</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_idipole</span><span class="p">)</span>
+        <span class="n">set_icluster</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_icluster</span><span class="p">)</span>
+        <span class="n">set_igamma</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_igamma</span><span class="p">)</span>
+        <span class="n">set_kpoints</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_kpts</span><span class="p">)</span>
+        <span class="n">set_cell</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cell</span><span class="p">)</span>
+        <span class="n">set_ifixcharge</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ifixcharges</span><span class="p">)</span>
+
     <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">natoms</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_initialize_infodat</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_initialize_options</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_options</span><span class="p">()</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fdata_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">default_infodat</span> <span class="o">=</span> <span class="n">get_default_infodat</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_infodat</span> <span class="o">=</span> <span class="n">default_infodat</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">numbers</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_fdata_path</span> <span class="o">=</span> <span class="n">download_needed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_infodat</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">natoms</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_infodat</span> <span class="o">=</span> <span class="n">InfoDat</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fdata_path</span><span class="p">,</span> <span class="s2">&quot;info.dat&quot;</span><span class="p">))</span>
-
-        <span class="n">loadfdata_from_path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fdata_path</span><span class="p">)</span>
-        <span class="n">set_coords</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">numbers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">positions</span><span class="p">)</span>
-        <span class="n">loadlvs_100</span><span class="p">()</span>
-        <span class="n">loadkpts_gamma</span><span class="p">()</span>
         <span class="n">call_allocate_system</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">charges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">natoms</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_infodat</span><span class="o">.</span><span class="n">maxshs</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">forces</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">natoms</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">forces</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">natoms</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ifixcharges</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">charges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">natoms</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">shell_charges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">natoms</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_infodat</span><span class="o">.</span><span class="n">maxshs</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">set_shell_atom_charge</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shell_charges</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">charges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shell_charges</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;charges&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">charges</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;shell_charges&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shell_charges</span></div>
+
 </pre></div>
 
            </div>
