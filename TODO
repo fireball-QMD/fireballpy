@@ -3,7 +3,7 @@ Jorge: DOC, workflow, examples jupyter, only_en_use, fireballpytestrepo
 Jesús: qmmm, interpolate1D, spline 
 Dani: testunitarios, casos uso, ifixcharges, only_en_use, test limpiar y reconstruir, get_fermi, eigenvalue
 José: autores
-
+...
 
 * icharge si no metemos cargas ?
 -  Quedarse con la mejor autoconsistencia
