@@ -37,4 +37,6 @@ dependencies = [
   "numpy>=1.21.0",
   "ase>=3.22.0",
   "tqdm>=4.66.0"
+  "sphinx",
+  "sphinx-rtd-theme", 
 ]
