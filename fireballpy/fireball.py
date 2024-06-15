@@ -118,7 +118,7 @@ class Fireball(Calculator):
         self._check_kpts()
         self.shell_charges = shell_charges
         self._ifixcharges = int(shell_charges is not None)
-
+        
     @staticmethod
     def clean_kpts(kpts):
         kpts_unique = [kpts[0, :]]
@@ -181,8 +181,8 @@ class Fireball(Calculator):
         index=0
         for ik in range(len(self.kpts)):
            if(np.linalg.norm(self.kpts[ik] - kpt ) < 0.00001):
-               index=ik  
-        return (self.shell_energies[index]-get_efermi()).copy()
+               index=ik 
+        return (self.shell_energies[index]).copy()
 
     def get_fermi_level(self):
         return 0.0
@@ -190,11 +190,21 @@ class Fireball(Calculator):
     def plot(self, bandpath: Optional[bandpath] = None, 
                    emin: Optional[float] = None,
                    emax: Optional[float] = None ):
-
+        
         xmin=0
         xmax=self.shell_energies.shape[0]
+        
+        Efermi=get_efermi()
+        #Ajustamos Efermi
+        AE=Efermi-self.shell_energies[0][0]
+        for ek in self.shell_energies:
+           for e in ek:
+             if ((Efermi-e)>0 and abs(Efermi-e)<abs(AE)): 
+               AE=Efermi-e
 
-        eigen=self.shell_energies-get_efermi()
+        Efermi=Efermi-AE
+
+        eigen=self.shell_energies-Efermi
 
         if bandpath is None:
             X = np.arange(0, xmax , 1)
@@ -211,10 +221,10 @@ class Fireball(Calculator):
         plt.xlim(xmin,xmax)
 
         if emin is None:
-           emin=np.min(self.shell_energies)-get_efermi()
+           emin=np.min(self.shell_energies)-Efermi
 
         if emax is None:
-           emax = np.max(self.shell_energies)-get_efermi()
+           emax = np.max(self.shell_energies)-Efermi
 
         plt.ylim(emin,emax)
 

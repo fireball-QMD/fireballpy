@@ -12,7 +12,7 @@ atoms = Atoms(symbols=['C', 'H', 'H', 'H', 'H'],
                        ( 0.6533, 0.6533, -0.6533)])
 
 
-atoms.calc = Fireball(charges_method='mdp', options='molecule')
+atoms.calc = Fireball(charges_method='mdp')
 
 ETOT=atoms.get_potential_energy()
 print(ETOT)

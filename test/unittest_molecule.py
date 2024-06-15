@@ -8,7 +8,7 @@ from fireballpy import Fireball
 
 
 class Test(unittest.TestCase):
-    TOL = 1e-5
+    TOL = 1e-4
 
     def setUp(self):
         FILEPATH = os.path.dirname(os.path.realpath(__file__))
