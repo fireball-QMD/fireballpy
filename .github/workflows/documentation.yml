@@ -9,7 +9,7 @@ on:
       - '*'
 
 jobs:
-  build:
+  setup:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -18,9 +18,26 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - name: Install the dependencies for Sphinx and JupyterLite
+      - name: Install the dependencies for FireballPy, Sphinx and JupyterLite
         run: |
           python -m pip install -r requirements.txt
+      - name: Setup Fortran and C compiler
+        uses: fortran-lang/setup-fortran@v1
+        id: setup-fortran
+        with:
+          compiler: gcc
+          version: 13
+        run: |
+          ${{ env.FC }} # environment vars FC, CC, and CXX are set
+          ${{ steps.setup-fortran.outputs.fc }} # outputs work too
+
+  build:
+    needs: setup
+    runs-on: ubuntu-latest
+    steps:
+      - name: Compile Fireball
+        run:
+          ./install.sh gnu debug
       - name: Build the JupyterLite site
         run: |
           cp -r fireballpy examples

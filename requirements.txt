@@ -6,12 +6,17 @@ notebook~=7.0.6
 # Python kernel (optional) for JupyterLite
 jupyterlite-pyodide-kernel==0.2.0
 
-# Python libraries
-numpy==1.26.2
-ase==3.22.1
+# FireballPy dependencies
+numpy>=1.26.2
+ase>=3.22.1
+tqdm>=4.66.0
 
 # Sphinx build
 sphinx
 sphinx_rtd_theme
 numpydoc
 sphinx_design
+
+# Meson build
+meson
+openblas # ?

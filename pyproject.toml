@@ -1,6 +1,6 @@
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+build-backend = "mesonpy"
+requires = ["meson-python"]
 
 [project]
 name = "fireballpy"
@@ -36,7 +36,7 @@ classifiers = [
 dependencies = [
   "numpy>=1.21.0",
   "ase>=3.22.0",
-  "tqdm>=4.66.0"
+  "tqdm>=4.66.0",
   "sphinx",
   "sphinx-rtd-theme", 
 ]

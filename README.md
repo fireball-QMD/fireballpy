@@ -11,5 +11,7 @@ Clone the repository to your computer:
 
     git clone git@github.com:fireball-QMD/fireballpy
 
+or
+
     git clone https://github.com/fireball-QMD/fireballpy
 
