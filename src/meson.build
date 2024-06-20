@@ -20,7 +20,6 @@ fdata_srcs = ['make_munuDipX.f90',
               'load_fdata.f90']
 system_srcs = ['kspace_gamma.f90',
                'kspace_double.f90',
-               'kspace_double_generalized.f90',
                'getforces.f90',
                'mpairnay.f90',
                'Dassemble_2c.f90',
