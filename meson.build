@@ -91,22 +91,8 @@ fortranobject_dep = declare_dependency(
 # Build fireball
 subdir('src')
 
-# Generate C module and Fortran wrappers
-fireball_source = custom_target('fireball_module',
-  input : ['src' / 'libf2py.f90'], # No module hence no .f90 wrappers
-  output : ['_fireballmodule.c', '_fireball-f2pywrappers.f'],
-  command : [py, '-m', 'numpy.f2py', '@INPUT@', '-m', '_fireball', '--lower']
-)
-
-py.extension_module('_fireball',
-  ['src' / 'libf2py.f90', fireball_source], # We use F90 so .f90 file is already included
-  fortran_args : fflags,
-  dependencies : [fortranobject_dep, blas_dep, fireball_dep],
-  link_language : 'fortran',
-  install : true,
-  install_dir : meson.current_source_dir() / 'fireballpy' # Temporal
-)
-
+# Build fireballpy
+subdir('fireballpy')
 
 # Test
 test('molecule', py,
