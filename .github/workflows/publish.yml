@@ -18,6 +18,8 @@ jobs:
         pip install
         build
         --user
+    - name: Install OpenBLAS
+      run: sudo apt install libopenblas-dev
     - name: Build a binary wheel and a source tarball
       run: python3 -m build
     - name: Store the distribution packages

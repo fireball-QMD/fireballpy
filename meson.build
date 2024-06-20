@@ -7,7 +7,8 @@ project(
     'buildtype=debugoptimized',
     'fortran_std=legacy',
     'c_std=c17',
-    'blas=openblas'
+    'blas=openblas',
+    'lapack=openblas',
   ],
 )
 
@@ -36,16 +37,38 @@ py_mod = import('python')
 py = py_mod.find_installation(pure: false)
 py_dep = py.dependency()
 
+# Set pkg-config environment
+env = environment()
+env.append('PATH', meson.current_source_dir())
+env.append('PKG_CONFIG_PATH', get_option('libdir') / 'pkgconfig')
+
 # Set compiler flags
 add_global_arguments(fflags, language: 'fortran')
 
-# Link OpenBLAS or MKL
+# Link LAPACK and BLAS (strat from scipy)
 blas_name = get_option('blas')
+lapack_name = get_option('lapack')
+_args_blas_lapack = [] # Might be useful later
+
 if blas_name == 'openblas'
-  blas_dep = dependency(['openblas', 'OpenBLAS'])
-elif blas_name == 'mkl'
-  blas_dep = dependency('mkl-dynamic-lp64-iomp')
+  blas = dependency(['openblas', 'OpenBLAS'])
+else # Different options
+  blas = dependency(blas_name)
 endif
+blas_dep = declare_dependency(
+  dependencies: blas,
+  compile_args: _args_blas_lapack
+)
+
+if blas_name.startswith('mkl') or blas_name == 'openblas' # They bring LAPACK
+  lapack = blas
+else # Different options
+  lapack = dependency(lapack_name)
+endif
+lapack_dep = declare_dependency(
+  dependencies: lapack,
+  compile_args: _args_blas_lapack
+)
 
 # Prepare f2py
 incdir_numpy = run_command(py, ['-c', 'import numpy; print(numpy.get_include())'],
@@ -86,12 +109,10 @@ py.extension_module('_fireball',
 
 
 # Test
-envdata = environment()
-envdata.append('PATH', meson.current_source_dir())
 test('molecule', py,
      args : [meson.current_source_dir() / 'test' / 'unittest_molecule.py'],
-     env : envdata)
+     env : env)
 test('periodic', py,
      args : [meson.current_source_dir() / 'test' / 'unittest_periodic.py'],
-     env : envdata,
+     env : env,
      timeout: 0)

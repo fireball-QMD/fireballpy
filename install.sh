@@ -3,9 +3,9 @@ rm fireballpy/_fireball.*.so
 
 if [ "$1" = "intel" ]; then
 	if [ "$2" = "debug" ]; then
-		CC=icx FC=ifx meson setup build -Dblas=mkl
+		CC=icx FC=ifx meson setup build -Dblas=mkl-dynamic-lp64-iomp
 	else
-		CC=icx FC=ifx meson setup build -Dblas=mkl --buildtype custom
+		CC=icx FC=ifx meson setup build -Dblas=mkl-dynamic-lp64-iomp --buildtype custom
 	fi
 elif [ "$1" = "gnu" ]; then
 	if [ "$2" = "debug" ]; then
