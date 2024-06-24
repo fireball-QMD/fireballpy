@@ -1,9 +1,6 @@
 import numpy as np
 from ase import Atoms
 from ase.dft.kpoints import monkhorst_pack
-from ase.io import write
-import sys
-sys.path.append("..")
 from fireballpy import Fireball
 import time
 
@@ -39,11 +36,12 @@ shell_charges = np.array([
 start_time = time.time()
 
 kpoints = monkhorst_pack([4, 4, 4])
-C='Mulliken_dipole_preserving'
-atoms.calc = Fireball(charges_method=C,kpts=kpoints,shell_charges=shell_charges)
-#atoms.calc = Fireball(charges=C)
+C = 'Mulliken_dipole_preserving'
+atoms.calc = Fireball(charges_method=C, kpts=kpoints,
+                      shell_charges=shell_charges)
+# atoms.calc = Fireball(charges=C)
 atoms.get_potential_energy()
-print('ETOT =',atoms.calc.results['energy'],'eV')
+print('ETOT =', atoms.calc.results['energy'], 'eV')
 print('ETOT = -1037.702899 eV saved')
 end_time = time.time()
 print(f"Tiempo de ejecución: {end_time - start_time} segundos")

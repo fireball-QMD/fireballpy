@@ -36,6 +36,3 @@ dependencies = [
   "ase>=3.22.0",
   "tqdm>=4.66.0",
 ]
-
-[tool.meson-python.args]
-setup = ['-Dblas=mkl-dynamic-lp64-iomp', '-Dbuildtype=custom']

@@ -2,8 +2,6 @@ import numpy as np
 from ase import Atoms
 from ase.dft.kpoints import monkhorst_pack
 from ase.io import write
-import sys
-sys.path.append("..")
 from fireballpy import Fireball
 
 atoms = Atoms(symbols=['Si', 'Si', 'C', 'C', 'Si', 'Si', 'C', 'C'],
@@ -58,7 +56,7 @@ for kpts in [None, kpoints]:
         print('')
 
 # Descomenta para generar el test otra vez
-#write('save/periodic_atoms.xyz', atoms)
-#np.savez('save/periodic_etot.npz', *ETOT)
-#np.savez('save/periodic_charges.npz', *charge)
-#np.savez('save/periodic_forces.npz', *force)
+# write('save/periodic_atoms.xyz', atoms)
+# np.savez('save/periodic_etot.npz', *ETOT)
+# np.savez('save/periodic_charges.npz', *charge)
+# np.savez('save/periodic_forces.npz', *force)

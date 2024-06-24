@@ -18,13 +18,13 @@ fflags = ['-unroll', '-fPIC']
 if fc.get_id() == 'gcc'
   fflags += ['-ffree-line-length-none', '-fdefault-real-8']
   if get_option('buildtype') == 'custom'
-    fflags += ['-O3', '-ffast-math', '-fstack-arrays', '-fallow-store-data-races',
+    fflags += ['-ffast-math', '-fstack-arrays', '-fallow-store-data-races',
                '-fno-semantic-interposition', '-march=native']
   endif
 elif fc.get_id() in ['intel', 'intel-llvm']
   fflags += ['-r8', '-fno-alias','-diag-disable 6916','-diag-disable 5268']
   if get_option('buildtype') == 'custom'
-    fflags += ['-O3', '-fp-model=fast', '-xHost']
+    fflags += ['-fp-model=fast', '-xHost']
   else
     fflags += ['-fp-model=strict']
   endif
@@ -90,6 +90,21 @@ fortranobject_dep = declare_dependency(
 
 # Build fireball
 subdir('src')
+
+# Build _fireball
+fireball_source = custom_target('fireball_module',
+  input : 'src' / 'libf2py.f90', # No module hence no .f90 wrappers
+  output : ['_fireballmodule.c', '_fireball-f2pywrappers.f'],
+  command : [py, '-m', 'numpy.f2py', '@INPUT@', '-m', '_fireball', '--lower'],
+)
+
+py.extension_module('_fireball',
+  ['src' / 'libf2py.f90', fireball_source], # We use F90 so .f90 file is already included
+  fortran_args : fflags,
+  dependencies : [fortranobject_dep, blas_dep, fireball_dep],
+  link_language : 'fortran',
+  install : true,
+)
 
 # Build fireballpy
 subdir('fireballpy')

@@ -11,28 +11,28 @@ from fireballpy.fdata import download_needed, get_default_infodat
 from ase.dft.kpoints import bandpath
 
 
-from ._fireball import (call_scf_loop,  # type: ignore
-                        call_getenergy,
-                        call_getforces,
-                        call_allocate_system,
-                        loadfdata_from_path,
-                        set_coords,
-                        set_iqout,
-                        set_cell,
-                        set_kpoints,
-                        set_igamma,
-                        set_idipole,
-                        set_icluster,
-                        set_ifixcharge,
-                        set_shell_atom_charge,
-                        get_etot,
-                        get_efermi,
-                        get_nssh,
-                        get_atom_force,
-                        get_shell_atom_charge,
-                        get_fdata_is_load,
-                        get_norbitals_new,
-                        get_eigen)
+from _fireball import (call_scf_loop,  # type: ignore
+                       call_getenergy,
+                       call_getforces,
+                       call_allocate_system,
+                       loadfdata_from_path,
+                       set_coords,
+                       set_iqout,
+                       set_cell,
+                       set_kpoints,
+                       set_igamma,
+                       set_idipole,
+                       set_icluster,
+                       set_ifixcharge,
+                       set_shell_atom_charge,
+                       get_etot,
+                       get_efermi,
+                       get_nssh,
+                       get_atom_force,
+                       get_shell_atom_charge,
+                       get_fdata_is_load,
+                       get_norbitals_new,
+                       get_eigen)
 
 ICHARGE_TABLE = {'lowdin': 1, 'mulliken': 2, 'npa': 3,
                  'mulliken_dipole': 4, 'mulliken_dipole_preserving': 7,
@@ -118,7 +118,7 @@ class Fireball(Calculator):
         self._check_kpts()
         self.shell_charges = shell_charges
         self._ifixcharges = int(shell_charges is not None)
-        
+
     @staticmethod
     def clean_kpts(kpts):
         kpts_unique = [kpts[0, :]]
@@ -169,45 +169,45 @@ class Fireball(Calculator):
                              "Perhaps try with kpts_units = 'angstroms'.")
 
     def get_k_point_weights(self):
-        w_k=np.ones(len(self.kpts))/len(self.kpts)
-        #print(w_k)
+        w_k = np.ones(len(self.kpts))/len(self.kpts)
+        # print(w_k)
         return w_k
 
     def get_number_of_spins(self):
-        return 1             
+        return 1
 
-    def get_eigenvalues(self,kpt,spin):
-        self.spin=spin
-        index=0
+    def get_eigenvalues(self, kpt, spin):
+        self.spin = spin
+        index = 0
         for ik in range(len(self.kpts)):
-           if(np.linalg.norm(self.kpts[ik] - kpt ) < 0.00001):
-               index=ik 
+            if (np.linalg.norm(self.kpts[ik] - kpt) < 0.00001):
+                index = ik
         return (self.shell_energies[index]).copy()
 
     def get_fermi_level(self):
         return 0.0
 
-    def plot(self, bandpath: Optional[bandpath] = None, 
-                   emin: Optional[float] = None,
-                   emax: Optional[float] = None ):
-        
-        xmin=0
-        xmax=self.shell_energies.shape[0]
-        
-        Efermi=get_efermi()
-        #Ajustamos Efermi
-        AE=Efermi-self.shell_energies[0][0]
+    def plot(self, bandpath: Optional[bandpath] = None,
+             emin: Optional[float] = None,
+             emax: Optional[float] = None):
+
+        xmin = 0
+        xmax = self.shell_energies.shape[0]
+
+        Efermi = get_efermi()
+        # Ajustamos Efermi
+        AE = Efermi-self.shell_energies[0][0]
         for ek in self.shell_energies:
-           for e in ek:
-             if ((Efermi-e)>0 and abs(Efermi-e)<abs(AE)): 
-               AE=Efermi-e
+            for e in ek:
+                if ((Efermi-e) > 0 and abs(Efermi-e) < abs(AE)):
+                    AE = Efermi-e
 
-        Efermi=Efermi-AE
+        Efermi = Efermi-AE
 
-        eigen=self.shell_energies-Efermi
+        eigen = self.shell_energies-Efermi
 
         if bandpath is None:
-            X = np.arange(0, xmax , 1)
+            X = np.arange(0, xmax, 1)
             plt.xticks([])
             plt.grid(False)
             plt.xlabel('k-points')
@@ -218,27 +218,27 @@ class Fireball(Calculator):
             plt.xticks(ticks, labels)
             plt.grid(True)
 
-        plt.xlim(xmin,xmax)
+        plt.xlim(xmin, xmax)
 
         if emin is None:
-           emin=np.min(self.shell_energies)-Efermi
+            emin = np.min(self.shell_energies)-Efermi
 
         if emax is None:
-           emax = np.max(self.shell_energies)-Efermi
+            emax = np.max(self.shell_energies)-Efermi
 
-        plt.ylim(emin,emax)
+        plt.ylim(emin, emax)
 
         for band in range(self.shell_energies.shape[1]):
             plt.plot(X, eigen[:, band])
-        
+
         plt.axhline(y=0.0, color='b', linestyle='--', label='y = 50')
 
         plt.ylabel('Energy (eV)')
         plt.title('Band Structure')
         plt.show()
 
-
     # Requisite energies
+
     def _check_compute(self) -> None:
         if 'energy' not in self.results:
             warnings.warn(

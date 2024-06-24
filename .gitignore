@@ -1,10 +1,10 @@
-.ipynb_checkpoints/
-.o
-.mod
+.ipynb_checkpoints
+__pycache__ 
 bin
 build
-__pycache__ 
+dist
+*.o
+*.mod
 *.so
 *.traj
 *.log
-dist

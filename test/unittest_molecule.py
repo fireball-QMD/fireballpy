@@ -1,9 +1,7 @@
 import unittest
 from ase.io import read
-import sys
 import os
 import numpy as np
-sys.path.append("..")
 from fireballpy import Fireball
 
 

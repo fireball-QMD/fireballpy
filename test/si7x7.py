@@ -1,10 +1,6 @@
-import numpy as np
 from ase import Atoms
 from ase.dft.kpoints import monkhorst_pack
-from ase.io import write
 from ase.constraints import FixAtoms
-import sys
-sys.path.append("..")
 from fireballpy import Fireball
 import time
 

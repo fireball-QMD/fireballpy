@@ -1,17 +1,16 @@
 rm -fr build
-rm fireballpy/_fireball.*.so
 
 if [ "$1" = "intel" ]; then
 	if [ "$2" = "debug" ]; then
-		CC=icx FC=ifx meson setup build -Dblas=mkl-dynamic-lp64-iomp
+		CC=icx FC=ifx meson setup build -Doptimization=3 -Dblas=mkl-dynamic-lp64-iomp -Dpython.install_env=auto
 	else
-		CC=icx FC=ifx meson setup build -Dblas=mkl-dynamic-lp64-iomp --buildtype custom
+		CC=icx FC=ifx meson setup build -Dblas=mkl-dynamic-lp64-iomp -Dpython.install_env=auto --buildtype custom
 	fi
 elif [ "$1" = "gnu" ]; then
 	if [ "$2" = "debug" ]; then
-		meson setup build
+		meson setup build -Doptimization=3 -Dpython.install_env=auto
 	else
-		meson setup build --buildtype custom
+		meson setup build -Dpython.install_env=auto --buildtype custom
 	fi
 else
 	echo "Must choose either 'intel' or 'gnu'"

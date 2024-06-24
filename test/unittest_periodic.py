@@ -1,10 +1,8 @@
 import unittest
 from ase.dft.kpoints import monkhorst_pack
 from ase.io import read
-import sys
 import os
 import numpy as np
-sys.path.append("..")
 from fireballpy import Fireball
 
 
