@@ -146,3 +146,20 @@ endforeach
 # Build fireball library
 fireball_lib = static_library('fireball', srcs, dependencies: blas_dep)
 fireball_dep = declare_dependency(link_with : fireball_lib, sources : srcs)
+
+# Build _fireball
+# Generate C module and Fortran wrappers
+fireball_source = custom_target('fireball_module',
+  input : ['libf2py.f90'], # No module hence no .f90 wrappers
+  output : ['_fireballmodule.c', '_fireball-f2pywrappers.f'],
+  command : [py, '-m', 'numpy.f2py', '@INPUT@', '-m', '_fireball', '--lower'],
+)
+
+py.extension_module('_fireball',
+  ['libf2py.f90', fireball_source], # We use F90 so .f90 file is already included
+  fortran_args : fflags,
+  dependencies : [fortranobject_dep, blas_dep, fireball_dep],
+  link_language : 'fortran',
+  install : true,
+  subdir : 'src'
+)
