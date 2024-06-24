@@ -23,16 +23,16 @@ jobs:
           python -m pip install -r requirements.txt
       - name: Install OpenBLAS
         run: sudo apt install libopenblas-dev
-      - name: Setup Fortran and C compiler
-        uses: fortran-lang/setup-fortran@v1
-        id: setup-fortran
-        with:
-          compiler: gcc
-          version: 13
-      - name: Check environment variables and output
-        run: |
-          ${{ env.FC }} # environment vars FC, CC, and CXX are set
-          ${{ steps.setup-fortran.outputs.fc }} # outputs work too
+#      - name: Setup Fortran and C compiler
+#        uses: fortran-lang/setup-fortran@v1
+#        id: setup-fortran
+#        with:
+#          compiler: gcc
+#          version: 13
+#      - name: Check environment variables and output
+#        run: |
+#          ${{ env.FC }} # environment vars FC, CC, and CXX are set
+#          ${{ steps.setup-fortran.outputs.fc }} # outputs work too
 
   build:
     needs: setup
