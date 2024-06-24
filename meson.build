@@ -22,7 +22,7 @@ if fc.get_id() == 'gcc'
                '-fno-semantic-interposition', '-march=native']
   endif
 elif fc.get_id() in ['intel', 'intel-llvm']
-  fflags += ['-r8', '-fno-alias']
+  fflags += ['-r8', '-fno-alias','-diag-disable 6916','-diag-disable 5268']
   if get_option('buildtype') == 'custom'
     fflags += ['-O3', '-fp-model=fast', '-xHost']
   else

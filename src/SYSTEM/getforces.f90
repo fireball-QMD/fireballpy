@@ -14,12 +14,12 @@ subroutine getforces ()
   if (idipole .eq. 1) call Dassemble_ca_3c_dip ()
   if (idipole .eq. 0) call Dassemble_lr ()
   if (idipole .eq. 1) call Dassemble_lr_dip ()
-!  if (iqmmm .eq. 1) then
-!    if (idipole .eq. 0) call Dassemble_qmmm (nprocs, iordern)
-!    if (idipole .eq. 1) call Dassemble_qmmm_dip (nprocs, iordern)
-!  else
+  if (iqmmm .eq. 1) then
+    if (idipole .eq. 0) call Dassemble_qmmm ()
+    if (idipole .eq. 1) call Dassemble_qmmm_dip ()
+  else
     flrew_qmmm = 0.0d0
-!  end if
+  end if
   call Dassemble_ca_olsxc_3c ()
   call assemble_F ()
  end subroutine getforces

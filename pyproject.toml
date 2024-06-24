@@ -1,10 +1,10 @@
 [build-system]
 build-backend = "mesonpy"
-requires = ["meson-python", "numpy", "scipy-openblas64"]
+requires = ["meson-python", "numpy"]
 
 [project]
 name = "fireballpy"
-version = "0.0.1"
+version = "0.0.2"
 license = { file="LICENSE" }
 authors = [
   { name="José Ortega Mateo", email="jose.ortega@uam.es" },
@@ -36,3 +36,6 @@ dependencies = [
   "ase>=3.22.0",
   "tqdm>=4.66.0",
 ]
+
+[tool.meson-python.args]
+setup = ['-Dblas=mkl-dynamic-lp64-iomp', '-Dbuildtype=custom']
