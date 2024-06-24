@@ -9,7 +9,7 @@ on:
       - '*'
 
 jobs:
-  setup:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -33,13 +33,6 @@ jobs:
 #        run: |
 #          ${{ env.FC }} # environment vars FC, CC, and CXX are set
 #          ${{ steps.setup-fortran.outputs.fc }} # outputs work too
-
-  build:
-    needs: setup
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
       - name: Compile Fireball
         run:
           ./install.sh gnu debug
