@@ -19,4 +19,3 @@ sphinx_design
 
 # Meson build
 meson
-openblas # ?
