@@ -30,10 +30,6 @@ subroutine mixer ()
       imix = imix + 1
       Qinmixer(imix) = Qin(issh,iatom)
       Qoutmixer(imix) = Qout(issh,iatom)
-      if (ialgmix .eq. 4) then 
-       mwe(imix) = 1.0d0
-       drwe(imix) = 1.0d0
-      endif
     end do
   end do
 
@@ -56,7 +52,10 @@ subroutine mixer ()
     sigmaold = sigma
   end if
 
-  if (sigma .lt. sigmatol) scf_achieved = .true. 
+  !if (sigma .lt. sigmatol) then
+  !  scf_achieved = .true.
+  !  deallocate(Fv, Xv, delF, delX, r2_sav)
+  !end if
   if (.not. scf_achieved) then
     imix = 0
     do iatom = 1, natoms

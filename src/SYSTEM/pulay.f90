@@ -11,16 +11,8 @@ subroutine pulay ( x_try, x_old, beta, r2, iter, max_order, nmsh )
   real*8, parameter :: tr2=2.0e-15  ! convergence factor, if r2<tr2, assume converged
   real*8, parameter :: A0 = 0.2d0  ! 0.2 can sometimes work better
   real*8, parameter :: q0 = 1.5d0  ! in angstrom^-1
-  real*8, allocatable, dimension(:) :: deltaF
-  real*8, allocatable, dimension(:) :: deltaX
-  real*8, allocatable, dimension(:) :: metric   !for Eq.64
   real*8, allocatable, dimension(:) :: mixcoeff !alphas in Eq.52
-  real*8, allocatable, dimension(:)     :: auxvec
-  real*8, allocatable, dimension(:)     :: auxvec2
   real*8, allocatable, dimension(:,:) :: amat
-  real*8, allocatable, dimension(:,:) :: bmat
-  real*8, allocatable, dimension(:,:) :: cmat
-  real*8, allocatable, dimension(:,:) :: idmat
   real*8 renorm
   real*8 aux
   real*8 aux2
@@ -33,9 +25,7 @@ subroutine pulay ( x_try, x_old, beta, r2, iter, max_order, nmsh )
   integer lda
   integer ldb
   integer ldx
-  write(*,*)'  '
-  write(*,*)' Welcome to pulay; mix charges to self-consistency.'
-  if(.not. allocated(Fv))then
+  if(iter .eq. 1) then
      allocate (Fv(nmsh,max_scf_iterations))
      allocate (Xv(nmsh,max_scf_iterations))
      allocate (r2_sav(max_scf_iterations))
@@ -45,24 +35,22 @@ subroutine pulay ( x_try, x_old, beta, r2, iter, max_order, nmsh )
         write (*,*) ' max_order=', max_order
         write (*,*) ' iter=',iter
         write (*,*) ' max_scf_iterations=',max_scf_iterations
+       deallocate(Fv,Xv,r2_sav)
         stop
      end if
      Xv(:,iter) = x_old(:)
  !residual vector
-     Fv(:,iter) = (x_try(:) - x_old(:))*mwe(:)        !residual vector
+     Fv(:,iter) = (x_try(:) - x_old(:))
      r2 = dot_product(Fv(:,iter),Fv(:,iter))
      r2 = r2 / nmsh
-     do i = 1,nmsh
-       write (1000+iter,*) Fv(i,iter), drwe(i)
-       write (2000+iter,*) Fv(i,iter), mwe(i)
-     enddo
      mix_order = min(iter,max_order)
-     if(r2 .lt. tr2) then
-        x_old(:) = x_old(:) + beta*Fv(:,iter)/mwe(:)
+     print*, iter, abs(r2 - sigmatol)
+     if(r2 .lt. sigmatol) then
+       scf_achieved = .true.
+       deallocate(Fv,Xv,r2_sav)
         return
      end if
      if(mix_order .lt. 4) then
-         write (*,*) ' Doing simple mixing', beta
          x_old(:) = (1.0d0-beta)*x_old(:) + beta*x_try(:)
         return
      end if
@@ -88,7 +76,6 @@ subroutine pulay ( x_try, x_old, beta, r2, iter, max_order, nmsh )
      ldb = mix_order + 1
      info = 0
      call dgesv(mix_order + 1,nrhs,amat,lda,ipiv,mixcoeff,ldb,info)
-     write (*,*) 'sum_alpha =', sum(mixcoeff(1:mix_order))
      x_old(:) = 0.0d0
      do i = 1, mix_order
         x_old(:) = x_old(:) + mixcoeff(i) * Xv(:,i) !Eq.52
@@ -96,39 +83,5 @@ subroutine pulay ( x_try, x_old, beta, r2, iter, max_order, nmsh )
      deallocate(mixcoeff)
      deallocate(amat,ipiv)
      return
-300  format (2x, ' norm =  ', f20.4)
-305  format (2x, ' norm of difference between auxvecs =  ', f20.4)
-301  format (2x, ' norm of the old vector =  ', f20.4)
-302  format (2x, ' norm of the new guess =  ', f20.4)
-308  format (2x, ' norm of difference between betaInvH, betaH^-1 =  ', f20.4)
-242  format (2x, ' Selected method is:  ', a17)
-   contains
-     real*8 function vecnorm(vec)
-       real*8, intent(in), dimension(nmsh) :: vec
-       integer i,j
-       real*8 r
-       r = 0.0d0
-       do i = 1,nmsh
-          r = r + vec(i)**2
-       end do
-       r = sqrt(r)
-       vecnorm = r
-     end function  vecnorm
-     real*8 function maxnorm(mat)
-       real*8, intent(in), dimension(nmsh,nmsh) :: mat
-       integer i,j
-       real*8 m
-       real*8 r
-       r = 0.0d0
-       m = 0.0d0
-       do i = 1,nmsh
-          do j = 1,nmsh
-             r = r + abs(mat(i,j))
-          end do
-          if (r .gt. m)  m = r
-          r = 0.0d0
-       end do
-       maxnorm = m
-     end function  maxnorm
 end subroutine pulay
 

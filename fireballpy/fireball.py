@@ -284,8 +284,7 @@ class Fireball(Calculator):
         # If the atoms change allocate memory
         if 'numbers' in system_changes:
             self.initialize()
-
-        if 'positions' in system_changes:
+        elif 'positions' in system_changes:
             set_coords(self.atoms.numbers, self.atoms.positions)
 
         # Check if charges needed

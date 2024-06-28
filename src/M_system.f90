@@ -23,6 +23,7 @@ module M_system
   integer, parameter :: max_scf_iterations = 200
   real*8 :: tempfe = 100.0d0
   real*8 :: bmix = 0.04d0
+  !real*8 :: bmix = 0.35d0
   real*8 :: sigma = 0.0d0
   real*8 :: sigmaold = 0.0d0
   real*8 :: sigmatol = 1.0E-8

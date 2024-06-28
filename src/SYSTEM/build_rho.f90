@@ -8,7 +8,7 @@ subroutine build_rho ()
   if (tempfe .le. 50.0d0) tempfe = 50.0d0 ! Can't be zero
   call denmat ()
   call mixer ()
-  if (sigma .lt. sigmatol) scf_achieved = .true.
+  !if (sigma .lt. sigmatol) scf_achieved = .true.
   !allocate (blowre_o(norbitals,norbitals,nkpoints))
   if ((iqout .eq. 1) .or. (iqout .eq. 3)) then
     deallocate (blowre)
