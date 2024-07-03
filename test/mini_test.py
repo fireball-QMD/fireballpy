@@ -42,7 +42,7 @@ atoms.calc = Fireball(charges_method=C, kpts=kpoints,
 # atoms.calc = Fireball(charges=C)
 atoms.get_potential_energy()
 print('ETOT =', atoms.calc.results['energy'], 'eV')
-print('ETOT = -1037.702899 eV saved')
+print('ETOT = -1037.64920294 eV saved')
 end_time = time.time()
 print(f"Tiempo de ejecución: {end_time - start_time} segundos")
 # -1037.70289

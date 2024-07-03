@@ -4,24 +4,13 @@ from ase.dft.kpoints import monkhorst_pack
 from ase.io import write
 from fireballpy import Fireball
 
-atoms = Atoms(symbols=['Si', 'Si', 'C', 'C', 'Si', 'Si', 'C', 'C'],
-              positions=[
-    (2.351869, 2.637258, -1.108009),
-    (3.459064, 0.714479, 1.110781),
-    (1.939962, 1.123183, -2.202729),
-    (3.040182, -0.788390, 0.002861),
-    (1.502626, -0.402626, -1.099998),
-    (2.602627, -2.307882, 1.100000),
-    (0.000000, 0.000000, 0.000000),
-    (1.100000, -1.905254, 2.200000)
-])
+a= 4.43000*1.5
 
-atoms.set_cell([
-    (1.100000, -1.905255, -2.200000),
-    (2.200000, -3.810511, 4.400000),
-    (3.810511, 2.200000, 0.000000)
-])
+atoms = Atoms(symbols=['C', 'Si'],
+        positions=[( 0.0000, 0.0000, 0.0000),
+                   (    a/4,    a/4,    a/4)])  
 
+atoms.set_cell([(a/2, a/2, 0), (a/2, 0, a/2), (0, a/2, a/2)])
 
 ETOT = []
 charge = []
@@ -56,7 +45,7 @@ for kpts in [None, kpoints]:
         print('')
 
 # Descomenta para generar el test otra vez
-# write('save/periodic_atoms.xyz', atoms)
-# np.savez('save/periodic_etot.npz', *ETOT)
-# np.savez('save/periodic_charges.npz', *charge)
-# np.savez('save/periodic_forces.npz', *force)
+write('save/periodic_atoms.xyz', atoms)
+#np.savez('save/periodic_etot.npz', *ETOT)
+#np.savez('save/periodic_charges.npz', *charge)
+#np.savez('save/periodic_forces.npz', *force)
