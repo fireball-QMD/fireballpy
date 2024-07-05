@@ -25,6 +25,7 @@ from _fireball import (call_scf_loop,  # type: ignore
                        set_icluster,
                        set_ifixcharge,
                        set_shell_atom_charge,
+                       set_mixer_params,
                        get_etot,
                        get_efermi,
                        get_nssh,
@@ -40,6 +41,10 @@ ICHARGE_TABLE = {'lowdin': 1, 'mulliken': 2, 'npa': 3,
 IDIPOLE_TABLE = {'improved': 1, 'legacy': 0}
 GAMMA = np.array([[0.0, 0.0, 0.0]])
 CELL100 = np.array([[100.0, 0.0, 0.0], [0.0, 100.0, 0.0], [0.0, 0.0, 100.0]])
+IMIXER_TABLE = {'anderson': 1, 'johnson': 2}
+MIXER_DEFAULT = {'method': 'anderson', 'mix_order': 6,
+                 'beta': 0.1, 'tol': 1e-8, 'max_iter': 200,
+                 'w0': 0.01, 'wi': np.ones(200)}
 
 
 class Fireball(Calculator):
@@ -104,6 +109,7 @@ class Fireball(Calculator):
                  kpts: Optional[ArrayLike] = None,
                  kpts_units: Optional[str] = "unit_cell",
                  shell_charges: Optional[ArrayLike] = None,
+                 mixer_kws: Optional[dict] = None,
                  **kwargs):
 
         super().__init__(**kwargs)
@@ -118,6 +124,8 @@ class Fireball(Calculator):
         self._check_kpts()
         self.shell_charges = shell_charges
         self._ifixcharges = int(shell_charges is not None)
+        self.mixer_kws = mixer_kws
+        self._check_mixer_kws()
 
     @staticmethod
     def clean_kpts(kpts):
@@ -167,6 +175,34 @@ class Fireball(Calculator):
         if self.kpts_units == 'unit_cell' and np.max(np.abs(self.kpts)) > 1.0:
             raise ValueError("K-points is not in unit cell coordinates. "
                              "Perhaps try with kpts_units = 'angstroms'.")
+
+    def _check_mixer_kws(self):
+        if self.mixer_kws is None:
+            self.mixer_kws = MIXER_DEFAULT
+            self._ialgmix = IMIXER_TABLE[MIXER_DEFAULT['method']]
+            return
+        self.mixer_kws['beta'] = self.mixer_kws.get(
+            'beta', MIXER_DEFAULT['beta'])
+        self.mixer_kws['max_iter'] = self.mixer_kws.get(
+            'max_iter', MIXER_DEFAULT['max_iter'])
+        self.mixer_kws['tol'] = self.mixer_kws.get('tol', MIXER_DEFAULT['tol'])
+        self.mixer_kws['mix_order'] = self.mixer_kws.get(
+            'mix_order', MIXER_DEFAULT['mix_order'])
+        if 'method' in self.mixer_kws:
+            if self.mixer_kws['method'] not in IMIXER_TABLE:
+                raise ValueError("Mixer method must be either 'anderson', "
+                                 "'johnson'. "
+                                 f"Got {self.mixer_kws['method']}")
+            self._ialgmix = IMIXER_TABLE[self.mixer_kws['method']]
+            self.mixer_kws['wi'] = np.ones(self.mixer_kws['max_iter'])
+            self.mixer_kws['w0'] = 0.0 if self._ialgmix == 1 else 0.01
+        elif ('wi' not in self.mixer_kws) or ('w0' not in self.mixer_kws):
+            raise ValueError("If method is not specified then 'w0' "
+                             "and 'wi' must be.")
+        self._ialgmix = 3
+        self.mixer_kws['wi'] = np.array(self.mixer_kws['wi'])
+        if self.mixer_kws['wi'].size == 1:
+            self.mixer_kws['wi'] *= np.ones(self.mixer_kws['max_iter'])
 
     def get_k_point_weights(self):
         w_k = np.ones(len(self.kpts))/len(self.kpts)
@@ -355,6 +391,12 @@ class Fireball(Calculator):
         set_kpoints(self._kpts)
         set_cell(self._cell)
         set_ifixcharge(self._ifixcharges)
+        set_mixer_params(self._ialgmix,
+                         self.mixer_kws['mix_order'],
+                         self.mixer_kws['beta'],
+                         self.mixer_kws['w0']**2,
+                         self.mixer_kws['tol'],
+                         self.mixer_kws['wi'])
 
     def initialize(self) -> None:
         self.natoms = len(self.atoms)

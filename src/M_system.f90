@@ -2,10 +2,10 @@ module M_system
 
   !========================
   integer :: iforce     = 1
-  integer :: iqout      = 2 ! 1:Lowdin 2:Mulliken 3:NPA 4:M-dipole :7MD-pres..
-  integer :: icluster   = 1 ! 
-  integer :: idipole    = 1 
-  integer :: igamma     = 1
+  integer :: iqout      != 2 ! 1:Lowdin 2:Mulliken 3:NPA 4:M-dipole :7MD-pres..
+  integer :: icluster   != 1 ! 
+  integer :: idipole    != 1 
+  integer :: igamma     != 1
   integer :: iqmmm      = 0
   integer :: ifixcharge = 0
   !========================
@@ -15,19 +15,20 @@ module M_system
   !periodic       0       0        0        !I periodic + kpoints
   !periodic_gamma 0       0        1        !R periodic + only gamma kpts
 
-  integer :: ialgmix  = 1 !1:anderson 2:broyden 3:louie 4:pulay
+  integer :: ialgmix  = 1 !1:anderson 2:johnson 3:custom
   real*8, parameter :: xc_overtol = 5.0d-5
   real*8, parameter :: smt_elect = 0.8d0 ! Ewald and electrostatic
   integer, parameter :: ithetamax = 5
-  integer, parameter :: idmix = 6
-  integer, parameter :: max_scf_iterations = 200
+  integer :: idmix = 6
+  integer :: max_scf_iterations = 200
   real*8 :: tempfe = 100.0d0
-  real*8 :: bmix = 0.04d0
-  !real*8 :: bmix = 0.35d0
+  real*8 :: bmix = 0.1
   real*8 :: sigma = 0.0d0
   real*8 :: sigmaold = 0.0d0
   real*8 :: sigmatol = 1.0E-8
-  logical ::  scf_achieved = .false.
+  real*8 :: sigmabest
+  real*8 :: w02 = 0.0
+  logical :: scf_achieved = .false.
  
   integer :: natoms
   real*8, dimension (:, :), allocatable :: ratom
@@ -210,6 +211,8 @@ module M_system
   real*8, allocatable, dimension(:,:) :: delF 
   real*8, allocatable, dimension(:,:) :: delX 
   real*8, allocatable, dimension(:)   :: r2_sav
+  real*8, allocatable, dimension(:)   :: wi
+  real*8, allocatable, dimension(:)   :: x_best
  
   real*8, allocatable, dimension(:,:) :: RJac
   real*8, allocatable, dimension(:,:) :: betaInvH

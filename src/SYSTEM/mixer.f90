@@ -33,16 +33,7 @@ subroutine mixer ()
     end do
   end do
 
-  select case (ialgmix)
-  case (1)
-    call anderson (Qoutmixer, Qinmixer, bmix, sigma, Kscf, idmix, imix )
-  case (2)
-    call broyden (Qoutmixer, Qinmixer, bmix, sigma, Kscf, idmix,imix )
-  case (3)
-    call louie (Qoutmixer, Qinmixer, bmix, sigma, Kscf, idmix, imix )
-  case (4)
-    call pulay (Qoutmixer, Qinmixer, bmix, sigma, Kscf, idmix, imix )
-  end select !ialgmix
+  call anderson (Qoutmixer, Qinmixer, imix)
 
   if (Kscf .gt. 1) then
     if (sigma .lt. sigmaold) then

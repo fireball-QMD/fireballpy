@@ -261,7 +261,6 @@ subroutine call_allocate_system()
   call allocate_system()
 end subroutine call_allocate_system
 
- 
 subroutine call_scf_loop()
   use M_system
   implicit none
@@ -280,3 +279,22 @@ subroutine call_getforces()
   call getforces()
 end subroutine call_getforces
 
+subroutine set_mixer_params(iam, msi, imix, bbmix, ww02, stol, wis)
+  use M_system
+  implicit none
+  integer, intent(in) :: iam
+  integer, intent(in) :: msi
+  integer, intent(in) :: imix
+  real*8, intent(in) :: ww02
+  real*8, intent(in) :: bbmix
+  real*8, intent(in) :: stol
+  real*8, intent(in), dimension(msi) :: wis
+  allocate(wi(msi))
+  ialgmix = iam
+  max_scf_iterations = msi
+  idmix = imix
+  w02 = ww02
+  bmix = bbmix
+  sigmatol = stol
+  wi(:) = wis(:)
+end subroutine set_mixer_params
