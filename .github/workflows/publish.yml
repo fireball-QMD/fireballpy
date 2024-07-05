@@ -22,6 +22,17 @@ jobs:
       run: sudo apt install libopenblas-dev
     - name: Build a binary wheel and a source tarball
       run: python3 -m build
+    - name: Fix wheel
+      run: |
+        mkdir -p wheels
+        mv dist/*.whl wheels/
+        docker pull quay.io/pypa/manylinux_2_28_x86_64
+        docker run -v $(pwd):/fireballpy quay.io/pypa/manylinux_2_28_x86_64 /bin/bash -c "cd /fireballpy && \
+        yum install -y openblas-devel && \
+        pipx install auditwheel && \
+        for whl in wheels/*.whl; do
+        auditwheel repair \$whl -w dist/
+        done"
     - name: Store the distribution packages
       uses: actions/upload-artifact@v4
       with:
