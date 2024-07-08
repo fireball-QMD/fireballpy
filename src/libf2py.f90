@@ -113,6 +113,18 @@ real*8 function get_shell_atom_charge(iauxssh,iauxatom)
   get_shell_atom_charge = Qin(iauxssh,iauxatom)
 end function get_shell_atom_charge
  
+real*8 function get_partial_charge(iatom,nssh)
+  use M_system, only : Qin, Q0_TOT
+  implicit none
+  integer issh
+  integer, intent(in):: iatom, nssh
+  get_partial_charge = Q0_TOT(iatom)
+  do  issh = 1, nssh
+    get_partial_charge = get_partial_charge - Qin(issh,iatom)
+  end do
+end function get_partial_charge
+
+
 
 subroutine set_shell_atom_charge(natoms,nssh,qaux)
   use M_system, only : Qin
