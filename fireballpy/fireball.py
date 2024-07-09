@@ -321,7 +321,7 @@ class Fireball(Calculator):
         if 'numbers' in system_changes:
             self.initialize()
         elif 'positions' in system_changes:
-            set_coords(self.atoms.numbers, self.atoms.positions)
+            self._set_options()
 
         # Check if charges needed
         if 'charges' in properties:
