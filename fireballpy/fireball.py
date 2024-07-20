@@ -196,6 +196,7 @@ class Fireball(Calculator):
             self._ialgmix = IMIXER_TABLE[self.mixer_kws['method']]
             self.mixer_kws['wi'] = np.ones(self.mixer_kws['max_iter'])
             self.mixer_kws['w0'] = 0.0 if self._ialgmix == 1 else 0.01
+            return
         elif ('wi' not in self.mixer_kws) or ('w0' not in self.mixer_kws):
             raise ValueError("If method is not specified then 'w0' "
                              "and 'wi' must be.")

@@ -55,7 +55,7 @@ subroutine anderson ( x_try, x_old, nmsh )
 
   Kscfm1 = Kscf - 1
   if (ialgmix .eq. 2) then
-    wi(Kscfm1) = nmsh / sqrt(r2_sav(Kscfm1))
+    wi(Kscfm1) = 1.0 / r2_sav(Kscfm1)
   end if
 
   delX(:,Kscfm1) = wi(Kscfm1)*(x_old(:) - Xv(:,Kscfm1))
@@ -64,7 +64,7 @@ subroutine anderson ( x_try, x_old, nmsh )
 
   imix = max(1, Kscf - idmix + 1)
   mix_order = min(Kscf, idmix) - 1
-  if (Kscf .gt. idmix .and. idmix .ge. 6) then
+  if (imix .gt. 1) then
     if (r2_sav(imix-1) .lt. minval(r2_sav(imix:Kscf))) then
       r2_sav(imix) = r2_sav(imix-1)
       Fv(:,imix) = Fv(:,imix-1)

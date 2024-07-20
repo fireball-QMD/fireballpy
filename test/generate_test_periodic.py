@@ -4,11 +4,11 @@ from ase.dft.kpoints import monkhorst_pack
 from ase.io import write
 from fireballpy import Fireball
 
-a= 4.43000*1.5
+a = 4.43000*1.5
 
 atoms = Atoms(symbols=['C', 'Si'],
-        positions=[( 0.0000, 0.0000, 0.0000),
-                   (    a/4,    a/4,    a/4)])  
+              positions=[(0.0000, 0.0000, 0.0000),
+                         (a/4,    a/4,    a/4)])
 
 atoms.set_cell([(a/2, a/2, 0), (a/2, 0, a/2), (0, a/2, a/2)])
 
@@ -45,7 +45,7 @@ for kpts in [None, kpoints]:
         print('')
 
 # Descomenta para generar el test otra vez
-write('save/periodic_atoms.xyz', atoms)
-#np.savez('save/periodic_etot.npz', *ETOT)
-#np.savez('save/periodic_charges.npz', *charge)
-#np.savez('save/periodic_forces.npz', *force)
+# write('save/periodic_atoms.xyz', atoms)
+# np.savez('save/periodic_etot.npz', *ETOT)
+# np.savez('save/periodic_charges.npz', *charge)
+# np.savez('save/periodic_forces.npz', *force)
