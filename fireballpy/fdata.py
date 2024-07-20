@@ -102,7 +102,7 @@ def download_file(url: str, dst: str) -> None:
 
     u = urlopen(url)
     txt = u.read()
-    txt = txt.decode("ascii")
+    txt = txt.decode("utf-8")
 
     # Save to a temp file in dst to avoid permission errors
     # in Windows and cover bad downloads

@@ -34,6 +34,7 @@ from _fireball import (call_scf_loop,  # type: ignore
                        get_fdata_is_load,
                        get_norbitals_new,
                        get_eigen)
+from ._types import real, integer
 
 ICHARGE_TABLE = {'lowdin': 1, 'mulliken': 2, 'npa': 3,
                  'mulliken_dipole': 4, 'mulliken_dipole_preserving': 7,
@@ -141,11 +142,15 @@ class Fireball(Calculator):
     def _check_fdata_path(self):
         if self.fdata_path is None:
             return
+        if not isinstance(self.fdata_path, str):
+            raise ValueError("'fdata_path' must be a string.")
         if not os.path.isfile(os.path.join(self.fdata_path, 'info.dat')):
             raise ValueError("info.dat file not found in the specified "
                              f"fdata path ({self.fdata_path}).")
 
     def _check_charges_method(self):
+        if not isinstance(self.charges_method, str):
+            raise ValueError("'charges_method' must be a string.")
         if self.charges_method not in ICHARGE_TABLE:
             raise ValueError("Parameter 'charges' must be one of "
                              "'lowdin', 'mulliken', 'npa', mulliken_dipole/md "
@@ -154,6 +159,8 @@ class Fireball(Calculator):
         self._icharge = ICHARGE_TABLE[self.charges_method]
 
     def _check_dipole(self):
+        if not isinstance(self.dipole, str):
+            raise ValueError("'dipole' must be a string.")
         if self.dipole not in IDIPOLE_TABLE:
             raise ValueError("Parameter 'dipole' must be either "
                              "'improved' or 'legacy'. "
@@ -161,13 +168,21 @@ class Fireball(Calculator):
         self._idipole = IDIPOLE_TABLE[self.dipole]
 
     def _check_kpts(self):
+        if not isinstance(self.kpts_units, str):
+            raise ValueError("'kpts_units' must be a string.")
         if self.kpts_units not in ['unit_cell', 'angstroms']:
             raise ValueError("Parameter 'kpts_units' must be either "
                              "'unit_cell' or 'angstroms'. "
                              f"Got '{self.kpts_units}'.")
         if self.kpts is None:
             return
-        self.kpts = np.array(self.kpts)
+        if not isinstance(self.kpts, (np.ndarray, list)):
+            raise ValueError("'kpts' must be a list or a numpy array.")
+        try:
+            self.kpts = np.array(self.kpts, dtype=real)
+        except ValueError:
+            raise ValueError("Not all elements in 'kpts' are parseable "
+                             "as float numbers")
         if self.kpts.shape[-1] != 3:
             raise ValueError("K-points must have 3 coordinates. "
                              f"Got {self.kpts.shape[-1]}")
@@ -181,13 +196,30 @@ class Fireball(Calculator):
             self.mixer_kws = MIXER_DEFAULT
             self._ialgmix = IMIXER_TABLE[MIXER_DEFAULT['method']]
             return
-        self.mixer_kws['beta'] = self.mixer_kws.get(
-            'beta', MIXER_DEFAULT['beta'])
-        self.mixer_kws['max_iter'] = self.mixer_kws.get(
-            'max_iter', MIXER_DEFAULT['max_iter'])
-        self.mixer_kws['tol'] = self.mixer_kws.get('tol', MIXER_DEFAULT['tol'])
-        self.mixer_kws['mix_order'] = self.mixer_kws.get(
-            'mix_order', MIXER_DEFAULT['mix_order'])
+        try:
+            self.mixer_kws['beta'] = real(self.mixer_kws.get(
+                'beta', MIXER_DEFAULT['beta']))
+        except ValueError:
+            raise ValueError("'beta' in 'mixer_kws' is not parseable "
+                             "as a float number")
+        try:
+            self.mixer_kws['max_iter'] = integer(self.mixer_kws.get(
+                'max_iter', MIXER_DEFAULT['max_iter']))
+        except ValueError:
+            raise ValueError("'max_iter' in 'mixer_kws' is not parseable "
+                             "as an integer number")
+        try:
+            self.mixer_kws['tol'] = real(self.mixer_kws.get(
+                'tol', MIXER_DEFAULT['tol']))
+        except ValueError:
+            raise ValueError("'tol' in 'mixer_kws' is not parseable "
+                             "as a float number")
+        try:
+            self.mixer_kws['mix_order'] = integer(self.mixer_kws.get(
+                'mix_order', MIXER_DEFAULT['mix_order']))
+        except ValueError:
+            raise ValueError("'mix_order' in 'mixer_kws' is not parseable "
+                             "as an integer number")
         if 'method' in self.mixer_kws:
             if self.mixer_kws['method'] not in IMIXER_TABLE:
                 raise ValueError("Mixer method must be either 'anderson', "
@@ -201,7 +233,11 @@ class Fireball(Calculator):
             raise ValueError("If method is not specified then 'w0' "
                              "and 'wi' must be.")
         self._ialgmix = 3
-        self.mixer_kws['wi'] = np.array(self.mixer_kws['wi'])
+        try:
+            self.mixer_kws['wi'] = np.array(self.mixer_kws['wi'], dtype=real)
+        except ValueError:
+            raise ValueError("Not all elements of 'wi' in 'mixer_kws' "
+                             "are parseable as float numbers")
         if self.mixer_kws['wi'].size == 1:
             self.mixer_kws['wi'] *= np.ones(self.mixer_kws['max_iter'])
 
