@@ -1,7 +1,7 @@
 subroutine Dassemble_2c ()
+  use M_constants, only: wp, eq2
   use M_system        
   use M_fdata, only: num_orb
-  use M_constants
   implicit none
   integer iatom
   integer ierror
@@ -18,18 +18,18 @@ subroutine Dassemble_2c ()
   integer kforce
   integer matom
   integer mbeta
-  real*8 muxc
-  real*8 sumS
-  real*8 sumT
-  real*8 y
-  real*8, dimension (numorb_max, numorb_max) :: bcnax
-  real*8, dimension (3, numorb_max, numorb_max) :: bcnapx
-  real*8, dimension (3, 3) :: eps
-  real*8, dimension (3, 3, 3) :: deps
-  real*8, dimension (3) :: r1
-  real*8, dimension (3) :: r2
-  real*8, dimension (3) :: r21
-  real*8, dimension (3) :: sighat
+  real(wp) muxc
+  real(wp) sumS
+  real(wp) sumT
+  real(wp) y
+  real(wp), dimension (numorb_max, numorb_max) :: bcnax
+  real(wp), dimension (3, numorb_max, numorb_max) :: bcnapx
+  real(wp), dimension (3, 3) :: eps
+  real(wp), dimension (3, 3, 3) :: deps
+  real(wp), dimension (3) :: r1
+  real(wp), dimension (3) :: r2
+  real(wp), dimension (3) :: r21
+  real(wp), dimension (3) :: sighat
   fana = 0.0d0
   fotna = 0.0d0
   ft = 0.0d0

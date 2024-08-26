@@ -1,4 +1,5 @@
 subroutine load_fdata()
+  use M_constants, only: wp, abohr
   use M_fdata, only: fdataLocation, infofname, nsh_max, nshPP_max, nspecies, nzx, symbolA, &
     & etotatom, smass, rc_PP, rcutoff, cl_PP, nssh, lssh, nsshPP, lsshPP, Qneutral, wavefxn, &
     & napot, errno2c, errno3c, ind2c, icon3c, splineint_2c, numz2c, z2cmax, interactions2c_max, &
@@ -6,8 +7,7 @@ subroutine load_fdata()
   implicit none
   integer :: in1, in2, in3, ispec, issh, aux, icount, isorp, &
     & interaction, ideriv, mintype, maxtype
-  real*8, parameter :: abohr = 0.5291772109
-  real*8, dimension (:,:), allocatable :: rcutoff_temp
+  real(wp), dimension (:,:), allocatable :: rcutoff_temp
 
   ! Find nsh_max and nsh_max_PP
   nsh_max = 0

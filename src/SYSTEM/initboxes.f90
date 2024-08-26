@@ -1,11 +1,12 @@
   subroutine initboxes ()
+  use M_constants, only: wp
   use M_system
   implicit none
   integer lbeta
   integer ix, iy
   integer mbeta
   integer midl
-  real*8, save, dimension (3, 0:728) :: xxl ! cube 9x9x9
+  real(wp), save, dimension (3, 0:728) :: xxl ! cube 9x9x9
   integer, parameter :: mbox = 4
   xxl (:,:) = 0.0d0
   xxl (1,1) = 1.0d0
@@ -52,24 +53,24 @@
   do ix = -mbox, mbox
     do iy = -mbox, mbox
       lbeta = lbeta + 1
-      xxl(1,lbeta) = real(ix)
-      xxl(2,lbeta) = real(iy)
+      xxl(1,lbeta) = real(ix, wp)
+      xxl(2,lbeta) = real(iy, wp)
       xxl(3,lbeta) = -4.0d0
     end do
   end do
   do ix = -mbox, mbox
     do iy = -mbox, mbox
       lbeta = lbeta + 1
-      xxl(1,lbeta) = real(ix)
-      xxl(2,lbeta) = real(iy)
+      xxl(1,lbeta) = real(ix, wp)
+      xxl(2,lbeta) = real(iy, wp)
       xxl(3,lbeta) = -3.0d0
     end do
   end do
   do ix = -mbox, mbox
     do iy = -mbox, mbox
       lbeta = lbeta + 1
-      xxl(1,lbeta) = real(ix)
-      xxl(2,lbeta) = real(iy)
+      xxl(1,lbeta) = real(ix, wp)
+      xxl(2,lbeta) = real(iy, wp)
       xxl(3,lbeta) = -2.0d0
     end do
   end do
@@ -78,9 +79,9 @@
      do iy = -mbox, mbox
        if (iabs(ix) .gt. 1 .or. iabs(iy) .gt. 1) then
         lbeta = lbeta + 1
-        xxl(1,lbeta) = real(ix)
-        xxl(2,lbeta) = real(iy)
-        xxl(3,lbeta) = real(midl)
+        xxl(1,lbeta) = real(ix, wp)
+        xxl(2,lbeta) = real(iy, wp)
+        xxl(3,lbeta) = real(midl, wp)
        end if
      end do
    end do
@@ -88,24 +89,24 @@
   do ix = -mbox, mbox
    do iy = -mbox, mbox
      lbeta = lbeta + 1
-     xxl(1,lbeta) = real(ix)
-     xxl(2,lbeta) = real(iy)
+     xxl(1,lbeta) = real(ix, wp)
+     xxl(2,lbeta) = real(iy, wp)
      xxl(3,lbeta) = 2.0d0
    end do
   end do
   do ix = -mbox, mbox
   do iy = -mbox, mbox
     lbeta = lbeta + 1
-     xxl(1,lbeta) = real(ix)
-     xxl(2,lbeta) = real(iy)
+     xxl(1,lbeta) = real(ix, wp)
+     xxl(2,lbeta) = real(iy, wp)
      xxl(3,lbeta) = 3.0d0
    end do
   end do
   do ix = -mbox, mbox
     do iy = -mbox, mbox
       lbeta = lbeta + 1
-      xxl(1,lbeta) = real(ix)
-      xxl(2,lbeta) = real(iy)
+      xxl(1,lbeta) = real(ix, wp)
+      xxl(2,lbeta) = real(iy, wp)
        xxl(3,lbeta) = 4.0d0
      end do
     end do

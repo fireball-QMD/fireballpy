@@ -1,15 +1,15 @@
 subroutine backnay ()
   use M_system
   implicit none
-  integer iatom
-  integer icount
-  integer ineigh
-  integer jatom
-  integer jbeta
-  integer jneigh
-  integer katom
-  integer mbeta
-  integer iloop
+  integer :: iatom
+  integer :: icount
+  integer :: ineigh
+  integer :: jatom
+  integer :: jbeta
+  integer :: jneigh
+  integer :: katom
+  integer :: mbeta
+  integer :: iloop
   727   continue
   do iatom = 1, natoms
    do ineigh = 1, neighn(iatom)

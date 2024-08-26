@@ -1,11 +1,12 @@
 subroutine readheader_3c (iounit, numx, numy, xmax, ymax)
+  use M_constants, only: wp
   use M_fdata, only: numXmax, numYmax, errno3c
   implicit none
   integer, intent (in) :: iounit
   integer, intent (out) :: numx, numy
-  real*8, intent (out) :: xmax, ymax
-  integer iline, nucZ1, nucZ2, nucZ3, nr, ntheta_in, nphi2
-  real*8 rc1a, rc2a, rc3a
+  real(wp), intent (out) :: xmax, ymax
+  integer :: iline, nucZ1, nucZ2, nucZ3, nr, ntheta_in, nphi2
+  real(wp) :: rc1a, rc2a, rc3a
 
   do iline = 1, 10
       read (iounit,*)

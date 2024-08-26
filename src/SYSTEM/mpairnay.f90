@@ -1,17 +1,18 @@
 integer function mpairnay (iatom, jatom, rdiff)
+  use M_constants, only: wp
   use M_system
   implicit none
   integer, intent(in) :: iatom
   integer, intent(in) :: jatom
-  real*8, intent(in), dimension (3) :: rdiff
+  real(wp), intent(in), dimension (3) :: rdiff
   integer imatch
   integer ineigh
   integer jjatom
   integer mbeta
-  real*8 diff
-  real*8, dimension (3) :: r1
-  real*8, dimension (3) :: r2
-  real*8, dimension (3) :: r21
+  real(wp) diff
+  real(wp), dimension (3) :: r1
+  real(wp), dimension (3) :: r2
+  real(wp), dimension (3) :: r21
   mpairnay = 0
   r1(:) = ratom(:,iatom)
   imatch = 0

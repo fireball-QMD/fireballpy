@@ -1,26 +1,19 @@
 subroutine deps3center (r1, r2, r21, distance12, ratm, rnabc, eps3, dera3, der13)
-  use M_constants
+  use M_constants, only: wp, xlevi, delk
   implicit none
-  real*8, intent(in) :: distance12 ! distance between atom 1 and atom 2
-  real*8, intent(in) :: eps3 (3, 3)! 3c epsilon matrix z = r2 - r1, x = dhat
-  real*8, intent(in) :: r1 (3)     ! position of atom 1
-  real*8, intent(in) :: r2 (3)     ! position of atom 2
-  real*8, intent(in) :: r21 (3)    ! vector between atom 1 and atom 2
-  real*8, intent(in) :: ratm (3)   ! position of the potential
-  real*8, intent(in) :: rnabc (3)  ! vector from bond charge to potential
-  real*8, intent(out) :: dera3 (3, 3, 3) ! deps/dratm in the 3-center system
-  real*8, intent(out) :: der13 (3, 3, 3) ! deps/dr1 in the 3-center system
-  integer imu
-  integer ix
-  real*8 crossmag
-  real*8 r1dotr2
-  real*8 r1dotratm
-  real*8 r2dotratm
-  real*8 r2mag2
-  real*8 r1mag2
-  real*8 ratmmag2
-  real*8 sum
-  real*8 crossa (3)
+  real(wp), intent(in) :: distance12 ! distance between atom 1 and atom 2
+  real(wp), dimension(3, 3), intent(in) :: eps3 ! 3c epsilon matrix z = r2 - r1, x = dhat
+  real(wp), dimension(3), intent(in) :: r1     ! position of atom 1
+  real(wp), dimension(3), intent(in) :: r2     ! position of atom 2
+  real(wp), dimension(3), intent(in) :: r21    ! vector between atom 1 and atom 2
+  real(wp), dimension(3), intent(in) :: ratm   ! position of the potential
+  real(wp), dimension(3), intent(in) :: rnabc  ! vector from bond charge to potential
+  real(wp), dimension(3, 3, 3), intent(out) :: dera3 ! deps/dratm in the 3-center system
+  real(wp), dimension(3, 3, 3), intent(out) :: der13 ! deps/dr1 in the 3-center system
+  integer :: imu, ix
+  real(wp) :: crossmag, r1dotr2, r1dotratm, r2dotratm, r2mag2, r1mag2, ratmmag2, sum
+  real(wp), dimension(3) :: crossa
+  
   dera3 = 0.0d0
   der13 = 0.0d0
   crossa(1) = r21(2)*rnabc(3) - r21(3)*rnabc(2)

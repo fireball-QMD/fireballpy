@@ -3,17 +3,17 @@ subroutine num_neigh_tot ()
   use M_system
   implicit none
   integer,allocatable  :: neighb_aux(:,:)
-  integer      :: iatom
-  integer      :: jatom
-  integer      :: jatomPP
-  integer      :: num_neigh
-  integer      :: num_neighPP
-  integer      :: num_neig_tot
-  integer      :: ineighPP
-  integer      :: ineigh
-  integer      :: count_neig
-  integer      :: mbeta
-  integer      :: mbetaPP
+  integer :: iatom
+  integer :: jatom
+  integer :: jatomPP
+  integer :: num_neigh
+  integer :: num_neighPP
+  integer :: num_neig_tot
+  integer :: ineighPP
+  integer :: ineigh
+  integer :: count_neig
+  integer :: mbeta
+  integer :: mbetaPP
 
   if ( allocated (neighj_tot)) deallocate (neighj_tot)
   if ( allocated (neighb_tot)) deallocate (neighb_tot)

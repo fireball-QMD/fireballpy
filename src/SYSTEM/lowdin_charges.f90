@@ -1,6 +1,6 @@
 subroutine LOWDIN_CHARGES()
+  use M_constants, only: wp, spin
   use M_system
-  use M_constants
   use M_fdata, only: num_orb,nssh,lssh
   implicit none
   integer iatom
@@ -11,7 +11,7 @@ subroutine LOWDIN_CHARGES()
   integer noccupy
   integer mqn
   integer iorbital
-  real*8 aux1, aux2, aux3
+  real(wp) aux1, aux2, aux3
   Qout = 0.0d0
   QLowdin_TOT = 0.0d0
   do iatom = 1, natoms

@@ -1,7 +1,7 @@
 subroutine Dassemble_lr ()
+  use M_constants, only: wp, eq2
   use M_system
   use M_fdata, only: num_orb,nssh,Qneutral
-  use M_constants
   implicit none
   integer iatom
   integer ierror
@@ -16,22 +16,22 @@ subroutine Dassemble_lr ()
   integer jmu
   integer katom
   integer mbeta
-  real*8 distance12
-  real*8 dq1
-  real*8 dq2
-  real*8 dq3
-  real*8 dterm
-  real*8 sterm
-  real*8, dimension (3) :: dewaldlr_i
-  real*8, dimension (3) :: dewaldlr_j
-  real*8, dimension (3) :: dewaldlr_k
-  real*8, dimension (3) :: dpterm
-  real*8, dimension (3) :: r1
-  real*8, dimension (3) :: r2
-  real*8, dimension (3) :: rhat12
-  real*8, dimension (3) :: spterm
-  real*8, dimension (natoms) :: sub_ewald
-  real*8, dimension (3, natoms) :: sub_dewald
+  real(wp) distance12
+  real(wp) dq1
+  real(wp) dq2
+  real(wp) dq3
+  real(wp) dterm
+  real(wp) sterm
+  real(wp), dimension (3) :: dewaldlr_i
+  real(wp), dimension (3) :: dewaldlr_j
+  real(wp), dimension (3) :: dewaldlr_k
+  real(wp), dimension (3) :: dpterm
+  real(wp), dimension (3) :: r1
+  real(wp), dimension (3) :: r2
+  real(wp), dimension (3) :: rhat12
+  real(wp), dimension (3) :: spterm
+  real(wp), dimension (natoms) :: sub_ewald
+  real(wp), dimension (3, natoms) :: sub_dewald
   flrew = 0.0d0
   sub_ewald = 0.0d0
   sub_dewald = 0.0d0

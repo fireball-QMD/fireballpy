@@ -1,4 +1,5 @@
  subroutine interpolate_1d (interaction, isub, in1, in2, non2c, ioption, xin, yout, dfdx)
+  use M_constants, only: wp
   use M_system
   use M_constants
   use M_fdata, only: ind2c, numz2c, z2cmax, splineint_2c, nfofx
@@ -9,14 +10,14 @@
   integer, intent(in) :: in2
   integer, intent(in) :: non2c
   integer, intent(in) :: ioption   ! Derivative or not?
-  real*8, intent(in)  :: xin   ! x
-  real*8, intent(out) :: yout  ! F(x)
-  real*8, intent(out) :: dfdx  ! dF/dx
-  real*8, parameter :: tol=1.0d-5
-  real*8, parameter :: e6t=.166666667d0
-  real*8, parameter :: e24t=.04166666667d0
-  real*8, parameter :: e5t=.2d0
-  real*8, parameter :: e2t5=.4d0
+  real(wp), intent(in)  :: xin   ! x
+  real(wp), intent(out) :: yout  ! F(x)
+  real(wp), intent(out) :: dfdx  ! dF/dx
+  real(wp), parameter :: tol=1.0d-5
+  real(wp), parameter :: e6t=.166666667d0
+  real(wp), parameter :: e24t=.04166666667d0
+  real(wp), parameter :: e5t=.2d0
+  real(wp), parameter :: e2t5=.4d0
   integer i
   integer ileft, imid, iright
   integer iprod, isum
@@ -25,27 +26,27 @@
   integer nn
   integer nnum
   integer norder
-  real*8 h
-  real*8 xmax
-  real*8, parameter :: xmin = 0.0d0
-  real*8 xxp
-  real*8 f0p1, f0p10, f0p2, f0p3, f0p30, f0p6, f0p8, f1m1, f1m12
-  real*8 f1m16, f1m2, f1m3, f1m4, f1p14, f1p16, f1p2, f1p24, f1p3
-  real*8 f1p4, f1p6, f2m1, f2m3, f2p1, f2p6, f2p7, f3p1, f3p2, ftp
-  real*8 p, pden
-  real*8 prod, prodd 
-  real*8 sum, sumx
-  real*8 xprod, xsumoverj
-  real*8, dimension (5) :: bb
-  real*8, dimension (nfofx) :: pdenom
-  real*8, dimension (nfofx) :: xx
+  real(wp) h
+  real(wp) xmax
+  real(wp), parameter :: xmin = 0.0d0
+  real(wp) xxp
+  real(wp) f0p1, f0p10, f0p2, f0p3, f0p30, f0p6, f0p8, f1m1, f1m12
+  real(wp) f1m16, f1m2, f1m3, f1m4, f1p14, f1p16, f1p2, f1p24, f1p3
+  real(wp) f1p4, f1p6, f2m1, f2m3, f2p1, f2p6, f2p7, f3p1, f3p2, ftp
+  real(wp) p, pden
+  real(wp) prod, prodd 
+  real(wp) sum, sumx
+  real(wp) xprod, xsumoverj
+  real(wp), dimension (5) :: bb
+  real(wp), dimension (nfofx) :: pdenom
+  real(wp), dimension (nfofx) :: xx
   integer iam
-  real*8, dimension (0:nfofx) :: a, b, c, d
-  real*8, dimension (0:nfofx) :: alpha
-  real*8, dimension (0:nfofx) :: L
-  real*8, dimension (0:nfofx) :: mu
-  real*8, dimension (0:nfofx) :: Z
-  real*8 aaa, bbb, ccc, ddd
+  real(wp), dimension (0:nfofx) :: a, b, c, d
+  real(wp), dimension (0:nfofx) :: alpha
+  real(wp), dimension (0:nfofx) :: L
+  real(wp), dimension (0:nfofx) :: mu
+  real(wp), dimension (0:nfofx) :: Z
+  real(wp) aaa, bbb, ccc, ddd
   jxx = ind2c(interaction,isub)
   nnum = numz2c(jxx,in1,in2)
   xmax = z2cmax(jxx,in1,in2)

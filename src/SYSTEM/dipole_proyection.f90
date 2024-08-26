@@ -1,10 +1,10 @@
 subroutine dipole_proyection()
+  use M_constants, only: wp
   use M_system
-  use M_constants
   use M_fdata, only: num_orb,nssh,lssh,Qneutral
   implicit none
-  real*8, parameter ::  Debye = 0.208194
-  real*8, parameter ::  klambda = 1.0
+  real(wp), parameter ::  Debye = 0.208194
+  real(wp), parameter ::  klambda = 1.0
   integer iatom
   integer imu
   integer in1, in2
@@ -13,22 +13,22 @@ subroutine dipole_proyection()
   integer issh
   integer jatom
   integer mbeta
-  real*8      Qtot, Qtot1, Qtot2
-  real*8, dimension(3) :: r1,r2,Rbc,u21
-  real*8, dimension(3) :: rmedio, raux
-  real*8      w_suma  
-  real*8, dimension(3,3) :: bwrr, bwrr_inv, u_bwrr, ut_bwrr, v_bwrr, vt_bwrr, zero_bwrr
-  real*8, dimension (natoms) :: c_k
-  real*8, dimension (neigh_max) :: w_k
-  real*8, dimension(3,natoms) :: intra_dip, res_dip
-  real*8, dimension(3,1) :: intra_dip_aux, delta_ck
+  real(wp)      Qtot, Qtot1, Qtot2
+  real(wp), dimension(3) :: r1,r2,Rbc,u21
+  real(wp), dimension(3) :: rmedio, raux
+  real(wp)      w_suma  
+  real(wp), dimension(3,3) :: bwrr, bwrr_inv, u_bwrr, ut_bwrr, v_bwrr, vt_bwrr, zero_bwrr
+  real(wp), dimension (natoms) :: c_k
+  real(wp), dimension (neigh_max) :: w_k
+  real(wp), dimension(3,natoms) :: intra_dip, res_dip
+  real(wp), dimension(3,1) :: intra_dip_aux, delta_ck
   integer :: n_bwrr = 3
   integer :: lda_bwrr = 3
   integer :: lwork = 15 !MAX(1,3*MIN(M,N) + MAX(M,N),5*MIN(M,N)) 
   integer info,i
   integer, dimension(3) :: ipiv
-  real*8, dimension(3) :: s_bwrr
-  real*8, dimension(15) :: dummy
+  real(wp), dimension(3) :: s_bwrr
+  real(wp), dimension(15) :: dummy
   do iatom = 1, natoms
     Q0_TOT(iatom) = 0
     in1 = imass(iatom)
@@ -274,9 +274,10 @@ subroutine dipole_proyection()
   dipQout_tot = dip_tot
 end subroutine dipole_proyection
   
-real*8 function get_min_parabola(x1,x2,x3,y1,y2,y3)
-  real*8,intent(in) :: x1,x2,x3,y1,y2,y3
-  real*8 a,b,c
+function get_min_parabola(x1,x2,x3,y1,y2,y3)
+  use M_constants, only: wp
+  real(wp),intent(in) :: x1,x2,x3,y1,y2,y3
+  real(wp) a,b,c,get_min_parabola
   b=(y2-y3)-(y1-y2)*(x2**2-x3**2)/(x1**2-x2**2)
   b=b/( (x2-x3)-(x1-x2)*(x2**2-x3**2)/(x1**2-x2**2) )
   a=(y1-y2)/(x1**2-x2**2)-b*(x1-x2)/(x1**2-x2**2)

@@ -1,14 +1,14 @@
 subroutine twisterd (eps, deps, ddmat, dpmat)
-  use M_constants
+  use M_constants, only: wp, haveDorbitals
+  use M_system, only: amat
   implicit none
-  real*8, intent(in) :: eps (3, 3)
-  real*8, intent(in) :: deps (3, 3, 3)
-  real*8, intent(out) :: ddmat (3, 5, 5)
-  real*8, intent(out) :: dpmat (3, 3, 3)
-  integer imu
-  integer ix, jx, kx
-  real*8 aterm12, aterm32, aterm33, aterm13, aterm11
-  real*8 amat_term
+  real(wp), dimension(3, 3), intent(in) :: eps
+  real(wp), dimension(3, 3, 3), intent(in) :: deps
+  real(wp), dimension(3, 5, 5), intent(out) :: ddmat
+  real(wp), dimension(3, 3, 3), intent(out) :: dpmat
+  integer :: imu, ix, jx, kx
+  real(wp) :: aterm12, aterm32, aterm33, aterm13, aterm11, amat_term
+
   do ix = 1, 3
    dpmat(ix,1,1) = deps(ix,2,2)
    dpmat(ix,1,2) = deps(ix,2,3)

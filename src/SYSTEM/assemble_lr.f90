@@ -1,6 +1,6 @@
 subroutine assemble_lr () 
+  use M_constants, only: wp, eq2
   use M_system
-  use M_constants
   use M_fdata, only: nssh,Qneutral,num_orb
   implicit none
   integer iatom
@@ -15,13 +15,13 @@ subroutine assemble_lr ()
   integer mbeta
   integer katom
   integer in3
-  real*8 distance12
-  real*8 dq1
-  real*8 dterm
-  real*8 sterm
-  real*8, dimension (3) :: r1
-  real*8, dimension (3) :: r2
-  real*8, dimension (natoms) :: sub_ewald
+  real(wp) distance12
+  real(wp) dq1
+  real(wp) dterm
+  real(wp) sterm
+  real(wp), dimension (3) :: r1
+  real(wp), dimension (3) :: r2
+  real(wp), dimension (natoms) :: sub_ewald
   ewaldlr = 0.0d0
   sub_ewald = 0.0d0
   do iatom = 1, natoms

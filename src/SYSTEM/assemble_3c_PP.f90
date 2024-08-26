@@ -1,4 +1,5 @@
 subroutine assemble_3c_PP ()
+  use M_constants, only: wp
   use M_system
   use M_fdata, only: num_orb, num_orbPP 
   implicit none
@@ -25,13 +26,13 @@ subroutine assemble_3c_PP ()
  
   integer, external :: mpairnay
 
-  real*8, dimension (numorb_max, numorb_max) :: bcnlx
-  real*8, dimension (numorb_max) :: cl
-  real*8, dimension (3) :: r1
-  real*8, dimension (3) :: r2
-  real*8, dimension (3) :: r31
-  real*8, dimension (3) :: r32
-  real*8, dimension (3) :: rna
+  real(wp), dimension (numorb_max, numorb_max) :: bcnlx
+  real(wp), dimension (numorb_max) :: cl
+  real(wp), dimension (3) :: r1
+  real(wp), dimension (3) :: r2
+  real(wp), dimension (3) :: r31
+  real(wp), dimension (3) :: r32
+  real(wp), dimension (3) :: rna
   do ialp = 1, natoms
     rna(:) = ratom(:,ialp)
     indna = imass(ialp)

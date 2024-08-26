@@ -1,10 +1,10 @@
 subroutine initamat()
-  use M_constants
+  use M_constants, only: haveDorbitals
   use M_system
   use M_fdata, only: nspecies,lsshPP,nsshPP,lssh,nssh
   implicit none
-  integer in1
-  integer issh
+  integer :: in1
+  integer :: issh
   haveDorbitals = .false.
   do in1 = 1, nspecies
    do issh = 1, nssh(in1)

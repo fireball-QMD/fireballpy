@@ -1,7 +1,7 @@
 subroutine getforces ()
   use M_system
   implicit none
-  integer iatom
+  integer :: iatom
   call Dassemble_2c ()
   call Dassemble_2c_PP ()
   call Dassemble_ca_olsxc_on ()

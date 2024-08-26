@@ -1,8 +1,8 @@
 subroutine scf_loop ()
-  use M_system,only : Kscf,max_scf_iterations,scf_achieved,ebs,sigma
-  use M_fdata, only : nssh
+  use M_system, only: Kscf,max_scf_iterations,scf_achieved,ebs,sigma
+  use M_fdata, only: nssh
   implicit none
-  integer iatom,in1,issh
+  integer :: iatom, in1, issh
   Kscf = 1
   scf_achieved = .false.
   do Kscf=1,max_scf_iterations+1

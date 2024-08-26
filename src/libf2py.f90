@@ -5,11 +5,12 @@ subroutine set_igamma(aux)
   igamma=aux
 end subroutine set_igamma
  
-integer function get_igamma()
+subroutine get_igamma(igamma_out)
   use M_system, only : igamma
-  get_igamma=igamma
-  return
-end function get_igamma
+  implicit none
+  integer, intent(out) :: igamma_out
+  igamma_out=igamma
+end subroutine get_igamma
  
 subroutine set_icluster(aux)
   use M_system, only : icluster
@@ -18,11 +19,12 @@ subroutine set_icluster(aux)
   icluster=aux
 end subroutine set_icluster
 
-integer function get_icluster()
+subroutine get_icluster(icluster_out)
   use M_system, only : icluster
-  get_icluster=icluster
-  return
-end function get_icluster
+  implicit none
+  integer, intent(out) :: icluster_out
+  icluster_out=icluster
+end subroutine get_icluster
 
 subroutine set_ifixcharge(aux)
   use M_system, only : ifixcharge
@@ -45,92 +47,94 @@ subroutine set_iqout(aux)
   iqout=aux
 end subroutine set_iqout
 
-integer function get_idipole()
+subroutine get_idipole(idipole_out)
   use M_system, only : idipole
-  get_idipole=idipole
-  return
-end function get_idipole
+  implicit none
+  integer, intent(out) :: idipole_out
+  idipole_out=idipole
+end subroutine get_idipole
 
-integer function get_iqout()
+subroutine get_iqout(iqout_out)
   use M_system, only : iqout
-  get_iqout=iqout
-  return
-end function get_iqout
+  implicit none
+  integer, intent(out) :: iqout_out
+  iqout_out=iqout
+end subroutine get_iqout
 
-
-integer function get_nssh(iaux)
+subroutine get_nssh(iaux, nssh_out)
   use M_fdata, only : nssh
   use M_system, only : imass
   implicit none
   integer, intent(in):: iaux
-  get_nssh=nssh(imass(iaux))
-  return
-end function get_nssh
+  integer, intent(out) :: nssh_out
+  nssh_out=nssh(imass(iaux))
+end subroutine get_nssh
 
-real*8 function get_etot()
+subroutine get_etot(etot_out)
   use M_system, only : etot
-  get_etot=etot
-  return
-end function get_etot
+  implicit none
+  real(kind=kind(0.0d0)), intent(out) :: etot_out
+  etot_out=etot
+end subroutine get_etot
 
-real*8 function get_efermi()
+subroutine get_efermi(efermi_out)
   use M_system, only : efermi
-  get_efermi=efermi
-  return
-end function get_efermi
+  implicit none
+  real(kind=kind(0.0d0)), intent(out) :: efermi_out
+  efermi_out=efermi
+end subroutine get_efermi
 
-
-integer function get_norbitals_new()
+subroutine get_norbitals_new(norbitals_new_out)
   use M_system, only : norbitals_new
-  get_norbitals_new = norbitals_new
-  return
-end function get_norbitals_new
+  implicit none
+  integer, intent(out) :: norbitals_new_out
+  norbitals_new_out = norbitals_new
+end subroutine get_norbitals_new
 
-real*8 function get_eigen(iaux,jaux)
+subroutine get_eigen(iaux,jaux,eigen_out)
   use M_system, only : eigen_k !(imu,ikpoint)
   implicit none
   integer, intent(in):: iaux
   integer, intent(in):: jaux
-  get_eigen = eigen_k(iaux,jaux)
-  return
-end function get_eigen
+  real(kind=kind(0.0d0)), intent(out) :: eigen_out
+  eigen_out = eigen_k(iaux,jaux)
+end subroutine get_eigen
 
-real*8 function get_atom_force(iaux,jaux)
+subroutine get_atom_force(iaux,jaux,atom_force_out)
   use M_system, only : ftot
   implicit none
   integer, intent(in):: iaux
   integer, intent(in):: jaux
-  get_atom_force = ftot(jaux,iaux)
-  return
-end function get_atom_force
+  real(kind=kind(0.0d0)), intent(out) :: atom_force_out
+  atom_force_out = ftot(jaux,iaux)
+end subroutine get_atom_force
 
- 
-real*8 function get_shell_atom_charge(iauxssh,iauxatom)
+subroutine get_shell_atom_charge(iauxssh,iauxatom,shell_atom_charge_out)
   use M_system, only : Qin
   implicit none
   integer, intent(in):: iauxatom
   integer, intent(in):: iauxssh
-  get_shell_atom_charge = Qin(iauxssh,iauxatom)
-end function get_shell_atom_charge
+  real(kind=kind(0.0d0)), intent(out) :: shell_atom_charge_out
+  shell_atom_charge_out = Qin(iauxssh,iauxatom)
+end subroutine get_shell_atom_charge
  
-real*8 function get_partial_charge(iatom,nssh)
+subroutine get_partial_charge(iatom,nssh,partial_charge_out)
   use M_system, only : Qin, Q0_TOT
   implicit none
   integer issh
   integer, intent(in):: iatom, nssh
-  get_partial_charge = Q0_TOT(iatom)
+  real(kind=kind(0.0d0)), intent(out) :: partial_charge_out
+  partial_charge_out = Q0_TOT(iatom)
   do  issh = 1, nssh
-    get_partial_charge = get_partial_charge - Qin(issh,iatom)
+    partial_charge_out = partial_charge_out - Qin(issh,iatom)
   end do
-end function get_partial_charge
-
-
+end subroutine get_partial_charge
 
 subroutine set_shell_atom_charge(natoms,nssh,qaux)
   use M_system, only : Qin
   implicit none
   integer, intent(in):: natoms, nssh
-  real*8, dimension(natoms, nssh), intent(in):: qaux
+  real(kind=kind(0.0d0)), dimension(natoms, nssh), intent(in):: qaux
   integer :: iauxssh, iauxatom
   do iauxatom=1,natoms
     do iauxssh=1,nssh
@@ -139,14 +143,15 @@ subroutine set_shell_atom_charge(natoms,nssh,qaux)
   end do
 end subroutine set_shell_atom_charge
 
-integer function get_fdata_is_load()
+subroutine get_fdata_is_load(aux)
   use M_fdata, only : fdata_is_load
-  get_fdata_is_load = fdata_is_load
-end function get_fdata_is_load
-
+  implicit none
+  integer, intent(out) :: aux
+  aux = fdata_is_load
+end subroutine get_fdata_is_load
 
 subroutine loadfdata_from_path(fdatafile)
-  use M_fdata
+  use M_fdata, only: fdataLocation, fdata_is_load
   implicit none
   character(len=400),intent(in):: fdatafile
   fdatalocation=trim(fdatafile)
@@ -155,9 +160,9 @@ subroutine loadfdata_from_path(fdatafile)
 end subroutine loadfdata_from_path
  
 subroutine set_cell(lvs)
-  use M_system
+  use M_system, only: a1vec, a2vec, a3vec
   implicit none
-  real*8, dimension(3,3), intent(in) :: lvs
+  real(kind=kind(0.0d0)), dimension(3,3), intent(in) :: lvs
   a1vec(1) = lvs(1,1)
   a1vec(2) = lvs(1,2)
   a1vec(3) = lvs(1,3)
@@ -170,12 +175,12 @@ subroutine set_cell(lvs)
 end subroutine set_cell
 
 subroutine set_coords(naux, z, xyz)
-  use M_system
+  use M_system, only: natoms, ratom, symbol, imass
   use M_fdata, only : symbolA, nspecies, nzx 
   implicit none
   integer, intent(in) :: naux
   integer, dimension(naux), intent(in) :: z
-  real*8, dimension(naux,3), intent(in) :: xyz
+  real(kind=kind(0.0d0)), dimension(naux,3), intent(in) :: xyz
   integer :: iatom,ispec
   natoms=naux
   if (allocated(ratom)) deallocate(ratom)
@@ -196,12 +201,12 @@ subroutine set_coords(naux, z, xyz)
 end subroutine set_coords
  
 subroutine set_coords_xyz(naux,xyz)
-  use M_system
+  use M_system, only: natoms, ratom, ishiftO, shifter
   implicit none
   integer, intent(in) :: naux
-  real*8, dimension(naux,3), intent(in) :: xyz
+  real(kind=kind(0.0d0)), dimension(naux,3), intent(in) :: xyz
   integer iatom
-  real*8 distance
+  real(kind=kind(0.0d0)) :: distance
 
   do iatom = 1, natoms
     ratom(:, iatom) = xyz(iatom, :)
@@ -221,10 +226,8 @@ subroutine set_coords_xyz(naux,xyz)
   end if
 end subroutine set_coords_xyz
 
- 
-
 subroutine load_cell_100()
-  use M_system
+  use M_system, only: a1vec, a2vec, a3vec
   implicit none
   a1vec(1) = 100
   a1vec(2) = 0
@@ -238,12 +241,12 @@ subroutine load_cell_100()
 end subroutine load_cell_100
  
 subroutine set_kpoints(naux,kpts)
-  use M_system
+  use M_system, only: nkpoints, special_k, special_k_orig, scale_k, weight_k, weight_k_orig
   implicit none
   integer, intent(in) :: naux
-  real*8, dimension(naux,3), intent(in) :: kpts
+  real(kind=kind(0.0d0)), dimension(naux,3), intent(in) :: kpts
   integer :: ikpoint
-  real*8 :: sum_weight
+  real(kind=kind(0.0d0)) :: sum_weight
   nkpoints=naux
   if (allocated(special_k)) deallocate(special_k)
   if (allocated(special_k_orig)) deallocate(special_k_orig)
@@ -268,39 +271,35 @@ subroutine set_kpoints(naux,kpts)
 end subroutine set_kpoints
 
 subroutine call_allocate_system()
-  use M_system
   implicit none
   call allocate_system()
 end subroutine call_allocate_system
 
 subroutine call_scf_loop()
-  use M_system
   implicit none
   call scf_loop ()
 end subroutine call_scf_loop
 
 subroutine call_getenergy()
-  use M_system
   implicit none
   call getenergy ()
 end subroutine call_getenergy
 
 subroutine call_getforces()
-  use M_system
   implicit none
   call getforces()
 end subroutine call_getforces
 
 subroutine set_mixer_params(iam, msi, imix, bbmix, ww02, stol, wis)
-  use M_system
+  use M_system, only: wi, ialgmix, max_scf_iterations, idmix, w02, bmix, sigmatol
   implicit none
   integer, intent(in) :: iam
   integer, intent(in) :: msi
   integer, intent(in) :: imix
-  real*8, intent(in) :: ww02
-  real*8, intent(in) :: bbmix
-  real*8, intent(in) :: stol
-  real*8, intent(in), dimension(msi) :: wis
+  real(kind=kind(0.0d0)), intent(in) :: ww02
+  real(kind=kind(0.0d0)), intent(in) :: bbmix
+  real(kind=kind(0.0d0)), intent(in) :: stol
+  real(kind=kind(0.0d0)), intent(in), dimension(msi) :: wis
   allocate(wi(msi))
   ialgmix = iam
   max_scf_iterations = msi

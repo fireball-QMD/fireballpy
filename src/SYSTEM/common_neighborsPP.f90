@@ -1,4 +1,5 @@
 subroutine common_neighborsPP ()
+  use M_constants, only: wp
   use M_system
   implicit none
   integer ialp
@@ -16,10 +17,10 @@ subroutine common_neighborsPP ()
   integer num_neigh
   integer mbeta
 
-  real*8  distance
-  real*8, dimension (3) :: dvec
-  real*8, dimension (3) :: diff
-  real*8, dimension (3) :: vec1, vec2, vec3, vec
+  real(wp)  distance
+  real(wp), dimension (3) :: dvec
+  real(wp), dimension (3) :: diff
+  real(wp), dimension (3) :: vec1, vec2, vec3, vec
   
   if(icluster .eq. 1) mbeta_max = 0
   do ialp = 1, natoms

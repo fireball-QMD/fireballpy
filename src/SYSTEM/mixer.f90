@@ -1,4 +1,5 @@
 subroutine mixer ()
+  use M_constants, only: wp
   use M_system
   use M_fdata, only: nssh, nsh_max
   implicit none
@@ -6,11 +7,11 @@ subroutine mixer ()
   integer in1
   integer issh
   integer imix
-  real*8 dqrms
-  real*8 dqmax
-  real*8 renorm
-  real*8 zcheck
-  real*8 zouttot
+  real(wp) dqrms
+  real(wp) dqmax
+  real(wp) renorm
+  real(wp) zcheck
+  real(wp) zouttot
   dqrms = 0
   dqmax = -99
   Qinmixer=0.0d0
@@ -18,7 +19,7 @@ subroutine mixer ()
   do iatom = 1, natoms
     in1 = imass(iatom)
     do issh = 1, nssh(in1)
-      dqmax = amax1(abs(Qin(issh,iatom) - Qout(issh,iatom)),dqmax)
+      dqmax = max(abs(Qin(issh,iatom) - Qout(issh,iatom)),dqmax)
       dqrms = dqrms + (Qin(issh,iatom) - Qout(issh,iatom))**2
     end do
   end do

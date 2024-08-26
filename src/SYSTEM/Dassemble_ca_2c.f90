@@ -1,7 +1,7 @@
 subroutine Dassemble_ca_2c ()
+  use M_constants, only: wp, eq2
  use M_system
  use M_fdata, only: nssh, Qneutral, rcutoff, lssh, num_orb
- use M_constants
  implicit none
  integer iatom
  integer icount
@@ -24,43 +24,43 @@ subroutine Dassemble_ca_2c ()
  integer kforce
  integer matom
  integer mbeta
- real*8 dq1
- real*8 dq2
- real*8 dstn_temp
- real*8 dterm_1
- real*8 dterm_2
- real*8 dxn
- real*8 rcutoff_j
- real*8 rend
- real*8 rend1
- real*8 rend2
- real*8 sterm_1
- real*8 sterm_2
- real*8 stn_temp1
- real*8 stn_temp2
- real*8 y
- real*8 rcutoff_i
- real*8, dimension (numorb_max, numorb_max) :: bcca
- real*8, dimension (3, numorb_max, numorb_max) :: bccap
- real*8, dimension (3, numorb_max, numorb_max) :: bccapx
- real*8, dimension (numorb_max, numorb_max) :: bccax
- real*8, dimension (numorb_max, numorb_max) :: demnpl
- real*8, dimension (3, 3, 3) :: deps
- real*8, dimension (3, numorb_max, numorb_max) :: dewaldsr
- real*8, dimension (3) :: dpterm_1
- real*8, dimension (3) :: dpterm_2
- real*8, dimension (numorb_max, numorb_max) :: dstn1
- real*8, dimension (numorb_max, numorb_max) :: dstn2
- real*8, dimension (numorb_max, numorb_max) :: emnpl
- real*8, dimension (3, 3) :: eps
- real*8, dimension (3) :: r1
- real*8, dimension (3) :: r2
- real*8, dimension (3) :: r21
- real*8, dimension (3) :: sighat
- real*8, dimension (3) :: spterm_1
- real*8, dimension (3) :: spterm_2
- real*8, dimension (numorb_max, numorb_max) :: stn1
- real*8, dimension (numorb_max, numorb_max) :: stn2
+ real(wp) dq1
+ real(wp) dq2
+ real(wp) dstn_temp
+ real(wp) dterm_1
+ real(wp) dterm_2
+ real(wp) dxn
+ real(wp) rcutoff_j
+ real(wp) rend
+ real(wp) rend1
+ real(wp) rend2
+ real(wp) sterm_1
+ real(wp) sterm_2
+ real(wp) stn_temp1
+ real(wp) stn_temp2
+ real(wp) y
+ real(wp) rcutoff_i
+ real(wp), dimension (numorb_max, numorb_max) :: bcca
+ real(wp), dimension (3, numorb_max, numorb_max) :: bccap
+ real(wp), dimension (3, numorb_max, numorb_max) :: bccapx
+ real(wp), dimension (numorb_max, numorb_max) :: bccax
+ real(wp), dimension (numorb_max, numorb_max) :: demnpl
+ real(wp), dimension (3, 3, 3) :: deps
+ real(wp), dimension (3, numorb_max, numorb_max) :: dewaldsr
+ real(wp), dimension (3) :: dpterm_1
+ real(wp), dimension (3) :: dpterm_2
+ real(wp), dimension (numorb_max, numorb_max) :: dstn1
+ real(wp), dimension (numorb_max, numorb_max) :: dstn2
+ real(wp), dimension (numorb_max, numorb_max) :: emnpl
+ real(wp), dimension (3, 3) :: eps
+ real(wp), dimension (3) :: r1
+ real(wp), dimension (3) :: r2
+ real(wp), dimension (3) :: r21
+ real(wp), dimension (3) :: sighat
+ real(wp), dimension (3) :: spterm_1
+ real(wp), dimension (3) :: spterm_2
+ real(wp), dimension (numorb_max, numorb_max) :: stn1
+ real(wp), dimension (numorb_max, numorb_max) :: stn2
  faca = 0.0d0
  fotca = 0.0d0
  do iatom = 1, natoms

@@ -1,7 +1,7 @@
 subroutine Dassemble_3c ()
+  use M_constants, only: wp, eq2
   use M_system
   use M_fdata, only: isorpmax,nspecies,num_orb
-  use M_constants
   implicit none
   integer iatom
   integer ibeta
@@ -21,23 +21,23 @@ subroutine Dassemble_3c ()
   integer jssh
   integer mneigh
   integer ialp
-  real*8 cost
-  real*8 x
-  real*8 y
-  real*8, dimension (numorb_max, numorb_max) :: bcnax
-  real*8, dimension (3, 3, 3) :: depsA
-  real*8, dimension (3, 3, 3) :: depsB
-  real*8, dimension (3, 3) :: eps
-  real*8, dimension (3, numorb_max, numorb_max) :: f3naXa
-  real*8, dimension (3, numorb_max, numorb_max) :: f3naXb
-  real*8, dimension (3, numorb_max, numorb_max) :: f3naXc
-  real*8, dimension (3) :: r1
-  real*8, dimension (3) :: r2
-  real*8, dimension (3) :: r21
-  real*8, dimension (3) :: rhat
-  real*8, dimension (3) :: rna
-  real*8, dimension (3) :: rnabc
-  real*8, dimension (3) :: sighat
+  real(wp) cost
+  real(wp) x
+  real(wp) y
+  real(wp), dimension (numorb_max, numorb_max) :: bcnax
+  real(wp), dimension (3, 3, 3) :: depsA
+  real(wp), dimension (3, 3, 3) :: depsB
+  real(wp), dimension (3, 3) :: eps
+  real(wp), dimension (3, numorb_max, numorb_max) :: f3naXa
+  real(wp), dimension (3, numorb_max, numorb_max) :: f3naXb
+  real(wp), dimension (3, numorb_max, numorb_max) :: f3naXc
+  real(wp), dimension (3) :: r1
+  real(wp), dimension (3) :: r2
+  real(wp), dimension (3) :: r21
+  real(wp), dimension (3) :: rhat
+  real(wp), dimension (3) :: rna
+  real(wp), dimension (3) :: rnabc
+  real(wp), dimension (3) :: sighat
   f3naa = 0.0d0
   f3nab = 0.0d0
   f3nac = 0.0d0

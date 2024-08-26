@@ -1,10 +1,11 @@
 subroutine recover_S (in1, in2, hlist, hbox)
+  use M_constants, only: wp
   use M_system
   use M_fdata, only: nssh, index_maxS, muS, nuS, MES_max, nsh_max, nsh_max
   implicit none
   integer, intent(in) :: in1, in2
-  real*8, intent(in) :: hlist (MES_max)
-  real*8, intent(out) :: hbox (nsh_max, nsh_max)
+  real(wp), intent(in) :: hlist (MES_max)
+  real(wp), intent(out) :: hbox (nsh_max, nsh_max)
   integer imu, inu
   integer index
   do inu = 1, nssh(in2)

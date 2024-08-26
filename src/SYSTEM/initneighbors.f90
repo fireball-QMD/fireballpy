@@ -4,16 +4,16 @@
 subroutine initneighbors ()
   use M_system
   implicit none
-  integer iatom
-  integer ineigh
-  integer jatom
-  integer jneigh
-  integer jjneigh
-  integer katom
-  integer kneigh
-  integer mbeta
-  integer num_neigh
-  integer num_neigh_vdw
+  integer :: iatom
+  integer :: ineigh
+  integer :: jatom
+  integer :: jneigh
+  integer :: jjneigh
+  integer :: katom
+  integer :: kneigh
+  integer :: mbeta
+  integer :: num_neigh
+  integer :: num_neigh_vdw
   !   SELF nPP_self  
   ! What's the neighbor of the atom itself?
   nPP_self = -999

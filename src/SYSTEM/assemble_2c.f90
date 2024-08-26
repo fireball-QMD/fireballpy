@@ -1,8 +1,8 @@
 ! This routine assembles all of the two-center and degenerate two-center interactions.
 subroutine assemble_2c ()
+  use M_constants, only: wp, eq2
   use M_system
   use M_fdata, only: num_orb
-  use M_constants
   integer iatom
   integer ierror
   integer imu
@@ -22,22 +22,22 @@ subroutine assemble_2c ()
   integer iy
   integer iz
  
-  real*8 y
-  real*8, dimension (numorb_max, numorb_max) :: bcna
-  real*8, dimension (3, numorb_max, numorb_max) :: bcnapx
-  real*8, dimension (numorb_max, numorb_max) :: bcnax
-  real*8, dimension (3, 3, 3) :: deps
-  real*8, dimension (3, 3) :: eps
-  real*8, dimension (3) :: r1
-  real*8, dimension (3) :: r2
-  real*8, dimension (3) :: r21
-  real*8, dimension (3) :: sighat
-  real*8, dimension (numorb_max, numorb_max) :: sx
-  real*8, dimension (3, numorb_max, numorb_max) :: spx
-  real*8, dimension (numorb_max, numorb_max) :: tx
-  real*8, dimension (3, numorb_max, numorb_max) :: tpx
-  real*8, dimension (numorb_max, numorb_max) :: dipx
-  real*8, dimension (3, numorb_max, numorb_max) :: dippx
+  real(wp) y
+  real(wp), dimension (numorb_max, numorb_max) :: bcna
+  real(wp), dimension (3, numorb_max, numorb_max) :: bcnapx
+  real(wp), dimension (numorb_max, numorb_max) :: bcnax
+  real(wp), dimension (3, 3, 3) :: deps
+  real(wp), dimension (3, 3) :: eps
+  real(wp), dimension (3) :: r1
+  real(wp), dimension (3) :: r2
+  real(wp), dimension (3) :: r21
+  real(wp), dimension (3) :: sighat
+  real(wp), dimension (numorb_max, numorb_max) :: sx
+  real(wp), dimension (3, numorb_max, numorb_max) :: spx
+  real(wp), dimension (numorb_max, numorb_max) :: tx
+  real(wp), dimension (3, numorb_max, numorb_max) :: tpx
+  real(wp), dimension (numorb_max, numorb_max) :: dipx
+  real(wp), dimension (3, numorb_max, numorb_max) :: dippx
 
   vna = 0.0d0
   s_mat = 0.0d0

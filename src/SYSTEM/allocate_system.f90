@@ -1,6 +1,6 @@
 subroutine allocate_system ()
+  use M_constants, only: wp, xlevi, delk
   use M_system 
-  use M_constants
   use M_fdata, only: nssh, rcutoff, rc_PP, nspecies, symbolA ,isorpmax
   use M_fdata, only: num_orb, Qneutral, lssh, nsshPP, lsshPP,  nsh_max
   use M_fdata, only: ME3c_max,numXmax,numYmax
@@ -20,12 +20,12 @@ subroutine allocate_system ()
   integer:: ispec
   integer:: numorb
   integer:: numorbPP_max
-  real*8 :: rcutoff_i
-  real*8 :: rcutoff_j
-  real*8 :: rcutoff_
-  real*8 :: distance2
-  real*8 :: range2
-  real*8 :: distance
+  real(wp) :: rcutoff_i
+  real(wp) :: rcutoff_j
+  real(wp) :: rcutoff_
+  real(wp) :: distance2
+  real(wp) :: range2
+  real(wp) :: distance
 
   !Shift the coordinates none of the atoms fall on (0.0, 0.0, 0.0)
   shifter(1) = 4.0d0*atan(1.0d0)    ! pi

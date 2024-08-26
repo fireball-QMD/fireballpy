@@ -1,6 +1,6 @@
 subroutine assemble_3c ()
+  use M_constants, only: wp, eq2
   use M_system
-  use M_constants
   use M_fdata, only: isorpmax,nspecies, num_orb
   implicit none
 
@@ -23,28 +23,28 @@ subroutine assemble_3c ()
   integer mneigh
   integer jneigh       
 
-  real*8 cost
-  real*8 distance_13
-  real*8 distance_23
-  real*8 dstn_temp
-  real*8 stn_temp1
-  real*8 stn_temp2
-  real*8 x
-  real*8 y
+  real(wp) cost
+  real(wp) distance_13
+  real(wp) distance_23
+  real(wp) dstn_temp
+  real(wp) stn_temp1
+  real(wp) stn_temp2
+  real(wp) x
+  real(wp) y
 
-  real*8, dimension (numorb_max, numorb_max) :: bcnax
-  real*8, dimension (3, 3) :: eps
-  real*8, dimension (3) :: r1
-  real*8, dimension (3) :: r2
-  real*8, dimension (3) :: r21
-  real*8, dimension (3) :: r31
-  real*8, dimension (3) :: r32
-  real*8, dimension (3) :: r13
-  real*8, dimension (3) :: r23
-  real*8, dimension (3) :: rhat
-  real*8, dimension (3) :: rna
-  real*8, dimension (3) :: rnabc
-  real*8, dimension (3) :: sighat
+  real(wp), dimension (numorb_max, numorb_max) :: bcnax
+  real(wp), dimension (3, 3) :: eps
+  real(wp), dimension (3) :: r1
+  real(wp), dimension (3) :: r2
+  real(wp), dimension (3) :: r21
+  real(wp), dimension (3) :: r31
+  real(wp), dimension (3) :: r32
+  real(wp), dimension (3) :: r13
+  real(wp), dimension (3) :: r23
+  real(wp), dimension (3) :: rhat
+  real(wp), dimension (3) :: rna
+  real(wp), dimension (3) :: rnabc
+  real(wp), dimension (3) :: sighat
   do ialp = 1, natoms
     rna(:) = ratom(:,ialp)
     indna = imass(ialp)

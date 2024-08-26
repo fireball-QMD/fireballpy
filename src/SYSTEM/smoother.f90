@@ -1,17 +1,18 @@
 subroutine smoother (r, rend, xi, stn, dstn)
+  use M_constants, only: wp
   implicit none
-  real*8, intent (in) :: r
-  real*8, intent (in) :: rend
-  real*8, intent (in) :: xi
-  real*8, intent (out) :: stn
-  real*8, intent (out) :: dstn
+  real(wp), intent (in) :: r
+  real(wp), intent (in) :: rend
+  real(wp), intent (in) :: xi
+  real(wp), intent (out) :: stn
+  real(wp), intent (out) :: dstn
   integer, parameter :: npower = 2
   integer, parameter :: mpower = 2
   integer, parameter :: scaler = 0
   logical, parameter :: old_method = .true.
-  real*8 frac
-  real*8 rbegin
-  real*8 dum
+  real(wp) frac
+  real(wp) rbegin
+  real(wp) dum
   rbegin = xi*rend
   if (r .lt. 0.0d0) then
     write (*,*) ' r < 0 in smoother *** error! '

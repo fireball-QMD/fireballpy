@@ -1,13 +1,14 @@
 ! This subroutine takes a 1D list of integrals and generates a 2x2 array with respect to the shells.
 subroutine recoverC (n1, n2, hlist, dhlist, hbox, dhbox)
+  use M_constants, only: wp
   use M_fdata
   use M_system
   implicit none
   integer, intent (in) :: n1, n2
-  real*8, intent(in), dimension (ME2c_max) :: hlist 
-  real*8, intent(in), dimension (ME2c_max) :: dhlist 
-  real*8, intent(out), dimension (nsh_max, nsh_max) :: hbox
-  real*8, intent(out), dimension (nsh_max, nsh_max) :: dhbox
+  real(wp), intent(in), dimension (ME2c_max) :: hlist 
+  real(wp), intent(in), dimension (ME2c_max) :: dhlist 
+  real(wp), intent(out), dimension (nsh_max, nsh_max) :: hbox
+  real(wp), intent(out), dimension (nsh_max, nsh_max) :: dhbox
 
   integer index
   integer indexcoulomb

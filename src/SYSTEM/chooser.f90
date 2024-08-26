@@ -1,9 +1,10 @@
         subroutine chooser (l, dmat, pmat, rmatrix)
+  use M_constants, only: wp
         implicit none
         integer, intent(in) :: l
-        real*8, intent(in), dimension(5, 5) :: dmat
-        real*8, intent(in), dimension(3, 3) :: pmat
-        real*8, intent(out), dimension(5, 5) :: rmatrix
+        real(wp), intent(in), dimension(5, 5) :: dmat
+        real(wp), intent(in), dimension(3, 3) :: pmat
+        real(wp), intent(out), dimension(5, 5) :: rmatrix
         rmatrix = 0.0d0
         if (l .eq. 0) then
          rmatrix(1,1) = 1.0d0

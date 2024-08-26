@@ -1,4 +1,5 @@
 subroutine assemble_olsxc_on ()
+  use M_constants, only: wp
   use M_system
   use M_fdata, only: num_orb
   implicit none
@@ -6,8 +7,8 @@ subroutine assemble_olsxc_on ()
   integer imu
   integer in1, in3
   integer inu
-  real*8, dimension (numorb_max, numorb_max) :: bcxcx
-  real*8 xc
+  real(wp), dimension (numorb_max, numorb_max) :: bcxcx
+  real(wp) xc
   vxc = 0.0d0
   vxc_ca = 0.0d0
   uxcdcc_ols = 0.0d0

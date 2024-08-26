@@ -43,7 +43,7 @@ IDIPOLE_TABLE = {'improved': 1, 'legacy': 0}
 GAMMA = np.array([[0.0, 0.0, 0.0]])
 CELL100 = np.array([[100.0, 0.0, 0.0], [0.0, 100.0, 0.0], [0.0, 0.0, 100.0]])
 IMIXER_TABLE = {'anderson': 1, 'johnson': 2}
-MIXER_DEFAULT = {'method': 'anderson', 'mix_order': 6,
+MIXER_DEFAULT = {'method': 'johnson', 'mix_order': 6,
                  'beta': 0.1, 'tol': 1e-8, 'max_iter': 200,
                  'w0': 0.01, 'wi': np.ones(200)}
 

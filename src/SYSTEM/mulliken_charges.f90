@@ -1,6 +1,6 @@
 subroutine MULLIKEN_CHARGES()        
+  use M_constants, only: wp
  use M_system
- use M_constants
  use M_fdata, only: num_orb,nssh,lssh
  implicit none
  integer iatom            
@@ -11,7 +11,7 @@ subroutine MULLIKEN_CHARGES()
  integer ineigh ,jatom,jneigh          
  integer noccupy  
  integer mqn             
- real*8, dimension (numorb_max, natoms) :: QMulliken
+ real(wp), dimension (numorb_max, natoms) :: QMulliken
  QMulliken = 0.0d0             
  do iatom = 1, natoms
    in1 = imass(iatom)

@@ -1,8 +1,8 @@
 ! This routine calculates the Ewald sum for a crystal with a given basis. This is specially designed for molecules with a given dipole moment.
 subroutine get_ewald (iauxforce)
+  use M_constants, only: wp, pi
   use M_system
   use M_fdata
-  use M_constants
   implicit none
   integer, intent (in) :: iauxforce
   integer iatom
@@ -24,31 +24,31 @@ subroutine get_ewald (iauxforce)
   integer jatom
   integer niters
   integer nitersp
-  real*8 argument
-  real*8 derfcdr
-  real*8 distance
-  real*8 erfc
-  real*8 factor
-  real*8 factorf
-  real*8 g1mag2, g2mag2, g3mag2
-  real*8 gdotb
-  real*8 gmax
-  real*8 gmin2
-  real*8 gsq
-  real*8 kappa
-  real*8 QQ
-  real*8 r1mag2, r2mag2, r3mag2
-  real*8 rmax
-  real*8 rmin2
-  real*8 stuff
-  real*8 volcel
-  real*8, dimension (3) :: cvec
-  real*8, dimension (3) :: eta
-  real*8, dimension (3, natoms) :: fewald1, fewald2
-  real*8, dimension (3) :: g
-  real*8, dimension (3) :: g1, g2, g3
-  real*8, dimension (natoms) :: Q, Q0
-  real*8, dimension (3) :: vecl
+  real(wp) argument
+  real(wp) my_erfc
+  real(wp) derfcdr
+  real(wp) distance
+  real(wp) factor
+  real(wp) factorf
+  real(wp) g1mag2, g2mag2, g3mag2
+  real(wp) gdotb
+  real(wp) gmax
+  real(wp) gmin2
+  real(wp) gsq
+  real(wp) kappa
+  real(wp) QQ
+  real(wp) r1mag2, r2mag2, r3mag2
+  real(wp) rmax
+  real(wp) rmin2
+  real(wp) stuff
+  real(wp) volcel
+  real(wp), dimension (3) :: cvec
+  real(wp), dimension (3) :: eta
+  real(wp), dimension (3, natoms) :: fewald1, fewald2
+  real(wp), dimension (3) :: g
+  real(wp), dimension (3) :: g1, g2, g3
+  real(wp), dimension (natoms) :: Q, Q0
+  real(wp), dimension (3) :: vecl
   ewald = 0.0d0
   if (iauxforce .eq. 1) dewald = 0.0d0
   if (iauxforce .eq. 1) fewald = 0.0d0
@@ -160,9 +160,9 @@ subroutine get_ewald (iauxforce)
        distance = sqrt(eta(1)**2 + eta(2)**2 + eta(3)**2)
        if (distance .gt. 0.0001d0) then
         argument = kappa*distance
-        ewald(iatom,jatom) =  ewald(iatom,jatom) + factor*erfc(argument)/distance
-        ewald(jatom,iatom) =  ewald(jatom,iatom) + factor*erfc(argument)/distance
-        derfcdr = (2.0d0*exp(-argument**2)*kappa/sqrt(pi) + erfc(argument)/distance)/distance**2
+        ewald(iatom,jatom) =  ewald(iatom,jatom) + factor*my_erfc(argument)/distance
+        ewald(jatom,iatom) =  ewald(jatom,iatom) + factor*my_erfc(argument)/distance
+        derfcdr = (2.0d0*exp(-argument**2)*kappa/sqrt(pi) + my_erfc(argument)/distance)/distance**2
         if (iauxforce .eq. 1) then
 
          do ix = 1, 3
@@ -192,13 +192,29 @@ subroutine get_ewald (iauxforce)
 end subroutine get_ewald
 
 subroutine cross (a, b, c)
+  use M_constants, only: wp
   implicit none
-  real*8, intent(in), dimension(3) :: a
-  real*8, intent(in), dimension(3) :: b
-  real*8, intent(out), dimension(3) :: c
+  real(wp), intent(in), dimension(3) :: a
+  real(wp), intent(in), dimension(3) :: b
+  real(wp), intent(out), dimension(3) :: c
   c(1) = a(2)*b(3) - a(3)*b(2)
   c(2) = a(3)*b(1) - a(1)*b(3)
   c(3) = a(1)*b(2) - a(2)*b(1)
   return
 end subroutine cross
 
+function my_erfc (x)
+  use M_constants, only: wp
+  implicit none
+  real(wp), intent(in) :: x
+  real(wp) :: s, ax, t, my_erfc
+
+  ax = abs(x)
+  if( ax .lt. 1.0d-10) then
+    my_erfc = 1.0d0
+    return
+  end if
+  s = x/ax
+  t = 1.0d0/(1.0d0 + 0.3275911d0*ax)
+  my_erfc = 1.0d0 - s*(1.0d0 - exp(-ax*ax)*t*(0.254829592d0 + t*(-0.284496736d0 + t*(1.421413741d0 + t*(-1.453152027d0 + t*1.061405429d0)))))
+end function my_erfc

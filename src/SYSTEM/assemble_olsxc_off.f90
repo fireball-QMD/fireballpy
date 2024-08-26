@@ -1,5 +1,6 @@
 ! This routine assembles the two & three-center exchange-correlation for the average density approximation. 
 subroutine assemble_olsxc_off ()
+  use M_constants, only: wp
   use M_system
   use M_fdata, only: num_orb,nssh,Qneutral
   implicit none
@@ -15,18 +16,18 @@ subroutine assemble_olsxc_off ()
   integer matom
   integer mbeta
 
-  real*8  y 
-  real*8 dxn
-  real*8, dimension (numorb_max, numorb_max) :: bcxcx
-  real*8, dimension (numorb_max, numorb_max) :: denmx
-  real*8, dimension (numorb_max, numorb_max) :: den1x
-  real*8, dimension (numorb_max, numorb_max) :: rhomx
-  real*8, dimension (3, numorb_max, numorb_max) :: rhompx
-  real*8, dimension (3, 3) :: eps
-  real*8, dimension (3, 3, 3) :: deps
-  real*8, dimension (3) :: r1, r2, r21
-  real*8, dimension (3) :: sighat
-  real*8, dimension (numorb_max, numorb_max) :: sx
+  real(wp)  y 
+  real(wp) dxn
+  real(wp), dimension (numorb_max, numorb_max) :: bcxcx
+  real(wp), dimension (numorb_max, numorb_max) :: denmx
+  real(wp), dimension (numorb_max, numorb_max) :: den1x
+  real(wp), dimension (numorb_max, numorb_max) :: rhomx
+  real(wp), dimension (3, numorb_max, numorb_max) :: rhompx
+  real(wp), dimension (3, 3) :: eps
+  real(wp), dimension (3, 3, 3) :: deps
+  real(wp), dimension (3) :: r1, r2, r21
+  real(wp), dimension (3) :: sighat
+  real(wp), dimension (numorb_max, numorb_max) :: sx
 
   do iatom = 1, natoms
     matom = neigh_self(iatom)

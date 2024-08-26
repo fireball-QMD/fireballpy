@@ -1,9 +1,10 @@
 subroutine cl_value (itype, cl)
+  use M_constants, only: wp
   use M_system
   use M_fdata, only: nsshPP,lsshPP,num_orbPP,cl_PP
   implicit none                  
   integer, intent (in) :: itype
-  real*8, intent (out), dimension (numorb_max) :: cl
+  real(wp), intent (out), dimension (numorb_max) :: cl
   integer imu
   integer index
   integer issh

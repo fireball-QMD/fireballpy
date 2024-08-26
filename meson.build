@@ -16,15 +16,16 @@ project(
 fc = meson.get_compiler('fortran')
 fflags = ['-unroll', '-fPIC']
 if fc.get_id() == 'gcc'
-  fflags += ['-ffree-line-length-none', '-fdefault-real-8']
+  fflags += ['-ffree-line-length-none']
   if get_option('buildtype') == 'custom'
     fflags += ['-ffast-math', '-fstack-arrays', '-fallow-store-data-races',
                '-fno-semantic-interposition', '-march=native']
   endif
 elif fc.get_id() in ['intel', 'intel-llvm']
-  fflags += ['-r8', '-fno-alias','-diag-disable 6916','-diag-disable 5268']
+  #fflags += ['-r8', '-fno-alias', '-diag-disable 6916','-diag-disable 5268']
+  fflags += ['-fno-alias', '-free', '-diag-disable 5268']
   if get_option('buildtype') == 'custom'
-    fflags += ['-fp-model=fast', '-xHost']
+    fflags += ['-fp-model=fast', '-xHost', '-diag-disable 10121']
   else
     fflags += ['-fp-model=strict']
   endif
@@ -93,9 +94,9 @@ subdir('src')
 
 # Build _fireball
 fireball_source = custom_target('fireball_module',
-  input : 'src' / 'libf2py.f90', # No module hence no .f90 wrappers
+  input : ['src' / 'libf2py.f90', '.f2py_f2cmap'], # No module hence no .f90 wrappers
   output : ['_fireballmodule.c', '_fireball-f2pywrappers.f'],
-  command : [py, '-m', 'numpy.f2py', '@INPUT@', '-m', '_fireball', '--lower'],
+  command : [py, '-m', 'numpy.f2py', '@INPUT0@', '-m', '_fireball', '--lower', '--f2cmap', '@INPUT1@'],
 )
 
 py.extension_module('_fireball',

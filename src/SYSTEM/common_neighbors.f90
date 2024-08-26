@@ -1,4 +1,5 @@
 subroutine common_neighbors ()
+  use M_constants, only: wp
   use M_system
   use M_fdata, only: nssh, rcutoff
   integer ialp
@@ -14,13 +15,13 @@ subroutine common_neighbors ()
   integer kbeta
   integer kneigh
   integer num_neigh
-  real*8 distance
-  real*8 distance2
-  real*8 range2
-  real*8 rcutoff_i, rcutoff_j
-  real*8, dimension (3) :: diff
-  real*8, dimension (3) :: dvec
-  real*8, dimension (3) :: vec, vec1, vec2
+  real(wp) distance
+  real(wp) distance2
+  real(wp) range2
+  real(wp) rcutoff_i, rcutoff_j
+  real(wp), dimension (3) :: diff
+  real(wp), dimension (3) :: dvec
+  real(wp), dimension (3) :: vec, vec1, vec2
   do ialp = 1,natoms
     num_neigh = 0
     do ineigh = 1, neighn(ialp)

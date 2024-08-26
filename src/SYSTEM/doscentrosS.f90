@@ -1,4 +1,5 @@
 subroutine doscentrosS (interaction, isub, iauxforce, in1, in2, in3, distance, eps, sx, spx)
+  use M_constants, only: wp
   use M_system
   use M_fdata, only: index_maxS,nsh_max,MES_max,nssh
   implicit none
@@ -8,17 +9,17 @@ subroutine doscentrosS (interaction, isub, iauxforce, in1, in2, in3, distance, e
   integer, intent (in) :: in1
   integer, intent (in) :: in2
   integer, intent (in) :: in3
-  real*8, intent (inout) :: distance
-  real*8, intent (in), dimension (3, 3) :: eps
-  real*8, intent (out), dimension (nsh_max, nsh_max) :: sx
-  real*8, intent (out), dimension (3, nsh_max, nsh_max) :: spx
+  real(wp), intent (inout) :: distance
+  real(wp), intent (in), dimension (3, 3) :: eps
+  real(wp), intent (out), dimension (nsh_max, nsh_max) :: sx
+  real(wp), intent (out), dimension (3, nsh_max, nsh_max) :: spx
   integer imu
   integer inu
   integer index
-  real*8, dimension (3) :: eta
-  real*8, dimension (MES_max) :: dslist
-  real*8, dimension (MES_max) :: slist
-  real*8, dimension (nsh_max,nsh_max) :: spm
+  real(wp), dimension (3) :: eta
+  real(wp), dimension (MES_max) :: dslist
+  real(wp), dimension (MES_max) :: slist
+  real(wp), dimension (nsh_max,nsh_max) :: spm
 
   sx = 0.0d0
   if (iauxforce .eq. 1) spm = 0.0d0

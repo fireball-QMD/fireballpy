@@ -1,9 +1,10 @@
 subroutine setterp_2d ()
+  use M_constants, only: wp
   use M_fdata, only: nspecies, icon3c, isorpmax, isorpmax_xc, hx_bcna, hy_bcna, hx_den3, hy_den3, &
     & x3cmax_bcna, y3cmax_bcna, x3cmax_den3, y3cmax_den3, numx3c_bcna, numy3c_bcna, numx3c_den3, numy3c_den3
   implicit none
-  integer in1, in2, in3, index, isorp
-  real*8 xmin, ymin
+  integer :: in1, in2, in3, index, isorp
+  real(wp) :: xmin, ymin
 
   xmin = 0.0d0
   ymin = 0.0d0

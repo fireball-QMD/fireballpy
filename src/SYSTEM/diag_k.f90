@@ -1,9 +1,10 @@
 subroutine diag_k ( )
+  use M_constants, only: wp
   use M_system
   implicit none
   integer ikpoint
   integer imu
-  real*8, dimension (3) :: k_temp
+  real(wp), dimension (3) :: k_temp
   if (allocated(bbnkre)) deallocate(bbnkre)
   allocate (bbnkre (norbitals, norbitals, nkpoints))
 

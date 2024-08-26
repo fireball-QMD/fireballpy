@@ -1,4 +1,5 @@
 subroutine trescentros (interaction, isorp, maxtype, in1, in2, indna, x, y, cost, eps, bcnax)
+  use M_constants, only: wp
   use M_system
   use M_fdata
   implicit none
@@ -8,30 +9,30 @@ subroutine trescentros (interaction, isorp, maxtype, in1, in2, indna, x, y, cost
   integer, intent (in) :: interaction
   integer, intent (in) :: isorp
   integer, intent (in) :: maxtype
-  real*8, intent (in) :: cost
-  real*8, intent (in) :: x
-  real*8, intent (in) :: y
-  real*8, intent (in), dimension (3, 3) :: eps
-  real*8, intent (out), dimension (numorb_max, numorb_max) :: bcnax
+  real(wp), intent (in) :: cost
+  real(wp), intent (in) :: x
+  real(wp), intent (in) :: y
+  real(wp), intent (in), dimension (3, 3) :: eps
+  real(wp), intent (out), dimension (numorb_max, numorb_max) :: bcnax
   integer imu
   integer iME
   integer index
   integer inu
   integer kforce
   integer nl
-  real*8 argument
-  real*8 cost2
-  real*8 dQ_Ldx
-  real*8 dQ_Ldy
-  real*8 Q_L
-  real*8 sint
+  real(wp) argument
+  real(wp) cost2
+  real(wp) dQ_Ldx
+  real(wp) dQ_Ldy
+  real(wp) Q_L
+  real(wp) sint
   integer nx, ny
-  real*8 xxmax, yymax
-  real*8 hx, hy
-  real*8, dimension (0:ntheta - 1, ME3c_max) :: bcnalist
-  real*8, dimension (numorb_max, numorb_max) :: bcnam
-  real*8, dimension (ME3c_max) :: hlist
-  real*8, dimension (0:ntheta - 1) :: p
+  real(wp) xxmax, yymax
+  real(wp) hx, hy
+  real(wp), dimension (0:ntheta - 1, ME3c_max) :: bcnalist
+  real(wp), dimension (numorb_max, numorb_max) :: bcnam
+  real(wp), dimension (ME3c_max) :: hlist
+  real(wp), dimension (0:ntheta - 1) :: p
   kforce = 0
   index = icon3c(in1,in2,indna)
   if (interaction .eq. 1) then

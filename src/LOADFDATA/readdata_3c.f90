@@ -1,8 +1,9 @@
 subroutine readdata_3c (iounit, numx, numy, num_nonzero, isorp, maxtype, index, xintegral)
+  use M_constants, only: wp
   use M_fdata, only: numXmax, numYmax, ME3c_max, nspecies
   implicit none
   integer, intent (in) :: index, iounit, isorp, maxtype, num_nonzero, numx, numy
-  real*8, intent (out), dimension (numXmax, numYmax, ME3c_max, 0:maxtype, nspecies**3) :: xintegral
+  real(wp), intent (out), dimension (numXmax, numYmax, ME3c_max, 0:maxtype, nspecies**3) :: xintegral
   integer :: ipoint, integral, jpoint
 
   do jpoint = 1, numy

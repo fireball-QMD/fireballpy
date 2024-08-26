@@ -1,10 +1,11 @@
 subroutine kspace_double (ikpoint, sks)
+  use M_constants, only: wp
   use M_system
   use M_fdata, only: num_orb, Qneutral
   implicit none
   integer, intent (in) :: ikpoint
-  real*8, intent (in), dimension (3) :: sks
-  real*8, parameter :: overtol = 1.0d-4
+  real(wp), intent (in), dimension (3) :: sks
+  real(wp), parameter :: overtol = 1.0d-4
   integer iatom
   integer imu
   integer info
@@ -19,28 +20,28 @@ subroutine kspace_double (ikpoint, sks)
   integer mineig
   integer lm
   integer issh
-  real*8 dot
-  real*8 sqlami
-  real*8, dimension (norbitals) :: eigen
-  real*8, dimension (norbitals) :: slam
-  real*8, dimension (3) :: vec
-  complex*16 a0
-  complex*16 a1
-  complex*16 phase
-  complex*16, dimension (:, :), allocatable :: xxxx
-  complex*16, dimension (:, :), allocatable :: yyyy
-  complex*16, dimension (:, :), allocatable :: zzzz
-  complex*16, dimension (:, :), allocatable :: ssss
-  real*8, dimension (:), allocatable :: ww
-  complex*16, allocatable, dimension (:) :: work
-  real*8, allocatable, dimension (:) :: rwork
+  real(wp) dot
+  real(wp) sqlami
+  real(wp), dimension (norbitals) :: eigen
+  real(wp), dimension (norbitals) :: slam
+  real(wp), dimension (3) :: vec
+  complex(wp) a0
+  complex(wp) a1
+  complex(wp) phase
+  complex(wp), dimension (:, :), allocatable :: xxxx
+  complex(wp), dimension (:, :), allocatable :: yyyy
+  complex(wp), dimension (:, :), allocatable :: zzzz
+  complex(wp), dimension (:, :), allocatable :: ssss
+  real(wp), dimension (:), allocatable :: ww
+  complex(wp), allocatable, dimension (:) :: work
+  real(wp), allocatable, dimension (:) :: rwork
   integer, allocatable, dimension (:) :: iwork
 
   integer lwork, lrwork, liwork
 
-  real*8 diff, imcoef, recoef
-  a0 = dcmplx(0.0d0,0.0d0)
-  a1 = dcmplx(1.0d0,0.0d0)
+  real(wp) diff, imcoef, recoef
+  a0 = cmplx(0.0d0,0.0d0,wp)
+  a1 = cmplx(1.0d0,0.0d0,wp)
   ishort = 1
   allocate (xxxx(norbitals,norbitals))
   allocate (yyyy(norbitals,norbitals))
@@ -80,7 +81,7 @@ subroutine kspace_double (ikpoint, sks)
     in2 = imass(jatom)
     vec(:) = xl(:,mbeta) + ratom(:,jatom) - ratom(:,iatom)
     dot = sks(1)*vec(1) + sks(2)*vec(2) + sks(3)*vec(3)
-    phase = dcmplx(cos(dot),sin(dot))
+    phase = cmplx(cos(dot),sin(dot),wp)
     do inu = 1, num_orb(in2)
      jnu = inu + degelec(jatom)
      do imu = 1, num_orb(in1)
@@ -97,7 +98,7 @@ subroutine kspace_double (ikpoint, sks)
     in2 = imass(jatom)
     vec(:) = xl(:,mbeta) + ratom(:,jatom) - ratom(:,iatom)
     dot = sks(1)*vec(1) + sks(2)*vec(2) + sks(3)*vec(3)
-    phase = dcmplx(cos(dot),sin(dot))
+    phase = cmplx(cos(dot),sin(dot),wp)
     do inu = 1, num_orb(in2)
      jnu = inu + degelec(jatom)
      do imu = 1, num_orb(in1)
@@ -209,7 +210,7 @@ subroutine kspace_double (ikpoint, sks)
   if (info .ne. 0) call diag_error (info, 0)
   eigen_k(1:norbitals,ikpoint) = eigen(:)
   if ((iqout .eq. 1) .or. (iqout .eq. 3)) then
-    blowre(:,:,ikpoint) = real(yyyy(:,:))
+    blowre(:,:,ikpoint) = real(yyyy(:,:), wp)
     if (igamma .eq. 0) then
       blowim(:,:,ikpoint) = aimag(yyyy(:,:))
     end if
@@ -219,7 +220,7 @@ subroutine kspace_double (ikpoint, sks)
   else
    call zgemm ( 'N', 'N', norbitals, norbitals, norbitals, a1, xxxx, norbitals, yyyy, norbitals, a0, zzzz, norbitals )
   end if
-  bbnkre(:,:,ikpoint) = real(zzzz(:,:))
+  bbnkre(:,:,ikpoint) = real(zzzz(:,:), wp)
   if (icluster .eq. 0 .and. igamma .eq. 0) bbnkim(:,:,ikpoint) = aimag(zzzz(:,:))
   deallocate (xxxx)
   deallocate (yyyy)

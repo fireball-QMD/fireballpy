@@ -1,9 +1,10 @@
 subroutine neighbors ()
+  use M_constants, only: wp
   use M_system
   use M_fdata, only: nssh, rcutoff
   implicit none
   integer :: iatom,jatom,mbeta,num_neigh,num_neigh_vdw,in1,imu,in2,neighcount
-	real*8 :: distance2,rcutoff_j, rcutoff_i,distance,range2,rc_max
+  real(wp) :: distance2,rcutoff_j, rcutoff_i,distance,range2,rc_max
   integer :: mbeta_max2
   integer :: neigh_max_old, ii, jj
   if (icluster .eq. 1) mbeta_max = 0

@@ -1,7 +1,7 @@
 subroutine assemble_usr ()
+  use M_constants, only: wp, eq2
   use M_system
   use M_fdata
-  use M_constants
   integer iatom
   integer ideriv
   integer in1, in2
@@ -15,31 +15,31 @@ subroutine assemble_usr ()
   integer mbeta
   integer n1, n2
   integer non2c
-  real*8 distance
-  real*8 dq1, dq2
-  real*8 dqi, dqj
-  real*8 dxc
-  real*8 dxc00, dxc0P, dxc0M, dxcP0, dxcM0
-  real*8 eklr
-  real*8 qi, qj
-  real*8 QQ
-  real*8 u0tot
-  real*8 ue0tot
-  real*8 xc
-  real*8 xc00, xc0P, xc0M, xcP0, xcM0
-  real*8 xforce
-  real*8 Zi, Zj
-  real*8, dimension (natoms, neigh_max) :: corksr
-  real*8, dimension (nsh_max, nsh_max) :: coulomb
-  real*8, dimension (nsh_max, nsh_max) :: coulombD
-  real*8, dimension (3) :: dcorksr
-  real*8, dimension (ME2c_max) :: dslist
-  real*8, dimension (3) :: eta
-  real*8, dimension (natoms) :: Q, Q0
-  real*8, dimension (3) :: r1, r2
-  real*8, dimension (ME2c_max) :: slist
-  real*8, dimension (natoms, neigh_max) :: u0
-  real*8, dimension (natoms) :: uee00
+  real(wp) distance
+  real(wp) dq1, dq2
+  real(wp) dqi, dqj
+  real(wp) dxc
+  real(wp) dxc00, dxc0P, dxc0M, dxcP0, dxcM0
+  real(wp) eklr
+  real(wp) qi, qj
+  real(wp) QQ
+  real(wp) u0tot
+  real(wp) ue0tot
+  real(wp) xc
+  real(wp) xc00, xc0P, xc0M, xcP0, xcM0
+  real(wp) xforce
+  real(wp) Zi, Zj
+  real(wp), dimension (natoms, neigh_max) :: corksr
+  real(wp), dimension (nsh_max, nsh_max) :: coulomb
+  real(wp), dimension (nsh_max, nsh_max) :: coulombD
+  real(wp), dimension (3) :: dcorksr
+  real(wp), dimension (ME2c_max) :: dslist
+  real(wp), dimension (3) :: eta
+  real(wp), dimension (natoms) :: Q, Q0
+  real(wp), dimension (3) :: r1, r2
+  real(wp), dimension (ME2c_max) :: slist
+  real(wp), dimension (natoms, neigh_max) :: u0
+  real(wp), dimension (natoms) :: uee00
   dusr = 0.0d0
   dxcv = 0.0d0
   u0 = 0.0d0

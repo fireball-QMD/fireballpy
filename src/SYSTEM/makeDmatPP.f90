@@ -1,25 +1,26 @@
 subroutine makeDmatPP (in1, in2, matm, dmatm, dmat, pmat, ddmat, dpmat, term)
+  use M_constants, only: wp
   use M_system
   use M_fdata, only: nssh,lssh,nsshPP,lsshPP
   implicit none
   integer, intent(in) :: in1, in2
-  real*8, intent(in) :: dmat (5, 5)
-  real*8, intent(in) :: dmatm (3, numorb_max, numorb_max)
-  real*8, intent(in) :: ddmat (3, 5, 5)
-  real*8, intent(in) :: matm (numorb_max, numorb_max)
-  real*8, intent(in) :: pmat (3, 3)
-  real*8, intent(in) :: dpmat (3, 3, 3)
-  real*8, intent(out) :: term (3, numorb_max, numorb_max)
+  real(wp), intent(in) :: dmat (5, 5)
+  real(wp), intent(in) :: dmatm (3, numorb_max, numorb_max)
+  real(wp), intent(in) :: ddmat (3, 5, 5)
+  real(wp), intent(in) :: matm (numorb_max, numorb_max)
+  real(wp), intent(in) :: pmat (3, 3)
+  real(wp), intent(in) :: dpmat (3, 3, 3)
+  real(wp), intent(out) :: term (3, numorb_max, numorb_max)
   integer issh, jssh
   integer ix
   integer k1, k2
   integer l1, l2
   integer m1, m2
   integer n1, n2
-  real*8 dleft (3, 5, 5)
-  real*8 dright (3, 5, 5)
-  real*8 left (5, 5)
-  real*8 right (5, 5)
+  real(wp) dleft (3, 5, 5)
+  real(wp) dright (3, 5, 5)
+  real(wp) left (5, 5)
+  real(wp) right (5, 5)
   n1 = 0
   do issh = 1, nssh(in1)
    l1 = lssh(issh,in1)

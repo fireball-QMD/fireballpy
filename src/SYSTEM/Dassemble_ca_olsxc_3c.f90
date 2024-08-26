@@ -1,4 +1,5 @@
 subroutine Dassemble_ca_olsxc_3c ()
+  use M_constants, only: wp
   use M_system
   use M_fdata, only: nssh,isorpmax,nspecies,num_orb,lssh,nsh_max
   implicit none
@@ -26,52 +27,52 @@ subroutine Dassemble_ca_olsxc_3c ()
   integer mneigh
   integer n1
   integer n2
-  real*8 cost
-  real*8 x
-  real*8 y
-  real*8 muxc
-  real*8 dmuxc
-  real*8 d2muxc
-  real*8 exc
-  real*8 dexc
-  real*8 d2exc
-  real*8 sx
-  real*8 sm
-  real*8 rho_av
-  real*8, dimension (3, 3, 3) :: depsA
-  real*8, dimension (3, 3, 3) :: depsB
-  real*8, dimension (3, 3) :: eps
-  real*8, dimension (nsh_max, nsh_max) :: rho_3c
-  real*8, dimension (3, nsh_max, nsh_max) :: rhop_3ca
-  real*8, dimension (3, nsh_max, nsh_max) :: rhop_3cb
-  real*8, dimension (3, nsh_max, nsh_max) :: rhop_3cc
-  real*8, dimension (3, numorb_max, numorb_max) :: rhoxpa
-  real*8, dimension (3, numorb_max, numorb_max) :: rhoxpb
-  real*8, dimension (3, numorb_max, numorb_max) :: rhoxpc
-  real*8, dimension (3, nsh_max, nsh_max) :: rhompa
-  real*8, dimension (3, nsh_max, nsh_max) :: rhompb
-  real*8, dimension (3, nsh_max, nsh_max) :: rhompc
-  real*8, dimension (3, numorb_max, numorb_max) :: rhoinpa
-  real*8, dimension (3, numorb_max, numorb_max) :: rhoinpb
-  real*8, dimension (3, numorb_max, numorb_max) :: rhoinpc
-  real*8, dimension (3, numorb_max, numorb_max) :: avrhop_a
-  real*8, dimension (3, numorb_max, numorb_max) :: avrhop_b
-  real*8, dimension (3, numorb_max, numorb_max) :: avrhop_c
-  real*8, dimension (3, numorb_max, numorb_max) :: mxca
-  real*8, dimension (3, numorb_max, numorb_max) :: mxcb
-  real*8, dimension (3, numorb_max, numorb_max) :: mxcc
-  real*8, dimension (numorb_max, numorb_max) :: rhoin
-  real*8, dimension (nsh_max, nsh_max) :: rhomm
-  real*8, dimension (3) :: spm
-  real*8, dimension (3) :: rhop_avb
-  real*8, dimension (3) :: rhop_avc
-  real*8, dimension (3) :: r1
-  real*8, dimension (3) :: r2
-  real*8, dimension (3) :: r21
-  real*8, dimension (3) :: rhat
-  real*8, dimension (3) :: rna
-  real*8, dimension (3) :: rnabc
-  real*8, dimension (3) :: sighat
+  real(wp) cost
+  real(wp) x
+  real(wp) y
+  real(wp) muxc
+  real(wp) dmuxc
+  real(wp) d2muxc
+  real(wp) exc
+  real(wp) dexc
+  real(wp) d2exc
+  real(wp) sx
+  real(wp) sm
+  real(wp) rho_av
+  real(wp), dimension (3, 3, 3) :: depsA
+  real(wp), dimension (3, 3, 3) :: depsB
+  real(wp), dimension (3, 3) :: eps
+  real(wp), dimension (nsh_max, nsh_max) :: rho_3c
+  real(wp), dimension (3, nsh_max, nsh_max) :: rhop_3ca
+  real(wp), dimension (3, nsh_max, nsh_max) :: rhop_3cb
+  real(wp), dimension (3, nsh_max, nsh_max) :: rhop_3cc
+  real(wp), dimension (3, numorb_max, numorb_max) :: rhoxpa
+  real(wp), dimension (3, numorb_max, numorb_max) :: rhoxpb
+  real(wp), dimension (3, numorb_max, numorb_max) :: rhoxpc
+  real(wp), dimension (3, nsh_max, nsh_max) :: rhompa
+  real(wp), dimension (3, nsh_max, nsh_max) :: rhompb
+  real(wp), dimension (3, nsh_max, nsh_max) :: rhompc
+  real(wp), dimension (3, numorb_max, numorb_max) :: rhoinpa
+  real(wp), dimension (3, numorb_max, numorb_max) :: rhoinpb
+  real(wp), dimension (3, numorb_max, numorb_max) :: rhoinpc
+  real(wp), dimension (3, numorb_max, numorb_max) :: avrhop_a
+  real(wp), dimension (3, numorb_max, numorb_max) :: avrhop_b
+  real(wp), dimension (3, numorb_max, numorb_max) :: avrhop_c
+  real(wp), dimension (3, numorb_max, numorb_max) :: mxca
+  real(wp), dimension (3, numorb_max, numorb_max) :: mxcb
+  real(wp), dimension (3, numorb_max, numorb_max) :: mxcc
+  real(wp), dimension (numorb_max, numorb_max) :: rhoin
+  real(wp), dimension (nsh_max, nsh_max) :: rhomm
+  real(wp), dimension (3) :: spm
+  real(wp), dimension (3) :: rhop_avb
+  real(wp), dimension (3) :: rhop_avc
+  real(wp), dimension (3) :: r1
+  real(wp), dimension (3) :: r2
+  real(wp), dimension (3) :: r21
+  real(wp), dimension (3) :: rhat
+  real(wp), dimension (3) :: rna
+  real(wp), dimension (3) :: rnabc
+  real(wp), dimension (3) :: sighat
   f3xca = 0.0d0
   f3xcb = 0.0d0
   f3xcc = 0.0d0

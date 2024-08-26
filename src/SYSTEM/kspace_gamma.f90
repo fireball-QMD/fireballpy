@@ -1,10 +1,11 @@
 subroutine kspace_gamma ( ikpoint, sks)
+  use M_constants, only: wp
   use M_system
   use M_fdata, only: num_orb, Qneutral
   implicit none
   integer, intent (in) :: ikpoint
-  real*8, intent (in), dimension (3) :: sks
-  real*8, parameter :: overtol = 1.0d-4
+  real(wp), intent (in), dimension (3) :: sks
+  real(wp), parameter :: overtol = 1.0d-4
   integer iatom
   integer imu
   integer info
@@ -19,18 +20,18 @@ subroutine kspace_gamma ( ikpoint, sks)
   integer mineig
   integer lm
   integer issh
-  real*8 sqlami
-  real*8, dimension (norbitals) :: eigen
-  real*8, dimension (norbitals) :: slam
-  real*8 a0
-  real*8 a1
-  real*8 magnitude
-  real*8, dimension (:, :), allocatable :: xxxx
-  real*8, dimension (:, :), allocatable :: yyyy
-  real*8, dimension (:, :), allocatable :: zzzz
-  real*8, dimension (:, :), allocatable :: ssss
-  real*8, dimension (:), allocatable :: ww
-  real*8, allocatable, dimension (:) :: work
+  real(wp) sqlami
+  real(wp), dimension (norbitals) :: eigen
+  real(wp), dimension (norbitals) :: slam
+  real(wp) a0
+  real(wp) a1
+  real(wp) magnitude
+  real(wp), dimension (:, :), allocatable :: xxxx
+  real(wp), dimension (:, :), allocatable :: yyyy
+  real(wp), dimension (:, :), allocatable :: zzzz
+  real(wp), dimension (:, :), allocatable :: ssss
+  real(wp), dimension (:), allocatable :: ww
+  real(wp), allocatable, dimension (:) :: work
   integer, allocatable, dimension (:) :: iwork
   integer lwork, liwork
   magnitude = sqrt(sks(1)**2 + sks(2)**2 + sks(3)**3) ! AQUI : sks(3)**3 ?
@@ -180,14 +181,14 @@ subroutine kspace_gamma ( ikpoint, sks)
   call dsyev ('V', 'U', norbitals, yyyy, norbitals, eigen, work, lwork, info )
   if (info .ne. 0) call diag_error (info, 0)
   eigen_k(1:norbitals,ikpoint) = eigen(:)
-  if ((iqout .eq. 1) .or. (iqout .eq. 3)) blowre(:,:,ikpoint) = real(yyyy(:,:))
+  if ((iqout .eq. 1) .or. (iqout .eq. 3)) blowre(:,:,ikpoint) = real(yyyy(:,:), wp)
   call dsymm ( 'L', 'U', norbitals, norbitals, a1, xxxx, norbitals, yyyy, norbitals, a0, zzzz, norbitals )
   if (iqout .ne. 3) then
     call dsymm ( 'L', 'U', norbitals, norbitals, a1, xxxx, norbitals, yyyy, norbitals, a0, zzzz, norbitals )
   else
     call dgemm ( 'N', 'N', norbitals, norbitals, norbitals, a1, xxxx, norbitals, yyyy, norbitals, a0, zzzz, norbitals )
   end if
-  bbnkre(:,:,ikpoint) = real(zzzz(:,:))
+  bbnkre(:,:,ikpoint) = real(zzzz(:,:), wp)
   deallocate (xxxx)
   deallocate (yyyy)
   deallocate (zzzz)

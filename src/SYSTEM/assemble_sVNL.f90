@@ -1,5 +1,6 @@
 ! This routine assembles all of the two-center sVNL (separable pseudopotential) interactions.
 subroutine assemble_sVNL ()
+  use M_constants, only: wp
   use M_system
   use M_fdata, only: num_orbPP, num_orb
   implicit none
@@ -16,15 +17,15 @@ subroutine assemble_sVNL ()
   integer matom
   integer mbeta
  
-  real*8 y
-  real*8, dimension (3, 3) :: eps
-  real*8, dimension (3, 3, 3) :: deps
-  real*8, dimension (3) :: r1
-  real*8, dimension (3) :: r2
-  real*8, dimension (3) :: r21
-  real*8, dimension (3) :: sighat
-  real*8, dimension (numorb_max, numorb_max) :: sVNLx
-  real*8, dimension (3, numorb_max, numorb_max) :: spVNLx
+  real(wp) y
+  real(wp), dimension (3, 3) :: eps
+  real(wp), dimension (3, 3, 3) :: deps
+  real(wp), dimension (3) :: r1
+  real(wp), dimension (3) :: r2
+  real(wp), dimension (3) :: r21
+  real(wp), dimension (3) :: sighat
+  real(wp), dimension (numorb_max, numorb_max) :: sVNLx
+  real(wp), dimension (3, numorb_max, numorb_max) :: spVNLx
  
   do iatom = 1, natoms 
     matom = nPP_self(iatom)

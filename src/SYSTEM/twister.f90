@@ -1,18 +1,13 @@
 subroutine twister (eps, dmat, pmat)
-  use M_constants
+  use M_constants, only: wp, haveDorbitals
+  use M_system, only: amat
   implicit none
-  real*8, intent(in) :: eps (3, 3)
-  real*8, intent(out) :: dmat (5, 5)
-  real*8, intent(out) :: pmat (3, 3)
-  integer imu
-  integer jx
-  integer ix
-  real*8 amat_term
-  real*8 xlambda11
-  real*8 xlambda12
-  real*8 xlambda13
-  real*8 xlambda32
-  real*8 xlambda33
+  real(wp), dimension(3, 3), intent(in) :: eps
+  real(wp), dimension(5, 5), intent(out) :: dmat
+  real(wp), dimension(3, 3), intent(out) :: pmat
+  integer :: imu, jx, ix
+  real(wp) :: amat_term, xlambda11, xlambda12, xlambda13, xlambda32, xlambda33
+
   pmat(1,1) = eps(2,2) 
   pmat(1,2) = eps(2,3) 
   pmat(1,3) = eps(2,1)

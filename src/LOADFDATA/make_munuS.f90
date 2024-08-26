@@ -1,7 +1,7 @@
 subroutine make_munuS ()
   use M_fdata, only: MES_max, nspecies, nssh, index_maxS, muS, mvalueS, nuS
   implicit none
-  integer imu, index, in1, in2, issh1, issh2, l1, l2, n1, n2
+  integer :: imu, index, in1, in2, issh1, issh2, l1, l2, n1, n2
 
   MES_max = 0
   allocate (index_maxS (nspecies, nspecies))

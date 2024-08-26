@@ -1,7 +1,7 @@
 subroutine Dassemble_lr_dip ()
+  use M_constants, only: wp, eq2
   use M_system
   use M_fdata, only: nssh, Qneutral,num_orb
-  use M_constants
   implicit none
   integer iatom
   integer ierror
@@ -21,32 +21,32 @@ subroutine Dassemble_lr_dip ()
   integer ix
   integer jneigh
   integer ipair
-  real*8 dist13
-  real*8 dist23
-  real*8 distance12
-  real*8 dq1
-  real*8 dq2
-  real*8 dq3
-  real*8 dterm 
-  real*8 x
-  real*8 sterm
-  real*8, dimension(3)  :: rnabc
-  real*8, dimension(3)  :: r13
-  real*8, dimension(3)  :: r23
-  real*8, dimension(3)  :: r21
-  real*8, dimension(3)  :: ddterm
-  real*8, dimension(3)  :: dptermA
-  real*8, dimension(3)  :: dptermB
-  real*8, dimension(3)  :: rna
-  real*8, dimension (3) :: dpterm
-  real*8, dimension (3) :: r1
-  real*8, dimension (3) :: r2
-  real*8, dimension (3) :: rhat12
-  real*8, dimension (3) :: spterm
-  real*8, dimension (numorb_max, numorb_max) :: emnpl
-  real*8, dimension (3, numorb_max, numorb_max) :: demnplA
-  real*8, dimension (3, numorb_max, numorb_max) :: demnplB
-  real*8, dimension (3, numorb_max, numorb_max) :: demnplC
+  real(wp) dist13
+  real(wp) dist23
+  real(wp) distance12
+  real(wp) dq1
+  real(wp) dq2
+  real(wp) dq3
+  real(wp) dterm 
+  real(wp) x
+  real(wp) sterm
+  real(wp), dimension(3)  :: rnabc
+  real(wp), dimension(3)  :: r13
+  real(wp), dimension(3)  :: r23
+  real(wp), dimension(3)  :: r21
+  real(wp), dimension(3)  :: ddterm
+  real(wp), dimension(3)  :: dptermA
+  real(wp), dimension(3)  :: dptermB
+  real(wp), dimension(3)  :: rna
+  real(wp), dimension (3) :: dpterm
+  real(wp), dimension (3) :: r1
+  real(wp), dimension (3) :: r2
+  real(wp), dimension (3) :: rhat12
+  real(wp), dimension (3) :: spterm
+  real(wp), dimension (numorb_max, numorb_max) :: emnpl
+  real(wp), dimension (3, numorb_max, numorb_max) :: demnplA
+  real(wp), dimension (3, numorb_max, numorb_max) :: demnplB
+  real(wp), dimension (3, numorb_max, numorb_max) :: demnplC
   flrew = 0.0d0
   do ipair = 1,tot_pairs
     iatom = neigh_pair_a1(ipair)

@@ -1,8 +1,8 @@
 ! This routine assembles all of the two-center and degenerate two-center interactions for DOGS.
 subroutine assemble_ca_2c_dip ()
+  use M_constants, only: wp, eq2
   use M_system
   use M_fdata, only: nssh,rcutoff,Qneutral,num_orb
-  use m_constants, only: eq2
   implicit none
   integer iatom
   integer icount
@@ -27,37 +27,37 @@ subroutine assemble_ca_2c_dip ()
   integer ix
   integer iy
  
-  real*8 dq1
-  real*8 dq2
-  real*8 dterm
-  real*8 dterm_1
-  real*8 dterm_2
-  real*8 dstn_temp
-  real*8 dxn
-  real*8 rcutoff_j
-  real*8 rend
-  real*8 rend1
-  real*8 rend2
-  real*8 sterm_1
-  real*8 sterm_2
-  real*8 y
-  real*8 rcutoff_i
+  real(wp) dq1
+  real(wp) dq2
+  real(wp) dterm
+  real(wp) dterm_1
+  real(wp) dterm_2
+  real(wp) dstn_temp
+  real(wp) dxn
+  real(wp) rcutoff_j
+  real(wp) rend
+  real(wp) rend1
+  real(wp) rend2
+  real(wp) sterm_1
+  real(wp) sterm_2
+  real(wp) y
+  real(wp) rcutoff_i
  
-  real*8, dimension (numorb_max, numorb_max) :: bcca
-  real*8, dimension (3, numorb_max, numorb_max) :: bccapx
-  real*8, dimension (numorb_max, numorb_max) :: bccax
-  real*8, dimension (3, 3, 3) :: deps
-  real*8, dimension (numorb_max, numorb_max) :: dipx
-  real*8, dimension (3, numorb_max, numorb_max) :: dippx
-  real*8, dimension (numorb_max, numorb_max) :: emnpl
-  real*8, dimension (numorb_max, numorb_max) :: emnpl_noq
-  real*8, dimension (3, 3) :: eps
-  real*8, dimension (3) :: r1
-  real*8, dimension (3) :: r2
-  real*8, dimension (3) :: r21
-  real*8, dimension (3) :: sighat
-  real*8 stn1
-  real*8 stn2
+  real(wp), dimension (numorb_max, numorb_max) :: bcca
+  real(wp), dimension (3, numorb_max, numorb_max) :: bccapx
+  real(wp), dimension (numorb_max, numorb_max) :: bccax
+  real(wp), dimension (3, 3, 3) :: deps
+  real(wp), dimension (numorb_max, numorb_max) :: dipx
+  real(wp), dimension (3, numorb_max, numorb_max) :: dippx
+  real(wp), dimension (numorb_max, numorb_max) :: emnpl
+  real(wp), dimension (numorb_max, numorb_max) :: emnpl_noq
+  real(wp), dimension (3, 3) :: eps
+  real(wp), dimension (3) :: r1
+  real(wp), dimension (3) :: r2
+  real(wp), dimension (3) :: r21
+  real(wp), dimension (3) :: sighat
+  real(wp) stn1
+  real(wp) stn2
   vca = 0.0d0
   ewaldsr = 0.0d0
 

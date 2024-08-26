@@ -1,4 +1,5 @@
 subroutine trescentrosS ( isorp, maxtype, in1, in2, indna, x, y, cost, eps, bcnax)
+  use M_constants, only: wp
   use M_system
   use M_fdata
   implicit none
@@ -7,11 +8,11 @@ subroutine trescentrosS ( isorp, maxtype, in1, in2, indna, x, y, cost, eps, bcna
   integer, intent (in) :: indna
   integer, intent (in) :: isorp
   integer, intent (in) :: maxtype
-  real*8, intent (in) :: cost
-  real*8, intent (in) :: x
-  real*8, intent (in) :: y
-  real*8, intent (in), dimension (3, 3) :: eps
-  real*8, intent (out), dimension (nsh_max, nsh_max) :: bcnax
+  real(wp), intent (in) :: cost
+  real(wp), intent (in) :: x
+  real(wp), intent (in) :: y
+  real(wp), intent (in), dimension (3, 3) :: eps
+  real(wp), intent (out), dimension (nsh_max, nsh_max) :: bcnax
   integer imu
   integer iME
   integer index
@@ -20,19 +21,19 @@ subroutine trescentrosS ( isorp, maxtype, in1, in2, indna, x, y, cost, eps, bcna
   integer nl
   integer nx
   integer ny
-  real*8 argument
-  real*8 cost2
-  real*8 dQ_Ldx
-  real*8 dQ_Ldy
-  real*8 Q_L
-  real*8 sint
-  real*8 xxmax
-  real*8 yymax
-  real*8 hx
-  real*8 hy
-  real*8, dimension (0:ithetamax - 1, MES_max) :: bcnalist
-  real*8, dimension (MES_max) :: hlist
-  real*8, dimension (0:ithetamax - 1) :: p
+  real(wp) argument
+  real(wp) cost2
+  real(wp) dQ_Ldx
+  real(wp) dQ_Ldy
+  real(wp) Q_L
+  real(wp) sint
+  real(wp) xxmax
+  real(wp) yymax
+  real(wp) hx
+  real(wp) hy
+  real(wp), dimension (0:ithetamax - 1, MES_max) :: bcnalist
+  real(wp), dimension (MES_max) :: hlist
+  real(wp), dimension (0:ithetamax - 1) :: p
   do inu = 1, nssh(in2)
     do imu = 1, nssh(in1)
       bcnax(imu,inu) = 0.0d0

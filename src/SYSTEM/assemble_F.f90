@@ -1,34 +1,35 @@
 subroutine assemble_F ()
+  use M_constants, only: wp
   use M_system
   implicit none
   integer iatom
   integer ineigh
   integer jatom
   integer ix
-  real*8 rms
-  real*8 maximum
-  real*8 minimum
-  real*8, dimension (3, natoms) :: f3ca       ! three-center charged atom
-  real*8, dimension (3, natoms) :: f3na       ! three-center neutral atom
-  real*8, dimension (3, natoms) :: f3nl       ! three-center non-local
-  real*8, dimension (3, natoms) :: f3xc       ! three-center xc
-  real*8, dimension (3, natoms) :: f3xc_ca    ! three-center xc - charges
-  real*8, dimension (3, natoms) :: fbs  ! total band-structure force
-  real*8, dimension (3, natoms) :: fca  ! total charged atom force
-  real*8, dimension (3, natoms) :: fcaatm     ! charged atom/atom force
-  real*8, dimension (3, natoms) :: fcaot      ! charged atom/ontop force
-  real*8, dimension (3, natoms) :: fna  ! total neutral atom force
-  real*8, dimension (3, natoms) :: fnaatm     ! neutral atom/atom force
-  real*8, dimension (3, natoms) :: fnaot      ! neutral atom/ontop force
-  real*8, dimension (3, natoms) :: fnl  ! total non-local force
-  real*8, dimension (3, natoms) :: fnlatm     ! non-local/atom force
-  real*8, dimension (3, natoms) :: fnlot      ! non-local/ontop force
-  real*8, dimension (3, natoms) :: fxc  ! total xc force
-  real*8, dimension (3, natoms) :: fxc_ca     ! total xc force - charges
-  real*8, dimension (3, natoms) :: fxcatm     ! xc atm/atm force
-  real*8, dimension (3, natoms) :: fxcatm_ca  ! xc atm/atm force - charges
-  real*8, dimension (3, natoms) :: fxcot      ! xc ontop force
-  real*8, dimension (3, natoms) :: fxcot_ca   ! xc ontop force - charges
+  real(wp) rms
+  real(wp) maximum
+  real(wp) minimum
+  real(wp), dimension (3, natoms) :: f3ca       ! three-center charged atom
+  real(wp), dimension (3, natoms) :: f3na       ! three-center neutral atom
+  real(wp), dimension (3, natoms) :: f3nl       ! three-center non-local
+  real(wp), dimension (3, natoms) :: f3xc       ! three-center xc
+  real(wp), dimension (3, natoms) :: f3xc_ca    ! three-center xc - charges
+  real(wp), dimension (3, natoms) :: fbs  ! total band-structure force
+  real(wp), dimension (3, natoms) :: fca  ! total charged atom force
+  real(wp), dimension (3, natoms) :: fcaatm     ! charged atom/atom force
+  real(wp), dimension (3, natoms) :: fcaot      ! charged atom/ontop force
+  real(wp), dimension (3, natoms) :: fna  ! total neutral atom force
+  real(wp), dimension (3, natoms) :: fnaatm     ! neutral atom/atom force
+  real(wp), dimension (3, natoms) :: fnaot      ! neutral atom/ontop force
+  real(wp), dimension (3, natoms) :: fnl  ! total non-local force
+  real(wp), dimension (3, natoms) :: fnlatm     ! non-local/atom force
+  real(wp), dimension (3, natoms) :: fnlot      ! non-local/ontop force
+  real(wp), dimension (3, natoms) :: fxc  ! total xc force
+  real(wp), dimension (3, natoms) :: fxc_ca     ! total xc force - charges
+  real(wp), dimension (3, natoms) :: fxcatm     ! xc atm/atm force
+  real(wp), dimension (3, natoms) :: fxcatm_ca  ! xc atm/atm force - charges
+  real(wp), dimension (3, natoms) :: fxcot      ! xc ontop force
+  real(wp), dimension (3, natoms) :: fxcot_ca   ! xc ontop force - charges
   do iatom = 1, natoms
     f3nl(:,iatom) = f3nla(:,iatom) + f3nlb(:,iatom) + f3nlc(:,iatom)
     f3na(:,iatom) = f3naa(:,iatom) + f3nab(:,iatom) + f3nac(:,iatom)

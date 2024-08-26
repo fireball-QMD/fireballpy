@@ -1,13 +1,14 @@
 subroutine unocentros (in1, iatom, exc_1c, muexc_1c, dccexc_1c, mu1xc)
+  use M_constants, only: wp
   use M_system
   use M_fdata
   implicit none
   integer, intent(in) :: iatom
   integer, intent(in) :: in1
-  real*8, intent(out) :: exc_1c  ! XC energy term of DCC
-  real*8, intent(out) :: muexc_1c      ! XC potential term of DCC
-  real*8, intent(out) :: dccexc_1c     ! XC DCC term
-  real*8, intent(out), dimension (numorb_max, numorb_max) :: mu1xc
+  real(wp), intent(out) :: exc_1c  ! XC energy term of DCC
+  real(wp), intent(out) :: muexc_1c      ! XC potential term of DCC
+  real(wp), intent(out) :: dccexc_1c     ! XC DCC term
+  real(wp), intent(out), dimension (numorb_max, numorb_max) :: mu1xc
   integer imu
   integer ideriv
   integer iderivmin
@@ -20,12 +21,12 @@ subroutine unocentros (in1, iatom, exc_1c, muexc_1c, dccexc_1c, mu1xc)
   integer inu
   integer jssh
   integer kssh
-  real*8 dqhelp
-  real*8 q_mu
-  real*8, dimension (0:2) :: dqfact
-  real*8, dimension (0:2) :: linfact
-  real*8, dimension (0:2) :: quadfact
-  real*8, dimension (nsh_max) :: dqi
+  real(wp) dqhelp
+  real(wp) q_mu
+  real(wp), dimension (0:2) :: dqfact
+  real(wp), dimension (0:2) :: linfact
+  real(wp), dimension (0:2) :: quadfact
+  real(wp), dimension (nsh_max) :: dqi
   integer iissh, jjssh
   exc_1c = 0.0d0
   dccexc_1c = 0.0d0

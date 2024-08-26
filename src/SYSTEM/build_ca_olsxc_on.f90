@@ -12,13 +12,14 @@
 !  n_i ... density on i-site
 ! 
 subroutine build_ca_olsxc_on (in1, iatom, bcxcx, xc)
+  use M_constants, only: wp
   use M_system
   use M_fdata, only: nssh, num_orb,lssh,nsh_max
   implicit none
   integer, intent (in) :: in1
   integer, intent (in) :: iatom
-  real*8, intent (out), dimension (numorb_max, numorb_max) :: bcxcx
-  real*8, intent (out) :: xc
+  real(wp), intent (out), dimension (numorb_max, numorb_max) :: bcxcx
+  real(wp), intent (out) :: xc
 
   integer imu
   integer ind1
@@ -31,24 +32,24 @@ subroutine build_ca_olsxc_on (in1, iatom, bcxcx, xc)
   integer n1
   integer n2
 
-  real*8 dexc
-  real*8 d2exc 
-  real*8 dmuxc
-  real*8 d2muxc
-  real*8 exc
-  real*8 muxc
-  real*8 dexci
-  real*8 d2exci
-  real*8 dmuxci
-  real*8 d2muxci
-  real*8 exci
-  real*8 muxci
-  real*8 q_mu
+  real(wp) dexc
+  real(wp) d2exc 
+  real(wp) dmuxc
+  real(wp) d2muxc
+  real(wp) exc
+  real(wp) muxc
+  real(wp) dexci
+  real(wp) d2exci
+  real(wp) dmuxci
+  real(wp) d2muxci
+  real(wp) exci
+  real(wp) muxci
+  real(wp) q_mu
 
-  real*8, dimension (nsh_max,nsh_max) :: arho
-  real*8, dimension (nsh_max,nsh_max) :: arhoi
-  real*8, dimension (numorb_max, numorb_max) :: denx
-  real*8, dimension (numorb_max, numorb_max) :: deni
+  real(wp), dimension (nsh_max,nsh_max) :: arho
+  real(wp), dimension (nsh_max,nsh_max) :: arhoi
+  real(wp), dimension (numorb_max, numorb_max) :: denx
+  real(wp), dimension (numorb_max, numorb_max) :: deni
 
   xc = 0.0d0
   bcxcx = 0.0d0

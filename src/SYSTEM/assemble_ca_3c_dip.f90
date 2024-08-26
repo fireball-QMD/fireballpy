@@ -1,6 +1,6 @@
 subroutine assemble_ca_3c_dip ()
+  use M_constants, only: wp, eq2
   use M_system
-  use M_constants
   use M_fdata, only: nssh, Qneutral,rcutoff, num_orb, isorpmax, nspecies
   implicit none
   integer ialp
@@ -29,43 +29,43 @@ subroutine assemble_ca_3c_dip ()
   integer mneigh
   integer ix
   integer j
-  real*8 cost
-  real*8 distance_13
-  real*8 distance_23
-  real*8 dq3
-  real*8 dstn_temp
-  real*8 dterm
-  real*8 dxn
-  real*8 rcutoff_ialp
-  real*8 rend1
-  real*8 rend2
-  real*8 sterm
-  real*8 stn_temp1
-  real*8 stn_temp2
-  real*8 x
-  real*8 y
-  real*8 rcutoff_i
-  real*8 rcutoff_j
-  real*8 dot_product_dipc_x
-  real*8, dimension (numorb_max, numorb_max) :: bcca
-  real*8, dimension (numorb_max, numorb_max) :: bccax
-  real*8, dimension (numorb_max, numorb_max) :: emnpl
-  real*8, dimension (numorb_max, numorb_max) :: emnpl_noq
-  real*8, dimension (3, 3, 3) :: deps
-  real*8, dimension (3, 3) :: eps
-  real*8, dimension (3) :: r1
-  real*8, dimension (3) :: r2
-  real*8, dimension (3) :: r21
-  real*8, dimension (3) :: rhat
-  real*8, dimension (3) :: rna
-  real*8, dimension (3) :: rnabc
-  real*8, dimension (3) :: sighat
-  real*8 stn1
-  real*8 stn2
-  real*8, dimension (:,:), allocatable :: smG
-  real*8, dimension (:,:,:), allocatable :: spmG
-  real*8, dimension (:, :, :, :), allocatable :: smatG
-  real*8, dimension (:, :, :, :), allocatable :: spmatG
+  real(wp) cost
+  real(wp) distance_13
+  real(wp) distance_23
+  real(wp) dq3
+  real(wp) dstn_temp
+  real(wp) dterm
+  real(wp) dxn
+  real(wp) rcutoff_ialp
+  real(wp) rend1
+  real(wp) rend2
+  real(wp) sterm
+  real(wp) stn_temp1
+  real(wp) stn_temp2
+  real(wp) x
+  real(wp) y
+  real(wp) rcutoff_i
+  real(wp) rcutoff_j
+  real(wp) dot_product_dipc_x
+  real(wp), dimension (numorb_max, numorb_max) :: bcca
+  real(wp), dimension (numorb_max, numorb_max) :: bccax
+  real(wp), dimension (numorb_max, numorb_max) :: emnpl
+  real(wp), dimension (numorb_max, numorb_max) :: emnpl_noq
+  real(wp), dimension (3, 3, 3) :: deps
+  real(wp), dimension (3, 3) :: eps
+  real(wp), dimension (3) :: r1
+  real(wp), dimension (3) :: r2
+  real(wp), dimension (3) :: r21
+  real(wp), dimension (3) :: rhat
+  real(wp), dimension (3) :: rna
+  real(wp), dimension (3) :: rnabc
+  real(wp), dimension (3) :: sighat
+  real(wp) stn1
+  real(wp) stn2
+  real(wp), dimension (:,:), allocatable :: smG
+  real(wp), dimension (:,:,:), allocatable :: spmG
+  real(wp), dimension (:, :, :, :), allocatable :: smatG
+  real(wp), dimension (:, :, :, :), allocatable :: spmatG
   allocate (smG (numorb_max, numorb_max))
   allocate (spmG (3, numorb_max, numorb_max))
   allocate (smatG (numorb_max, numorb_max, neigh_max, natoms))

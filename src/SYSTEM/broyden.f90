@@ -1,20 +1,21 @@
 subroutine broyden ( x_try, x_old, beta, r2, iter, max_order, nmsh)
+  use M_constants, only: wp
   use M_system
   implicit none
   integer, intent(in) :: nmsh      ! Size of vectors being optimized
-  real*8, intent(in) :: beta         ! Mixing factor - used just for starting guess and simple mixing
+  real(wp), intent(in) :: beta         ! Mixing factor - used just for starting guess and simple mixing
   integer, intent(in) :: iter      ! iteration number
   integer, intent(in) :: max_order ! How far back do we go to extrapolate? - not used
-  real*8, intent(in), dimension(nmsh) :: x_try ! potential new vector on input
-  real*8, intent(inout), dimension(nmsh) :: x_old ! old vector in input, real*8 new vector on output
-  real*8, intent(out) :: r2 ! mean-square of (x_try(i)-x_old(i))**2
-  real*8, parameter :: tr2=2.0e-15  ! convergence factor, if r2<tr2, assume converged
-  real*8, dimension(nmsh)   :: auxvec
-  real*8, dimension(nmsh,nmsh) :: amat
-  real*8 renorm
-  real*8 aux
-  real*8 aux2
-  real*8 norm
+  real(wp), intent(in), dimension(nmsh) :: x_try ! potential new vector on input
+  real(wp), intent(inout), dimension(nmsh) :: x_old ! old vector in input, real(wp) new vector on output
+  real(wp), intent(out) :: r2 ! mean-square of (x_try(i)-x_old(i))**2
+  real(wp), parameter :: tr2=2.0e-15  ! convergence factor, if r2<tr2, assume converged
+  real(wp), dimension(nmsh)   :: auxvec
+  real(wp), dimension(nmsh,nmsh) :: amat
+  real(wp) renorm
+  real(wp) aux
+  real(wp) aux2
+  real(wp) norm
   integer i,j,k
   integer mix_order ! Actual order used min(iter,max_order)
   integer, dimension(nmsh) :: ipiv

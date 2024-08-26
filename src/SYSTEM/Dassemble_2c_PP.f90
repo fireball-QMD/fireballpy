@@ -1,4 +1,5 @@
 subroutine Dassemble_2c_PP ()
+  use M_constants, only: wp
   use M_system
   use M_fdata, only: num_orb, num_orbPP
   implicit none
@@ -17,8 +18,8 @@ subroutine Dassemble_2c_PP ()
   integer mbeta
   integer mneigh_self
   integer ncc
-  real*8, dimension (numorb_max) :: cl
-  real*8, dimension (3, numorb_max, numorb_max) :: fnlb
+  real(wp), dimension (numorb_max) :: cl
+  real(wp), dimension (3, numorb_max, numorb_max) :: fnlb
   fanl = 0.0d0
   fotnl = 0.0d0
   do iatom = 1, natoms

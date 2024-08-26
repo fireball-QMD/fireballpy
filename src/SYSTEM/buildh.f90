@@ -1,4 +1,5 @@
 subroutine buildh ()
+  use M_constants, only: wp
   use M_system
   use m_fdata, only: num_orb 
   implicit none
@@ -13,10 +14,10 @@ subroutine buildh ()
   integer inu
   integer jatom
   integer mbeta
-  real*8 distance
-  real*8, dimension (numorb_max, numorb_max) :: htemp
-  real*8, dimension (numorb_max, numorb_max) :: stemp
-  real*8, dimension (3) :: dvec
+  real(wp) distance
+  real(wp), dimension (numorb_max, numorb_max) :: htemp
+  real(wp), dimension (numorb_max, numorb_max) :: stemp
+  real(wp), dimension (3) :: dvec
   integer issh
   integer numorb
   integer jatom0
