@@ -88,7 +88,7 @@ class Fireball(Calculator):
         it is not yet implemented and thus will be ignored.
     mixer_kws : Optional[dict]
         Dictionary with the mixer parameters.
-        More information :ref:`here <_fireballpy_docs_mixer`.
+        More information :ref:`here <_fireballpy_docs_mixer>`.
 
     Notes
     -----
