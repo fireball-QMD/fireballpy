@@ -86,6 +86,9 @@ class Fireball(Calculator):
         the improved dipole description.
         By default this is turned on except for periodic systems as
         it is not yet implemented and thus will be ignored.
+    mixer_kws : Optional[dict]
+        Dictionary with the mixer parameters.
+        More information :ref:`here <_fireballpy_docs_mixer`.
 
     Notes
     -----
