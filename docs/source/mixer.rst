@@ -1,4 +1,4 @@
-.. _fireballpy_docs_mixer:
+.. _api_mixer:
 
 ****************
 Mixer parameters
