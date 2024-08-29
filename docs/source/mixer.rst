@@ -31,7 +31,7 @@ As a brief overview, we implement the following equations,
 
 .. math::
 
-   \lvert Q^{(k+1)} \rangle &= \lvert Q^{(k)} \rangle + G^{(1)} \lvert F^{(k)} \rangle - \sum_{\max(1,k-m+1)\leq i\leq k-1} w_i \langle \alpha^{(k)}_i \,\vert\, u^{(i)} \rangle \,, \\
+   \lvert Q^{(k+1)} \rangle &= \lvert Q^{(k)} \rangle + G^{(1)} \lvert F^{(k)} \rangle - \sum_{\max(1,k-m+1)\leq i\leq k-1} w_i \alpha^{(k)}_i \lvert u^{(i)} \rangle \,, \\
    \lvert u^{(i)} \rangle &= G^{(1)} \lvert \Delta F^{(i)} \rangle + \lvert \Delta Q^{(i)} \rangle \,, \\
    \lvert \Delta Q^{(i)} \rangle &= \lvert Q^{(i)} \rangle - \lvert Q^{(i-1)} \rangle \,, \\
    \lvert \Delta F^{(i)} \rangle &= \lvert F^{(i)} \rangle - \lvert F^{(i-1)} \rangle \,,
