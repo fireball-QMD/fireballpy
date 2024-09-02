@@ -12,7 +12,7 @@ authors = [
   { name="Jesús Ignacio Mendieta Moreno", email="jesus.mendieta@uam.es" },
   { name="Daniel González Trabada", email="daniel.gonzalez@uam.es" },
   { name="Jorge Vega Martín", email="jorge.vega@uam.es" },
-  { name="Carlos Roldán Piñero", email="carlos.roldanp@uam.es" },
+  { name="C. Roldán Piñero", email="carlos.roldanp@uam.es" },
 ]
 description = "Minimalistic Fireball for Python"
 readme = "README.md"

@@ -18,14 +18,22 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - name: Install the dependencies for FireballPy, Sphinx and JupyterLite
+      - name: Clean before build
+        run: git clean -xdfq
+      - name: Install build dependencies
+        run: python -m pip install build --user
+      - name: Install Sphinx dependencies
+        run: python -m pip install sphinx sphinx_design sphinx_rtd_theme numpydoc --user
+      - name: Install Sphinx JupyterLite
         run: |
-          python -m pip install -r requirements.txt
+          python -m pip install jupyterlite-core==0.2.1 jupyterlab~=4.0.9 notebook~=7.0.6 --user
+          python -m pip install jupyterlite-pyodite-kernel==0.2.0 --user
       - name: Install OpenBLAS
         run: sudo apt install libopenblas-dev
-      - name: Compile Fireball
-        run:
-          ./install.sh gnu debug
+      - name: Build FireballPy
+        run: python -m build
+      - name: Install FireballPy
+        run: python -m pip install dist/*.whl
       - name: Build the JupyterLite site
         run: |
           cp -r fireballpy examples

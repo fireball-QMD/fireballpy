@@ -1,4 +1,6 @@
-.. _fireballpy_docs_mainpage:
+.. module:: fireballpy
+
+.. _mainpage:
 
 ########################
 FireballPy Documentation
@@ -9,7 +11,7 @@ FireballPy Documentation
    :hidden:
 
    Getting started <start>
-   API reference <reference>
+   API reference <api>
 
 
 **Version**: |release|
@@ -54,7 +56,7 @@ FireballPy Documentation
 
       +++
 
-      .. button-ref:: reference
+      .. button-ref:: api
          :expand:
          :color: secondary
          :click-parent:

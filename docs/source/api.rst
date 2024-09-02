@@ -1,6 +1,6 @@
 .. module:: fireballpy
 
-.. _reference:
+.. _api:
 
 ########################
 FireballPy API reference
@@ -17,11 +17,3 @@ Fireball
 
    Fireball
 
-
-InfoDat
-^^^^^^^
-
-.. autosummary::
-   :toctree: generated/
-
-   InfoDat

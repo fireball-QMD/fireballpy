@@ -8,15 +8,19 @@
 
 import os
 import sys
-sys.path.insert(0, os.path.abspath('..'))
-sys.path.insert(0, os.path.abspath(os.path.join('..', '..')))
+import tomllib
+# sys.path.insert(0, os.path.abspath('..'))
+# sys.path.insert(0, os.path.abspath(os.path.join('..', '..')))
 
 import fireballpy
 
+with open('../../pyproject.toml', 'rb') as fp:
+    pyproject = tomllib.load(fp)
+
+author = ', '.join([a['name'] for a in pyproject['project']['authors']])
 project = 'FireballPy'
-copyright = '2024, José Ortega Mateo, Linda Angela Zotti, Jesús Ignacio Mendieta Moreno, Daniel González Trabada, Jorge Vega Martín, Carlos Roldán Piñero'
-author = 'José Ortega Mateo, Linda Angela Zotti, Jesús Ignacio Mendieta Moreno, Daniel González Trabada, Jorge Vega Martín, Carlos Roldán Piñero'
-release = '0.0.1'
+copyright = f'2024, {author}'
+release = pyproject['project']['version']
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

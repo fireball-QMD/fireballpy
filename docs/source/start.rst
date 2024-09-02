@@ -1,6 +1,6 @@
 .. module:: fireballpy
 
-.. _reference:
+.. _start:
 
 ##########################
 FireballPy Getting started
@@ -9,4 +9,4 @@ FireballPy Getting started
 **Release:** |release|
 **Date:** |today|
 
-TODO
+TODO2
