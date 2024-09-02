@@ -16,7 +16,7 @@ authors = [
 ]
 description = "Minimalistic Fireball for Python"
 readme = "README.md"
-requires-python = ">=3.7,<3.12"
+requires-python = ">=3.7,<3.13"
 classifiers = [
     "Intended Audience :: Science/Research",
     "Operating System :: POSIX :: Linux",
