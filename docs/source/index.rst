@@ -6,15 +6,7 @@
 FireballPy Documentation
 ########################
 
-.. toctree::
-   :maxdepth: 1
-   :hidden:
-
-   Getting started <start>
-   API reference <api>
-
-
-**Version**: |release|
+**Date**: |today| **Version**: |release|
 
 **Useful links**: 
 `Fireball webpage <https://fireball-qmd.github.io/fireball.html>`_ |
@@ -25,7 +17,9 @@ FireballPy Documentation
 .. grid:: 2
 
    .. grid-item-card::
-  
+      :img-top: _static/open-book.svg
+      :text-align: center
+
       Getting started
       ^^^^^^^^^^^^^^^
 
@@ -35,14 +29,15 @@ FireballPy Documentation
 
       +++
 
-      .. button-ref:: start
-         :expand:
+      .. button-ref:: user_guide
          :color: secondary
          :click-parent:
 
-         Go!
+         To the user guide
 
    .. grid-item-card::
+      :img-top: _static/slash-square.svg
+      :text-align: center
 
       API reference
       ^^^^^^^^^^^^^
@@ -52,15 +47,19 @@ FireballPy Documentation
       In this reference it will be assumed that the user has basic understanding
       of Python and on how this package works.
       For a gentler and guided introduction to the package please look the
-      Getting started section.
+      user guide.
 
       +++
 
-      .. button-ref:: api
-         :expand:
+      .. button-ref:: fireballpy-api
          :color: secondary
          :click-parent:
 
-         Go!
+         To the reference
 
+.. toctree::
+   :maxdepth: 1
+   :hidden:
 
+   User Guide <tutorial/index>
+   API reference <reference/index>

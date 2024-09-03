@@ -1,7 +1,7 @@
 project(
   'fireballpy',
   'fortran', 'c',
-  version: '0.0.1',
+  version: run_command(['tools/gitversion.py'], check: true).stdout().strip(),
   license: 'GPL-3',
   default_options: [
     'buildtype=debugoptimized',
@@ -94,7 +94,7 @@ subdir('src')
 
 # Build _fireball
 fireball_source = custom_target('fireball_module',
-  input : ['src' / 'libf2py.f90', '.f2py_f2cmap'], # No module hence no .f90 wrappers
+  input : ['src' / 'libf2py.f90', 'src' / '.f2py_f2cmap'], # No module hence no .f90 wrappers
   output : ['_fireballmodule.c', '_fireball-f2pywrappers.f'],
   command : [py, '-m', 'numpy.f2py', '@INPUT0@', '-m', '_fireball', '--lower', '--f2cmap', '@INPUT1@'],
 )

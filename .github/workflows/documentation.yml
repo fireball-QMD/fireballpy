@@ -23,8 +23,8 @@ jobs:
       - name: Install build dependencies
         run: python -m pip install build --user
       - name: Install Sphinx dependencies
-        run: python -m pip install sphinx sphinx_design sphinx_rtd_theme numpydoc --user
-      - name: Install Sphinx JupyterLite
+        run: python -m pip install sphinx sphinx_design sphinx_copybutton sphinx_favicon numpydoc pydata-sphinx-theme --user
+      - name: Install JupyterLite
         run: |
           python -m pip install jupyterlite-core==0.2.1 jupyterlab~=4.0.9 notebook~=7.0.6 --user
           python -m pip install jupyterlite-pyodide-kernel==0.2.0 --user
@@ -39,8 +39,7 @@ jobs:
           cp -r fireballpy examples
           jupyter lite build --contents examples --output-dir jupyter
       - name: Build the documentation with Sphinx
-        run: |
-          make html -C docs
+        run: make html -C docs
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

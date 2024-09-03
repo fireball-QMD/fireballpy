@@ -8,25 +8,25 @@
 
 import os
 import sys
-import tomllib
-# sys.path.insert(0, os.path.abspath('..'))
-# sys.path.insert(0, os.path.abspath(os.path.join('..', '..')))
-
+import re
 import fireballpy
 
-with open('../../pyproject.toml', 'rb') as fp:
-    pyproject = tomllib.load(fp)
+sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 
-author = ', '.join([a['name'] for a in pyproject['project']['authors']])
+# General information
+with open('../../pyproject.toml', 'r') as fp:
+    pyproject = fp.readlines()
+author = ', '.join(y.split('"')[1]
+                   for y in filter(lambda x: x.startswith("  { name="),
+                                   pyproject))
 project = 'FireballPy'
 copyright = f'2024, {author}'
-release = pyproject['project']['version']
+version = re.sub(r'\.dev.*$', r'.dev', fireballpy.__version__)
+release = version
 
-# -- General configuration ---------------------------------------------------
-# https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
-
+# Sphinx
 extensions = [
-    'sphinx_rtd_theme',
+    # 'sphinx_rtd_theme',
     'sphinx.ext.duration',
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
@@ -34,16 +34,82 @@ extensions = [
     'sphinx.ext.viewcode',
     'numpydoc',
     'sphinx_design',
+    'sphinx_favicon',
+    "sphinx_copybutton",
 ]
 
+master_doc = 'index'
+source_suffix = '.rst'
+
+today_fmt = '%B %d, %Y'
 templates_path = ['_templates']
 exclude_patterns = []
 
-source_suffix = '.rst'
+# HTML
+# html_theme = 'sphinx_rtd_theme'
+html_theme = 'pydata_sphinx_theme'
+html_logo = '_static/fireball.svg'
+html_favicon = '_static/fireball.ico'
+html_sidebars = {
+    "index": ["search-button-field"],
+    "**": ["search-button-field", "sidebar-nav-bs"]
+}
+html_theme_options = {
+    "external_links": [
+        {
+            "url": "https://fireball-qmd.github.io",
+            "name": "Fireball",
+        },
+        {
+            "url": "https://wiki.fysik.dtu.dk/ase/",
+            "name": "ASE",
+        },
+    ],
+    "header_links_before_dropdown": 4,
+    "logo": {
+        "text": "FireballPy",
+    },
+    "icon_links": [
+        {
+            "name": "GitHub",
+            "url": "https://github.com/fireball-QMD/fireballpy",
+            "icon": "fa-brands fa-github",
+        },
+        {
+            "name": "PyPI",
+            "url": "https://pypi.org/project/fireballpy/",
+            "icon": "fa-custom fa-pypi",
+        },
+    ],
+    "navbar_start": ["navbar-logo"],
+    "navbar_end": ["theme-switcher", "navbar-icon-links"],
+    "navbar_persistent": [],
+    "secondary_sidebar_items": ["page-toc"],
+    "footer_start": ["copyright"],
+    "footer_center": ["sphinx-version"],
+}
 
+html_title = f"{project} v{version} Manual"
+html_static_path = ['_static', os.path.join('..', '..', 'examples')]
+html_last_updated_fmt = '%b %d, %Y'
+html_additional_pages = {}
+html_use_modindex = True
+html_domain_indices = False
+html_copy_source = False
+html_file_suffix = '.html'
+htmlhelp_basename = 'fireballpy'
+html_js_files = ["custom-icon.js"]
+html_css_files = ["fireballpy.css"]
 
-# -- Options for HTML output -------------------------------------------------
-# https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
+# Copy-button
+copybutton_prompt_text = r">>> |\.\.\. |\$ |In \[\d*\]: | {2,5}\.{3,}: | {5,8}: "
+copybutton_prompt_is_regexp = True
 
-html_theme = 'sphinx_rtd_theme'
-html_static_path = ['_static', os.path.join('..', '..', 'jupyter')]
+# Autosummary
+autosummary_generate = True
+
+# Autodoc
+autodoc_default_options = {
+    'inherited-members': None,
+}
+autodoc_typehints = 'none'
