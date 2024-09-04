@@ -9,13 +9,16 @@ FireballPy API
 **Release:** |release|
 **Date:** |today|
 
-Fireball
-^^^^^^^^
-
-.. autoclass:: Fireball
+Write something here.
 
 .. toctree::
    :maxdepth: 1
-   :hidden:
+   :caption: Fireball
 
-   Mixer <mixer>
+   Fireball <fireball>
+
+.. toctree::
+   :hidden:
+   :caption: Extras
+
+   ../license

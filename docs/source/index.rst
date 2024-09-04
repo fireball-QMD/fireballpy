@@ -6,9 +6,10 @@
 FireballPy Documentation
 ########################
 
-**Date**: |today| **Version**: |release|
+**Date**: |today|
+**Version**: |release|
 
-**Useful links**: 
+**Useful links**:
 `Fireball webpage <https://fireball-qmd.github.io/fireball.html>`_ |
 `Source code <https://github.com/fireball-QMD/fireballpy>`_ |
 `Open course <https://fireball.ftmc.uam.es/moodle/login/index.php>`_

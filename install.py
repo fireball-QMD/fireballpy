@@ -39,6 +39,20 @@ def install(meson, folder):
                            f"{err.decode()}")
 
 
+def version():
+    p = subprocess.Popen([sys.executable,
+                          os.path.join('tools', 'gitversion.py'),
+                          '--write',
+                          os.path.join('fireballpy', 'version.py')],
+                         stdout=subprocess.PIPE,
+                         stderr=subprocess.PIPE)
+    out, err = p.communicate()
+    if not (p.returncode == 0):
+        raise RuntimeError(f"Creating a local version.py file failed!\n"
+                           f"{out.decode()}\n"
+                           f"{err.decode()}")
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-b", "--build-dir", type=str,
@@ -71,6 +85,7 @@ def main():
         setup(meson, args.build_dir, setup_args, env)
         comp(meson, args.build_dir)
         install(meson, args.build_dir)
+    version()
 
 
 if __name__ == '__main__':
