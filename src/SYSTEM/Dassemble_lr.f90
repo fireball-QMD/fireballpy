@@ -1,37 +1,38 @@
 subroutine Dassemble_lr ()
-  use M_constants, only: wp, eq2
+  use iso_c_binding
+  use M_constants, only: eq2
   use M_system
   use M_fdata, only: num_orb,nssh,Qneutral
   implicit none
-  integer iatom
-  integer ierror
-  integer imu
-  integer in1
-  integer in2
-  integer in3
-  integer ineigh
-  integer inu
-  integer issh
-  integer jatom
-  integer jmu
-  integer katom
-  integer mbeta
-  real(wp) distance12
-  real(wp) dq1
-  real(wp) dq2
-  real(wp) dq3
-  real(wp) dterm
-  real(wp) sterm
-  real(wp), dimension (3) :: dewaldlr_i
-  real(wp), dimension (3) :: dewaldlr_j
-  real(wp), dimension (3) :: dewaldlr_k
-  real(wp), dimension (3) :: dpterm
-  real(wp), dimension (3) :: r1
-  real(wp), dimension (3) :: r2
-  real(wp), dimension (3) :: rhat12
-  real(wp), dimension (3) :: spterm
-  real(wp), dimension (natoms) :: sub_ewald
-  real(wp), dimension (3, natoms) :: sub_dewald
+  integer(c_long) iatom
+  integer(c_long) ierror
+  integer(c_long) imu
+  integer(c_long) in1
+  integer(c_long) in2
+  integer(c_long) in3
+  integer(c_long) ineigh
+  integer(c_long) inu
+  integer(c_long) issh
+  integer(c_long) jatom
+  integer(c_long) jmu
+  integer(c_long) katom
+  integer(c_long) mbeta
+  real(c_double) distance12
+  real(c_double) dq1
+  real(c_double) dq2
+  real(c_double) dq3
+  real(c_double) dterm
+  real(c_double) sterm
+  real(c_double), dimension (3) :: dewaldlr_i
+  real(c_double), dimension (3) :: dewaldlr_j
+  real(c_double), dimension (3) :: dewaldlr_k
+  real(c_double), dimension (3) :: dpterm
+  real(c_double), dimension (3) :: r1
+  real(c_double), dimension (3) :: r2
+  real(c_double), dimension (3) :: rhat12
+  real(c_double), dimension (3) :: spterm
+  real(c_double), dimension (natoms) :: sub_ewald
+  real(c_double), dimension (3, natoms) :: sub_dewald
   flrew = 0.0d0
   sub_ewald = 0.0d0
   sub_dewald = 0.0d0

@@ -1,45 +1,45 @@
 subroutine Dassemble_ca_olsxc_on ()
-  use M_constants, only: wp
+  use iso_c_binding
   use M_system
   use M_fdata, only: nssh, lssh
   implicit none
-  integer iatom
-  integer ierror
-  integer imu
-  integer in1
-  integer in2
-  integer in3
-  integer index
-  integer ineigh
-  integer interaction
-  integer inu
-  integer isorp
-  integer issh
-  integer ix
-  integer jatom
-  integer kforce
-  integer jndex
-  integer jssh
-  integer l1 
-  integer l2
-  integer matom
-  integer mbeta
-  integer n1
-  integer n2
-  real(wp) exc
-  real(wp) dexc
-  real(wp) d2exc
-  real(wp) d2muxc
-  real(wp) dmuxc
-  real(wp) muxc
-  real(wp) rhoxc
-  real(wp) rhoxc_av
-  real(wp) y
-  real(wp) q_mu
-  real(wp), dimension (3, numorb_max, numorb_max) :: bcxcpx
-  real(wp), dimension (numorb_max, numorb_max) :: delta
-  real(wp), dimension (3) :: drhoxc
-  real(wp), dimension (3) :: drhoxc_av
+  integer(c_long) iatom
+  integer(c_long) ierror
+  integer(c_long) imu
+  integer(c_long) in1
+  integer(c_long) in2
+  integer(c_long) in3
+  integer(c_long) index
+  integer(c_long) ineigh
+  integer(c_long) interaction
+  integer(c_long) inu
+  integer(c_long) isorp
+  integer(c_long) issh
+  integer(c_long) ix
+  integer(c_long) jatom
+  integer(c_long) kforce
+  integer(c_long) jndex
+  integer(c_long) jssh
+  integer(c_long) l1 
+  integer(c_long) l2
+  integer(c_long) matom
+  integer(c_long) mbeta
+  integer(c_long) n1
+  integer(c_long) n2
+  real(c_double) exc
+  real(c_double) dexc
+  real(c_double) d2exc
+  real(c_double) d2muxc
+  real(c_double) dmuxc
+  real(c_double) muxc
+  real(c_double) rhoxc
+  real(c_double) rhoxc_av
+  real(c_double) y
+  real(c_double) q_mu
+  real(c_double), dimension (3, numorb_max, numorb_max) :: bcxcpx
+  real(c_double), dimension (numorb_max, numorb_max) :: delta
+  real(c_double), dimension (3) :: drhoxc
+  real(c_double), dimension (3) :: drhoxc_av
   faxc = 0.0d0
   faxc_ca = 0.0d0
   dxcdcc  = 0.0d0

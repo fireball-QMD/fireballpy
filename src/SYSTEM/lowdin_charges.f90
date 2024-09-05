@@ -1,17 +1,18 @@
 subroutine LOWDIN_CHARGES()
-  use M_constants, only: wp, spin
+  use iso_c_binding
+  use M_constants, only: spin
   use M_system
   use M_fdata, only: num_orb,nssh,lssh
   implicit none
-  integer iatom
-  integer ikpoint
-  integer imu, inu
-  integer in1, in2
-  integer issh, jssh,mmu
-  integer noccupy
-  integer mqn
-  integer iorbital
-  real(wp) aux1, aux2, aux3
+  integer(c_long) iatom
+  integer(c_long) ikpoint
+  integer(c_long) imu, inu
+  integer(c_long) in1, in2
+  integer(c_long) issh, jssh,mmu
+  integer(c_long) noccupy
+  integer(c_long) mqn
+  integer(c_long) iorbital
+  real(c_double) aux1, aux2, aux3
   Qout = 0.0d0
   QLowdin_TOT = 0.0d0
   do iatom = 1, natoms

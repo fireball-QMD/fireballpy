@@ -1,52 +1,53 @@
 subroutine Dassemble_lr_dip ()
-  use M_constants, only: wp, eq2
+  use iso_c_binding
+  use M_constants, only: eq2
   use M_system
   use M_fdata, only: nssh, Qneutral,num_orb
   implicit none
-  integer iatom
-  integer ierror
-  integer imu
-  integer in1
-  integer in2
-  integer in3
-  integer ineigh
-  integer inu
-  integer issh
-  integer jatom
-  integer jmu
-  integer katom
-  integer mbeta
-  integer ialp
-  integer inalp
-  integer ix
-  integer jneigh
-  integer ipair
-  real(wp) dist13
-  real(wp) dist23
-  real(wp) distance12
-  real(wp) dq1
-  real(wp) dq2
-  real(wp) dq3
-  real(wp) dterm 
-  real(wp) x
-  real(wp) sterm
-  real(wp), dimension(3)  :: rnabc
-  real(wp), dimension(3)  :: r13
-  real(wp), dimension(3)  :: r23
-  real(wp), dimension(3)  :: r21
-  real(wp), dimension(3)  :: ddterm
-  real(wp), dimension(3)  :: dptermA
-  real(wp), dimension(3)  :: dptermB
-  real(wp), dimension(3)  :: rna
-  real(wp), dimension (3) :: dpterm
-  real(wp), dimension (3) :: r1
-  real(wp), dimension (3) :: r2
-  real(wp), dimension (3) :: rhat12
-  real(wp), dimension (3) :: spterm
-  real(wp), dimension (numorb_max, numorb_max) :: emnpl
-  real(wp), dimension (3, numorb_max, numorb_max) :: demnplA
-  real(wp), dimension (3, numorb_max, numorb_max) :: demnplB
-  real(wp), dimension (3, numorb_max, numorb_max) :: demnplC
+  integer(c_long) iatom
+  integer(c_long) ierror
+  integer(c_long) imu
+  integer(c_long) in1
+  integer(c_long) in2
+  integer(c_long) in3
+  integer(c_long) ineigh
+  integer(c_long) inu
+  integer(c_long) issh
+  integer(c_long) jatom
+  integer(c_long) jmu
+  integer(c_long) katom
+  integer(c_long) mbeta
+  integer(c_long) ialp
+  integer(c_long) inalp
+  integer(c_long) ix
+  integer(c_long) jneigh
+  integer(c_long) ipair
+  real(c_double) dist13
+  real(c_double) dist23
+  real(c_double) distance12
+  real(c_double) dq1
+  real(c_double) dq2
+  real(c_double) dq3
+  real(c_double) dterm 
+  real(c_double) x
+  real(c_double) sterm
+  real(c_double), dimension(3)  :: rnabc
+  real(c_double), dimension(3)  :: r13
+  real(c_double), dimension(3)  :: r23
+  real(c_double), dimension(3)  :: r21
+  real(c_double), dimension(3)  :: ddterm
+  real(c_double), dimension(3)  :: dptermA
+  real(c_double), dimension(3)  :: dptermB
+  real(c_double), dimension(3)  :: rna
+  real(c_double), dimension (3) :: dpterm
+  real(c_double), dimension (3) :: r1
+  real(c_double), dimension (3) :: r2
+  real(c_double), dimension (3) :: rhat12
+  real(c_double), dimension (3) :: spterm
+  real(c_double), dimension (numorb_max, numorb_max) :: emnpl
+  real(c_double), dimension (3, numorb_max, numorb_max) :: demnplA
+  real(c_double), dimension (3, numorb_max, numorb_max) :: demnplB
+  real(c_double), dimension (3, numorb_max, numorb_max) :: demnplC
   flrew = 0.0d0
   do ipair = 1,tot_pairs
     iatom = neigh_pair_a1(ipair)

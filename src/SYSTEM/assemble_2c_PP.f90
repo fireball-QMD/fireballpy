@@ -1,27 +1,27 @@
 ! This routine assembles all of the two-center and degenerate two-center interactions.
 subroutine assemble_2c_PP ()
-  use M_constants, only: wp
+  use iso_c_binding
   use M_system
   use M_fdata, only: num_orb, num_orbPP
   implicit none
-  integer iatom
-  integer ierror
-  integer imu
-  integer in1
-  integer in2
-  integer ineigh
-  integer inu
-  integer isorp
-  integer jatom
-  integer jneigh
-  integer kneigh
-  integer matom
-  integer mbeta
-  integer mneigh_self
-  integer ncc
+  integer(c_long) iatom
+  integer(c_long) ierror
+  integer(c_long) imu
+  integer(c_long) in1
+  integer(c_long) in2
+  integer(c_long) ineigh
+  integer(c_long) inu
+  integer(c_long) isorp
+  integer(c_long) jatom
+  integer(c_long) jneigh
+  integer(c_long) kneigh
+  integer(c_long) matom
+  integer(c_long) mbeta
+  integer(c_long) mneigh_self
+  integer(c_long) ncc
  
-  real(wp), dimension (numorb_max) :: cl
-  real(wp), dimension (numorb_max, numorb_max) :: PPx
+  real(c_double), dimension (numorb_max) :: cl
+  real(c_double), dimension (numorb_max, numorb_max) :: PPx
 
   vnl = 0.0d0
 
@@ -102,7 +102,7 @@ subroutine assemble_2c_PP ()
       in2 = imass(jatom)
       if (iatom .eq. jatom .and. mbeta .eq. 0) then
         if (nPP_self(iatom) .ne. ineigh) then
-          write (*,*) ' Something real(wp)ly wrong in assemble_2c_PP.f90 '
+          write (*,*) ' Something real(c_double)ly wrong in assemble_2c_PP.f90 '
           write (*,*) ' iatom, jatom, mbeta = ', iatom, jatom, mbeta
           write (*,*) ' neigh_self(iatom), ineigh = ',nPP_self(iatom), ineigh  
           stop

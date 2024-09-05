@@ -1,18 +1,18 @@
-integer function mpairnay (iatom, jatom, rdiff)
-  use M_constants, only: wp
+integer(c_long) function mpairnay (iatom, jatom, rdiff)
+  use iso_c_binding
   use M_system
   implicit none
-  integer, intent(in) :: iatom
-  integer, intent(in) :: jatom
-  real(wp), intent(in), dimension (3) :: rdiff
-  integer imatch
-  integer ineigh
-  integer jjatom
-  integer mbeta
-  real(wp) diff
-  real(wp), dimension (3) :: r1
-  real(wp), dimension (3) :: r2
-  real(wp), dimension (3) :: r21
+  integer(c_long), intent(in) :: iatom
+  integer(c_long), intent(in) :: jatom
+  real(c_double), intent(in), dimension (3) :: rdiff
+  integer(c_long) imatch
+  integer(c_long) ineigh
+  integer(c_long) jjatom
+  integer(c_long) mbeta
+  real(c_double) diff
+  real(c_double), dimension (3) :: r1
+  real(c_double), dimension (3) :: r2
+  real(c_double), dimension (3) :: r21
   mpairnay = 0
   r1(:) = ratom(:,iatom)
   imatch = 0

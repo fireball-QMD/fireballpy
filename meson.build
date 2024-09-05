@@ -5,7 +5,6 @@ project(
   license: 'GPL-3',
   default_options: [
     'buildtype=debugoptimized',
-    'fortran_std=legacy',
     'c_std=c17',
     'blas=openblas',
     'lapack=openblas',
@@ -22,7 +21,6 @@ if fc.get_id() == 'gcc'
                '-fno-semantic-interposition', '-march=native']
   endif
 elif fc.get_id() in ['intel', 'intel-llvm']
-  #fflags += ['-r8', '-fno-alias', '-diag-disable 6916','-diag-disable 5268']
   fflags += ['-fno-alias', '-free', '-diag-disable 5268']
   if get_option('buildtype') == 'custom'
     fflags += ['-fp-model=fast', '-xHost', '-diag-disable 10121']
@@ -94,9 +92,9 @@ subdir('src')
 
 # Build _fireball
 fireball_source = custom_target('fireball_module',
-  input : ['src' / 'libf2py.f90', 'src' / '.f2py_f2cmap'], # No module hence no .f90 wrappers
+  input : 'src' / 'libf2py.f90', # No module hence no .f90 wrappers
   output : ['_fireballmodule.c', '_fireball-f2pywrappers.f'],
-  command : [py, '-m', 'numpy.f2py', '@INPUT0@', '-m', '_fireball', '--lower', '--f2cmap', '@INPUT1@'],
+  command : [py, '-m', 'numpy.f2py', '@INPUT@', '-m', '_fireball', '--lower'],
 )
 
 py.extension_module('_fireball',

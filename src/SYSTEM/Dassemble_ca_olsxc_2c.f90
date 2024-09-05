@@ -1,54 +1,54 @@
 subroutine Dassemble_ca_olsxc_2c ()
-  use M_constants, only: wp
+  use iso_c_binding
   use M_system
   use M_fdata, only: num_orb, nssh, lssh, Qneutral
   implicit none
-  integer iatom
-  integer ierror
-  integer inu
-  integer imu
-  integer in1
-  integer in2
-  integer in3
-  integer index1
-  integer index2
-  integer ineigh
-  integer interaction
-  integer isorp
-  integer issh
-  integer ix
-  integer jatom
-  integer jssh
-  integer kforce
-  integer l1
-  integer l2
-  integer mbeta
-  integer matom
-  integer n1
-  integer n2
-  real(wp) y
-  real(wp) muxc
-  real(wp) dmuxc
-  real(wp) d2muxc
-  real(wp) exc
-  real(wp) dexc
-  real(wp) d2exc
-  real(wp) sx
-  real(wp) rho_av
-  real(wp) rhoin
-  real(wp) dxn
-  real(wp), dimension (numorb_max, numorb_max) :: bcxcx
-  real(wp), dimension (3, numorb_max, numorb_max) :: bcxcpx
-  real(wp), dimension (3, numorb_max, numorb_max) :: mxcb
-  real(wp), dimension (3) :: rhoinp
-  real(wp), dimension (3) :: rhop_av
-  real(wp), dimension (3) :: spx
-  real(wp), dimension (3, 3) :: eps
-  real(wp), dimension (3, 3, 3) :: deps
-  real(wp), dimension (3) :: r1
-  real(wp), dimension (3) :: r2
-  real(wp), dimension (3) :: r21
-  real(wp), dimension (3) :: sighat
+  integer(c_long) iatom
+  integer(c_long) ierror
+  integer(c_long) inu
+  integer(c_long) imu
+  integer(c_long) in1
+  integer(c_long) in2
+  integer(c_long) in3
+  integer(c_long) index1
+  integer(c_long) index2
+  integer(c_long) ineigh
+  integer(c_long) interaction
+  integer(c_long) isorp
+  integer(c_long) issh
+  integer(c_long) ix
+  integer(c_long) jatom
+  integer(c_long) jssh
+  integer(c_long) kforce
+  integer(c_long) l1
+  integer(c_long) l2
+  integer(c_long) mbeta
+  integer(c_long) matom
+  integer(c_long) n1
+  integer(c_long) n2
+  real(c_double) y
+  real(c_double) muxc
+  real(c_double) dmuxc
+  real(c_double) d2muxc
+  real(c_double) exc
+  real(c_double) dexc
+  real(c_double) d2exc
+  real(c_double) sx
+  real(c_double) rho_av
+  real(c_double) rhoin
+  real(c_double) dxn
+  real(c_double), dimension (numorb_max, numorb_max) :: bcxcx
+  real(c_double), dimension (3, numorb_max, numorb_max) :: bcxcpx
+  real(c_double), dimension (3, numorb_max, numorb_max) :: mxcb
+  real(c_double), dimension (3) :: rhoinp
+  real(c_double), dimension (3) :: rhop_av
+  real(c_double), dimension (3) :: spx
+  real(c_double), dimension (3, 3) :: eps
+  real(c_double), dimension (3, 3, 3) :: deps
+  real(c_double), dimension (3) :: r1
+  real(c_double), dimension (3) :: r2
+  real(c_double), dimension (3) :: r21
+  real(c_double), dimension (3) :: sighat
   fotxc = 0.0d0
   fotxc_ca = 0.0d0
   do iatom = 1, natoms

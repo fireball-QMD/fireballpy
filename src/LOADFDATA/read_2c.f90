@@ -1,12 +1,12 @@
 subroutine read_2c (interaction)
-  use M_constants, only: wp
+  use iso_c_binding
   use M_fdata, only: fdataLocation, twocfname, nspecies, nssh, nsshPP, nzx, nfofx, cl_PP, errno2c, &
     & ind2c, index_max2c, index_maxS, index_maxPP, index_max2cDipX, index_max2cDipY, z2cmax, numz2c, nsh_max
   implicit none
-  integer, intent (in) :: interaction
-  integer :: in1, in2, initype, iounit, isorp, issh, isub2c, itype, npseudo, num_nonzero, numz, nzx1, nzx2
-  real(wp) :: rc1, rc2, zmax, zmin
-  real(wp), dimension (nsh_max) :: cl_pseudo
+  integer(c_long), intent (in) :: interaction
+  integer(c_long) :: in1, in2, initype, iounit, isorp, issh, isub2c, itype, npseudo, num_nonzero, numz, nzx1, nzx2
+  real(c_double) :: rc1, rc2, zmax, zmin
+  real(c_double), dimension (nsh_max) :: cl_pseudo
   character (len = 1000) :: extension, filename, root, root_isorp
 
   iounit = 71

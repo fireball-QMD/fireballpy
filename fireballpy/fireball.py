@@ -34,40 +34,41 @@ from _fireball import (call_scf_loop,  # type: ignore
                        get_fdata_is_load,
                        get_norbitals_new,
                        get_eigen)
-from ._types import real, integer
 
-ICHARGE_TABLE = {'lowdin': 1, 'mulliken': 2, 'npa': 3,
-                 'mulliken_dipole': 4, 'mulliken_dipole_preserving': 7,
-                 'md': 4, 'mdp': 7}
-IDIPOLE_TABLE = {'improved': 1, 'legacy': 0}
-GAMMA = np.array([[0.0, 0.0, 0.0]])
-CELL100 = np.array([[100.0, 0.0, 0.0], [0.0, 100.0, 0.0], [0.0, 0.0, 100.0]])
-IMIXER_TABLE = {'anderson': 1, 'johnson': 2}
-MIXER_DEFAULT = {'method': 'johnson', 'mix_order': 6,
-                 'beta': 0.1, 'tol': 1e-8, 'max_iter': 200,
-                 'w0': 0.01, 'wi': np.ones(200)}
+ICHARGE_TABLE = {'lowdin': np.int64(1), 'mulliken': np.int64(2),
+                 'npa': np.int64(3), 'mulliken_dipole': np.int64(4),
+                 'mulliken_dipole_preserving': np.int64(7),
+                 'md': np.int64(4), 'mdp': np.int64(7)}
+IDIPOLE_TABLE = {'improved': np.int64(1), 'legacy': np.int64(0)}
+GAMMA = np.array([[0.0, 0.0, 0.0]], dtype=np.float64)
+CELL100 = np.array([[100.0, 0.0, 0.0], [0.0, 100.0, 0.0], [0.0, 0.0, 100.0]],
+                   dtype=np.float64)
+IMIXER_TABLE = {'anderson': np.int64(1), 'johnson': np.int64(2)}
+MIXER_DEFAULT = {'method': 'johnson', 'mix_order': np.int64(6),
+                 'beta': np.float64(0.1), 'tol': np.float64(1e-8),
+                 'max_iter': np.int64(200), 'w0': np.float64(0.01)}
 
 
 class Fireball(Calculator):
     """Python implementation of Fireball QM/MM code.
 
-    Out of the box supports molecules containing H, B, C, N, O and Si
+    Out of the box supports molecules containing H, B, C, N, O and Si.
 
     Parameters
     ----------
     fdata_path : Optional[str]
-        Path to the folder with all FData files. If None (default)
+        Path to the folder with all FData files. If ``None`` (default)
         it will download needed precomputed FData files.
         More information
         `here <https://fireball-qmd.github.io/fireball.html>`_.
     charges_method : Optional[str]
         How the autoconsistency in the charges will be performed.
         Options are:
-        - Mulliken (default): ... [1]_
-        - Mulliken-Dipole: ... [2]_
-        - Mulliken-Dipole-Preserving: ... [3]_
-        - Lowdin: ... [4]_
-        - NPA: ... [5]_
+        - Mulliken (default): ... [Mul]_
+        - Mulliken-Dipole: ... [MulDip]_
+        - Mulliken-Dipole-Preserving: ... [MulDipPre]_
+        - Lowdin: ... [Low]_
+        - NPA: ... [NPA]_
         Note: this parameter is case insensitive.
     kpts : Optional[ArrayLike]
         K-points considered in the DFT computation.
@@ -75,32 +76,49 @@ class Fireball(Calculator):
         This parameter is only relevant if the Atoms object
         has a defined cell.
         If the Atoms object has a defined cell and this parameter
-        is absent, the Gamma point, kpts=[0.0, 0.0, 0.0],
+        is absent, the Gamma point, ``kpts=[0.0, 0.0, 0.0]``,
         will be assumed.
     kpts_units : Optional[str]
         Units in which the k-points (if present) should be interpreted.
         There are two options: unit cell units (default),
-        kpts_units = 'unit_cell'; and angstroms, kpts_units = 'angstroms'.
+        ``kpts_units = 'unit_cell'``;
+        and angstroms, ``kpts_units = 'angstroms'``.
     dipole : Optional[str]
-        Whether to use (dipole='improved') or not (dipole='legacy')
+        Whether to use (``dipole='improved'``) or not (``dipole='legacy'``)
         the improved dipole description.
         By default this is turned on except for periodic systems as
         it is not yet implemented and thus will be ignored.
     mixer_kws : Optional[dict]
         Dictionary with the mixer parameters.
-        More information :ref:`here <api_mixer>`.
+        More information :ref:`here <mixer>`.
 
     Notes
     -----
-    If you use this code in a publication please cite us. [6]_
+    If you use this code in a publication please cite us [Lewis2011]_.
 
-    .. [6] Advances and applications in the FIREBALL ab initio tight-binding
-       molecular-dynamics formalism.
-       James P. Lewis, Pavel Jelínek, José Ortega, Alexander A. Demkov,
-       Daniel G. Trabada, Barry Haycock , Hao Wang, Gary Adams,
-       John K. Tomfohr , Enrique Abad, Hong Wang, and David A. Drabold.
-       Phys. Status Solidi B 248, No. 9, 1989-2007 (2011)
-       DOI 10.1002/pssb.201147259
+    References
+    ----------
+    .. [Mul] Reference for Mulliken.
+           Must add.
+
+    .. [MulDip] Reference for Mulliken Dipole.
+           Must add.
+
+    .. [MulDipPre] Reference for Mulliken Dipole Preserving.
+           Must add.
+
+    .. [Low] Reference for Lowdin.
+           Must add.
+
+    .. [NPA] Reference for NPA.
+           Must add.
+
+    .. [Lewis2011] James. P. Lewis, et al.,
+                   "Advances and applications in the FIREBALL ab initio
+                   tight-binding molecular-dynamics formalism",
+                   *Phys. Status Solidi B*, 248(9):1989-2007, 2011.
+                   `DOI:10.1002/pssb.201147259
+                   <https://doi.org/10.1002/pssb.201147259>`_
     """
 
     implemented_properties = ['energy', 'forces', 'charges']
@@ -140,7 +158,7 @@ class Fireball(Calculator):
                     break
             else:
                 kpts_unique.append(k1)
-        return np.array(kpts_unique)
+        return np.array(kpts_unique, dtype=np.float64)
 
     def _check_fdata_path(self):
         if self.fdata_path is None:
@@ -182,7 +200,7 @@ class Fireball(Calculator):
         if not isinstance(self.kpts, (np.ndarray, list)):
             raise ValueError("'kpts' must be a list or a numpy array.")
         try:
-            self.kpts = np.array(self.kpts, dtype=real)
+            self.kpts = np.array(self.kpts, dtype=np.float64)
         except ValueError:
             raise ValueError("Not all elements in 'kpts' are parseable "
                              "as float numbers")
@@ -195,49 +213,48 @@ class Fireball(Calculator):
                              "Perhaps try with kpts_units = 'angstroms'.")
 
     def _check_mixer_kws(self):
+        # Not provided -> default
         if self.mixer_kws is None:
             self.mixer_kws = MIXER_DEFAULT
+            self.mixer_kws['wi'] = np.ones(self.mixer_kws['max_iter'],
+                                           dtype=np.float64)
             self._ialgmix = IMIXER_TABLE[MIXER_DEFAULT['method']]
             return
-        try:
-            self.mixer_kws['beta'] = real(self.mixer_kws.get(
-                'beta', MIXER_DEFAULT['beta']))
-        except ValueError:
-            raise ValueError("'beta' in 'mixer_kws' is not parseable "
-                             "as a float number")
-        try:
-            self.mixer_kws['max_iter'] = integer(self.mixer_kws.get(
-                'max_iter', MIXER_DEFAULT['max_iter']))
-        except ValueError:
-            raise ValueError("'max_iter' in 'mixer_kws' is not parseable "
-                             "as an integer number")
-        try:
-            self.mixer_kws['tol'] = real(self.mixer_kws.get(
-                'tol', MIXER_DEFAULT['tol']))
-        except ValueError:
-            raise ValueError("'tol' in 'mixer_kws' is not parseable "
-                             "as a float number")
-        try:
-            self.mixer_kws['mix_order'] = integer(self.mixer_kws.get(
-                'mix_order', MIXER_DEFAULT['mix_order']))
-        except ValueError:
-            raise ValueError("'mix_order' in 'mixer_kws' is not parseable "
-                             "as an integer number")
+        # Check integer keys
+        for k in ['max_iter', 'mix_order']:
+            try:
+                self.mixer_kws[k] = np.int64(
+                    self.mixer_kws.get(k, MIXER_DEFAULT[k]))
+            except ValueError:
+                raise ValueError(f"'{k}' in 'mixer_kws' is not parseable "
+                                 "as an integer number")
+        # Check real keys
+        for k in ['beta', 'tol']:
+            try:
+                self.mixer_kws[k] = np.float64(
+                    self.mixer_kws.get(k, MIXER_DEFAULT[k]))
+            except ValueError:
+                raise ValueError(f"'{k}' in 'mixer_kws' is not parseable "
+                                 "as an float number")
+        # If method -> fix w0 and wi
         if 'method' in self.mixer_kws:
             if self.mixer_kws['method'] not in IMIXER_TABLE:
                 raise ValueError("Mixer method must be either 'anderson', "
                                  "'johnson'. "
                                  f"Got {self.mixer_kws['method']}")
             self._ialgmix = IMIXER_TABLE[self.mixer_kws['method']]
-            self.mixer_kws['wi'] = np.ones(self.mixer_kws['max_iter'])
-            self.mixer_kws['w0'] = 0.0 if self._ialgmix == 1 else 0.01
+            self.mixer_kws['wi'] = np.ones(self.mixer_kws['max_iter'],
+                                           dtype=np.float64)
+            self.mixer_kws['w0'] = np.float64(0.01 * (self._ialgmix == 2))
             return
-        elif ('wi' not in self.mixer_kws) or ('w0' not in self.mixer_kws):
+        # If not method -> set w0 and wi
+        if ('wi' not in self.mixer_kws) or ('w0' not in self.mixer_kws):
             raise ValueError("If method is not specified then 'w0' "
                              "and 'wi' must be.")
         self._ialgmix = 3
         try:
-            self.mixer_kws['wi'] = np.array(self.mixer_kws['wi'], dtype=real)
+            self.mixer_kws['wi'] = np.array(self.mixer_kws['wi'],
+                                            dtype=np.float64)
         except ValueError:
             raise ValueError("Not all elements of 'wi' in 'mixer_kws' "
                              "are parseable as float numbers")
@@ -391,31 +408,32 @@ class Fireball(Calculator):
 
     def _initialize_options(self):
         if self.atoms.cell.any():  # periodic and peridic_gamma
-            self._idipole = 0
-            self._icluster = 0
+            self._idipole = np.int64(0)
+            self._icluster = np.int64(0)
             self._cell = self.atoms.cell.array
             if self.kpts is None:  # periodic_gamma
                 warnings.warn("K-points not provided in periodic system."
                               " Gamma point will be assumed", UserWarning)
-                self._igamma = 1
+                self._igamma = np.int64(1)
                 self._kpts = GAMMA
             elif np.allclose(self.kpts, GAMMA):  # periodic_gamma
-                self._igamma = 1
+                self._igamma = np.int64(1)
                 self._kpts = GAMMA
             else:  # periodic
                 if self.kpts_units == 'unit_cell':
                     self._kpts = 2*np.pi*np.dot(self.kpts,
                                                 self.atoms.cell.reciprocal().T)
                 self._kpts = self.clean_kpts(self._kpts)
-                self._igamma = 0
+                self._igamma = np.int64(0)
         else:  # molecule and molecule_test
-            self._icluster = 1
-            self._igamma = 1
+            self._icluster = np.int64(1)
+            self._igamma = np.int64(1)
             self._kpts = GAMMA
             self._cell = CELL100
         self._nkpts = len(self._kpts)
         if self._ifixcharges == 1:
-            self.shell_charges = np.array(self.shell_charges)
+            self.shell_charges = np.array(self.shell_charges,
+                                          dtype=np.float64)
             if self.shell_charges.shape != (self.natoms, self._infodat.maxshs):
                 raise ValueError("Given shell charges have incorrect shape. "
                                  "Expected natoms x max_shells "

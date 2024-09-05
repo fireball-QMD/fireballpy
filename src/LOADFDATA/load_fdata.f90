@@ -1,13 +1,14 @@
 subroutine load_fdata()
-  use M_constants, only: wp, abohr
+  use iso_c_binding
+  use M_constants, only: abohr
   use M_fdata, only: fdataLocation, infofname, nsh_max, nshPP_max, nspecies, nzx, symbolA, &
     & etotatom, smass, rc_PP, rcutoff, cl_PP, nssh, lssh, nsshPP, lsshPP, Qneutral, wavefxn, &
     & napot, errno2c, errno3c, ind2c, icon3c, splineint_2c, numz2c, z2cmax, interactions2c_max, &
     & isorpmax, isorpmax_xc, ME2c_max, nfofx
   implicit none
-  integer :: in1, in2, in3, ispec, issh, aux, icount, isorp, &
+  integer(c_long) :: in1, in2, in3, ispec, issh, aux, icount, isorp, &
     & interaction, ideriv, mintype, maxtype
-  real(wp), dimension (:,:), allocatable :: rcutoff_temp
+  real(c_double), dimension (:,:), allocatable :: rcutoff_temp
 
   ! Find nsh_max and nsh_max_PP
   nsh_max = 0
@@ -137,7 +138,7 @@ subroutine load_fdata()
     if (interaction .eq. 2) cycle
     call read_3c (interaction)
     if (errno3c .ne. 0) return
-  end do                                           
+  end do
   call setterp_2d ()
   deallocate(rcutoff_temp)
 end subroutine load_fdata

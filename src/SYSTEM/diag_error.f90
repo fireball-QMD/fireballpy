@@ -1,7 +1,8 @@
 subroutine diag_error (info, istyle)
+  use iso_c_binding
   implicit none
-  integer, intent (in) :: info
-  integer, intent (in) :: istyle
+  integer(c_long), intent (in) :: info
+  integer(c_long), intent (in) :: istyle
   write (*,*) '  '
   write (*,*) ' Diagonalization not successful, info = ', info
   if (info .lt. 0) then

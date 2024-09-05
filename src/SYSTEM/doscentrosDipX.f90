@@ -1,27 +1,27 @@
 subroutine doscentrosDipX (interaction, isub, in1, in2, in3, distance, eps, deps, sx, spx)
-  use M_constants, only: wp
+  use iso_c_binding
   use M_system
   use M_fdata, only: num_orb,index_max2cDipX,ME2cDipX_max
   implicit none
-  integer, intent (in) :: interaction
-  integer, intent (in) :: isub
-  integer, intent (in) :: in1
-  integer, intent (in) :: in2
-  integer, intent (in) :: in3
-  real(wp), intent (inout) :: distance
-  real(wp), intent (in), dimension (3, 3, 3) :: deps
-  real(wp), intent (in), dimension (3, 3) :: eps
-  real(wp), intent (out), dimension (numorb_max, numorb_max) :: sx
-  real(wp), intent (out), dimension (3, numorb_max, numorb_max) :: spx
-  integer imu
-  integer inu
-  integer index
-  real(wp), dimension (3) :: eta
-  real(wp), dimension (ME2cDipX_max) :: dslist
-  real(wp), dimension (ME2cDipX_max) :: slist
-  real(wp), dimension (numorb_max,numorb_max) :: sm
-  real(wp), dimension (numorb_max,numorb_max) :: spm
-  real(wp), dimension (3,numorb_max,numorb_max) :: spmx
+  integer(c_long), intent (in) :: interaction
+  integer(c_long), intent (in) :: isub
+  integer(c_long), intent (in) :: in1
+  integer(c_long), intent (in) :: in2
+  integer(c_long), intent (in) :: in3
+  real(c_double), intent (inout) :: distance
+  real(c_double), intent (in), dimension (3, 3, 3) :: deps
+  real(c_double), intent (in), dimension (3, 3) :: eps
+  real(c_double), intent (out), dimension (numorb_max, numorb_max) :: sx
+  real(c_double), intent (out), dimension (3, numorb_max, numorb_max) :: spx
+  integer(c_long) imu
+  integer(c_long) inu
+  integer(c_long) index
+  real(c_double), dimension (3) :: eta
+  real(c_double), dimension (ME2cDipX_max) :: dslist
+  real(c_double), dimension (ME2cDipX_max) :: slist
+  real(c_double), dimension (numorb_max,numorb_max) :: sm
+  real(c_double), dimension (numorb_max,numorb_max) :: spm
+  real(c_double), dimension (3,numorb_max,numorb_max) :: spmx
   logical switch
   sm = 0.0d0
   sx = 0.0d0

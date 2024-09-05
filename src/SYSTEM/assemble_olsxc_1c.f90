@@ -1,17 +1,17 @@
 ! This routine assembles all of the one-center exchange-interactions. The results are stored in vxc_1c and etotxc_1c
 subroutine assemble_olsxc_1c ()
-  use M_constants, only: wp
+  use iso_c_binding
   use M_system
   use M_fdata, only: num_orb
   implicit none
-  integer iatom
-  integer imu,inu
-  integer in1
-  integer matom
-  real(wp) dccexc_1c
-  real(wp) exc_1c
-  real(wp) muexc_1c
-  real(wp), dimension (numorb_max,numorb_max) :: mu1xc
+  integer(c_long) iatom
+  integer(c_long) imu,inu
+  integer(c_long) in1
+  integer(c_long) matom
+  real(c_double) dccexc_1c
+  real(c_double) exc_1c
+  real(c_double) muexc_1c
+  real(c_double), dimension (numorb_max,numorb_max) :: mu1xc
   etotxc_1c = 0.0d0
   Uexc_1c = 0.0d0
   Umuxc_1c = 0.0d0

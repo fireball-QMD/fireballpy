@@ -1,26 +1,26 @@
 subroutine common_neighborsPP ()
-  use M_constants, only: wp
+  use iso_c_binding
   use M_system
   implicit none
-  integer ialp
-  integer iatom
-  integer ibeta
-  integer imu
-  integer in1, in2, indna
-  integer ineigh
-  integer jatom
-  integer jbeta
-  integer jneigh
-  integer katom
-  integer kbeta
-  integer kneigh
-  integer num_neigh
-  integer mbeta
+  integer(c_long) ialp
+  integer(c_long) iatom
+  integer(c_long) ibeta
+  integer(c_long) imu
+  integer(c_long) in1, in2, indna
+  integer(c_long) ineigh
+  integer(c_long) jatom
+  integer(c_long) jbeta
+  integer(c_long) jneigh
+  integer(c_long) katom
+  integer(c_long) kbeta
+  integer(c_long) kneigh
+  integer(c_long) num_neigh
+  integer(c_long) mbeta
 
-  real(wp)  distance
-  real(wp), dimension (3) :: dvec
-  real(wp), dimension (3) :: diff
-  real(wp), dimension (3) :: vec1, vec2, vec3, vec
+  real(c_double)  distance
+  real(c_double), dimension (3) :: dvec
+  real(c_double), dimension (3) :: diff
+  real(c_double), dimension (3) :: vec1, vec2, vec3, vec
   
   if(icluster .eq. 1) mbeta_max = 0
   do ialp = 1, natoms

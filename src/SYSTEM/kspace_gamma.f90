@@ -1,39 +1,39 @@
 subroutine kspace_gamma ( ikpoint, sks)
-  use M_constants, only: wp
+  use iso_c_binding
   use M_system
   use M_fdata, only: num_orb, Qneutral
   implicit none
-  integer, intent (in) :: ikpoint
-  real(wp), intent (in), dimension (3) :: sks
-  real(wp), parameter :: overtol = 1.0d-4
-  integer iatom
-  integer imu
+  integer(c_long), intent (in) :: ikpoint
+  real(c_double), intent (in), dimension (3) :: sks
+  real(c_double), parameter :: overtol = 1.0d-4
+  integer(c_long) iatom
+  integer(c_long) imu
   integer info
-  integer inu
-  integer in1, in2
-  integer ineigh
-  integer ishort
-  integer jatom
-  integer jmu
-  integer jnu
-  integer mbeta
-  integer mineig
-  integer lm
-  integer issh
-  real(wp) sqlami
-  real(wp), dimension (norbitals) :: eigen
-  real(wp), dimension (norbitals) :: slam
-  real(wp) a0
-  real(wp) a1
-  real(wp) magnitude
-  real(wp), dimension (:, :), allocatable :: xxxx
-  real(wp), dimension (:, :), allocatable :: yyyy
-  real(wp), dimension (:, :), allocatable :: zzzz
-  real(wp), dimension (:, :), allocatable :: ssss
-  real(wp), dimension (:), allocatable :: ww
-  real(wp), allocatable, dimension (:) :: work
-  integer, allocatable, dimension (:) :: iwork
-  integer lwork, liwork
+  integer(c_long) inu
+  integer(c_long) in1, in2
+  integer(c_long) ineigh
+  integer(c_long) ishort
+  integer(c_long) jatom
+  integer(c_long) jmu
+  integer(c_long) jnu
+  integer(c_long) mbeta
+  integer(c_long) mineig
+  integer(c_long) lm
+  integer(c_long) issh
+  real(c_double) sqlami
+  real(c_double), dimension (norbitals) :: eigen
+  real(c_double), dimension (norbitals) :: slam
+  real(c_double) a0
+  real(c_double) a1
+  real(c_double) magnitude
+  real(c_double), dimension (:, :), allocatable :: xxxx
+  real(c_double), dimension (:, :), allocatable :: yyyy
+  real(c_double), dimension (:, :), allocatable :: zzzz
+  real(c_double), dimension (:, :), allocatable :: ssss
+  real(c_double), dimension (:), allocatable :: ww
+  real(c_double), allocatable, dimension (:) :: work
+  integer(c_long), allocatable, dimension (:) :: iwork
+  integer(c_long) lwork, liwork
   magnitude = sqrt(sks(1)**2 + sks(2)**2 + sks(3)**3) ! AQUI : sks(3)**3 ?
   if (magnitude .gt. 1.0d-3) then
     write (*,*) ' gamma point, the complex version of LAPACK is needed.'
@@ -115,8 +115,8 @@ subroutine kspace_gamma ( ikpoint, sks)
   endif 
 
   if (Kscf .eq. 1 .or. iqout .eq. 3) then
-    call dsyev ('V', 'U', norbitals, zzzz, norbitals, slam, work, -1, info)
-    lwork = work(1)
+    call dsyev ('V', 'U', norbitals, zzzz, norbitals, slam, work, -1_c_long, info)
+    lwork = int(work(1), c_long)
     deallocate (work)
     allocate(work(lwork))
     call dsyev ('V', 'U', norbitals, zzzz, norbitals, slam, work,lwork, info )
@@ -174,21 +174,21 @@ subroutine kspace_gamma ( ikpoint, sks)
   lwork = 1
   deallocate (work)
   allocate (work(lwork))
-  call dsyev ('V', 'U', norbitals, yyyy, norbitals, eigen, work, -1, info)
-  lwork = work(1)
+  call dsyev ('V', 'U', norbitals, yyyy, norbitals, eigen, work, -1_c_long, info)
+  lwork = int(work(1), c_long)
   deallocate (work)
   allocate(work(lwork))
   call dsyev ('V', 'U', norbitals, yyyy, norbitals, eigen, work, lwork, info )
   if (info .ne. 0) call diag_error (info, 0)
   eigen_k(1:norbitals,ikpoint) = eigen(:)
-  if ((iqout .eq. 1) .or. (iqout .eq. 3)) blowre(:,:,ikpoint) = real(yyyy(:,:), wp)
+  if ((iqout .eq. 1) .or. (iqout .eq. 3)) blowre(:,:,ikpoint) = real(yyyy(:,:), c_double)
   call dsymm ( 'L', 'U', norbitals, norbitals, a1, xxxx, norbitals, yyyy, norbitals, a0, zzzz, norbitals )
   if (iqout .ne. 3) then
     call dsymm ( 'L', 'U', norbitals, norbitals, a1, xxxx, norbitals, yyyy, norbitals, a0, zzzz, norbitals )
   else
     call dgemm ( 'N', 'N', norbitals, norbitals, norbitals, a1, xxxx, norbitals, yyyy, norbitals, a0, zzzz, norbitals )
   end if
-  bbnkre(:,:,ikpoint) = real(zzzz(:,:), wp)
+  bbnkre(:,:,ikpoint) = real(zzzz(:,:), c_double)
   deallocate (xxxx)
   deallocate (yyyy)
   deallocate (zzzz)

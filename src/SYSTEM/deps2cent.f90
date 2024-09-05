@@ -1,13 +1,14 @@
 subroutine deps2cent(r1,r2,eps2,deps2)
-  use M_constants, only: wp, xlevi, delk
+  use iso_c_binding
+  use M_constants, only: xlevi, delk
 
   implicit none
-  real(wp), dimension(3), intent(in) :: r1, r2
-  real(wp), dimension(3, 3), intent(in) :: eps2
-  real(wp), dimension (3, 3, 3), intent(out) :: deps2
-  integer :: i,ii,ix
-  real(wp) :: r2mag2,r2mag,r1mag,denom,crossmag,dd,dot,term,ddinv,crossinv
-  real(wp), dimension(3) :: crossa
+  real(c_double), dimension(3), intent(in) :: r1, r2
+  real(c_double), dimension(3, 3), intent(in) :: eps2
+  real(c_double), dimension (3, 3, 3), intent(out) :: deps2
+  integer(c_long) :: i,ii,ix
+  real(c_double) :: r2mag2,r2mag,r1mag,denom,crossmag,dd,dot,term,ddinv,crossinv
+  real(c_double), dimension(3) :: crossa
   deps2=0.e0
   dd=sqrt((r2(1)-r1(1))**2+(r2(2)-r1(2))**2+(r2(3)-r1(3))**2) 
   if(dd.lt.1.0d-4)return

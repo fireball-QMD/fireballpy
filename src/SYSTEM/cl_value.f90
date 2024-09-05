@@ -1,15 +1,15 @@
 subroutine cl_value (itype, cl)
-  use M_constants, only: wp
+  use iso_c_binding
   use M_system
   use M_fdata, only: nsshPP,lsshPP,num_orbPP,cl_PP
   implicit none                  
-  integer, intent (in) :: itype
-  real(wp), intent (out), dimension (numorb_max) :: cl
-  integer imu
-  integer index
-  integer issh
-  integer Lvalue
-  integer Lmax
+  integer(c_long), intent (in) :: itype
+  real(c_double), intent (out), dimension (numorb_max) :: cl
+  integer(c_long) imu
+  integer(c_long) index
+  integer(c_long) issh
+  integer(c_long) Lvalue
+  integer(c_long) Lmax
   cl(1:numorb_max) = 0.0d0
   index = 0
   do issh = 1, nsshPP(itype)

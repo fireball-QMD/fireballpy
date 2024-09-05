@@ -12,44 +12,44 @@
 !  n_i ... density on i-site
 ! 
 subroutine build_ca_olsxc_on (in1, iatom, bcxcx, xc)
-  use M_constants, only: wp
+  use iso_c_binding
   use M_system
   use M_fdata, only: nssh, num_orb,lssh,nsh_max
   implicit none
-  integer, intent (in) :: in1
-  integer, intent (in) :: iatom
-  real(wp), intent (out), dimension (numorb_max, numorb_max) :: bcxcx
-  real(wp), intent (out) :: xc
+  integer(c_long), intent (in) :: in1
+  integer(c_long), intent (in) :: iatom
+  real(c_double), intent (out), dimension (numorb_max, numorb_max) :: bcxcx
+  real(c_double), intent (out) :: xc
 
-  integer imu
-  integer ind1
-  integer ind2
-  integer inu
-  integer issh
-  integer jssh
-  integer l1
-  integer l2
-  integer n1
-  integer n2
+  integer(c_long) imu
+  integer(c_long) ind1
+  integer(c_long) ind2
+  integer(c_long) inu
+  integer(c_long) issh
+  integer(c_long) jssh
+  integer(c_long) l1
+  integer(c_long) l2
+  integer(c_long) n1
+  integer(c_long) n2
 
-  real(wp) dexc
-  real(wp) d2exc 
-  real(wp) dmuxc
-  real(wp) d2muxc
-  real(wp) exc
-  real(wp) muxc
-  real(wp) dexci
-  real(wp) d2exci
-  real(wp) dmuxci
-  real(wp) d2muxci
-  real(wp) exci
-  real(wp) muxci
-  real(wp) q_mu
+  real(c_double) dexc
+  real(c_double) d2exc 
+  real(c_double) dmuxc
+  real(c_double) d2muxc
+  real(c_double) exc
+  real(c_double) muxc
+  real(c_double) dexci
+  real(c_double) d2exci
+  real(c_double) dmuxci
+  real(c_double) d2muxci
+  real(c_double) exci
+  real(c_double) muxci
+  real(c_double) q_mu
 
-  real(wp), dimension (nsh_max,nsh_max) :: arho
-  real(wp), dimension (nsh_max,nsh_max) :: arhoi
-  real(wp), dimension (numorb_max, numorb_max) :: denx
-  real(wp), dimension (numorb_max, numorb_max) :: deni
+  real(c_double), dimension (nsh_max,nsh_max) :: arho
+  real(c_double), dimension (nsh_max,nsh_max) :: arhoi
+  real(c_double), dimension (numorb_max, numorb_max) :: denx
+  real(c_double), dimension (numorb_max, numorb_max) :: deni
 
   xc = 0.0d0
   bcxcx = 0.0d0

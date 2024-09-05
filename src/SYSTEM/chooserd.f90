@@ -1,10 +1,10 @@
 subroutine chooserd (l, ddmat, dpmat, dmatrix)
-  use M_constants, only: wp
+  use iso_c_binding
   implicit none
-  integer, intent (in) :: l
-  real(wp), intent (in), dimension(3, 5, 5) :: ddmat
-  real(wp), intent (in), dimension(3, 3, 3) :: dpmat
-  real(wp), intent (out), dimension(3, 5, 5) :: dmatrix
+  integer(c_long), intent (in) :: l
+  real(c_double), intent (in), dimension(3, 5, 5) :: ddmat
+  real(c_double), intent (in), dimension(3, 3, 3) :: dpmat
+  real(c_double), intent (out), dimension(3, 5, 5) :: dmatrix
   dmatrix = 0.0d0
   if (l .eq. 0) then
   else if (l .eq. 1) then

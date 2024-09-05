@@ -1,15 +1,15 @@
 subroutine interpolate_1d (interaction, isub, in1, in2, non2c, ioption, xin, yout, dfdx)
-  use M_constants, only: wp
+  use iso_c_binding
   use M_system
   use M_fdata, only: ind2c, numz2c, z2cmax, splineint_2c
   implicit none
-  integer, intent(in) :: interaction, isub, in1, in2, non2c, ioption ! Derivative or not
-  real(wp), intent(in)  :: xin
-  real(wp), intent(out) :: yout, dfdx
-  real(wp), parameter :: tol=1.0d-5
-  integer :: i, jxx, nnum
-  real(wp) xmax, xmin, x, h, hi
-  real(wp) :: a, b, c, d
+  integer(c_long), intent(in) :: interaction, isub, in1, in2, non2c, ioption ! Derivative or not
+  real(c_double), intent(in)  :: xin
+  real(c_double), intent(out) :: yout, dfdx
+  real(c_double), parameter :: tol=1.0d-5
+  integer(c_long) :: i, jxx, nnum
+  real(c_double) xmax, xmin, x, h, hi
+  real(c_double) :: a, b, c, d
 
   xmin = 0.0d0
   dfdx = 0.0d0
@@ -47,7 +47,7 @@ subroutine interpolate_1d (interaction, isub, in1, in2, non2c, ioption, xin, you
 
   x = hi*(xin - xmin)
   i = int(x) + 1
-  x = x - real(i - 1, wp)
+  x = x - real(i - 1, c_double)
 
   a = splineint_2c(1,non2c,i,jxx,in1,in2)
   b = splineint_2c(2,non2c,i,jxx,in1,in2)

@@ -1,57 +1,57 @@
 subroutine Dtrescentros (interaction, isorp, maxtype, in1, in2, indna, x, y, cost, eps, depsA, depsB, rhat, sighat, bcnax, f3naXa, f3naXb, f3naXc)
-  use M_constants, only: wp
+  use iso_c_binding
   use M_system
   use M_fdata
   implicit none
-  integer, intent (in) :: in1
-  integer, intent (in) :: in2
-  integer, intent (in) :: indna
-  integer, intent (in) :: interaction
-  integer, intent (in) :: isorp
-  integer, intent (in) :: maxtype
-  real(wp), intent (in) :: cost
-  real(wp), intent (in) :: x
-  real(wp), intent (in) :: y
-  real(wp), intent (in), dimension (3, 3) :: eps
-  real(wp), intent (in), dimension (3, 3, 3) :: depsA
-  real(wp), intent (in), dimension (3, 3, 3) :: depsB
-  real(wp), intent (in), dimension (3) :: rhat
-  real(wp), intent (in), dimension (3) :: sighat
-  real(wp), intent (out), dimension (numorb_max, numorb_max) :: bcnax
-  real(wp), intent (out), dimension (3, numorb_max, numorb_max) :: f3naXa
-  real(wp), intent (out), dimension (3, numorb_max, numorb_max) :: f3naXb
-  real(wp), intent (out), dimension (3, numorb_max, numorb_max) :: f3naXc
-  integer imu
-  integer iME
-  integer index
-  integer inu
-  integer ix
-  integer kforce
-  integer nl
-  real(wp) amt
-  real(wp) argument
-  real(wp) bmt
-  real(wp) cost2
-  real(wp) dQ_Ldx
-  real(wp) dQ_Ldy
-  real(wp) Q_L
-  real(wp) sint
-  real(wp) hx, hy
-  integer nx, ny
-  real(wp) xxmax, yymax, xinv
-  real(wp), dimension (0:ntheta - 1, ME3c_max) :: bcnalist
-  real(wp), dimension (numorb_max, numorb_max) :: bcnam
-  real(wp), dimension (0:ntheta - 1) :: dp
-  real(wp), dimension (ME3c_max) :: dphlist
-  real(wp), dimension (0:ntheta - 1, ME3c_max) :: dxbcnalist
-  real(wp), dimension (ME3c_max) :: dxhlist
-  real(wp), dimension (0:ntheta - 1, ME3c_max) :: dybcnalist
-  real(wp), dimension (ME3c_max) :: dyhlist
-  real(wp), dimension (3, numorb_max, numorb_max) :: f3naMa
-  real(wp), dimension (3, numorb_max, numorb_max) :: f3naMb
-  real(wp), dimension (ME3c_max) :: hlist
-  real(wp), dimension (0:ntheta - 1) :: p
-  real(wp), dimension (numorb_max, numorb_max) :: temp
+  integer(c_long), intent (in) :: in1
+  integer(c_long), intent (in) :: in2
+  integer(c_long), intent (in) :: indna
+  integer(c_long), intent (in) :: interaction
+  integer(c_long), intent (in) :: isorp
+  integer(c_long), intent (in) :: maxtype
+  real(c_double), intent (in) :: cost
+  real(c_double), intent (in) :: x
+  real(c_double), intent (in) :: y
+  real(c_double), intent (in), dimension (3, 3) :: eps
+  real(c_double), intent (in), dimension (3, 3, 3) :: depsA
+  real(c_double), intent (in), dimension (3, 3, 3) :: depsB
+  real(c_double), intent (in), dimension (3) :: rhat
+  real(c_double), intent (in), dimension (3) :: sighat
+  real(c_double), intent (out), dimension (numorb_max, numorb_max) :: bcnax
+  real(c_double), intent (out), dimension (3, numorb_max, numorb_max) :: f3naXa
+  real(c_double), intent (out), dimension (3, numorb_max, numorb_max) :: f3naXb
+  real(c_double), intent (out), dimension (3, numorb_max, numorb_max) :: f3naXc
+  integer(c_long) imu
+  integer(c_long) iME
+  integer(c_long) index
+  integer(c_long) inu
+  integer(c_long) ix
+  integer(c_long) kforce
+  integer(c_long) nl
+  real(c_double) amt
+  real(c_double) argument
+  real(c_double) bmt
+  real(c_double) cost2
+  real(c_double) dQ_Ldx
+  real(c_double) dQ_Ldy
+  real(c_double) Q_L
+  real(c_double) sint
+  real(c_double) hx, hy
+  integer(c_long) nx, ny
+  real(c_double) xxmax, yymax, xinv
+  real(c_double), dimension (0:ntheta - 1, ME3c_max) :: bcnalist
+  real(c_double), dimension (numorb_max, numorb_max) :: bcnam
+  real(c_double), dimension (0:ntheta - 1) :: dp
+  real(c_double), dimension (ME3c_max) :: dphlist
+  real(c_double), dimension (0:ntheta - 1, ME3c_max) :: dxbcnalist
+  real(c_double), dimension (ME3c_max) :: dxhlist
+  real(c_double), dimension (0:ntheta - 1, ME3c_max) :: dybcnalist
+  real(c_double), dimension (ME3c_max) :: dyhlist
+  real(c_double), dimension (3, numorb_max, numorb_max) :: f3naMa
+  real(c_double), dimension (3, numorb_max, numorb_max) :: f3naMb
+  real(c_double), dimension (ME3c_max) :: hlist
+  real(c_double), dimension (0:ntheta - 1) :: p
+  real(c_double), dimension (numorb_max, numorb_max) :: temp
   kforce = 1
   index = icon3c(in1,in2,indna)
   if (interaction .eq. 1) then

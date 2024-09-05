@@ -1,26 +1,26 @@
 subroutine makeDmatPP (in1, in2, matm, dmatm, dmat, pmat, ddmat, dpmat, term)
-  use M_constants, only: wp
+  use iso_c_binding
   use M_system
   use M_fdata, only: nssh,lssh,nsshPP,lsshPP
   implicit none
-  integer, intent(in) :: in1, in2
-  real(wp), intent(in) :: dmat (5, 5)
-  real(wp), intent(in) :: dmatm (3, numorb_max, numorb_max)
-  real(wp), intent(in) :: ddmat (3, 5, 5)
-  real(wp), intent(in) :: matm (numorb_max, numorb_max)
-  real(wp), intent(in) :: pmat (3, 3)
-  real(wp), intent(in) :: dpmat (3, 3, 3)
-  real(wp), intent(out) :: term (3, numorb_max, numorb_max)
-  integer issh, jssh
-  integer ix
-  integer k1, k2
-  integer l1, l2
-  integer m1, m2
-  integer n1, n2
-  real(wp) dleft (3, 5, 5)
-  real(wp) dright (3, 5, 5)
-  real(wp) left (5, 5)
-  real(wp) right (5, 5)
+  integer(c_long), intent(in) :: in1, in2
+  real(c_double), intent(in) :: dmat (5, 5)
+  real(c_double), intent(in) :: dmatm (3, numorb_max, numorb_max)
+  real(c_double), intent(in) :: ddmat (3, 5, 5)
+  real(c_double), intent(in) :: matm (numorb_max, numorb_max)
+  real(c_double), intent(in) :: pmat (3, 3)
+  real(c_double), intent(in) :: dpmat (3, 3, 3)
+  real(c_double), intent(out) :: term (3, numorb_max, numorb_max)
+  integer(c_long) issh, jssh
+  integer(c_long) ix
+  integer(c_long) k1, k2
+  integer(c_long) l1, l2
+  integer(c_long) m1, m2
+  integer(c_long) n1, n2
+  real(c_double) dleft (3, 5, 5)
+  real(c_double) dright (3, 5, 5)
+  real(c_double) left (5, 5)
+  real(c_double) right (5, 5)
   n1 = 0
   do issh = 1, nssh(in1)
    l1 = lssh(issh,in1)

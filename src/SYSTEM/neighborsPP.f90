@@ -17,31 +17,31 @@
 ! xl(:,neighbPP(iatom,ineigh)) + ratom(:,neighjPP(iatom,ineigh)).
 
 subroutine neighborsPP ()
-  use M_constants, only: wp
+  use iso_c_binding
   use M_system
   use M_fdata,only : nssh, rcutoff, rc_PP    
   implicit none
-  integer iatom
-  integer ineigh
-  integer ibeta
-  integer imu
-  integer in1
-  integer in2
-  integer jatom
-  integer jneigh
-  integer jbeta
-  integer katom
-  integer kneigh
-  integer kbeta
-  integer ialp
-  integer mbeta
-  integer num_neigh
-  real(wp) distance
-  real(wp) distance2
-  real(wp) range2
-  real(wp) rcutoff_i
-  real(wp) rcutoff_j
-  real(wp), dimension (3) :: vec1, vec2, vec3, vec
+  integer(c_long) iatom
+  integer(c_long) ineigh
+  integer(c_long) ibeta
+  integer(c_long) imu
+  integer(c_long) in1
+  integer(c_long) in2
+  integer(c_long) jatom
+  integer(c_long) jneigh
+  integer(c_long) jbeta
+  integer(c_long) katom
+  integer(c_long) kneigh
+  integer(c_long) kbeta
+  integer(c_long) ialp
+  integer(c_long) mbeta
+  integer(c_long) num_neigh
+  real(c_double) distance
+  real(c_double) distance2
+  real(c_double) range2
+  real(c_double) rcutoff_i
+  real(c_double) rcutoff_j
+  real(c_double), dimension (3) :: vec1, vec2, vec3, vec
   logical flag
 
   neighPP_j = 0.0d0

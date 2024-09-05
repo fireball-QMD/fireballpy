@@ -1,11 +1,12 @@
 subroutine neighbors_pairs ()
+  use iso_c_binding
   use M_system
   implicit none
-  integer :: num_pairs
-  integer :: iatom
-  integer :: ineigh
-  integer :: jatom
-  integer :: jneigh
+  integer(c_long) :: num_pairs
+  integer(c_long) :: iatom
+  integer(c_long) :: ineigh
+  integer(c_long) :: jatom
+  integer(c_long) :: jneigh
   num_pairs = 0
   if (icluster .eq. 1) then
     do iatom = 1,natoms

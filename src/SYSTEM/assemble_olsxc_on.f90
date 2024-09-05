@@ -1,14 +1,14 @@
 subroutine assemble_olsxc_on ()
-  use M_constants, only: wp
+  use iso_c_binding
   use M_system
   use M_fdata, only: num_orb
   implicit none
-  integer iatom, matom
-  integer imu
-  integer in1, in3
-  integer inu
-  real(wp), dimension (numorb_max, numorb_max) :: bcxcx
-  real(wp) xc
+  integer(c_long) iatom, matom
+  integer(c_long) imu
+  integer(c_long) in1, in3
+  integer(c_long) inu
+  real(c_double), dimension (numorb_max, numorb_max) :: bcxcx
+  real(c_double) xc
   vxc = 0.0d0
   vxc_ca = 0.0d0
   uxcdcc_ols = 0.0d0

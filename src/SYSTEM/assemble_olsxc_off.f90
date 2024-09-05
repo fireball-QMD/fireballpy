@@ -1,33 +1,33 @@
 ! This routine assembles the two & three-center exchange-correlation for the average density approximation. 
 subroutine assemble_olsxc_off ()
-  use M_constants, only: wp
+  use iso_c_binding
   use M_system
   use M_fdata, only: num_orb,nssh,Qneutral
   implicit none
-  integer iatom
-  integer imu
-  integer in1, in2, in3
-  integer ineigh
-  integer interaction
-  integer inu
-  integer isorp
-  integer jatom
-  integer kforce
-  integer matom
-  integer mbeta
+  integer(c_long) iatom
+  integer(c_long) imu
+  integer(c_long) in1, in2, in3
+  integer(c_long) ineigh
+  integer(c_long) interaction
+  integer(c_long) inu
+  integer(c_long) isorp
+  integer(c_long) jatom
+  integer(c_long) kforce
+  integer(c_long) matom
+  integer(c_long) mbeta
 
-  real(wp)  y 
-  real(wp) dxn
-  real(wp), dimension (numorb_max, numorb_max) :: bcxcx
-  real(wp), dimension (numorb_max, numorb_max) :: denmx
-  real(wp), dimension (numorb_max, numorb_max) :: den1x
-  real(wp), dimension (numorb_max, numorb_max) :: rhomx
-  real(wp), dimension (3, numorb_max, numorb_max) :: rhompx
-  real(wp), dimension (3, 3) :: eps
-  real(wp), dimension (3, 3, 3) :: deps
-  real(wp), dimension (3) :: r1, r2, r21
-  real(wp), dimension (3) :: sighat
-  real(wp), dimension (numorb_max, numorb_max) :: sx
+  real(c_double)  y 
+  real(c_double) dxn
+  real(c_double), dimension (numorb_max, numorb_max) :: bcxcx
+  real(c_double), dimension (numorb_max, numorb_max) :: denmx
+  real(c_double), dimension (numorb_max, numorb_max) :: den1x
+  real(c_double), dimension (numorb_max, numorb_max) :: rhomx
+  real(c_double), dimension (3, numorb_max, numorb_max) :: rhompx
+  real(c_double), dimension (3, 3) :: eps
+  real(c_double), dimension (3, 3, 3) :: deps
+  real(c_double), dimension (3) :: r1, r2, r21
+  real(c_double), dimension (3) :: sighat
+  real(c_double), dimension (numorb_max, numorb_max) :: sx
 
   do iatom = 1, natoms
     matom = neigh_self(iatom)

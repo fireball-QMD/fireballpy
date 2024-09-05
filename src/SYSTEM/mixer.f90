@@ -1,17 +1,17 @@
 subroutine mixer ()
-  use M_constants, only: wp
+  use iso_c_binding
   use M_system
   use M_fdata, only: nssh, nsh_max
   implicit none
-  integer iatom
-  integer in1
-  integer issh
-  integer imix
-  real(wp) dqrms
-  real(wp) dqmax
-  real(wp) renorm
-  real(wp) zcheck
-  real(wp) zouttot
+  integer(c_long) iatom
+  integer(c_long) in1
+  integer(c_long) issh
+  integer(c_long) imix
+  real(c_double) dqrms
+  real(c_double) dqmax
+  real(c_double) renorm
+  real(c_double) zcheck
+  real(c_double) zouttot
   dqrms = 0
   dqmax = -99
   Qinmixer=0.0d0

@@ -1,29 +1,29 @@
 ! This routine computes the non-local pseudopotential matrix element ppx(mu,nu)
 ! The range of neighbours could/should be different for  3-center pseudopotential matrix elements than for neutral-coulomb contributions.  This could/should be taken into account in the future
 subroutine doscentrosPP (interaction, isub, distance, eps, deps, iauxforce, in1, in2, sx, spx)
-  use M_constants, only: wp
+  use iso_c_binding
   use M_system
   use M_fdata, only: index_maxPP,num_orb,num_orbpp,ME2cPP_max
   implicit none
-  integer, intent(in) :: iauxforce
-  integer, intent(in) :: in1
-  integer, intent(in) :: in2
-  integer, intent(in) :: isub
-  integer, intent(in) :: interaction
-  real(wp), intent (in) :: distance
-  real(wp), intent (in), dimension (3, 3, 3) :: deps
-  real(wp), intent (in), dimension (3, 3) :: eps
-  real(wp), intent(out), dimension (numorb_max, numorb_max) :: sx
-  real(wp), intent(out), dimension (3, numorb_max, numorb_max) :: spx
-  integer imu
-  integer inu
-  integer index
-  real(wp), dimension (ME2cPP_max) :: dpplist
-  real(wp), dimension (3) :: eta
-  real(wp), dimension (ME2cPP_max) :: pplist
-  real(wp), dimension (numorb_max, numorb_max) :: sm
-  real(wp), dimension (numorb_max, numorb_max) :: spm
-  real(wp), dimension (3, numorb_max, numorb_max) :: spmx
+  integer(c_long), intent(in) :: iauxforce
+  integer(c_long), intent(in) :: in1
+  integer(c_long), intent(in) :: in2
+  integer(c_long), intent(in) :: isub
+  integer(c_long), intent(in) :: interaction
+  real(c_double), intent (in) :: distance
+  real(c_double), intent (in), dimension (3, 3, 3) :: deps
+  real(c_double), intent (in), dimension (3, 3) :: eps
+  real(c_double), intent(out), dimension (numorb_max, numorb_max) :: sx
+  real(c_double), intent(out), dimension (3, numorb_max, numorb_max) :: spx
+  integer(c_long) imu
+  integer(c_long) inu
+  integer(c_long) index
+  real(c_double), dimension (ME2cPP_max) :: dpplist
+  real(c_double), dimension (3) :: eta
+  real(c_double), dimension (ME2cPP_max) :: pplist
+  real(c_double), dimension (numorb_max, numorb_max) :: sm
+  real(c_double), dimension (numorb_max, numorb_max) :: spm
+  real(c_double), dimension (3, numorb_max, numorb_max) :: spmx
   if (interaction .ne. 5 .or. isub .ne. 0) then
     write (*,*) ' interaction = ', interaction
     write (*,*) ' This routine is only for the pseudopotential '

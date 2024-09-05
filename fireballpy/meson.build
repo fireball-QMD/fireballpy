@@ -13,7 +13,6 @@ generate_version = custom_target(
 
 python_sources = [
   '__init__.py',
-  '_types.py',
   'utils.py',
   'fdata.py',
   'infodat.py',

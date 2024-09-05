@@ -1,63 +1,64 @@
 ! This routine assembles all of the two-center and degenerate two-center interactions for DOGS.
 subroutine assemble_ca_2c_dip ()
-  use M_constants, only: wp, eq2
+  use iso_c_binding
+  use M_constants, only: eq2
   use M_system
   use M_fdata, only: nssh,rcutoff,Qneutral,num_orb
   implicit none
-  integer iatom
-  integer icount
-  integer icount_sav
-  integer ierror
-  integer imu
-  integer in1
-  integer in2
-  integer in3
-  integer ineigh
-  integer interaction
-  integer inu
-  integer isorp
-  integer issh
-  integer jatom
-  integer jcount
-  integer jcount_sav
-  integer jssh
-  integer kforce
-  integer matom
-  integer mbeta
-  integer ix
-  integer iy
+  integer(c_long) iatom
+  integer(c_long) icount
+  integer(c_long) icount_sav
+  integer(c_long) ierror
+  integer(c_long) imu
+  integer(c_long) in1
+  integer(c_long) in2
+  integer(c_long) in3
+  integer(c_long) ineigh
+  integer(c_long) interaction
+  integer(c_long) inu
+  integer(c_long) isorp
+  integer(c_long) issh
+  integer(c_long) jatom
+  integer(c_long) jcount
+  integer(c_long) jcount_sav
+  integer(c_long) jssh
+  integer(c_long) kforce
+  integer(c_long) matom
+  integer(c_long) mbeta
+  integer(c_long) ix
+  integer(c_long) iy
  
-  real(wp) dq1
-  real(wp) dq2
-  real(wp) dterm
-  real(wp) dterm_1
-  real(wp) dterm_2
-  real(wp) dstn_temp
-  real(wp) dxn
-  real(wp) rcutoff_j
-  real(wp) rend
-  real(wp) rend1
-  real(wp) rend2
-  real(wp) sterm_1
-  real(wp) sterm_2
-  real(wp) y
-  real(wp) rcutoff_i
+  real(c_double) dq1
+  real(c_double) dq2
+  real(c_double) dterm
+  real(c_double) dterm_1
+  real(c_double) dterm_2
+  real(c_double) dstn_temp
+  real(c_double) dxn
+  real(c_double) rcutoff_j
+  real(c_double) rend
+  real(c_double) rend1
+  real(c_double) rend2
+  real(c_double) sterm_1
+  real(c_double) sterm_2
+  real(c_double) y
+  real(c_double) rcutoff_i
  
-  real(wp), dimension (numorb_max, numorb_max) :: bcca
-  real(wp), dimension (3, numorb_max, numorb_max) :: bccapx
-  real(wp), dimension (numorb_max, numorb_max) :: bccax
-  real(wp), dimension (3, 3, 3) :: deps
-  real(wp), dimension (numorb_max, numorb_max) :: dipx
-  real(wp), dimension (3, numorb_max, numorb_max) :: dippx
-  real(wp), dimension (numorb_max, numorb_max) :: emnpl
-  real(wp), dimension (numorb_max, numorb_max) :: emnpl_noq
-  real(wp), dimension (3, 3) :: eps
-  real(wp), dimension (3) :: r1
-  real(wp), dimension (3) :: r2
-  real(wp), dimension (3) :: r21
-  real(wp), dimension (3) :: sighat
-  real(wp) stn1
-  real(wp) stn2
+  real(c_double), dimension (numorb_max, numorb_max) :: bcca
+  real(c_double), dimension (3, numorb_max, numorb_max) :: bccapx
+  real(c_double), dimension (numorb_max, numorb_max) :: bccax
+  real(c_double), dimension (3, 3, 3) :: deps
+  real(c_double), dimension (numorb_max, numorb_max) :: dipx
+  real(c_double), dimension (3, numorb_max, numorb_max) :: dippx
+  real(c_double), dimension (numorb_max, numorb_max) :: emnpl
+  real(c_double), dimension (numorb_max, numorb_max) :: emnpl_noq
+  real(c_double), dimension (3, 3) :: eps
+  real(c_double), dimension (3) :: r1
+  real(c_double), dimension (3) :: r2
+  real(c_double), dimension (3) :: r21
+  real(c_double), dimension (3) :: sighat
+  real(c_double) stn1
+  real(c_double) stn2
   vca = 0.0d0
   ewaldsr = 0.0d0
 

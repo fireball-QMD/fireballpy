@@ -6,7 +6,6 @@ import numpy as np
 from numpy.typing import NDArray
 from ase.data import atomic_masses, chemical_symbols  # type: ignore
 
-from ._types import integer
 from fireballpy.utils import (file_as_deque,
                               read_integer_array,
                               read_line,
@@ -60,7 +59,7 @@ class InfoDat:
             max(self.nshs_pp[num] for num in self.anums)
         )
 
-    def select(self, anums: NDArray[integer]) -> InfoDat:
+    def select(self, anums: NDArray[np.int64]) -> InfoDat:
         """Get a subset with the InfoDat with only some elements
 
         Parameters

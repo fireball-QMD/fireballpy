@@ -1,31 +1,31 @@
 ! This routine assembles all of the two-center sVNL (separable pseudopotential) interactions.
 subroutine assemble_sVNL ()
-  use M_constants, only: wp
+  use iso_c_binding
   use M_system
   use M_fdata, only: num_orbPP, num_orb
   implicit none
  
-  integer iatom
-  integer imu
-  integer in1
-  integer in2
-  integer ineigh
-  integer interaction
-  integer inu
-  integer isorp
-  integer jatom
-  integer matom
-  integer mbeta
+  integer(c_long) iatom
+  integer(c_long) imu
+  integer(c_long) in1
+  integer(c_long) in2
+  integer(c_long) ineigh
+  integer(c_long) interaction
+  integer(c_long) inu
+  integer(c_long) isorp
+  integer(c_long) jatom
+  integer(c_long) matom
+  integer(c_long) mbeta
  
-  real(wp) y
-  real(wp), dimension (3, 3) :: eps
-  real(wp), dimension (3, 3, 3) :: deps
-  real(wp), dimension (3) :: r1
-  real(wp), dimension (3) :: r2
-  real(wp), dimension (3) :: r21
-  real(wp), dimension (3) :: sighat
-  real(wp), dimension (numorb_max, numorb_max) :: sVNLx
-  real(wp), dimension (3, numorb_max, numorb_max) :: spVNLx
+  real(c_double) y
+  real(c_double), dimension (3, 3) :: eps
+  real(c_double), dimension (3, 3, 3) :: deps
+  real(c_double), dimension (3) :: r1
+  real(c_double), dimension (3) :: r2
+  real(c_double), dimension (3) :: r21
+  real(c_double), dimension (3) :: sighat
+  real(c_double), dimension (numorb_max, numorb_max) :: sVNLx
+  real(c_double), dimension (3, numorb_max, numorb_max) :: spVNLx
  
   do iatom = 1, natoms 
     matom = nPP_self(iatom)

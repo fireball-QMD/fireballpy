@@ -1,31 +1,32 @@
 subroutine allocate_system ()
-  use M_constants, only: wp, xlevi, delk
+  use iso_c_binding
+  use M_constants, only: xlevi, delk
   use M_system 
   use M_fdata, only: nssh, rcutoff, rc_PP, nspecies, symbolA ,isorpmax
   use M_fdata, only: num_orb, Qneutral, lssh, nsshPP, lsshPP,  nsh_max
   use M_fdata, only: ME3c_max,numXmax,numYmax
 !  use M_fdata, only: numy3c_xc3c, ideriv_max
   implicit none
-  integer:: iatom
-  integer:: jatom
-  integer:: matom
-  integer:: ineigh
-  integer:: i,iorb
-  integer:: mbeta
-  integer:: num_neigh
-  integer:: in1
-  integer:: imu, qmu
-  integer:: issh
-  integer:: in2
-  integer:: ispec
-  integer:: numorb
-  integer:: numorbPP_max
-  real(wp) :: rcutoff_i
-  real(wp) :: rcutoff_j
-  real(wp) :: rcutoff_
-  real(wp) :: distance2
-  real(wp) :: range2
-  real(wp) :: distance
+  integer(c_long):: iatom
+  integer(c_long):: jatom
+  integer(c_long):: matom
+  integer(c_long):: ineigh
+  integer(c_long):: i,iorb
+  integer(c_long):: mbeta
+  integer(c_long):: num_neigh
+  integer(c_long):: in1
+  integer(c_long):: imu, qmu
+  integer(c_long):: issh
+  integer(c_long):: in2
+  integer(c_long):: ispec
+  integer(c_long):: numorb
+  integer(c_long):: numorbPP_max
+  real(c_double) :: rcutoff_i
+  real(c_double) :: rcutoff_j
+  real(c_double) :: rcutoff_
+  real(c_double) :: distance2
+  real(c_double) :: range2
+  real(c_double) :: distance
 
   !Shift the coordinates none of the atoms fall on (0.0, 0.0, 0.0)
   shifter(1) = 4.0d0*atan(1.0d0)    ! pi

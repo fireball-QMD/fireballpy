@@ -1,18 +1,18 @@
 subroutine anderson ( x_try, x_old, nmsh )
-  use M_constants, only: wp
+  use iso_c_binding
   use M_system, only: Fv, Xv, delF, delX, r2_sav, w02, wi, sigma, sigmatol, &
     & max_scf_iterations, Kscf, bmix, idmix, x_best, ialgmix, sigmabest, scf_achieved
   implicit none
-  integer, intent(in) :: nmsh    ! Size of vectors being optimized
-  real(wp), intent(in), dimension(nmsh) :: x_try ! potential new vector on input
-  real(wp), intent(inout), dimension(nmsh) :: x_old ! old vector in input, real(wp) new vector on output
-  integer :: iloop, jloop, retry, mix_order, imix, Kscfm1, mixm1
-  real(wp), allocatable, dimension(:) :: delF_F    ! <delF|F> in Eq. 5.31
-  real(wp), allocatable, dimension(:,:) :: a_matrix
+  integer(c_long), intent(in) :: nmsh    ! Size of vectors being optimized
+  real(c_double), intent(in), dimension(nmsh) :: x_try ! potential new vector on input
+  real(c_double), intent(inout), dimension(nmsh) :: x_old ! old vector in input, real(c_double) new vector on output
+  integer(c_long) :: iloop, jloop, retry, mix_order, imix, Kscfm1, mixm1
+  real(c_double), allocatable, dimension(:) :: delF_F    ! <delF|F> in Eq. 5.31
+  real(c_double), allocatable, dimension(:,:) :: a_matrix
   ! BLAS stuff
-  integer :: lwork, info
-  integer, allocatable, dimension(:) :: ipiv
-  real(wp), allocatable, dimension(:) :: work
+  integer(c_long) :: lwork, info
+  integer(c_long), allocatable, dimension(:) :: ipiv
+  real(c_double), allocatable, dimension(:) :: work
 
   if(Kscf .eq. 1)then
     ! wi need to be allocated somewhere else
@@ -85,8 +85,8 @@ subroutine anderson ( x_try, x_old, nmsh )
     a_matrix(jloop,jloop) = a_matrix(jloop,jloop) + w02
   end do
   allocate(work(1), ipiv(mix_order))
-  call dsysv('U',mix_order,1,a_matrix,mix_order,ipiv,delF_F,mix_order,work,-1,info)
-  lwork = int(work(1))
+  call dsysv('U',mix_order,1,a_matrix,mix_order,ipiv,delF_F,mix_order,work,-1_c_long,info)
+  lwork = int(work(1), c_long)
   deallocate(work)
   allocate(work(lwork))
   call dsysv('U',mix_order,1,a_matrix,mix_order,ipiv,delF_F,mix_order,work,lwork,info)

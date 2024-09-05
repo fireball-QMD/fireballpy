@@ -1,38 +1,38 @@
 subroutine assemble_3c_PP ()
-  use M_constants, only: wp
+  use iso_c_binding
   use M_system
   use M_fdata, only: num_orb, num_orbPP 
   implicit none
-  integer ialp
-  integer iatom
-  integer ibeta
-  integer ierror
-  integer imu
-  integer in1
-  integer in2
-  integer indna
-  integer ineigh
-  integer interaction
-  integer inu
-  integer isorp
-  integer issh
-  integer jatom
-  integer jbeta
-  integer jssh
-  integer m31
-  integer m32
-  integer mneigh
-  integer ncc
+  integer(c_long) ialp
+  integer(c_long) iatom
+  integer(c_long) ibeta
+  integer(c_long) ierror
+  integer(c_long) imu
+  integer(c_long) in1
+  integer(c_long) in2
+  integer(c_long) indna
+  integer(c_long) ineigh
+  integer(c_long) interaction
+  integer(c_long) inu
+  integer(c_long) isorp
+  integer(c_long) issh
+  integer(c_long) jatom
+  integer(c_long) jbeta
+  integer(c_long) jssh
+  integer(c_long) m31
+  integer(c_long) m32
+  integer(c_long) mneigh
+  integer(c_long) ncc
  
-  integer, external :: mpairnay
+  integer(c_long), external :: mpairnay
 
-  real(wp), dimension (numorb_max, numorb_max) :: bcnlx
-  real(wp), dimension (numorb_max) :: cl
-  real(wp), dimension (3) :: r1
-  real(wp), dimension (3) :: r2
-  real(wp), dimension (3) :: r31
-  real(wp), dimension (3) :: r32
-  real(wp), dimension (3) :: rna
+  real(c_double), dimension (numorb_max, numorb_max) :: bcnlx
+  real(c_double), dimension (numorb_max) :: cl
+  real(c_double), dimension (3) :: r1
+  real(c_double), dimension (3) :: r2
+  real(c_double), dimension (3) :: r31
+  real(c_double), dimension (3) :: r32
+  real(c_double), dimension (3) :: rna
   do ialp = 1, natoms
     rna(:) = ratom(:,ialp)
     indna = imass(ialp)

@@ -31,16 +31,16 @@
 !
 ! ===========================================================================
 subroutine epsilon(R1,R2,spe)
-  use M_constants, only: wp
+  use iso_c_binding
   implicit none
  
-  real(wp), intent(in) :: r1(3)
-  real(wp), intent(in) :: r2(3)
-  real(wp), intent(out) :: spe(3,3)
+  real(c_double), intent(in) :: r1(3)
+  real(c_double), intent(in) :: r2(3)
+  real(c_double), intent(out) :: spe(3,3)
  
-  integer i,j,ii,jj,kk,ix
-  real(wp) r1mag,r2mag,ypmag,unit
-  real(wp) XPHAT(3),YPHAT(3),ZPHAT(3),R1HAT(3)
+  integer(c_long) i,j,ii,jj,kk,ix
+  real(c_double) r1mag,r2mag,ypmag,unit
+  real(c_double) XPHAT(3),YPHAT(3),ZPHAT(3),R1HAT(3)
  
   r1mag=sqrt(r1(1)*r1(1)+r1(2)*r1(2)+r1(3)*r1(3))
   r2mag=sqrt(r2(1)*r2(1)+r2(2)*r2(2)+r2(3)*r2(3))

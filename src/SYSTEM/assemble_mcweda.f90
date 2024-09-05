@@ -1,7 +1,8 @@
 subroutine assemble_mcweda ()
+  use iso_c_binding
   use M_system
   implicit none
-  integer :: iatom, jatom, ineigh, mbeta, kforce
+  integer(c_long) :: iatom, jatom, ineigh, mbeta, kforce
   if (Kscf .eq. 1) then
 
     call neighbors()

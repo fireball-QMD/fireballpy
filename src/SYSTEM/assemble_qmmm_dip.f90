@@ -1,11 +1,12 @@
 subroutine assemble_qmmm_dip () 
-  use M_constants, only : eq2, wp
+  use iso_c_binding
+  use M_constants, only: eq2
   use M_system
   use M_fdata, only  : nssh, Qneutral, num_orb
   implicit none
-  integer :: iatom, imu, inu, in1, in2, in3, ineigh, issh, jatom, katom, mbeta
-  real(wp) :: dij, dterm, sterm, dq3, dq4, x, emnpl
-  real(wp), dimension (3) :: rna, rnabc, r1, r2, r21
+  integer(c_long) :: iatom, imu, inu, in1, in2, in3, ineigh, issh, jatom, katom, mbeta
+  real(c_double) :: dij, dterm, sterm, dq3, dq4, x, emnpl
+  real(c_double), dimension (3) :: rna, rnabc, r1, r2, r21
 
   ewaldqmmm = 0.0d0
   emnpl = 0.0d0

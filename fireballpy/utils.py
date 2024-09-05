@@ -4,15 +4,13 @@ from collections import deque
 import numpy as np
 from numpy.typing import NDArray
 
-from ._types import real, integer
+
+def alloc_integer(*size: int) -> NDArray[np.int64]:
+    return np.zeros(size, dtype=np.int64, order="F")
 
 
-def alloc_integer(*size: int) -> NDArray[integer]:
-    return np.zeros(size, dtype=integer, order="F")
-
-
-def alloc_real(*size: int) -> NDArray[real]:
-    return np.zeros(size, dtype=real, order="F")
+def alloc_real(*size: int) -> NDArray[np.float64]:
+    return np.zeros(size, dtype=np.float64, order="F")
 
 
 def file_as_deque(fpath: str) -> deque[str]:
@@ -22,8 +20,8 @@ def file_as_deque(fpath: str) -> deque[str]:
 
 
 def read_integer_array(data: deque[str], width: int,
-                       lines: int = 1) -> NDArray[integer]:
-    result = np.empty((lines, width), dtype=integer)
+                       lines: int = 1) -> NDArray[np.int64]:
+    result = np.empty((lines, width), dtype=np.int64)
     for i in range(lines):
         line = read_line(data)
         for j in range(width):
@@ -32,8 +30,8 @@ def read_integer_array(data: deque[str], width: int,
 
 
 def read_real_array(data: deque[str], width: int,
-                    lines: int = 1) -> NDArray[real]:
-    result = np.empty((lines, width), dtype=real)
+                    lines: int = 1) -> NDArray[np.float64]:
+    result = np.empty((lines, width), dtype=np.float64)
     for i in range(lines):
         line = read_line(data)
         for j in range(width):
@@ -50,9 +48,9 @@ def skip_lines(data: deque[str], lines: int = 1) -> None:
         _ = data.popleft()
 
 
-def to_integer(string: str) -> integer:
-    return integer(string)
+def to_integer(string: str) -> np.int64:
+    return np.int64(string)
 
 
-def to_real(string: str) -> real:
-    return real(string.upper().replace("D", "E"))
+def to_real(string: str) -> np.float64:
+    return np.float64(string.upper().replace("D", "E"))

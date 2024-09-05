@@ -1,21 +1,22 @@
 subroutine fermie ()
-  use M_constants, only: wp, spin, kconvert
+  use iso_c_binding
+  use M_constants, only: spin, kconvert
   use M_system
   implicit none
-  integer, parameter :: imax = 1000 ! maximum sc iterations
-  integer, parameter :: nmax = 5000 ! cutoff for degeneracy check
-  real(wp), parameter :: tol = 1.0d-10
-  integer ikpoint
-  integer imu
-  integer inu
-  integer iter
-  integer jkpoint
-  real(wp) delta
-  real(wp) emin
-  real(wp) emax
-  real(wp) qcharge
-  real(wp) qztot
-  real(wp) temp
+  integer(c_long), parameter :: imax = 1000 ! maximum sc iterations
+  integer(c_long), parameter :: nmax = 5000 ! cutoff for degeneracy check
+  real(c_double), parameter :: tol = 1.0d-10
+  integer(c_long) ikpoint
+  integer(c_long) imu
+  integer(c_long) inu
+  integer(c_long) iter
+  integer(c_long) jkpoint
+  real(c_double) delta
+  real(c_double) emin
+  real(c_double) emax
+  real(c_double) qcharge
+  real(c_double) qztot
+  real(c_double) temp
   qztot = ztot 
   ioccupy_k = 0
   foccupy = 0.0d0

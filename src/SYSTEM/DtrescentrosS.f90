@@ -1,56 +1,56 @@
 subroutine DtrescentrosS (isorp, maxtype, in1, in2, indna, x, y, cost, rhat, sighat, bcnax, f3naXa, f3naXb, f3naXc)
-  use M_constants, only: wp
+  use iso_c_binding
  use M_system
  use M_fdata
  implicit none
- integer, intent (in) :: in1
- integer, intent (in) :: in2
- integer, intent (in) :: indna
- integer, intent (in) :: isorp
- integer, intent (in) :: maxtype
- real(wp), intent (in) :: cost
- real(wp), intent (in) :: x
- real(wp), intent (in) :: y
- real(wp), intent (in), dimension (3) :: rhat
- real(wp), intent (in), dimension (3) :: sighat
- real(wp), intent (out), dimension (nsh_max, nsh_max) :: bcnax
- real(wp), intent (out), dimension (3, nsh_max, nsh_max) :: f3naXa
- real(wp), intent (out), dimension (3, nsh_max, nsh_max) :: f3naXb
- real(wp), intent (out), dimension (3, nsh_max, nsh_max) :: f3naXc
- integer imu
- integer iME
- integer index
- integer inu
- integer ix
- integer kforce
- integer nl
- integer nx
- integer ny
- real(wp) amt
- real(wp) argument
- real(wp) bmt
- real(wp) cost2
- real(wp) dQ_Ldx
- real(wp) dQ_Ldy
- real(wp) Q_L
- real(wp) sint
- real(wp) xxmax
- real(wp) yymax
- real(wp) hx
- real(wp) hy
- real(wp) xinv
- real(wp), dimension (0:ithetamax - 1, MES_max) :: bcnalist
- real(wp), dimension (0:ithetamax - 1) :: dp
- real(wp), dimension (MES_max) :: dphlist
- real(wp), dimension (0:ithetamax - 1, MES_max) :: dxbcnalist
- real(wp), dimension (MES_max) :: dxhlist
- real(wp), dimension (0:ithetamax - 1, MES_max) :: dybcnalist
- real(wp), dimension (MES_max) :: dyhlist
- real(wp), dimension (3, nsh_max, nsh_max) :: f3naMa
- real(wp), dimension (3, nsh_max, nsh_max) :: f3naMb
- real(wp), dimension (MES_max) :: hlist
- real(wp), dimension (0:ithetamax - 1) :: p
- real(wp), dimension (nsh_max, nsh_max) :: temp
+ integer(c_long), intent (in) :: in1
+ integer(c_long), intent (in) :: in2
+ integer(c_long), intent (in) :: indna
+ integer(c_long), intent (in) :: isorp
+ integer(c_long), intent (in) :: maxtype
+ real(c_double), intent (in) :: cost
+ real(c_double), intent (in) :: x
+ real(c_double), intent (in) :: y
+ real(c_double), intent (in), dimension (3) :: rhat
+ real(c_double), intent (in), dimension (3) :: sighat
+ real(c_double), intent (out), dimension (nsh_max, nsh_max) :: bcnax
+ real(c_double), intent (out), dimension (3, nsh_max, nsh_max) :: f3naXa
+ real(c_double), intent (out), dimension (3, nsh_max, nsh_max) :: f3naXb
+ real(c_double), intent (out), dimension (3, nsh_max, nsh_max) :: f3naXc
+ integer(c_long) imu
+ integer(c_long) iME
+ integer(c_long) index
+ integer(c_long) inu
+ integer(c_long) ix
+ integer(c_long) kforce
+ integer(c_long) nl
+ integer(c_long) nx
+ integer(c_long) ny
+ real(c_double) amt
+ real(c_double) argument
+ real(c_double) bmt
+ real(c_double) cost2
+ real(c_double) dQ_Ldx
+ real(c_double) dQ_Ldy
+ real(c_double) Q_L
+ real(c_double) sint
+ real(c_double) xxmax
+ real(c_double) yymax
+ real(c_double) hx
+ real(c_double) hy
+ real(c_double) xinv
+ real(c_double), dimension (0:ithetamax - 1, MES_max) :: bcnalist
+ real(c_double), dimension (0:ithetamax - 1) :: dp
+ real(c_double), dimension (MES_max) :: dphlist
+ real(c_double), dimension (0:ithetamax - 1, MES_max) :: dxbcnalist
+ real(c_double), dimension (MES_max) :: dxhlist
+ real(c_double), dimension (0:ithetamax - 1, MES_max) :: dybcnalist
+ real(c_double), dimension (MES_max) :: dyhlist
+ real(c_double), dimension (3, nsh_max, nsh_max) :: f3naMa
+ real(c_double), dimension (3, nsh_max, nsh_max) :: f3naMb
+ real(c_double), dimension (MES_max) :: hlist
+ real(c_double), dimension (0:ithetamax - 1) :: p
+ real(c_double), dimension (nsh_max, nsh_max) :: temp
  do inu = 1, nssh(in2)
    do imu = 1, nssh(in1)
      bcnax(imu,inu) = 0.0d0

@@ -1,15 +1,16 @@
 subroutine backnay ()
+  use iso_c_binding
   use M_system
   implicit none
-  integer :: iatom
-  integer :: icount
-  integer :: ineigh
-  integer :: jatom
-  integer :: jbeta
-  integer :: jneigh
-  integer :: katom
-  integer :: mbeta
-  integer :: iloop
+  integer(c_long) :: iatom
+  integer(c_long) :: icount
+  integer(c_long) :: ineigh
+  integer(c_long) :: jatom
+  integer(c_long) :: jbeta
+  integer(c_long) :: jneigh
+  integer(c_long) :: katom
+  integer(c_long) :: mbeta
+  integer(c_long) :: iloop
   727   continue
   do iatom = 1, natoms
    do ineigh = 1, neighn(iatom)

@@ -1,71 +1,72 @@
 subroutine assemble_ca_3c_dip ()
-  use M_constants, only: wp, eq2
+  use iso_c_binding
+  use M_constants, only: eq2
   use M_system
   use M_fdata, only: nssh, Qneutral,rcutoff, num_orb, isorpmax, nspecies
   implicit none
-  integer ialp
-  integer iatom
-  integer ibeta
-  integer icount
-  integer icount_sav
-  integer ierror
-  integer imu
-  integer in1
-  integer in2
-  integer indna
-  integer ineigh
-  integer interaction
-  integer inu
-  integer isorp
-  integer issh
-  integer jatom
-  integer jneigh
-  integer jbeta
-  integer jcount
-  integer jcount_sav
-  integer jssh
-  integer matom
-  integer mbeta
-  integer mneigh
-  integer ix
-  integer j
-  real(wp) cost
-  real(wp) distance_13
-  real(wp) distance_23
-  real(wp) dq3
-  real(wp) dstn_temp
-  real(wp) dterm
-  real(wp) dxn
-  real(wp) rcutoff_ialp
-  real(wp) rend1
-  real(wp) rend2
-  real(wp) sterm
-  real(wp) stn_temp1
-  real(wp) stn_temp2
-  real(wp) x
-  real(wp) y
-  real(wp) rcutoff_i
-  real(wp) rcutoff_j
-  real(wp) dot_product_dipc_x
-  real(wp), dimension (numorb_max, numorb_max) :: bcca
-  real(wp), dimension (numorb_max, numorb_max) :: bccax
-  real(wp), dimension (numorb_max, numorb_max) :: emnpl
-  real(wp), dimension (numorb_max, numorb_max) :: emnpl_noq
-  real(wp), dimension (3, 3, 3) :: deps
-  real(wp), dimension (3, 3) :: eps
-  real(wp), dimension (3) :: r1
-  real(wp), dimension (3) :: r2
-  real(wp), dimension (3) :: r21
-  real(wp), dimension (3) :: rhat
-  real(wp), dimension (3) :: rna
-  real(wp), dimension (3) :: rnabc
-  real(wp), dimension (3) :: sighat
-  real(wp) stn1
-  real(wp) stn2
-  real(wp), dimension (:,:), allocatable :: smG
-  real(wp), dimension (:,:,:), allocatable :: spmG
-  real(wp), dimension (:, :, :, :), allocatable :: smatG
-  real(wp), dimension (:, :, :, :), allocatable :: spmatG
+  integer(c_long) ialp
+  integer(c_long) iatom
+  integer(c_long) ibeta
+  integer(c_long) icount
+  integer(c_long) icount_sav
+  integer(c_long) ierror
+  integer(c_long) imu
+  integer(c_long) in1
+  integer(c_long) in2
+  integer(c_long) indna
+  integer(c_long) ineigh
+  integer(c_long) interaction
+  integer(c_long) inu
+  integer(c_long) isorp
+  integer(c_long) issh
+  integer(c_long) jatom
+  integer(c_long) jneigh
+  integer(c_long) jbeta
+  integer(c_long) jcount
+  integer(c_long) jcount_sav
+  integer(c_long) jssh
+  integer(c_long) matom
+  integer(c_long) mbeta
+  integer(c_long) mneigh
+  integer(c_long) ix
+  integer(c_long) j
+  real(c_double) cost
+  real(c_double) distance_13
+  real(c_double) distance_23
+  real(c_double) dq3
+  real(c_double) dstn_temp
+  real(c_double) dterm
+  real(c_double) dxn
+  real(c_double) rcutoff_ialp
+  real(c_double) rend1
+  real(c_double) rend2
+  real(c_double) sterm
+  real(c_double) stn_temp1
+  real(c_double) stn_temp2
+  real(c_double) x
+  real(c_double) y
+  real(c_double) rcutoff_i
+  real(c_double) rcutoff_j
+  real(c_double) dot_product_dipc_x
+  real(c_double), dimension (numorb_max, numorb_max) :: bcca
+  real(c_double), dimension (numorb_max, numorb_max) :: bccax
+  real(c_double), dimension (numorb_max, numorb_max) :: emnpl
+  real(c_double), dimension (numorb_max, numorb_max) :: emnpl_noq
+  real(c_double), dimension (3, 3, 3) :: deps
+  real(c_double), dimension (3, 3) :: eps
+  real(c_double), dimension (3) :: r1
+  real(c_double), dimension (3) :: r2
+  real(c_double), dimension (3) :: r21
+  real(c_double), dimension (3) :: rhat
+  real(c_double), dimension (3) :: rna
+  real(c_double), dimension (3) :: rnabc
+  real(c_double), dimension (3) :: sighat
+  real(c_double) stn1
+  real(c_double) stn2
+  real(c_double), dimension (:,:), allocatable :: smG
+  real(c_double), dimension (:,:,:), allocatable :: spmG
+  real(c_double), dimension (:, :, :, :), allocatable :: smatG
+  real(c_double), dimension (:, :, :, :), allocatable :: spmatG
   allocate (smG (numorb_max, numorb_max))
   allocate (spmG (3, numorb_max, numorb_max))
   allocate (smatG (numorb_max, numorb_max, neigh_max, natoms))

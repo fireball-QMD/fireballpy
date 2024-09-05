@@ -1,14 +1,14 @@
 subroutine interpolate_2d (xin, yin, iauxforce, nx, ny, hx, hy, xintegral, Q_L, dQ_Ldx, dQ_Ldy)
-  use M_constants, only: wp
+  use iso_c_binding
   use M_fdata, only: numXmax, numYmax
   implicit none
-  integer, intent (in) :: iauxforce, nx, ny
-  real(wp), intent (in) :: xin, yin, hx, hy
-  real(wp), intent (in), dimension (numXmax, numYmax) :: xintegral
-  real(wp), intent (out) :: Q_L, dQ_Ldx, dQ_Ldy
-  real(wp), parameter :: tol = 1.0d-5
-  integer :: ix, ixp, ixn, ixn2, iy, iyp, iyn, iyn2
-  real(wp) :: xmin, ymin, xmax, ymax, x, y, hxi, hyi, &
+  integer(c_long), intent (in) :: iauxforce, nx, ny
+  real(c_double), intent (in) :: xin, yin, hx, hy
+  real(c_double), intent (in), dimension (numXmax, numYmax) :: xintegral
+  real(c_double), intent (out) :: Q_L, dQ_Ldx, dQ_Ldy
+  real(c_double), parameter :: tol = 1.0d-5
+  integer(c_long) :: ix, ixp, ixn, ixn2, iy, iyp, iyn, iyn2
+  real(c_double) :: xmin, ymin, xmax, ymax, x, y, hxi, hyi, &
     & fm1m1, fm10, fm11, fm12, f0m1, f00, f01, f02, &
     & f1m1, f10, f11, f12, f2m1, f20, f21, f22, &
     & cm10, cm11, cm12, cm13, c00, c01, c02, c03, &
@@ -38,7 +38,7 @@ subroutine interpolate_2d (xin, yin, iauxforce, nx, ny, hx, hy, xintegral, Q_L, 
       write (*,*) 'INTERPOLATE 2D xin, xmax = ', xin, xmax
       stop
     end if
-    x = real(nx - 1, wp)
+    x = real(nx - 1, c_double)
     ix = nx - 1
   else
     x = hxi*(xin - xmin)
@@ -58,7 +58,7 @@ subroutine interpolate_2d (xin, yin, iauxforce, nx, ny, hx, hy, xintegral, Q_L, 
       write (*,*) 'INTERPOLATE 2D yin, ymax = ', yin, ymax
       stop
     end if
-    y = real(ny - 1, wp)
+    y = real(ny - 1, c_double)
     iy = ny - 1
   else
     y = hyi*(yin - ymin)
@@ -66,8 +66,8 @@ subroutine interpolate_2d (xin, yin, iauxforce, nx, ny, hx, hy, xintegral, Q_L, 
   end if
 
   ! Scaled variables
-  x = x - real(ix - 1, wp)
-  y = y - real(iy - 1, wp)
+  x = x - real(ix - 1, c_double)
+  y = y - real(iy - 1, c_double)
 
   ! Precompute indices
   ixp = ix - 1

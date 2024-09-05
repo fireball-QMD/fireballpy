@@ -1,27 +1,27 @@
 subroutine common_neighbors ()
-  use M_constants, only: wp
+  use iso_c_binding
   use M_system
   use M_fdata, only: nssh, rcutoff
-  integer ialp
-  integer iatom
-  integer ibeta
-  integer imu
-  integer in1, in2
-  integer ineigh
-  integer jatom
-  integer jbeta
-  integer jneigh
-  integer katom
-  integer kbeta
-  integer kneigh
-  integer num_neigh
-  real(wp) distance
-  real(wp) distance2
-  real(wp) range2
-  real(wp) rcutoff_i, rcutoff_j
-  real(wp), dimension (3) :: diff
-  real(wp), dimension (3) :: dvec
-  real(wp), dimension (3) :: vec, vec1, vec2
+  integer(c_long) ialp
+  integer(c_long) iatom
+  integer(c_long) ibeta
+  integer(c_long) imu
+  integer(c_long) in1, in2
+  integer(c_long) ineigh
+  integer(c_long) jatom
+  integer(c_long) jbeta
+  integer(c_long) jneigh
+  integer(c_long) katom
+  integer(c_long) kbeta
+  integer(c_long) kneigh
+  integer(c_long) num_neigh
+  real(c_double) distance
+  real(c_double) distance2
+  real(c_double) range2
+  real(c_double) rcutoff_i, rcutoff_j
+  real(c_double), dimension (3) :: diff
+  real(c_double), dimension (3) :: dvec
+  real(c_double), dimension (3) :: vec, vec1, vec2
   do ialp = 1,natoms
     num_neigh = 0
     do ineigh = 1, neighn(ialp)

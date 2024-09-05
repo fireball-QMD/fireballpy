@@ -2,36 +2,37 @@
 ! functional is that of Ceperley-Alder as parameterized by Perdew-Zunger.
 ! Phys. Rev. B23, 5048 (1981). Units are Hartree a.u. (but see below)
 subroutine cepal (rh, exc, muxc, dexc, d2exc, dmuxc, d2muxc)
-  use M_constants, only: wp, eq2, abohr
+  use iso_c_binding
+  use M_constants, only: eq2, abohr
   implicit none
-  real(wp), intent (in) :: rh
-  real(wp), intent (out) :: dexc
-  real(wp), intent (out) :: d2exc
-  real(wp), intent (out) :: dmuxc
-  real(wp), intent (out) :: exc
-  real(wp), intent (out) :: muxc
-  real(wp), intent (out) :: d2muxc
-  real(wp), parameter :: eps = 1.0d-3
-  real(wp), parameter :: delta_rh = 1.0d-6
-  real(wp) d2nec
-  real(wp) d2nex
-  real(wp) d3nec
-  real(wp) d3nex
-  real(wp) dec
-  real(wp) ddec
-  real(wp) d2dec
-  real(wp) den
-  real(wp) dden
-  real(wp) d2den
-  real(wp) d3den
-  real(wp) ex
-  real(wp) rho_third
-  real(wp) rho
-  real(wp) rhx
-  real(wp) rs
-  real(wp) rsl
-  real(wp) sqrs
-  real(wp) hartree1
+  real(c_double), intent (in) :: rh
+  real(c_double), intent (out) :: dexc
+  real(c_double), intent (out) :: d2exc
+  real(c_double), intent (out) :: dmuxc
+  real(c_double), intent (out) :: exc
+  real(c_double), intent (out) :: muxc
+  real(c_double), intent (out) :: d2muxc
+  real(c_double), parameter :: eps = 1.0d-3
+  real(c_double), parameter :: delta_rh = 1.0d-6
+  real(c_double) d2nec
+  real(c_double) d2nex
+  real(c_double) d3nec
+  real(c_double) d3nex
+  real(c_double) dec
+  real(c_double) ddec
+  real(c_double) d2dec
+  real(c_double) den
+  real(c_double) dden
+  real(c_double) d2den
+  real(c_double) d3den
+  real(c_double) ex
+  real(c_double) rho_third
+  real(c_double) rho
+  real(c_double) rhx
+  real(c_double) rs
+  real(c_double) rsl
+  real(c_double) sqrs
+  real(c_double) hartree1
  
   exc = 0.0d0
   muxc = 0.0d0

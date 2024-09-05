@@ -1,19 +1,20 @@
 ! The subroutine gets total number of neighbors (normal+PP) of each atom
 subroutine num_neigh_tot ()
+  use iso_c_binding
   use M_system
   implicit none
-  integer,allocatable  :: neighb_aux(:,:)
-  integer :: iatom
-  integer :: jatom
-  integer :: jatomPP
-  integer :: num_neigh
-  integer :: num_neighPP
-  integer :: num_neig_tot
-  integer :: ineighPP
-  integer :: ineigh
-  integer :: count_neig
-  integer :: mbeta
-  integer :: mbetaPP
+  integer(c_long),allocatable  :: neighb_aux(:,:)
+  integer(c_long) :: iatom
+  integer(c_long) :: jatom
+  integer(c_long) :: jatomPP
+  integer(c_long) :: num_neigh
+  integer(c_long) :: num_neighPP
+  integer(c_long) :: num_neig_tot
+  integer(c_long) :: ineighPP
+  integer(c_long) :: ineigh
+  integer(c_long) :: count_neig
+  integer(c_long) :: mbeta
+  integer(c_long) :: mbetaPP
 
   if ( allocated (neighj_tot)) deallocate (neighj_tot)
   if ( allocated (neighb_tot)) deallocate (neighb_tot)

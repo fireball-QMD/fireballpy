@@ -1,22 +1,22 @@
 subroutine rotatePP(in1,in2,eps,mmatrix,xmatrix)
-  use M_constants, only: wp
+  use iso_c_binding
   use M_system
   use M_fdata, only: nssh,lssh,nsshPP,lsshPP
   implicit none
-  integer, intent(in) :: in1
-  integer, intent(in) :: in2
-  real(wp), intent(in) :: eps (3, 3)
-  real(wp), intent(in) :: mmatrix (numorb_max, numorb_max)
-  real(wp), intent(out) :: xmatrix (numorb_max, numorb_max)
-  integer issh
-  integer jssh
-  integer k1, k2
-  integer n1, l1, m1
-  integer n2, l2, m2
-  real(wp) dmat (5, 5)
-  real(wp) left (5, 5)
-  real(wp) pmat (3, 3)
-  real(wp) right (5, 5)
+  integer(c_long), intent(in) :: in1
+  integer(c_long), intent(in) :: in2
+  real(c_double), intent(in) :: eps (3, 3)
+  real(c_double), intent(in) :: mmatrix (numorb_max, numorb_max)
+  real(c_double), intent(out) :: xmatrix (numorb_max, numorb_max)
+  integer(c_long) issh
+  integer(c_long) jssh
+  integer(c_long) k1, k2
+  integer(c_long) n1, l1, m1
+  integer(c_long) n2, l2, m2
+  real(c_double) dmat (5, 5)
+  real(c_double) left (5, 5)
+  real(c_double) pmat (3, 3)
+  real(c_double) right (5, 5)
   call twister (eps, dmat, pmat)
   xmatrix=0.0d0
   n1 = 0

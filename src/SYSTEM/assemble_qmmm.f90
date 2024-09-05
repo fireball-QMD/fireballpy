@@ -1,13 +1,14 @@
 subroutine assemble_qmmm ()
-  use M_constants, only: eq2, wp
+  use iso_c_binding
+  use M_constants, only: eq2
   use M_system
   use M_fdata, only: nssh, Qneutral, num_orb
   implicit none
-  integer :: iatom, imu, inu, in1, in2, in3, ineigh, issh, jatom, katom, gatom, mbeta
-  real(wp) :: distance12, dij, dterm, sterm, out_charge, dq3, dq4
-  real(wp), dimension (3) :: r1, r2
-  real(wp), dimension (natoms) :: sub_ewaldqmmm
-  real(wp), dimension (qmmm_qm_mm_pairs) :: charge_new
+  integer(c_long) :: iatom, imu, inu, in1, in2, in3, ineigh, issh, jatom, katom, gatom, mbeta
+  real(c_double) :: distance12, dij, dterm, sterm, out_charge, dq3, dq4
+  real(c_double), dimension (3) :: r1, r2
+  real(c_double), dimension (natoms) :: sub_ewaldqmmm
+  real(c_double), dimension (qmmm_qm_mm_pairs) :: charge_new
 
   ewaldqmmm = 0.0d0
   sub_ewaldqmmm = 0.0d0

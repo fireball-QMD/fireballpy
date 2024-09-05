@@ -1,8 +1,9 @@
 subroutine make_munu ()
+  use iso_c_binding
   use M_fdata, only: ME2c_max, ME3c_max, num_orb, index_max2c, index_max3c, &
     & nspecies, lssh, nssh, mu, nu, mvalue
   implicit none
-  integer :: imu, index, in1, in2, issh1, issh2, l1, l2, n1, n2
+  integer(c_long) :: imu, index, in1, in2, issh1, issh2, l1, l2, n1, n2
 
   ME2c_max = 0
   ME3c_max = 0

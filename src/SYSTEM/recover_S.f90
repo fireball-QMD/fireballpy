@@ -1,13 +1,13 @@
 subroutine recover_S (in1, in2, hlist, hbox)
-  use M_constants, only: wp
+  use iso_c_binding
   use M_system
   use M_fdata, only: nssh, index_maxS, muS, nuS, MES_max, nsh_max, nsh_max
   implicit none
-  integer, intent(in) :: in1, in2
-  real(wp), intent(in) :: hlist (MES_max)
-  real(wp), intent(out) :: hbox (nsh_max, nsh_max)
-  integer imu, inu
-  integer index
+  integer(c_long), intent(in) :: in1, in2
+  real(c_double), intent(in) :: hlist (MES_max)
+  real(c_double), intent(out) :: hbox (nsh_max, nsh_max)
+  integer(c_long) imu, inu
+  integer(c_long) index
   do inu = 1, nssh(in2)
     do imu = 1, nssh(in1)
       hbox(imu,inu) = 0.0d0

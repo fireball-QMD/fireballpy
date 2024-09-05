@@ -1,13 +1,13 @@
 subroutine read_3c (interaction)
-  use M_constants, only: wp
+  use iso_c_binding
   use M_fdata, only: isorpmax, isorpmax_xc, numXmax, numYmax, ME3c_max, nspecies, icon3c, nssh, nzx, index_max3c, index_maxS, &
     & bcna_01, bcna_02, bcna_03, bcna_04, bcna_05, numx3c_bcna, numy3c_bcna, x3cmax_bcna, y3cmax_bcna, hx_bcna, hy_bcna, &
     & den3_01, den3_02, den3_03, den3_04, den3_05, numx3c_den3, numy3c_den3, x3cmax_den3, y3cmax_den3, hx_den3, hy_den3, &
     & den3S_01, den3S_02, den3S_03, den3S_04, den3S_05, fdataLocation, ntheta, threecfname, errno3c
   implicit none
-  integer, intent (in) :: interaction
-  integer :: iounit, in1, in2, in3, index, isorp, itheta, maxtype, mintype, numx, numy, nz1, nz2, nz3
-  real(wp) :: xmax, ymax
+  integer(c_long), intent (in) :: interaction
+  integer(c_long) :: iounit, in1, in2, in3, index, isorp, itheta, maxtype, mintype, numx, numy, nz1, nz2, nz3
+  real(c_double) :: xmax, ymax
   character (len=1000) :: extension, filename, root, root1, root2
 
   iounit = 71

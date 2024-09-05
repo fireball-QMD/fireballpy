@@ -1,13 +1,13 @@
 subroutine recover_3c (in1, in2, hlist, hbox)
-  use M_constants, only: wp
+  use iso_c_binding
   use M_system
   use m_fdata, only: ME3c_max,num_orb,index_max3c,mu,nu
   implicit none
-  integer, intent(in) :: in1, in2
-  real(wp), intent(in) :: hlist (ME3c_max)
-  real(wp), intent(out) :: hbox (numorb_max, numorb_max)
-  integer imu, inu
-  integer index
+  integer(c_long), intent(in) :: in1, in2
+  real(c_double), intent(in) :: hlist (ME3c_max)
+  real(c_double), intent(out) :: hbox (numorb_max, numorb_max)
+  integer(c_long) imu, inu
+  integer(c_long) index
   do inu = 1, num_orb(in2)
    do imu = 1, num_orb(in1)
     hbox(imu,inu) = 0.0d0

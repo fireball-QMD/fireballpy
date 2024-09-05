@@ -1,54 +1,55 @@
 ! This routine calculates the Ewald sum for a crystal with a given basis. This is specially designed for molecules with a given dipole moment.
 subroutine get_ewald (iauxforce)
-  use M_constants, only: wp, pi
+  use iso_c_binding
+  use M_constants, only: pi
   use M_system
   use M_fdata
   implicit none
-  integer, intent (in) :: iauxforce
-  integer iatom
-  integer ig1
-  integer ig2
-  integer ig3
-  integer ig1mx
-  integer ig2mx
-  integer ig3mx
-  integer il1
-  integer il2
-  integer il3
-  integer il1mx
-  integer il2mx
-  integer il3mx
-  integer in1
-  integer issh
-  integer ix
-  integer jatom
-  integer niters
-  integer nitersp
-  real(wp) argument
-  real(wp) my_erfc
-  real(wp) derfcdr
-  real(wp) distance
-  real(wp) factor
-  real(wp) factorf
-  real(wp) g1mag2, g2mag2, g3mag2
-  real(wp) gdotb
-  real(wp) gmax
-  real(wp) gmin2
-  real(wp) gsq
-  real(wp) kappa
-  real(wp) QQ
-  real(wp) r1mag2, r2mag2, r3mag2
-  real(wp) rmax
-  real(wp) rmin2
-  real(wp) stuff
-  real(wp) volcel
-  real(wp), dimension (3) :: cvec
-  real(wp), dimension (3) :: eta
-  real(wp), dimension (3, natoms) :: fewald1, fewald2
-  real(wp), dimension (3) :: g
-  real(wp), dimension (3) :: g1, g2, g3
-  real(wp), dimension (natoms) :: Q, Q0
-  real(wp), dimension (3) :: vecl
+  integer(c_long), intent (in) :: iauxforce
+  integer(c_long) iatom
+  integer(c_long) ig1
+  integer(c_long) ig2
+  integer(c_long) ig3
+  integer(c_long) ig1mx
+  integer(c_long) ig2mx
+  integer(c_long) ig3mx
+  integer(c_long) il1
+  integer(c_long) il2
+  integer(c_long) il3
+  integer(c_long) il1mx
+  integer(c_long) il2mx
+  integer(c_long) il3mx
+  integer(c_long) in1
+  integer(c_long) issh
+  integer(c_long) ix
+  integer(c_long) jatom
+  integer(c_long) niters
+  integer(c_long) nitersp
+  real(c_double) argument
+  real(c_double) my_erfc
+  real(c_double) derfcdr
+  real(c_double) distance
+  real(c_double) factor
+  real(c_double) factorf
+  real(c_double) g1mag2, g2mag2, g3mag2
+  real(c_double) gdotb
+  real(c_double) gmax
+  real(c_double) gmin2
+  real(c_double) gsq
+  real(c_double) kappa
+  real(c_double) QQ
+  real(c_double) r1mag2, r2mag2, r3mag2
+  real(c_double) rmax
+  real(c_double) rmin2
+  real(c_double) stuff
+  real(c_double) volcel
+  real(c_double), dimension (3) :: cvec
+  real(c_double), dimension (3) :: eta
+  real(c_double), dimension (3, natoms) :: fewald1, fewald2
+  real(c_double), dimension (3) :: g
+  real(c_double), dimension (3) :: g1, g2, g3
+  real(c_double), dimension (natoms) :: Q, Q0
+  real(c_double), dimension (3) :: vecl
   ewald = 0.0d0
   if (iauxforce .eq. 1) dewald = 0.0d0
   if (iauxforce .eq. 1) fewald = 0.0d0
@@ -192,11 +193,12 @@ subroutine get_ewald (iauxforce)
 end subroutine get_ewald
 
 subroutine cross (a, b, c)
-  use M_constants, only: wp
+  use iso_c_binding
+  use M_constants, only: pi
   implicit none
-  real(wp), intent(in), dimension(3) :: a
-  real(wp), intent(in), dimension(3) :: b
-  real(wp), intent(out), dimension(3) :: c
+  real(c_double), intent(in), dimension(3) :: a
+  real(c_double), intent(in), dimension(3) :: b
+  real(c_double), intent(out), dimension(3) :: c
   c(1) = a(2)*b(3) - a(3)*b(2)
   c(2) = a(3)*b(1) - a(1)*b(3)
   c(3) = a(1)*b(2) - a(2)*b(1)
@@ -204,10 +206,11 @@ subroutine cross (a, b, c)
 end subroutine cross
 
 function my_erfc (x)
-  use M_constants, only: wp
+  use iso_c_binding
+  use M_constants, only: pi
   implicit none
-  real(wp), intent(in) :: x
-  real(wp) :: s, ax, t, my_erfc
+  real(c_double), intent(in) :: x
+  real(c_double) :: s, ax, t, my_erfc
 
   ax = abs(x)
   if( ax .lt. 1.0d-10) then

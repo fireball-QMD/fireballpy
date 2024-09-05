@@ -2,18 +2,19 @@
 ! old neighbor file exists, then this will be used to determine the neighbors
 ! If not, then the neighbors will be calculated as normal. 
 subroutine initneighbors ()
+  use iso_c_binding
   use M_system
   implicit none
-  integer :: iatom
-  integer :: ineigh
-  integer :: jatom
-  integer :: jneigh
-  integer :: jjneigh
-  integer :: katom
-  integer :: kneigh
-  integer :: mbeta
-  integer :: num_neigh
-  integer :: num_neigh_vdw
+  integer(c_long) :: iatom
+  integer(c_long) :: ineigh
+  integer(c_long) :: jatom
+  integer(c_long) :: jneigh
+  integer(c_long) :: jjneigh
+  integer(c_long) :: katom
+  integer(c_long) :: kneigh
+  integer(c_long) :: mbeta
+  integer(c_long) :: num_neigh
+  integer(c_long) :: num_neigh_vdw
   !   SELF nPP_self  
   ! What's the neighbor of the atom itself?
   nPP_self = -999

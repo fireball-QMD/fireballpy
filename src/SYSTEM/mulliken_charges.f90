@@ -1,17 +1,17 @@
 subroutine MULLIKEN_CHARGES()        
-  use M_constants, only: wp
+  use iso_c_binding
  use M_system
  use M_fdata, only: num_orb,nssh,lssh
  implicit none
- integer iatom            
- integer ikpoint          
- integer imu, inu          
- integer in1, in2          
- integer issh, jssh
- integer ineigh ,jatom,jneigh          
- integer noccupy  
- integer mqn             
- real(wp), dimension (numorb_max, natoms) :: QMulliken
+ integer(c_long) iatom            
+ integer(c_long) ikpoint          
+ integer(c_long) imu, inu          
+ integer(c_long) in1, in2          
+ integer(c_long) issh, jssh
+ integer(c_long) ineigh ,jatom,jneigh          
+ integer(c_long) noccupy  
+ integer(c_long) mqn             
+ real(c_double), dimension (numorb_max, natoms) :: QMulliken
  QMulliken = 0.0d0             
  do iatom = 1, natoms
    in1 = imass(iatom)

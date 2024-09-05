@@ -1,86 +1,87 @@
 subroutine Dassemble_ca_3c_dip () 
-  use M_constants, only: wp, eq2
+  use iso_c_binding
+  use M_constants, only: eq2
   use M_system
   use M_fdata, only: isorpmax, nssh,rcutoff,Qneutral,num_orb,nspecies
   implicit none
-  integer ialp
-  integer iatom
-  integer ibeta
-  integer icount
-  integer ierror
-  integer icount_sav
-  integer imu
-  integer in1
-  integer in2
-  integer indna
-  integer ineigh
-  integer interaction
-  integer inu
-  integer isorp
-  integer issh
-  integer ix
-  integer jatom
-  integer jbeta
-  integer jcount
-  integer jcount_sav
-  integer jssh
-  integer mneigh
-  real(wp) cost
-  real(wp) distance13
-  real(wp) distance23
-  real(wp) dq1
-  real(wp) dq2
-  real(wp) dq3
-  real(wp) dstn_temp1
-  real(wp) dstn_temp2
-  real(wp) dterm
-  real(wp) dxn
-  real(wp) rcutoff_ialp
-  real(wp) rend1
-  real(wp) rend2
-  real(wp) sterm
-  real(wp) stn_temp1
-  real(wp) stn_temp2
-  real(wp) x
-  real(wp) y
-  real(wp) rcutoff_i
-  real(wp) rcutoff_j
-  real(wp), dimension (numorb_max, numorb_max) :: bcca
-  real(wp), dimension (numorb_max, numorb_max) :: bccax
-  real(wp), dimension (3, numorb_max, numorb_max) :: demnplA
-  real(wp), dimension (3, numorb_max, numorb_max) :: demnplB
-  real(wp), dimension (3, numorb_max, numorb_max) :: demnplC
-  real(wp), dimension (3, 3, 3) :: depsA
-  real(wp), dimension (3, 3, 3) :: depsB
-  real(wp), dimension (3) :: dpterm
-  real(wp) dstn1
-  real(wp) dstn2
-  real(wp), dimension (3) :: dstnA
-  real(wp), dimension (3) :: dstnB
-  real(wp), dimension (3) :: dstnC
-  real(wp), dimension (numorb_max, numorb_max) :: emnpl
-  real(wp), dimension (3, 3) :: eps
-  real(wp), dimension (3, numorb_max, numorb_max) :: f3caXa
-  real(wp), dimension (3, numorb_max, numorb_max) :: f3caXb
-  real(wp), dimension (3, numorb_max, numorb_max) :: f3caXc
-  real(wp), dimension (3, numorb_max, numorb_max) :: f3caXa_sorp
-  real(wp), dimension (3, numorb_max, numorb_max) :: f3caXb_sorp
-  real(wp), dimension (3, numorb_max, numorb_max) :: f3caXc_sorp
-  real(wp), dimension (3) :: r1
-  real(wp), dimension (3) :: r2
-  real(wp), dimension (3) :: r21
-  real(wp), dimension (3) :: rhat
-  real(wp), dimension (3) :: rhatA1
-  real(wp), dimension (3) :: rhatA2
-  real(wp), dimension (3) :: rna
-  real(wp), dimension (3) :: rnabc
-  real(wp), dimension (3) :: sighat
-  real(wp), dimension (3) :: spterm
-  real(wp), dimension (3) :: ddterm
-  real(wp), dimension (3) :: dptermA
-  real(wp), dimension (3) :: dptermB
-  real(wp) stn1
-  real(wp) stn2
+  integer(c_long) ialp
+  integer(c_long) iatom
+  integer(c_long) ibeta
+  integer(c_long) icount
+  integer(c_long) ierror
+  integer(c_long) icount_sav
+  integer(c_long) imu
+  integer(c_long) in1
+  integer(c_long) in2
+  integer(c_long) indna
+  integer(c_long) ineigh
+  integer(c_long) interaction
+  integer(c_long) inu
+  integer(c_long) isorp
+  integer(c_long) issh
+  integer(c_long) ix
+  integer(c_long) jatom
+  integer(c_long) jbeta
+  integer(c_long) jcount
+  integer(c_long) jcount_sav
+  integer(c_long) jssh
+  integer(c_long) mneigh
+  real(c_double) cost
+  real(c_double) distance13
+  real(c_double) distance23
+  real(c_double) dq1
+  real(c_double) dq2
+  real(c_double) dq3
+  real(c_double) dstn_temp1
+  real(c_double) dstn_temp2
+  real(c_double) dterm
+  real(c_double) dxn
+  real(c_double) rcutoff_ialp
+  real(c_double) rend1
+  real(c_double) rend2
+  real(c_double) sterm
+  real(c_double) stn_temp1
+  real(c_double) stn_temp2
+  real(c_double) x
+  real(c_double) y
+  real(c_double) rcutoff_i
+  real(c_double) rcutoff_j
+  real(c_double), dimension (numorb_max, numorb_max) :: bcca
+  real(c_double), dimension (numorb_max, numorb_max) :: bccax
+  real(c_double), dimension (3, numorb_max, numorb_max) :: demnplA
+  real(c_double), dimension (3, numorb_max, numorb_max) :: demnplB
+  real(c_double), dimension (3, numorb_max, numorb_max) :: demnplC
+  real(c_double), dimension (3, 3, 3) :: depsA
+  real(c_double), dimension (3, 3, 3) :: depsB
+  real(c_double), dimension (3) :: dpterm
+  real(c_double) dstn1
+  real(c_double) dstn2
+  real(c_double), dimension (3) :: dstnA
+  real(c_double), dimension (3) :: dstnB
+  real(c_double), dimension (3) :: dstnC
+  real(c_double), dimension (numorb_max, numorb_max) :: emnpl
+  real(c_double), dimension (3, 3) :: eps
+  real(c_double), dimension (3, numorb_max, numorb_max) :: f3caXa
+  real(c_double), dimension (3, numorb_max, numorb_max) :: f3caXb
+  real(c_double), dimension (3, numorb_max, numorb_max) :: f3caXc
+  real(c_double), dimension (3, numorb_max, numorb_max) :: f3caXa_sorp
+  real(c_double), dimension (3, numorb_max, numorb_max) :: f3caXb_sorp
+  real(c_double), dimension (3, numorb_max, numorb_max) :: f3caXc_sorp
+  real(c_double), dimension (3) :: r1
+  real(c_double), dimension (3) :: r2
+  real(c_double), dimension (3) :: r21
+  real(c_double), dimension (3) :: rhat
+  real(c_double), dimension (3) :: rhatA1
+  real(c_double), dimension (3) :: rhatA2
+  real(c_double), dimension (3) :: rna
+  real(c_double), dimension (3) :: rnabc
+  real(c_double), dimension (3) :: sighat
+  real(c_double), dimension (3) :: spterm
+  real(c_double), dimension (3) :: ddterm
+  real(c_double), dimension (3) :: dptermA
+  real(c_double), dimension (3) :: dptermB
+  real(c_double) stn1
+  real(c_double) stn2
   f3caa = 0.0d0
   f3cab = 0.0d0
   f3cac = 0.0d0
