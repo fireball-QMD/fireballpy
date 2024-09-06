@@ -19,7 +19,6 @@ subroutine kspace_double (ikpoint, sks)
   integer(c_long) mbeta
   integer(c_long) mineig
   integer(c_long) lm
-  integer(c_long) issh
   real(c_double) dot
   real(c_double) sqlami
   real(c_double), dimension (norbitals) :: eigen
@@ -35,11 +34,8 @@ subroutine kspace_double (ikpoint, sks)
   real(c_double), dimension (:), allocatable :: ww
   complex(c_double_complex), allocatable, dimension (:) :: work
   real(c_double), allocatable, dimension (:) :: rwork
-  integer(c_long), allocatable, dimension (:) :: iwork
+  integer(c_long) lwork, lrwork
 
-  integer(c_long) lwork, lrwork, liwork
-
-  real(c_double) diff, imcoef, recoef
   a0 = cmplx(0.0d0,0.0d0,c_double_complex)
   a1 = cmplx(1.0d0,0.0d0,c_double_complex)
   ishort = 1
@@ -126,7 +122,7 @@ subroutine kspace_double (ikpoint, sks)
 
   if (Kscf .eq. 1 .or. iqout .eq. 3) then
    call zheev ('V', 'U', norbitals, zzzz, norbitals, slam, work, -1_c_long, rwork, info)
-   lwork = int(work(1), c_long)
+   lwork = nint(real(work(1), c_double), c_long)
    deallocate (work)
    allocate (work(lwork))
    call zheev ('V', 'U', norbitals, zzzz, norbitals, slam, work, lwork, rwork , info)
@@ -203,7 +199,7 @@ subroutine kspace_double (ikpoint, sks)
   deallocate (work)
   allocate (work(lwork))
   call zheev ('V', 'U', norbitals, yyyy, norbitals, eigen, work, -1_c_long, rwork, info)
-  lwork = int(work(1), c_long)
+  lwork = nint(real(work(1), c_double), c_long)
   deallocate (work)
   allocate (work(lwork))
   call zheev ('V', 'U', norbitals, yyyy, norbitals, eigen, work, lwork, rwork, info)

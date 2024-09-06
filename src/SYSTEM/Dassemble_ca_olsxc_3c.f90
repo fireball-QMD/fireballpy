@@ -1,12 +1,11 @@
 subroutine Dassemble_ca_olsxc_3c ()
   use iso_c_binding
   use M_system
-  use M_fdata, only: nssh,isorpmax,nspecies,num_orb,lssh,nsh_max
+  use M_fdata, only: nssh,num_orb,lssh,nsh_max
   implicit none
   integer(c_long) ialp
   integer(c_long) iatom
   integer(c_long) ibeta
-  integer(c_long) ierror
   integer(c_long) imu
   integer(c_long) inu
   integer(c_long) in1
@@ -128,8 +127,8 @@ subroutine Dassemble_ca_olsxc_3c ()
         avrhop_b = 0.0d0
         avrhop_c = 0.0d0
         do isorp = 1, nssh(indna)
-          call Dtrescentros (interaction, isorp, isorpmax, in1, in2, indna, x, y, cost, eps, depsA, depsB, rhat, sighat, rhoin, rhoxpa, rhoxpb, rhoxpc)
-          call DtrescentrosS (isorp, isorpmax, in1, in2, indna, x, y, cost, rhat, sighat, rhomm, rhompa, rhompb, rhompc)
+          call Dtrescentros (interaction, isorp, in1, in2, indna, x, y, cost, eps, depsA, depsB, rhat, sighat, rhoin, rhoxpa, rhoxpb, rhoxpc)
+          call DtrescentrosS (isorp, in1, in2, indna, x, y, cost, rhat, sighat, rhomm, rhompa, rhompb, rhompc)
           rhoin(:,:) = rho_off(:,:,mneigh,iatom)
           do inu = 1, num_orb(in2)
             do imu = 1, num_orb(in1)

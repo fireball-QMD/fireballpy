@@ -6,18 +6,15 @@ subroutine Dassemble_3c_PP ()
   integer(c_long) ialp
   integer(c_long) iatom
   integer(c_long) ibeta
-  integer(c_long) ierror
   integer(c_long) imu
   integer(c_long) in1
   integer(c_long) in2
   integer(c_long) indna
   integer(c_long) ineigh
   integer(c_long) inu
-  integer(c_long) issh
   integer(c_long) ix
   integer(c_long) jatom
   integer(c_long) jbeta
-  integer(c_long) jssh
   integer(c_long) m31
   integer(c_long) m32
   integer(c_long) mneigh

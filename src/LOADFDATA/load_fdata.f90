@@ -7,7 +7,7 @@ subroutine load_fdata()
     & isorpmax, isorpmax_xc, ME2c_max, nfofx
   implicit none
   integer(c_long) :: in1, in2, in3, ispec, issh, aux, icount, isorp, &
-    & interaction, ideriv, mintype, maxtype
+    & interaction, mintype, maxtype
   real(c_double), dimension (:,:), allocatable :: rcutoff_temp
 
   ! Find nsh_max and nsh_max_PP

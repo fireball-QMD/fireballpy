@@ -1,4 +1,4 @@
-subroutine DtrescentrosS (isorp, maxtype, in1, in2, indna, x, y, cost, rhat, sighat, bcnax, f3naXa, f3naXb, f3naXc)
+subroutine DtrescentrosS (isorp, in1, in2, indna, x, y, cost, rhat, sighat, bcnax, f3naXa, f3naXb, f3naXc)
   use iso_c_binding
  use M_system
  use M_fdata
@@ -7,7 +7,6 @@ subroutine DtrescentrosS (isorp, maxtype, in1, in2, indna, x, y, cost, rhat, sig
  integer(c_long), intent (in) :: in2
  integer(c_long), intent (in) :: indna
  integer(c_long), intent (in) :: isorp
- integer(c_long), intent (in) :: maxtype
  real(c_double), intent (in) :: cost
  real(c_double), intent (in) :: x
  real(c_double), intent (in) :: y

@@ -2,13 +2,12 @@ subroutine Dassemble_ca_3c ()
   use iso_c_binding
   use M_constants, only: eq2
   use M_system
-  use M_fdata, only: isorpmax, nssh,rcutoff,Qneutral,lssh,num_orb,nspecies
+  use M_fdata, only: nssh,rcutoff,Qneutral,lssh,num_orb
   implicit none
   integer(c_long) ialp
   integer(c_long) iatom
   integer(c_long) ibeta
   integer(c_long) icount
-  integer(c_long) ierror
   integer(c_long) icount_sav
   integer(c_long) imu
   integer(c_long) in1
@@ -208,7 +207,7 @@ subroutine Dassemble_ca_3c ()
      f3caXc = 0.0d0
      interaction = 1
      do isorp = 1, nssh(indna)
-      call Dtrescentros (interaction, isorp, isorpmax, in1, in2, indna, x, y, cost, eps, depsA, depsB, rhat, sighat, bccax, f3caXa_sorp, f3caXb_sorp, f3caXc_sorp)
+      call Dtrescentros (interaction, isorp, in1, in2, indna, x, y, cost, eps, depsA, depsB, rhat, sighat, bccax, f3caXa_sorp, f3caXb_sorp, f3caXc_sorp)
       dxn = (Qin(isorp,ialp) - Qneutral(isorp,indna))
       do inu = 1, num_orb(in2)
        do imu = 1, num_orb(in1)

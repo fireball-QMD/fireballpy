@@ -8,7 +8,6 @@ subroutine assemble_ca_2c ()
   integer(c_long) iatom
   integer(c_long) icount
   integer(c_long) icount_sav
-  integer(c_long) ierror
   integer(c_long) imu
   integer(c_long) in1
   integer(c_long) in2
@@ -33,8 +32,6 @@ subroutine assemble_ca_2c ()
   real(c_double) dxn
   real(c_double) rcutoff_j
   real(c_double) rend
-  real(c_double) rend1
-  real(c_double) rend2
   real(c_double) sterm_1
   real(c_double) sterm_2
   real(c_double) stn_temp1

@@ -2,14 +2,11 @@ subroutine assemble_ca_3c_dip ()
   use iso_c_binding
   use M_constants, only: eq2
   use M_system
-  use M_fdata, only: nssh, Qneutral,rcutoff, num_orb, isorpmax, nspecies
+  use M_fdata, only: nssh, Qneutral,rcutoff, num_orb
   implicit none
   integer(c_long) ialp
   integer(c_long) iatom
   integer(c_long) ibeta
-  integer(c_long) icount
-  integer(c_long) icount_sav
-  integer(c_long) ierror
   integer(c_long) imu
   integer(c_long) in1
   integer(c_long) in2
@@ -22,14 +19,9 @@ subroutine assemble_ca_3c_dip ()
   integer(c_long) jatom
   integer(c_long) jneigh
   integer(c_long) jbeta
-  integer(c_long) jcount
-  integer(c_long) jcount_sav
-  integer(c_long) jssh
   integer(c_long) matom
   integer(c_long) mbeta
   integer(c_long) mneigh
-  integer(c_long) ix
-  integer(c_long) j
   real(c_double) cost
   real(c_double) distance_13
   real(c_double) distance_23
@@ -47,7 +39,6 @@ subroutine assemble_ca_3c_dip ()
   real(c_double) y
   real(c_double) rcutoff_i
   real(c_double) rcutoff_j
-  real(c_double) dot_product_dipc_x
   real(c_double), dimension (numorb_max, numorb_max) :: bcca
   real(c_double), dimension (numorb_max, numorb_max) :: bccax
   real(c_double), dimension (numorb_max, numorb_max) :: emnpl
@@ -176,7 +167,7 @@ subroutine assemble_ca_3c_dip ()
         bcca = 0.0d0
         do isorp = 1, nssh(indna)
           interaction = 1
-          call trescentros (interaction, isorp, isorpmax, in1, in2, indna, x, y, cost, eps, bccax)
+          call trescentros (interaction, isorp, in1, in2, indna, x, y, cost, eps, bccax)
           dxn = (Qin(isorp,ialp) - Qneutral(isorp,indna))
           do inu = 1, num_orb(in2)
             do imu = 1, num_orb(in1)

@@ -23,7 +23,6 @@ subroutine doscentrosDipY (interaction, isub, in1, in2, in3, distance, eps, deps
   real(c_double), dimension (numorb_max,numorb_max) :: sm
   real(c_double), dimension (numorb_max,numorb_max) :: spm
   real(c_double), dimension (3,numorb_max,numorb_max) :: spmx
-  logical switch
   sm = 0.0d0
   sx = 0.0d0
   if (iforce .eq. 1) spm = 0.0d0

@@ -5,7 +5,6 @@ subroutine assemble_lr ()
   use M_fdata, only: nssh,Qneutral,num_orb
   implicit none
   integer(c_long) iatom
-  integer(c_long) ierror
   integer(c_long) imu
   integer(c_long) inu
   integer(c_long) in1
@@ -14,8 +13,6 @@ subroutine assemble_lr ()
   integer(c_long) issh
   integer(c_long) jatom
   integer(c_long) mbeta
-  integer(c_long) katom
-  integer(c_long) in3
   real(c_double) distance12
   real(c_double) dq1
   real(c_double) dterm

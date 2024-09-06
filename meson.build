@@ -15,13 +15,14 @@ project(
 fc = meson.get_compiler('fortran')
 fflags = ['-unroll', '-fPIC']
 if fc.get_id() == 'gcc'
-  fflags += ['-ffree-line-length-none']
+  fflags += ['-ffree-line-length-none', '-Wno-maybe-uninitialized']
   if get_option('buildtype') == 'custom'
+    # unitialized warning could be problematic as gnu is different from intel
     fflags += ['-ffast-math', '-fstack-arrays', '-fallow-store-data-races',
-               '-fno-semantic-interposition', '-march=native']
+               '-fno-semantic-interposition', '-march=native', '-Wno-uninitialized']
   endif
 elif fc.get_id() in ['intel', 'intel-llvm']
-  fflags += ['-fno-alias', '-free', '-diag-disable 5268']
+  fflags += ['-fno-alias', '-free']
   if get_option('buildtype') == 'custom'
     fflags += ['-fp-model=fast', '-xHost', '-diag-disable 10121']
   else
@@ -43,6 +44,7 @@ env.append('PKG_CONFIG_PATH', get_option('libdir') / 'pkgconfig')
 
 # Set compiler flags
 add_global_arguments(fflags, language: 'fortran')
+add_global_arguments('-Wno-misleading-indentation', language: 'c')
 
 # Link LAPACK and BLAS (strat from scipy)
 blas_name = get_option('blas')
@@ -91,10 +93,12 @@ fortranobject_dep = declare_dependency(
 subdir('src')
 
 # Build _fireball
+# --quiet flag to supress stupid non-sense warnings
+# one might have to take it out if it does not work to debug
 fireball_source = custom_target('fireball_module',
   input : 'src' / 'libf2py.f90', # No module hence no .f90 wrappers
   output : ['_fireballmodule.c', '_fireball-f2pywrappers.f'],
-  command : [py, '-m', 'numpy.f2py', '@INPUT@', '-m', '_fireball', '--lower'],
+  command : [py, '-m', 'numpy.f2py', '@INPUT@', '-m', '_fireball', '--lower', '--quiet'],
 )
 
 py.extension_module('_fireball',

@@ -4,12 +4,10 @@ subroutine MULLIKEN_CHARGES()
  use M_fdata, only: num_orb,nssh,lssh
  implicit none
  integer(c_long) iatom            
- integer(c_long) ikpoint          
  integer(c_long) imu, inu          
  integer(c_long) in1, in2          
- integer(c_long) issh, jssh
+ integer(c_long) issh
  integer(c_long) ineigh ,jatom,jneigh          
- integer(c_long) noccupy  
  integer(c_long) mqn             
  real(c_double), dimension (numorb_max, natoms) :: QMulliken
  QMulliken = 0.0d0             

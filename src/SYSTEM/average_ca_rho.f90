@@ -2,17 +2,15 @@
 subroutine average_ca_rho ()
   use iso_c_binding
   use M_system
-  use M_fdata, only: nssh, num_orb, isorpmax, nspecies, nsh_max
+  use M_fdata, only: nssh, num_orb, nsh_max
   implicit none
   integer(c_long) iatom
   integer(c_long) ibeta
-  integer(c_long) ierror
   integer(c_long) imu
   integer(c_long) in1
   integer(c_long) in2
   integer(c_long) in3
   integer(c_long) indna
-  integer(c_long) index
   integer(c_long) ineigh
   integer(c_long) interaction
   integer(c_long) interaction0
@@ -23,15 +21,11 @@ subroutine average_ca_rho ()
   integer(c_long) jneigh
   integer(c_long) jbeta
   integer(c_long) jssh
-  integer(c_long) l1
   integer(c_long) mbeta
   integer(c_long) mneigh
-  integer(c_long) n1
-
   real(c_double) cost
   real(c_double) x
   real(c_double) y
-
   real(c_double), dimension (3, 3, 3) :: deps
   real(c_double), dimension (3, 3) :: eps
   real(c_double), dimension (3) :: r1
@@ -56,8 +50,6 @@ subroutine average_ca_rho ()
   real(c_double), dimension (nsh_max, nsh_max) :: sm
   real(c_double), dimension (3, nsh_max, nsh_max) :: spm
   !
-  real(c_double), dimension (nsh_max, nsh_max) :: smGS
-  real(c_double), dimension (3, nsh_max, nsh_max) :: spmGS
   real(c_double) rho_modified
 
   rhomx=0.0d0
@@ -258,8 +250,8 @@ subroutine average_ca_rho ()
         call epsilon (rhat, sighat, eps)
         interaction = 3
         do isorp = 1, nssh(indna)
-          call trescentros (interaction, isorp, isorpmax, in1, in2, indna, x, y, cost, eps, rhomx)
-          call trescentrosS (isorp, isorpmax, in1, in2, indna, x, y, cost, eps, rhomm)
+          call trescentros (interaction, isorp, in1, in2, indna, x, y, cost, eps, rhomx)
+          call trescentrosS (isorp, in1, in2, indna, x, y, cost, rhomm)
           do inu = 1, num_orb(in2)
             do imu = 1, num_orb(in1)
               rho_off(imu,inu,mneigh,iatom) = rho_off(imu,inu,mneigh,iatom) + rhomx(imu,inu)*Qin(isorp,ialp)

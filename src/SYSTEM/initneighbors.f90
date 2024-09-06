@@ -8,13 +8,7 @@ subroutine initneighbors ()
   integer(c_long) :: iatom
   integer(c_long) :: ineigh
   integer(c_long) :: jatom
-  integer(c_long) :: jneigh
-  integer(c_long) :: jjneigh
-  integer(c_long) :: katom
-  integer(c_long) :: kneigh
   integer(c_long) :: mbeta
-  integer(c_long) :: num_neigh
-  integer(c_long) :: num_neigh_vdw
   !   SELF nPP_self  
   ! What's the neighbor of the atom itself?
   nPP_self = -999

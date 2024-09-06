@@ -5,9 +5,8 @@ subroutine Dassemble_qmmm_dip ()
   use M_fdata, only: nssh, Qneutral, num_orb
   implicit none
   integer(c_long) :: iatom, imu, inu, in1, in2, in3, ineigh, issh, jatom, katom, mbeta, ix
-  real(c_double) :: dist13, dist23, distance12, dij, dq1, dq2, dq3, dq4, dterm, x, sterm
+  real(c_double) :: dij, dq3, dq4, dterm, x, sterm
   real(c_double), dimension (3) :: rna, rnabc, r1, r2, r21, vij, ddterm, dptermA, dptermB, spterm
-  real(c_double), dimension (numorb_max, numorb_max) :: emnpl
   real(c_double), dimension (3, numorb_max, numorb_max) :: demnplA, demnplB, demnplC
 
   flrew_qmmm = 0.0d0

@@ -19,7 +19,6 @@ subroutine kspace_gamma ( ikpoint, sks)
   integer(c_long) mbeta
   integer(c_long) mineig
   integer(c_long) lm
-  integer(c_long) issh
   real(c_double) sqlami
   real(c_double), dimension (norbitals) :: eigen
   real(c_double), dimension (norbitals) :: slam
@@ -116,7 +115,7 @@ subroutine kspace_gamma ( ikpoint, sks)
 
   if (Kscf .eq. 1 .or. iqout .eq. 3) then
     call dsyev ('V', 'U', norbitals, zzzz, norbitals, slam, work, -1_c_long, info)
-    lwork = int(work(1), c_long)
+    lwork = nint(work(1), c_long)
     deallocate (work)
     allocate(work(lwork))
     call dsyev ('V', 'U', norbitals, zzzz, norbitals, slam, work,lwork, info )
@@ -175,7 +174,7 @@ subroutine kspace_gamma ( ikpoint, sks)
   deallocate (work)
   allocate (work(lwork))
   call dsyev ('V', 'U', norbitals, yyyy, norbitals, eigen, work, -1_c_long, info)
-  lwork = int(work(1), c_long)
+  lwork = nint(work(1), c_long)
   deallocate (work)
   allocate(work(lwork))
   call dsyev ('V', 'U', norbitals, yyyy, norbitals, eigen, work, lwork, info )

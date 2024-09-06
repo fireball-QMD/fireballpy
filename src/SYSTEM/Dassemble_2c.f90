@@ -5,7 +5,6 @@ subroutine Dassemble_2c ()
   use M_fdata, only: num_orb
   implicit none
   integer(c_long) iatom
-  integer(c_long) ierror
   integer(c_long) imu
   integer(c_long) in1
   integer(c_long) in2
@@ -19,7 +18,6 @@ subroutine Dassemble_2c ()
   integer(c_long) kforce
   integer(c_long) matom
   integer(c_long) mbeta
-  real(c_double) muxc
   real(c_double) sumS
   real(c_double) sumT
   real(c_double) y

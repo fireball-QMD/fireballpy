@@ -4,16 +4,15 @@ subroutine MULLIKEN_DIPOLE_CHARGES()
   use M_fdata, only: num_orb,nssh,lssh
   implicit none
   integer(c_long) iatom                        
-  integer(c_long) ikpoint                    
   integer(c_long) imu, inu                   
   integer(c_long) in1, in2                   
   integer(c_long) issh, jssh
   integer(c_long) ineigh , jatom,jneigh                        
-  integer(c_long) noccupy    
   integer(c_long) mqn                          
   real(c_double) y
   real(c_double), dimension (numorb_max, natoms) :: QMulliken
-  real(c_double), dimension (3) :: vec, r1, r2, r21
+  real(c_double), dimension (3) :: r1, r2, r21
+
   QMulliken = 0.0d0
   do iatom = 1, natoms
     in1 = imass(iatom)

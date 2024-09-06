@@ -3,10 +3,9 @@ subroutine neighbors ()
   use M_system
   use M_fdata, only: nssh, rcutoff
   implicit none
-  integer(c_long) :: iatom,jatom,mbeta,num_neigh,num_neigh_vdw,in1,imu,in2,neighcount
+  integer(c_long) :: iatom,jatom,mbeta,num_neigh,in1,imu,in2
   real(c_double) :: distance2,rcutoff_j, rcutoff_i,distance,range2,rc_max
-  integer(c_long) :: mbeta_max2
-  integer(c_long) :: neigh_max_old, ii, jj
+
   if (icluster .eq. 1) mbeta_max = 0
   rc_max = 0.00
   do iatom = 1, natoms

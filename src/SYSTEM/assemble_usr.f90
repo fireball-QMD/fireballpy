@@ -15,19 +15,14 @@ subroutine assemble_usr ()
   integer(c_long) jssh
   integer(c_long) mbeta
   integer(c_long) n1, n2
-  integer(c_long) non2c
   real(c_double) distance
-  real(c_double) dq1, dq2
-  real(c_double) dqi, dqj
-  real(c_double) dxc
-  real(c_double) dxc00, dxc0P, dxc0M, dxcP0, dxcM0
+  real(c_double) dq1
+  real(c_double) dqi
   real(c_double) eklr
   real(c_double) qi, qj
   real(c_double) QQ
   real(c_double) u0tot
   real(c_double) ue0tot
-  real(c_double) xc
-  real(c_double) xc00, xc0P, xc0M, xcP0, xcM0
   real(c_double) xforce
   real(c_double) Zi, Zj
   real(c_double), dimension (natoms, neigh_max) :: corksr

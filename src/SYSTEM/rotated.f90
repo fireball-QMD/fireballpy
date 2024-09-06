@@ -8,9 +8,6 @@ subroutine rotated (in1, in2, eps, deps, matm, dmatm, dmatx)
   real(c_double), intent(in) :: dmatm (3, numorb_max, numorb_max)
   real(c_double), intent(in) :: matm (numorb_max, numorb_max)
   real(c_double), intent(out) :: dmatx (3, numorb_max, numorb_max)
-  integer(c_long) imu
-  integer(c_long) inu
-  integer(c_long) ix
   real(c_double) ddmat (3, 5, 5)
   real(c_double) dmat (5, 5)
   real(c_double) dpmat (3, 3, 3)

@@ -23,8 +23,6 @@ subroutine get_ewald (iauxforce)
   integer(c_long) issh
   integer(c_long) ix
   integer(c_long) jatom
-  integer(c_long) niters
-  integer(c_long) nitersp
   real(c_double) argument
   real(c_double) my_erfc
   real(c_double) derfcdr
@@ -85,15 +83,15 @@ subroutine get_ewald (iauxforce)
   if (g2mag2 .lt. gmin2) gmin2 = g2mag2
   if (g3mag2 .lt. gmin2) gmin2 = g3mag2
   kappa = sqrt(sqrt(gmin2/(4.0d0*rmin2)))
-  ig1mx = int(gmax * sqrt(4.0d0*kappa**2/g1mag2) + 1.0d0)
-  ig2mx = int(gmax * sqrt(4.0d0*kappa**2/g2mag2) + 1.0d0)
-  ig3mx = int(gmax * sqrt(4.0d0*kappa**2/g3mag2) + 1.0d0)
+  ig1mx = nint(gmax * sqrt(4.0d0*kappa**2/g1mag2) + 1.0d0, c_long)
+  ig2mx = nint(gmax * sqrt(4.0d0*kappa**2/g2mag2) + 1.0d0, c_long)
+  ig3mx = nint(gmax * sqrt(4.0d0*kappa**2/g3mag2) + 1.0d0, c_long)
   if (ig1mx .le. 1) ig1mx = 2
   if (ig2mx .le. 1) ig2mx = 2
   if (ig3mx .le. 1) ig3mx = 2
-  il1mx = int(rmax * sqrt(1.0d0/(kappa**2*r1mag2)) + 1.0d0)
-  il2mx = int(rmax * sqrt(1.0d0/(kappa**2*r2mag2)) + 1.0d0)
-  il3mx = int(rmax * sqrt(1.0d0/(kappa**2*r3mag2)) + 1.0d0)
+  il1mx = nint(rmax * sqrt(1.0d0/(kappa**2*r1mag2)) + 1.0d0, c_long)
+  il2mx = nint(rmax * sqrt(1.0d0/(kappa**2*r2mag2)) + 1.0d0, c_long)
+  il3mx = nint(rmax * sqrt(1.0d0/(kappa**2*r3mag2)) + 1.0d0, c_long)
   if (il1mx .le. 1) il1mx = 2
   if (il2mx .le. 1) il2mx = 2
   if (il3mx .le. 1) il3mx = 2

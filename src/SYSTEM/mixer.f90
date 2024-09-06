@@ -1,7 +1,7 @@
 subroutine mixer ()
   use iso_c_binding
   use M_system
-  use M_fdata, only: nssh, nsh_max
+  use M_fdata, only: nssh
   implicit none
   integer(c_long) iatom
   integer(c_long) in1

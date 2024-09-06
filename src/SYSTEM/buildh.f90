@@ -3,26 +3,15 @@ subroutine buildh ()
   use M_system
   use m_fdata, only: num_orb 
   implicit none
-  integer(c_long) katom
   integer(c_long) iatom
-  integer(c_long) ierror
   integer(c_long) imu
   integer(c_long) in1
   integer(c_long) in2
   integer(c_long) ineigh
-  integer(c_long) matom
   integer(c_long) inu
   integer(c_long) jatom
   integer(c_long) mbeta
-  real(c_double) distance
-  real(c_double), dimension (numorb_max, numorb_max) :: htemp
-  real(c_double), dimension (numorb_max, numorb_max) :: stemp
-  real(c_double), dimension (3) :: dvec
-  integer(c_long) issh
-  integer(c_long) numorb
-  integer(c_long) jatom0
-  integer(c_long) ineigh0
-  integer(c_long) mbeta0
+
   do iatom = 1, natoms
     in1 = imass(iatom)
     do ineigh = 1, neighn(iatom)

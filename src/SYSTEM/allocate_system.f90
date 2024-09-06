@@ -2,28 +2,24 @@ subroutine allocate_system ()
   use iso_c_binding
   use M_constants, only: xlevi, delk
   use M_system 
-  use M_fdata, only: nssh, rcutoff, rc_PP, nspecies, symbolA ,isorpmax
+  use M_fdata, only: nssh, rcutoff, rc_PP, nspecies
   use M_fdata, only: num_orb, Qneutral, lssh, nsshPP, lsshPP,  nsh_max
-  use M_fdata, only: ME3c_max,numXmax,numYmax
+  use M_fdata, only: numXmax,numYmax
 !  use M_fdata, only: numy3c_xc3c, ideriv_max
   implicit none
   integer(c_long):: iatom
   integer(c_long):: jatom
-  integer(c_long):: matom
-  integer(c_long):: ineigh
-  integer(c_long):: i,iorb
+  integer(c_long):: iorb
   integer(c_long):: mbeta
   integer(c_long):: num_neigh
   integer(c_long):: in1
-  integer(c_long):: imu, qmu
+  integer(c_long):: imu
   integer(c_long):: issh
   integer(c_long):: in2
-  integer(c_long):: ispec
   integer(c_long):: numorb
   integer(c_long):: numorbPP_max
   real(c_double) :: rcutoff_i
   real(c_double) :: rcutoff_j
-  real(c_double) :: rcutoff_
   real(c_double) :: distance2
   real(c_double) :: range2
   real(c_double) :: distance
@@ -125,7 +121,7 @@ subroutine allocate_system ()
    in1 = imass(iatom)
    do issh = 1, nssh(in1)
     ztot = ztot + Qneutral(issh,in1)
-    nelectron(iatom) = nelectron(iatom) + Qneutral(issh,in1)
+    nelectron(iatom) = nelectron(iatom) + nint(Qneutral(issh,in1), c_long)
    end do
   end do
 

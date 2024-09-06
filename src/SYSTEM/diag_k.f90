@@ -3,7 +3,6 @@ subroutine diag_k ( )
   use M_system
   implicit none
   integer(c_long) ikpoint
-  integer(c_long) imu
   real(c_double), dimension (3) :: k_temp
   if (allocated(bbnkre)) deallocate(bbnkre)
   allocate (bbnkre (norbitals, norbitals, nkpoints))

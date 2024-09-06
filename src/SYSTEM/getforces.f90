@@ -2,7 +2,6 @@ subroutine getforces ()
   use iso_c_binding
   use M_system
   implicit none
-  integer(c_long) :: iatom
   call Dassemble_2c ()
   call Dassemble_2c_PP ()
   call Dassemble_ca_olsxc_on ()

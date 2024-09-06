@@ -5,7 +5,6 @@ subroutine assemble_lr_dip ()
   use M_fdata, only: nssh, Qneutral, num_orb
   implicit none
   integer(c_long) iatom
-  integer(c_long) ierror
   integer(c_long) imu
   integer(c_long) inu
   integer(c_long) in1
@@ -13,7 +12,6 @@ subroutine assemble_lr_dip ()
   integer(c_long) ineigh
   integer(c_long) issh
   integer(c_long) jatom
-  integer(c_long) mbeta
   integer(c_long) ialp
   integer(c_long) inalp
   integer(c_long) jneigh
@@ -31,7 +29,6 @@ subroutine assemble_lr_dip ()
   real(c_double), dimension (3) :: r23
   real(c_double), dimension (3) :: r21
   real(c_double), dimension (3) :: rnabc
-  real(c_double), dimension (natoms) :: sub_ewald
   real(c_double), dimension (numorb_max, numorb_max) :: emnpl
   real(c_double), dimension (numorb_max, numorb_max) :: emnpl_noq
   ewaldlr = 0.0d0

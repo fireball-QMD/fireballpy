@@ -1,7 +1,7 @@
 subroutine dipole_proyection()
   use iso_c_binding
   use M_system
-  use M_fdata, only: num_orb,nssh,lssh,Qneutral
+  use M_fdata, only: num_orb,nssh,Qneutral
   implicit none
   real(c_double), parameter ::  Debye = 0.208194d0
   real(c_double), parameter ::  klambda = 1.0d0
@@ -25,8 +25,8 @@ subroutine dipole_proyection()
   integer(c_long) :: n_bwrr = 3
   integer(c_long) :: lda_bwrr = 3
   integer(c_long) :: lwork = 15 !MAX(1,3*MIN(M,N) + MAX(M,N),5*MIN(M,N)) 
-  integer(c_long) info,i
-  integer(c_long), dimension(3) :: ipiv
+  integer(c_long) i
+  integer :: info
   real(c_double), dimension(3) :: s_bwrr
   real(c_double), dimension(15) :: dummy
   do iatom = 1, natoms

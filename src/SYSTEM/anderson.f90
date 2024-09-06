@@ -6,11 +6,12 @@ subroutine anderson ( x_try, x_old, nmsh )
   integer(c_long), intent(in) :: nmsh    ! Size of vectors being optimized
   real(c_double), intent(in), dimension(nmsh) :: x_try ! potential new vector on input
   real(c_double), intent(inout), dimension(nmsh) :: x_old ! old vector in input, real(c_double) new vector on output
-  integer(c_long) :: iloop, jloop, retry, mix_order, imix, Kscfm1, mixm1
+  integer(c_long) :: iloop, jloop, mix_order, imix, Kscfm1
   real(c_double), allocatable, dimension(:) :: delF_F    ! <delF|F> in Eq. 5.31
   real(c_double), allocatable, dimension(:,:) :: a_matrix
   ! BLAS stuff
-  integer(c_long) :: lwork, info
+  integer(c_long) :: lwork
+  integer :: info
   integer(c_long), allocatable, dimension(:) :: ipiv
   real(c_double), allocatable, dimension(:) :: work
 
@@ -86,7 +87,7 @@ subroutine anderson ( x_try, x_old, nmsh )
   end do
   allocate(work(1), ipiv(mix_order))
   call dsysv('U',mix_order,1,a_matrix,mix_order,ipiv,delF_F,mix_order,work,-1_c_long,info)
-  lwork = int(work(1), c_long)
+  lwork = nint(work(1), c_long)
   deallocate(work)
   allocate(work(lwork))
   call dsysv('U',mix_order,1,a_matrix,mix_order,ipiv,delF_F,mix_order,work,lwork,info)

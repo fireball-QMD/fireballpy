@@ -4,20 +4,15 @@ subroutine Dassemble_ca_olsxc_on ()
   use M_fdata, only: nssh, lssh
   implicit none
   integer(c_long) iatom
-  integer(c_long) ierror
   integer(c_long) imu
   integer(c_long) in1
   integer(c_long) in2
-  integer(c_long) in3
   integer(c_long) index
   integer(c_long) ineigh
-  integer(c_long) interaction
   integer(c_long) inu
-  integer(c_long) isorp
   integer(c_long) issh
   integer(c_long) ix
   integer(c_long) jatom
-  integer(c_long) kforce
   integer(c_long) jndex
   integer(c_long) jssh
   integer(c_long) l1 
@@ -34,7 +29,6 @@ subroutine Dassemble_ca_olsxc_on ()
   real(c_double) muxc
   real(c_double) rhoxc
   real(c_double) rhoxc_av
-  real(c_double) y
   real(c_double) q_mu
   real(c_double), dimension (3, numorb_max, numorb_max) :: bcxcpx
   real(c_double), dimension (numorb_max, numorb_max) :: delta

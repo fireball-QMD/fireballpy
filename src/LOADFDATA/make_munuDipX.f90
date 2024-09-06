@@ -3,7 +3,7 @@ subroutine make_munuDipX ()
   use M_fdata, only: ME2cDipX_max, nspecies, nssh, num_orb, lssh, &
     & index_max2cDipX, ME2c_max, muDipX, nuDipX
   implicit none
-  integer(c_long) :: imu, index, in1, in2, issh1, issh2, l1, l2, n1, n2
+  integer(c_long) :: index, in1, in2, issh1, issh2, l1, l2, n1, n2
 
   ME2cDipX_max = 0
   allocate (index_max2cDipX (nspecies, nspecies))

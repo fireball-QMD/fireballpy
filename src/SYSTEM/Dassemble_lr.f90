@@ -5,7 +5,6 @@ subroutine Dassemble_lr ()
   use M_fdata, only: num_orb,nssh,Qneutral
   implicit none
   integer(c_long) iatom
-  integer(c_long) ierror
   integer(c_long) imu
   integer(c_long) in1
   integer(c_long) in2

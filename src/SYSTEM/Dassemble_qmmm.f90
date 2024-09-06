@@ -4,9 +4,9 @@ subroutine Dassemble_qmmm ()
   use M_system
   use M_fdata, only  : nssh, Qneutral, num_orb
   implicit none
-  integer(c_long) :: iatom, imu, in1, in2, in3, ineigh, inu, issh, jatom, gatom, jmu, katom, mbeta
-  real(c_double) :: distance12, dij, dq1, dq2, dq3, dterm, sterm, out_charge
-  real(c_double), dimension (3) :: dewaldlr_i_qmmm, dewaldlr_j_qmmm, dewaldlr_k, dpterm, r1, r2, rhat12, spterm, vij
+  integer(c_long) :: iatom, imu, in1, in2, in3, ineigh, inu, issh, jatom, jmu, katom, mbeta
+  real(c_double) :: distance12, dij, dq3, dterm, sterm
+  real(c_double), dimension (3) :: dewaldlr_i_qmmm, dewaldlr_j_qmmm, dpterm, r1, r2, rhat12, spterm, vij
   real(c_double), dimension (natoms) :: sub_ewaldqmmm
   real(c_double), dimension (3, natoms) :: sub_dewaldqmmm
   real(c_double), dimension (3, natoms, qmmm_qm_mm_pairs) :: dqmmm

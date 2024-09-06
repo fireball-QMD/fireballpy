@@ -2,14 +2,13 @@ subroutine LOWDIN_CHARGES()
   use iso_c_binding
   use M_constants, only: spin
   use M_system
-  use M_fdata, only: num_orb,nssh,lssh
+  use M_fdata, only: nssh,lssh
   implicit none
   integer(c_long) iatom
   integer(c_long) ikpoint
-  integer(c_long) imu, inu
-  integer(c_long) in1, in2
-  integer(c_long) issh, jssh,mmu
-  integer(c_long) noccupy
+  integer(c_long) imu
+  integer(c_long) in1
+  integer(c_long) issh, mmu
   integer(c_long) mqn
   integer(c_long) iorbital
   real(c_double) aux1, aux2, aux3

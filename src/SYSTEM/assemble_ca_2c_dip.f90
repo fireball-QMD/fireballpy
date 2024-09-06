@@ -6,9 +6,6 @@ subroutine assemble_ca_2c_dip ()
   use M_fdata, only: nssh,rcutoff,Qneutral,num_orb
   implicit none
   integer(c_long) iatom
-  integer(c_long) icount
-  integer(c_long) icount_sav
-  integer(c_long) ierror
   integer(c_long) imu
   integer(c_long) in1
   integer(c_long) in2
@@ -19,37 +16,22 @@ subroutine assemble_ca_2c_dip ()
   integer(c_long) isorp
   integer(c_long) issh
   integer(c_long) jatom
-  integer(c_long) jcount
-  integer(c_long) jcount_sav
-  integer(c_long) jssh
   integer(c_long) kforce
   integer(c_long) matom
   integer(c_long) mbeta
-  integer(c_long) ix
-  integer(c_long) iy
- 
   real(c_double) dq1
   real(c_double) dq2
   real(c_double) dterm
-  real(c_double) dterm_1
-  real(c_double) dterm_2
   real(c_double) dstn_temp
   real(c_double) dxn
   real(c_double) rcutoff_j
   real(c_double) rend
-  real(c_double) rend1
-  real(c_double) rend2
-  real(c_double) sterm_1
-  real(c_double) sterm_2
   real(c_double) y
   real(c_double) rcutoff_i
- 
   real(c_double), dimension (numorb_max, numorb_max) :: bcca
   real(c_double), dimension (3, numorb_max, numorb_max) :: bccapx
   real(c_double), dimension (numorb_max, numorb_max) :: bccax
   real(c_double), dimension (3, 3, 3) :: deps
-  real(c_double), dimension (numorb_max, numorb_max) :: dipx
-  real(c_double), dimension (3, numorb_max, numorb_max) :: dippx
   real(c_double), dimension (numorb_max, numorb_max) :: emnpl
   real(c_double), dimension (numorb_max, numorb_max) :: emnpl_noq
   real(c_double), dimension (3, 3) :: eps
@@ -59,6 +41,7 @@ subroutine assemble_ca_2c_dip ()
   real(c_double), dimension (3) :: sighat
   real(c_double) stn1
   real(c_double) stn2
+
   vca = 0.0d0
   ewaldsr = 0.0d0
 

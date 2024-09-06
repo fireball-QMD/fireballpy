@@ -3,13 +3,9 @@ subroutine read_1c ()
   use M_fdata, only: nspecies, nzx, fdataLocation, onecfname, exc1c0, nuxc1c, &
     & dnuxc1c, dexc1c, d2exc1c, d2nuxc1c, nsh_max, nssh
   implicit none
-  logical :: skip_it
-  integer(c_long) :: iline, Nlines_vdip1c_max, trash, in1, ins, issh, isorp, &
-    & itype, jssh, kssh, kkssh, numsh, ideriv, iissh, jjssh
-  integer(c_long), dimension (nsh_max) :: imask
-  real(c_double), dimension (nspecies) :: idshell
+  integer(c_long) :: iline, in1, issh, itype, jssh, kssh, kkssh, numsh
   character (len=3) :: auxz
-  character (len=1000) :: extension, filename, root
+  character (len=1000) :: root
 
   allocate(exc1c0 (nspecies,nsh_max,nsh_max))
   allocate(nuxc1c (nspecies,nsh_max,nsh_max))

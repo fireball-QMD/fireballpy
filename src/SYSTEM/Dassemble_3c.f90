@@ -2,11 +2,10 @@ subroutine Dassemble_3c ()
   use iso_c_binding
   use M_constants, only: eq2
   use M_system
-  use M_fdata, only: isorpmax,nspecies,num_orb
+  use M_fdata, only: num_orb
   implicit none
   integer(c_long) iatom
   integer(c_long) ibeta
-  integer(c_long) ierror
   integer(c_long) imu
   integer(c_long) in1
   integer(c_long) in2
@@ -15,11 +14,9 @@ subroutine Dassemble_3c ()
   integer(c_long) interaction
   integer(c_long) inu
   integer(c_long) isorp
-  integer(c_long) issh
   integer(c_long) ix
   integer(c_long) jatom
   integer(c_long) jbeta
-  integer(c_long) jssh
   integer(c_long) mneigh
   integer(c_long) ialp
   real(c_double) cost
@@ -81,7 +78,7 @@ subroutine Dassemble_3c ()
      call deps3center (r1, r2, r21, y, rna, rnabc, eps, depsA, depsB)
      isorp = 0
      interaction = 1
-     call Dtrescentros (interaction, isorp, isorpmax, in1, in2, indna, x, y, cost, eps, depsA, depsB, rhat, sighat, bcnax, f3naXa, f3naXb, f3naXc) 
+     call Dtrescentros (interaction, isorp, in1, in2, indna, x, y, cost, eps, depsA, depsB, rhat, sighat, bcnax, f3naXa, f3naXb, f3naXc) 
      do inu = 1, num_orb(in2)
       do imu = 1, num_orb(in1)
        do ix = 1, 3

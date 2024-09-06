@@ -5,8 +5,7 @@ subroutine common_neighborsPP ()
   integer(c_long) ialp
   integer(c_long) iatom
   integer(c_long) ibeta
-  integer(c_long) imu
-  integer(c_long) in1, in2, indna
+  integer(c_long) in1, in2
   integer(c_long) ineigh
   integer(c_long) jatom
   integer(c_long) jbeta
@@ -15,13 +14,10 @@ subroutine common_neighborsPP ()
   integer(c_long) kbeta
   integer(c_long) kneigh
   integer(c_long) num_neigh
-  integer(c_long) mbeta
 
-  real(c_double)  distance
-  real(c_double), dimension (3) :: dvec
   real(c_double), dimension (3) :: diff
   real(c_double), dimension (3) :: vec1, vec2, vec3, vec
-  
+
   if(icluster .eq. 1) mbeta_max = 0
   do ialp = 1, natoms
     vec2(:) = ratom(:,ialp)

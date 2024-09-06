@@ -5,7 +5,6 @@ subroutine assemble_2c ()
   use M_system
   use M_fdata, only: num_orb
   integer(c_long) iatom
-  integer(c_long) ierror
   integer(c_long) imu
   integer(c_long) in1
   integer(c_long) in2
@@ -18,7 +17,6 @@ subroutine assemble_2c ()
   integer(c_long) kforce
   integer(c_long) matom
   integer(c_long) mbeta
-  integer(c_long) mneigh_self
   integer(c_long) ix
   integer(c_long) iy
   integer(c_long) iz

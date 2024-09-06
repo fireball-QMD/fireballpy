@@ -2,14 +2,11 @@ subroutine Dassemble_ca_3c_dip ()
   use iso_c_binding
   use M_constants, only: eq2
   use M_system
-  use M_fdata, only: isorpmax, nssh,rcutoff,Qneutral,num_orb,nspecies
+  use M_fdata, only: nssh,rcutoff,Qneutral,num_orb,nspecies
   implicit none
   integer(c_long) ialp
   integer(c_long) iatom
   integer(c_long) ibeta
-  integer(c_long) icount
-  integer(c_long) ierror
-  integer(c_long) icount_sav
   integer(c_long) imu
   integer(c_long) in1
   integer(c_long) in2
@@ -22,9 +19,6 @@ subroutine Dassemble_ca_3c_dip ()
   integer(c_long) ix
   integer(c_long) jatom
   integer(c_long) jbeta
-  integer(c_long) jcount
-  integer(c_long) jcount_sav
-  integer(c_long) jssh
   integer(c_long) mneigh
   real(c_double) cost
   real(c_double) distance13
@@ -32,8 +26,6 @@ subroutine Dassemble_ca_3c_dip ()
   real(c_double) dq1
   real(c_double) dq2
   real(c_double) dq3
-  real(c_double) dstn_temp1
-  real(c_double) dstn_temp2
   real(c_double) dterm
   real(c_double) dxn
   real(c_double) rcutoff_ialp
@@ -53,7 +45,6 @@ subroutine Dassemble_ca_3c_dip ()
   real(c_double), dimension (3, numorb_max, numorb_max) :: demnplC
   real(c_double), dimension (3, 3, 3) :: depsA
   real(c_double), dimension (3, 3, 3) :: depsB
-  real(c_double), dimension (3) :: dpterm
   real(c_double) dstn1
   real(c_double) dstn2
   real(c_double), dimension (3) :: dstnA
@@ -198,7 +189,7 @@ subroutine Dassemble_ca_3c_dip ()
         f3caXc = 0.0d0
         interaction = 1
         do isorp = 1, nssh(indna)
-          call Dtrescentros (interaction, isorp, isorpmax, in1, in2, indna, x, y, cost, eps, depsA, depsB, rhat, sighat, bccax, f3caXa_sorp, f3caXb_sorp, f3caXc_sorp, nspecies)
+          call Dtrescentros (interaction, isorp, in1, in2, indna, x, y, cost, eps, depsA, depsB, rhat, sighat, bccax, f3caXa_sorp, f3caXb_sorp, f3caXc_sorp, nspecies)
           dxn = (Qin(isorp,ialp) - Qneutral(isorp,indna))
           do inu = 1, num_orb(in2)
             do imu = 1, num_orb(in1)

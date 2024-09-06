@@ -2,13 +2,12 @@ subroutine assemble_3c ()
   use iso_c_binding
   use M_constants, only: eq2
   use M_system
-  use M_fdata, only: isorpmax,nspecies, num_orb
+  use M_fdata, only: num_orb
   implicit none
 
   integer(c_long) ialp
   integer(c_long) iatom
   integer(c_long) ibeta
-  integer(c_long) ierror
   integer(c_long) imu
   integer(c_long) in1
   integer(c_long) in2
@@ -17,19 +16,14 @@ subroutine assemble_3c ()
   integer(c_long) interaction
   integer(c_long) inu
   integer(c_long) isorp
-  integer(c_long) issh
   integer(c_long) jatom
   integer(c_long) jbeta
-  integer(c_long) jssh
   integer(c_long) mneigh
   integer(c_long) jneigh       
 
   real(c_double) cost
   real(c_double) distance_13
   real(c_double) distance_23
-  real(c_double) dstn_temp
-  real(c_double) stn_temp1
-  real(c_double) stn_temp2
   real(c_double) x
   real(c_double) y
 
@@ -38,14 +32,13 @@ subroutine assemble_3c ()
   real(c_double), dimension (3) :: r1
   real(c_double), dimension (3) :: r2
   real(c_double), dimension (3) :: r21
-  real(c_double), dimension (3) :: r31
-  real(c_double), dimension (3) :: r32
   real(c_double), dimension (3) :: r13
   real(c_double), dimension (3) :: r23
   real(c_double), dimension (3) :: rhat
   real(c_double), dimension (3) :: rna
   real(c_double), dimension (3) :: rnabc
   real(c_double), dimension (3) :: sighat
+
   do ialp = 1, natoms
     rna(:) = ratom(:,ialp)
     indna = imass(ialp)
@@ -88,7 +81,7 @@ subroutine assemble_3c ()
         ! CALL TRESCENTROS FOR NEUTRAL ATOM PIECE
         isorp = 0
         interaction = 1
-        call trescentros (interaction, isorp, isorpmax, in1, in2, indna, x, y, cost, eps, bcnax)
+        call trescentros (interaction, isorp, in1, in2, indna, x, y, cost, eps, bcnax)
         do inu = 1, num_orb(in2)
           do imu = 1, num_orb(in1)
             vna(imu,inu,mneigh,iatom) = vna(imu,inu,mneigh,iatom) + bcnax(imu,inu)*eq2

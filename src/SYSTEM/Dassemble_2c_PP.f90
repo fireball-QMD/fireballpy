@@ -4,7 +4,6 @@ subroutine Dassemble_2c_PP ()
   use M_fdata, only: num_orb, num_orbPP
   implicit none
   integer(c_long) iatom
-  integer(c_long) ierror
   integer(c_long) imu
   integer(c_long) in1
   integer(c_long) in2

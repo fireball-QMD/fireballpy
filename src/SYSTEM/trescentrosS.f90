@@ -1,4 +1,4 @@
-subroutine trescentrosS ( isorp, maxtype, in1, in2, indna, x, y, cost, eps, bcnax)
+subroutine trescentrosS ( isorp, in1, in2, indna, x, y, cost, bcnax)
   use iso_c_binding
   use M_system
   use M_fdata
@@ -7,11 +7,9 @@ subroutine trescentrosS ( isorp, maxtype, in1, in2, indna, x, y, cost, eps, bcna
   integer(c_long), intent (in) :: in2
   integer(c_long), intent (in) :: indna
   integer(c_long), intent (in) :: isorp
-  integer(c_long), intent (in) :: maxtype
   real(c_double), intent (in) :: cost
   real(c_double), intent (in) :: x
   real(c_double), intent (in) :: y
-  real(c_double), intent (in), dimension (3, 3) :: eps
   real(c_double), intent (out), dimension (nsh_max, nsh_max) :: bcnax
   integer(c_long) imu
   integer(c_long) iME

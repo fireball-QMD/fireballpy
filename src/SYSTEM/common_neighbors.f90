@@ -15,12 +15,10 @@ subroutine common_neighbors ()
   integer(c_long) kbeta
   integer(c_long) kneigh
   integer(c_long) num_neigh
-  real(c_double) distance
   real(c_double) distance2
   real(c_double) range2
   real(c_double) rcutoff_i, rcutoff_j
   real(c_double), dimension (3) :: diff
-  real(c_double), dimension (3) :: dvec
   real(c_double), dimension (3) :: vec, vec1, vec2
   do ialp = 1,natoms
     num_neigh = 0
