@@ -1,4 +1,4 @@
-subroutine MULLIKEN_CHARGES()        
+subroutine mulliken_charges()
   use iso_c_binding
  use M_system
  use M_fdata, only: num_orb,nssh,lssh
@@ -32,4 +32,4 @@ subroutine MULLIKEN_CHARGES()
      QMulliken_TOT(iatom) = QMulliken_TOT(iatom) + Qout(issh,iatom)
    end do
  end do  
-end subroutine MULLIKEN_CHARGES 
+end subroutine mulliken_charges

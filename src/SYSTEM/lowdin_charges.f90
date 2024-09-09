@@ -1,4 +1,4 @@
-subroutine LOWDIN_CHARGES()
+subroutine lowdin_charges()
   use iso_c_binding
   use M_constants, only: spin
   use M_system
@@ -39,4 +39,4 @@ subroutine LOWDIN_CHARGES()
       end do !kpoints
     end do
   end do !atoms
-end subroutine LOWDIN_CHARGES 
+end subroutine lowdin_charges

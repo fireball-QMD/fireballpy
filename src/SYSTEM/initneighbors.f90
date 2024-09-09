@@ -31,4 +31,4 @@ subroutine initneighbors ()
   end do
 
   return
-end
+end subroutine initneighbors

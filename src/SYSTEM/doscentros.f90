@@ -65,4 +65,3 @@ subroutine doscentros (interaction, isub, iforceaux, in1, in2, in3, distance, ep
   end if
   return
 end subroutine doscentros
-

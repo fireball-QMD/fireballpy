@@ -65,5 +65,4 @@ subroutine deps3center (r1, r2, r21, distance12, ratm, rnabc, eps3, dera3, der13
   der13(3,2,1) = eps3(1,3)*der13(3,3,2) - eps3(1,2)*der13(3,3,3) - eps3(3,3)*der13(3,1,2) + eps3(3,2)*der13(3,1,3)
   der13(3,3,1) = eps3(2,3)*der13(3,1,2) - eps3(2,2)*der13(3,1,3) - eps3(1,3)*der13(3,2,2) + eps3(1,2)*der13(3,2,3)
   return
-end
-
+end subroutine deps3center

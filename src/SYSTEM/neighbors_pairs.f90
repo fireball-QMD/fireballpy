@@ -26,4 +26,4 @@ subroutine neighbors_pairs ()
   end if !end if icluster .eq. 1
   tot_pairs = num_pairs    !tot_pairs stores the total number of non-repeated
   return 
-end
+end subroutine neighbors_pairs

@@ -55,5 +55,4 @@ subroutine assemble_lr ()
     end do
   end do
   return
-  end
-
+end subroutine assemble_lr

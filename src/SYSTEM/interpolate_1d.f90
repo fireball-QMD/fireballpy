@@ -56,4 +56,3 @@ subroutine interpolate_1d (interaction, isub, in1, in2, non2c, ioption, xin, you
   yout = a + x*(b + x*(c + x*d))
   if(ioption .eq. 1) dfdx = hi*(b + x*(2.0d0*c + x*3.0d0*d))
 end subroutine interpolate_1d
-

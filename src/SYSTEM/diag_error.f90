@@ -31,5 +31,4 @@ subroutine diag_error (info, istyle)
     write (*,*) ' Send e-mail to scalapack@cs.utk.edu if you feel like it'
   end if
   stop
-end
-
+end subroutine diag_error

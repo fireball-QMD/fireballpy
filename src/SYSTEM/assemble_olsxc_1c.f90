@@ -28,4 +28,3 @@ subroutine assemble_olsxc_1c ()
     end do
   end do
 end subroutine assemble_olsxc_1c
-

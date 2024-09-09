@@ -101,4 +101,3 @@ subroutine Dassemble_ca_olsxc_on ()
   end do !  iatom
 
 end subroutine Dassemble_ca_olsxc_on
-

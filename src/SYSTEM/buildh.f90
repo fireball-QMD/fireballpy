@@ -31,7 +31,4 @@ subroutine buildh ()
       end do 
     end do 
   end do
-
- 
 end subroutine buildh
-

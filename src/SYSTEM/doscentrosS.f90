@@ -1,6 +1,5 @@
 subroutine doscentrosS (interaction, isub, iauxforce, in1, in2, in3, distance, eps, sx, spx)
   use iso_c_binding
-  use M_system
   use M_fdata, only: index_maxS,nsh_max,MES_max,nssh
   implicit none
   integer(c_long), intent (in) :: iauxforce

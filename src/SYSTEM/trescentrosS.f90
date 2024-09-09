@@ -94,4 +94,3 @@ subroutine trescentrosS ( isorp, in1, in2, indna, x, y, cost, bcnax)
   call recover_S (in1, in2, hlist, bcnax)
   return
 end subroutine trescentrosS
-

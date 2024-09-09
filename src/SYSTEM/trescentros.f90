@@ -134,4 +134,3 @@ subroutine trescentros (interaction, isorp, in1, in2, indna, x, y, cost, eps, bc
   call rotate_fb (in1, in2, eps, bcnam, bcnax)
   return
 end subroutine trescentros
-

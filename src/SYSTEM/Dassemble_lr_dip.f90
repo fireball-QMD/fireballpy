@@ -147,5 +147,4 @@ subroutine Dassemble_lr_dip ()
       end if  !end if if ((dist13 .lt. 1.0d-5) .or. (dist23 .lt.1.0d-5)) 
     end do !ialp 
   end do !iatom 
-end
-
+end subroutine Dassemble_lr_dip

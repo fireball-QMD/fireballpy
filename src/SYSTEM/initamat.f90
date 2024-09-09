@@ -29,5 +29,4 @@ subroutine initamat()
   amat(1,1,5) = 0.5d0 
   amat(2,2,5) = - 0.5d0
   return
-end
-
+end subroutine initamat

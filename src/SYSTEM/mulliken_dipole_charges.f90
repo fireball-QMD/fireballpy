@@ -1,4 +1,4 @@
-subroutine MULLIKEN_DIPOLE_CHARGES()                   
+subroutine mulliken_dipole_charges()                   
   use iso_c_binding
   use M_system
   use M_fdata, only: num_orb,nssh,lssh
@@ -62,4 +62,4 @@ subroutine MULLIKEN_DIPOLE_CHARGES()
       end if !end if  Qout(issh,iatom) .lt. 0
     end do !end do issh = 1, nssh(in1)
   end do !iatoms
-end subroutine MULLIKEN_DIPOLE_CHARGES  
+end subroutine mulliken_dipole_charges

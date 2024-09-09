@@ -221,5 +221,4 @@ subroutine Dassemble_ca_3c_dip ()
       end if !mneigh .ne. 0
     end do !ineigh
   end do !atoms   
-end
-  
+end subroutine Dassemble_ca_3c_dip

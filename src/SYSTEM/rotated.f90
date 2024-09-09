@@ -16,5 +16,4 @@ subroutine rotated (in1, in2, eps, deps, matm, dmatm, dmatx)
   call twisterd (eps, deps, ddmat, dpmat)
   call makeDmat (in1, in2, matm, dmatm, dmat, pmat, ddmat, dpmat, dmatx)
   return
-end
-
+end subroutine rotated

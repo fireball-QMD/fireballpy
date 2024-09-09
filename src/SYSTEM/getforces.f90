@@ -23,4 +23,3 @@ subroutine getforces ()
   call Dassemble_ca_olsxc_3c ()
   call assemble_F ()
  end subroutine getforces
-

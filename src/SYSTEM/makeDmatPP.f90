@@ -54,5 +54,4 @@ subroutine makeDmatPP (in1, in2, matm, dmatm, dmat, pmat, ddmat, dpmat, term)
    n1 = n1 + 2*l1 + 1
   end do
   return
-end
-
+end subroutine makeDmatPP

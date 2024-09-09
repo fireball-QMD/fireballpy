@@ -14,4 +14,3 @@ subroutine getenergy ()
   etotnew = etotper
 
 end subroutine getenergy
-

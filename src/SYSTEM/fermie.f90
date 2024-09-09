@@ -98,5 +98,4 @@ subroutine fermie ()
    write (*,*) '  '
   end if
   return
-  end
-
+  end subroutine fermie

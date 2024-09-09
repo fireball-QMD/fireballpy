@@ -113,5 +113,4 @@ subroutine assemble_lr_dip ()
    end do     ! end do ialp = 1, natoms
  end do      ! end do iatom = 1,natoms
  return
-end
-
+end subroutine assemble_lr_dip

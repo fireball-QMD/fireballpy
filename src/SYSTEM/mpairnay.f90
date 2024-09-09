@@ -46,4 +46,3 @@ integer(c_long) function mpairnay (iatom, jatom, rdiff)
   end if
   return
 end function mpairnay
-

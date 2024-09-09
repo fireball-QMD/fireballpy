@@ -44,5 +44,4 @@ subroutine twister (eps, dmat, pmat)
    dmat(imu,5) = 2.0d0*xlambda11 + xlambda33
   end do
   return
-end
-
+end subroutine twister

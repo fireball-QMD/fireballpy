@@ -243,4 +243,3 @@ subroutine neighborsPP ()
   end do
   return
 end subroutine neighborsPP
-

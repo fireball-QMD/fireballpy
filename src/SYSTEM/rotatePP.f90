@@ -42,5 +42,4 @@ subroutine rotatePP(in1,in2,eps,mmatrix,xmatrix)
    n1 = n1 + 2*l1 + 1
   end do
   return
-  end
-
+end subroutine rotatePP

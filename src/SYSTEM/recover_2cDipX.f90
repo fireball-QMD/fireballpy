@@ -19,5 +19,4 @@ subroutine recover_2cDipX (in1, in2, hlist, hbox)
    hbox(imu,inu) = hlist (index)
   end do
   return
-end
-
+end subroutine recover_2cDipX

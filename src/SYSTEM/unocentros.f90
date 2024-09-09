@@ -54,4 +54,3 @@ subroutine unocentros (in1, iatom, exc_1c, muexc_1c, dccexc_1c, mu1xc)
   end do
   return
 end subroutine unocentros
-

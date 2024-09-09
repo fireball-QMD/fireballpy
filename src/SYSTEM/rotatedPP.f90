@@ -16,5 +16,4 @@ subroutine rotatedPP (in1, in2, eps, deps, matm, dmatm, dmatx)
   call twisterd (eps, deps, ddmat, dpmat)
   call makeDmatPP (in1, in2, matm, dmatm, dmat, pmat, ddmat, dpmat, dmatx)
   return
-end
-
+end subroutine rotatedPP

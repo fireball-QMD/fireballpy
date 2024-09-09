@@ -115,5 +115,4 @@ do iatom = 1, natoms
   minimum = abs(minval(ftot))
   if (minimum .gt. maximum) maximum = minimum
  
-end
-
+end subroutine assemble_F

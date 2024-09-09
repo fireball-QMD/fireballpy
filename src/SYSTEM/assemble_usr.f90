@@ -142,4 +142,3 @@ subroutine assemble_usr ()
   u0tot = u0tot - eklr
   uiiuee = u0tot - ue0tot
 end subroutine assemble_usr
-

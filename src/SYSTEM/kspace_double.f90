@@ -229,4 +229,3 @@ subroutine kspace_double (ikpoint, sks)
   deallocate (work)
   return
 end subroutine kspace_double
-

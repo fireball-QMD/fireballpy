@@ -198,5 +198,4 @@ subroutine kspace_gamma ( ikpoint, sks)
   deallocate (work)
   deallocate (iwork)
   return
-end 
-
+end subroutine kspace_gamma

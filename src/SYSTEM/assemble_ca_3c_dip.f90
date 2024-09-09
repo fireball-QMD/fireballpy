@@ -188,5 +188,4 @@ subroutine assemble_ca_3c_dip ()
   deallocate (spmG)
   deallocate (smatG)
   deallocate (spmatG)
-end
-
+end subroutine assemble_ca_3c_dip

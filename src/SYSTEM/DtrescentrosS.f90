@@ -180,4 +180,3 @@ subroutine DtrescentrosS (isorp, in1, in2, indna, x, y, cost, rhat, sighat, bcna
  end do
  return
 end subroutine DtrescentrosS
-

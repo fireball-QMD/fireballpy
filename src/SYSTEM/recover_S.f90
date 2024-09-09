@@ -1,6 +1,5 @@
 subroutine recover_S (in1, in2, hlist, hbox)
   use iso_c_binding
-  use M_system
   use M_fdata, only: nssh, index_maxS, muS, nuS, MES_max, nsh_max, nsh_max
   implicit none
   integer(c_long), intent(in) :: in1, in2
@@ -20,4 +19,3 @@ subroutine recover_S (in1, in2, hlist, hbox)
   end do
   return
 end subroutine recover_S
-

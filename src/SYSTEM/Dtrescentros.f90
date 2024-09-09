@@ -240,4 +240,3 @@ subroutine Dtrescentros (interaction, isorp, in1, in2, indna, x, y, cost, eps, d
   end do
   return
 end subroutine Dtrescentros
-

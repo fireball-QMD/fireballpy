@@ -50,4 +50,4 @@ subroutine doscentrosPP (interaction, isub, distance, eps, deps, iauxforce, in1,
     call rotatedPP (in1, in2, eps, deps, sm, spmx, spx)
   end if
   return
-end
+end subroutine doscentrosPP

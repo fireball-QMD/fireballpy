@@ -74,5 +74,4 @@ subroutine common_neighbors ()
     neigh_comn(ialp) = num_neigh
   end do
   return
-end
-
+end subroutine common_neighbors

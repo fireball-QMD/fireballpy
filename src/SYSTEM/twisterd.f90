@@ -49,5 +49,4 @@ subroutine twisterd (eps, deps, ddmat, dpmat)
    end do
   end do
   return
-end
-
+end subroutine twisterd

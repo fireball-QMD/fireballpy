@@ -513,4 +513,4 @@ subroutine allocate_system ()
   allocate (ftot (3, natoms))
   if (allocated(dxcv)) deallocate(dxcv)
   allocate (dxcv (3, natoms))  
-end subroutine
+end subroutine allocate_system

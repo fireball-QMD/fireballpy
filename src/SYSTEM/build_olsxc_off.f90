@@ -63,4 +63,3 @@ subroutine build_olsxc_off (in1, in2, den1x, denx, sx, ineigh,iatom, bcxcx)
   end do !do issh = 1, nssh(in1)
   return
 end subroutine build_olsxc_off
-

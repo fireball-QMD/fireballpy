@@ -29,5 +29,4 @@ subroutine recoverC (n1, n2, hlist, dhlist, hbox, dhbox)
     end if
   end do
   return
-end subroutine
- 
+end subroutine recoverC

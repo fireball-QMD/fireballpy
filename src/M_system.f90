@@ -23,12 +23,12 @@ module M_system
   integer(c_long) :: idmix = 6
   integer(c_long) :: max_scf_iterations = 200
   real(c_double) :: tempfe = 100.0d0
-  real(c_double) :: bmix = 0.1
+  real(c_double) :: bmix = 0.1d0
   real(c_double) :: sigma = 0.0d0
   real(c_double) :: sigmaold = 0.0d0
   real(c_double) :: sigmatol = 1.0E-8
   real(c_double) :: sigmabest
-  real(c_double) :: w02 = 0.0
+  real(c_double) :: w02 = 0.0d0
   logical :: scf_achieved = .false.
  
   integer(c_long) :: natoms
@@ -151,7 +151,7 @@ module M_system
   integer(c_long), dimension (:, :), allocatable :: neighPP_comm
   integer(c_long), dimension (:, :, :), allocatable :: neighPP_comj
   integer(c_long), dimension (:, :, :), allocatable :: neighPP_comb 
-  integer(c_long),allocatable   :: neighj_aux(:,:)
+  integer(c_long), dimension(:, :), allocatable   :: neighj_aux
   integer(c_long) :: neighPP_max 
   integer(c_long) :: num_neig_maxtot
  
@@ -166,10 +166,10 @@ module M_system
   real(c_double), dimension (:), allocatable :: QLowdin_TOT
   real(c_double), dimension (:), allocatable :: QMulliken_TOT
   real(c_double), allocatable, dimension(:,:) :: qaux
-  real(c_double)    dip_x, dipQout_x, dipTot_x, dipProy_x, dipIntra_x, dip_res_x, dipQin_x, dipRes_x
-  real(c_double)    dip_y, dipQout_y, dipTot_y, dipProy_y, dipIntra_y, dip_res_y, dipQin_y, dipRes_y
-  real(c_double)    dip_z, dipQout_z, dipTot_z, dipProy_z, dipIntra_z, dip_res_z, dipQin_z, dipRes_z
-  real(c_double)    dip_tot, dip_proy, dipQin_tot, dipTot_tot, dipIntra_tot, dipQout_tot, dip_res_tot, dipRes_tot 
+  real(c_double) :: dip_x, dipQout_x, dipTot_x, dipProy_x, dipIntra_x, dip_res_x, dipQin_x, dipRes_x
+  real(c_double) :: dip_y, dipQout_y, dipTot_y, dipProy_y, dipIntra_y, dip_res_y, dipQin_y, dipRes_y
+  real(c_double) :: dip_z, dipQout_z, dipTot_z, dipProy_z, dipIntra_z, dip_res_z, dipQin_z, dipRes_z
+  real(c_double) :: dip_tot, dip_proy, dipQin_tot, dipTot_tot, dipIntra_tot, dipQout_tot, dip_res_tot, dipRes_tot 
   real(c_double), dimension (:), allocatable :: dq_DP
 
   !interaccions
@@ -261,6 +261,6 @@ module M_system
   real(c_double), dimension(:), allocatable :: qmmm_Qneutral_TOT
 
 
-  real(c_double) amat (3, 3, 5) 
+  real(c_double), dimension(3, 3, 5) :: amat
 
 end module

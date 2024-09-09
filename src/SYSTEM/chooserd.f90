@@ -12,6 +12,4 @@ subroutine chooserd (l, ddmat, dpmat, dmatrix)
   else if (l .eq. 2) then
    dmatrix = ddmat
   end if
-  return
-end
-
+end subroutine chooserd

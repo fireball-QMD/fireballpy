@@ -19,4 +19,3 @@ subroutine build_rho ()
   if (icluster .eq. 0 .and. igamma .eq. 0) deallocate (bbnkim)
   deallocate (bbnkre)
 end subroutine build_rho
-

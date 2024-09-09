@@ -273,7 +273,7 @@ subroutine dipole_proyection()
   dipQout_z    = dip_z
   dipQout_tot = dip_tot
 end subroutine dipole_proyection
-  
+
 function get_min_parabola(x1,x2,x3,y1,y2,y3)
   use iso_c_binding
   real(c_double),intent(in) :: x1,x2,x3,y1,y2,y3
@@ -285,4 +285,3 @@ function get_min_parabola(x1,x2,x3,y1,y2,y3)
   get_min_parabola=-b/(2*a)
   ! print*,a,'*x**2+',b,'*x+',c
 end function get_min_parabola
-

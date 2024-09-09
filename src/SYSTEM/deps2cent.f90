@@ -41,4 +41,4 @@ subroutine deps2cent(r1,r2,eps2,deps2)
    end do
   end do
   return
-end
+end subroutine deps2cent

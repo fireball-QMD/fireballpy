@@ -214,4 +214,4 @@ subroutine assemble_ca_3c ()
   deallocate (smatG)
   deallocate (spmatG)
   return
-end
+end subroutine assemble_ca_3c

@@ -38,5 +38,4 @@ subroutine neighbors ()
    end do
    neighn(iatom) = num_neigh
  end do                                   
-end subroutine
-
+end subroutine neighbors

@@ -67,5 +67,4 @@ subroutine backnay ()
    end do
   end do
   return
-end
-
+end subroutine backnay

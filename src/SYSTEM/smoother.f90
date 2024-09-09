@@ -35,5 +35,4 @@ subroutine smoother (r, rend, xi, stn, dstn)
     end if
   end if
   return
-end
-
+end subroutine smoother

@@ -28,4 +28,4 @@ subroutine cl_value (itype, cl)
     stop
   end if
   return
-end
+end subroutine cl_value

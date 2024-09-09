@@ -42,4 +42,3 @@ subroutine diag_k ( )
   end if
 
 end subroutine diag_k
-
