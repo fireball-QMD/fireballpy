@@ -1,7 +1,9 @@
 ! This routine calculates the average densities with charge transfer.
 subroutine average_ca_rho ()
   use iso_c_binding
-  use M_system
+  use M_system, only: iforce, xc_overtol, natoms, ratom, imass, neigh_max, Kscf, neigh_b, neigh_j, neighn, neigh_comb, neigh_comj, &
+    & neigh_comm, neigh_comn, neigh_back, numorb_max, Qin, rho_off, rhoij_off, sm_mat, spm_mat, rho_on, arho_on, rhoi_on, &
+    & arhoi_on, arhop_on, rhop_on, arhoij_off, arho_off, arhopij_off, arhop_off, rhop_off, rhopij_off, xl
   use M_fdata, only: nssh, num_orb, nsh_max
   implicit none
   integer(c_long) iatom

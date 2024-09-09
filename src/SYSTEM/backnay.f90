@@ -1,6 +1,6 @@
 subroutine backnay ()
   use iso_c_binding
-  use M_system
+  use M_system, only: natoms, ratom, neigh_b, neigh_j, neighn, neigh_back, xl
   implicit none
   integer(c_long) :: iatom
   integer(c_long) :: icount

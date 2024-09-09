@@ -1,6 +1,6 @@
 integer(c_long) function mpairnay (iatom, jatom, rdiff)
   use iso_c_binding
-  use M_system
+  use M_system, only: ratom, nPP_b, nPP_j, nPPn, xl
   implicit none
   integer(c_long), intent(in) :: iatom
   integer(c_long), intent(in) :: jatom

@@ -1,7 +1,8 @@
 ! The subroutine gets total number of neighbors (normal+PP) of each atom
 subroutine num_neigh_tot ()
   use iso_c_binding
-  use M_system
+  use M_system, only: natoms, neigh_max, neigh_b, neigh_j, neighn, neighj_tot, neighb_tot, neighn_tot, numorb_max, neighPPn, neighPP_b, &
+    & neighPP_j, neighj_aux, neighPP_max, num_neig_maxtot, hr_box
   implicit none
   integer(c_long),allocatable  :: neighb_aux(:,:)
   integer(c_long) :: iatom

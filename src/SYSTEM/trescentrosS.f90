@@ -1,7 +1,9 @@
 subroutine trescentrosS ( isorp, in1, in2, indna, x, y, cost, bcnax)
   use iso_c_binding
-  use M_system
-  use M_fdata
+  use M_system, only: ithetamax
+  use M_fdata, only: hx_den3, hy_den3, numx3c_den3, numy3c_den3, x3cmax_den3, y3cmax_den3, &
+    & den3S_01, den3S_02, den3S_03, den3S_04, den3S_05, &
+    & ntheta, MES_max, icon3c, index_maxS, mvalueS, nsh_max, nssh
   implicit none
   integer(c_long), intent (in) :: in1
   integer(c_long), intent (in) :: in2
@@ -38,10 +40,6 @@ subroutine trescentrosS ( isorp, in1, in2, indna, x, y, cost, bcnax)
     end do
   end do
   kforce = 0
-  if (ntheta .gt. ithetamax .or. ntheta .gt. 5) then
-    write (*,*) ' too many thetas in trescentros.f90 '
-    stop
-  end if
   index = icon3c(in1,in2,indna)
     hx = hx_den3(isorp,index)
     hy = hy_den3(isorp,index)

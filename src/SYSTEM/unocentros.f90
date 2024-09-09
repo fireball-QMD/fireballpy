@@ -1,7 +1,7 @@
 subroutine unocentros (in1, iatom, exc_1c, muexc_1c, dccexc_1c, mu1xc)
   use iso_c_binding
-  use M_system
-  use M_fdata
+  use M_system, only: degelec, getmssh, getlssh, getissh, numorb_max, Qin
+  use M_fdata, only: nsh_max, nssh, num_orb, nuxc1c, dnuxc1c, exc1c0, dexc1c, Qneutral
   implicit none
   integer(c_long), intent(in) :: iatom
   integer(c_long), intent(in) :: in1

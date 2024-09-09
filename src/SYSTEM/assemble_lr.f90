@@ -1,7 +1,7 @@
 subroutine assemble_lr () 
   use iso_c_binding
   use M_constants, only: eq2
-  use M_system
+  use M_system, only: natoms, ratom, imass, ewald, dip, neigh_b, neigh_j, neighn, Qin, s_mat, ewaldlr, xl
   use M_fdata, only: nssh,Qneutral,num_orb
   implicit none
   integer(c_long) iatom

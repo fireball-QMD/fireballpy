@@ -1,6 +1,6 @@
 subroutine recover_2cDipY (in1, in2, hlist, hbox)
   use iso_c_binding
-  use M_system
+  use M_system, only: numorb_max
   use M_fdata, only: num_orb, muDipY, nuDipY,ME2cDipY_max,index_max2cDipY
   implicit none
   integer(c_long), intent(in) :: in1, in2

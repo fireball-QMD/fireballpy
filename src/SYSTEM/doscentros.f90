@@ -8,7 +8,7 @@
 ! position of the orbital of the BRA.
 subroutine doscentros (interaction, isub, iforceaux, in1, in2, in3, distance, eps, deps, sx, spx)
   use iso_c_binding
-  use M_system
+  use M_system, only: numorb_max
   use M_fdata, only: index_max2c,num_orb,ME2c_max
   implicit none
   integer(c_long), intent (in) :: interaction

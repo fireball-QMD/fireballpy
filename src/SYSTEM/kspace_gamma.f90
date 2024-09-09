@@ -1,6 +1,7 @@
 subroutine kspace_gamma ( ikpoint, sks)
   use iso_c_binding
-  use M_system
+  use M_system, only: iqout, natoms, degelec, imass, getlssh, getissh, Kscf, blowre, bbnkre, sm12_real, eigen_k, norbitals, &
+    & norbitals_new, getiatom, neigh_b, neigh_j, neighn, neighPPn, neighPP_b, neighPP_j, vnl, s_mat, h_mat
   use M_fdata, only: num_orb, Qneutral
   implicit none
   integer(c_long), intent (in) :: ikpoint

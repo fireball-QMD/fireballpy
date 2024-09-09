@@ -1,6 +1,6 @@
 subroutine cl_value (itype, cl)
   use iso_c_binding
-  use M_system
+  use M_system, only: numorb_max
   use M_fdata, only: nsshPP,lsshPP,num_orbPP,cl_PP
   implicit none                  
   integer(c_long), intent (in) :: itype

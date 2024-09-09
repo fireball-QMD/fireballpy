@@ -1,7 +1,8 @@
 subroutine Dassemble_qmmm_dip () 
   use iso_c_binding
   use M_constants, only: eq2
-  use M_system
+  use M_system, only: natoms, ratom, imass, neigh_b, neigh_j, neighn, numorb_max, sp_mat, dippc, rho, s_mat, dipc, xl, &
+    & flrew, flrew_qmmm, qmmm_qm_mm_pairs, qmmm_dxyzcl, qmmm_qm_xcrd
   use M_fdata, only: nssh, Qneutral, num_orb
   implicit none
   integer(c_long) :: iatom, imu, inu, in1, in2, in3, ineigh, issh, jatom, katom, mbeta, ix

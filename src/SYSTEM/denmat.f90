@@ -1,7 +1,9 @@
 subroutine denmat ()
   use iso_c_binding
   use M_constants, only: spin
-  use M_system
+  use M_system, only: iqout, icluster, igamma, ifixcharge, natoms, ratom, degelec, imass, ebs, bbnkre, bbnkim, eigen_k, special_k, &
+    & norbitals_new, nkpoints, ioccupy_k, foccupy, cape, rhoPP, ztot, weight_k, neigh_b, neigh_j, neighn, neighPPn, &
+    & neighPP_b, neighPP_j, Qin, Qout, QLowdin_TOT, dq_DP, rho, xl
   use M_fdata, only: num_orb,nssh
   implicit none
   integer(c_long) iatom

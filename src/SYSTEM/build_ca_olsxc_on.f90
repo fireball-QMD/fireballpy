@@ -13,7 +13,7 @@
 ! 
 subroutine build_ca_olsxc_on (in1, iatom, bcxcx, xc)
   use iso_c_binding
-  use M_system
+  use M_system, only: numorb_max, Qin, rho_on, arho_on, rhoi_on, arhoi_on
   use M_fdata, only: nssh, num_orb,lssh,nsh_max
   implicit none
   integer(c_long), intent (in) :: in1

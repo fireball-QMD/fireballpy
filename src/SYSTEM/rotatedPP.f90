@@ -1,6 +1,6 @@
 subroutine rotatedPP (in1, in2, eps, deps, matm, dmatm, dmatx)
   use iso_c_binding
-  use M_system
+  use M_system, only: numorb_max
   implicit none
   integer(c_long), intent(in) :: in1, in2
   real(c_double), intent(in) :: deps (3, 3, 3)

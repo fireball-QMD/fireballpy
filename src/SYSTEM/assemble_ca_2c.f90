@@ -2,7 +2,8 @@
 subroutine assemble_ca_2c ()
   use iso_c_binding
   use M_constants, only: eq2
-  use M_system
+  use M_system, only: iforce, smt_elect, natoms, ratom, imass, ewaldsr, dip, dipp, neigh_b, neigh_j, neighn, neigh_self, &
+    & numorb_max, Qin, s_mat, vca, xl
   use M_fdata, only: nssh, num_orb, rcutoff, Qneutral, lssh
   implicit none
   integer(c_long) iatom

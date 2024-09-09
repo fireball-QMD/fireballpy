@@ -1,7 +1,17 @@
 subroutine allocate_system ()
   use iso_c_binding
   use M_constants, only: xlevi, delk
-  use M_system 
+  use M_system, only: icluster, natoms, ratom, degelec, imass, mbeta_max, neigh_max, ishiftO, shifter, getmssh, getlssh, getissh, vxc_1c, &
+    & Q0_TOT, nelectron, eigen_k, norbitals, nkpoints, getiatom, ioccupy_k, ioccupy, foccupy, cape, rhoPP, ztot, nssh_tot, ewald, &
+    & dewald, fewald, ewaldsr, dip, dipp, neigh_b, neigh_j, neighn, neigh_comb, neigh_comj, neigh_comm, neigh_comn, neigh_back, &
+    & neigh_self, nPP_b, nPP_j, nPP_map, nPPn, nPP_self, nPPx_b, nPPx_j, nPPx_map, nPPx_point, nPPxn, nPPx_self, neigh_pair_a1, &
+    & neigh_pair_a2, neigh_pair_n1, neigh_pair_n2, neighj_tot, neighb_tot, neighn_tot, numorb_max, neighPP_self, neighPPn, neighPP_b, &
+    & neighPP_j, sVNL, spVNL, sp_mat, tp_mat, dipcm, dippcm, dippc, vnl, neighPP_comn, neighPP_comm, neighPP_comj, neighPP_comb, &
+    & neighPP_max, Qin, Qinmixer, Qout, Qoutmixer, dq, Q_partial, QLowdin_TOT, QMulliken_TOT, dq_DP, vxc, vxc_ca, rho, rho_off, &
+    & rhoij_off, s_mat, sm_mat, spm_mat, rho_on, arho_on, rhoi_on, arhoi_on, arhop_on, rhop_on, arhoij_off, arho_off, arhopij_off, &
+    & arhop_off, rhop_off, rhopij_off, vca, ewaldlr, h_mat, t_mat, vna, ewaldqmmm, dipc, xl, fotnl, fanl, fotna, fana, faxc, faxc_ca, &
+    & dxcdcc, ft, dusr, fotxc, fotxc_ca, faca, fotca, f3naa, f3nab, f3nac, f3nla, f3nlb, f3nlc, f3caa, f3cab, f3cac, flrew, f3xca_ca, &
+    & f3xcb_ca, f3xcc_ca, f3xca, f3xcb, f3xcc, flrew_qmmm, fro, ftot, dxcv
   use M_fdata, only: nssh, rcutoff, rc_PP, nspecies
   use M_fdata, only: num_orb, Qneutral, lssh, nsshPP, lsshPP,  nsh_max
   use M_fdata, only: numXmax,numYmax

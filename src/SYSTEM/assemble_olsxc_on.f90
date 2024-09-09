@@ -1,6 +1,6 @@
 subroutine assemble_olsxc_on ()
   use iso_c_binding
-  use M_system
+  use M_system, only: natoms, imass, uxcdcc_ols, neigh_self, numorb_max, vxc, vxc_ca
   use M_fdata, only: num_orb
   implicit none
   integer(c_long) iatom, matom

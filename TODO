@@ -1,7 +1,7 @@
-Carlos : only_en_use
-Jorge: DOC, workflow, examples jupyter, only_en_use, fireballpytestrepo
-Jesús: qmmm, interpolate1D, spline 
-Dani: testunitarios, casos uso, ifixcharges, only_en_use, test limpiar y reconstruir, get_fermi, eigenvalue
+Carlos :
+Jorge: DOC, workflow, examples jupyter, fireballpytestrepo
+Jesús: qmmm
+Dani: testunitarios, casos uso, ifixcharges, test limpiar y reconstruir, get_fermi, eigenvalue
 José: autores
 
 * icharge si no metemos cargas ?
@@ -13,7 +13,7 @@ Fdata: https://pubs.acs.org/doi/10.1021/acs.jctc.9b01265
 
 - gfortran fireball clasico
 
-- tesunitario.  limpiar variables ?
+- tesunitario.
 
 
 sigma ? ....

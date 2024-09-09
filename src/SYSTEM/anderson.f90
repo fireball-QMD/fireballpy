@@ -1,7 +1,7 @@
 subroutine anderson ( x_try, x_old, nmsh )
   use iso_c_binding
-  use M_system, only: Fv, Xv, delF, delX, r2_sav, w02, wi, sigma, sigmatol, &
-    & max_scf_iterations, Kscf, bmix, idmix, x_best, ialgmix, sigmabest, scf_achieved
+  use M_system, only: ialgmix, idmix, max_scf_iterations, bmix, sigma, sigmatol, sigmabest, w02, scf_achieved, Kscf, Fv, Xv, delF, delX, &
+    & r2_sav, wi, x_best
   implicit none
   integer(c_long), intent(in) :: nmsh    ! Size of vectors being optimized
   real(c_double), intent(in), dimension(nmsh) :: x_try ! potential new vector on input

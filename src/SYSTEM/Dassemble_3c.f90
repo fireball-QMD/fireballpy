@@ -1,7 +1,7 @@
 subroutine Dassemble_3c ()
   use iso_c_binding
   use M_constants, only: eq2
-  use M_system
+  use M_system, only: natoms, ratom, imass, neigh_comb, neigh_comj, neigh_comm, neigh_comn, numorb_max, rho, xl, f3naa, f3nab, f3nac
   use M_fdata, only: num_orb
   implicit none
   integer(c_long) iatom

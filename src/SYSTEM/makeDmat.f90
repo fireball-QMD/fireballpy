@@ -1,6 +1,6 @@
 subroutine makeDmat (in1, in2, matm, dmatm, dmat, pmat, ddmat, dpmat, term)
   use iso_c_binding
-  use M_system
+  use M_system, only: numorb_max
   use M_fdata, only: nssh,lssh
   implicit none
   integer(c_long), intent(in) :: in1, in2

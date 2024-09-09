@@ -1,6 +1,6 @@
 subroutine neighbors ()
   use iso_c_binding
-  use M_system
+  use M_system, only: icluster, natoms, ratom, imass, mbeta_max, neigh_b, neigh_j, neighn, xl
   use M_fdata, only: nssh, rcutoff
   implicit none
   integer(c_long) :: iatom,jatom,mbeta,num_neigh,in1,imu,in2

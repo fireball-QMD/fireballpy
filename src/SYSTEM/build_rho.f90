@@ -1,6 +1,6 @@
 subroutine build_rho ()
   use iso_c_binding
-  use M_system
+  use M_system, only: iqout, icluster, igamma, tempfe, blowre, bbnkre, blowim, bbnkim, cape, rho
   implicit none
   rho = 0.0d0
   cape = 0.0d0

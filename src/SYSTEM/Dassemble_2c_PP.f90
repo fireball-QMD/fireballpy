@@ -1,6 +1,7 @@
 subroutine Dassemble_2c_PP ()
   use iso_c_binding
-  use M_system
+  use M_system, only: natoms, imass, rhoPP, nPP_b, nPP_j, nPPn, nPP_self, nPPx_b, nPPx_j, nPPx_map, nPPx_point, nPPxn, &
+    & numorb_max, neighPP_self, sVNL, spVNL, fotnl, fanl
   use M_fdata, only: num_orb, num_orbPP
   implicit none
   integer(c_long) iatom

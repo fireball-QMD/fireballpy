@@ -1,6 +1,7 @@
 subroutine Dassemble_ca_olsxc_2c ()
   use iso_c_binding
-  use M_system
+  use M_system, only: natoms, ratom, imass, neigh_b, neigh_j, neighn, neigh_self, numorb_max, sp_mat, Qin, rho, rho_off, rhoij_off, &
+    & s_mat, arhoij_off, arho_off, arhopij_off, arhop_off, rhop_off, rhopij_off, xl, fotxc, fotxc_ca
   use M_fdata, only: num_orb, nssh, lssh, Qneutral
   implicit none
   integer(c_long) iatom

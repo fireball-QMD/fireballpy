@@ -3,7 +3,7 @@
 ! If not, then the neighbors will be calculated as normal. 
 subroutine initneighbors ()
   use iso_c_binding
-  use M_system
+  use M_system, only: natoms, nPP_b, nPP_j, nPPn, nPP_self, nPPx_b, nPPx_j, nPPxn, nPPx_self
   implicit none
   integer(c_long) :: iatom
   integer(c_long) :: ineigh

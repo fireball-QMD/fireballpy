@@ -1,6 +1,8 @@
 subroutine kspace_double (ikpoint, sks)
   use iso_c_binding
-  use M_system
+  use M_system, only: iqout, icluster, igamma, natoms, ratom, degelec, imass, getlssh, getissh, Kscf, blowre, bbnkre, blowim, bbnkim, &
+    & sm12_complex, eigen_k, norbitals, norbitals_new, getiatom, neigh_b, neigh_j, neighn, neighPPn, neighPP_b, neighPP_j, vnl, s_mat, &
+    & h_mat, xl
   use M_fdata, only: num_orb, Qneutral
   implicit none
   integer(c_long), intent (in) :: ikpoint

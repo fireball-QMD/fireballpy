@@ -1,6 +1,7 @@
 subroutine assemble_mcweda ()
   use iso_c_binding
-  use M_system
+  use M_system, only: idipole, iqmmm, natoms, eqmmm, Kscf, neigh_b, neigh_j, neighn, neigh_self, neighPP_self, neighPPn, &
+    & neighPP_b, neighPP_j, ewaldqmmm
   implicit none
   integer(c_long) :: iatom, jatom, ineigh, mbeta, kforce
   if (Kscf .eq. 1) then

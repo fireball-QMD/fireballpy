@@ -1,6 +1,5 @@
 subroutine interpolate_1d (interaction, isub, in1, in2, non2c, ioption, xin, yout, dfdx)
   use iso_c_binding
-  use M_system
   use M_fdata, only: ind2c, numz2c, z2cmax, splineint_2c
   implicit none
   integer(c_long), intent(in) :: interaction, isub, in1, in2, non2c, ioption ! Derivative or not

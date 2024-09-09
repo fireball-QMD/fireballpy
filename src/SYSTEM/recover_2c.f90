@@ -1,6 +1,6 @@
 subroutine recover_2c (in1, in2, hlist, hbox)
   use iso_c_binding
-  use M_system
+  use M_system, only: numorb_max
   use M_fdata, only: ME2c_max, num_orb,index_max2c,mu, num_orb,index_max2c,mu,nu
   implicit none
   integer(c_long), intent(in) :: in1, in2

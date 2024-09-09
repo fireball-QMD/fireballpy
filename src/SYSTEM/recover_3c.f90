@@ -1,6 +1,6 @@
 subroutine recover_3c (in1, in2, hlist, hbox)
   use iso_c_binding
-  use M_system
+  use M_system, only: numorb_max
   use m_fdata, only: ME3c_max,num_orb,index_max3c,mu,nu
   implicit none
   integer(c_long), intent(in) :: in1, in2

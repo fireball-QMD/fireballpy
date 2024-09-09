@@ -1,7 +1,8 @@
 subroutine assemble_lr_dip () 
   use iso_c_binding
   use M_constants, only: eq2
-  use M_system
+  use M_system, only: natoms, ratom, imass, neigh_self, neigh_pair_a1, neigh_pair_a2, neigh_pair_n1, neigh_pair_n2, &
+    & numorb_max, tot_pairs, Qin, s_mat, ewaldlr, dipc
   use M_fdata, only: nssh, Qneutral, num_orb
   implicit none
   integer(c_long) iatom

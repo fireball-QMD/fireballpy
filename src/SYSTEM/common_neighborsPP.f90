@@ -1,6 +1,7 @@
 subroutine common_neighborsPP ()
   use iso_c_binding
-  use M_system
+  use M_system, only: icluster, natoms, ratom, imass, mbeta_max, nPPx_b, nPPx_j, nPPxn, neighPPn, neighPP_b, neighPP_j, neighPP_comn, &
+    & neighPP_comm, neighPP_comj, neighPP_comb, neighPP_max, xl
   implicit none
   integer(c_long) ialp
   integer(c_long) iatom

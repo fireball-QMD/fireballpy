@@ -1,6 +1,6 @@
 subroutine mixer ()
   use iso_c_binding
-  use M_system
+  use M_system, only: sigma, sigmaold, scf_achieved, natoms, imass, Kscf, ztot, nssh_tot, Qin, Qinmixer, Qout, Qoutmixer
   use M_fdata, only: nssh
   implicit none
   integer(c_long) iatom

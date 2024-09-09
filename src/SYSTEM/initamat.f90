@@ -1,7 +1,7 @@
 subroutine initamat()
   use iso_c_binding
   use M_constants, only: haveDorbitals
-  use M_system
+  use M_system, only: amat
   use M_fdata, only: nspecies,lsshPP,nsshPP,lssh,nssh
   implicit none
   integer(c_long) :: in1

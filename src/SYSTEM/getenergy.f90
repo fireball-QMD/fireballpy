@@ -1,6 +1,6 @@
 subroutine getenergy () 
   use iso_c_binding
-  use M_system 
+  use M_system, only: iforce, natoms, etot, etotold, etotnew, etotper, uiiuee, uxcdcc, uxcdcc_ols, etotxc_1c, ebs, eqmmm
   implicit none
 
   call get_ewald (iforce)

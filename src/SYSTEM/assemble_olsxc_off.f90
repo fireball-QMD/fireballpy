@@ -1,7 +1,8 @@
 ! This routine assembles the two & three-center exchange-correlation for the average density approximation. 
 subroutine assemble_olsxc_off ()
   use iso_c_binding
-  use M_system
+  use M_system, only: natoms, ratom, imass, neigh_b, neigh_j, neighn, neigh_self, numorb_max, Qin, vxc, vxc_ca, rho_off, &
+    & rhoij_off, s_mat, xl
   use M_fdata, only: num_orb,nssh,Qneutral
   implicit none
   integer(c_long) iatom

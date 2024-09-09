@@ -1,7 +1,11 @@
 subroutine trescentros (interaction, isorp, in1, in2, indna, x, y, cost, eps, bcnax)
   use iso_c_binding
-  use M_system
-  use M_fdata
+  use M_system, only: numorb_max
+  use M_fdata, only: hx_bcna, hy_bcna, hx_den3, hy_den3, numx3c_bcna, numy3c_bcna, &
+    & numx3c_den3, numy3c_den3, x3cmax_bcna, y3cmax_bcna, x3cmax_den3, y3cmax_den3, &
+    & bcna_01, bcna_02, bcna_03, bcna_04, bcna_05, &
+    & den3_01, den3_02, den3_03, den3_04, den3_05, &
+    & ntheta, ME3c_max, icon3c, index_max3c, mvalue
   implicit none
   integer(c_long), intent (in) :: in1
   integer(c_long), intent (in) :: in2
@@ -112,10 +116,6 @@ subroutine trescentros (interaction, isorp, in1, in2, indna, x, y, cost, eps, bc
   argument = 1.0d0 - cost2
   if (argument .lt. 1.0d-5) argument = 1.0d-5
   sint = sqrt(argument) 
-  if (ntheta .ne. 5) then
-      write(*,*) ' ntheta must be 5, but it is ',ntheta
-      stop       
-  end if
   p(0) = 1.0d0
   p(1) = cost
   p(2) = (3.0d0*cost2 - 1.0d0)/2.0d0

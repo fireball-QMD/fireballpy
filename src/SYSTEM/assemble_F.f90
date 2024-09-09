@@ -1,6 +1,8 @@
 subroutine assemble_F ()
   use iso_c_binding
-  use M_system
+  use M_system, only: natoms, neigh_j, neighn, nPP_j, nPPn, nPPx_j, nPPxn, fotnl, fanl, fotna, fana, faxc, faxc_ca, dxcdcc, ft, dusr, &
+    & fotxc, fotxc_ca, faca, fotca, f3naa, f3nab, f3nac, f3nla, f3nlb, f3nlc, f3caa, f3cab, f3cac, flrew, f3xca_ca, f3xcb_ca, f3xcc_ca, &
+    & f3xca, f3xcb, f3xcc, flrew_qmmm, fro, ftot, dxcv
   implicit none
   integer(c_long) iatom
   integer(c_long) ineigh

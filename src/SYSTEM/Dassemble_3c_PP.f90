@@ -1,6 +1,7 @@
 subroutine Dassemble_3c_PP () 
   use iso_c_binding
-  use M_system
+  use M_system, only: natoms, ratom, imass, rhoPP, numorb_max, sVNL, spVNL, neighPP_comn, neighPP_comm, neighPP_comj, neighPP_comb, &
+    & xl, f3nla, f3nlb, f3nlc
   use M_fdata, only: num_orb,num_orbPP
   implicit none
   integer(c_long) ialp

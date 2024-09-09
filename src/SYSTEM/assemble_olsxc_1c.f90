@@ -1,7 +1,7 @@
 ! This routine assembles all of the one-center exchange-interactions. The results are stored in vxc_1c and etotxc_1c
 subroutine assemble_olsxc_1c ()
   use iso_c_binding
-  use M_system
+  use M_system, only: natoms, imass, etotxc_1c, Uexc_1c, Umuxc_1c, vxc_1c, neigh_self, numorb_max
   use M_fdata, only: num_orb
   implicit none
   integer(c_long) iatom

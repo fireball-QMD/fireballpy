@@ -2,7 +2,8 @@
 subroutine assemble_2c ()
   use iso_c_binding
   use M_constants, only: eq2
-  use M_system
+  use M_system, only: iforce, iqout, idipole, natoms, ratom, imass, dip, neigh_b, neigh_j, neighn, neigh_self, numorb_max, sp_mat, &
+    & tp_mat, dipcm, dippcm, dippc, s_mat, t_mat, vna, dipc, xl
   use M_fdata, only: num_orb
   integer(c_long) iatom
   integer(c_long) imu

@@ -1,8 +1,8 @@
 subroutine assemble_usr ()
   use iso_c_binding
   use M_constants, only: eq2
-  use M_system
-  use M_fdata
+  use M_system, only: iforce, natoms, ratom, imass, neigh_max, uiiuee, ewald, fewald, neigh_b, neigh_j, neighn, Qin, dq, xl, dusr, dxcv
+  use M_fdata, only: nsh_max, ME2c_max, nssh, Qneutral
   integer(c_long) iatom
   integer(c_long) ideriv
   integer(c_long) in1, in2
@@ -65,7 +65,7 @@ subroutine assemble_usr ()
       qj = Q(jatom)
       Zj = Q0(jatom)
       QQ = Zi*Zj - qi*qj
-      distance = sqrt((r2(1) - r1(1))**2 + (r2(2) - r1(2))**2    + (r2(3) - r1(3))**2)
+      distance = sqrt((r2(1) - r1(1))**2 + (r2(2) - r1(2))**2 + (r2(3) - r1(3))**2)
       index_coulomb = nssh(in1)*nssh(in2)
       interaction = 12
       ideriv = 0

@@ -1,6 +1,6 @@
 subroutine common_neighbors ()
   use iso_c_binding
-  use M_system
+  use M_system, only: natoms, ratom, imass, neigh_max, neigh_b, neigh_j, neighn, neigh_comb, neigh_comj, neigh_comm, neigh_comn, xl
   use M_fdata, only: nssh, rcutoff
   integer(c_long) ialp
   integer(c_long) iatom

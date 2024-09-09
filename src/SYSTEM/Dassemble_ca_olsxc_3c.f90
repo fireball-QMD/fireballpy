@@ -1,6 +1,7 @@
 subroutine Dassemble_ca_olsxc_3c ()
   use iso_c_binding
-  use M_system
+  use M_system, only: xc_overtol, natoms, ratom, imass, neigh_comb, neigh_comj, neigh_comm, neigh_comn, numorb_max, Qin, rho, rho_off, &
+    & s_mat, sm_mat, spm_mat, arho_off, xl, f3xca_ca, f3xcb_ca, f3xcc_ca, f3xca, f3xcb, f3xcc
   use M_fdata, only: nssh,num_orb,lssh,nsh_max
   implicit none
   integer(c_long) ialp

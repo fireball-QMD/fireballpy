@@ -1,6 +1,6 @@
   subroutine initboxes ()
   use iso_c_binding
-  use M_system
+  use M_system, only: mbeta_max, xl, a1vec, a2vec, a3vec
   implicit none
   integer(c_long) lbeta
   integer(c_long) ix, iy

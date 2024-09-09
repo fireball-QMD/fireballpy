@@ -1,6 +1,6 @@
 subroutine build_olsxc_off (in1, in2, den1x, denx, sx, ineigh,iatom, bcxcx)
   use iso_c_binding
-  use M_system
+  use M_system, only: numorb_max, arhoij_off, arho_off
   use M_fdata, only: nssh,lssh,nsh_max
   implicit none
   integer(c_long), intent (in) :: in1

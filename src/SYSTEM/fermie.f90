@@ -1,7 +1,7 @@
 subroutine fermie ()
   use iso_c_binding
   use M_constants, only: spin, kconvert
-  use M_system
+  use M_system, only: tempfe, efermi, eigen_k, norbitals, nkpoints, ioccupy_k, foccupy, ztot, weight_k
   implicit none
   integer(c_long), parameter :: imax = 1000 ! maximum sc iterations
   integer(c_long), parameter :: nmax = 5000 ! cutoff for degeneracy check

@@ -1,8 +1,7 @@
 ! This subroutine takes a 1D list of integrals and generates a 2x2 array with respect to the shells.
 subroutine recoverC (n1, n2, hlist, dhlist, hbox, dhbox)
   use iso_c_binding
-  use M_fdata
-  use M_system
+  use M_fdata, only: ME2c_max, nsh_max
   implicit none
   integer(c_long), intent (in) :: n1, n2
   real(c_double), intent(in), dimension (ME2c_max) :: hlist 

@@ -1,6 +1,6 @@
 subroutine buildh ()
   use iso_c_binding
-  use M_system
+  use M_system, only: natoms, imass, vxc_1c, ewaldsr, neigh_b, neigh_j, neighn, vxc, vxc_ca, vca, ewaldlr, h_mat, t_mat, vna, ewaldqmmm
   use m_fdata, only: num_orb 
   implicit none
   integer(c_long) iatom

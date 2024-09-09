@@ -1,6 +1,6 @@
 subroutine getforces ()
   use iso_c_binding
-  use M_system
+  use M_system, only: idipole, iqmmm, flrew_qmmm
   implicit none
   call Dassemble_2c ()
   call Dassemble_2c_PP ()

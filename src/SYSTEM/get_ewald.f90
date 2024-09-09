@@ -2,8 +2,8 @@
 subroutine get_ewald (iauxforce)
   use iso_c_binding
   use M_constants, only: pi
-  use M_system
-  use M_fdata
+  use M_system, only: icluster, natoms, ratom, imass, ewald, dewald, fewald, Qin, a1vec, a2vec, a3vec
+  use M_fdata, only: nssh, Qneutral
   implicit none
   integer(c_long), intent (in) :: iauxforce
   integer(c_long) iatom
@@ -192,7 +192,6 @@ end subroutine get_ewald
 
 subroutine cross (a, b, c)
   use iso_c_binding
-  use M_constants, only: pi
   implicit none
   real(c_double), intent(in), dimension(3) :: a
   real(c_double), intent(in), dimension(3) :: b
@@ -205,7 +204,6 @@ end subroutine cross
 
 function my_erfc (x)
   use iso_c_binding
-  use M_constants, only: pi
   implicit none
   real(c_double), intent(in) :: x
   real(c_double) :: s, ax, t, my_erfc

@@ -1,6 +1,6 @@
 subroutine recover_PP (in1, in2, hlist, hbox)
   use iso_c_binding
-  use M_system
+  use M_system, only: numorb_max
   use M_fdata, only: ME2c_max,num_orbPP,num_orb,index_maxPP,nuPP,muPP
   implicit none
   integer(c_long), intent(in) :: in1, in2

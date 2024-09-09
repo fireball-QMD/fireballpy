@@ -1,7 +1,7 @@
 ! This routine assembles all of the two-center sVNL (separable pseudopotential) interactions.
 subroutine assemble_sVNL ()
   use iso_c_binding
-  use M_system
+  use M_system, only: iforce, natoms, ratom, imass, nPP_b, nPP_j, nPPn, nPP_self, numorb_max, sVNL, spVNL, xl
   use M_fdata, only: num_orbPP, num_orb
   implicit none
  

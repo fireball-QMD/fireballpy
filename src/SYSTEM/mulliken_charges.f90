@@ -1,6 +1,6 @@
 subroutine mulliken_charges()
   use iso_c_binding
- use M_system
+  use M_system, only: natoms, imass, neigh_j, neighn, neigh_back, numorb_max, Qout, QMulliken_TOT, rho, s_mat
  use M_fdata, only: num_orb,nssh,lssh
  implicit none
  integer(c_long) iatom            

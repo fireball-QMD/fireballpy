@@ -1,6 +1,9 @@
 subroutine dipole_proyection()
   use iso_c_binding
-  use M_system
+  use M_system, only: natoms, ratom, imass, neigh_max, Q0_TOT, neigh_b, neigh_j, neighn, neigh_self, Qin, Qout, dip_x, &
+    & dipQout_x, dipTot_x, dipIntra_x, dip_res_x, dipQin_x, dipRes_x, dip_y, dipQout_y, dipTot_y, dipIntra_y, dip_res_y, dipQin_y, &
+    & dipRes_y, dip_z, dipQout_z, dipTot_z, dipIntra_z, dip_res_z, dipQin_z, dipRes_z, dip_tot, dip_proy, dipQin_tot, dipTot_tot, &
+    & dipIntra_tot, dipQout_tot, dip_res_tot, dipRes_tot, dq_DP, rho, s_mat, dipc, xl
   use M_fdata, only: num_orb,nssh,Qneutral
   implicit none
   real(c_double), parameter ::  Debye = 0.208194d0

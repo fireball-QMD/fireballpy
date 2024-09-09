@@ -1,7 +1,8 @@
 subroutine Dassemble_ca_3c () 
   use iso_c_binding
   use M_constants, only: eq2
-  use M_system
+  use M_system, only: smt_elect, natoms, ratom, imass, dip, dipp, neigh_comb, neigh_comj, neigh_comm, neigh_comn, numorb_max, sp_mat, &
+    & Qin, rho, s_mat, xl, f3caa, f3cab, f3cac
   use M_fdata, only: nssh,rcutoff,Qneutral,lssh,num_orb
   implicit none
   integer(c_long) ialp

@@ -1,6 +1,6 @@
 subroutine doscentrosDipY (interaction, isub, in1, in2, in3, distance, eps, deps, sx, spx)
   use iso_c_binding
-  use M_system
+  use M_system, only: iforce, numorb_max
   use M_fdata, only: num_orb, index_max2cDipY,ME2cDipY_max
   implicit none
   integer(c_long), intent (in) :: interaction

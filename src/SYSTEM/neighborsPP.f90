@@ -18,7 +18,8 @@
 
 subroutine neighborsPP ()
   use iso_c_binding
-  use M_system
+  use M_system, only: icluster, natoms, ratom, imass, mbeta_max, nPP_b, nPP_j, nPP_map, nPPn, nPP_self, nPPx_b, &
+    & nPPx_j, nPPx_map, nPPx_point, nPPxn, nPPx_self, neighPPn, neighPP_b, neighPP_j, neighPP_max, xl
   use M_fdata,only : nssh, rcutoff, rc_PP    
   implicit none
   integer(c_long) iatom
