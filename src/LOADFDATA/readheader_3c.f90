@@ -1,6 +1,6 @@
 subroutine readheader_3c (iounit, numx, numy, xmax, ymax)
   use iso_c_binding
-  use M_fdata, only: numXmax, numYmax, errno3c
+  use M_fdata, only: numXmax, numYmax
   implicit none
   integer(c_long), intent (in) :: iounit
   integer(c_long), intent (out) :: numx, numy
@@ -19,12 +19,4 @@ subroutine readheader_3c (iounit, numx, numy, xmax, ymax)
   read (iounit,*) nucZ2, rc2a
   read (iounit,*) nucZ3, rc3a
   read (iounit,*)
-  if (numx .gt. numXmax .or. numy .gt. numYmax) then
-    !write (*,*) ' Courseness too fine in 3c data files. '
-    !write (*,*) ' numx = ', numx, ' numXmax = ', numXmax
-    !write (*,*) ' numy = ', numy, ' numYmax = ', numYmax
-    !write (*,*) ' Change numXmax and numYmax in MODULES/dimensions.f90! '
-    errno3c = 1
-    return
-  end if
 end subroutine readheader_3c

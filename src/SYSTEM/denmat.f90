@@ -3,7 +3,7 @@ subroutine denmat ()
   use M_constants, only: spin
   use M_system, only: iqout, icluster, igamma, ifixcharge, natoms, ratom, degelec, imass, ebs, bbnkre, bbnkim, eigen_k, special_k, &
     & norbitals_new, nkpoints, ioccupy_k, foccupy, cape, rhoPP, ztot, weight_k, neigh_b, neigh_j, neighn, neighPPn, &
-    & neighPP_b, neighPP_j, Qin, Qout, QLowdin_TOT, dq_DP, rho, xl
+    & neighPP_b, neighPP_j, Qin, Qout, QLowdin_TOT, dq_DP, rho, xl, errno
   use M_fdata, only: num_orb,nssh
   implicit none
   integer(c_long) iatom
@@ -177,10 +177,8 @@ subroutine denmat ()
     end do
   end do
   if (abs(ztest - ztot) .gt. 1.0d-02) then
-    write (*,*) ' *************** error *************** '
-    write (*,*) ' ztest = ', ztest, ' ztot = ', ztot
-    write (*,*) ' In denmat.f - ztest .ne. ztot! '
-    stop
+    errno = 1
+    return
   end if
 
 end subroutine denmat

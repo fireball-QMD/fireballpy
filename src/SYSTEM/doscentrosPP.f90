@@ -24,13 +24,6 @@ subroutine doscentrosPP (interaction, isub, distance, eps, deps, iauxforce, in1,
   real(c_double), dimension (numorb_max, numorb_max) :: sm
   real(c_double), dimension (numorb_max, numorb_max) :: spm
   real(c_double), dimension (3, numorb_max, numorb_max) :: spmx
-  if (interaction .ne. 5 .or. isub .ne. 0) then
-    write (*,*) ' interaction = ', interaction
-    write (*,*) ' This routine is only for the pseudopotential '
-    write (*,*) ' interactions.  The wrong subroutine is being called. '
-    write (*,*) ' We must stop here! '
-    stop
-  end if
   sm = 0.0d0
   sx = 0.0d0
   if (iauxforce .eq. 1) spx = 0.0d0

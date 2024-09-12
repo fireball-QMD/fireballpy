@@ -1,3 +1,4 @@
+! We assume we do not go outside the range NEVER
 subroutine interpolate_2d (xin, yin, iauxforce, nx, ny, hx, hy, xintegral, Q_L, dQ_Ldx, dQ_Ldy)
   use iso_c_binding
   use M_fdata, only: numXmax, numYmax
@@ -27,17 +28,9 @@ subroutine interpolate_2d (xin, yin, iauxforce, nx, ny, hx, hy, xintegral, Q_L, 
 
   ! Save rounding errors for the x
   if(xin .le. xmin) then
-    if((xmin - xin)/xmin > tol) then
-      write (*,*) 'INTERPOLATE 2D xin, xmin = ', xin, xmin
-      stop
-    end if
     x = 0.0
     ix = 1
   else if(xin .ge. xmax) then
-    if((xin - xmax)/xmax > tol) then
-      write (*,*) 'INTERPOLATE 2D xin, xmax = ', xin, xmax
-      stop
-    end if
     x = real(nx - 1, c_double)
     ix = nx - 1
   else
@@ -47,17 +40,9 @@ subroutine interpolate_2d (xin, yin, iauxforce, nx, ny, hx, hy, xintegral, Q_L, 
 
   ! Save rounding errors for the y
   if(yin .le. ymin) then
-    if((ymin - yin)/ymin > tol) then
-      write (*,*) 'INTERPOLATE 2D yin, ymin = ', yin, ymin
-      stop
-    end if
     y = 0.0
     iy = 1
   else if(yin .ge. ymax) then
-    if((yin - ymax)/ymax > tol) then
-      write (*,*) 'INTERPOLATE 2D yin, ymax = ', yin, ymax
-      stop
-    end if
     y = real(ny - 1, c_double)
     iy = ny - 1
   else

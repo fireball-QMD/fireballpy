@@ -52,7 +52,6 @@ subroutine epsilon(R1,R2,spe)
       end do
       spe(i,i)=1.0e0
     end do
-    write(*,*) '  r2=0 : spe = unit matrix!'
     return
   end if
   ! zphat lies along r2vector
@@ -112,16 +111,10 @@ subroutine epsilon(R1,R2,spe)
   ! test by computing spe*spe(dagger)
   do ii=1,3
     do jj=1,3
-      unit=0.0e0
+      unit=0.0d0
       do kk=1,3
         unit=unit+spe(ii,kk)*spe(jj,kk)
       end do
-      if(ii.eq.jj.and.abs(unit-1.e0).gt.1.0d-4)then
-        write(*,*) ' ******* error in  epsiln 1=spe*spedag=',unit
-      end if
-      if(ii.ne.jj.and.abs(unit).gt.1.0d-4)then
-        write(*,*) ' ******* error in  epsiln 0=spe*spedag=',unit
-      end if
     end do
   end do
   return

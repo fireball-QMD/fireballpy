@@ -64,12 +64,6 @@ subroutine Dtrescentros (interaction, isorp, in1, in2, indna, x, y, cost, eps, d
    ny = numy3c_bcna(isorp,index)
    xxmax = x3cmax_bcna(isorp,index)
    yymax = y3cmax_bcna(isorp,index)
-   if (x .gt. xxmax .or. y .gt. yymax .or. x .lt. 0 .or. y .lt. 0) then
-     write (*,*) ' What the heck is going on in Dtrescentros!!! error!!! '
-     write (*,*) ' x = ', x, ' Max of data = ', xxmax
-     write (*,*) ' y = ', y, ' Max of data = ', yymax
-     stop
-   end if
    do iME = 1, index_max3c(in1,in2)
     call interpolate_2d (x, y, kforce, nx, ny, hx, hy, bcna_01(:,:,iME,isorp,index), Q_L, dQ_Ldx, dQ_Ldy)
     bcnalist(0,iME) = Q_L
@@ -99,12 +93,6 @@ subroutine Dtrescentros (interaction, isorp, in1, in2, indna, x, y, cost, eps, d
   ! ny = numy3c_xc3c(isorp,index)
   ! xxmax = x3cmax_xc3c(isorp,index)
   ! yymax = y3cmax_xc3c(isorp,index)
-  ! if (x .gt. xxmax .or. y .gt. yymax .or. x .lt. 0 .or. y .lt. 0) then
-  !   write (*,*) ' What the heck is going on in Dtrescentros!!! error!!! '
-  !   write (*,*) ' x = ', x, ' Max of data = ', xxmax
-  !   write (*,*) ' y = ', y, ' Max of data = ', yymax
-  !   stop
-  ! end if
   ! do iME = 1, index_max3c(in1,in2)
   !  call interpolate_2d (x, y, kforce, nx, ny, hx, hy,  xc3c_01(1,1,iME,isorp,index), Q_L, dQ_Ldx, dQ_Ldy) 
   !  bcnalist(0,iME) = Q_L
@@ -134,12 +122,6 @@ subroutine Dtrescentros (interaction, isorp, in1, in2, indna, x, y, cost, eps, d
    ny = numy3c_den3(isorp,index)
    xxmax = x3cmax_den3(isorp,index)
    yymax = y3cmax_den3(isorp,index)
-   if (x .gt. xxmax .or. y .gt. yymax .or. x .lt. 0 .or. y .lt. 0) then
-     write (*,*) ' What the heck is going on in trescentros!!! error!!! '
-     write (*,*) ' x = ', x, ' Max of data = ', xxmax
-     write (*,*) ' y = ', y, ' Max of data = ', yymax
-     stop
-   end if
    do iME = 1, index_max3c(in1,in2)
     call interpolate_2d (x, y, kforce, nx, ny, hx, hy, &
      &       den3_01(:,:,iME,isorp,index), Q_L, dQ_Ldx, dQ_Ldy)
@@ -192,10 +174,6 @@ subroutine Dtrescentros (interaction, isorp, in1, in2, indna, x, y, cost, eps, d
    if (mvalue(iME,in1,in2) .eq. 1) then
     dxhlist(iME) = dxhlist(iME)*sint
     dyhlist(iME) = dyhlist(iME)*sint
-    if (sint .eq. 0.0d0) then
-        write (*,*) ' Dividing by zero (sint = 0) in Dtrescentros.f '
-        stop
-    end if
     dphlist(iME) = dphlist(iME)*sint - cost*hlist(iME)/sint
     hlist(iME) = hlist(iME)*sint
    end if

@@ -71,12 +71,6 @@ subroutine DtrescentrosS (isorp, in1, in2, indna, x, y, cost, rhat, sighat, bcna
   ny = numy3c_den3(isorp,index)
   xxmax = x3cmax_den3(isorp,index)
   yymax = y3cmax_den3(isorp,index)
-  if (x .gt. xxmax .or. y .gt. yymax .or. x .lt. 0 .or. y .lt. 0) then
-    write (*,*) ' What the heck is going on in trescentros!!! error!!! '
-    write (*,*) ' x = ', x, ' Max of data = ', xxmax
-    write (*,*) ' y = ', y, ' Max of data = ', yymax
-    stop
-  end if
   do iME = 1, index_maxS(in1,in2)
       call interpolate_2d (x, y, kforce, nx, ny, hx, hy, den3S_01(:,:,iME,isorp,index), Q_L, dQ_Ldx, dQ_Ldy)
       bcnalist(0,iME) = Q_L
@@ -99,15 +93,9 @@ subroutine DtrescentrosS (isorp, in1, in2, indna, x, y, cost, rhat, sighat, bcna
       dxbcnalist(4,iME) = dQ_Ldx
       dybcnalist(4,iME) = dQ_Ldy
   end do
-  argument = 1.0d0 - cost**2 + 1.0d-05
-  if (argument .ge. 0.0d0) then
-    sint = sqrt(argument)
-  else
-    write (*,*) '  Trescentros: BAD SQRT ******* ERROR '
-    write (*,*) '  *** STANDARD FIXUP, SET SINT = 0 '
-    argument = 0.0d0
-    sint = 0.0d0
-  end if
+  argument = 1.0d0 - cost**2
+  if (argument .lt. 1.0d-5) argument = 1.0d-5
+  sint = sqrt(argument)
   p(0) = 1.0d0
   p(1) = cost
   cost2 = cost*cost
@@ -133,10 +121,6 @@ subroutine DtrescentrosS (isorp, in1, in2, indna, x, y, cost, rhat, sighat, bcna
     if (mvalueS(iME,in1,in2) .eq. 1) then
     dxhlist(iME) = dxhlist(iME)*sint
     dyhlist(iME) = dyhlist(iME)*sint
-    if (sint .eq. 0.0d0) then
-        write (*,*) ' Dividing by zero (sint = 0) in Dtrescentros.f '
-        stop
-    end if
     dphlist(iME) = dphlist(iME)*sint - cost*hlist(iME)/sint
     hlist(iME) = hlist(iME)*sint
     end if

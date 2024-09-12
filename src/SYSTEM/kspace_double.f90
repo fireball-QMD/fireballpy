@@ -2,7 +2,7 @@ subroutine kspace_double (ikpoint, sks)
   use iso_c_binding
   use M_system, only: iqout, icluster, igamma, natoms, ratom, degelec, imass, getlssh, getissh, Kscf, blowre, bbnkre, blowim, bbnkim, &
     & sm12_complex, eigen_k, norbitals, norbitals_new, getiatom, neigh_b, neigh_j, neighn, neighPPn, neighPP_b, neighPP_j, vnl, s_mat, &
-    & h_mat, xl
+    & h_mat, xl, errno
   use M_fdata, only: num_orb, Qneutral
   implicit none
   integer(c_long), intent (in) :: ikpoint
@@ -128,7 +128,10 @@ subroutine kspace_double (ikpoint, sks)
    deallocate (work)
    allocate (work(lwork))
    call zheev ('V', 'U', norbitals, zzzz, norbitals, slam, work, lwork, rwork , info)
-   if (info .ne. 0) call diag_error (info, 0)
+   if (info .ne. 0) then
+     errno = -info
+     return
+   end if
    mineig = 0
    do imu = 1, norbitals
     if (slam(imu) .lt. overtol) mineig = imu
@@ -136,33 +139,6 @@ subroutine kspace_double (ikpoint, sks)
    mineig = mineig + 1
    norbitals_new = norbitals + 1 - mineig
    if (norbitals_new .ne. norbitals) then
-    write (*,*) ' Linear dependence encountered in basis set. '
-    write (*,*) ' An overlap eigenvalue is very small. '
-    write (*,*) norbitals - norbitals_new, ' vectors removed. '
-    write (*,*) ' Spurious orbital energies near zero will '
-    write (*,*) ' appear as a result of dropping these orbitals'
-    write (*,*) ' You can change this by adjusting overtol in '
-    write (*,*) ' kspace.f '
-    write (*,*) '  '
-    if(ishort .eq. 1) then    ! Don't print out again if done above
-     write (*,*) '      The overlap eigenvalues: '
-     write (*,*) ' ********************************************** '
-     write (*,*) (slam(imu), imu = 1, norbitals)
-    else          ! They asked for extra printout
-     write(*,*) ' '
-     write(*,*) ' Eigenvectors that correspond to eigenvalues'
-     write(*,*) ' that were eliminated.  These might provide'
-     write(*,*) ' insight into what atomic orbitals are causing'
-     write(*,*) ' the problem.'
-     write(*,*) ' '
-     do imu = 1, mineig - 1
-      write(*,*) ' eigenvector',imu
-      do jmu = 1, norbitals
-       write(*,*) jmu,' ',zzzz(jmu,imu)
-      end do
-     end do
-    end if
-    write (*,*) ' '
     do imu = mineig, norbitals
      jmu = imu - mineig + 1
      zzzz(:,jmu) = zzzz(:,imu)
@@ -205,7 +181,10 @@ subroutine kspace_double (ikpoint, sks)
   deallocate (work)
   allocate (work(lwork))
   call zheev ('V', 'U', norbitals, yyyy, norbitals, eigen, work, lwork, rwork, info)
-  if (info .ne. 0) call diag_error (info, 0)
+  if (info .ne. 0) then
+    errno = -info
+    return
+  end if
   eigen_k(1:norbitals,ikpoint) = eigen(:)
   if ((iqout .eq. 1) .or. (iqout .eq. 3)) then
     blowre(:,:,ikpoint) = real(yyyy(:,:), c_double)

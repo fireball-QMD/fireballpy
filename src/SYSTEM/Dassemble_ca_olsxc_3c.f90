@@ -99,8 +99,6 @@ subroutine Dassemble_ca_olsxc_3c ()
           sighat(1) = 0.0d0
           sighat(2) = 0.0d0
           sighat(3) = 1.0d0
-          write (*,*) ' There is an error here in assemble_olsxc_off.f '
-          write (*,*) ' r1 = r2!!!! BAD!!!! '
         else
           sighat(:) = r21(:)/y
         end if

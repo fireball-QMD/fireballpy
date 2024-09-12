@@ -1,7 +1,7 @@
 subroutine cl_value (itype, cl)
   use iso_c_binding
   use M_system, only: numorb_max
-  use M_fdata, only: nsshPP,lsshPP,num_orbPP,cl_PP
+  use M_fdata, only: nsshPP,lsshPP,cl_PP
   implicit none                  
   integer(c_long), intent (in) :: itype
   real(c_double), intent (out), dimension (numorb_max) :: cl
@@ -20,12 +20,5 @@ subroutine cl_value (itype, cl)
       cl(index) = cl_PP(issh,itype)
     end do
   end do
-  if (index .ne. num_orbPP(itype)) then
-    write (*,*) ' itype = ', itype
-    write (*,*) ' index of orbitals for pseudopotential = ',index
-    write (*,*) ' Program has num_orbPP = ', num_orbPP(itype)
-    write (*,*) ' cl_value: index and num_orbPP DO NOT agree. '
-    stop
-  end if
   return
 end subroutine cl_value

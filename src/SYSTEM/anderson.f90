@@ -1,7 +1,7 @@
 subroutine anderson ( x_try, x_old, nmsh )
   use iso_c_binding
   use M_system, only: ialgmix, idmix, max_scf_iterations, bmix, sigma, sigmatol, sigmabest, w02, scf_achieved, Kscf, Fv, Xv, delF, delX, &
-    & r2_sav, wi, x_best
+    & r2_sav, wi, x_best, Kbest
   implicit none
   integer(c_long), intent(in) :: nmsh    ! Size of vectors being optimized
   real(c_double), intent(in), dimension(nmsh) :: x_try ! potential new vector on input
@@ -26,7 +26,7 @@ subroutine anderson ( x_try, x_old, nmsh )
 
     Xv(:,1) = x_old(:)
     Fv(:,1) = x_try(:) - x_old(:)
-    sigma = dot_product(Fv(:,1), Fv(:,1)) / nmsh
+    sigma = dot_product(Fv(:,1), Fv(:,1))
     if(sigma .lt. sigmatol) then
       scf_achieved = .true.
       deallocate(Fv, Xv, delF, delX, r2_sav, x_best, wi)
@@ -35,12 +35,13 @@ subroutine anderson ( x_try, x_old, nmsh )
     x_old(:) = x_old(:) + bmix*Fv(:,1)
     r2_sav(1) = sigma
     sigmabest = sigma
+    Kbest = 1
     return
   end if
 
   Xv(:,Kscf) = x_old(:) ! last element is x_old, rest are |U>
   Fv(:,Kscf) = x_try(:) - x_old(:)
-  sigma = dot_product(Fv(:,Kscf), Fv(:,Kscf)) / nmsh
+  sigma = dot_product(Fv(:,Kscf), Fv(:,Kscf))
   if(sigma .lt. sigmatol) then
     scf_achieved = .true.
     deallocate(Fv, Xv, delF, delX, r2_sav, wi, x_best)
@@ -50,6 +51,7 @@ subroutine anderson ( x_try, x_old, nmsh )
     deallocate(Fv, Xv, delF, delX, r2_sav, wi, x_best)
     return
   else if(sigma .lt. sigmabest) then
+    Kbest = Kscf
     x_best(:) = x_old(:)
     sigmabest = sigma
   end if
@@ -57,7 +59,7 @@ subroutine anderson ( x_try, x_old, nmsh )
 
   Kscfm1 = Kscf - 1
   if (ialgmix .eq. 2) then
-    wi(Kscfm1) = 1.0d0 / r2_sav(Kscfm1)
+    wi(Kscfm1) = real(nmsh, c_double) / r2_sav(Kscfm1)
   end if
 
   delX(:,Kscfm1) = wi(Kscfm1)*(x_old(:) - Xv(:,Kscfm1))

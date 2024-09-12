@@ -14,10 +14,7 @@ subroutine smoother (r, rend, xi, stn, dstn)
   real(c_double) rbegin
   real(c_double) dum
   rbegin = xi*rend
-  if (r .lt. 0.0d0) then
-    write (*,*) ' r < 0 in smoother *** error! '
-    stop
-  else if (r .gt. rend) then
+  if (r .gt. rend) then
     stn = 0.0d0
     dstn = 0.0d0
   else if (r .lt. rbegin) then

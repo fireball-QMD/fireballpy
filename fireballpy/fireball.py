@@ -3,16 +3,17 @@ from typing import Optional
 import os
 import warnings
 import numpy as np
+from scipy.spatial.distance import pdist
 from numpy.typing import ArrayLike
 import matplotlib.pyplot as plt  # type: ignore
 from ase.calculators.calculator import Calculator, all_changes  # type: ignore
 from fireballpy.infodat import InfoDat
 from fireballpy.fdata import download_needed, get_default_infodat
+from fireballpy._errors import raise_fb_error
 from ase.dft.kpoints import bandpath
 
 
 from _fireball import (call_scf_loop,  # type: ignore
-                       call_getenergy,
                        call_getforces,
                        call_allocate_system,
                        loadfdata_from_path,
@@ -33,7 +34,8 @@ from _fireball import (call_scf_loop,  # type: ignore
                        get_shell_atom_charge,
                        get_fdata_is_load,
                        get_norbitals_new,
-                       get_eigen)
+                       get_eigen,
+                       get_errno)
 
 ICHARGE_TABLE = {'lowdin': np.int64(1), 'mulliken': np.int64(2),
                  'npa': np.int64(3), 'mulliken_dipole': np.int64(4),
@@ -339,8 +341,10 @@ class Fireball(Calculator):
             self._calculate_energies()
 
     def _calculate_energies(self) -> None:
-        call_scf_loop()
-        call_getenergy()
+        call_scf_loop(verbose=True)  # Debug
+        fb_errno = get_errno()
+        if fb_errno != 0:
+            raise_fb_error(fb_errno)
         self.energy = get_etot()
         self.results['energy'] = self.energy
         self.results['free_energy'] = self.energy
@@ -373,6 +377,10 @@ class Fireball(Calculator):
                   properties=['energy'],
                   system_changes=all_changes) -> None:
         super().calculate(atoms, properties, system_changes)
+
+        # Check positions
+        if np.any(pdist(self.atoms.positions) < 1e-6):
+            raise ValueError("Atom positions are too close! (tolerance 1e-6)")
 
         # If the atoms change allocate memory
         if 'numbers' in system_changes:

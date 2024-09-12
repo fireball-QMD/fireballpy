@@ -83,19 +83,5 @@ subroutine fermie ()
     end if
   end do
 
-  if (iter .gt. imax) then
-   write (*,*) '  '
-   write (*,*) ' ************ WARNING ******** WARNING ************* '
-   write (*,*) '  not under tolerance (toll) after ',imax
-   write (*,*) '    iterations in subroutine fermie'
-   write (*,*) '  '
-   write (*,*) '    qcharge = ', qcharge
-   write (*,*) '    qztot = ', qztot
-   write (*,*) '    emax = ', emax
-   write (*,*) '    emin = ', emin
-   write (*,*) '    tol = ', tol, abs(qcharge - qztot),qcharge,qztot
-   write (*,*) ' *************************************************** '
-   write (*,*) '  '
-  end if
   return
   end subroutine fermie

@@ -1,3 +1,4 @@
+! We assume we do not go outside the range NEVER
 subroutine interpolate_1d (interaction, isub, in1, in2, non2c, ioption, xin, yout, dfdx)
   use iso_c_binding
   use M_fdata, only: ind2c, numz2c, z2cmax, splineint_2c
@@ -20,10 +21,6 @@ subroutine interpolate_1d (interaction, isub, in1, in2, non2c, ioption, xin, you
 
   ! Save rounding errors from below
   if(xin .le. xmin) then
-    if((xmin - xin)/xmin > tol) then
-      write (*,*) 'INTERPOLATE 1D xin, xmin = ', xin, xmin
-      stop
-    end if
     yout = splineint_2c(1,non2c,1,jxx,in1,in2)
     if(ioption .eq. 1) dfdx = hi*splineint_2c(2,non2c,1,jxx,in1,in2)
     return
@@ -31,10 +28,6 @@ subroutine interpolate_1d (interaction, isub, in1, in2, non2c, ioption, xin, you
 
   ! Save rounding errors from above
   if(xin .ge. xmax) then
-    if((xin - xmax)/xmax > tol) then
-      write (*,*) 'INTERPOLATE 1D xin, xmax = ', xin, xmax
-      stop
-    end if
     a = splineint_2c(1,non2c,nnum-1,jxx,in1,in2)
     b = splineint_2c(2,non2c,nnum-1,jxx,in1,in2)
     c = splineint_2c(3,non2c,nnum-1,jxx,in1,in2)

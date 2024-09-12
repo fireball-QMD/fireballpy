@@ -19,7 +19,7 @@
 subroutine neighborsPP ()
   use iso_c_binding
   use M_system, only: icluster, natoms, ratom, imass, mbeta_max, nPP_b, nPP_j, nPP_map, nPPn, nPP_self, nPPx_b, &
-    & nPPx_j, nPPx_map, nPPx_point, nPPxn, nPPx_self, neighPPn, neighPP_b, neighPP_j, neighPP_max, xl
+    & nPPx_j, nPPx_map, nPPx_point, nPPxn, nPPx_self, neighPPn, neighPP_b, neighPP_j, xl
   use M_fdata,only : nssh, rcutoff, rc_PP    
   implicit none
   integer(c_long) iatom
@@ -70,10 +70,6 @@ subroutine neighborsPP ()
      distance = sqrt(distance2)
      range2 = (rcutoff_i + rcutoff_j - 0.01d0)**2
      if (distance2 .le. range2) then
-      if (distance2 .lt. 0.7d0 .and. distance .gt. 1.0d-4 .and. iatom .ne. jatom) then
-       write (*,*) ' WARNING - atoms dangerously close! '
-       write (*,*) ' iatom, jatom, distance = ', iatom, jatom, distance
-      end if 
       num_neigh = num_neigh + 1
       nPP_j(num_neigh,iatom) = jatom
       nPP_b(num_neigh,iatom) = mbeta
@@ -103,12 +99,6 @@ subroutine neighborsPP ()
      distance = sqrt(distance2)
      range2 = (rcutoff_i + rcutoff_j - 0.01d0)**2
      if (distance2 .le. range2) then
-      if (distance2 .lt. 0.7d0 .and. distance .gt. 1.0d-4 .and. iatom .ne. jatom) then
-       write (*,*) ' WARNING - atoms dangerously close! '
-       write (*,*) ' WARNING - atoms dangerously close! '
-       write (*,*) ' WARNING - atoms dangerously close! '
-       write (*,*) ' iatom, jatom, distance = ', iatom, jatom, distance
-      end if 
       num_neigh = num_neigh + 1
       nPPx_j(num_neigh,iatom) = jatom
       nPPx_b(num_neigh,iatom) = mbeta
@@ -137,18 +127,6 @@ subroutine neighborsPP ()
                 &         ( vec(3) - vec3(3) )**2.0d0  ) 
          if(distance .lt. 0.0001) exit
        enddo
-       if (mbeta .gt. mbeta_max) then 
-         write (*,*) ' ++++++++++++++++++++++++++++++++++++++++++++++++++'
-         write (*,*) ' mbeta_max =', mbeta_max
-         write (*,*) ' vec_look =', vec3(:)
-         write (*,*) ' Fireball cannot find desired neighboring cell. '
-         write (*,*) ' This propably means you need to increase number '
-         write (*,*) ' of the periodic unit cell box and to recompile the code.'
-         write (*,*) ' For details see INITIALIZERS/initboxes.f90 file.'
-         write (*,*) ' Fireball is going to die!'
-         write (*,*) ' ++++++++++++++++++++++++++++++++++++++++++++++++++'
-         stop
-       endif
        flag = .false.  
        do kneigh = 1, num_neigh
          katom = neighPP_j(kneigh,iatom)
@@ -157,14 +135,6 @@ subroutine neighborsPP ()
        enddo ! do kneigh
        if(.not. flag ) then 
          num_neigh = num_neigh + 1
-         if (num_neigh .gt. neighPP_max**2) then
-           write (*,*) 'Oh no. In common_neighbors.f90, we have too many'
-           write (*,*) 'common neighbors. In MODULES/dimensions.f90 '
-           write (*,*) 'dimension neigh_max**2 = ', neighPP_max**2
-           write (*,*) 'So far (*but still counting) we have '
-           write (*,*) 'num_neigh = ',num_neigh,' within neighbors.f90!'
-           stop
-         end if
          neighPP_j(num_neigh,iatom) = jatom
          neighPP_b(num_neigh,iatom) = mbeta
        endif ! if(flag)

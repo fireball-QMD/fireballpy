@@ -30,19 +30,5 @@ integer(c_long) function mpairnay (iatom, jatom, rdiff)
     end if
    end if
   end do
-  if (imatch .ne. 1) then
-   write (*,*) ' imatch = ', imatch
-   write (*,*) ' The variable imatch MUST be ONE! NO EXCEPTIONS '
-   write (*,*) ' Bad imatch value in mpairnay.f90; must abort! '
-   write (*,*) ' iatom = ', iatom, r1(:)
-   write (*,*) ' jatom = ', jatom, rdiff(:) 
-   stop
-  end if
-  if (mpairnay .le. 0) then
-   write (*,*) ' Huh? The variable, mpairnay < 0, mpairnay = ', mpairnay
-   write (*,*) ' It MUST be > 1. NO EXCEPTIONS '
-   write (*,*) ' Bad mpairnay value in mpairnay.f90; must abort! '
-   stop
-  end if
   return
 end function mpairnay

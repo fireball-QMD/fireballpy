@@ -43,12 +43,6 @@ subroutine trescentros (interaction, isorp, in1, in2, indna, x, y, cost, eps, bc
     ny = numy3c_bcna(isorp,index)
     xxmax = x3cmax_bcna(isorp,index)
     yymax = y3cmax_bcna(isorp,index)
-    if (x .gt. xxmax .or. y .gt. yymax .or. x .lt. 0 .or. y .lt. 0) then
-       write (*,*) ' What the heck is going on in trescentros!!! error!!! '
-       write (*,*) ' x = ', x, ' Max of data = ', xxmax
-       write (*,*) ' y = ', y, ' Max of data = ', yymax
-       stop
-    end if
     do iME = 1, index_max3c(in1,in2)
       call interpolate_2d (x, y, kforce, nx, ny, hx, hy, bcna_01(:,:,iME,isorp,index), Q_L, dQ_Ldx, dQ_Ldy) 
       bcnalist(0,iME) = Q_L
@@ -68,12 +62,6 @@ subroutine trescentros (interaction, isorp, in1, in2, indna, x, y, cost, eps, bc
   !  ny = numy3c_xc3c(isorp,index)
   !  xxmax = x3cmax_xc3c(isorp,index)
   !  yymax = y3cmax_xc3c(isorp,index)
-  !  if (x .gt. xxmax .or. y .gt. yymax .or. x .lt. 0 .or. y .lt. 0) then
-  !     write (*,*) ' What the heck is going on in trescentros!!! error!!! ' 
-  !     write (*,*) ' x = ', x, ' Max of data = ', xxmax
-  !     write (*,*) ' y = ', y, ' Max of data = ', yymax
-  !     stop
-  !  end if
   !  do iME = 1, index_max3c(in1,in2)
   !    call interpolate_2d (x, y, kforce, nx, ny, hx, hy, xc3c_01(1,1,iME,isorp,index), Q_L, dQ_Ldx, dQ_Ldy) 
   !    bcnalist(0,iME) = Q_L
@@ -93,12 +81,6 @@ subroutine trescentros (interaction, isorp, in1, in2, indna, x, y, cost, eps, bc
     ny = numy3c_den3(isorp,index)
     xxmax = x3cmax_den3(isorp,index)
     yymax = y3cmax_den3(isorp,index)
-    if (x .gt. xxmax .or. y .gt. yymax .or. x .lt. 0 .or. y .lt. 0) then
-       write (*,*) ' What the heck is going on in trescentros!!! error!!! '
-       write (*,*) ' x = ', x, ' Max of data = ', xxmax
-       write (*,*) ' y = ', y, ' Max of data = ', yymax
-       stop
-    end if
     do iME = 1, index_max3c(in1,in2)
       call interpolate_2d (x, y, kforce, nx, ny, hx, hy, den3_01(:,:,iME,isorp,index), Q_L, dQ_Ldx, dQ_Ldy)
       bcnalist(0,iME) = Q_L

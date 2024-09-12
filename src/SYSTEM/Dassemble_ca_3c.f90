@@ -122,8 +122,6 @@ subroutine Dassemble_ca_3c ()
       sighat(1) = 0.0d0
       sighat(2) = 0.0d0
       sighat(3) = 1.0d0
-      write (*,*) ' There is an error here in assemble_3c.f '
-      write (*,*) ' r1 = r2!!!! BAD!!!! '
      else
       sighat(:) = r21(:)/y
      end if
@@ -141,18 +139,10 @@ subroutine Dassemble_ca_3c ()
      call deps3center (r1, r2, r21, y, rna, rnabc, eps, depsA, depsB)
      distance13 = sqrt((rna(1) - r1(1))**2 + (rna(2) - r1(2))**2 + (rna(3) - r1(3))**2)
      distance23 = sqrt((rna(1) - r2(1))**2 + (rna(2) - r2(2))**2 + (rna(3) - r2(3))**2)
-     if (distance13 .gt. 1.0d-05) then
-      rhatA1(:) = (rna(:) - r1(:))/distance13
-     else
-      write (*,*) ' distance13 is too small in Dassemble_ca_2c.f '
-      write (*,*) ' This can not be so!!!! '
-     end if
-     if (distance23 .gt. 1.0d-05) then
-      rhatA2(:) = (rna(:) - r2(:))/distance23
-     else
-      write (*,*) ' distance23 is too small in Dassemble_ca_2c.f '
-      write (*,*) ' This can not be so!!!! '
-     end if
+     if (distance13 .lt. 1.0d-05) distance13 = 1.0d-5
+     if (distance23 .lt. 1.0d-05) distance23 = 1.0d-5
+    rhatA1(:) = (rna(:) - r1(:))/distance13
+    rhatA2(:) = (rna(:) - r2(:))/distance23
      dq3 = 0.0d0
      do issh = 1, nssh(indna)
       dq3 = dq3 + (Qin(issh,ialp) - Qneutral(issh,indna))

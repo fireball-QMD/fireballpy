@@ -1,7 +1,7 @@
 subroutine common_neighborsPP ()
   use iso_c_binding
   use M_system, only: icluster, natoms, ratom, imass, mbeta_max, nPPx_b, nPPx_j, nPPxn, neighPPn, neighPP_b, neighPP_j, neighPP_comn, &
-    & neighPP_comm, neighPP_comj, neighPP_comb, neighPP_max, xl
+    & neighPP_comm, neighPP_comj, neighPP_comb, xl
   implicit none
   integer(c_long) ialp
   integer(c_long) iatom
@@ -36,10 +36,6 @@ subroutine common_neighborsPP ()
           if (.not. (jatom .eq. ialp .and. jbeta .eq. 0) .and. (ineigh .ne. jneigh)) then
             vec3(:) = ratom(:,jatom) + xl(:,jbeta)
             num_neigh = num_neigh + 1
-            if (num_neigh .gt. neighPP_max**2) then
-              write (*,*) ' num_neigh = ', num_neigh, ' within neighbors.f90! '
-              stop
-            end if ! if(num_neigh)
             neighPP_comj(1,num_neigh,ialp) = iatom
             neighPP_comb(1,num_neigh,ialp) = ibeta
             neighPP_comj(2,num_neigh,ialp) = jatom

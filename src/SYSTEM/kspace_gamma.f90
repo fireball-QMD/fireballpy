@@ -1,12 +1,11 @@
-subroutine kspace_gamma ( ikpoint, sks)
+subroutine kspace_gamma ()
   use iso_c_binding
   use M_system, only: iqout, natoms, degelec, imass, getlssh, getissh, Kscf, blowre, bbnkre, sm12_real, eigen_k, norbitals, &
-    & norbitals_new, getiatom, neigh_b, neigh_j, neighn, neighPPn, neighPP_b, neighPP_j, vnl, s_mat, h_mat
+    & norbitals_new, getiatom, neigh_b, neigh_j, neighn, neighPPn, neighPP_b, neighPP_j, vnl, s_mat, h_mat, errno
   use M_fdata, only: num_orb, Qneutral
   implicit none
-  integer(c_long), intent (in) :: ikpoint
-  real(c_double), intent (in), dimension (3) :: sks
   real(c_double), parameter :: overtol = 1.0d-4
+  integer(c_long) ikpoint
   integer(c_long) iatom
   integer(c_long) imu
   integer info
@@ -25,7 +24,6 @@ subroutine kspace_gamma ( ikpoint, sks)
   real(c_double), dimension (norbitals) :: slam
   real(c_double) a0
   real(c_double) a1
-  real(c_double) magnitude
   real(c_double), dimension (:, :), allocatable :: xxxx
   real(c_double), dimension (:, :), allocatable :: yyyy
   real(c_double), dimension (:, :), allocatable :: zzzz
@@ -34,12 +32,7 @@ subroutine kspace_gamma ( ikpoint, sks)
   real(c_double), allocatable, dimension (:) :: work
   integer(c_long), allocatable, dimension (:) :: iwork
   integer(c_long) lwork, liwork
-  magnitude = sqrt(sks(1)**2 + sks(2)**2 + sks(3)**3) ! AQUI : sks(3)**3 ?
-  if (magnitude .gt. 1.0d-3) then
-    write (*,*) ' gamma point, the complex version of LAPACK is needed.'
-    write (*,*) ' We must stop here! ',sks
-    stop
-  end if
+  ikpoint = 1
   a0 = 0.0d0
   a1 = 1.0d0
   ishort = 1
@@ -120,7 +113,10 @@ subroutine kspace_gamma ( ikpoint, sks)
     deallocate (work)
     allocate(work(lwork))
     call dsyev ('V', 'U', norbitals, zzzz, norbitals, slam, work,lwork, info )
-    if (info .ne. 0) call diag_error (info, 0)
+    if (info .ne. 0) then
+      errno = -info
+      return
+    end if
     mineig = 0
     do imu = 1, norbitals
       if (slam(imu) .lt. overtol) mineig = imu
@@ -128,18 +124,6 @@ subroutine kspace_gamma ( ikpoint, sks)
     mineig = mineig + 1
     norbitals_new = norbitals + 1 - mineig
     if (norbitals_new .ne. norbitals) then
-      write (*,*) ' Linear dependence encountered in basis set. '
-      if(ishort .eq. 1) then    ! Don't print out again if done above
-        write (*,*) '      The overlap eigenvalues: '
-      else          ! They asked for extra printout
-        write(*,*) ' Eigenvectors that correspond to eigenvalues'
-        do imu = 1, mineig - 1
-          write(*,*) ' eigenvector',imu
-          do jmu = 1, norbitals
-            write(*,*) jmu,' ',zzzz(jmu,imu)
-          end do
-        end do
-      end if
       do imu = mineig, norbitals
         jmu = imu - mineig + 1
         zzzz(:,jmu) = zzzz(:,imu)
@@ -179,7 +163,10 @@ subroutine kspace_gamma ( ikpoint, sks)
   deallocate (work)
   allocate(work(lwork))
   call dsyev ('V', 'U', norbitals, yyyy, norbitals, eigen, work, lwork, info )
-  if (info .ne. 0) call diag_error (info, 0)
+  if (info .ne. 0) then
+    errno = -info
+    return
+  end if
   eigen_k(1:norbitals,ikpoint) = eigen(:)
   if ((iqout .eq. 1) .or. (iqout .eq. 3)) blowre(:,:,ikpoint) = real(yyyy(:,:), c_double)
   call dsymm ( 'L', 'U', norbitals, norbitals, a1, xxxx, norbitals, yyyy, norbitals, a0, zzzz, norbitals )

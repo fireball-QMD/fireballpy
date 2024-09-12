@@ -27,9 +27,6 @@ subroutine neighbors ()
         range2 = (rcutoff_i + rcutoff_j - 0.01d0)**2
         rc_max = max(rc_max,(rcutoff_i + rcutoff_j))        
         if (distance2 .le. range2) then
-          if (distance2 .lt. 0.7d0 .and. distance .gt. 1.0d-4 .and.iatom .ne. jatom) then
-            write (*,*) ' WARNING - atoms dangerously close! '
-          end if
           num_neigh = num_neigh + 1
           neigh_j(num_neigh,iatom) = jatom
           neigh_b(num_neigh,iatom) = mbeta          

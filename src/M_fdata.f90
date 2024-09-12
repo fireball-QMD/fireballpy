@@ -68,7 +68,6 @@ module M_fdata
     & 'vna_atom   ','vnl        ','xc_ontop   ','xc_atom    ','xc_corr    ','dipole_z   ','dipole_y   ','dipole_x   ', &
     & 'coulomb    ','kinetic    ','nuxc       ','den_ontopl ','den_ontopr ','den_atom   ','dnuxc_ol   ','dnuxc_or   ', &
     & 'denS_ontopl','denS_ontopr','denS_atom  ','overlapS   '/)
-  integer(c_long) :: errno2c
   integer(c_long) :: interactions2c_max
   integer(c_long), dimension (1:23,0:8) :: ind2c
   integer(c_long), dimension (:,:,:), allocatable :: numz2c
@@ -81,7 +80,6 @@ module M_fdata
   integer(c_long), parameter :: ntheta = 5
   character (len=4), dimension (4), parameter :: threecfname = (/'bcna','xc3c','den3','deS3'/)
   !integer(c_long), parameter :: ideriv_max = 6
-  integer(c_long) :: errno3c
   integer(c_long), dimension (:,:,:), allocatable :: icon3c
   ! Neutral (charged) atom interactions; there are five bcna arrays - one for each theta
   integer(c_long), dimension (:,:), allocatable :: numx3c_bcna, numy3c_bcna

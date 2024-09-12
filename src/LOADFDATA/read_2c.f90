@@ -1,6 +1,6 @@
 subroutine read_2c (interaction)
   use iso_c_binding
-  use M_fdata, only: fdataLocation, twocfname, nspecies, nssh, nsshPP, nzx, nfofx, cl_PP, errno2c, &
+  use M_fdata, only: fdataLocation, twocfname, nspecies, nssh, nsshPP, nzx, nfofx, cl_PP, &
     & ind2c, index_max2c, index_maxS, index_maxPP, index_max2cDipX, index_max2cDipY, z2cmax, numz2c, nsh_max
   implicit none
   integer(c_long), intent (in) :: interaction
@@ -44,14 +44,6 @@ subroutine read_2c (interaction)
         filename = trim(filename) // trim(extension) !append_string (filename, extension)
         open(iounit, file=filename, status='old')
         call readheader_2c (interaction, iounit, nsh_max, numz, rc1, rc2, zmin, zmax, npseudo, cl_pseudo)
-        if (numz .gt. nfofx) then
-          !write (*,*) ' numz = ', numz, ' in read_2c.f90'
-          !write (*,*) ' nfofx = ',nfofx
-          !write (*,*) ' Fix this parameter and recompile! '
-          !stop
-          errno2c = 1
-          return
-        end if
         if (interaction .eq. 5) then
           do issh = 1, nsshPP(in2) 
             cl_PP(issh,in2) = cl_pseudo(issh)

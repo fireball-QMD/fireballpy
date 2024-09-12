@@ -2,7 +2,7 @@
 subroutine assemble_2c_PP ()
   use iso_c_binding
   use M_system, only: natoms, imass, nPP_b, nPP_j, nPP_map, nPPn, nPP_self, nPPx_b, nPPx_j, nPPx_map, nPPx_point, nPPxn, &
-    & nPPx_self, numorb_max, neighPP_self, sVNL, vnl
+    & numorb_max, neighPP_self, sVNL, vnl
   use M_fdata, only: num_orb, num_orbPP
   implicit none
   integer(c_long) iatom
@@ -58,14 +58,7 @@ subroutine assemble_2c_PP ()
       mbeta = nPPx_b(ineigh,iatom)
       jatom = nPPx_j(ineigh,iatom)
       in2 = imass(jatom)
-      if (iatom .eq. jatom .and. mbeta .eq. 0) then
-        if (nPPx_self(iatom) .ne. ineigh) then
-          write (*,*) ' Something really wrong in assemble_2c_PP.f90 '
-          write (*,*) ' iatom, jatom, mbeta = ', iatom, jatom, mbeta
-          write (*,*) ' neigh_self(iatom), ineigh = ', nPPx_self(iatom), ineigh  
-        end if   ! if(neighPP_self)
-      else   ! if(iatom .eq. jatom)
-
+      if (iatom .ne. jatom .or. mbeta .ne. 0) then
         ! Case 1. PP is iatom.  <i | VNL(i) |j>.
         call cl_value (in1, cl)
         jneigh = nPPx_point(ineigh,iatom)
@@ -99,14 +92,7 @@ subroutine assemble_2c_PP ()
       mbeta = nPP_b(ineigh,iatom)
       jatom = nPP_j(ineigh,iatom)
       in2 = imass(jatom)
-      if (iatom .eq. jatom .and. mbeta .eq. 0) then
-        if (nPP_self(iatom) .ne. ineigh) then
-          write (*,*) ' Something real(c_double)ly wrong in assemble_2c_PP.f90 '
-          write (*,*) ' iatom, jatom, mbeta = ', iatom, jatom, mbeta
-          write (*,*) ' neigh_self(iatom), ineigh = ',nPP_self(iatom), ineigh  
-          stop
-        end if   ! if(neighPP_self)
-      else   ! if(iatom .eq. jatom)
+      if (iatom .ne. jatom .or. mbeta .ne. 0) then
         ! Now the second case. <i | V(j) | j>.
         call cl_value (in2, cl)
         ! Looking for <phi_j|Psi_j>, what is jneigh of jatom itself in the nPPx list 

@@ -1,3 +1,11 @@
+subroutine get_errno(errno_out)
+  use iso_c_binding
+  use M_system, only: errno
+  implicit none
+  integer(c_long), intent(out) :: errno_out
+  errno_out = errno
+end subroutine get_errno
+
 subroutine set_igamma(aux)
   use iso_c_binding
   use M_system, only : igamma
@@ -301,17 +309,12 @@ subroutine call_allocate_system()
   call allocate_system()
 end subroutine call_allocate_system
 
-subroutine call_scf_loop()
+subroutine call_scf_loop(verbose)
   use iso_c_binding
   implicit none
-  call scf_loop ()
+  logical, intent(in) :: verbose
+  call scf_loop (verbose)
 end subroutine call_scf_loop
-
-subroutine call_getenergy()
-  use iso_c_binding
-  implicit none
-  call getenergy ()
-end subroutine call_getenergy
 
 subroutine call_getforces()
   use iso_c_binding

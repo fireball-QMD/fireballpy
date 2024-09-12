@@ -94,7 +94,7 @@ subroutine dipole_proyection()
   dipTot_y    = dip_y
   dipTot_z    = dip_z
   dipTot_tot = dip_tot
-  ! write the intraatomic dipole
+  ! save the intraatomic dipole
   dip_x = 0.0d0
   dip_y = 0.0d0
   dip_z = 0.0d0      

@@ -16,6 +16,8 @@ module M_system
   !periodic       0       0        0        !I periodic + kpoints
   !periodic_gamma 0       0        1        !R periodic + only gamma kpts
 
+  integer(c_long) :: errno = 0
+
   integer(c_long) :: ialgmix  = 1 !1:anderson 2:johnson 3:custom
   real(c_double), parameter :: xc_overtol = 5.0d-5
   real(c_double), parameter :: smt_elect = 0.8d0 ! Ewald and electrostatic
@@ -24,9 +26,10 @@ module M_system
   integer(c_long) :: max_scf_iterations = 200
   real(c_double) :: tempfe = 100.0d0
   real(c_double) :: bmix = 0.1d0
+  integer(c_long) :: Kbest
   real(c_double) :: sigma = 0.0d0
   real(c_double) :: sigmaold = 0.0d0
-  real(c_double) :: sigmatol = 1.0E-8
+  real(c_double) :: sigmatol = 1.0d-8
   real(c_double) :: sigmabest
   real(c_double) :: w02 = 0.0d0
   logical :: scf_achieved = .false.

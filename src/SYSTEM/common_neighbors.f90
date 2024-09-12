@@ -1,6 +1,6 @@
 subroutine common_neighbors ()
   use iso_c_binding
-  use M_system, only: natoms, ratom, imass, neigh_max, neigh_b, neigh_j, neighn, neigh_comb, neigh_comj, neigh_comm, neigh_comn, xl
+  use M_system, only: natoms, ratom, imass, neigh_b, neigh_j, neighn, neigh_comb, neigh_comj, neigh_comm, neigh_comn, xl
   use M_fdata, only: nssh, rcutoff
   integer(c_long) ialp
   integer(c_long) iatom
@@ -46,13 +46,6 @@ subroutine common_neighbors ()
            range2 = (rcutoff_i + rcutoff_j - 0.01d0)**2
            if (distance2 .le. range2) then
              num_neigh = num_neigh + 1
-             if (num_neigh .gt. neigh_max**2) then
-               write (*,*) ' Oh no. In common_neighbors.f90, we have too many '
-               write (*,*) ' common neighbors. In MODULES/dimensions.f90 '
-               write (*,*) ' dimension neigh_max**2 = ', neigh_max**2
-               write (*,*) ' So far (*but still counting) we have '
-               write (*,*) ' num_neigh = ', num_neigh, ' within neighbors.f90! '
-             end if
              neigh_comj(1,num_neigh,ialp) = iatom
              neigh_comb(1,num_neigh,ialp) = ibeta
              neigh_comj(2,num_neigh,ialp) = jatom
