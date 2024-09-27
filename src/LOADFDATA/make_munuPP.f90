@@ -5,6 +5,8 @@ subroutine make_munuPP ()
   implicit none
   integer(c_long) :: imu, index, in1, in2, issh1, issh2, l1, l2, n1, n2
 
+  if (allocated(index_maxPP)) deallocate(index_maxPP)
+  if (allocated(num_orbPP)) deallocate(num_orbPP)
   allocate (index_maxPP (nspecies, nspecies))
   allocate (num_orbPP (nspecies))
   do in1 = 1, nspecies
@@ -33,6 +35,8 @@ subroutine make_munuPP ()
   end do
   if (ME2cPP_max .gt. ME2c_max) ME2c_max = ME2cPP_max
 
+  if (allocated(muPP)) deallocate(muPP)
+  if (allocated(nuPP)) deallocate(nuPP)
   allocate (muPP (ME2cPP_max, nspecies, nspecies))
   allocate (nuPP (ME2cPP_max, nspecies, nspecies))
   muPP = 0

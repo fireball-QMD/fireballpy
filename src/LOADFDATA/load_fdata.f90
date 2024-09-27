@@ -32,6 +32,20 @@ subroutine load_fdata()
   close(12)
 
   !AQUI pensar, Qinmixer(imix) = Qin(issh,iatom) en miser, (Qinmixer(nsh_max*natoms))
+  if (allocated(nzx)) deallocate(nzx)
+  if (allocated(symbolA)) deallocate(symbolA)
+  if (allocated(etotatom)) deallocate(etotatom)
+  if (allocated(smass)) deallocate(smass)
+  if (allocated(rc_PP)) deallocate(rc_PP)
+  if (allocated(rcutoff)) deallocate(rcutoff)
+  if (allocated(cl_PP)) deallocate(cl_PP)
+  if (allocated(nssh)) deallocate(nssh)
+  if (allocated(lssh)) deallocate(lssh)
+  if (allocated(nsshPP)) deallocate(nsshPP)
+  if (allocated(lsshPP)) deallocate(lsshPP)
+  if (allocated(Qneutral)) deallocate(Qneutral)
+  if (allocated(wavefxn)) deallocate(wavefxn)
+  if (allocated(napot)) deallocate(napot)
   allocate (nzx (nspecies))
   allocate (symbolA (nspecies))
   allocate (etotatom (nspecies))
@@ -94,6 +108,9 @@ subroutine load_fdata()
   icount = 0
   ind2c = 0
   interactions2c_max = 27 + 11*nsh_max
+  if (allocated(numz2c)) deallocate(numz2c)
+  if (allocated(z2cmax)) deallocate(z2cmax)
+  if (allocated(splineint_2c)) deallocate(splineint_2c)
   allocate (numz2c (interactions2c_max, nspecies, nspecies))
   allocate (z2cmax (interactions2c_max, nspecies, nspecies))
   allocate (splineint_2c (4, ME2c_max, nfofx, interactions2c_max, nspecies, nspecies))
@@ -123,6 +140,7 @@ subroutine load_fdata()
   end do
 
   ! Prepare and load three centre
+  if (allocated(icon3c)) deallocate(icon3c)
   allocate(icon3c(nspecies, nspecies, nspecies))
   do in1=1,nspecies
     do in2=1,nspecies

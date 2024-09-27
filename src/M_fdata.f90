@@ -6,10 +6,8 @@ module M_fdata
   integer(c_long) :: itheory = 1 !DOGS 
   integer(c_long) :: itheory_xc = 2 !McWEDA
   logical :: debug = .True.
-  character(len=100) :: infofname = 'info.dat'
+  character(len=100) :: infofname = 'info.ase.dat'
   !===================================
-  
-  integer(c_long) :: fdata_is_load = 0 
   
   ! info.dat variables
   integer(c_long) :: nsh_max, nshPP_max, isorpmax, isorpmax_xc, nspecies

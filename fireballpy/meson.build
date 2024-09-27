@@ -6,7 +6,11 @@ generate_version = custom_target(
   build_by_default: true,
   output: 'version.py',
   input: '../tools/gitversion.py',
-  command: ['../tools/gitversion.py', '--meson-dist', '--write', 'fireballpy' / 'version.py'],
+  command: [
+    '../tools/gitversion.py',
+    '--meson-dist',
+    '--write', 'fireballpy' / 'version.py',
+  ],
   install_dir: py.get_install_dir() / 'fireballpy',
   install_tag: 'python-runtime',
 )
@@ -14,14 +18,10 @@ generate_version = custom_target(
 python_sources = [
   '__init__.py',
   '_errors.py',
-  'utils.py',
-  'fdata.py',
-  'infodat.py',
-  'retro.py',
+  '_fdata.py',
+  '_options.py',
+  '_dftd3.py',
   'fireball.py',
 ]
 
-py.install_sources(
-  python_sources,
-  subdir: 'fireballpy'
-)
+py.install_sources(python_sources, subdir: 'fireballpy')

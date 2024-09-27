@@ -18,7 +18,7 @@ module M_system
 
   integer(c_long) :: errno = 0
 
-  integer(c_long) :: ialgmix  = 1 !1:anderson 2:johnson 3:custom
+  integer(c_long) :: ialgmix  = 2 !1:anderson 2:johnson 3:custom
   real(c_double), parameter :: xc_overtol = 5.0d-5
   real(c_double), parameter :: smt_elect = 0.8d0 ! Ewald and electrostatic
   integer(c_long), parameter :: ithetamax = 5
@@ -238,9 +238,6 @@ module M_system
   real(c_double), dimension (:, :, :), allocatable :: dxcdcc
   real(c_double), dimension (:, :), allocatable :: ft
   real(c_double), dimension (:, :), allocatable :: dusr
-  real(c_double), dimension (:, :), allocatable :: special_k_orig
-  real(c_double), dimension (:), allocatable :: weight_k_orig
-  real(c_double), dimension (:, :), allocatable :: scale_k
   real(c_double), dimension (:, :, :), allocatable :: fotxc 
   real(c_double), dimension (:, :, :), allocatable :: fotxc_ca
   real(c_double), dimension (:, :, :), allocatable :: faca 

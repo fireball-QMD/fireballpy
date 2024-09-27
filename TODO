@@ -1,19 +1,11 @@
 Carlos :
-Jorge: DOC, workflow, examples jupyter, fireballpytestrepo
+Jorge: DOC, workflow, examples jupyter
 Jesús: qmmm
-Dani: testunitarios, casos uso, ifixcharges, test limpiar y reconstruir, get_fermi, eigenvalue
+Dani: testunitarios, casos uso, test limpiar y reconstruir
 José: autores
 
-* icharge si no metemos cargas ?
--  Quedarse con la mejor autoconsistencia
--  Diagonalizar en base fb
 -  Paralelo
 
 Fdata: https://pubs.acs.org/doi/10.1021/acs.jctc.9b01265
 
-- gfortran fireball clasico
-
 - tesunitario.
-
-
-sigma ? ....

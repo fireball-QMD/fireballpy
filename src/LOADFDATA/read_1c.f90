@@ -7,6 +7,12 @@ subroutine read_1c ()
   character (len=3) :: auxz
   character (len=1000) :: root
 
+  if (allocated(exc1c0)) deallocate(exc1c0)
+  if (allocated(nuxc1c)) deallocate(nuxc1c)
+  if (allocated(dexc1c)) deallocate(dexc1c)
+  if (allocated(d2exc1c)) deallocate(d2exc1c)
+  if (allocated(dnuxc1c)) deallocate(dnuxc1c)
+  if (allocated(d2nuxc1c)) deallocate(d2nuxc1c)
   allocate(exc1c0 (nspecies,nsh_max,nsh_max))
   allocate(nuxc1c (nspecies,nsh_max,nsh_max))
   allocate(dexc1c (nspecies,nsh_max,nsh_max,nsh_max))

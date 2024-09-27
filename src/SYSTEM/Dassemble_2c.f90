@@ -64,9 +64,9 @@ subroutine Dassemble_2c ()
           end do
          end do
       ft(ix,iatom) = ft(ix,iatom) + (-1.0d0)*sumT
-      fro(ix,iatom) = fro(ix,iatom) +  sumS
+      fro(ix,iatom) = fro(ix,iatom) + sumS
       ft(ix,jatom) = ft(ix,jatom) - (-1.0d0)*sumT
-      fro(ix,jatom) = fro(ix,jatom) -      sumS
+      fro(ix,jatom) = fro(ix,jatom) - sumS
       end do ! do ix
       isorp = 0
       kforce = 1  

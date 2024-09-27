@@ -16,13 +16,14 @@ subroutine anderson ( x_try, x_old, nmsh )
   real(c_double), allocatable, dimension(:) :: work
 
   if(Kscf .eq. 1)then
-    ! wi need to be allocated somewhere else
     allocate (Fv(nmsh,max_scf_iterations+1))
     allocate (Xv(nmsh,max_scf_iterations+1))
     allocate (delF(nmsh,max_scf_iterations))
     allocate (delX(nmsh,max_scf_iterations))
     allocate (r2_sav(max_scf_iterations))
     allocate (x_best(nmsh))
+    allocate (wi(max_scf_iterations))
+    wi = 1.0d0
 
     Xv(:,1) = x_old(:)
     Fv(:,1) = x_try(:) - x_old(:)
@@ -66,7 +67,7 @@ subroutine anderson ( x_try, x_old, nmsh )
   delF(:,Kscfm1) = wi(Kscfm1)*(Fv(:,Kscf) - Fv(:,Kscfm1))
   Xv(:,Kscfm1) = bmix*delF(:,Kscfm1) + delX(:,Kscfm1)
 
-  imix = max(1, Kscf - idmix + 1)
+  imix = max(1_c_long, Kscf - idmix + 1)
   mix_order = min(Kscf, idmix) - 1
   if (imix .gt. 1) then
     if (r2_sav(imix-1) .lt. minval(r2_sav(imix:Kscf))) then

@@ -6,6 +6,7 @@ subroutine make_munuDipX ()
   integer(c_long) :: index, in1, in2, issh1, issh2, l1, l2, n1, n2
 
   ME2cDipX_max = 0
+  if (allocated(index_max2cDipX)) deallocate(index_max2cDipX)
   allocate (index_max2cDipX (nspecies, nspecies))
   do in1 = 1, nspecies
     num_orb(in1) = 0
@@ -55,6 +56,8 @@ subroutine make_munuDipX ()
   end do
   if (ME2cDipX_max .gt. ME2c_max) ME2c_max = ME2cDipX_max
 
+  if (allocated(muDipX)) deallocate(muDipX)
+  if (allocated(nuDipX)) deallocate(nuDipX)
   allocate (muDipX (ME2cDipX_max, nspecies, nspecies))
   allocate (nuDipX (ME2cDipX_max, nspecies, nspecies))
   muDipX = 0

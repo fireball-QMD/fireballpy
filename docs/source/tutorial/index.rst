@@ -25,31 +25,19 @@ deeply recommend reading.
 Structure of the package
 ========================
 
-FireballPy consists of one class, :class:`Fireball` and one module
-:mod:`retro`.
-
 The :class:`Fireball` class provides an ASE compatible calculator to
 perform DFT computations using ASE API.
-This is possible thanks to the Fortran to C module conversion
-performed by `f2py <https://numpy.org/doc/stable/f2py/>`_,
+This is possible thanks to the Fortran wrappers generated
+by `f2py <https://numpy.org/doc/stable/f2py/>`_,
 which although it provides with fantastic performance it does
 also come with some shortcomings which we will explore later.
-
-The module :mod:`retro` is dedicated to old time Fireball users
-to ease with the adaptation of old projects and input files
-to FireballPy.
 
 .. toctree::
    :caption: Fireball calculator
    :maxdepth: 1
 
    howtouse
-
-.. toctree::
-   :caption: Coming from old Fireball
-   :maxdepth: 1
-
-   readingbas
+   fdata
 
 .. toctree::
    :caption: Theory

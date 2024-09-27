@@ -7,6 +7,9 @@ subroutine make_munu ()
 
   ME2c_max = 0
   ME3c_max = 0
+  if (allocated(num_orb)) deallocate(num_orb)
+  if (allocated(index_max2c)) deallocate(index_max2c)
+  if (allocated(index_max3c)) deallocate(index_max3c)
   allocate (num_orb (nspecies))
   allocate (index_max2c (nspecies, nspecies))
   allocate (index_max3c (nspecies, nspecies))
@@ -76,6 +79,9 @@ subroutine make_munu ()
     end do
   end do
 
+  if (allocated(mu)) deallocate(mu)
+  if (allocated(nu)) deallocate(nu)
+  if (allocated(mvalue)) deallocate(mvalue)
   allocate (mu (ME3c_max, nspecies, nspecies))
   allocate (nu (ME3c_max, nspecies, nspecies))
   allocate (mvalue (ME3c_max, nspecies, nspecies))

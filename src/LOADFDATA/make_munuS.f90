@@ -5,6 +5,7 @@ subroutine make_munuS ()
   integer(c_long) :: index, in1, in2, issh1, issh2, n1, n2
 
   MES_max = 0
+  if (allocated(index_maxS)) deallocate(index_maxS)
   allocate (index_maxS (nspecies, nspecies))
   do in1 = 1, nspecies
     do in2 = 1, nspecies
@@ -18,9 +19,12 @@ subroutine make_munuS ()
     end do
   end do
 
+  if (allocated(muS)) deallocate(muS)
+  if (allocated(nuS)) deallocate(nuS)
+  if (allocated(mvalueS)) deallocate(mvalueS)
   allocate (muS (MES_max, nspecies, nspecies))
-  allocate (mvalueS (MES_max, nspecies, nspecies))
   allocate (nuS (MES_max, nspecies, nspecies))
+  allocate (mvalueS (MES_max, nspecies, nspecies))
   muS = 0
   nuS = 0
   mvalueS = 0

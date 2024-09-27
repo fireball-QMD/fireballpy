@@ -15,6 +15,17 @@ subroutine read_3c (interaction)
 
   if (interaction .eq. 1) then
     maxtype = isorpmax
+    if (allocated(bcna_01)) deallocate(bcna_01)
+    if (allocated(bcna_02)) deallocate(bcna_02)
+    if (allocated(bcna_03)) deallocate(bcna_03)
+    if (allocated(bcna_04)) deallocate(bcna_04)
+    if (allocated(bcna_05)) deallocate(bcna_05)
+    if (allocated(numx3c_bcna)) deallocate(numx3c_bcna)
+    if (allocated(numy3c_bcna)) deallocate(numy3c_bcna)
+    if (allocated(hx_bcna)) deallocate(hx_bcna)
+    if (allocated(hy_bcna)) deallocate(hy_bcna)
+    if (allocated(x3cmax_bcna)) deallocate(x3cmax_bcna)
+    if (allocated(y3cmax_bcna)) deallocate(y3cmax_bcna)
     allocate (bcna_01(numXmax, numYmax, ME3c_max, 0:maxtype, nspecies**3))
     allocate (bcna_02(numXmax, numYmax, ME3c_max, 0:maxtype, nspecies**3))
     allocate (bcna_03(numXmax, numYmax, ME3c_max, 0:maxtype, nspecies**3))
@@ -59,6 +70,17 @@ subroutine read_3c (interaction)
   !  y3cmax_xc3c = 0.0d0
   else if (interaction .eq. 3) then
     maxtype = isorpmax_xc
+    if (allocated(den3_01)) deallocate(den3_01)
+    if (allocated(den3_02)) deallocate(den3_02)
+    if (allocated(den3_03)) deallocate(den3_03)
+    if (allocated(den3_04)) deallocate(den3_04)
+    if (allocated(den3_05)) deallocate(den3_05)
+    if (allocated(numx3c_den3)) deallocate(numx3c_den3)
+    if (allocated(numy3c_den3)) deallocate(numy3c_den3)
+    if (allocated(hx_den3)) deallocate(hx_den3)
+    if (allocated(hy_den3)) deallocate(hy_den3)
+    if (allocated(x3cmax_den3)) deallocate(x3cmax_den3)
+    if (allocated(y3cmax_den3)) deallocate(y3cmax_den3)
     allocate (den3_01(numXmax, numYmax, ME3c_max, 0:maxtype, nspecies**3))
     allocate (den3_02(numXmax, numYmax, ME3c_max, 0:maxtype, nspecies**3))
     allocate (den3_03(numXmax, numYmax, ME3c_max, 0:maxtype, nspecies**3))
@@ -81,6 +103,11 @@ subroutine read_3c (interaction)
     y3cmax_den3 = 0.0d0
   else if (interaction .eq. 4 ) then 
     maxtype = isorpmax_xc
+    if (allocated(den3S_01)) deallocate(den3S_01)
+    if (allocated(den3S_02)) deallocate(den3S_02)
+    if (allocated(den3S_03)) deallocate(den3S_03)
+    if (allocated(den3S_04)) deallocate(den3S_04)
+    if (allocated(den3S_05)) deallocate(den3S_05)
     allocate (den3S_01(numXmax, numYmax, ME3c_max, 0:maxtype, nspecies**3))
     allocate (den3S_02(numXmax, numYmax, ME3c_max, 0:maxtype, nspecies**3))
     allocate (den3S_03(numXmax, numYmax, ME3c_max, 0:maxtype, nspecies**3))
