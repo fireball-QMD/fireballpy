@@ -14,26 +14,29 @@ import uuid
 import requests
 from tqdm import tqdm
 
+if sys.version_info >= (3, 11):
+    import tomllib
+else:
+    import tomli as tomllib
+
 ENV_FB_HOME = "FIREBALL_HOME"
 ENV_XDG_CACHE_HOME = "XDG_CACHE_HOME"
 DEFAULT_CACHE_DIR = "~/.cache"
 
 TIMESTR = '%a, %d %b %Y %H:%M:%S %Z'
-BASEURL = 'http://fireball.ftmc.uam.es/'
-SHA256SUMS = BASEURL + 'sha256sums_fireballpy.txt'
+SHA256SUMS = 'http://fireball.ftmc.uam.es/sha256sums_fireballpy.txt'
 
 _quiet = False
 
-# OUR FDATAS
-_fdatas = {
-    'biology': ('biology_fireballpy', 'HCNOS'),
-    'biology_extended': ('biology_ext_fireballpy', 'HCNOS'),
-    'CHON': ('CHON_fireballpy', 'HCNO')
-}
+
+def _load_fdatas() -> dict[str, Any]:
+    fdata_db = os.path.join(os.path.dirname(__file__), 'fdata.toml')
+    with open(fdata_db, 'rb') as fp:
+        return tomllib.load(fp)
 
 
 def available_fdatas() -> list[str]:
-    return list(_fdatas.keys())
+    return list(_load_fdatas().keys())
 
 
 def get_fb_home() -> str:
@@ -147,35 +150,44 @@ def extract_fdata(tarpath: str, fdata_path: str, meta: dict[str, Any],
         json.dump(meta, fp)
 
 
-def get_fdata(name: str, species: list[str]) -> str:
+def get_fdata_charge_method(name: str) -> str:
     # Check
-    if name not in _fdatas:
+    fdatas = _load_fdatas()
+    if name not in fdatas:
         raise ValueError(f'FData {name} does not exist')
-    if not all([s in _fdatas[name][1] for s in species]):
+    return fdatas[name]['charges_method']
+
+
+def get_fdata(name: str, species: set[str]) -> str:
+    # Check
+    fdatas = _load_fdatas()
+    if name not in fdatas:
+        raise ValueError(f'FData {name} does not exist')
+    if not all([s in fdatas[name]['species'] for s in species]):
         raise ValueError(f'FData {name} does not contain all required species')
 
     fb_home = get_fb_home()
     os.makedirs(fb_home, exist_ok=True)  # Ensure folder exists
-    fdata_folder = os.path.join(fb_home, name)
-    fdata_path = os.path.join(fdata_folder, _fdatas[name][0]) + os.sep
+    fdata_folder = os.path.join(fb_home, name) + os.sep
 
     # Download if not exists
-    tarurl = f'{BASEURL}{_fdatas[name][0]}.tar.gz'
-    tarpath = os.path.join(fb_home, f'{_fdatas[name][0]}.tar.gz')
-    if not os.path.isdir(fdata_folder):
+    tarurl = fdatas[name]['url']
+    tarpath = os.path.join(fb_home, f'{name}.tar.gz')
+    metafile = os.path.join(fdata_folder, 'meta.json')
+    if not os.path.isfile(metafile):
         vnew = download_file(tarurl, tarpath)
         meta = {'NAME': name}
         extract_fdata(tarpath, fdata_folder, meta, vnew)
-        return fdata_path
+        return fdata_folder
 
     # Read metadata
-    with open(os.path.join(fdata_folder, 'meta.json'), 'r') as fp:
+    with open(metafile, 'r') as fp:
         meta = json.load(fp)
     vhave = time.strptime(meta['TIME'], TIMESTR)
     vnew = download_file(tarurl, tarpath, vhave)
     if vnew != vhave:
         extract_fdata(tarpath, fdata_folder, meta, vnew)
-    return fdata_path
+    return fdata_folder
 
 
 def _get_blocks_infodat(infodat: list[str]) -> Iterable[tuple[int, int]]:
@@ -187,7 +199,7 @@ def _get_specie_block(infodat: list[str], block: tuple[int, int]) -> str:
     return infodat[block[0]+2].split('-')[0].strip()
 
 
-def check_fdata_path(fdata_path, species: list[str]) -> None:
+def check_fdata_path(fdata_path, species: set[str]) -> str:
     if not isinstance(fdata_path, str):
         raise ValueError("'fdata_path' must be a string.")
     if not os.path.isfile(os.path.join(fdata_path, 'info.dat')):
@@ -198,9 +210,12 @@ def check_fdata_path(fdata_path, species: list[str]) -> None:
     idatspcs = [_get_specie_block(infodat, b) for b in _get_blocks_infodat(infodat)]
     if not all([s in idatspcs for s in species]):
         raise ValueError(f'FData {fdata_path} does not contain all required species')
+    if fdata_path[-1] != os.sep:
+        return fdata_path + os.sep
+    return fdata_path
 
 
-def prep_infodat(fdata_path: str, species: list[str], lazy: bool) -> str:
+def prep_infodat(fdata_path: str, species: Optional[set[str]], lazy: bool) -> set[str]:
     idat = os.path.join(fdata_path, 'info.dat')
     newidat = os.path.join(fdata_path, 'info.ase.dat')
     with open(idat, 'r') as fp:
@@ -209,18 +224,28 @@ def prep_infodat(fdata_path: str, species: list[str], lazy: bool) -> str:
         idatspcs = [_get_specie_block(infodat, b) for b in _get_blocks_infodat(infodat)]
         with open(newidat, 'w') as fp:
             fp.write(os.linesep.join(infodat))
-        return ''.join(idatspcs)
+        return set(idatspcs)
 
-    newspecies = ''
+    assert species is not None
+    newspecies = []
     newinfodat = []
     for i, j in _get_blocks_infodat(infodat):
         sp = _get_specie_block(infodat, (i, j))
         if sp not in species:
             continue
-        newspecies += sp
+        newspecies.append(sp)
         newinfodat.extend(infodat[i:j+1])
     newinfodat = ['   fireballpy_generated ',
                   f'   {len(newspecies)} - Number of species '] + newinfodat
     with open(newidat, 'w') as fp:
         fp.write(os.linesep.join(newinfodat))
-    return newspecies
+    return set(newspecies)
+
+
+def get_correction(name: str) -> tuple[str, dict]:
+    fdatas = _load_fdatas()
+    if name not in fdatas:
+        return '', {}
+    if 'correction' not in fdatas[name]:
+        return '', {}
+    return fdatas[name]['correction']['type'], fdatas[name]['correction']['parameters']

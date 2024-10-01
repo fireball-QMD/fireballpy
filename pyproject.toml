@@ -1,40 +1,52 @@
 [build-system]
-build-backend = "mesonpy"
-requires = ["meson-python", "numpy"]
+build-backend = 'mesonpy'
+requires = ['meson-python', 'numpy']
 
 [project]
-name = "fireballpy"
-version = "0.1.0.dev0"
-license = { file="LICENSE" }
+name = 'fireballpy'
+version = '0.2.0.dev0'
+license = { file = 'LICENSE' }
 authors = [
-  { name="José Ortega Mateo", email="jose.ortega@uam.es" },
-  { name="Linda Angela Zotti", email="linda.zotti@uam.es" },
-  { name="Jesús Ignacio Mendieta Moreno", email="jesus.mendieta@uam.es" },
-  { name="Daniel González Trabada", email="daniel.gonzalez@uam.es" },
-  { name="Jorge Vega Martín", email="jorge.vega@uam.es" },
-  { name="C. Roldán Piñero", email="carlos.roldanp@uam.es" },
+  { name = 'José Ortega Mateo', email = 'jose.ortega@uam.es' },
+  { name = 'Linda Angela Zotti', email = 'linda.zotti@uam.es' },
+  { name = 'Jesús Ignacio Mendieta Moreno', email = 'jesus.mendieta@uam.es' },
+  { name = 'Daniel González Trabada', email = 'daniel.gonzalez@uam.es' },
+  { name = 'Jorge Vega Martín', email = 'jorge.vega@uam.es' },
+  { name = 'C. Roldán Piñero', email = 'carlos.roldanp@uam.es' },
 ]
-description = "Minimalistic Fireball for Python"
-readme = "README.md"
-requires-python = ">=3.9,<3.13"
+description = 'ASE calculator implementing Fireball DFT code'
+readme = 'README.md'
+requires-python = '>=3.9, <3.13'
 classifiers = [
-  "Intended Audience :: Science/Research",
-  "Operating System :: POSIX :: Linux",
-  "Programming Language :: Fortran",
-  "Programming Language :: Python",
-  "Programming Language :: Python :: 3 :: Only",
-  "Programming Language :: Python :: 3.9",
-  "Programming Language :: Python :: 3.10",
-  "Programming Language :: Python :: 3.11",
-  "Programming Language :: Python :: 3.12",
-  "Topic :: Scientific/Engineering",
-  "Topic :: Scientific/Engineering :: Physics"
+  'Intended Audience :: Science/Research',
+  'Operating System :: POSIX :: Linux',
+  'Programming Language :: Fortran',
+  'Programming Language :: Python',
+  'Programming Language :: Python :: 3 :: Only',
+  'Programming Language :: Python :: 3.9',
+  'Programming Language :: Python :: 3.10',
+  'Programming Language :: Python :: 3.11',
+  'Programming Language :: Python :: 3.12',
+  'Topic :: Scientific/Engineering',
+  'Topic :: Scientific/Engineering :: Physics'
 ]
 dependencies = [
-  "numpy>=2.0.0",
-  "scipy>=1.13.0",
-  "ase>=3.22.0",
-  "tqdm>=4.66.0",
-  "requests>=2.30.0",
-  "dftd3>=1.1.0"
+  'numpy >= 2.0.0',
+  'scipy >= 1.7.0',
+  'ase >= 3.22.0',
+  'tqdm >= 4.40.0',
+  'requests >= 2.31.0',
+  'tomli >= 1.1.0 ; python_version < 3.11"',
 ]
+
+[project.optional-dependencies]
+dftd3 = ['dftd3 >= 1.1.0']
+documentation = [
+  'sphinx >= 8.0.0',
+  'sphinx_design >= 0.6.0',
+  'sphinx_copybutton >= 0.15.0',
+  'sphinx_favicon >= 1.0.0',
+  'numpydoc >= 1.8.0',
+  'pydata-sphinx-theme >= 0.15.0',
+]
+all = ['fireballpy[dftd3,documentation]']

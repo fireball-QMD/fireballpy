@@ -20,8 +20,9 @@ python_sources = [
   '_errors.py',
   '_fdata.py',
   '_options.py',
-  '_dftd3.py',
+  'ase.py',
   'fireball.py',
+  'fdata.toml'
 ]
 
 py.install_sources(python_sources, subdir: 'fireballpy')

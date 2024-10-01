@@ -44,6 +44,7 @@ also come with some shortcomings which we will explore later.
    :maxdepth: 1
 
    mixer
+   charges
 
 .. toctree::
    :hidden:

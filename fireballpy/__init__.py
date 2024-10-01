@@ -12,7 +12,7 @@ from ase.calculators.calculator import register_calculator_class  # type: ignore
 from ase.outputs import _defineprop  # type: ignore
 
 # Expose API to the user
-from fireballpy.fireball import Fireball as Fireball
+from fireballpy.ase import Fireball as Fireball
 from fireballpy._fdata import get_fb_home, available_fdatas
 from fireballpy.version import version as __version__
 
