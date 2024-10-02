@@ -106,7 +106,3 @@ It has the following keys:
 | ``w0``        | ``float``                   | Value fo the zeroth weight (:math:`w_0`).                                                |
 |               |                             | This option will be ignored if ``method`` is set.                                        |
 +---------------+-----------------------------+------------------------------------------------------------------------------------------+
-| ``wi``        | ``float`` or ``np.ndarray`` | Value of the rest of weights (:math:`w_i`). If a ``float`` all will have the same value. |
-|               |                             | If an array it must have ``max_iter`` elements.                                          |
-|               |                             | This option will be ignored if ``method`` is set.                                        |
-+---------------+-----------------------------+------------------------------------------------------------------------------------------+

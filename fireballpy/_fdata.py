@@ -36,7 +36,12 @@ def _load_fdatas() -> dict[str, Any]:
 
 
 def available_fdatas() -> list[str]:
-    return list(_load_fdatas().keys())
+    fdatas = _load_fdatas()
+    keys = list(fdatas.keys())
+    for i, k in enumerate(keys):
+        if 'correction' in fdatas[k]:
+            keys[i] += f' ({fdatas[k]["correction"]["type"].upper()} available)'
+    return keys
 
 
 def get_fb_home() -> str:

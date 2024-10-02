@@ -90,26 +90,13 @@ class BaseFireball:
     -----
     If you use this code in a publication please cite us [Lewis2011]_.
 
-    References
-    ----------
-    .. [NPA] Reference for NPA.
-           Must add.
-
-    .. [Mulliken] Reference for Mulliken.
-           Must add.
-
-    .. [MullikenDip] Reference for Mulliken Dipole.
-           Must add.
-
-    .. [Lowdin] Reference for Lowdin.
-           Must add.
-
     .. [Lewis2011] James. P. Lewis, et al.,
                    "Advances and applications in the FIREBALL ab initio
                    tight-binding molecular-dynamics formalism",
                    *Phys. Status Solidi B*, 248(9):1989-2007, 2011.
                    `DOI:10.1002/pssb.201147259
                    <https://doi.org/10.1002/pssb.201147259>`_
+
     """
 
     def __init__(self, *,
@@ -149,7 +136,7 @@ class BaseFireball:
         assert len(self.wkpts.shape) == 1, "'wkpts' must be a 1d array"
         self.nkpts = self.wkpts.size
         self.kpts = np.ascontiguousarray(kpts, dtype=np.float64)
-        assert self.kpts.shape == (self.wkpts, 3), "'kpts' must be a (nkpts, 3) array"
+        assert self.kpts.shape == (self.nkpts, 3), "'kpts' must be a (nkpts, 3) array"
         self.lazy = lazy
         assert isinstance(self.lazy, bool)
         self.verbose = verbose
@@ -203,12 +190,9 @@ class BaseFireball:
         if np.isnan(self.cell).any():
             self.wrapped_positions = self.positions
             return
-        shift = np.zeros(3, dtype=np.float64)
-        shift[self.pbc] -= eps
+        shift = np.zeros(3, dtype=np.float64) - eps*self.pbc
         fractional = solve(self.cell.T, self.positions.T).T - shift
-        for i, periodic in enumerate(self.pbc):
-            if periodic:
-                fractional[:, i] = shift[i]
+        fractional[:, self.pbc] = fractional[:, self.pbc] % 1.0 + shift[self.pbc]
         self.wrapped_positions = np.dot(fractional, self.cell)
 
     def _init_fdata(self) -> None:

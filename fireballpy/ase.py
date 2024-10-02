@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import Any
 
 from numpy.typing import ArrayLike
-from ase.calculators.abc import GetOutputsMixin  # type: ignore
+from ase.calculators.abc import GetPropertiesMixin, GetOutputsMixin  # type: ignore
 from ase.calculators.calculator import (Calculator,  # type: ignore
                                         kpts2sizeandoffsets, all_changes)
 from ase.dft.kpoints import monkhorst_pack
@@ -47,7 +47,7 @@ class Fireball(Calculator, GetOutputsMixin):
         integer elements. A corresponding Monkhorst Pack will be generated with these indices.
         By default it will generate a (1, 1, 1) Monkhorst Pack.
     **kwargs
-        Advanced options:
+        Advanced options. May requiere previous experience with DFT computations:
 
         +--------------------+--------------------------------------------------------------------------+
         | Property           | Description                                                              |
@@ -62,10 +62,18 @@ class Fireball(Calculator, GetOutputsMixin):
         |                    | or not (``'legacy'``). In periodic systems this is ignored as only       |
         |                    | the legacy description is implemented.                                   |
         +--------------------+--------------------------------------------------------------------------+
+        | ``fdata_path``     | Path to a custom FData. Ignored unless ``fdata = 'custom'``              |
+        +--------------------+--------------------------------------------------------------------------+
+        | ``correction``     | By default (``'auto'``) will apply DFT3 correction for the selected      |
+        |                    | FData if optimized parameters are available (see ``available_fdatas()``) |
+        |                    | Can be turned off with ``'off'``.                                        |
+        |                    | Also, a custom ASE calculator (usually :class:`dftd3.ase.DFTD3`) may.    |
+        |                    | be provided. This is preferable to using                                 |
+        |                    | an :class:`ase.calculators.mixing.SumCalculator` in order to preserve    |
+        |                    | the niceties of our API.                                                 |
+        +--------------------+--------------------------------------------------------------------------+
         | ``mixer_kws``      | Dictionary with the charges mixer options. For reference                 |
         |                    | see :ref:`here <mixer>`.                                                 |
-        +--------------------+--------------------------------------------------------------------------+
-        | ``fdata_path``     | Path to a custom FData. Ignored unless ``fdata = 'custom'``              |
         +--------------------+--------------------------------------------------------------------------+
 
     Methods
@@ -95,9 +103,10 @@ class Fireball(Calculator, GetOutputsMixin):
                    *Phys. Status Solidi B*, 248(9):1989-2007, 2011.
                    `DOI:10.1002/pssb.201147259
                    <https://doi.org/10.1002/pssb.201147259>`_
+
     """
 
-    implemented_properties = ['energy', 'forces', 'charges']
+    implemented_properties = ['energy', 'free_energy', 'forces', 'charges']
 
     calc_properties = ['shell_charges', 'fermi_level', 'eigenvalues',
                        'ibz_kpoints', 'kpoint_weights']
@@ -125,7 +134,7 @@ class Fireball(Calculator, GetOutputsMixin):
         self.dipole_method = kwargs.get('dipole_method', 'improved')
         self.mixer = kwargs.get('mixer_kws', None)
         self.fdata_path = kwargs.get('fdata_path', None)
-        self._correction = kwargs.get('correction', None)
+        self._correction = kwargs.get('correction', 'auto')
 
         # Check kpts
         self.kpts = np.asarray(kpts, dtype=np.int64)
@@ -134,6 +143,10 @@ class Fireball(Calculator, GetOutputsMixin):
         ksize, koffset = kpts2sizeandoffsets(self.kpts, gamma=self.gamma)
         self.kpts = monkhorst_pack(ksize) + np.array(koffset)
         self.wkpts = np.ones(self.kpts.shape[0])  # FIXED WEIGHTS
+
+        # Check correction
+        if not isinstance(self._correction, GetPropertiesMixin) and self._correction not in ['auto', 'off']:
+            raise ValueError("Parameter 'correction' must be either 'auto', 'off' or an ASE Calculator")
 
     def _outputmixin_get_results(self) -> dict[str, Any]:
         return self.results
@@ -334,22 +347,23 @@ class Fireball(Calculator, GetOutputsMixin):
         # If positions change we just need to update them not repeat anything else
         elif 'positions' in system_changes:
             self._dft.update_coords(self.atoms.get_positions())
+            if self._correction is not None:
+                self._correct_atoms.positions = self.atoms.get_positions()
 
-        if 'energy' in properties:
+        if 'energy' in properties or 'free_energy' in properties:
             self.energy, self.fermi_level = self._dft.get_energies()
             if self._correction is not None:
-                correct_atoms = self.atoms.copy()
-                correct_atoms.calc = self._correction
-                self.energy += correct_atoms.get_potential_energy()
+                self.energy += self._correct_atoms.get_potential_energy()
+            self.energy = float(self.energy)
+            self.free_energy = self.energy
+            self.fermi_level = float(self.fermi_level)
         if 'charges' in properties:
             self.charges, self.shell_charges = self._dft.get_charges()
         if 'forces' in properties:
             self._dft.calc_forces()
             self.forces = self._dft.get_forces()
             if self._correction is not None:
-                correct_atoms = self.atoms.copy()
-                correct_atoms.calc = self._correction
-                self.forces += correct_atoms.get_forces()
+                self.forces += self._correct_atoms.get_forces()
 
         # Dump into results
         for prop in self.implemented_properties + self.calc_properties:
@@ -362,8 +376,8 @@ class Fireball(Calculator, GetOutputsMixin):
                                  numbers=self.atoms.get_atomic_numbers(), positions=self.atoms.get_positions(),
                                  lazy=self.lazy, kpts=self.kpts, wkpts=self.wkpts, verbose=self.verbose,
                                  charges_method=self.charges_method, dipole_method=self.dipole_method,
-                                 cell=self.atoms.cell.array if self.atoms.cell.array.any() else None, pbc=self.atoms.pbc,
-                                 mixer_kws=self.mixer, fdata_path=self.fdata_path)
+                                 cell=self.atoms.cell.complete().array if self.atoms.cell.array.any() else None,
+                                 pbc=self.atoms.pbc, mixer_kws=self.mixer, fdata_path=self.fdata_path)
 
         # Get fixed variables
         self.nspecies, self.natoms = self._dft.nspecies, self._dft.natoms
@@ -371,10 +385,22 @@ class Fireball(Calculator, GetOutputsMixin):
         self.ibz_kpoints, self.kpoint_weights = self._dft.kpts, self._dft.wkpts
 
         # Fetch correction if available
-        corrtype, corrparams = get_correction(self.fdata)
-        if corrtype == 'dftd3':
-            try:
-                from dftd3.ase import DFTD3
-            except ModuleNotFoundError:
-                return
-            self._correction = DFTD3(damping='d3bj', params_tweaks=corrparams)
+        if isinstance(self._correction, str) and self._correction == 'auto':
+            corrtype, corrparams = get_correction(self.fdata)
+            if corrtype == 'dftd3':
+                try:
+                    from dftd3.ase import DFTD3
+                    self._correction = DFTD3(damping='d3bj', params_tweaks=corrparams)
+                except ModuleNotFoundError:
+                    self._correction = None
+        elif isinstance(self._correction, str) and self._correction == 'off':
+            self._correction = None
+
+        # Prepare atoms for correction
+        if self._correction is not None:
+            self._correct_atoms = self.atoms.copy()
+            # Fix DFTD3 compute volume check
+            if not self.atoms.pbc.all():
+                self._correct_atoms.pbc = np.array([False, False, False])
+            self._correct_atoms.calc = self._correction
+

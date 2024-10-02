@@ -19,13 +19,13 @@ You can check what *FDatas* are available by using the
 ``available_fdatas()`` function.
 
 Before moving further we should address the question:
-"Are you downloading files into my computer?" **Yes**.
+"Are you downloading files into my computer?" Yes.
 We aknowledge the posible security concerns which is why
 we perform sha256sum checks to ensure nothing wrong
 happens with the download.
 We also ask before updating any *FData* and replacing files.
 Nonetheless, this a good time as any to remind that no
-script (ours or not) should NEVER be executed with administrator
+script (ours or not) should **NEVER** be executed with administrator
 priviledges unless you place the utmost trust on it and it is strictly necessary.
 To end with this discourse, you may check where these files
 are downloaded with the ``get_fb_home()`` function.

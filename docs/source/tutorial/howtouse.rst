@@ -9,14 +9,10 @@ How to use :class:`Fireball`
 needs to be attached first to a valid :class:`ase.Atoms` object.
 This may be done by setting the ``calc`` attribute:
 
-    >>> from ase import Atoms
+    >>> from ase.builder import molecule
     >>> from fireballpy import Fireball
-    >>> atoms = Atoms('CH4',
-    ...               positions=[( 0.0000,  0.0000,  0.0000),
-    ...                          ( 0.6276,  0.6276,  0.6276),
-    ...                          ( 0.6276, -0.6276, -0.6276),
-    ...                          (-0.6276,  0.6276, -0.6276),
-    ...                          (-0.6276, -0.6276,  0.6276)])
+    >>> atoms = molecule('CH4')
+    >>> atoms = Atoms('CH4')
     >>> atoms.calc = Fireball(fdata='biology')
 
 Do not worry about the ``fdata`` argument.
@@ -25,17 +21,17 @@ We are now ready to perform some computations!
 Let's get the energy, charges and forces:
 
     >>> atoms.get_potential_energy()
-    -208.34774557250086
+    -208.56448015852973
     >>> atoms.get_charges()
-    array([-0.4479097, 0.11197742, 0.11197743, 0.11197743, 0.11197742])
+    array([-0.44507143,  0.11126785,  0.11126785,  0.11126786,  0.11126786])
     >>> atoms.get_forces()
-    array([[ 4.30489932e-15, -2.74825372e-15, -2.00305221e-07],
-    ...    [-2.22048842e-01, -2.22048842e-01, -2.22048833e-01],
-    ...    [-2.22048924e-01,  2.22048924e-01,  2.22048933e-01],
-    ...    [ 2.22048924e-01, -2.22048924e-01,  2.22048933e-01],
-    ...    [ 2.22048842e-01,  2.22048842e-01, -2.22048833e-01]])
+    array([[ 3.18824910e-14,  3.49360951e-14, -4.16910533e-07],
+    ...    [-1.56317853e+00, -1.56317853e+00, -1.56317854e+00],
+    ...    [ 1.56317853e+00,  1.56317853e+00, -1.56317854e+00],
+    ...    [-1.56317875e+00,  1.56317875e+00,  1.56317875e+00],
+    ...    [ 1.56317875e+00, -1.56317875e+00,  1.56317875e+00]])
 
-Nice! We got our first results for `this methane molecule <https://cccbdb.nist.gov/exp2x.asp?casno=74828&charge=0>`_.
+Nice! We got our first results for a methane molecule.
 
 Now, if this is the first time you run this tutorial you may have noticed
 what appeared to be a download before any computation took place.

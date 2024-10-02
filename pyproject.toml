@@ -4,7 +4,7 @@ requires = ['meson-python', 'numpy']
 
 [project]
 name = 'fireballpy'
-version = '0.2.0.dev0'
+version = '0.2.1.dev0'
 license = { file = 'LICENSE' }
 authors = [
   { name = 'José Ortega Mateo', email = 'jose.ortega@uam.es' },
@@ -36,7 +36,7 @@ dependencies = [
   'ase >= 3.22.0',
   'tqdm >= 4.40.0',
   'requests >= 2.31.0',
-  'tomli >= 1.1.0 ; python_version < 3.11"',
+  'tomli >= 1.1.0 ; python_version < "3.11"',
 ]
 
 [project.optional-dependencies]
