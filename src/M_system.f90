@@ -41,8 +41,8 @@ module M_system
   character (len = 2), dimension (:), allocatable:: symbol
   integer(c_long) :: mbeta_max  
   integer(c_long) :: neigh_max
-  integer(c_long) :: ishiftO
-  real(c_double), dimension (3) :: shifter
+  !integer(c_long) :: ishiftO
+  !real(c_double), dimension (3) :: shifter
 
   !--- mandar a M_fdata ? AQUI
   integer(c_long), dimension (:), allocatable :: getmssh

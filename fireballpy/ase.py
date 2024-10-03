@@ -393,6 +393,8 @@ class Fireball(Calculator, GetOutputsMixin):
                     self._correction = DFTD3(damping='d3bj', params_tweaks=corrparams)
                 except ModuleNotFoundError:
                     self._correction = None
+            else:
+                self._correction = None
         elif isinstance(self._correction, str) and self._correction == 'off':
             self._correction = None
 

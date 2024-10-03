@@ -1,7 +1,7 @@
 subroutine allocate_system ()
   use iso_c_binding
   use M_constants, only: xlevi, delk
-  use M_system, only: icluster, natoms, ratom, degelec, imass, mbeta_max, neigh_max, ishiftO, shifter, getmssh, getlssh, getissh, vxc_1c, &
+  use M_system, only: icluster, natoms, ratom, degelec, imass, mbeta_max, neigh_max, getmssh, getlssh, getissh, vxc_1c, &
     & Q0_TOT, nelectron, eigen_k, norbitals, nkpoints, getiatom, ioccupy_k, ioccupy, foccupy, cape, rhoPP, ztot, nssh_tot, ewald, &
     & dewald, fewald, ewaldsr, dip, dipp, neigh_b, neigh_j, neighn, neigh_comb, neigh_comj, neigh_comm, neigh_comn, neigh_back, &
     & neigh_self, nPP_b, nPP_j, nPP_map, nPPn, nPP_self, nPPx_b, nPPx_j, nPPx_map, nPPx_point, nPPxn, nPPx_self, neigh_pair_a1, &
@@ -35,21 +35,23 @@ subroutine allocate_system ()
   real(c_double) :: distance
 
   !Shift the coordinates none of the atoms fall on (0.0, 0.0, 0.0)
-  shifter(1) = 4.0d0*atan(1.0d0)    ! pi
-  shifter(2) = 1.0/exp(1.0d0)       ! 1/e
-  shifter(3) = sqrt(2.0d0)          ! square root of 2
-  ishiftO = 0
-  do iatom = 1, natoms
-    distance = ratom(1,iatom)**2 + ratom(2,iatom)**2 + ratom(3,iatom)**2
-    distance = sqrt(distance)
-    if (distance .lt. 1.0d-4) ishiftO = 1
-  end do
+  !shifter(1) = 4.0d0*atan(1.0d0)    ! pi
+  !shifter(2) = 1.0/exp(1.0d0)       ! 1/e
+  !shifter(3) = sqrt(2.0d0)          ! square root of 2
+  !ishiftO = 0
+  !do iatom = 1, natoms
+  !  distance = ratom(1,iatom)**2 + ratom(2,iatom)**2 + ratom(3,iatom)**2
+  !  if (distance .lt. 1.0d-8) then
+  !    ishiftO = 1
+  !    exit
+  !  end if
+  !end do
 
-  if (ishiftO .eq. 1) then
-    do iatom = 1, natoms
-      ratom(:,iatom) = ratom(:,iatom) + shifter
-    end do
-  end if
+  !if (ishiftO .eq. 1) then
+  !  do iatom = 1, natoms
+  !    ratom(:,iatom) = ratom(:,iatom) + shifter
+  !  end do
+  !end if
  
 
   if (allocated(degelec)) deallocate(degelec)

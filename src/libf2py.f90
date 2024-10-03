@@ -30,7 +30,7 @@ subroutine set_cell(lvs)
   a3vec(:) = lvs(:,3)
 end subroutine set_cell
 
-! Set coordinates. Fireball handles shift
+! Set coordinates
 subroutine set_coords(naux, z, xyz)
   use iso_c_binding
   use M_system, only: natoms, ratom, symbol, imass
