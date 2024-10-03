@@ -99,6 +99,8 @@ class BaseFireball:
 
     """
 
+    #_shifter = np.array([np.pi, np.exp(-1.0), np.sqrt(2.0)])
+
     def __init__(self, *,
                  fdata: str,
                  species: set[str],
@@ -145,8 +147,9 @@ class BaseFireball:
         assert isinstance(self.charges_method, str)
         self.dipole_method = dipole_method
         assert isinstance(self.dipole_method, str)
-        self.cell = np.ascontiguousarray(cell, dtype=np.float64)
-        assert self.cell.shape == (3, 3) or np.isnan(self.cell), "'cell' must be a (3, 3) array"
+        if cell is not None:
+            self.cell = np.ascontiguousarray(cell, dtype=np.float64)
+            assert self.cell.shape == (3, 3), "'cell' must be a (3, 3) array"
         self.pbc = np.ascontiguousarray(pbc, dtype=np.bool_)
         assert self.pbc.shape == (3,), "'pbc' must be a 3 element array"
         assert isinstance(mixer, dict)
@@ -160,18 +163,16 @@ class BaseFireball:
         if self.fdata == 'custom':
             assert isinstance(self.fdata_path, str), "If 'fdata=\"custom\"' then fdata_path must be provided"
 
-        # Check if too close
-        self._wrap_positions()
-        if np.any(pdist(self.wrapped_positions) < 1e-6):
-            raise ValueError("Atom positions are too close! (tolerance 1e-6)")
-
         # Load FData and set coordinates
+        self._check_positions()
+        #self._shift = np.any(norm(self.positions, axis=1) < 1e-4)
+        #if self._shift:
+        #    self.positions += self._shifter
         self._init_fdata()
         set_coords(self.numbers, self.positions.T)
 
         # Set all periodic/cell variables
         self._init_cell()
-        set_cell(self.cell.T)
         set_kpoints(self.kpts.T, self.wkpts)
 
         # Set Fireball-like options
@@ -186,14 +187,17 @@ class BaseFireball:
         # Allocate module
         call_allocate_system()
 
-    def _wrap_positions(self, eps: float = 1e-7) -> None:
-        if np.isnan(self.cell).any():
-            self.wrapped_positions = self.positions
-            return
+    def _wrap_positions(self, eps: float = 1e-6) -> NDArray[np.float64]:
+        if not hasattr(self, 'cell'):
+            return self.positions
         shift = np.zeros(3, dtype=np.float64) - eps*self.pbc
         fractional = solve(self.cell.T, self.positions.T).T - shift
         fractional[:, self.pbc] = fractional[:, self.pbc] % 1.0 + shift[self.pbc]
-        self.wrapped_positions = np.dot(fractional, self.cell)
+        return np.dot(fractional, self.cell)
+
+    def _check_positions(self, eps: float = 1e-6) -> None:
+        if np.any(pdist(self._wrap_positions(eps=eps)) < eps):
+            raise ValueError("Atom positions are too close! (tolerance 1e-6)")
 
     def _init_fdata(self) -> None:
         global _loaded_fdata
@@ -226,25 +230,34 @@ class BaseFireball:
         self.wkpts /= self.wkpts.sum()
         self.nkpts = self.wkpts.size
 
-    def _init_cell(self) -> None:
-        self._isperiodic = not np.isnan(self.cell).any()
+    def _init_cell(self, eps=1e-5) -> None:
+        self._isperiodic = hasattr(self, 'cell')
         if not self._isperiodic:
-            if self.nkpts > 1 or norm(self.kpts[0, :]) > 1e-5:
+            if self.nkpts > 1 or norm(self.kpts[0, :]) > eps:
                 raise ValueError("If there is no cell, then 'kpts' must be the gamma point")
             self._isgamma = True
-            self.cell = np.diag(2.0*self.positions.max(axis=0))
             self.wkpts /= self.wkpts.sum()
+            set_cell(np.diag(2.0*np.abs(self.positions).max(axis=0)).T)
             return
         self.kpts = 2.0*np.pi*np.dot(self.kpts, pinv(self.cell))
         self._remove_redundant_kpts()
-        self._isgamma = self.nkpts == 1 and norm(self.kpts[0, :]) < 1e-5
+        self._isgamma = self.nkpts == 1 and norm(self.kpts[0, :]) < eps
+        set_cell(self.cell)
+
+    def _alloc_arrays(self) -> None:
+        self.charges = np.zeros(self.natoms, dtype=np.float64, order='C')
+        self.forces = np.zeros((self.natoms, 3), dtype=np.float64, order='C')
+        self.shell_charges = np.zeros((self.natoms, self.nshells), dtype=np.float64, order='C')
+        self.eigenvalues = np.zeros((self.nspin, self.nkpts, self.nbands), dtype=np.float64, order='C')
 
     def run_scf(self) -> None:
         if not self._scf_computed:
             fb_errno = scf(self.verbose)
             if fb_errno != 0:
                 raise_fb_error(fb_errno)
-            self.nshells, self.nbands = get_sizes()
+            if not hasattr(self, 'nshells') or not hasattr(self, 'nbands'):
+                self.nshells, self.nbands = get_sizes()
+                self._alloc_arrays()
             self._scf_computed = True
 
     def calc_forces(self) -> None:
@@ -257,8 +270,6 @@ class BaseFireball:
 
     def get_charges(self) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
         self.run_scf()
-        self.charges = np.zeros(self.natoms, dtype=np.float64)
-        self.shell_charges = np.zeros((self.natoms, self.nshells), dtype=np.float64)
         get_charges(self.charges, self.shell_charges.T)
         return self.charges, self.shell_charges
 
@@ -269,22 +280,20 @@ class BaseFireball:
 
     def get_eigenvalues(self) -> NDArray[np.float64]:
         self.run_scf()
-        self.eigenvalues = np.zeros((self.nspin, self.nkpts, self.nbands))
         get_eigenvalues(self.eigenvalues[0, :, :].T)
         return self.eigenvalues
 
     def get_forces(self) -> NDArray[np.float64]:
         self.calc_forces()
-        self.forces = np.zeros((self.natoms, 3), dtype=np.float64)
         get_forces(self.forces.T)
         return self.forces
 
     def update_coords(self, positions: ArrayLike) -> None:
         self.positions = np.ascontiguousarray(positions, dtype=np.float64)
         assert self.positions.shape == (self.natoms, 3), "'positions' must be a (natoms, 3) array"
-        self._wrap_positions()
-        if np.any(pdist(self.wrapped_positions) < 1e-6):
-            raise ValueError("Atom positions are too close! (tolerance 1e-6)")
+        self._check_positions()
+        #if self._shift:
+        #    self.positions += self._shifter
         update_coords(self.positions.T)
         self._scf_computed = False
         self._forces_computed = False
