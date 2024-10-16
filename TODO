@@ -14,3 +14,6 @@ Fdata: https://pubs.acs.org/doi/10.1021/acs.jctc.9b01265
 -----------------
 python3.12 -m venv $(pwd)/fbpyenv
 source $(pwd)/fbpyenv/bin/activate
+pip install meson numpy ase requests tqdm 
+sudo apt-get install gfortran libopenblas-dev
+
