@@ -1,3 +1,4 @@
+# TODO: bandpath return
 from __future__ import annotations
 from typing import Any
 
@@ -5,7 +6,8 @@ from numpy.typing import ArrayLike
 from ase.calculators.abc import GetPropertiesMixin  # type: ignore
 from ase.calculators.calculator import (Calculator, PropertyNotPresent,  # type: ignore
                                         kpts2sizeandoffsets, all_changes)
-from ase.dft.kpoints import monkhorst_pack
+from ase.dft.kpoints import monkhorst_pack, bandpath
+from ase.spectrum.band_structure import get_band_structure
 import numpy as np
 
 from .fireball import BaseFireball
@@ -42,10 +44,13 @@ class Fireball(Calculator):
     verbose : bool
         If ``True`` information of the convergence of the SCF loop will be printed on screen.
         Default is ``False``.
-    kpts : ArrayLike[int]
+    kpts : ArrayLike[int] | dict[str, Any]
         Three element array-like structure (like list, tuple or numpy.ndarray) with three
         integer elements. A corresponding Monkhorst Pack will be generated with these indices.
         By default it will generate a (1, 1, 1) Monkhorst Pack, corresponding to the Gamma point.
+        Another option is to provide a dictionary with the keys ``'path'`` and ``'npoints'`` which
+        correspond to a :function:`ase.dft.kpoints.parse_path_string` parseable string and
+        to the number of points in the path, respectively.
     **kwargs
         Advanced options. May requiere previous experience with DFT computations:
 
@@ -66,7 +71,7 @@ class Fireball(Calculator):
         +--------------------+--------------------------------------------------------------------------+
         | ``correction``     | By default (``'auto'``) will apply DFT3 correction for the selected      |
         |                    | FData if optimized parameters are available                              |
-        |                    |(see ``available_fdatas()``). Can be turned off with ``'off'``.           |
+        |                    | (see ``available_fdatas()``). Can be turned off with ``'off'``.          |
         |                    | Also, a custom ASE calculator (usually :class:`dftd3.ase.DFTD3`) may     |
         |                    | be provided. This is preferable to using                                 |
         |                    | an :class:`ase.calculators.mixing.SumCalculator` in order to preserve    |
@@ -122,7 +127,7 @@ class Fireball(Calculator):
     def __init__(self, fdata: str, *,
                  lazy: bool = True,
                  verbose: bool = False,
-                 kpts: ArrayLike = (1, 1, 1),
+                 kpts: ArrayLike | dict[str, Any] = (1, 1, 1),
                  **kwargs):
 
         super().__init__(**kwargs)
@@ -141,12 +146,16 @@ class Fireball(Calculator):
         self._correction = kwargs.get('correction', 'auto')
 
         # Check kpts
-        self.kpts = np.asarray(kpts, dtype=np.int64)
-        if self.kpts.shape != (3,):
-            raise ValueError("Parameter 'kpts' must be a 3-element array-like structure.")
-        ksize, koffset = kpts2sizeandoffsets(self.kpts, gamma=self.gamma)
-        self.kpts = monkhorst_pack(ksize) + np.array(koffset)
-        self.wkpts = np.ones(self.kpts.shape[0])  # FIXED WEIGHTS
+        if isinstance(self.kpts, dict):
+            if 'path' not in self.kpts or 'npoints' not in self.kpts:
+                raise KeyError("If parameter 'kpts' is a dictionary it must have the 'path' and 'npoints' keys.")
+        else:
+            self.kpts = np.asarray(kpts, dtype=np.int64)
+            if self.kpts.shape != (3,):
+                raise ValueError("Parameter 'kpts' must be a 3-element array-like structure.")
+            ksize, koffset = kpts2sizeandoffsets(self.kpts, gamma=self.gamma)
+            self.kpts = monkhorst_pack(ksize) + np.array(koffset)
+            self.wkpts = np.ones(self.kpts.shape[0])  # FIXED WEIGHTS
 
         # Check correction
         if not isinstance(self._correction, GetPropertiesMixin) and self._correction not in ['auto', 'off']:
@@ -182,12 +191,41 @@ class Fireball(Calculator):
 
     def _create_fireball(self) -> None:
         assert self.atoms is not None
-        self._dft = BaseFireball(fdata=self.fdata, species=set(self.atoms.get_chemical_symbols()),
-                                 numbers=self.atoms.get_atomic_numbers(), positions=self.atoms.get_positions(),
-                                 lazy=self.lazy, kpts=self.kpts, wkpts=self.wkpts, verbose=self.verbose,
-                                 charges_method=self.charges_method, dipole_method=self.dipole_method,
-                                 cell=self.atoms.cell.complete().array if self.atoms.cell.array.any() else None,
-                                 pbc=self.atoms.pbc, mixer_kws=self.mixer, fdata_path=self.fdata_path)
+
+        # Create bandpath if needed
+        if isinstance(self.kpts, dict):
+            self.bandpath = bandpath(cell=self.atoms.cell, **self.kpts)
+            self.kpts = self.bandpath.kpts
+            self.wkpts = np.ones(self.kpts.shape[0])  # FIXED WEIGHTS
+
+        # Cell for BaseFireball interpretation
+        cell = self.atoms.cell.complete().array
+        for i in range(3):
+            if self.atoms.pbc[i]:
+                continue
+            cell[i, i] = 2.0*np.abs(self.atoms.get_positions()[:, i]).max()
+
+        self._dft = BaseFireball(
+                ## FData block
+                fdata=self.fdata,
+                fdata_path=self.fdata_path,
+                ## Atoms block
+                species=set(self.atoms.get_chemical_symbols()),
+                numbers=self.atoms.get_atomic_numbers(),
+                positions=self.atoms.get_positions(),
+                ## Periodic block
+                periodic=self.atoms.pbc.any(),
+                kpts=self.kpts,
+                wkpts=self.wkpts,
+                reducekpts=not hasattr(self, 'bandpath'),
+                cell=cell,
+                ## SCF block
+                verbose=self.verbose,
+                lazy=self.lazy,
+                charges_method=self.charges_method,
+                dipole_method=self.dipole_method,
+                mixer_kws=self.mixer
+        )
 
         # Get fixed variables
         self.nspecies, self.natoms = self._dft.nspecies, self._dft.natoms
@@ -216,6 +254,11 @@ class Fireball(Calculator):
                 self._correct_atoms.pbc = np.array([False, False, False])
             self._correct_atoms.calc = self._correction
 
+    def band_structure(self):
+        if hasattr(self, 'bandpath'):
+            return get_band_structure(calc=self, path=self.bandpath)
+        return super().band_structure()
+
     def get_eigenvalues(self, kpt=0, spin=0):
         """Get the eigenvalues of the hamiltonian in electronvolts.
 
@@ -237,9 +280,10 @@ class Fireball(Calculator):
         PropertyNotPresent
             If any computation has been done and eigenvalues were not yet computed.
         IndexError
-            If the an out-of-bounds k-point (or spin) index is requested.
+            If the an out-of-bounds k-point index is requested.
         """
-        return self._get('eigenvalues')
+        spin = 0
+        return self._get('eigenvalues')[spin, kpt]
 
     def get_fermi_level(self):
         """Get the Fermi level in electronvolts.
@@ -320,6 +364,16 @@ class Fireball(Calculator):
         """
         return self.get_shell_charges().shape[1]
 
+    def get_number_of_spins(self):
+        """Get the number of spins.
+
+        Returns
+        -------
+        int
+            Number of spins (always 1)
+        """
+        return 1
+
     def get_shell_charges(self):
         """Get the charges of each shell if computed.
 
@@ -336,56 +390,6 @@ class Fireball(Calculator):
         """
         return self._get('shell_charges')
 
-        #    def plot(self, bandpath: Optional[bandpath] = None,
-        #             emin: Optional[float] = None,
-        #             emax: Optional[float] = None):
-        #
-        #        xmin = 0
-        #        xmax = self.shell_energies.shape[0]
-        #
-        #        Efermi = get_efermi()
-        #        # Ajustamos Efermi
-        #        AE = Efermi-self.shell_energies[0][0]
-        #        for ek in self.shell_energies:
-        #            for e in ek:
-        #                if ((Efermi-e) > 0 and abs(Efermi-e) < abs(AE)):
-        #                    AE = Efermi-e
-        #
-        #        Efermi = Efermi-AE
-        #
-        #        eigen = self.shell_energies-Efermi
-        #
-        #        if bandpath is None:
-        #            X = np.arange(0, xmax, 1)
-        #            plt.xticks([])
-        #            plt.grid(False)
-        #            plt.xlabel('k-points')
-        #        else:
-        #            X = np.arange(0, xmax, 1)
-        #            kpts, Blx, labels = bandpath.get_linear_kpoint_axis()
-        #            ticks = Blx*xmax/kpts[-1]
-        #            plt.xticks(ticks, labels)
-        #            plt.grid(True)
-        #
-        #        plt.xlim(xmin, xmax)
-        #
-        #        if emin is None:
-        #            emin = np.min(self.shell_energies)-Efermi
-        #
-        #        if emax is None:
-        #            emax = np.max(self.shell_energies)-Efermi
-        #
-        #        plt.ylim(emin, emax)
-        #
-        #        for band in range(self.shell_energies.shape[1]):
-        #            plt.plot(X, eigen[:, band])
-        #
-        #        plt.axhline(y=0.0, color='b', linestyle='--', label='y = 50')
-        #
-        #        plt.ylabel('Energy (eV)')
-        #        plt.title('Band Structure')
-        #        plt.show()
-        #
     def calculate(self, atoms=None, properties=['energy'],
                   system_changes=all_changes) -> None:
         super().calculate(atoms, properties, system_changes)
@@ -400,5 +404,8 @@ class Fireball(Calculator):
             if self._correction is not None:
                 self._correct_atoms.positions = atoms.get_positions()
 
+        # Compute energy always
+        if 'energy' not in properties:
+            properties.append('energy')
         for prop in properties:
             _ = self._get(prop)

@@ -56,7 +56,7 @@ class BaseFireball:
         Array with the weights associated to each k-point.
         Does not need to be normalized.
     kpts : ArrayLike[float]
-        Array with the k-points in units of the main cell.
+        Array with the k-points in units of the reciprocal cell.
         Redundant k-points will be automatically eliminated.
     lazy : bool
         If set to ``True`` it will only load necessary files for the species
@@ -101,32 +101,31 @@ class BaseFireball:
 
     #_shifter = np.array([np.pi, np.exp(-1.0), np.sqrt(2.0)])
 
-    def __init__(self, *,
-                 fdata: str,
-                 species: set[str],
-                 numbers: ArrayLike,
-                 positions: ArrayLike,
-                 wkpts: ArrayLike,
-                 kpts: ArrayLike,
-                 lazy: bool,
-                 verbose: bool,
-                 charges_method: str = 'auto',
-                 dipole_method: str = 'improved',
-                 cell: Optional[ArrayLike] = None,
-                 pbc: Optional[ArrayLike] = None,
+    def __init__(self, *, fdata: str, fdata_path: Optional[str] = None, lazy: bool = True,
+                 species: set[str], numbers: ArrayLike, positions: ArrayLike,
+                 periodic: bool, kpts: ArrayLike, wkpts: ArrayLike, reducekpts: bool, cell: ArrayLike,
+                 verbose: bool, charges_method: str = 'auto', dipole_method: str = 'improved',
                  mixer_kws: Optional[dict[str, Any]] = None,
-                 fdata_path: Optional[str] = None) -> None:
+                 ) -> None:
 
         # Init variables
         self._scf_computed = False
         self._forces_computed = False
         self.nspin = 1
-        pbc = [False, False, False] if pbc is None else pbc
         mixer = deepcopy(DEFAULT_MIXER) if mixer_kws is None else deepcopy(mixer_kws)
 
         # Save to self and ensure type safety
+        
+        ## FData block
+        assert isinstance(fdata, str)
         self.fdata = fdata
-        assert isinstance(self.fdata, str)
+        if self.fdata == 'custom':
+            assert isinstance(fdata_path, str), "If 'fdata=\"custom\"' then fdata_path must be provided"
+        self.fdata_path = fdata_path
+        assert isinstance(lazy, (bool, np.bool_))
+        self.lazy = bool(lazy)
+
+        ## Atoms block
         self.species = set(species)
         self.nspecies = len(self.species)
         self.numbers = np.ascontiguousarray(numbers, dtype=np.int64)
@@ -134,24 +133,29 @@ class BaseFireball:
         self.natoms = self.numbers.size
         self.positions = np.ascontiguousarray(positions, dtype=np.float64)
         assert self.positions.shape == (self.natoms, 3), "'positions' must be a (natoms, 3) array"
+
+        ## Periodic block
+        assert isinstance(periodic, (bool, np.bool_))
+        self.periodic = bool(periodic)
         self.wkpts = np.ascontiguousarray(wkpts, dtype=np.float64)
         assert len(self.wkpts.shape) == 1, "'wkpts' must be a 1d array"
         self.nkpts = self.wkpts.size
+        assert isinstance(reducekpts, (bool, np.bool_))
         self.kpts = np.ascontiguousarray(kpts, dtype=np.float64)
         assert self.kpts.shape == (self.nkpts, 3), "'kpts' must be a (nkpts, 3) array"
-        self.lazy = lazy
-        assert isinstance(self.lazy, bool)
-        self.verbose = verbose
-        assert isinstance(self.verbose, bool)
+        self.reducekpts = bool(reducekpts)
+        self.cell = np.ascontiguousarray(cell, dtype=np.float64)
+        assert self.cell.shape == (3, 3), "'cell' must be a (3, 3) array"
+
+        ## SCF block
+        assert isinstance(verbose, (bool, np.bool_))
+        self.verbose = bool(verbose)
+        assert isinstance(charges_method, str)
         self.charges_method = charges_method
-        assert isinstance(self.charges_method, str)
+        assert isinstance(dipole_method, str)
         self.dipole_method = dipole_method
-        assert isinstance(self.dipole_method, str)
-        if cell is not None:
-            self.cell = np.ascontiguousarray(cell, dtype=np.float64)
-            assert self.cell.shape == (3, 3), "'cell' must be a (3, 3) array"
-        self.pbc = np.ascontiguousarray(pbc, dtype=np.bool_)
-        assert self.pbc.shape == (3,), "'pbc' must be a 3 element array"
+
+        ## Mixer block
         assert isinstance(mixer, dict)
         assert 'method' in mixer, "'mixer' must have a 'method' key"
         self.mixer = {'mixmethod': mixer['method']}
@@ -159,9 +163,6 @@ class BaseFireball:
             self.mixer[prop] = np.int64(mixer.get(prop, DEFAULT_MIXER[prop]))
         for prop in ['beta', 'tol', 'w0']:
             self.mixer[prop] = np.float64(mixer.get(prop, DEFAULT_MIXER[prop]))
-        self.fdata_path = fdata_path
-        if self.fdata == 'custom':
-            assert isinstance(self.fdata_path, str), "If 'fdata=\"custom\"' then fdata_path must be provided"
 
         # Load FData and set coordinates
         self._check_positions()
@@ -173,12 +174,13 @@ class BaseFireball:
 
         # Set all periodic/cell variables
         self._init_cell()
+        set_cell(self.cell)
         set_kpoints(self.kpts.T, self.wkpts)
 
         # Set Fireball-like options
-        self._options = {'dmethod': np.int64(0) if self._isperiodic else get_idipole(dipole_method),
+        self._options = {'dmethod': np.int64(0) if self.periodic else get_idipole(dipole_method),
                          'qmethod': get_icharge(self.charges_method),
-                         'molecule': np.int64(not self._isperiodic),
+                         'molecule': np.int64(not self.periodic),
                          'gonly': np.int64(self._isgamma)}
         self._options.update(self.mixer)
         self._options['mixmethod'] = get_imixer(self.mixer['mixmethod'])
@@ -188,11 +190,11 @@ class BaseFireball:
         call_allocate_system()
 
     def _wrap_positions(self, eps: float = 1e-6) -> NDArray[np.float64]:
-        if not hasattr(self, 'cell'):
+        if not self.periodic:
             return self.positions
-        shift = np.zeros(3, dtype=np.float64) - eps*self.pbc
+        shift = np.zeros(3, dtype=np.float64) - eps
         fractional = solve(self.cell.T, self.positions.T).T - shift
-        fractional[:, self.pbc] = fractional[:, self.pbc] % 1.0 + shift[self.pbc]
+        fractional = fractional % 1.0 + shift
         return np.dot(fractional, self.cell)
 
     def _check_positions(self, eps: float = 1e-6) -> None:
@@ -231,18 +233,18 @@ class BaseFireball:
         self.nkpts = self.wkpts.size
 
     def _init_cell(self, eps=1e-5) -> None:
-        self._isperiodic = hasattr(self, 'cell')
-        if not self._isperiodic:
+        self._isgamma = False
+        if not self.periodic:
             if self.nkpts > 1 or norm(self.kpts[0, :]) > eps:
                 raise ValueError("If there is no cell, then 'kpts' must be the gamma point")
-            self._isgamma = True
-            self.wkpts /= self.wkpts.sum()
-            set_cell(np.diag(2.0*np.abs(self.positions).max(axis=0)).T)
-            return
         self.kpts = 2.0*np.pi*np.dot(self.kpts, pinv(self.cell))
-        self._remove_redundant_kpts()
-        self._isgamma = self.nkpts == 1 and norm(self.kpts[0, :]) < eps
-        set_cell(self.cell)
+        if self.reducekpts:
+            self._remove_redundant_kpts()
+        if self.nkpts == 1 and norm(self.kpts[0, :]) < eps:
+            self._isgamma = True
+        if self._isgamma:
+            self.kpts = np.array([[0.0, 0.0, 0.0]], dtype=np.float64)
+        self.wkpts /= self.wkpts.sum()
 
     def _alloc_arrays(self) -> None:
         self.charges = np.zeros(self.natoms, dtype=np.float64, order='C')
