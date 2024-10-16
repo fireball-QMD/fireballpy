@@ -9,3 +9,35 @@ José: autores
 Fdata: https://pubs.acs.org/doi/10.1021/acs.jctc.9b01265
 
 - tesunitario.
+
+
+-----------------
+python3.12 -m venv $(pwd)/fbpyenv
+source $(pwd)/fbpyenv/bin/activate
+pip install meson numpy ase requests tqdm 
+sudo apt-get install gfortran libopenblas-dev
+
+
+Lanzamos jupyter usando https:
+
+mkdir ~/.jupyter/ssl
+cd ~/.jupyter/ssl
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout mykey.key -out mycert.pem
+
+jupyter notebook --generate-config
+
+c = get_config()
+c.NotebookApp.certfile = u'/home/usuario/.jupyter/ssl/mycert.pem'
+c.NotebookApp.keyfile = u'/home/usuario/.jupyter/ssl/mykey.key'
+c.NotebookApp.ip = '0.0.0.0'
+c.NotebookApp.port = 4656
+c.NotebookApp.open_browser = False
+c.NotebookApp.password = ''  
+
+#antes de lanzar jupyter pon una contraseña con el comando:
+jupyter notebook password
+
+
+jupyter notebook --no-browser --ip=0.0.0.0 --port=54321
+
+

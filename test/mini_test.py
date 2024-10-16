@@ -38,7 +38,8 @@ start_time = time.time()
 kpoints = monkhorst_pack([4, 4, 4])
 C = 'Mulliken_dipole_preserving'
 atoms.calc = Fireball(charges_method=C, kpts=kpoints,
-                      shell_charges=shell_charges)
+                      shell_charges=shell_charges,
+                      fdata='biology')
 # atoms.calc = Fireball(charges=C)
 atoms.get_potential_energy()
 print('ETOT =', atoms.calc.results['energy'], 'eV')
