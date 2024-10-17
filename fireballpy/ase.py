@@ -141,6 +141,8 @@ class Fireball(Calculator):
         self.gamma = kwargs.get('gamma', None)
         self.charges_method = kwargs.get('charges_method', 'auto')
         self.dipole_method = kwargs.get('dipole_method', 'improved')
+        self.fix_charges = bool(kwargs.get('fix_charges', False))
+        self.input_charges = kwargs.get('input_charges', None)
         self.mixer = kwargs.get('mixer_kws', None)
         self.fdata_path = kwargs.get('fdata_path', None)
         self._correction = kwargs.get('correction', 'auto')
@@ -224,6 +226,8 @@ class Fireball(Calculator):
                 lazy=self.lazy,
                 charges_method=self.charges_method,
                 dipole_method=self.dipole_method,
+                fix_charges=self.fix_charges,
+                input_charges=self.input_charges,
                 mixer_kws=self.mixer
         )
 

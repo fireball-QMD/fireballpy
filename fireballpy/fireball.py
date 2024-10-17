@@ -16,6 +16,7 @@ from _fireball import (loadfdata_from_path,  # type: ignore
                        set_cell,
                        set_kpoints,
                        set_options,
+                       set_charges,
                        call_allocate_system,
                        scf,
                        get_sizes,
@@ -105,6 +106,7 @@ class BaseFireball:
                  species: set[str], numbers: ArrayLike, positions: ArrayLike,
                  periodic: bool, kpts: ArrayLike, wkpts: ArrayLike, reducekpts: bool, cell: ArrayLike,
                  verbose: bool, charges_method: str = 'auto', dipole_method: str = 'improved',
+                 fix_charges: bool = False, input_charges: Optional[ArrayLike] = None,
                  mixer_kws: Optional[dict[str, Any]] = None,
                  ) -> None:
 
@@ -154,6 +156,11 @@ class BaseFireball:
         self.charges_method = charges_method
         assert isinstance(dipole_method, str)
         self.dipole_method = dipole_method
+        assert isinstance(fix_charges, (bool, np.bool_))
+        self.fix_charges = bool(fix_charges)
+        if input_charges is not None:
+            self.input_charges = np.ascontiguousarray(input_charges, dtype=np.float64)
+            # TODO: assert
 
         ## Mixer block
         assert isinstance(mixer, dict)
@@ -180,6 +187,7 @@ class BaseFireball:
         # Set Fireball-like options
         self._options = {'dmethod': np.int64(0) if self.periodic else get_idipole(dipole_method),
                          'qmethod': get_icharge(self.charges_method),
+                         'fix_charges': np.int64(fix_charges),
                          'molecule': np.int64(not self.periodic),
                          'gonly': np.int64(self._isgamma)}
         self._options.update(self.mixer)
@@ -188,6 +196,8 @@ class BaseFireball:
 
         # Allocate module
         call_allocate_system()
+        if input_charges is not None:
+            set_charges(self.input_charges.T)
 
     def _wrap_positions(self, eps: float = 1e-6) -> NDArray[np.float64]:
         if not self.periodic:

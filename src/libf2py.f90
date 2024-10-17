@@ -1,16 +1,17 @@
 ! Set int options
-subroutine set_options(gonly, molecule, dmethod, qmethod, mixmethod, max_iter, mix_order, beta, w0, tol)
+subroutine set_options(gonly, molecule, dmethod, qmethod, fix_charges, mixmethod, max_iter, mix_order, beta, w0, tol)
   use iso_c_binding
-  use M_system, only: igamma, icluster, idipole, iqout, ialgmix, max_scf_iterations, &
+  use M_system, only: igamma, icluster, idipole, iqout, ifixcharge, ialgmix, max_scf_iterations, &
     & idmix, w02, bmix, sigmatol
   implicit none
-  integer(c_long), intent(in) :: gonly, molecule, dmethod, qmethod, mixmethod, &
+  integer(c_long), intent(in) :: gonly, molecule, dmethod, qmethod, fix_charges, mixmethod, &
     & max_iter, mix_order
   real(c_double), intent(in) :: beta, w0, tol
   igamma = gonly
   icluster = molecule
   idipole = dmethod
   iqout = qmethod
+  ifixcharge = fix_charges
   ialgmix = mixmethod
   max_scf_iterations = max_iter
   idmix = mix_order
@@ -58,6 +59,15 @@ subroutine set_coords(naux, z, xyz)
     end do
   end do
 end subroutine set_coords
+
+subroutine set_charges(natoms, nsh_max, qinput)
+  use iso_c_binding
+  use M_system, only : Qin
+  implicit none
+  integer(c_long), intent(in) :: nsh_max, natoms
+  real(c_double), dimension(nsh_max, natoms), intent(in) :: qinput
+  Qin = qinput
+end subroutine set_charges
 
 ! Faster set coordinates for simulations
 subroutine update_coords(natoms, xyz)

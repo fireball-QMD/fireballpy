@@ -16,11 +16,18 @@ ETOT = []
 charge = []
 force = []
 
+charges=[
+[1.67073876, 2.79846614],
+[0.58844418, 0.        ],
+[0.98078358, 0.        ],
+[0.98078358, 0.        ],
+[0.98078375, 0.        ]]
+
 for dipole in ['improved', 'legacy']:
-    for C in ['Lowdin', 'Mulliken', 'NPA', 'Mulliken_dipole',
-              'Mulliken_dipole_preserving']:
+    for C in ['lowdin', 'mulliken', 'npa', 'mulliken_dipole',
+              'mulliken_dipole_preserving']:
         print('-------', C, '-----------------')
-        atoms.calc = Fireball(charges_method=C, dipole=dipole)
+        atoms.calc = Fireball(fdata='biology', charges_method=C, dipole_method=dipole, input_charges=charges, fix_charges=False)
         atoms.get_potential_energy()
         atoms.get_charges()
         atoms.get_forces()
