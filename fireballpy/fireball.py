@@ -100,7 +100,7 @@ class BaseFireball:
 
     """
 
-    #_shifter = np.array([np.pi, np.exp(-1.0), np.sqrt(2.0)])
+    _shifter = np.array([np.pi, np.exp(-1.0), np.sqrt(2.0)])
 
     def __init__(self, *, fdata: str, fdata_path: Optional[str] = None, lazy: bool = True,
                  species: set[str], numbers: ArrayLike, positions: ArrayLike,
@@ -117,7 +117,6 @@ class BaseFireball:
         mixer = deepcopy(DEFAULT_MIXER) if mixer_kws is None else deepcopy(mixer_kws)
 
         # Save to self and ensure type safety
-        
         ## FData block
         assert isinstance(fdata, str)
         self.fdata = fdata
@@ -173,15 +172,15 @@ class BaseFireball:
 
         # Load FData and set coordinates
         self._check_positions()
-        #self._shift = np.any(norm(self.positions, axis=1) < 1e-4)
-        #if self._shift:
-        #    self.positions += self._shifter
         self._init_fdata()
+        self._shift = np.any(norm(self.positions, axis=1) < 1e-4)
+        if self._shift:
+            self.positions += self._shifter
         set_coords(self.numbers, self.positions.T)
 
         # Set all periodic/cell variables
         self._init_cell()
-        set_cell(self.cell)
+        set_cell(self.cell.T)
         set_kpoints(self.kpts.T, self.wkpts)
 
         # Set Fireball-like options
@@ -304,8 +303,8 @@ class BaseFireball:
         self.positions = np.ascontiguousarray(positions, dtype=np.float64)
         assert self.positions.shape == (self.natoms, 3), "'positions' must be a (natoms, 3) array"
         self._check_positions()
-        #if self._shift:
-        #    self.positions += self._shifter
+        if self._shift:
+            self.positions += self._shifter
         update_coords(self.positions.T)
         self._scf_computed = False
         self._forces_computed = False

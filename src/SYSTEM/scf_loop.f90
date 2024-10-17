@@ -12,18 +12,15 @@ subroutine scf_loop (verbose)
     if (errno .ne. 0) return
     call build_rho ()
     if (errno .ne. 0) return
-    if (Kscf .eq. 1) then
-      call get_ewald (iforce)
-      call assemble_usr ()
-    end if
     if (scf_achieved) exit
     if (verbose) then
-      etot = ebs + uiiuee + uxcdcc_ols + etotxc_1c + eqmmm
-      print '(a13,i4,a6,f12.6,a7,e10.3,a3,e10.3)', '-> Iteration ', Kscf, ': E = ', etot, '; dE = ', sigma, ' > ', sigmatol
+      print '(a13,i4,a8,f12.6,a9,e10.3,a3,e10.3)', '-> Iteration ', Kscf, ': EBS = ', ebs, '; dEBS = ', sigma, ' > ', sigmatol
     end if
   end do
-  etot = ebs + uiiuee + uxcdcc_ols + etotxc_1c + eqmmm
   if (verbose) then
-    print '(a13,i4,a6,f12.6,a7,e10.3,a3,e10.3)', '-> Iteration ', Kscf, ': E = ', etot, '; dE = ', sigma, ' < ', sigmatol
+    print '(a13,i4,a8,f12.6,a9,e10.3,a3,e10.3)', '-> Iteration ', Kscf, ': EBS = ', ebs, '; dEBS = ', sigma, ' < ', sigmatol
   end if
+  call get_ewald (iforce)
+  call assemble_usr ()
+  etot = ebs + uiiuee + uxcdcc_ols + etotxc_1c + eqmmm
 end subroutine scf_loop

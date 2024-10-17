@@ -2,7 +2,7 @@
 from __future__ import annotations
 from typing import Any
 
-from numpy.typing import ArrayLike
+from numpy.typing import ArrayLike, NDArray
 from ase.calculators.abc import GetPropertiesMixin  # type: ignore
 from ase.calculators.calculator import (Calculator, PropertyNotPresent,  # type: ignore
                                         kpts2sizeandoffsets, all_changes)
@@ -127,7 +127,7 @@ class Fireball(Calculator):
     def __init__(self, fdata: str, *,
                  lazy: bool = True,
                  verbose: bool = False,
-                 kpts: ArrayLike | dict[str, Any] = (1, 1, 1),
+                 kpts: ArrayLike = (1, 1, 1),
                  **kwargs):
 
         super().__init__(**kwargs)
@@ -148,16 +148,12 @@ class Fireball(Calculator):
         self._correction = kwargs.get('correction', 'auto')
 
         # Check kpts
-        if isinstance(self.kpts, dict):
-            if 'path' not in self.kpts or 'npoints' not in self.kpts:
-                raise KeyError("If parameter 'kpts' is a dictionary it must have the 'path' and 'npoints' keys.")
-        else:
-            self.kpts = np.asarray(kpts, dtype=np.int64)
-            if self.kpts.shape != (3,):
-                raise ValueError("Parameter 'kpts' must be a 3-element array-like structure.")
-            ksize, koffset = kpts2sizeandoffsets(self.kpts, gamma=self.gamma)
-            self.kpts = monkhorst_pack(ksize) + np.array(koffset)
-            self.wkpts = np.ones(self.kpts.shape[0])  # FIXED WEIGHTS
+        self.kpts = np.asarray(kpts, dtype=np.int64)
+        if self.kpts.shape != (3,):
+            raise ValueError("Parameter 'kpts' must be a 3-element array-like structure.")
+        ksize, koffset = kpts2sizeandoffsets(self.kpts, gamma=self.gamma)
+        self.kpts = monkhorst_pack(ksize) + np.array(koffset)
+        self.wkpts = np.ones(self.kpts.shape[0])  # FIXED WEIGHTS
 
         # Check correction
         if not isinstance(self._correction, GetPropertiesMixin) and self._correction not in ['auto', 'off']:
@@ -168,37 +164,31 @@ class Fireball(Calculator):
             raise PropertyNotPresent(name)
         if name not in self.results:
             fname = f'_get_{self._prop2fun[name]}'
-            getattr(self, fname)()
+            self.results.update(getattr(self, fname)())
         return self.results[name]
 
-    def _get_energy(self) -> None:
+    def _get_energy(self) -> dict[str, float]:
         energy, fermi_level = self._dft.get_energies()
         if self._correction is not None:
             energy += self._correct_atoms.get_potential_energy()
-        self.results.update({'energy': float(energy), 'free_energy': float(energy), 'fermi_level': float(fermi_level)})
+        return {'energy': float(energy), 'free_energy': float(energy), 'fermi_level': float(fermi_level)}
 
-    def _get_eigenvalues(self) -> None:
+    def _get_eigenvalues(self) -> dict[str, NDArray[np.float64]]:
         eigenvalues = self._dft.get_eigenvalues()
-        self.results['eigenvalues'] = eigenvalues
+        return {'eigenvalues': eigenvalues}
 
-    def _get_charges(self) -> None:
+    def _get_charges(self) -> dict[str, NDArray[np.float64]]:
         charges, shell_charges = self._dft.get_charges()
-        self.results.update({'charges': charges, 'shell_charges': shell_charges})
+        return {'charges': charges, 'shell_charges': shell_charges}
 
-    def _get_forces(self) -> None:
+    def _get_forces(self) -> dict[str, NDArray[np.float64]]:
         forces = self._dft.get_forces()
         if self._correction is not None:
             forces += self._correct_atoms.get_forces()
-        self.results['forces'] = forces
+        return {'forces': forces}
 
     def _create_fireball(self) -> None:
         assert self.atoms is not None
-
-        # Create bandpath if needed
-        if isinstance(self.kpts, dict):
-            self.bandpath = bandpath(cell=self.atoms.cell, **self.kpts)
-            self.kpts = self.bandpath.kpts
-            self.wkpts = np.ones(self.kpts.shape[0])  # FIXED WEIGHTS
 
         # Cell for BaseFireball interpretation
         cell = self.atoms.cell.complete().array

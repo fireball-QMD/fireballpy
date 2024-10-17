@@ -60,6 +60,7 @@ subroutine set_coords(naux, z, xyz)
   end do
 end subroutine set_coords
 
+! Provide input charges
 subroutine set_charges(natoms, nsh_max, qinput)
   use iso_c_binding
   use M_system, only : Qin
@@ -101,7 +102,7 @@ subroutine loadfdata_from_path(fdata_path)
   use iso_c_binding
   use M_fdata, only: fdataLocation
   implicit none
-  character(len=400), intent(in) ::fdata_path 
+  character(len=400), intent(in) :: fdata_path
   fdatalocation=trim(fdata_path)
   call load_fdata()
 end subroutine loadfdata_from_path

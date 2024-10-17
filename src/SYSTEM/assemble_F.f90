@@ -97,14 +97,11 @@ subroutine assemble_F ()
   
   
   do iatom = 1, natoms
-    fbs(:,iatom) = ft(:,iatom) + fna(:,iatom) + fnl(:,iatom) + fxc(:,iatom)
-    fbs(:,iatom) = fbs(:,iatom) + fca(:,iatom) + fxc_ca(:,iatom) + flrew(:,iatom) + flrew_qmmm(:,iatom)
+    fbs(:,iatom) = ft(:,iatom) + fna(:,iatom) + fnl(:,iatom) + fxc(:,iatom) + &
+      & fca(:,iatom) + fxc_ca(:,iatom) + flrew(:,iatom) + flrew_qmmm(:,iatom)
   end do
-do iatom = 1, natoms
-   end do
   do iatom = 1, natoms
     ftot(:,iatom) = fbs(:,iatom) + dusr(:,iatom) + dxcv(:,iatom) + fro(:,iatom)
-    !if (idftd3 .ge. 1) ftot(:,iatom) = ftot(:,iatom) + ftot_dftd3(:,iatom)
   end do
   rms = 0.0d0
   do iatom = 1, natoms
