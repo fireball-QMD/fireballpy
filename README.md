@@ -10,7 +10,7 @@
 Clone the repository to your computer:
 
     git clone https://github.com/fireball-QMD/fireballpy
-
+    git clone git@github.com:fireball-QMD/fireballpy
 ## How to compile in local:
 
 First ensure you have the desired virtual Python environment activated (or conda environment).
