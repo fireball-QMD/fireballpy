@@ -1,12 +1,11 @@
 import numpy as np
 from ase import Atoms
-from ase.dft.kpoints import monkhorst_pack
 from ase.io import write
 from fireballpy import Fireball
 
-a = 4.43000*1.5
+a = 4.43000
 
-atoms = Atoms(symbols=['C', 'Si'],
+atoms = Atoms(symbols=['C', 'C'],
               positions=[(0.0000, 0.0000, 0.0000),
                          (a/4,    a/4,    a/4)])
 
@@ -16,13 +15,15 @@ ETOT = []
 charge = []
 force = []
 
-kpoints = monkhorst_pack([4, 4, 4])
-for kpts in [None, kpoints]:
-    for C in ['Lowdin', 'Mulliken', 'NPA', 'Mulliken_dipole',
-              'Mulliken_dipole_preserving']:
+for idx in range(2):
+    for C in ['lowdin', 'mulliken', 'npa', 'mulliken_dipole',
+              'mulliken_dipole_preserving']:
         print('-------', C, '-----------------')
         # el kpts_monkhorst_pack_ind lo ignora cuando es periodic_gamm
-        atoms.calc = Fireball(charges_method=C, kpts=kpts)
+        if idx == 0:
+            atoms.calc = Fireball(fdata='biology', charges_method=C)
+        else:
+            atoms.calc = Fireball(fdata='biology', charges_method=C, kpts=(4,4,4))
         atoms.get_potential_energy()
         atoms.get_charges()
         atoms.get_forces()

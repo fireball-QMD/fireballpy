@@ -27,7 +27,7 @@ for dipole in ['improved', 'legacy']:
     for C in ['lowdin', 'mulliken', 'npa', 'mulliken_dipole',
               'mulliken_dipole_preserving']:
         print('-------', C, '-----------------')
-        atoms.calc = Fireball(fdata='biology', charges_method=C, dipole_method=dipole, input_charges=charges, fix_charges=False)
+        atoms.calc = Fireball(fdata='biology', charges_method=C, dipole_method=dipole, initial_charges=charges)
         atoms.get_potential_energy()
         atoms.get_charges()
         atoms.get_forces()

@@ -6,7 +6,7 @@ module M_fdata
   integer(c_long) :: itheory = 1 !DOGS 
   integer(c_long) :: itheory_xc = 2 !McWEDA
   logical :: debug = .True.
-  character(len=100) :: infofname = 'info.ase.dat'
+  character(len=100) :: infofname = 'info.py.dat'
   !===================================
   
   ! info.dat variables

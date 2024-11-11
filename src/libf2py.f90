@@ -1,18 +1,20 @@
 ! Set int options
-subroutine set_options(gonly, molecule, dmethod, qmethod, fix_charges, mixmethod, max_iter, mix_order, beta, w0, tol)
+subroutine set_options(dipole_method, charges_method, fix_charges, &
+    & ismolecule, isgamma, total_charge, mixer_method, &
+    & max_iter, mix_order, beta, w0, tol)
   use iso_c_binding
-  use M_system, only: igamma, icluster, idipole, iqout, ifixcharge, ialgmix, max_scf_iterations, &
-    & idmix, w02, bmix, sigmatol
+  use M_system, only: igamma, icluster, idipole, iqout, ifixcharge, &
+    & qstate, ialgmix, max_scf_iterations, idmix, w02, bmix, sigmatol
   implicit none
-  integer(c_long), intent(in) :: gonly, molecule, dmethod, qmethod, fix_charges, mixmethod, &
-    & max_iter, mix_order
+  integer(c_long), intent(in) :: dipole_method, charges_method, fix_charges, &
+    & ismolecule, isgamma, total_charge, mixer_method, max_iter, mix_order
   real(c_double), intent(in) :: beta, w0, tol
-  igamma = gonly
-  icluster = molecule
-  idipole = dmethod
-  iqout = qmethod
+  idipole = dipole_method
+  iqout = charges_method
   ifixcharge = fix_charges
-  ialgmix = mixmethod
+  icluster = ismolecule
+  qstate = total_charge
+  ialgmix = mixer_method
   max_scf_iterations = max_iter
   idmix = mix_order
   w02 = w0*w0
@@ -21,14 +23,14 @@ subroutine set_options(gonly, molecule, dmethod, qmethod, fix_charges, mixmethod
 end subroutine set_options
 
 ! Set cell vectors
-subroutine set_cell(lvs)
+subroutine set_cell(a1, a2, a3)
   use iso_c_binding
   use M_system, only: a1vec, a2vec, a3vec
   implicit none
-  real(c_double), dimension(3, 3), intent(in) :: lvs
-  a1vec(:) = lvs(:,1)
-  a2vec(:) = lvs(:,2)
-  a3vec(:) = lvs(:,3)
+  real(c_double), dimension(3), intent(in) :: a1, a2, a3
+  a1vec = a1
+  a2vec = a2
+  a3vec = a3
 end subroutine set_cell
 
 ! Set coordinates

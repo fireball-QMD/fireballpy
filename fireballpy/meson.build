@@ -18,11 +18,14 @@ generate_version = custom_target(
 python_sources = [
   '__init__.py',
   '_errors.py',
-  '_fdata.py',
   '_options.py',
-  'ase.py',
+  '_correction.py',
+  'fdata.py',
+  'atoms.py',
+  'kpoints.py',
   'fireball.py',
-  'fdata.toml'
+  'ase.py',
+  'fdata.toml',
 ]
 
 py.install_sources(python_sources, subdir: 'fireballpy')

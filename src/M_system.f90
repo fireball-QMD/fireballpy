@@ -8,7 +8,8 @@ module M_system
   integer(c_long) :: idipole    != 1 
   integer(c_long) :: igamma     != 1
   integer(c_long) :: iqmmm      = 0
-  integer(c_long) :: ifixcharge = 0
+  integer(c_long) :: ifixcharge
+  integer(c_long) :: qstate = 0
   !========================
   !               idipole icluster igamma 
   !molecule       1       1        1        !R non periodic + only gamma kpts

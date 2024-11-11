@@ -15,7 +15,8 @@ Write something here.
    :maxdepth: 1
    :caption: Fireball
 
-   Fireball <fireball>
+   ASE interface <ase>
+   Low-level API <fireball>
 
 .. toctree::
    :hidden:
