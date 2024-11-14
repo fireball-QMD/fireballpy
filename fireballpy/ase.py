@@ -1,13 +1,9 @@
 from __future__ import annotations
-from typing import Any
+from typing import Any, SupportsFloat
 
-from numpy.typing import ArrayLike, NDArray
+from numpy.typing import ArrayLike
 from ase.calculators.calculator import Calculator, PropertyNotPresent, all_changes
-import numpy as np
 
-from .fdata import new_fdatafiles
-from .atoms import new_atomsystem
-from .kpoints import new_kpoints
 from .fireball import BaseFireball
 
 
@@ -44,8 +40,8 @@ class Fireball(Calculator, BaseFireball):
     kpts : ArrayLike[int] | ArrayLike[float] | float
         Specify the k-points for a periodic computation. It can be either a set of three
         Monkhorst-Pack indices, a nkpts x 3 array with the coordinates of the k-points
-        in angstroms, or a density of k-points in inverse angstroms.
-        By default, it will generate a (1, 1, 1) Monkhorst-Pack corresponding to the Gamma
+        in reciprocal cell units, or a density of k-points in inverse angstroms.
+        By default, it will generate a ``(1, 1, 1)`` Monkhorst-Pack corresponding to the Gamma
         point alone.
     **kwargs
         Advanced options. May requiere previous experience with DFT computations:
@@ -58,13 +54,13 @@ class Fireball(Calculator, BaseFireball):
         |                    |                      | array with the weights associated to each of the k-points. By default,   |
         |                    |                      | all points have the same weight.                                         |
         +--------------------+----------------------+--------------------------------------------------------------------------+
-        | ``gamma``          | ``bool``             | If the k-points are to be generated from a Monkhorst-Pack or from a      |
-        |                    |                      | k-point density, should the Gamma ([0, 0, 0]) point be forcefully        |
+        | ``gamma``          | ``bool | None``      | If the k-points are to be generated from a Monkhorst-Pack or from a      |
+        |                    |                      | k-point density, should the Gamma (``[0, 0, 0]``) point be forcefully    |
         |                    |                      | included (``True``), forcefully excluded (``False``) or                  |
         |                    |                      | don't care whether it is included or not (``None``, default)             |
         +--------------------+----------------------+--------------------------------------------------------------------------+
-        | ``charges_method`` | ``str``              | How the autoconsistency in the charges will be performed.                |
-        |                    |                      | By default depends on the FData (``'auto'``).                            |
+        | ``charges_method`` | ``str | None``       | How the autoconsistency in the charges will be performed.                |
+        |                    |                      | By default depends on the FData (``None``).                              |
         |                    |                      | If a custom FData is selected, then this parameter must be specified.    |
         |                    |                      | For more options see :ref:`here <charges_methods>`.                      |
         +--------------------+----------------------+--------------------------------------------------------------------------+
@@ -74,14 +70,18 @@ class Fireball(Calculator, BaseFireball):
         +--------------------+----------------------+--------------------------------------------------------------------------+
         | ``fdata_path``     | ``str``              | Path to a custom FData. Ignored unless ``fdata = 'custom'``.             |
         +--------------------+----------------------+--------------------------------------------------------------------------+
-        | ``correction``     | ``str`` or ``dict``  | By default (``'auto'``) will apply DFT3 correction for the selected      |
+        | ``total_charge``   | ``int``              | Total charge of the system in elementary charge units                    |
+        |                    |                      | (1 extra electron will be ``total_charge = -1``). Default is 0.          |
+        +--------------------+----------------------+--------------------------------------------------------------------------+
+        | ``correction``     | ``dict | None``      | By default (``None``) will apply DFT-D3 correction for the selected      |
         |                    |                      | FData if optimized parameters are available                              |
-        |                    |                      | (see ``available_fdatas()``). Can be turned off with ``'off'``.          |
-        |                    |                      | Also, it may be a dictionary with the parameters for DFTD3 correction    |
-        |                    |                      | The dictionary must contain the keys ``'type'`` (right now it can only   |
+        |                    |                      | (see ``available_fdatas()``).                                            |
+        |                    |                      | Also, it may be a dictionary with the parameters for DFT-D3 correction   |
+        |                    |                      | The dictionary must contain the keys ``'kind'`` (right now it can only   |
         |                    |                      | be ``'dftd3'``), ``'damping'`` and either ``'method'`` or                |
-        |                    |                      | ``'params_tweaks'``. For more information, see                           |
-        |                    |                      | `Simple DFT-D3 documentation <dftd3.readthedocs.io>`_.                   |
+        |                    |                      | ``'params_tweaks'``. It may be forcefully shut down by providing         |
+        |                    |                      | ``False``. For more information, see                                     |
+        |                    |                      | `Simple DFT-D3 documentation <https://dftd3.readthedocs.io>`_.           |
         +--------------------+----------------------+--------------------------------------------------------------------------+
         | ``mixer_kws``      | ``dict``             | Dictionary with the charges mixer options. For reference                 |
         |                    |                      | see :ref:`here <mixer>`.                                                 |
@@ -117,9 +117,10 @@ class Fireball(Calculator, BaseFireball):
 
     """
 
-    _prop2fun = {'energy': 'energy', 'free_energy': 'energy', 'fermi_level': 'energy',
-                 'eigenvalues': 'eigenvalues', 'charges': 'charges',
-                 'shell_charges': 'charges', 'forces': 'forces'}
+    _fun2prop = {'energy': ['energy', 'free_energy', 'fermi_level'],
+                 'eigenvalues': ['eigenvalues'],
+                 'charges': ['charges', 'shell_charges'],
+                 'forces': ['forces']}
 
     implemented_properties = ['energy', 'free_energy', 'forces', 'charges']
 
@@ -133,48 +134,43 @@ class Fireball(Calculator, BaseFireball):
     def __init__(self, fdata: str, *,
                  lazy: bool = True,
                  verbose: bool = False,
-                 kpts: ArrayLike = (1, 1, 1),
+                 kpts: ArrayLike | SupportsFloat = (1, 1, 1),
                  **kwargs):
-
         Calculator.__init__(self, **kwargs)
+        self._fb_started = False
+        self.nspin = 1
 
         # Sadly for us we cannot check many things here, we have
         # to wait for the call to calculate.
+        # We just check the most basic thing and pray the user is not mad about it.
+        if fdata == 'custom' and 'fdata_path' not in kwargs:
+            raise ValueError("If ``fdata='custom'`` then ``fdata_path`` must be set")
         # Save things for later and call BaseFireball init
-        self.fdata_args = {'fdata': fdata, 'fdata_path': kwargs.get('fdata_path', None)}
-        self.kpts_args = {'kpts': kpts, 'wkpts': kwargs.get('wkpts', None), 'gamma': kwargs.get('gamma', None)}
-        self.init_args = {'lazy': bool(lazy),
+        self.init_args = {'fdata': fdata,
+                          'kpts': kpts,
+                          'fdata_path': kwargs.get('fdata_path', None),
+                          'wkpts': kwargs.get('wkpts', None),
+                          'gamma': kwargs.get('gamma', None),
+                          'lazy': bool(lazy),
                           'verbose': bool(verbose),
-                          'charges_method': kwargs.get('charges_method', 'auto'),
+                          'charges_method': kwargs.get('charges_method', None),
                           'dipole_method': kwargs.get('dipole_method', 'improved'),
-                          'fix_charges': kwargs.get('fix_charges', False),
-                          'correction': kwargs.get('correction', 'auto'),
+                          'total_charge': kwargs.get('total_charge', 0),
+                          'fix_charges': bool(kwargs.get('fix_charges', False)),
+                          'correction': kwargs.get('correction', None),
                           'initial_charges': kwargs.get('initial_charges', None),
                           'mixer_kws': kwargs.get('mixer_kws', None)}
 
     def _get(self, name: str) -> Any:
-        if not hasattr(self, '_run_scf'):
+        if not self._fb_started:
             raise PropertyNotPresent(name)
-        if name not in self.results:
-            fname = f'_get_{self._prop2fun[name]}'
-            self.results.update(getattr(self, fname)())
+        for fun in self._fun2prop:
+            if name in self._fun2prop[fun]:
+                getattr(self, f'compute_{fun}')()
+                for n in self._fun2prop[fun]:
+                    self.results.update({n: getattr(self, n)})
+                break
         return self.results[name]
-
-    def _get_energy(self) -> dict[str, float]:
-        energy, fermi_level = self.compute_energies()
-        return {'energy': float(energy), 'free_energy': float(energy), 'fermi_level': float(fermi_level)}
-
-    def _get_eigenvalues(self) -> dict[str, NDArray[np.float64]]:
-        eigenvalues = self.compute_eigenvalues()
-        return {'eigenvalues': eigenvalues}
-
-    def _get_charges(self) -> dict[str, NDArray[np.float64]]:
-        charges, shell_charges = self.compute_charges()
-        return {'charges': charges, 'shell_charges': shell_charges}
-
-    def _get_forces(self) -> dict[str, NDArray[np.float64]]:
-        forces = self.compute_forces()
-        return {'forces': forces}
 
     def get_eigenvalues(self, kpt=0, spin=0):
         """Get the eigenvalues of the hamiltonian in electronvolts.
@@ -200,7 +196,7 @@ class Fireball(Calculator, BaseFireball):
             If the an out-of-bounds k-point index is requested.
         """
         spin = 0
-        return self._get('eigenvalues')[spin, kpt]
+        return self._get('eigenvalues').reshape(1, self.nkpts, self.nbands)[spin, kpt]
 
     def get_fermi_level(self):
         """Get the Fermi level in electronvolts.
@@ -231,7 +227,7 @@ class Fireball(Calculator, BaseFireball):
         PropertyNotPresent
             If any computation has been done and k-points were not yet computed.
         """
-        self.results['ibz_kpoints'] = self.kpts.ks
+        self.results['ibz_kpoints'] = self.kpts_.ks
         return self.results['ibz_kpoints']
 
     def get_k_point_weights(self):
@@ -248,7 +244,7 @@ class Fireball(Calculator, BaseFireball):
         PropertyNotPresent
             If the any computation has been done and k-point weights were not yet computed.
         """
-        self.results['kpoint_weights'] = self.kpts.ws
+        self.results['kpoint_weights'] = self.kpts_.ws
         return self.results['kpoint_weights']
 
     def get_number_of_bands(self):
@@ -314,13 +310,14 @@ class Fireball(Calculator, BaseFireball):
 
         # If the atoms change we reinit BaseFireball
         if 'numbers' in system_changes:
-            fdata = new_fdatafiles(**self.fdata_args)
-            atomsystem = new_atomsystem(atoms.get_chemical_symbols(),
-                                        atoms.get_atomic_numbers(),
-                                        atoms.get_positions(),
-                                        atoms.cell[0], atoms.cell[1], atoms.cell[2])
-            kpts = new_kpoints(icell=atomsystem.icell, pbc=atomsystem.pbc, **self.kpts_args)
-            BaseFireball.__init__(self, fdata=fdata, atomsystem=atomsystem, kpts=kpts, **self.init_args)
+            self.init_args.update({'species': set(atoms.get_chemical_symbols()),
+                                   'numbers': atoms.get_atomic_numbers(),
+                                   'positions': atoms.get_positions(),
+                                   'a1': atoms.cell[0],
+                                   'a2': atoms.cell[1],
+                                   'a3': atoms.cell[2]})
+            BaseFireball.__init__(self, **self.init_args)
+            self._fb_started = True
         # If positions change we just need to update them not repeat anything else
         elif 'positions' in system_changes:
             self.update_coords(atoms.get_positions())

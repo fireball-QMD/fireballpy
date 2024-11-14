@@ -1,6 +1,11 @@
 from numpy.linalg import LinAlgError
 
 
+def type_check(obj, objtype, name, msg=''):
+    if not isinstance(obj, objtype):
+        raise TypeError(f"Parameter ``{name}`` must be of type ``{objtype}``{msg}.")
+
+
 def raise_fb_error(fb_errno):
     # Linear Algebra errors
     if fb_errno < 0:

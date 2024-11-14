@@ -9,10 +9,8 @@ Options are:
 +-----------------+-------------------+-----------------+
 | Method          | Value             | Notes           |
 +=================+===================+=================+
-| Automatic       | 'auto'            | FData dependent |
+| Automatic       | None              | FData dependent |
 | (default)       |                   |                 |
-+-----------------+-------------------+-----------------+
-| NPA             | 'npa'             | [NPA]_          |
 +-----------------+-------------------+-----------------+
 | Mulliken        | 'mulliken'        | [Mulliken]_     |
 +-----------------+-------------------+-----------------+
@@ -20,11 +18,11 @@ Options are:
 +-----------------+-------------------+-----------------+
 | Lowdin          | 'lowdin'          | [Lowdin]_       |
 +-----------------+-------------------+-----------------+
+| Weighted Lowdin | 'weighted_lowdin' | [WeightLowdin]_ |
++-----------------+-------------------+-----------------+
 
 References
 ----------
-.. [NPA] Reference for NPA.
-         Must add.
 
 .. [Mulliken] Reference for Mulliken.
               Must add.
@@ -34,3 +32,7 @@ References
 
 .. [Lowdin] Reference for Lowdin.
             Must add.
+
+.. [WeightLowdin] Reference for NPA.
+         Must add.
+

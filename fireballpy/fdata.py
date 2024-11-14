@@ -1,4 +1,5 @@
 from __future__ import annotations
+from copy import deepcopy
 import errno
 import hashlib
 import json
@@ -8,7 +9,7 @@ import sys
 import tarfile
 import tempfile
 import time
-from typing import Any, Iterable, Optional
+from typing import Any, Iterable
 import uuid
 
 import requests
@@ -19,7 +20,8 @@ if sys.version_info >= (3, 11):
 else:
     import tomli as tomllib
 
-from ._correction import new_correction, DFTD3Correction
+from ._errors import type_check
+from ._correction import Correction
 from .atoms import AtomSystem
 from _fireball import loadfdata_from_path
 
@@ -83,7 +85,7 @@ def available_fdatas() -> list[str]:
     keys = list(fdatas.keys())
     for i, k in enumerate(keys):
         if 'correction' in fdatas[k]:
-            keys[i] += f' ({fdatas[k]["correction"]["type"].upper()} available)'
+            keys[i] += f' ({fdatas[k]["correction"]["kind"].upper()} available)'
     return keys
 
 def get_fdata(name: str) -> dict[str, Any]:
@@ -95,7 +97,7 @@ def get_fdata(name: str) -> dict[str, Any]:
 
 # Reference: httlps://github.com/pytorch/pytorch/blob/main/torch/hub.py
 def download_file(url: str, dst: str,
-                  vhave: Optional[time.struct_time] = None) -> time.struct_time:
+                  vhave: time.struct_time | None = None) -> time.struct_time:
     # Make connection
     try:
         r = requests.get(url, stream=True)
@@ -185,12 +187,14 @@ class FDataFiles:
 
     Parameters
     ----------
-    path : Optional[str]
-        Path to a custom FData. Incompatible with ``name``.
-    name: Optional[str]
+    fdata : str
         Name of the FData to be used. See ``available_fdatas()``
-        for a table of available FData.
-        Incompatible with ``path``.
+        for a table of available FData. If set to ``'custom'`` then
+        an ``fdata_path`` pointing to a local FData folder must be provided.
+        Please note that the first time an FData is used it needs to download
+        all the necessary files.
+    fdata_path : str | None
+        Path to a custom FData. Ignored unless ``fdata = 'custom'``.
 
     Methods
     -------
@@ -202,33 +206,32 @@ class FDataFiles:
         charge method. It will raise ``RuntimeError`` if the
         FData is not provided by us.
     get_correction(atomsystem)
-        Returns `DFT-D3 <dftd3.readthedocs.io>`_ correction
-        to be used with Fireball. It will return None if
+        Returns `DFT-D3 <https://dftd3.readthedocs.io>`_ correction
+        to be used with Fireball. It will return ``None`` if
         either the FData is not provided by us or no optimal parameters are recorded.
     """
 
     fb_home = get_fb_home()
 
-    def __init__(self, path: Optional[str] = None, name: Optional[str] = None) -> None:
-        if path is None and name is None:
-            raise ValueError('path and name cannot be unset at the same time')
-        if path is not None and name is not None:
-            raise ValueError('path and name cannot be set at the same time')
-        if name is not None:
-            assert isinstance(name, str), 'name must be a string'
-            self.name = name
+    def __init__(self, *, fdata: str, fdata_path: str | None = None) -> None:
+        type_check(fdata, str, 'fdata')
+        if fdata != 'custom':
+            self.name = fdata
             self._from_name()
             self.indb = True
-        if path is not None:
-            assert isinstance(path, str), 'path must be a string'
-            self.path = path
+        else:
+            type_check(fdata_path, str, 'fdata_path', " when ``fdata='custom'``")
+            self.name = fdata
+            self.path = fdata_path
             self.indb = False
+
+        assert self.path is not None
         if self.path[-1] != os.sep:
             self.path += os.sep
         self.infofile = os.path.join(self.path, 'info.dat')
         if not os.path.isfile(self.infofile):
-            raise ValueError("info.dat file not found in the specified "
-                            f"fdata path ({path}).")
+            raise ValueError("File 'info.dat' not found in the specified "
+                            f"fdata path ('{self.path}').")
         with open(self.infofile, 'r') as fp:
             self.infodat = fp.read().splitlines()
         self.blocks = _get_blocks_infodat(self.infodat)
@@ -310,8 +313,8 @@ class FDataFiles:
             raise RuntimeError('Cannot get charges method for custom FData')
         return self.fdata['charges_method']
 
-    def get_correction(self, atomsystem: AtomSystem) -> None | DFTD3Correction:
-        """Gives the options needed to apply `DFT-D3 <dftd3.readthedocs.io>`_ correction.
+    def get_correction(self, atomsystem: AtomSystem, charges_method: str) -> tuple[dict, Correction] | tuple[dict, None]:
+        """Gives the options needed to apply `DFT-D3 <https://dftd3.readthedocs.io>`_ correction.
 
         Parameters
         ----------
@@ -320,44 +323,20 @@ class FDataFiles:
 
         Returns
         -------
-        None | DFTD3Correction
+        DFTD3Correction | None
             Object which can apply the correction in Fireball.
-            Will return None if either we did not provide
+            Will return ``None`` if either we did not provide
             the FData or there are no optimal parameters recorded.
         """
+        type_check(atomsystem, AtomSystem, 'atomsystem')
+        type_check(charges_method, str, 'charges_method')
         if not self.indb:
-            return None
+            return {}, None
         try:
             corr = self.fdata['correction']
         except KeyError:
-            return None
-        corrtype = corr['type']
-        corrdamping = corr['parameters'].pop('damping')
-        corrparms = corr['parameters']
-        return new_correction(atomsystem, corrtype, corrdamping, params_tweaks=corrparms)
+            return {}, None
+        if self.get_charges_method() != charges_method:
+            return {}, None
 
-
-def new_fdatafiles(fdata: str, fdata_path: Optional[str] = None) -> FDataFiles:
-    """Wrapper to use the appropiate constructor for FDataFiles
-
-    Parameters
-    ----------
-    fdata : str
-        Name of the FData to be used. See ``available_fdatas()``
-        for a table of available FData. If set to ``'custom'`` then
-        an ``fdata_path`` pointing to a local FData folder must be provided.
-        Please note that the first time an FData is used it needs to download
-        all the necessary files.
-    fdata_path : Optional[str]
-        Path to a custom FData. Ignored unless ``fdata = 'custom'``.
-
-    Returns
-    -------
-    FDataFiles
-        Created object with needed information to be used in Fireball.
-    """
-    assert isinstance(fdata, str), "fdata must be a string"
-    if fdata != 'custom':
-        return FDataFiles(name=fdata)
-    assert isinstance(fdata_path, str), "If fdata is custom then fdata_path must be a string"
-    return FDataFiles(path=fdata_path)
+        return corr, Correction(atomsystem=atomsystem, **corr)

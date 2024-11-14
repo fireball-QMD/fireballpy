@@ -1,13 +1,80 @@
-from typing import Optional
 import dftd3.interface as d3i
 
+from ._errors import type_check
 from .atoms import AtomSystem
 
 # Could be replaced by constants in future versions if
 # ase dependency is to be removed
-from ase.units import Bohr
+from ase.units import Bohr, Hartree
 
-class DFTD3Correction:
+
+# Reference: https://stackoverflow.com/a/60769071
+class Correction:
+    """Low-level interaction with DFT-D3 or DFT-D4 correction
+
+    Parameters
+    ----------
+    kind : str
+        Right now it can only be ``'dftd3'``.
+    atomsystem : AtomSystem
+        An AtomSystem object with the information of the atomic numbers, positions and the unit cell.
+    damping : str | None
+        Damping model used. Compulsory for DFT-D3.
+    method : str | None
+        Named set of parameters to be used. Incompatible with ``params_tweaks``.
+    params_tweaks : dict | None
+        Dictionary with the explicit values for the parameters. Incompatible with ``method``.
+    """
+    def __new__(cls, *,
+                kind: str,
+                atomsystem: AtomSystem,
+                damping: str | None = None,
+                method: str | None = None,
+                params_tweaks: dict | None = None):
+        type_check(kind, str, 'kind')
+        type_check(atomsystem, AtomSystem, 'atomsystem')
+        if kind == 'dftd3':
+            type_check(damping, str, 'damping', ' for DFT-D3 correction')
+        else:
+            raise ValueError("Parameter ``kind`` must be ``'dftd3'``.")
+        if method is not None and params_tweaks is not None:
+            raise ValueError("Parameters ``method`` and ``params_tweaks`` cannot be set at the same time.")
+        if method is None and params_tweaks is None:
+            raise ValueError("Parameters ``method`` and ``params_tweaks`` cannot be ``None`` at the same time.")
+        if method is None:
+            type_check(params_tweaks, dict, 'params_tweaks')
+        if params_tweaks is None:
+            type_check(method, str, 'method')
+
+        subclass_map = {subclass.kind: subclass for subclass in cls.__subclasses__()}  # type: ignore
+        subclass = subclass_map[kind]
+        return super(Correction, subclass).__new__(subclass)
+
+    def update_coords(self, atomsystem: AtomSystem) -> None:
+        self.disp.update(atomsystem.pos/Bohr, atomsystem.cell/Bohr)  # type: ignore
+
+    def correct(self) -> None:
+        self.res = self.disp.get_dispersion(param=self.dpar, grad=True)  # type: ignore
+        self.res['energy'] *= Hartree
+        self.res['gradient'] *= Hartree/Bohr
+
+
+class _DFTD3Correction(Correction):
+    """Low-level interaction with DFT-D3 correction
+
+    Parameters
+    ----------
+    atomsystem : AtomSystem
+        An AtomSystem object with the information of the atomic numbers, positions and the unit cell.
+    damping : str
+        Damping model used.
+    method : str | None
+        Named set of parameters to be used. Incompatible with ``params_tweaks``.
+    params_tweaks : dict | None
+        Dictionary with the explicit values for the parameters. Incompatible with ``method``.
+    """
+
+    kind = 'dftd3'
 
     _damping_param = {
         "d3bj": d3i.RationalDampingParam,
@@ -19,78 +86,30 @@ class DFTD3Correction:
         "d3op": d3i.OptimizedPowerDampingParam,
     }
 
-    def __init__(self,
-                 atomsystem: AtomSystem,
-                 damping: str,
-                 method: Optional[str] = None,
-                 params_tweaks: Optional[dict[str, float]] = None) -> None:
-        assert isinstance(atomsystem, AtomSystem)
-        assert isinstance(damping, str)
-        self.atomsystem = atomsystem
+    def __init__(self, kind: str, atomsystem: AtomSystem, damping: str,
+                 method: str | None = None, params_tweaks: dict | None = None) -> None:
         self.damping = damping
         self.method = method
-        self.params = params_tweaks
-        self._create_api_calculator()
+        self.params_tweaks = params_tweaks
+        self._create_api_calculator(atomsystem)
         self._create_damping_param()
 
-    def _create_api_calculator(self) -> None:
-        """Create a new API calculator object"""
-
+    def _create_api_calculator(self, atomsystem: AtomSystem) -> None:
+        """Create a new API calculator object.
+        """
         try:
-            self.disp = d3i.DispersionModel(
-                self.atomsystem.nums,
-                self.atomsystem.pos/Bohr,
-                self.atomsystem.cell/Bohr,
-                self.atomsystem.pbc
-            )
+            self.disp = d3i.DispersionModel(atomsystem.nums,
+                                            atomsystem.pos/Bohr,
+                                            atomsystem.cell/Bohr,
+                                            atomsystem.pbc)
         except RuntimeError:
             raise ValueError("Cannot construct dispersion model for dftd3")
 
     def _create_damping_param(self) -> None:
-            """Create a new API damping parameter object"""
-
-            if self.method is not None and self.params is not None:
-                raise ValueError("'method' and 'params_tweaks' cannot be set at the same time.")
-            if self.method is None and self.params is None:
-                raise ValueError("'method' and 'params_tweaks' cannot be unset at the same time.")
-
+            """Create a new API damping parameter object.
+            """
             try:
-                params_tweaks = self.params if self.params is not None else {'method': self.method}
+                params_tweaks = self.params_tweaks if self.params_tweaks is not None else {'method': self.method}
                 self.dpar = self._damping_param[self.damping](**params_tweaks)
             except RuntimeError:
                 raise ValueError("Cannot construct damping parameter for dftd3")
-
-
-def new_correction(atomsystem: AtomSystem,
-                   corrtype: str,
-                   damping: str,
-                   method: Optional[str] = None,
-                   params_tweaks: Optional[dict[str, float]] = None) -> DFTD3Correction:
-    """Wrapper to create the appropiate correction.
-
-    Parameters
-    ----------
-    atomsystem : AtomSystem
-        An AtomSystem object with the information of the atomic numbers, positions and the unit cell.
-    corrtype : str
-        Right it can only be ``'dftd3'``.
-    damping : str
-        Damping model used.
-    method : Optional[str]
-        Named set of parameters to be used. Incompatible with ``params_tweaks``.
-    params_tweaks : Optional[dict]
-        Dictionary with the explicit values for the parameters. Incompatible with ``method``.
-
-    Returns
-    -------
-    DFTD3Correction
-        Created correction object to be used in Fireball.
-    """
-    assert isinstance(corrtype, str)
-    if method is not None and params_tweaks is not None:
-        raise ValueError("'method' and 'params_tweaks' cannot be set at the same time.")
-    if method is None and params_tweaks is None:
-        raise ValueError("'method' and 'params_tweaks' cannot be unset at the same time.")
-    if corrtype not in ['dftd3']:
-        raise ValueError("correction type must be 'dftd3'")
-    return DFTD3Correction(atomsystem, damping, method, params_tweaks)

@@ -2,8 +2,8 @@ from __future__ import annotations
 import numpy as np
 
 _icharge_table = {'lowdin': np.int64(1), 'mulliken': np.int64(2),
-                 'npa': np.int64(3), 'mulliken_dipole': np.int64(4),
-                  'mulliken_dipole_preserving': np.int64(7)}
+                 'weighted_lowdin': np.int64(3), 'mulliken_dipole': np.int64(4),
+                 'mulliken_dipole_preserving': np.int64(7)}
 
 _idipole_table = {'improved': np.int64(1), 'legacy': np.int64(0)}
 

@@ -15,17 +15,19 @@ generate_version = custom_target(
   install_tag: 'python-runtime',
 )
 
-python_sources = [
-  '__init__.py',
-  '_errors.py',
-  '_options.py',
-  '_correction.py',
-  'fdata.py',
-  'atoms.py',
-  'kpoints.py',
-  'fireball.py',
-  'ase.py',
-  'fdata.toml',
-]
+py.install_sources([
+    '__init__.py',
+    '_errors.py',
+    '_options.py',
+    '_correction.py',
+    'fdata.py',
+    'atoms.py',
+    'kpoints.py',
+    'fireball.py',
+    'ase.py',
+    'fdata.toml',
+  ],
+  subdir: 'fireballpy'
+)
 
-py.install_sources(python_sources, subdir: 'fireballpy')
+subdir('bands')

@@ -24,7 +24,7 @@ charges=[
 [0.98078375, 0.        ]]
 
 for dipole in ['improved', 'legacy']:
-    for C in ['lowdin', 'mulliken', 'npa', 'mulliken_dipole',
+    for C in ['lowdin', 'mulliken', 'weighted_lowdin', 'mulliken_dipole',
               'mulliken_dipole_preserving']:
         print('-------', C, '-----------------')
         atoms.calc = Fireball(fdata='biology', charges_method=C, dipole_method=dipole, initial_charges=charges)
