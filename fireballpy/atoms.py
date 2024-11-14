@@ -7,6 +7,9 @@ from scipy.spatial.distance import pdist
 from ._errors import type_check
 from _fireball import set_coords, set_cell, update_coords
 
+TWOPI = 2.0*np.pi
+RECIPROCAL = 1/TWOPI
+
 class AtomSystem:
     """Class to contain all the information about the atomic system.
 
@@ -43,17 +46,17 @@ class AtomSystem:
                  a2: ArrayLike | None = None,
                  a3: ArrayLike | None = None) -> None:
         # Deal with atom information
-        self.sps = set(species)
-        self.nums = np.ascontiguousarray(numbers, dtype=np.int64)
-        if len(self.nums.shape) > 1:
+        self.species = set(species)
+        self.numbers = np.ascontiguousarray(numbers, dtype=np.int64)
+        if len(self.numbers.shape) > 1:
             raise ValueError("Parameter ``numbers`` must be a 1D array")
-        self.n = self.nums.size
-        self.pos = np.ascontiguousarray(positions, dtype=np.float64)
-        if self.pos.shape != (self.n, 3):
+        self.n = self.numbers.size
+        self.positions = np.ascontiguousarray(positions, dtype=np.float64)
+        if self.positions.shape != (self.n, 3):
             raise ValueError("Parameter ``positions`` must be a 2D array with dimensions natoms x 3")
         # Shift coords if needed
         if self._needs_shift():
-            self.pos += self._shifter
+            self.positions += self._shifter
 
         # Deal with the cell vectors
         if a1 is None:
@@ -82,18 +85,18 @@ class AtomSystem:
         for i, p in enumerate(self.pbc):
             if not p:
                 self.cell[i] = np.zeros(3, dtype=np.float64, order='C')
-                self.cell[i,i] = np.max(np.abs(self.pos[:,i])) + 100.0
-        self.icell = 2.0*np.pi*np.ascontiguousarray(inv(self.cell).T)
+                self.cell[i,i] = np.max(np.abs(self.positions[:,i])) + 100.0
+        self.icell = TWOPI*np.ascontiguousarray(inv(self.cell).T)
         # Use the cell to check wrapped positions
         self._check_positions()
 
     def _needs_shift(self, tol: float = 1e-5) -> bool:
-        return bool(np.any(norm(self.pos, axis=1) < tol))
+        return bool(np.any(norm(self.positions, axis=1) < tol))
 
     def _wrap_positions(self, eps: float = 1e-5) -> NDArray[np.float64]:
         if not self.isperiodic:
-            return self.pos
-        fractional = 0.5*np.dot(self.pos, self.icell)/np.pi + eps
+            return self.positions
+        fractional = RECIPROCAL*np.dot(self.positions, self.icell) + eps
         fractional = fractional % 1.0 - eps
         return np.dot(fractional, self.cell.T)
 
@@ -104,7 +107,7 @@ class AtomSystem:
     def set_coords(self) -> None:
         """Set the coordinate info in the Fortran module.
         """
-        set_coords(self.nums, self.pos.T)
+        set_coords(self.numbers, self.positions.T)
 
     def set_cell(self) -> None:
         """Set the cell info in the Fortran module.
@@ -119,9 +122,9 @@ class AtomSystem:
         positions : ArrayLike[float]
             A natoms x 3 array with the positions of each atom in angstroms.
         """
-        self.pos = np.ascontiguousarray(positions, dtype=np.float64)
-        assert self.pos.shape == (self.n, 3), "positions must be a (nkpts, 3) size array"
+        self.positions = np.ascontiguousarray(positions, dtype=np.float64)
+        assert self.positions.shape == (self.n, 3), "positions must be a (nkpts, 3) size array"
         self._check_positions()
         if self._needs_shift():
-            self.pos += self._shifter
-        update_coords(self.pos.T)
+            self.positions += self._shifter
+        update_coords(self.positions.T)

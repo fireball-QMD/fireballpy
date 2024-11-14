@@ -278,23 +278,23 @@ class FDataFiles:
         with open(self.pyinfofile, 'w') as fp:
             fp.write(os.linesep.join(infodat))
 
-    def load_fdata(self, sps: set[str], lazy: bool) -> None:
+    def load_fdata(self, atomsystem: AtomSystem, lazy: bool) -> None:
         """Set Fortran module variables and load the FData into memory.
 
         Parameters
         ----------
-        sps : set[str]
-            Set with the species to appear in the calculation.
+        atomsystem : AtomSystem
+            AtomSystem object with the species to appear in the calculation.
         lazy : bool
             If ``True`` load only FData for the involved species.
             If ``False`` load the full FData.
         """
         global _loaded_fdata
-        load_tuple = (self.path, sps)
+        load_tuple = (self.path, atomsystem.species)
         if load_tuple != _loaded_fdata:
-            self._prep_infodat(sps, lazy)
+            self._prep_infodat(atomsystem.species, lazy)
             loadfdata_from_path(self.path)
-            _loaded_fdata = load_tuple
+            _loaded_fdata = deepcopy(load_tuple)
 
     def get_charges_method(self) -> str:
         """Get the optimal charge method for autoconsistency.

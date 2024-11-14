@@ -16,7 +16,7 @@ charge = []
 force = []
 
 for idx in range(2):
-    for C in ['lowdin', 'mulliken', 'npa', 'mulliken_dipole',
+    for C in ['lowdin', 'mulliken', 'weighted_lowdin', 'mulliken_dipole',
               'mulliken_dipole_preserving']:
         print('-------', C, '-----------------')
         # el kpts_monkhorst_pack_ind lo ignora cuando es periodic_gamm

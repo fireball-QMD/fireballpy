@@ -16,8 +16,8 @@ subroutine anderson ( x_try, x_old, nmsh )
   real(c_double), allocatable, dimension(:) :: work
 
   if(Kscf .eq. 1)then
-    allocate (Fv(nmsh,max_scf_iterations+1))
-    allocate (Xv(nmsh,max_scf_iterations+1))
+    allocate (Fv(nmsh,max_scf_iterations))
+    allocate (Xv(nmsh,max_scf_iterations))
     allocate (delF(nmsh,max_scf_iterations))
     allocate (delX(nmsh,max_scf_iterations))
     allocate (r2_sav(max_scf_iterations))
@@ -47,7 +47,7 @@ subroutine anderson ( x_try, x_old, nmsh )
     scf_achieved = .true.
     deallocate(Fv, Xv, delF, delX, r2_sav, wi, x_best)
     return
-  else if(Kscf .eq. max_scf_iterations+1 .and. sigma .gt. sigmabest) then
+  else if(Kscf .eq. max_scf_iterations .and. sigma .gt. sigmabest) then
     x_old(:) = x_best(:)
     deallocate(Fv, Xv, delF, delX, r2_sav, wi, x_best)
     return

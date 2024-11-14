@@ -1,6 +1,7 @@
 from __future__ import annotations
 from copy import deepcopy
 from typing import SupportsFloat
+import warnings
 
 from numpy.typing import ArrayLike
 import numpy as np
@@ -13,12 +14,13 @@ from .atoms import AtomSystem
 from .kpoints import KPoints
 
 from _fireball import (set_options,
-                       set_charges,
+                       set_initial_charges,
                        call_allocate_system,
                        scf,
                        get_sizes,
+                       get_initial_charges,
                        get_charges,
-                       get_energies,
+                       get_energy,
                        get_eigenvalues,
                        calc_forces,
                        get_forces)
@@ -67,11 +69,6 @@ class BaseFireball:
         Second cell vector coordinates in angstroms.
     a3 : ArrayLike[float] | None
         Third cell vector coordinates in angstroms.
-    wkpts : ArrayLike[float] | None
-        If ``kpts`` is specified as a nkpts x 3 array with the coordinates of
-        the k-points in reciprocal cell units, then ``wkpts`` may be a nkpts
-        array with the weights associated to each of the k-points. By default,
-        all points have the same weight.
     gamma : bool | None
         If the k-points are to be generated from a Monkhorst-Pack or from a
         k-point density, should the Gamma (``[0, 0, 0]``) point be forcefully
@@ -148,7 +145,6 @@ class BaseFireball:
                  a1: ArrayLike | None = None,
                  a2: ArrayLike | None = None,
                  a3: ArrayLike | None = None,
-                 wkpts: ArrayLike | None = None,
                  gamma: bool | None = None,
                  verbose: bool = False,
                  total_charge: int = 0,
@@ -171,18 +167,17 @@ class BaseFireball:
         type_check(fix_charges, bool, 'fix_charges')
 
         # Save to self
-        self.fdatafiles_ = FDataFiles(fdata=fdata, fdata_path=fdata_path)
-        self.atomsystem_ = AtomSystem(species=species,
+        self.fdatafiles = FDataFiles(fdata=fdata, fdata_path=fdata_path)
+        self.atomsystem = AtomSystem(species=species,
                                      numbers=numbers,
                                      positions=positions,
                                      a1=a1, a2=a2, a3=a3)
-        self.kpts_ = KPoints(kpts=kpts,
-                             atomsystem=self.atomsystem_,
-                             wkpts=wkpts,
-                             gamma=gamma)
+        self.kpts = KPoints(kpts=kpts,
+                            atomsystem=self.atomsystem,
+                            gamma=gamma)
 
-        self.natoms = self.atomsystem_.n
-        self.nkpts = self.kpts_.n
+        self.natoms = self.atomsystem.n
+        self.nkpts = self.kpts.n
         self.lazy = lazy
         self.verbose = verbose
         self.total_charge = total_charge
@@ -192,53 +187,52 @@ class BaseFireball:
 
         # Get charges method
         if self.charges_method is None:
-            self.charges_method_ = self.fdatafiles_.get_charges_method()
+            self.charges_method = self.fdatafiles.get_charges_method()
         else:
             type_check(self.charges_method, str, 'charges_method')
-            self.charges_method_ = self.charges_method
 
         # Address correction
-        self.correction_ = {}
-        if correction is None:
-            self.correction_, self._correction = self.fdatafiles_.get_correction(self.atomsystem_, self.charges_method_)
-        elif correction:
+        self.correction = None
+        if correction:
             type_check(correction, dict, 'correction', ' if custom parameters are desired')
-            self._correction = Correction(atomsystem=self.atomsystem_, **correction)
-            self.correction_ = correction
+            self._correction = Correction(atomsystem=self.atomsystem, **correction)
+            self.correction = correction
+        elif correction is None:
+            self.correction, self._correction = self.fdatafiles.get_correction(self.atomsystem, self.charges_method)
 
         # Address mixer
-        self.mixer_ = deepcopy(DEFAULT_MIXER)
+        self.mixer_kws = deepcopy(DEFAULT_MIXER)
         if mixer_kws is not None:
             type_check(mixer_kws, dict, 'mixer_kws')
             try:
-                self.mixer_ = {'method': mixer_kws['method']}
+                self.mixer_kws = {'method': mixer_kws['method']}
             except KeyError:
                 raise ValueError("Parameter ``mixer_kws`` if specified must contain the key ``'method'``.")
             for prop in ['max_iter', 'mix_order', 'beta', 'tol', 'w0']:
-                self.mixer_[prop] = mixer_kws.get(prop, DEFAULT_MIXER[prop])
+                self.mixer_kws[prop] = mixer_kws.get(prop, DEFAULT_MIXER[prop])
 
         # Set Fireball-like options
-        self._options = {'dipole_method': np.int64(0) if self.atomsystem_.isperiodic else get_idipole(dipole_method),
-                         'charges_method': get_icharge(self.charges_method_),
+        self._options = {'dipole_method': np.int64(0) if self.atomsystem.isperiodic else get_idipole(dipole_method),
+                         'charges_method': get_icharge(self.charges_method),
                          'fix_charges': np.int64(self.fix_charges),
-                         'ismolecule': np.int64(not self.atomsystem_.isperiodic),
-                         'isgamma': np.int64(self.kpts_.isgamma),
+                         'ismolecule': np.int64(not self.atomsystem.isperiodic),
+                         'isgamma': np.int64(self.kpts.isgamma),
                          'total_charge': np.int64(-self.total_charge),
-                         'mixer_method': get_imixer(self.mixer_['method']),
-                         'max_iter': np.int64(self.mixer_['max_iter']),
-                         'mix_order': np.int64(self.mixer_['mix_order']),
-                         'beta': np.float64(self.mixer_['beta']),
-                         'tol': np.float64(self.mixer_['tol']),
-                         'w0': np.float64(self.mixer_['w0'])}
+                         'mixer_method': get_imixer(self.mixer_kws['method']),
+                         'max_iter': np.int64(self.mixer_kws['max_iter']),
+                         'mix_order': np.int64(self.mixer_kws['mix_order']),
+                         'beta': np.float64(self.mixer_kws['beta']),
+                         'tol': np.float64(self.mixer_kws['tol']),
+                         'w0': np.float64(self.mixer_kws['w0'])}
         set_options(**self._options)
 
         # Save variables to modules
-        self.fdatafiles_.load_fdata(self.atomsystem_.sps, self.lazy)
-        self.atomsystem_.set_coords()
-        self.atomsystem_.set_cell()
+        self.fdatafiles.load_fdata(self.atomsystem, self.lazy)
+        self.atomsystem.set_coords()
+        self.atomsystem.set_cell()
         if not self.fix_charges:
-            self.kpts_.reduce_kpts()
-        self.kpts_.set_kpoints()
+            self.kpts.reduce_kpts()
+        self.kpts.set_kpoints()
 
         # Allocate module
         call_allocate_system()
@@ -251,7 +245,10 @@ class BaseFireball:
             if self.initial_charges.shape != (self.natoms, self.nshells):
                 raise ValueError("Parameter ``initial_charges`` must be a natoms x nshells array. "
                                  f"Got shape {self.initial_charges.shape}")
-            set_charges(self.initial_charges.T)
+            set_initial_charges(self.initial_charges.T)
+        else:
+            self.initial_charges = np.zeros((self.natoms, self.nshells), dtype=np.float64, order='C')
+            get_initial_charges(self.initial_charges.T)
 
     def _alloc_arrays(self) -> None:
         self.nshells, self.nbands_new = get_sizes()
@@ -264,12 +261,14 @@ class BaseFireball:
 
     def _run_scf(self) -> None:
         if not self.scf_computed:
-            fb_errno = scf(self.verbose)
-            if fb_errno != 0 and not self.fix_charges:
+            fb_errno, converged = scf(self.verbose)
+            if fb_errno != 0:
                 raise_fb_error(fb_errno)
+            if not converged:
+                warnings.warn("SCF loop did not converge. Try incrementing ``'max_iter'`` in ``mixer_kws``", UserWarning)
             self._alloc_arrays()
             self.scf_computed = True
-            if self.correction_:
+            if self.correction:
                 self._correction.correct()  # type: ignore
 
     def _calc_forces(self) -> None:
@@ -293,8 +292,8 @@ class BaseFireball:
         Automatically applies DFT-D3 correction if applicable.
         """
         self._run_scf()
-        self.energy, self.fermi_level = get_energies()
-        if self.correction_:
+        self.energy, self.fermi_level = get_energy()
+        if self.correction:
             self.energy += self._correction.res['energy']  # type: ignore
         self.free_energy = self.energy
 
@@ -311,7 +310,7 @@ class BaseFireball:
         """
         self._calc_forces()
         get_forces(self.forces.T)
-        if self.correction_:
+        if self.correction:
             self.forces -= self._correction.res['gradient']  # type: ignore
 
     def update_coords(self, positions: ArrayLike) -> None:
@@ -322,9 +321,9 @@ class BaseFireball:
         positions : ArrayLike[float]
             A natoms x 3 array with the new positions in angstroms.
         """
-        self.atomsystem_.update_coords(positions)
-        if self.correction_:
-            self._correction.update_coords(self.atomsystem_)  # type: ignore
+        self.atomsystem.update_coords(positions)
+        if self.correction:
+            self._correction.update_coords(self.atomsystem)  # type: ignore
         self.scf_computed = False
         self.forces_computed = False
 
@@ -343,23 +342,22 @@ class BaseFireball:
         fbobj.compute_charges()
 
         arg_dict = {'fdata': 'custom',
-                    'species': fbobj.atomsystem_.sps,
-                    'numbers': fbobj.atomsystem_.nums,
-                    'positions': fbobj.atomsystem_.pos,
-                    'kpts': fbobj.kpts_.ks,
-                    'fdata_path': fbobj.fdatafiles_.path,
+                    'species': fbobj.atomsystem.species,
+                    'numbers': fbobj.atomsystem.numbers,
+                    'positions': fbobj.atomsystem.positions,
+                    'kpts': fbobj.kpts.kpts,
+                    'fdata_path': fbobj.fdatafiles.path,
                     'lazy': fbobj.lazy,
-                    'a1': fbobj.atomsystem_.cell[0],
-                    'a2': fbobj.atomsystem_.cell[1],
-                    'a3': fbobj.atomsystem_.cell[2],
-                    'wkpts': fbobj.kpts_.ws,
-                    'gamma': fbobj.kpts_.gamma,
+                    'a1': fbobj.atomsystem.cell[0],
+                    'a2': fbobj.atomsystem.cell[1],
+                    'a3': fbobj.atomsystem.cell[2],
+                    'gamma': fbobj.kpts.gamma,
                     'verbose': fbobj.verbose,
                     'total_charge': fbobj.total_charge,
-                    'correction': fbobj.correction_,
-                    'charges_method': fbobj.charges_method_,
+                    'correction': fbobj.correction,
+                    'charges_method': fbobj.charges_method,
                     'dipole_method': fbobj.dipole_method,
-                    'mixer_kws': fbobj.mixer_}
+                    'mixer_kws': fbobj.mixer_kws}
         for k in kwargs:
             if k not in arg_dict:
                 raise ValueError(f"Parameter ``{k}`` not recognized.")

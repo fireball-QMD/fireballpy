@@ -49,11 +49,6 @@ class Fireball(Calculator, BaseFireball):
         +--------------------+----------------------+--------------------------------------------------------------------------+
         | Property           | Type                 | Description                                                              |
         +====================+======================+==========================================================================+
-        | ``wkpts``          | ``ArrayLike[float]`` | If ``kpts`` is specified as a nkpts x 3 array with the coordinates of    |
-        |                    |                      | the k-points in reciprocal cell units, then ``wkpts`` may be a nkpts     |
-        |                    |                      | array with the weights associated to each of the k-points. By default,   |
-        |                    |                      | all points have the same weight.                                         |
-        +--------------------+----------------------+--------------------------------------------------------------------------+
         | ``gamma``          | ``bool | None``      | If the k-points are to be generated from a Monkhorst-Pack or from a      |
         |                    |                      | k-point density, should the Gamma (``[0, 0, 0]``) point be forcefully    |
         |                    |                      | included (``True``), forcefully excluded (``False``) or                  |
@@ -149,7 +144,6 @@ class Fireball(Calculator, BaseFireball):
         self.init_args = {'fdata': fdata,
                           'kpts': kpts,
                           'fdata_path': kwargs.get('fdata_path', None),
-                          'wkpts': kwargs.get('wkpts', None),
                           'gamma': kwargs.get('gamma', None),
                           'lazy': bool(lazy),
                           'verbose': bool(verbose),

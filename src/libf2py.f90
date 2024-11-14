@@ -63,14 +63,14 @@ subroutine set_coords(naux, z, xyz)
 end subroutine set_coords
 
 ! Provide input charges
-subroutine set_charges(natoms, nsh_max, qinput)
+subroutine set_initial_charges(natoms, nsh_max, qinput)
   use iso_c_binding
   use M_system, only : Qin
   implicit none
   integer(c_long), intent(in) :: nsh_max, natoms
   real(c_double), dimension(nsh_max, natoms), intent(in) :: qinput
   Qin = qinput
-end subroutine set_charges
+end subroutine set_initial_charges
 
 ! Faster set coordinates for simulations
 subroutine update_coords(natoms, xyz)
@@ -117,15 +117,17 @@ subroutine call_allocate_system()
 end subroutine call_allocate_system
 
 ! Compute the SCF loop
-subroutine scf(verbose, errno_out)
+subroutine scf(verbose, errno_out, converged)
   use iso_c_binding
-  use M_system, only: errno
+  use M_system, only: errno, scf_achieved
   implicit none
   logical, intent(in) :: verbose
   integer(c_long), intent(out) :: errno_out
+  logical, intent(out) :: converged
   errno = 0
   call scf_loop (verbose)
   errno_out = errno
+  converged = scf_achieved
 end subroutine scf
 
 ! Execute Dassembles for forces
@@ -149,15 +151,35 @@ subroutine get_sizes(nsh, norbs)
   norbs = norbitals_new
 end subroutine get_sizes
 
+! Return initial charges
+subroutine get_initial_charges(natoms, nsh_max, qinitial)
+  use iso_c_binding
+  use M_fdata, only : Qneutral, nssh
+  use M_system, only : Qin, imass
+  implicit none
+  integer(c_long), intent(in) :: nsh_max, natoms
+  real(c_double), dimension(nsh_max, natoms), intent(inout) :: qinitial
+  integer(c_long) :: iatom, issh, in1
+  do iatom=1,natoms
+    in1 = imass(iatom)
+    do issh=1,nssh(in1)
+      qinitial(issh, iatom) = Qneutral(issh, iatom)
+    end do
+    do issh=nssh(in1)+1,nsh_max
+      qinitial(issh, iatom) = 0.0d0
+    end do
+  end do
+end subroutine get_initial_charges
+
 ! Return energy, fermi level
-subroutine get_energies(e, ef)
+subroutine get_energy(e, ef)
   use iso_c_binding
   use M_system, only: etot, efermi
   implicit none
   real(c_double), intent(out) :: e, ef
   e = etot
   ef = efermi
-end subroutine get_energies
+end subroutine get_energy
 
 ! Return eigenvalues
 subroutine get_eigenvalues(norbitals_new, nkpoints, eig)

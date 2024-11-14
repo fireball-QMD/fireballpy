@@ -51,7 +51,7 @@ class Correction:
         return super(Correction, subclass).__new__(subclass)
 
     def update_coords(self, atomsystem: AtomSystem) -> None:
-        self.disp.update(atomsystem.pos/Bohr, atomsystem.cell/Bohr)  # type: ignore
+        self.disp.update(atomsystem.positions/Bohr, atomsystem.cell/Bohr)  # type: ignore
 
     def correct(self) -> None:
         self.res = self.disp.get_dispersion(param=self.dpar, grad=True)  # type: ignore
@@ -98,8 +98,8 @@ class _DFTD3Correction(Correction):
         """Create a new API calculator object.
         """
         try:
-            self.disp = d3i.DispersionModel(atomsystem.nums,
-                                            atomsystem.pos/Bohr,
+            self.disp = d3i.DispersionModel(atomsystem.numbers,
+                                            atomsystem.positions/Bohr,
                                             atomsystem.cell/Bohr,
                                             atomsystem.pbc)
         except RuntimeError:

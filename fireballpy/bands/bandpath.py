@@ -31,13 +31,13 @@ class BandPath:
         self.npoints = int(npoints)
 
         # We will need an ASE cell
-        self.asecell = Cell(fbobj.atomsystem_.cell)
+        self.asecell = Cell(fbobj.atomsystem.cell)
         if special_points is None:
             # Get them from ASE
-            self.spts = get_special_points(self.asecell)
+            self.special_points = get_special_points(self.asecell)
         else:
             type_check(special_points, dict, 'special_points')
-            self.spts = special_points
+            self.special_points = special_points
 
         # See if we have a path as str or defined as an array
         if isinstance(path, str):
@@ -48,11 +48,10 @@ class BandPath:
             self.paths = [[f"Kpt{i}" for i in range(len(path))]]
         else:
             raise TypeError("Parameter ``path`` could not be identified.")
-        bp = self.asecell.bandpath(path, self.npoints, special_points=self.spts)  # type: ignore
-        kpts = bp.kpts
+        kpts = self.asecell.bandpath(path, self.npoints, special_points=self.special_points).kpts  # type: ignore
 
         # Compute new eigenvalues
         self.fermi = fbobj.fermi_level
-        self.fbobj = BaseFireball.postprocessing(fbobj, kpts=kpts, wkpts=np.ones(kpts.shape[0]))
+        self.fbobj = BaseFireball.postprocessing(fbobj, kpts=kpts)
         self.fbobj.compute_eigenvalues()
         self.eigenvalues = self.fbobj.eigenvalues
