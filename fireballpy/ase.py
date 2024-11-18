@@ -49,12 +49,12 @@ class Fireball(Calculator, BaseFireball):
         +--------------------+----------------------+--------------------------------------------------------------------------+
         | Property           | Type                 | Description                                                              |
         +====================+======================+==========================================================================+
-        | ``gamma``          | ``bool | None``      | If the k-points are to be generated from a Monkhorst-Pack or from a      |
+        | ``gamma``          | ``bool`` or ``None`` | If the k-points are to be generated from a Monkhorst-Pack or from a      |
         |                    |                      | k-point density, should the Gamma (``[0, 0, 0]``) point be forcefully    |
         |                    |                      | included (``True``), forcefully excluded (``False``) or                  |
         |                    |                      | don't care whether it is included or not (``None``, default)             |
         +--------------------+----------------------+--------------------------------------------------------------------------+
-        | ``charges_method`` | ``str | None``       | How the autoconsistency in the charges will be performed.                |
+        | ``charges_method`` | ``str`` or ``None``  | How the autoconsistency in the charges will be performed.                |
         |                    |                      | By default depends on the FData (``None``).                              |
         |                    |                      | If a custom FData is selected, then this parameter must be specified.    |
         |                    |                      | For more options see :ref:`here <charges_methods>`.                      |
@@ -68,7 +68,7 @@ class Fireball(Calculator, BaseFireball):
         | ``total_charge``   | ``int``              | Total charge of the system in elementary charge units                    |
         |                    |                      | (1 extra electron will be ``total_charge = -1``). Default is 0.          |
         +--------------------+----------------------+--------------------------------------------------------------------------+
-        | ``correction``     | ``dict | None``      | By default (``None``) will apply DFT-D3 correction for the selected      |
+        | ``correction``     | ``dict`` or ``None`` | By default (``None``) will apply DFT-D3 correction for the selected      |
         |                    |                      | FData if optimized parameters are available                              |
         |                    |                      | (see ``available_fdatas()``).                                            |
         |                    |                      | Also, it may be a dictionary with the parameters for DFT-D3 correction   |
@@ -190,7 +190,7 @@ class Fireball(Calculator, BaseFireball):
             If the an out-of-bounds k-point index is requested.
         """
         spin = 0
-        return self._get('eigenvalues').reshape(1, self.nkpts, self.nbands)[spin, kpt]
+        return self._get('eigenvalues')[kpt]
 
     def get_fermi_level(self):
         """Get the Fermi level in electronvolts.
@@ -221,7 +221,7 @@ class Fireball(Calculator, BaseFireball):
         PropertyNotPresent
             If any computation has been done and k-points were not yet computed.
         """
-        self.results['ibz_kpoints'] = self.kpts_.ks
+        self.results['ibz_kpoints'] = self.kpoints.kpts
         return self.results['ibz_kpoints']
 
     def get_k_point_weights(self):
@@ -238,7 +238,7 @@ class Fireball(Calculator, BaseFireball):
         PropertyNotPresent
             If the any computation has been done and k-point weights were not yet computed.
         """
-        self.results['kpoint_weights'] = self.kpts_.ws
+        self.results['kpoint_weights'] = self.kpoints.weights/self.kpoints.weights.sum()
         return self.results['kpoint_weights']
 
     def get_number_of_bands(self):
@@ -254,7 +254,7 @@ class Fireball(Calculator, BaseFireball):
         PropertyNotPresent
             If the any computation has been done and the number of bands is not yet computed.
         """
-        return self.get_eigenvalues().shape[2]
+        return self.get_eigenvalues().shape[1]
 
     def get_number_of_shells(self):
         """Get the number of shells.

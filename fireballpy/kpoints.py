@@ -9,8 +9,6 @@ from ._errors import type_check
 from .atoms import AtomSystem
 from _fireball import set_kpoints
 
-TWOPI = 2.0*np.pi
-RECIPROCAL = 1/TWOPI
 
 class KPoints:
     """Class to hold the coordinates of the k-points and their weights.
@@ -23,10 +21,6 @@ class KPoints:
         in reciprocal cell units or inverse angstroms, or a density of k-points in inverse angstroms.
     atomsystem : AtomSystem
         An AtomSystem class with the information of the atomic numbers, positions and the unit cell.
-    reciprocal : bool
-        If ``True`` (default), when ``kpts`` are coordinates they will be understood as reciprocal
-        cell units. If ``False`` they will be understood as inverse angstroms.
-        When ``kpts`` is not an array of coordinates this parameter will be ignored.
     gamma : bool | None
         Should the Gamma (``[0, 0, 0]``) point be forcefully
         included (``True``), forcefully excluded (``False``) or
@@ -43,7 +37,6 @@ class KPoints:
     def __init__(self, *,
                  kpts: ArrayLike | SupportsFloat,
                  atomsystem: AtomSystem,
-                 reciprocal: bool = True,
                  gamma: bool | None = None) -> None:
 
         # Need to initialize
@@ -60,12 +53,8 @@ class KPoints:
                 raise ValueError("Parameter ``kpts`` if specified as coordinates "
                                  "must be a 2D array with dimensions nkpts x 3")
             self.weights = np.ones(self.n, dtype=np.float64, order='C')
-            if reciprocal:
-                self.kpts = kpts
-                self.coords = np.dot(kpts, atomsystem.icell)
-            else:
-                self.coords = kpts
-                self.kpts = RECIPROCAL*np.dot(kpts, atomsystem.cell.T)
+            self.kpts = kpts
+            self.coords = np.dot(kpts, atomsystem.icell)
             if self.n == 1 and norm(self.kpts[0, :]) < 1e-5:
                 self.kpts = self.coords.copy()
                 self.coords = np.ascontiguousarray([[0.0, 0.0, 0.0]], dtype=np.float64)

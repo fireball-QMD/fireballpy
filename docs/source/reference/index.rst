@@ -16,7 +16,14 @@ Write something here.
    :caption: Fireball
 
    ASE interface <ase>
-   Low-level API <fireball>
+   Band utilities <bands>
+
+.. toctree::
+   :hidden:
+   :caption: Low-level API
+
+   Internal classes <internal>
+   Ground calculator <fireball>
 
 .. toctree::
    :hidden:

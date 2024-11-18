@@ -166,18 +166,19 @@ class BaseFireball:
         type_check(dipole_method, str, 'dipole_method')
         type_check(fix_charges, bool, 'fix_charges')
 
-        # Save to self
+        # Create convenient subobjects
         self.fdatafiles = FDataFiles(fdata=fdata, fdata_path=fdata_path)
         self.atomsystem = AtomSystem(species=species,
                                      numbers=numbers,
                                      positions=positions,
                                      a1=a1, a2=a2, a3=a3)
-        self.kpts = KPoints(kpts=kpts,
-                            atomsystem=self.atomsystem,
-                            gamma=gamma)
-
+        self.kpoints = KPoints(kpts=kpts,
+                               atomsystem=self.atomsystem,
+                               gamma=gamma)
         self.natoms = self.atomsystem.n
-        self.nkpts = self.kpts.n
+        self.nkpts = self.kpoints.n
+
+        # Save everything to self
         self.lazy = lazy
         self.verbose = verbose
         self.total_charge = total_charge
@@ -216,7 +217,7 @@ class BaseFireball:
                          'charges_method': get_icharge(self.charges_method),
                          'fix_charges': np.int64(self.fix_charges),
                          'ismolecule': np.int64(not self.atomsystem.isperiodic),
-                         'isgamma': np.int64(self.kpts.isgamma),
+                         'isgamma': np.int64(self.kpoints.isgamma),
                          'total_charge': np.int64(-self.total_charge),
                          'mixer_method': get_imixer(self.mixer_kws['method']),
                          'max_iter': np.int64(self.mixer_kws['max_iter']),
@@ -231,8 +232,8 @@ class BaseFireball:
         self.atomsystem.set_coords()
         self.atomsystem.set_cell()
         if not self.fix_charges:
-            self.kpts.reduce_kpts()
-        self.kpts.set_kpoints()
+            self.kpoints.reduce_kpts()
+        self.kpoints.set_kpoints()
 
         # Allocate module
         call_allocate_system()
@@ -345,13 +346,13 @@ class BaseFireball:
                     'species': fbobj.atomsystem.species,
                     'numbers': fbobj.atomsystem.numbers,
                     'positions': fbobj.atomsystem.positions,
-                    'kpts': fbobj.kpts.kpts,
+                    'kpts': fbobj.kpoints.kpts,
                     'fdata_path': fbobj.fdatafiles.path,
                     'lazy': fbobj.lazy,
                     'a1': fbobj.atomsystem.cell[0],
                     'a2': fbobj.atomsystem.cell[1],
                     'a3': fbobj.atomsystem.cell[2],
-                    'gamma': fbobj.kpts.gamma,
+                    'gamma': fbobj.kpoints.gamma,
                     'verbose': fbobj.verbose,
                     'total_charge': fbobj.total_charge,
                     'correction': fbobj.correction,

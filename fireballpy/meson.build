@@ -18,6 +18,7 @@ generate_version = custom_target(
 py.install_sources([
     '__init__.py',
     '_errors.py',
+    '_utils.py',
     '_options.py',
     '_correction.py',
     'fdata.py',

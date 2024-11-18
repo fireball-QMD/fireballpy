@@ -1,3 +1,4 @@
+from __future__ import annotations
 from numpy.linalg import LinAlgError
 
 
