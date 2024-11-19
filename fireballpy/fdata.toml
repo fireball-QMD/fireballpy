@@ -22,3 +22,9 @@ params_tweaks = {s8 = 1.90, a1 = 0.65, a2 = 3.30}
 url = 'https://fireball.ftmc.uam.es/fireballpy/fdata/CHON_fireballpy.tar.gz'
 species = ['H', 'C', 'N', 'O']
 charges_method = 'mulliken_dipole_preserving'
+
+
+[HCSi]
+url = 'https://fireball.ftmc.uam.es/fireballpy/fdata/HCSi_fireballpy.tar.gz'
+species = ['H', 'C', 'Si']
+charges_method = 'weighted_lowdin'
