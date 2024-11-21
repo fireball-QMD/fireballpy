@@ -212,6 +212,14 @@ class BaseFireball:
             for prop in ['max_iter', 'mix_order', 'beta', 'tol', 'w0']:
                 self.mixer_kws[prop] = mixer_kws.get(prop, DEFAULT_MIXER[prop])
 
+        # Save variables to modules
+        self.fdatafiles.load_fdata(self.atomsystem, self.lazy)
+        self.atomsystem.set_coords()
+        if not self.fix_charges:
+            self.kpoints.reduce_kpts()
+        self.kpoints.set_kpoints()
+        self.atomsystem.set_cell()
+
         # Set Fireball-like options
         self._options = {'dipole_method': np.int64(0) if self.atomsystem.isperiodic else get_idipole(dipole_method),
                          'charges_method': get_icharge(self.charges_method),
@@ -226,14 +234,6 @@ class BaseFireball:
                          'tol': np.float64(self.mixer_kws['tol']),
                          'w0': np.float64(self.mixer_kws['w0'])}
         set_options(**self._options)
-
-        # Save variables to modules
-        self.fdatafiles.load_fdata(self.atomsystem, self.lazy)
-        self.atomsystem.set_coords()
-        self.atomsystem.set_cell()
-        if not self.fix_charges:
-            self.kpoints.reduce_kpts()
-        self.kpoints.set_kpoints()
 
         # Allocate module
         call_allocate_system()

@@ -19,7 +19,7 @@ subroutine backnay ()
         do jneigh = 1, neighn(jatom)
           jbeta = neigh_b(jneigh,jatom)
           katom = neigh_j(jneigh,jatom)
-          if (katom .eq. iatom .and. sum((xl(:,jbeta) - xl(:,mbeta))**2) .lt. 1.0d-5) then
+          if (katom .eq. iatom .and. sum((xl(:,jbeta) + xl(:,mbeta))**2) .lt. 1.0d-5) then
             neigh_back (iatom,ineigh) = jneigh
             cycle inner
           end if

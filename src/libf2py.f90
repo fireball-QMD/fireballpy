@@ -13,12 +13,13 @@ subroutine set_options(dipole_method, charges_method, fix_charges, &
   iqout = charges_method
   ifixcharge = fix_charges
   icluster = ismolecule
+  igamma = isgamma
   qstate = total_charge
   ialgmix = mixer_method
   max_scf_iterations = max_iter
   idmix = mix_order
-  w02 = w0*w0
   bmix = beta
+  w02 = w0*w0
   sigmatol = tol
 end subroutine set_options
 
@@ -155,7 +156,7 @@ end subroutine get_sizes
 subroutine get_initial_charges(natoms, nsh_max, qinitial)
   use iso_c_binding
   use M_fdata, only : Qneutral, nssh
-  use M_system, only : Qin, imass
+  use M_system, only : imass
   implicit none
   integer(c_long), intent(in) :: nsh_max, natoms
   real(c_double), dimension(nsh_max, natoms), intent(inout) :: qinitial
@@ -163,7 +164,7 @@ subroutine get_initial_charges(natoms, nsh_max, qinitial)
   do iatom=1,natoms
     in1 = imass(iatom)
     do issh=1,nssh(in1)
-      qinitial(issh, iatom) = Qneutral(issh, iatom)
+      qinitial(issh, iatom) = Qneutral(issh, in1)
     end do
     do issh=nssh(in1)+1,nsh_max
       qinitial(issh, iatom) = 0.0d0
