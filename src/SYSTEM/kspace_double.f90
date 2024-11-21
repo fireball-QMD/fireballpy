@@ -14,7 +14,6 @@ subroutine kspace_double (ikpoint, sks)
   integer(c_long) inu
   integer(c_long) in1, in2
   integer(c_long) ineigh
-  integer(c_long) ishort
   integer(c_long) jatom
   integer(c_long) jmu
   integer(c_long) jnu
@@ -40,7 +39,6 @@ subroutine kspace_double (ikpoint, sks)
 
   a0 = cmplx(0.0d0,0.0d0,c_double_complex)
   a1 = cmplx(1.0d0,0.0d0,c_double_complex)
-  ishort = 1
   allocate (xxxx(norbitals,norbitals))
   allocate (yyyy(norbitals,norbitals))
   allocate (zzzz(norbitals,norbitals))
@@ -49,7 +47,7 @@ subroutine kspace_double (ikpoint, sks)
    allocate (ww(norbitals))
   endif
 
-  lwork = 1
+  lwork = 1_c_long
   allocate (work(lwork))
   lrwork = 3*norbitals - 2
   allocate (rwork(lrwork))
@@ -173,7 +171,7 @@ subroutine kspace_double (ikpoint, sks)
    call zgemm ( 'N', 'N', norbitals, norbitals, norbitals, a1, zzzz, norbitals, xxxx, norbitals, a0, yyyy, norbitals )
   endif     
 
-  lwork = 1
+  lwork = 1_c_long
   deallocate (work)
   allocate (work(lwork))
   call zheev ('V', 'U', norbitals, yyyy, norbitals, eigen, work, -1_c_long, rwork, info)
@@ -189,7 +187,7 @@ subroutine kspace_double (ikpoint, sks)
   if ((iqout .eq. 1) .or. (iqout .eq. 3)) then
     blowre(:,:,ikpoint) = real(yyyy(:,:), c_double)
     if (igamma .eq. 0) then
-      blowim(:,:,ikpoint) = aimag(yyyy(:,:))
+      blowim(:,:,ikpoint) = real(aimag(yyyy(:,:)), c_double)
     end if
   end if
   if (iqout .ne. 3) then
@@ -198,7 +196,7 @@ subroutine kspace_double (ikpoint, sks)
    call zgemm ( 'N', 'N', norbitals, norbitals, norbitals, a1, xxxx, norbitals, yyyy, norbitals, a0, zzzz, norbitals )
   end if
   bbnkre(:,:,ikpoint) = real(zzzz(:,:), c_double)
-  if (icluster .eq. 0 .and. igamma .eq. 0) bbnkim(:,:,ikpoint) = aimag(zzzz(:,:))
+  if (icluster .eq. 0 .and. igamma .eq. 0) bbnkim(:,:,ikpoint) = real(aimag(zzzz(:,:)), c_double)
   deallocate (xxxx)
   deallocate (yyyy)
   deallocate (zzzz)

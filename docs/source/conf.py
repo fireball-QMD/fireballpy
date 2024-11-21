@@ -11,14 +11,17 @@ import sys
 import re
 import fireballpy
 
+if sys.version_info >= (3, 11):
+    import tomllib
+else:
+    import tomli as tomllib
+
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 
 # General information
-with open('../../pyproject.toml', 'r') as fp:
-    pyproject = fp.readlines()
-author = ', '.join(y.split('"')[1]
-                   for y in filter(lambda x: x.startswith("  { name="),
-                                   pyproject))
+with open('../../pyproject.toml', 'rb') as fp:
+    pyproject = tomllib.load(fp)
+author = ', '.join([x['name'] for x in pyproject['project']['authors']])
 project = 'FireballPy'
 copyright = f'2024, {author}'
 version = re.sub(r'\.dev.*$', r'.dev', fireballpy.__version__)

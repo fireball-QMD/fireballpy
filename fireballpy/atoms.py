@@ -54,9 +54,6 @@ class AtomSystem:
         self.positions = np.ascontiguousarray(positions, dtype=np.float64)
         if self.positions.shape != (self.n, 3):
             raise ValueError("Parameter ``positions`` must be a 2D array with dimensions natoms x 3")
-        # Shift coords if needed
-        if self._needs_shift():
-            self.positions += self._shifter
 
         # Deal with the cell vectors
         if a1 is None:
@@ -88,10 +85,11 @@ class AtomSystem:
                 self.cell[i,i] = np.max(np.abs(self.positions[:,i])) + 100.0
         self.icell = TWOPI*np.ascontiguousarray(inv(self.cell).T)
         # Use the cell to check wrapped positions
+        self._is_shift = self._needs_shift()
         self._check_positions()
 
     def _needs_shift(self, tol: float = 1e-5) -> bool:
-        return bool(np.any(norm(self.positions, axis=1) < tol))
+        return bool(np.any(norm(self._wrap_positions(), axis=1) < tol))
 
     def _wrap_positions(self, eps: float = 1e-5) -> NDArray[np.float64]:
         if not self.isperiodic:
@@ -107,6 +105,10 @@ class AtomSystem:
     def set_coords(self) -> None:
         """Set the coordinate info in the Fortran module.
         """
+        # Shift coords if needed
+        if self._is_shift:
+            set_coords(self.numbers, (self.positions + self._shifter).T)
+            return
         set_coords(self.numbers, self.positions.T)
 
     def set_cell(self) -> None:
@@ -125,6 +127,7 @@ class AtomSystem:
         self.positions = np.ascontiguousarray(positions, dtype=np.float64)
         assert self.positions.shape == (self.n, 3), "positions must be a (nkpts, 3) size array"
         self._check_positions()
-        if self._needs_shift():
-            self.positions += self._shifter
+        if self._is_shift:
+            update_coords((self.positions + self._shifter).T)
+            return
         update_coords(self.positions.T)
