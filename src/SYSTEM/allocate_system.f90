@@ -30,7 +30,6 @@ subroutine allocate_system ()
   real(c_double) :: rcutoff_j
   real(c_double) :: distance2
   real(c_double) :: range2
-  real(c_double) :: distance
 
   !Shift the coordinates none of the atoms fall on (0.0, 0.0, 0.0)
   !shifter(1) = 4.0d0*atan(1.0d0)    ! pi

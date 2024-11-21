@@ -142,13 +142,14 @@ subroutine calc_forces(errno_out)
 end subroutine calc_forces
 
 ! Get util system size information
-subroutine get_sizes(nsh, norbs)
+subroutine get_sizes(nsh, norbs_new, norbs)
   use iso_c_binding
-  use M_system, only: norbitals_new
+  use M_system, only: norbitals_new, norbitals
   use M_fdata, only: nsh_max
-  integer(c_long), intent(out) :: nsh, norbs
+  integer(c_long), intent(out) :: nsh, norbs_new, norbs
   nsh = nsh_max
-  norbs = norbitals_new
+  norbs_new = norbitals_new
+  norbs = norbitals
 end subroutine get_sizes
 
 ! Return initial charges
@@ -223,3 +224,22 @@ subroutine get_forces(natoms, forces)
   real(c_double), dimension(3, natoms), intent(inout) :: forces
   forces = ftot
 end subroutine get_forces
+
+! Get coordinates for hamiltonian. Vectors need to be cut to ndata elements in Python
+subroutine get_hs_coords(norbitals, nspecies, numorb, rowidx, colidx, hdat, sdat, ndata)
+  use iso_c_binding
+  use M_system, only : hvec, svec, colvec, rowvec
+  use M_fdata, only : num_orb
+  implicit none
+  integer(c_long), intent(in) :: norbitals, nspecies
+  integer(c_long), dimension(nspecies), intent(inout) :: numorb
+  integer(c_long), dimension(norbitals*norbitals), intent(inout) :: rowidx, colidx
+  real(c_double), dimension(norbitals*norbitals), intent(inout) :: hdat, sdat
+  integer(c_long), intent(out) :: ndata
+  ndata = size(hvec)
+  numorb = num_orb
+  rowidx(1:ndata) = rowvec(:)
+  colidx(1:ndata) = colvec(:)
+  hdat(1:ndata) = hvec(:)
+  sdat(1:ndata) = svec(:)
+end subroutine get_hs_coords
