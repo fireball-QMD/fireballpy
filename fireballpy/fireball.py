@@ -182,7 +182,7 @@ class BaseFireball:
         self.lazy = lazy
         self.verbose = verbose
         self.total_charge = total_charge
-        self.charges_method = charges_method
+        self.charges_method = charges_method.lower()
         self.dipole_method = dipole_method
         self.fix_charges = fix_charges
 
