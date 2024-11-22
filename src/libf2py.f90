@@ -237,6 +237,7 @@ subroutine get_hs_coords(norbitals, nspecies, numorb, rowidx, colidx, hdat, sdat
   integer(c_long), dimension(norbitals*norbitals), intent(inout) :: rowidx, colidx
   real(c_double), dimension(norbitals*norbitals), intent(inout) :: hdat, sdat
   integer(c_long), intent(out) :: ndata
+  call geth()
   ndata = size(hvec)
   numorb = num_orb
   rowidx(1:ndata) = rowvec(:)

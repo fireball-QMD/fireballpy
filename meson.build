@@ -6,7 +6,7 @@ project(
   license: 'GPL-3',
   default_options: [
     'buildtype=debugoptimized',
-    'c_std=c17',
+    'c_std=c11',
     'fortran_std=f2003',
     'blas=openblas',
     'lapack=openblas',
@@ -123,7 +123,7 @@ fireball_source = custom_target(
 
 py.extension_module(
   '_fireball',
-  ['src' / 'libf2py.f90', fireball_source], # We use F90 so .f90 file is already included
+  ['src' / 'libf2py.f90', fireball_source],
   fortran_args: fflags,
   dependencies: [fortranobject_dep, blas_dep, fireball_dep],
   link_language: 'fortran',

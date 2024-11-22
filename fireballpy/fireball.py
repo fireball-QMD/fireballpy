@@ -252,7 +252,7 @@ class BaseFireball:
             get_initial_charges(self.initial_charges.T)
 
     def _alloc_arrays(self) -> None:
-        self.nshells, self.nbands_new = get_sizes()
+        self.nshells, self.nbands_new, self.norbitals = get_sizes()
         if self.nbands_new != self.nbands:
             self.nbands = self.nbands_new
             self.charges = np.zeros(self.natoms, dtype=np.float64, order='C')
