@@ -226,22 +226,14 @@ subroutine get_forces(natoms, forces)
   forces = ftot
 end subroutine get_forces
 
-! Get coordinates for hamiltonian. Vectors need to be cut to ndata elements in Python
-subroutine get_hs_coords(norbitals, nspecies, numorb, rowidx, colidx, hdat, sdat, ndata)
+! Get hamiltonian and overlap matrix
+subroutine get_hs_coords(norbitals, nspecies, numorb, sdat, hdat)
   use iso_c_binding
-  use M_system, only : hvec, svec, colvec, rowvec
   use M_fdata, only : num_orb
   implicit none
   integer(c_long), intent(in) :: norbitals, nspecies
   integer(c_long), dimension(nspecies), intent(inout) :: numorb
-  integer(c_long), dimension(norbitals*norbitals), intent(inout) :: rowidx, colidx
-  real(c_double), dimension(norbitals*norbitals), intent(inout) :: hdat, sdat
-  integer(c_long), intent(out) :: ndata
-  call geth()
-  ndata = size(hvec)
+  real(c_double), dimension(norbitals, norbitals), intent(inout) :: sdat, hdat
+  call geth(sdat, hdat)
   numorb = num_orb
-  rowidx(1:ndata) = rowvec(:)
-  colidx(1:ndata) = colvec(:)
-  hdat(1:ndata) = hvec(:)
-  sdat(1:ndata) = svec(:)
 end subroutine get_hs_coords

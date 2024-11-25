@@ -264,8 +264,4 @@ module M_system
 
   real(c_double), dimension(3, 3, 5) :: amat
 
-  ! buildH
-  integer(c_long), dimension(:), allocatable :: rowvec, colvec
-  real(c_double), dimension(:), allocatable :: hvec, svec
-
 end module M_system

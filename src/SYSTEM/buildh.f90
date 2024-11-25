@@ -1,16 +1,11 @@
 subroutine buildh ()
   use iso_c_binding
   use M_system, only: natoms, imass, vxc_1c, ewaldsr, neigh_j, neighn, vxc, vxc_ca, vca, ewaldlr, h_mat, t_mat, vna, ewaldqmmm
-  use m_fdata, only: num_orb
+  use M_fdata, only: num_orb
   implicit none
-  integer(c_long) iatom
-  integer(c_long) imu
-  integer(c_long) in1
-  integer(c_long) in2
-  integer(c_long) ineigh
-  integer(c_long) inu
-  integer(c_long) jatom
+  integer(c_long) :: iatom, jatom, imu, inu, ineigh, in1, in2
 
+  h_mat = 0.0d0
   do iatom = 1, natoms
     in1 = imass(iatom)
     do ineigh = 1, neighn(iatom)

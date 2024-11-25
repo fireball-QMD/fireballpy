@@ -182,7 +182,7 @@ class BaseFireball:
         self.lazy = lazy
         self.verbose = verbose
         self.total_charge = total_charge
-        self.charges_method = charges_method.lower()
+        self.charges_method = charges_method
         self.dipole_method = dipole_method
         self.fix_charges = fix_charges
 
@@ -191,6 +191,7 @@ class BaseFireball:
             self.charges_method = self.fdatafiles.get_charges_method()
         else:
             type_check(self.charges_method, str, 'charges_method')
+            self.charges_method = self.charges_method.lower()
 
         # Address correction
         self.correction = None
