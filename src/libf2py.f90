@@ -117,31 +117,6 @@ subroutine call_allocate_system()
   call allocate_system()
 end subroutine call_allocate_system
 
-! Compute the SCF loop
-subroutine scf(verbose, errno_out, converged)
-  use iso_c_binding
-  use M_system, only: errno, scf_achieved
-  implicit none
-  logical, intent(in) :: verbose
-  integer(c_long), intent(out) :: errno_out
-  logical, intent(out) :: converged
-  errno = 0
-  call scf_loop (verbose)
-  errno_out = errno
-  converged = scf_achieved
-end subroutine scf
-
-! Execute Dassembles for forces
-subroutine calc_forces(errno_out)
-  use iso_c_binding
-  use M_system, only: errno
-  implicit none
-  integer(c_long), intent(out) :: errno_out
-  errno = 0
-  call getforces()
-  errno_out = errno
-end subroutine calc_forces
-
 ! Get util system size information
 subroutine get_sizes(nsh, norbs_new, norbs)
   use iso_c_binding
@@ -173,67 +148,60 @@ subroutine get_initial_charges(natoms, nsh_max, qinitial)
   end do
 end subroutine get_initial_charges
 
-! Return energy, fermi level
-subroutine get_energy(e, ef)
+! Compute the SCF loop
+subroutine scf(natoms, nshell, nkpts, nbands, &
+    & verbose, shell_charges, eigenvalues, &
+    & converged, errno_out, energy, fermi_level, charges)
   use iso_c_binding
-  use M_system, only: etot, efermi
+  use M_system, only: errno, scf_achieved, etot, efermi, eigen_k, Qin, imass
+  use M_fdata, only: Qneutral
   implicit none
-  real(c_double), intent(out) :: e, ef
-  e = etot
-  ef = efermi
-end subroutine get_energy
+  integer(c_long), intent(in) :: natoms, nshell, nkpts, nbands
+  logical, intent(in) :: verbose
+  real(c_double), dimension(nshell, natoms), intent(inout) :: shell_charges
+  real(c_double), dimension(nbands, nkpts), intent(inout) :: eigenvalues
+  logical, intent(out) :: converged
+  integer(c_long), intent(out) :: errno_out
+  real(c_double), intent(out) :: energy, fermi_level
+  real(c_double), dimension(natoms), intent(out) :: charges
 
-! Return eigenvalues
-subroutine get_eigenvalues(norbitals_new, nkpoints, eig)
-  use iso_c_binding
-  use M_system, only: eigen_k
-  implicit none
-  integer(c_long), intent(in) :: norbitals_new, nkpoints
-  real(c_double), dimension(norbitals_new, nkpoints), intent(inout) :: eig
-  eig = eigen_k(1:norbitals_new, :)
-end subroutine get_eigenvalues
-
-! Return partial charges and shell charges
-subroutine get_charges(natoms, nsh_max, qpartial, qshell)
-  use iso_c_binding
-  use M_fdata, only : Qneutral, nssh
-  use M_system, only : Qin, imass
-  implicit none
-  integer(c_long), intent(in) :: nsh_max, natoms
-  real(c_double), dimension(natoms), intent(inout) :: qpartial
-  real(c_double), dimension(nsh_max, natoms), intent(inout) :: qshell
-  integer(c_long) :: iatom, issh, in1
-  do iatom=1,natoms
-    in1 = imass(iatom)
-    qpartial(iatom) = 0.0d0
-    do issh=1,nssh(in1)
-      qshell(issh, iatom) = Qin(issh, iatom)
-      qpartial(iatom) = qpartial(iatom) + Qneutral(issh,in1) - Qin(issh,iatom)
-    end do
-    do issh=nssh(in1)+1,nsh_max
-      qshell(issh, iatom) = 0.0d0
-    end do
-  end do
-end subroutine get_charges
+  errno = 0
+  call scf_loop (verbose)
+  converged = scf_achieved
+  errno_out = errno
+  energy = etot
+  fermi_level = efermi
+  charges = sum(Qneutral - Qin, dim=1)
+  shell_charges = Qin
+  eigenvalues = eigen_k(1:nbands, :)
+end subroutine scf
 
 ! Get the forces in each atom
-subroutine get_forces(natoms, forces)
+subroutine calc_forces(natoms, forces, errno_out)
   use iso_c_binding
-  use M_system, only : ftot
+  use M_system, only : ftot, errno
   implicit none
   integer(c_long), intent(in) :: natoms
   real(c_double), dimension(3, natoms), intent(inout) :: forces
+  integer(c_long), intent(out) :: errno_out
+  errno = 0
+  call getforces()
+  errno_out = errno
   forces = ftot
-end subroutine get_forces
+end subroutine calc_forces
 
 ! Get hamiltonian and overlap matrix
-subroutine get_hs_coords(norbitals, nspecies, numorb, sdat, hdat)
+subroutine get_hs(norbitals, natoms, orbitals, sdat, hdat)
   use iso_c_binding
+  use M_system, only : imass
   use M_fdata, only : num_orb
   implicit none
-  integer(c_long), intent(in) :: norbitals, nspecies
-  integer(c_long), dimension(nspecies), intent(inout) :: numorb
+  integer(c_long), intent(in) :: norbitals, natoms
+  integer(c_long), dimension(natoms), intent(inout) :: orbitals
   real(c_double), dimension(norbitals, norbitals), intent(inout) :: sdat, hdat
+  integer(c_long) :: iatom
   call geth(sdat, hdat)
-  numorb = num_orb
-end subroutine get_hs_coords
+  do iatom = 1, natoms
+    orbitals(iatom) = num_orb(imass(iatom))
+  end do
+end subroutine get_hs

@@ -77,7 +77,7 @@ class BandPath:
                  special_points: dict | None = None) -> None:
 
         fbobj = fbobj_from_obj(fbobj=fbobj, atoms=atoms)
-        if not hasattr(fbobj, '_run_scf') or not fbobj.scf_computed:
+        if not hasattr(fbobj, 'run_scf') or not fbobj.scf_computed:
             raise RuntimeError("SCF loop needs to be carried first")
 
         type_check(npoints, SupportsInt, 'npoints')
@@ -116,7 +116,7 @@ class BandPath:
         # Compute new eigenvalues
         self.fermi = fbobj.fermi_level
         self.fbobj = BaseFireball.postprocessing(fbobj, kpts=self.pathcoords)
-        self.fbobj.compute_eigenvalues()
+        self.fbobj.run_scf()
         self.eigenvalues = self.fbobj.eigenvalues
         self.nkpts, self.nbands = self.eigenvalues.shape
 

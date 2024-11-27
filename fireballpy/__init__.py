@@ -25,6 +25,7 @@ del _defineprop
 
 submodules = [
     'bands',
+    'outputs',
 ]
 
 __all__ = submodules + [  # type: ignore

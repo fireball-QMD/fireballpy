@@ -19,11 +19,7 @@ from _fireball import (set_options,
                        scf,
                        get_sizes,
                        get_initial_charges,
-                       get_charges,
-                       get_energy,
-                       get_eigenvalues,
-                       calc_forces,
-                       get_forces)
+                       calc_forces,)
 
 DEFAULT_MIXER = {'method': 'johnson',
                  'max_iter': np.int64(200),
@@ -261,59 +257,33 @@ class BaseFireball:
             self.shell_charges = np.zeros((self.natoms, self.nshells), dtype=np.float64, order='C')
             self.eigenvalues = np.zeros((self.nkpts, self.nbands), dtype=np.float64, order='C')
 
-    def _run_scf(self) -> None:
+    def run_scf(self) -> None:
+        """Check if SCF is computed, execute the loop if not,
+        then store energy, fermi_level, partial charges, shell charges and eigenvalues.
+        """
         if not self.scf_computed:
-            fb_errno, converged = scf(self.verbose)
+            converged, fb_errno, energy, fermi_level, charges = scf(self.verbose, self.shell_charges.T, self.eigenvalues.T)
             if fb_errno != 0:
                 raise_fb_error(fb_errno)
             if not converged:
                 warnings.warn("SCF loop did not converge. Try incrementing ``'max_iter'`` in ``mixer_kws``", UserWarning)
-            self._alloc_arrays()
+            self.energy = float(energy)
+            self.fermi_level = float(fermi_level)
+            self.charges = charges
             self.scf_computed = True
             if self.correction:
                 self._correction.correct()  # type: ignore
 
-    def _calc_forces(self) -> None:
-        self._run_scf()
+    def calc_forces(self) -> None:
+        """Check if SCF is computed, execute the loop if not,
+        then compute and store forces.
+        """
+        self.run_scf()
         if not self.forces_computed:
-            fb_errno = calc_forces()
+            fb_errno = calc_forces(self.forces.T)
             if fb_errno != 0 and not self.fix_charges:
                 raise_fb_error(fb_errno)
             self.forces_computed = True
-
-    def compute_charges(self) -> None:
-        """Check if SCF is computed, execute the loop if not,
-        then compute partial charges and shell charges.
-        """
-        self._run_scf()
-        get_charges(self.charges, self.shell_charges.T)
-
-    def compute_energy(self) -> None:
-        """Check if SCF is computed, execute the loop if not,
-        then compute the potential energy and the fermi level.
-        Automatically applies DFT-D3 correction if applicable.
-        """
-        self._run_scf()
-        self.energy, self.fermi_level = get_energy()
-        if self.correction:
-            self.energy += self._correction.res['energy']  # type: ignore
-        self.free_energy = self.energy
-
-    def compute_eigenvalues(self) -> None:
-        """Check if SCF is computed, execute the loop if not,
-        then compute the eigenvalues.
-        """
-        self._run_scf()
-        get_eigenvalues(self.eigenvalues.T)
-
-    def compute_forces(self) -> None:
-        """Check if SCF is computed, execute the loop if not,
-        then compute forces.
-        """
-        self._calc_forces()
-        get_forces(self.forces.T)
-        if self.correction:
-            self.forces -= self._correction.res['gradient']  # type: ignore
 
     def update_coords(self, positions: ArrayLike) -> None:
         """Update the coordinates in the module.
@@ -341,7 +311,7 @@ class BaseFireball:
             Parameters to substitute
         """
         type_check(fbobj, BaseFireball, 'fbobj')
-        fbobj.compute_charges()
+        fbobj.run_scf()
 
         arg_dict = {'fdata': 'custom',
                     'species': fbobj.atomsystem.species,

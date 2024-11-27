@@ -61,6 +61,7 @@ subroutine load_fdata()
   allocate (Qneutral (nsh_max, nspecies))
   allocate (wavefxn (nsh_max, nspecies))
   allocate (napot (0:nsh_max, nspecies))
+  Qneutral = 0.0d0
   rcutoff = 0.0d0
 
   ! Load info.dat

@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any, SupportsFloat
+from typing import SupportsFloat
 
 from numpy.typing import ArrayLike
 from ase.calculators.calculator import Calculator, PropertyNotPresent, all_changes
@@ -112,17 +112,10 @@ class Fireball(Calculator, BaseFireball):
 
     """
 
-    _fun2prop = {'energy': ['energy', 'free_energy', 'fermi_level'],
-                 'eigenvalues': ['eigenvalues'],
-                 'charges': ['charges', 'shell_charges'],
-                 'forces': ['forces']}
-
     implemented_properties = ['energy', 'free_energy', 'forces', 'charges']
 
     calc_properties = ['shell_charges', 'fermi_level', 'eigenvalues',
                        'ibz_kpoints', 'kpoint_weights']
-
-    dimensions = ['natoms', 'nspin', 'nshells', 'nspecies', 'nkpts', 'nbands']
 
     ignored_changes = set(['initial_magmoms'])
 
@@ -155,17 +148,6 @@ class Fireball(Calculator, BaseFireball):
                           'initial_charges': kwargs.get('initial_charges', None),
                           'mixer_kws': kwargs.get('mixer_kws', None)}
 
-    def _get(self, name: str) -> Any:
-        if not self._fb_started:
-            raise PropertyNotPresent(name)
-        for fun in self._fun2prop:
-            if name in self._fun2prop[fun]:
-                getattr(self, f'compute_{fun}')()
-                for n in self._fun2prop[fun]:
-                    self.results.update({n: getattr(self, n)})
-                break
-        return self.results[name]
-
     def get_eigenvalues(self, kpt=0, spin=0):
         """Get the eigenvalues of the hamiltonian in electronvolts.
 
@@ -189,8 +171,9 @@ class Fireball(Calculator, BaseFireball):
         IndexError
             If the an out-of-bounds k-point index is requested.
         """
-        spin = 0
-        return self._get('eigenvalues')[kpt]
+        if not self._fb_started:
+            raise PropertyNotPresent('eigenvalues')
+        return self.eigenvalues[kpt]
 
     def get_fermi_level(self):
         """Get the Fermi level in electronvolts.
@@ -205,7 +188,9 @@ class Fireball(Calculator, BaseFireball):
         PropertyNotPresent
             If any computation has been done and the Fermi level was not yet computed.
         """
-        return self._get('fermi_level')
+        if not self._fb_started:
+            raise PropertyNotPresent('fermi_level')
+        return self.fermi_level
 
     def get_ibz_k_points(self):
         """Get the k-points used for computation.
@@ -221,8 +206,10 @@ class Fireball(Calculator, BaseFireball):
         PropertyNotPresent
             If any computation has been done and k-points were not yet computed.
         """
-        self.results['ibz_kpoints'] = self.kpoints.kpts
-        return self.results['ibz_kpoints']
+        if not self._fb_started:
+            raise PropertyNotPresent('ibz_kpoints')
+        self.results.update({'ibz_kpoints': self.kpoints.coords})
+        return self.kpoints.coords
 
     def get_k_point_weights(self):
         """Get the weights of the k-points used for computation.
@@ -238,8 +225,10 @@ class Fireball(Calculator, BaseFireball):
         PropertyNotPresent
             If the any computation has been done and k-point weights were not yet computed.
         """
-        self.results['kpoint_weights'] = self.kpoints.weights/self.kpoints.weights.sum()
-        return self.results['kpoint_weights']
+        if not self._fb_started:
+            raise PropertyNotPresent('kpoint_weights')
+        self.results.update({'kpoint_weights': self.kpoints.weights})
+        return self.kpoints.weights
 
     def get_number_of_bands(self):
         """Get the number of bands.
@@ -254,7 +243,9 @@ class Fireball(Calculator, BaseFireball):
         PropertyNotPresent
             If the any computation has been done and the number of bands is not yet computed.
         """
-        return self.get_eigenvalues().shape[1]
+        if not self._fb_started:
+            raise PropertyNotPresent('shell_charges')
+        return self.nbands
 
     def get_number_of_shells(self):
         """Get the number of shells.
@@ -269,7 +260,9 @@ class Fireball(Calculator, BaseFireball):
         PropertyNotPresent
             If the any computation has been done and the number of shells is not yet computed.
         """
-        return self.get_shell_charges().shape[1]
+        if not self._fb_started:
+            raise PropertyNotPresent('shell_charges')
+        return self.nshells
 
     def get_number_of_spins(self):
         """Get the number of spins.
@@ -279,7 +272,7 @@ class Fireball(Calculator, BaseFireball):
         int
             Number of spins (always 1)
         """
-        return 1
+        return self.nspin
 
     def get_shell_charges(self):
         """Get the charges of each shell if computed.
@@ -295,7 +288,9 @@ class Fireball(Calculator, BaseFireball):
         PropertyNotPresent
             If the any computation has been done and the shell charges are not yet computed.
         """
-        return self._get('shell_charges')
+        if not self._fb_started:
+            raise PropertyNotPresent('shell_charges')
+        return self.shell_charges
 
     def calculate(self, atoms=None, properties=['energy'],
                   system_changes=all_changes) -> None:
@@ -316,8 +311,15 @@ class Fireball(Calculator, BaseFireball):
         elif 'positions' in system_changes:
             self.update_coords(atoms.get_positions())
 
-        # Compute energy always
-        if 'energy' not in properties:
-            properties.append('energy')
-        for prop in properties:
-            _ = self._get(prop)
+        # Compute energy, fermi_level, eigenvalues, charges and shell_charges always
+        self.run_scf()
+        self.results.update({'energy': self.energy,
+                             'free_energy': self.energy,
+                             'fermi_level': self.fermi_level,
+                             'charges': self.charges,
+                             'shell_charges': self.shell_charges,
+                             'eigenvalues': self.eigenvalues})
+
+        if 'forces' in properties:
+            self.calc_forces()
+            self.results.update({'forces': self.forces})

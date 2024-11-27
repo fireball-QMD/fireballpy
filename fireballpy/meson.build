@@ -32,3 +32,4 @@ py.install_sources([
 )
 
 subdir('bands')
+subdir('outputs')
