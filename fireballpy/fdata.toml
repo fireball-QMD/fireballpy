@@ -24,6 +24,12 @@ species = ['H', 'C', 'N', 'O']
 charges_method = 'mulliken_dipole_preserving'
 
 
+[HCSi]
+url = 'https://fireball.ftmc.uam.es/fireballpy/fdata/HCSi_fireballpy.tar.gz'
+species = ['HCSi']
+charges_method = 'weighted_lowdin'
+
+
 [Si]
 url = 'https://fireball.ftmc.uam.es/fireballpy/fdata/Si_fireballpy.tar.gz'
 species = ['Si']
