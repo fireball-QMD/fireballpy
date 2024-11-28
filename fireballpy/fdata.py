@@ -20,9 +20,8 @@ if sys.version_info >= (3, 11):
 else:
     import tomli as tomllib
 
-from ._errors import type_check
-from ._correction import Correction
-from .atoms import AtomSystem
+from fireballpy._errors import type_check
+from fireballpy.atoms import AtomSystem
 from _fireball import loadfdata_from_path
 
 ENV_FB_HOME = "FIREBALL_HOME"
@@ -193,19 +192,32 @@ class FDataFiles:
         an ``fdata_path`` pointing to a local FData folder must be provided.
         Please note that the first time an FData is used it needs to download
         all the necessary files.
+    atomsystem : AtomSystem
+        AtomSystem object with the information of the species which intervine in the computation.
+    lazy : bool
+        If set to ``True`` it will only load necessary files for the species
+        which are involved in the computation. If set to ``False`` it will load
+        the FData for all the species available in it. This will add a significant overhead
+        at the exchange of not having to load new species if they are added later.
     fdata_path : str | None
         Path to a custom FData. Ignored unless ``fdata = 'custom'``.
 
+    Attributes
+    ----------
+    name : str
+        Name of the provided FData.
+    path : str
+        Path to the FData.
+
     Methods
     -------
-    load_fdata(sps, lazy)
-        Set Fortran module variables and load the FData
-        into memory.
+    load_fdata()
+        Set Fortran module variables and load the FData into memory.
     get_charges_method()
         Return the string with the corresponding optimal
         charge method. It will raise ``RuntimeError`` if the
         FData is not provided by us.
-    get_correction(atomsystem)
+    get_correction()
         Returns `DFT-D3 <https://dftd3.readthedocs.io>`_ correction
         to be used with Fireball. It will return ``None`` if
         either the FData is not provided by us or no optimal parameters are recorded.
@@ -213,8 +225,11 @@ class FDataFiles:
 
     fb_home = get_fb_home()
 
-    def __init__(self, *, fdata: str, fdata_path: str | None = None) -> None:
+    def __init__(self, *, fdata: str, atomsystem: AtomSystem,
+                 lazy: bool, fdata_path: str | None = None) -> None:
         type_check(fdata, str, 'fdata')
+        type_check(atomsystem, AtomSystem, 'atomsystem')
+        type_check(lazy, bool, 'lazy')
         if fdata != 'custom':
             self.name = fdata
             self._from_name()
@@ -224,7 +239,10 @@ class FDataFiles:
             self.name = fdata
             self.path = fdata_path
             self.indb = False
+        self.species_present = atomsystem.species
+        self.lazy = lazy
 
+        # Fix path
         assert self.path is not None
         if self.path[-1] != os.sep:
             self.path += os.sep
@@ -232,9 +250,12 @@ class FDataFiles:
         if not os.path.isfile(self.infofile):
             raise ValueError("File 'info.dat' not found in the specified "
                             f"fdata path ('{self.path}').")
+
+        # Prepare to (later) create custom info.dat
         with open(self.infofile, 'r') as fp:
             self.infodat = fp.read().splitlines()
         self.blocks = _get_blocks_infodat(self.infodat)
+        self._check_species()
         self.pyinfofile = os.path.join(self.path, 'info.py.dat')
 
     def _from_name(self) -> None:
@@ -260,25 +281,22 @@ class FDataFiles:
         if vnew != vhave:
             extract_fdata(tarpath, self.path, meta, vnew)
 
-    def _check_species(self, sps: set[str]) -> None:
+    def _check_species(self) -> None:
         self.species = set(_get_specie_block(self.infodat, b) for b in self.blocks)
-        if not sps <= self.species:
+        if not self.species_present <= self.species:
             raise ValueError(f'FData {self.path} does not contain all required species')
 
-    def _prep_infodat(self, sps: set[str], lazy: bool) -> None:
-        self._check_species(sps)
-        if lazy:
-            self.species = sps
+    def _prep_infodat(self) -> None:
         infodat = []
         for i, j in self.blocks:
-            if (not lazy) or (_get_specie_block(self.infodat, (i, j)) in self.species):
+            if (not self.lazy) or (_get_specie_block(self.infodat, (i, j)) in self.species):
                 infodat.extend(self.infodat[i:j+1])
         infodat = ['   fireballpy_generated ',
                   f'   {len(self.species)} - Number of species '] + infodat
         with open(self.pyinfofile, 'w') as fp:
             fp.write(os.linesep.join(infodat))
 
-    def load_fdata(self, atomsystem: AtomSystem, lazy: bool) -> None:
+    def load_fdata(self) -> None:
         """Set Fortran module variables and load the FData into memory.
 
         Parameters
@@ -290,9 +308,9 @@ class FDataFiles:
             If ``False`` load the full FData.
         """
         global _loaded_fdata
-        load_tuple = (self.path, atomsystem.species)
+        load_tuple = (self.path, self.species_present if self.lazy else self.species)
         if load_tuple != _loaded_fdata:
-            self._prep_infodat(atomsystem.species, lazy)
+            self._prep_infodat()
             loadfdata_from_path(self.path)
             _loaded_fdata = deepcopy(load_tuple)
 
@@ -313,7 +331,7 @@ class FDataFiles:
             raise RuntimeError('Cannot get charges method for custom FData')
         return self.fdata['charges_method']
 
-    def get_correction(self, atomsystem: AtomSystem, charges_method: str) -> tuple[dict, Correction] | tuple[dict, None]:
+    def get_correction(self, charges_method: str) -> dict:
         """Gives the options needed to apply `DFT-D3 <https://dftd3.readthedocs.io>`_ correction.
 
         Parameters
@@ -328,15 +346,14 @@ class FDataFiles:
             Will return ``None`` if either we did not provide
             the FData or there are no optimal parameters recorded.
         """
-        type_check(atomsystem, AtomSystem, 'atomsystem')
         type_check(charges_method, str, 'charges_method')
         if not self.indb:
-            return {}, None
+            return {}
         try:
             corr = self.fdata['correction']
         except KeyError:
-            return {}, None
+            return {}
         if self.get_charges_method() != charges_method:
-            return {}, None
+            return {}
 
-        return corr, Correction(atomsystem=atomsystem, **corr)
+        return corr

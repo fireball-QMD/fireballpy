@@ -5,8 +5,8 @@ import numpy as np
 from numpy.typing import ArrayLike
 from numpy.linalg import norm
 
-from ._errors import type_check
-from .atoms import AtomSystem
+from fireballpy._errors import type_check
+from fireballpy.atoms import AtomSystem
 from _fireball import set_kpoints
 
 
@@ -18,7 +18,7 @@ class KPoints:
     kpts : ArrayLike[int] | ArrayLike[float] | float
         Specify the k-points for a periodic computation. It can be either a set of three
         Monkhorst-Pack indices, a nkpts x 3 array with the coordinates of the k-points
-        in reciprocal cell units or inverse angstroms, or a density of k-points in inverse angstroms.
+        in reciprocal cell units, or a density of k-points in inverse angstroms.
     atomsystem : AtomSystem
         An AtomSystem class with the information of the atomic numbers, positions and the unit cell.
     gamma : bool | None
@@ -26,11 +26,21 @@ class KPoints:
         included (``True``), forcefully excluded (``False``) or
         don't care whether it is included or not (``None``, default)
 
+    Attributes
+    ----------
+    n : int
+        Number of k-points.
+    kpts : NDArray[np.float64]
+        A nkpts x 3 array with the coordinates of the k-points in reciprocal cell units.
+    coords : NDArray[np.float64]
+        A nkpts x 3 array with the coordinates of the k-points in inverse angstroms.
+    weights : NDArray[np.float64]
+        Non-normalized weights associated to each k-point.
+    map : list[int]
+        Map from each k-point to its representative (when symmetry reduction has been performed).
+
     Methods
     -------
-    reduce_kpts(tol=1e-5)
-        Reduce the k-points using inverse symmetry.
-        Weights are readjusted accordingly.
     set_kpoints()
         Set the k-points in the fortran module.
     """
@@ -103,8 +113,9 @@ class KPoints:
         self.weights = np.ones(self.n, dtype=np.float64, order='C')
         self.coords = np.dot(self.kpts, atomsystem.icell)
         self.map = list(range(self.n))
+        self._reduce_kpts()
 
-    def reduce_kpts(self, tol: float = 1e-5) -> None:
+    def _reduce_kpts(self, tol: float = 1e-5) -> None:
         """Reduce the k-points using inverse symmetry. Weights are readjusted accordingly.
 
         Parameters

@@ -17,6 +17,7 @@ Write something here.
 
    ASE interface <ase>
    Band utilities <bands>
+   Fireball computation outputs <outputs>
 
 .. toctree::
    :hidden:

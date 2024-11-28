@@ -1,17 +1,16 @@
 ! Set int options
-subroutine set_options(dipole_method, charges_method, fix_charges, &
+subroutine set_options(dipole_method, charges_method, &
     & ismolecule, isgamma, total_charge, mixer_method, &
     & max_iter, mix_order, beta, w0, tol)
   use iso_c_binding
-  use M_system, only: igamma, icluster, idipole, iqout, ifixcharge, &
+  use M_system, only: igamma, icluster, idipole, iqout, &
     & qstate, ialgmix, max_scf_iterations, idmix, w02, bmix, sigmatol
   implicit none
-  integer(c_long), intent(in) :: dipole_method, charges_method, fix_charges, &
+  integer(c_long), intent(in) :: dipole_method, charges_method, &
     & ismolecule, isgamma, total_charge, mixer_method, max_iter, mix_order
   real(c_double), intent(in) :: beta, w0, tol
   idipole = dipole_method
   iqout = charges_method
-  ifixcharge = fix_charges
   icluster = ismolecule
   igamma = isgamma
   qstate = total_charge
@@ -150,14 +149,14 @@ end subroutine get_initial_charges
 
 ! Compute the SCF loop
 subroutine scf(natoms, nshell, nkpts, nbands, &
-    & verbose, shell_charges, eigenvalues, &
+    & verbose, fix_charges, shell_charges, eigenvalues, &
     & converged, errno_out, energy, fermi_level, charges)
   use iso_c_binding
-  use M_system, only: errno, scf_achieved, etot, efermi, eigen_k, Qin, imass
+  use M_system, only: errno, scf_achieved, etot, efermi, eigen_k, Qin, imass, ifixcharge
   use M_fdata, only: Qneutral
   implicit none
   integer(c_long), intent(in) :: natoms, nshell, nkpts, nbands
-  logical, intent(in) :: verbose
+  logical, intent(in) :: verbose, fix_charges
   real(c_double), dimension(nshell, natoms), intent(inout) :: shell_charges
   real(c_double), dimension(nbands, nkpts), intent(inout) :: eigenvalues
   logical, intent(out) :: converged
@@ -166,6 +165,11 @@ subroutine scf(natoms, nshell, nkpts, nbands, &
   real(c_double), dimension(natoms), intent(out) :: charges
 
   errno = 0
+  if(fix_charges) then
+    ifixcharge = 1_c_long
+  else
+    ifixcharge = 0_c_long
+  end if
   call scf_loop (verbose)
   converged = scf_achieved
   errno_out = errno

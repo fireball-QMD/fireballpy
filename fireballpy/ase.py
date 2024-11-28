@@ -4,7 +4,10 @@ from typing import SupportsFloat
 from numpy.typing import ArrayLike
 from ase.calculators.calculator import Calculator, PropertyNotPresent, all_changes
 
-from .fireball import BaseFireball
+from fireballpy.atoms import AtomSystem
+from fireballpy.fdata import FDataFiles
+from fireballpy.kpoints import KPoints
+from fireballpy.fireball import BaseFireball
 
 
 class Fireball(Calculator, BaseFireball):
@@ -29,15 +32,15 @@ class Fireball(Calculator, BaseFireball):
         an ``fdata_path`` pointing to a local FData folder must be provided.
         Please note that the first time an FData is used it needs to download
         all the necessary files.
-    lazy : bool
+    lazy : bool, optional
         If set to ``True`` (default) it will only load necessary files for the species
         which are involved in the computation. If set to ``False`` it will load
         the FData for all the species available in it. This will add a significant overhead
         at the exchange of not having to load new species if they are added later.
-    verbose : bool
+    verbose : bool, optional
         If ``True`` information of the convergence of the SCF loop will be printed on screen.
         Default is ``False``.
-    kpts : ArrayLike[int] | ArrayLike[float] | float
+    kpts : ArrayLike[int] | ArrayLike[float] | float, optional
         Specify the k-points for a periodic computation. It can be either a set of three
         Monkhorst-Pack indices, a nkpts x 3 array with the coordinates of the k-points
         in reciprocal cell units, or a density of k-points in inverse angstroms.
@@ -98,6 +101,10 @@ class Fireball(Calculator, BaseFireball):
         Obtain the number of shells considered.
     get_shell_charges()
         Obtain the charges of each shell.
+    fix_charges()
+        Fix shell charges
+    unfix_charges()
+        Unfix shell charges
 
     Notes
     -----
@@ -111,6 +118,9 @@ class Fireball(Calculator, BaseFireball):
                    <https://doi.org/10.1002/pssb.201147259>`_
 
     """
+    _valid_kwargs = {'fdata_path': None, 'gamma': None, 'charges_method': None,
+                     'dipole_method': 'improved', 'total_charge': 0, 'fix_charges': False,
+                     'correction': None, 'initial_charges': None, 'mixer_kws': None}
 
     implemented_properties = ['energy', 'free_energy', 'forces', 'charges']
 
@@ -133,20 +143,19 @@ class Fireball(Calculator, BaseFireball):
         # We just check the most basic thing and pray the user is not mad about it.
         if fdata == 'custom' and 'fdata_path' not in kwargs:
             raise ValueError("If ``fdata='custom'`` then ``fdata_path`` must be set")
-        # Save things for later and call BaseFireball init
-        self.init_args = {'fdata': fdata,
-                          'kpts': kpts,
-                          'fdata_path': kwargs.get('fdata_path', None),
-                          'gamma': kwargs.get('gamma', None),
-                          'lazy': bool(lazy),
-                          'verbose': bool(verbose),
-                          'charges_method': kwargs.get('charges_method', None),
-                          'dipole_method': kwargs.get('dipole_method', 'improved'),
-                          'total_charge': kwargs.get('total_charge', 0),
-                          'fix_charges': bool(kwargs.get('fix_charges', False)),
-                          'correction': kwargs.get('correction', None),
-                          'initial_charges': kwargs.get('initial_charges', None),
-                          'mixer_kws': kwargs.get('mixer_kws', None)}
+        self.fdata = fdata
+        self.lazy = lazy
+        self.verbose = verbose
+        self.kpts = kpts
+        for k in kwargs:
+            if k not in self._valid_kwargs:
+                raise ValueError(f"Parameter ``{k}`` not recognised.")
+        self._kwargs = {}
+        for k in self._valid_kwargs:
+            self._kwargs[k] = kwargs.get(k, self._valid_kwargs[k])
+        self.fdata_path = self._kwargs.pop('fdata_path')
+        self.gamma = bool(self._kwargs.pop('gamma'))
+        self.isfix_charges = bool(self._kwargs.pop('fix_charges'))
 
     def get_eigenvalues(self, kpt=0, spin=0):
         """Get the eigenvalues of the hamiltonian in electronvolts.
@@ -292,6 +301,16 @@ class Fireball(Calculator, BaseFireball):
             raise PropertyNotPresent('shell_charges')
         return self.shell_charges
 
+    def fix_charges(self) -> None:
+        """Fix shell charges for following computations
+        """
+        self.isfix_charges = True
+
+    def unfix_charges(self) -> None:
+        """Unfix shell charges for following computations
+        """
+        self.isfix_charges = False
+
     def calculate(self, atoms=None, properties=['energy'],
                   system_changes=all_changes) -> None:
         Calculator.calculate(self, atoms, properties, system_changes)
@@ -299,20 +318,23 @@ class Fireball(Calculator, BaseFireball):
 
         # If the atoms change we reinit BaseFireball
         if 'numbers' in system_changes:
-            self.init_args.update({'species': set(atoms.get_chemical_symbols()),
-                                   'numbers': atoms.get_atomic_numbers(),
-                                   'positions': atoms.get_positions(),
-                                   'a1': atoms.cell[0],
-                                   'a2': atoms.cell[1],
-                                   'a3': atoms.cell[2]})
-            BaseFireball.__init__(self, **self.init_args)
+            atomsystem = AtomSystem(species=set(atoms.get_chemical_symbols()),
+                                    numbers=atoms.get_atomic_numbers(),
+                                    positions=atoms.get_positions(),
+                                    a1=atoms.cell[0], a2=atoms.cell[1], a3=atoms.cell[2])
+            fdatafiles = FDataFiles(fdata=self.fdata, atomsystem=atomsystem,
+                                    lazy=self.lazy, fdata_path=self.fdata_path)
+            kpoints = KPoints(kpts=self.kpts, atomsystem=atomsystem, gamma=self.gamma)
+            BaseFireball.__init__(self, atomsystem=atomsystem, fdatafiles=fdatafiles, kpoints=kpoints,
+                                  verbose=self.verbose, **self._kwargs)
             self._fb_started = True
+
         # If positions change we just need to update them not repeat anything else
         elif 'positions' in system_changes:
             self.update_coords(atoms.get_positions())
 
         # Compute energy, fermi_level, eigenvalues, charges and shell_charges always
-        self.run_scf()
+        self.run_scf(self.isfix_charges)
         self.results.update({'energy': self.energy,
                              'free_energy': self.energy,
                              'fermi_level': self.fermi_level,
@@ -321,5 +343,5 @@ class Fireball(Calculator, BaseFireball):
                              'eigenvalues': self.eigenvalues})
 
         if 'forces' in properties:
-            self.calc_forces()
+            self.calc_forces(self.isfix_charges)
             self.results.update({'forces': self.forces})

@@ -1,8 +1,8 @@
 from __future__ import annotations
 from ase import Atoms
 
-from ._errors import type_check
-from .fireball import BaseFireball
+from fireballpy._errors import type_check
+from fireballpy.fireball import BaseFireball
 
 
 def fbobj_from_obj(fbobj: BaseFireball | None, atoms: Atoms | None) -> BaseFireball:

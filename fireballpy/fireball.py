@@ -1,17 +1,16 @@
 from __future__ import annotations
 from copy import deepcopy
-from typing import SupportsFloat
 import warnings
 
 from numpy.typing import ArrayLike
 import numpy as np
 
-from ._errors import raise_fb_error, type_check
-from ._options import get_icharge, get_idipole, get_imixer
-from ._correction import Correction
-from .fdata import FDataFiles
-from .atoms import AtomSystem
-from .kpoints import KPoints
+from fireballpy._errors import raise_fb_error, type_check
+from fireballpy._options import get_icharge, get_idipole, get_imixer
+from fireballpy._correction import Correction
+from fireballpy.fdata import FDataFiles
+from fireballpy.atoms import AtomSystem
+from fireballpy.kpoints import KPoints
 
 from _fireball import (set_options,
                        set_initial_charges,
@@ -34,49 +33,21 @@ class BaseFireball:
 
     Parameters
     ----------
-    fdata : str
-        Name of the FData to be used. See ``available_fdatas()``
-        for a table of available FData. If set to ``'custom'`` then
-        an ``fdata_path`` pointing to a local FData folder must be provided.
-        Please note that the first time an FData is used it needs to download
-        all the necessary files.
-    species : set[str]
-        Set with the element names entering the computation.
-    numbers : ArrayLike[int]
-        Array with the atomic numbers of each atom.
-    positions : ArrayLike[float]
-        A natoms x 3 array with the positions of each atom in angstroms.
-    kpts : ArrayLike[int] | ArrayLike[float] | float
-        Specify the k-points for a periodic computation. It can be either a set of three
-        Monkhorst-Pack indices, a nkpts x 3 array with the coordinates of the k-points
-        in reciprocal cell units, or a density of k-points in inverse angstroms.
-        By default, it will generate a (1, 1, 1) Monkhorst-Pack corresponding to the Gamma
-        point alone.
-    fdata_path : str | None
-        Path to a custom FData. Ignored unless ``fdata = 'custom'``.
-    lazy : bool
-        If set to ``True`` it will only load necessary files for the species
-        which are involved in the computation. If set to ``False`` it will load
-        the FData for all the species available in it. This will add a significant overhead
-        at the exchange of not having to load new species if they are added later.
-    a1 : ArrayLike[float] | None
-        First cell vector coordinates in angstroms.
-    a2 : ArrayLike[float] | None
-        Second cell vector coordinates in angstroms.
-    a3 : ArrayLike[float] | None
-        Third cell vector coordinates in angstroms.
-    gamma : bool | None
-        If the k-points are to be generated from a Monkhorst-Pack or from a
-        k-point density, should the Gamma (``[0, 0, 0]``) point be forcefully
-        included (``True``), forcefully excluded (``False``) or
-        don't care whether it is included or not (``None``, default)
-    verbose : bool
+    atomsystem : AtomSystem
+        Class with all the information of species, atomic numbers,
+        positions and cell of the system.
+    fdatafiles : FDataFiles
+        Class with all the information on the location of the basis functions.
+    kpoints : KPoints
+        Class with all the information of the coordinates of the k-points as well
+        as their associated weights.
+    verbose : bool, optional
         If ``True`` information of the convergence of the SCF loop will be printed on screen.
         Default is ``False``.
-    total_charge : int
+    total_charge : int, optional
         Total charge of the system in elementary charge units (1 extra electron would be ``total_charge = -1``).
         By default this is 0.
-    correction : dict | None
+    correction : dict | bool | None, optional
         By default (``None``) will apply DFT3 correction for the selected
         FData if optimized parameters are available
         (see ``available_fdatas()``).
@@ -86,37 +57,29 @@ class BaseFireball:
         ``'params_tweaks'``. It may be forcefully shut down by providing ``False``.
         For more information, see
         `Simple DFT-D3 documentation <https://dftd3.readthedocs.io>`_.
-    charges_method : str | None
+    charges_method : str | None, optional
         How the autoconsistency in the charges will be performed.
         By default depends on the FData (``None``).
         If a custom FData is selected, then this parameter must be specified.
         For more information see :ref:`here <charges_methods>`.
-    dipole_method : str
+    dipole_method : str, optional
         Whether to use (``dipole='improved'``) or not (``dipole='legacy'``)
         the improved dipole description.
         By default ``'improved'`` except for periodic systems as it is not yet implemented and thus it will be ignored.
-    fix_charges : bool
-        Flag to set the initial charges as fixed for the computation, not doing SCF (default is ``False``).
-    initial_charges : ArrayLike[float] | None
+    initial_charges : ArrayLike[float], optional
         A (natoms, nshells) array with the charges of each of the atom shells (0 if no shell for that atom is defined).
-    mixer_kws : dict | None
+    mixer_kws : dict, optional
         Dictionary with the mixer parameters.
         More information :ref:`here <mixer>`.
 
     Methods
     -------
-    compute_charges()
-        Get partial and shell charges.
-    compute_energy()
-        Get the potential energy and the fermi level in eV.
-    compute_eigenvalues()
-        Get the Hamiltonian eigenvalues in eV for each k-point.
-    compute_forces()
-        Get the forces in each atom in eV/angstroms.
+    run_scf(fix_charges=False)
+        Run the SCF loop and store energy and charge related quantities.
+    calc_forces(fix_charges=False)
+        Compute the forces and store them.
     update_coords(positions)
         Update the coordinates in the Fortran module.
-    postprocessing(cls, fbobj, **kwargs)
-        Create a BaseFireball object with fixed charges for postprocessing.
 
     Notes
     -----
@@ -131,23 +94,14 @@ class BaseFireball:
 
     """
     def __init__(self, *,
-                 fdata: str,
-                 species: set[str],
-                 numbers: ArrayLike,
-                 positions: ArrayLike,
-                 kpts: ArrayLike | SupportsFloat,
-                 fdata_path: str | None = None,
-                 lazy: bool = True,
-                 a1: ArrayLike | None = None,
-                 a2: ArrayLike | None = None,
-                 a3: ArrayLike | None = None,
-                 gamma: bool | None = None,
+                 atomsystem: AtomSystem,
+                 fdatafiles: FDataFiles,
+                 kpoints: KPoints,
                  verbose: bool = False,
                  total_charge: int = 0,
                  correction: dict | None = None,
                  charges_method: str | None = None,
                  dipole_method: str = 'improved',
-                 fix_charges: bool = False,
                  initial_charges: ArrayLike | None = None,
                  mixer_kws: dict | None = None) -> None:
 
@@ -156,31 +110,26 @@ class BaseFireball:
         self.forces_computed = False
 
         # Type safety
-        type_check(lazy, bool, 'lazy')
+        type_check(atomsystem, AtomSystem, 'atomsystem')
+        type_check(fdatafiles, FDataFiles, 'fdatafiles')
+        type_check(kpoints, KPoints, 'kpoints')
         type_check(verbose, bool, 'verbose')
         type_check(total_charge, int, 'total_charge')
         type_check(dipole_method, str, 'dipole_method')
-        type_check(fix_charges, bool, 'fix_charges')
 
-        # Create convenient subobjects
-        self.fdatafiles = FDataFiles(fdata=fdata, fdata_path=fdata_path)
-        self.atomsystem = AtomSystem(species=species,
-                                     numbers=numbers,
-                                     positions=positions,
-                                     a1=a1, a2=a2, a3=a3)
-        self.kpoints = KPoints(kpts=kpts,
-                               atomsystem=self.atomsystem,
-                               gamma=gamma)
-        self.natoms = self.atomsystem.n
-        self.nkpts = self.kpoints.n
 
         # Save everything to self
-        self.lazy = lazy
+        self.fdatafiles = fdatafiles
+        self.atomsystem = atomsystem
+        self.kpoints = kpoints
         self.verbose = verbose
         self.total_charge = total_charge
         self.charges_method = charges_method
         self.dipole_method = dipole_method
-        self.fix_charges = fix_charges
+
+        # Convenient aliases
+        self.natoms = self.atomsystem.n
+        self.nkpts = self.kpoints.n
 
         # Get charges method
         if self.charges_method is None:
@@ -196,7 +145,9 @@ class BaseFireball:
             self._correction = Correction(atomsystem=self.atomsystem, **correction)
             self.correction = correction
         elif correction is None:
-            self.correction, self._correction = self.fdatafiles.get_correction(self.atomsystem, self.charges_method)
+            self.correction = self.fdatafiles.get_correction(self.charges_method)
+            if self.correction:
+                self._correction = Correction(atomsystem=self.atomsystem, **self.correction)
 
         # Address mixer
         self.mixer_kws = deepcopy(DEFAULT_MIXER)
@@ -210,17 +161,14 @@ class BaseFireball:
                 self.mixer_kws[prop] = mixer_kws.get(prop, DEFAULT_MIXER[prop])
 
         # Save variables to modules
-        self.fdatafiles.load_fdata(self.atomsystem, self.lazy)
+        self.fdatafiles.load_fdata()
         self.atomsystem.set_coords()
-        if not self.fix_charges:
-            self.kpoints.reduce_kpts()
         self.kpoints.set_kpoints()
         self.atomsystem.set_cell()
 
         # Set Fireball-like options
         self._options = {'dipole_method': np.int64(0) if self.atomsystem.isperiodic else get_idipole(dipole_method),
                          'charges_method': get_icharge(self.charges_method),
-                         'fix_charges': np.int64(self.fix_charges),
                          'ismolecule': np.int64(not self.atomsystem.isperiodic),
                          'isgamma': np.int64(self.kpoints.isgamma),
                          'total_charge': np.int64(-self.total_charge),
@@ -257,12 +205,22 @@ class BaseFireball:
             self.shell_charges = np.zeros((self.natoms, self.nshells), dtype=np.float64, order='C')
             self.eigenvalues = np.zeros((self.nkpts, self.nbands), dtype=np.float64, order='C')
 
-    def run_scf(self) -> None:
+    def run_scf(self, fix_charges: bool = False) -> None:
         """Check if SCF is computed, execute the loop if not,
         then store energy, fermi_level, partial charges, shell charges and eigenvalues.
+
+        Parameters
+        ----------
+        fix_charges : bool
+            If ``True`` then only one SCF loop iteration will be performed. If ``False`` (default)
+            then it will perform the usual computation.
+            In general it is useful to fix the charges when making postprocessing.
         """
         if not self.scf_computed:
-            converged, fb_errno, energy, fermi_level, charges = scf(self.verbose, self.shell_charges.T, self.eigenvalues.T)
+            converged, fb_errno, energy, fermi_level, charges = scf(self.verbose,
+                                                                    fix_charges,
+                                                                    self.shell_charges.T,
+                                                                    self.eigenvalues.T)
             if fb_errno != 0:
                 raise_fb_error(fb_errno)
             if not converged:
@@ -274,14 +232,21 @@ class BaseFireball:
             if self.correction:
                 self._correction.correct()  # type: ignore
 
-    def calc_forces(self) -> None:
+    def calc_forces(self, fix_charges: bool = False) -> None:
         """Check if SCF is computed, execute the loop if not,
         then compute and store forces.
+
+        Parameters
+        ----------
+        fix_charges : bool
+            If ``True`` then only one SCF loop iteration will be performed. If ``False`` (default)
+            then it will perform the usual computation.
+            In general it is useful to fix the charges when making postprocessing.
         """
-        self.run_scf()
+        self.run_scf(fix_charges)
         if not self.forces_computed:
             fb_errno = calc_forces(self.forces.T)
-            if fb_errno != 0 and not self.fix_charges:
+            if fb_errno != 0:
                 raise_fb_error(fb_errno)
             self.forces_computed = True
 
@@ -298,41 +263,3 @@ class BaseFireball:
             self._correction.update_coords(self.atomsystem)  # type: ignore
         self.scf_computed = False
         self.forces_computed = False
-
-    @classmethod
-    def postprocessing(cls, fbobj: BaseFireball, **kwargs) -> BaseFireball:
-        """Create a BaseFireball object with fixed charges for postprocessing.
-
-        Parameters
-        ----------
-        fbobj : BaseFireball
-            BaseFireball object to be cloned.
-        **kwargs
-            Parameters to substitute
-        """
-        type_check(fbobj, BaseFireball, 'fbobj')
-        fbobj.run_scf()
-
-        arg_dict = {'fdata': 'custom',
-                    'species': fbobj.atomsystem.species,
-                    'numbers': fbobj.atomsystem.numbers,
-                    'positions': fbobj.atomsystem.positions,
-                    'kpts': fbobj.kpoints.kpts,
-                    'fdata_path': fbobj.fdatafiles.path,
-                    'lazy': fbobj.lazy,
-                    'a1': fbobj.atomsystem.cell[0],
-                    'a2': fbobj.atomsystem.cell[1],
-                    'a3': fbobj.atomsystem.cell[2],
-                    'gamma': fbobj.kpoints.gamma,
-                    'verbose': fbobj.verbose,
-                    'total_charge': fbobj.total_charge,
-                    'correction': fbobj.correction,
-                    'charges_method': fbobj.charges_method,
-                    'dipole_method': fbobj.dipole_method,
-                    'mixer_kws': fbobj.mixer_kws}
-        for k in kwargs:
-            if k not in arg_dict:
-                raise ValueError(f"Parameter ``{k}`` not recognized.")
-            arg_dict[k] = kwargs[k]
-
-        return cls(fix_charges=True, initial_charges=fbobj.shell_charges, **arg_dict)

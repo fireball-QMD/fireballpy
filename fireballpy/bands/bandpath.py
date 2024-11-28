@@ -8,10 +8,11 @@ from numpy.typing import ArrayLike
 import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 
-from .._errors import type_check
-from .._utils import fbobj_from_obj
-from ..atoms import AtomSystem
-from ..fireball import BaseFireball
+from fireballpy._errors import type_check
+from fireballpy._utils import fbobj_from_obj
+from fireballpy.atoms import AtomSystem
+from fireballpy.kpoints import KPoints
+from fireballpy.fireball import BaseFireball
 
 from ase import Atoms
 
@@ -66,6 +67,8 @@ class BandPath:
 
     Raises
     ------
+    ValueError
+        If more than one fireballpy object is passed.
     RuntimeError
         If the SCF loop was not computed.
     """
@@ -115,8 +118,12 @@ class BandPath:
 
         # Compute new eigenvalues
         self.fermi = fbobj.fermi_level
-        self.fbobj = BaseFireball.postprocessing(fbobj, kpts=self.pathcoords)
-        self.fbobj.run_scf()
+        self.fbobj = BaseFireball(atomsystem=fbobj.atomsystem, fdatafiles=fbobj.fdatafiles,
+                                  kpoints=KPoints(kpts=self.pathcoords, atomsystem=fbobj.atomsystem),
+                                  total_charge=fbobj.total_charge, correction=fbobj.correction,
+                                  charges_method=fbobj.charges_method, dipole_method=fbobj.dipole_method,
+                                  initial_charges=fbobj.shell_charges, mixer_kws=fbobj.mixer_kws)
+        self.fbobj.run_scf(fix_charges=True)
         self.eigenvalues = self.fbobj.eigenvalues
         self.nkpts, self.nbands = self.eigenvalues.shape
 
@@ -193,7 +200,6 @@ class BandPath:
         center = bool(center)
         line_kws = line_kws if line_kws else {}
         font_kws = font_kws if font_kws else {}
-
         if ax is None:
             _, ax = plt.subplots(figsize=(6.9, 5), layout='constrained')
             assert ax is not None

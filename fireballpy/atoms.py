@@ -4,7 +4,7 @@ from numpy.typing import ArrayLike, NDArray
 from scipy.linalg import norm, inv
 from scipy.spatial.distance import pdist
 
-from ._errors import type_check
+from fireballpy._errors import type_check
 from _fireball import set_coords, set_cell, update_coords
 
 TWOPI = 2.0*np.pi
@@ -27,6 +27,24 @@ class AtomSystem:
         Second cell vector coordinates in angstroms.
     a3 : ArrayLike[float] | None
         Third cell vector coordinates in angstroms.
+
+    Attributes
+    ----------
+    n : int
+        Number of atoms.
+    species : set[str]
+        Set with the element names entering the computation.
+    numbers : NDArray[np.int64]
+        Array with the atomic numbers of each atom.
+    positions : NDArray[np.float64]
+        A natoms x 3 array with the positions of each atom in angstroms.
+    pbc : NDArray[bool]
+        Array telling whether there are periodic boundary conditions
+        in the x, y or z directions.
+    cell : NDArray[np.float64]
+        Matrix where each row corresponds to each of the lattice vectors.
+    icell : NDArray[np.float64]
+        Matrix where each row corresponds to each of the reciprocal lattice vectors.
 
     Methods
     -------

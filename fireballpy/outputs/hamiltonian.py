@@ -3,16 +3,30 @@ from collections import namedtuple
 import numpy as np
 from numpy.typing import NDArray
 
-from .._errors import type_check
-from .._utils import fbobj_from_obj
-from ..fireball import BaseFireball
+from fireballpy._errors import type_check
+from fireballpy._utils import fbobj_from_obj
+from fireballpy.fireball import BaseFireball
 
 from _fireball import get_hs
 
 from ase import Atoms
 
+
 class OrbitalMatrix:
     """Object to manipulate the Hamiltonian and Overlap matrix in a computation.
+
+    This object adds the ability to select atoms and their orbitals with 4 index expressions.
+    When accessing elements of the matrix one may use a ``[iatom, jatom, iorb, jorb]`` syntax.
+
+    * ``iatom``: Refers to the index/indices of the first atom (row).
+    * ``jatom``: Refers to the index/indices of the second atom (column).
+    * ``iorb``: Refers to the orbital index of the first atom.
+    * ``jorb``: Refers to the orbital index of the second atom.
+
+    Following :class:`np.ndarray` indexing, it is also valid to use expressions as
+    ``[iatom]``, ``[iatom, jatom]``, ``[iatom, jatom, iorb]``, where the absence of an index is assumed
+    as a full selection.
+    Slicing is supported in both the orbitals and atoms (when orbitals are not specified).
 
     Parameters
     ----------
@@ -21,10 +35,12 @@ class OrbitalMatrix:
     orbitals : NDArray[int]
         Array with the number of orbitals each atom has.
 
-    Methods
-    -------
-    plot()
-        Plot the bandpath using :mod:`matplotlib`.
+    Attributes
+    ----------
+    matrix : NDArray
+        Matrix where each row/column represents an orbital.
+    orbitals : NDArray[int]
+        Array with the number of orbitals each atom has.
     """
     def __init__(self, *,
                  matrix: NDArray,
@@ -41,6 +57,12 @@ class OrbitalMatrix:
         for i in range(1, self.orbitals.size):
             start = self.slices[-1].stop
             self.slices.append(slice(start, start + self.orbitals[i]))
+
+    def __repr__(self) -> str:
+        return self.matrix.__repr__()
+
+    def __str__(self) -> str:
+        return self.matrix.__str__()
 
     def __getitem__(self, key):
         # Only one index provided
@@ -61,7 +83,7 @@ class OrbitalMatrix:
                 start = sl.start if sl.start else 0
                 stop = sl.stop if sl.stop else self.matrix.shape[0]
                 step = sl.step if sl.step else 1
-                key0.extend([i for i in range(start, stop, step)])
+                key0.extend([[i] for i in range(start, stop, step)])
             key1 = []
             sls = self.slices[key[1]]
             if isinstance(sls, slice):
@@ -105,12 +127,40 @@ Hamiltonian = namedtuple('Hamiltonian', ['hamiltonian', 'overlap'])
 
 def get_hamiltonian(*, atoms: Atoms | None = None,
                     fbobj: BaseFireball | None = None) -> Hamiltonian:
+    """Function to extract the hamiltonian and overlap matrices from Fireball.
+
+    This function accepts any fireballpy-like object and returns a named tuple
+    with the hamiltonian and the overlap matrices as :class:`OrbitalMatrix` instances.
+
+    Parameters
+    ----------
+    atoms : ase.Atoms | None
+        An :class:`ase.Atoms` object with a :class:`Fireball` attached as calculator.
+        The SCF loop must be computed before.
+        This parameter is not compatible with ``fbobj``.
+    fbobj : BaseFireball | None
+        Directly a low-level :class:`BaseFireball` object.
+        In general this is reserved only for advanced users.
+        The SCF loop must be computed before.
+        This parameter is not compatible with ``atoms``.
+
+    Returns
+    -------
+    Hamiltonian
+        Named tuple with the hamiltonian (``.hamiltonian``) and overlap (``.overlap``) matrices.
+
+    Raises
+    ------
+    ValueError
+        If more than one fireballpy object is passed.
+    RuntimeError
+        If the SCF loop was not computed.
+    """
 
     fbobj = fbobj_from_obj(fbobj=fbobj, atoms=atoms)
     if not hasattr(fbobj, 'run_scf') or not fbobj.scf_computed:
         raise RuntimeError("SCF loop needs to be carried first")
-    fbobj = BaseFireball.postprocessing(fbobj, kpts=np.zeros((1, 3), dtype=np.float64))
-    fbobj.run_scf()
+    fbobj.run_scf(fix_charges=True)
 
     # Get from module
     orbitals = np.zeros(fbobj.natoms, dtype=np.int64)

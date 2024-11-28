@@ -14,6 +14,6 @@ Internal classes
    :no-inherited-members:
 
 .. autoclass:: KPoints
-   :members: reduce_kpts, set_kpoints
+   :members: set_kpoints
    :no-inherited-members:
 

@@ -1,7 +1,7 @@
 import dftd3.interface as d3i
 
-from ._errors import type_check
-from .atoms import AtomSystem
+from fireballpy._errors import type_check
+from fireballpy.atoms import AtomSystem
 
 # Could be replaced by constants in future versions if
 # ase dependency is to be removed
@@ -48,10 +48,10 @@ class Correction:
 
         subclass_map = {subclass.kind: subclass for subclass in cls.__subclasses__()}  # type: ignore
         subclass = subclass_map[kind]
-        return super(Correction, subclass).__new__(subclass)
+        return super(cls, subclass).__new__(subclass)
 
     def update_coords(self, atomsystem: AtomSystem) -> None:
-        self.disp.update(atomsystem.positions/Bohr, atomsystem.cell/Bohr)  # type: ignore
+        self.disp.update(atomsystem.positions/Bohr)  # type: ignore
 
     def correct(self) -> None:
         self.res = self.disp.get_dispersion(param=self.dpar, grad=True)  # type: ignore
@@ -99,9 +99,7 @@ class _DFTD3Correction(Correction):
         """
         try:
             self.disp = d3i.DispersionModel(atomsystem.numbers,
-                                            atomsystem.positions/Bohr,
-                                            atomsystem.cell/Bohr,
-                                            atomsystem.pbc)
+                                            atomsystem.positions/Bohr)
         except RuntimeError:
             raise ValueError("Cannot construct dispersion model for dftd3")
 

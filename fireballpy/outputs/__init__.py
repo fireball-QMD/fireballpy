@@ -1,8 +1,9 @@
-"""Submodule with all band-related utilities.
+"""Submodule to extract direct computation outputs
 """
 
-from .hamiltonian import get_hamiltonian
+from .hamiltonian import OrbitalMatrix, get_hamiltonian
 
 __all__ = [
-    'get_hamiltonian'
+    'OrbitalMatrix',
+    'get_hamiltonian',
 ]
