@@ -153,7 +153,7 @@ subroutine scf(natoms, nshell, nkpts, nbands, &
     & converged, errno_out, energy, fermi_level, charges)
   use iso_c_binding
   use M_system, only: errno, scf_achieved, etot, efermi, eigen_k, Qin, imass, ifixcharge
-  use M_fdata, only: Qneutral
+  use M_fdata, only: Qneutral, nssh
   implicit none
   integer(c_long), intent(in) :: natoms, nshell, nkpts, nbands
   logical, intent(in) :: verbose, fix_charges
@@ -163,6 +163,7 @@ subroutine scf(natoms, nshell, nkpts, nbands, &
   integer(c_long), intent(out) :: errno_out
   real(c_double), intent(out) :: energy, fermi_level
   real(c_double), dimension(natoms), intent(out) :: charges
+  integer(c_long) :: iatom, issh, in1
 
   errno = 0
   if(fix_charges) then
@@ -175,7 +176,13 @@ subroutine scf(natoms, nshell, nkpts, nbands, &
   errno_out = errno
   energy = etot
   fermi_level = efermi
-  charges = sum(Qneutral - Qin, dim=1)
+  do iatom = 1, natoms
+    in1 = imass(iatom)
+    charges(iatom) = 0.0d0
+    do issh = 1, nssh(in1)
+      charges(iatom) = charges(iatom) + Qneutral(issh,in1) - Qin(issh,iatom)
+    end do
+  end do
   shell_charges = Qin
   eigenvalues = eigen_k(1:nbands, :)
 end subroutine scf

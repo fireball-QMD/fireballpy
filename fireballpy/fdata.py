@@ -192,14 +192,11 @@ class FDataFiles:
         an ``fdata_path`` pointing to a local FData folder must be provided.
         Please note that the first time an FData is used it needs to download
         all the necessary files.
-    atomsystem : AtomSystem
+    atomsystem : AtomSystem | None, optional
         AtomSystem object with the information of the species which intervine in the computation.
-    lazy : bool
-        If set to ``True`` it will only load necessary files for the species
-        which are involved in the computation. If set to ``False`` it will load
-        the FData for all the species available in it. This will add a significant overhead
+        If ``None`` (default) then the whole FData will be loaded. This will add a significant overhead
         at the exchange of not having to load new species if they are added later.
-    fdata_path : str | None
+    fdata_path : str | None, optional
         Path to a custom FData. Ignored unless ``fdata = 'custom'``.
 
     Attributes
@@ -225,11 +222,9 @@ class FDataFiles:
 
     fb_home = get_fb_home()
 
-    def __init__(self, *, fdata: str, atomsystem: AtomSystem,
-                 lazy: bool, fdata_path: str | None = None) -> None:
+    def __init__(self, *, fdata: str, atomsystem: AtomSystem | None = None,
+                 fdata_path: str | None = None) -> None:
         type_check(fdata, str, 'fdata')
-        type_check(atomsystem, AtomSystem, 'atomsystem')
-        type_check(lazy, bool, 'lazy')
         if fdata != 'custom':
             self.name = fdata
             self._from_name()
@@ -239,8 +234,14 @@ class FDataFiles:
             self.name = fdata
             self.path = fdata_path
             self.indb = False
-        self.species_present = atomsystem.species
-        self.lazy = lazy
+
+        if atomsystem is None:
+            self.lazy = False
+            self.species_present = set()
+        else:
+            type_check(atomsystem, AtomSystem, 'atomsystem')
+            self.lazy = True
+            self.species_present = atomsystem.species
 
         # Fix path
         assert self.path is not None
@@ -298,14 +299,6 @@ class FDataFiles:
 
     def load_fdata(self) -> None:
         """Set Fortran module variables and load the FData into memory.
-
-        Parameters
-        ----------
-        atomsystem : AtomSystem
-            AtomSystem object with the species to appear in the calculation.
-        lazy : bool
-            If ``True`` load only FData for the involved species.
-            If ``False`` load the full FData.
         """
         global _loaded_fdata
         load_tuple = (self.path, self.species_present if self.lazy else self.species)
@@ -341,10 +334,9 @@ class FDataFiles:
 
         Returns
         -------
-        DFTD3Correction | None
-            Object which can apply the correction in Fireball.
-            Will return ``None`` if either we did not provide
-            the FData or there are no optimal parameters recorded.
+        dict
+            Dictionary with the parameters to create the correction.
+            Empty if no correction is applicable.
         """
         type_check(charges_method, str, 'charges_method')
         if not self.indb:
@@ -357,3 +349,10 @@ class FDataFiles:
             return {}
 
         return corr
+
+
+def load_fdata(fdata: str, fdata_path: str | None = None) -> None:
+    """Set Fortran module variables and load the whole FData into memory.
+    """
+    fdatafiles = FDataFiles(fdata=fdata, fdata_path=fdata_path)
+    fdatafiles.load_fdata()

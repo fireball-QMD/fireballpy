@@ -13,6 +13,8 @@ Internal classes
    :members: load_fdata, get_charges_method, get_correction
    :no-inherited-members:
 
+.. autofunction:: load_fdata
+
 .. autoclass:: KPoints
    :members: set_kpoints
    :no-inherited-members:

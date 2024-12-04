@@ -21,11 +21,11 @@ class AtomSystem:
         Array with the atomic numbers of each atom.
     positions : ArrayLike[float]
         A natoms x 3 array with the positions of each atom in angstroms.
-    a1 : ArrayLike[float] | None
+    a1 : ArrayLike[float] | None, optional
         First cell vector coordinates in angstroms.
-    a2 : ArrayLike[float] | None
+    a2 : ArrayLike[float] | None, optional
         Second cell vector coordinates in angstroms.
-    a3 : ArrayLike[float] | None
+    a3 : ArrayLike[float] | None, optional
         Third cell vector coordinates in angstroms.
 
     Attributes

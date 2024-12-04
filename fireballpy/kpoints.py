@@ -21,7 +21,7 @@ class KPoints:
         in reciprocal cell units, or a density of k-points in inverse angstroms.
     atomsystem : AtomSystem
         An AtomSystem class with the information of the atomic numbers, positions and the unit cell.
-    gamma : bool | None
+    gamma : bool | None, optional
         Should the Gamma (``[0, 0, 0]``) point be forcefully
         included (``True``), forcefully excluded (``False``) or
         don't care whether it is included or not (``None``, default)

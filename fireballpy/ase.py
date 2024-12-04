@@ -322,8 +322,8 @@ class Fireball(Calculator, BaseFireball):
                                     numbers=atoms.get_atomic_numbers(),
                                     positions=atoms.get_positions(),
                                     a1=atoms.cell[0], a2=atoms.cell[1], a3=atoms.cell[2])
-            fdatafiles = FDataFiles(fdata=self.fdata, atomsystem=atomsystem,
-                                    lazy=self.lazy, fdata_path=self.fdata_path)
+            fdatafiles = FDataFiles(fdata=self.fdata, atomsystem=atomsystem if self.lazy else None,
+                                    fdata_path=self.fdata_path)
             kpoints = KPoints(kpts=self.kpts, atomsystem=atomsystem, gamma=self.gamma)
             BaseFireball.__init__(self, atomsystem=atomsystem, fdatafiles=fdatafiles, kpoints=kpoints,
                                   verbose=self.verbose, **self._kwargs)

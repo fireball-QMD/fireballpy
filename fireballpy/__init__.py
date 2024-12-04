@@ -6,7 +6,7 @@ import importlib as _importlib
 # Expose API to the user
 ## Documentation
 from fireballpy.version import version as __version__
-from fireballpy.fdata import get_fb_home, available_fdatas, FDataFiles
+from fireballpy.fdata import get_fb_home, available_fdatas, FDataFiles, load_fdata
 from fireballpy.atoms import AtomSystem
 from fireballpy.kpoints import KPoints
 from fireballpy.fireball import BaseFireball
@@ -32,6 +32,7 @@ __all__ = submodules + [  # type: ignore
     '__version__',
     'get_fb_home',
     'available_fdatas',
+    'load_fdata',
     'Fireball',
 ]
 
