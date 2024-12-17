@@ -168,8 +168,10 @@ class BandPath:
              fermi_level_fmt: str = '--r',
              center: bool = False,
              ax: Axes | None = None,
+             figsize: tuple[float, float] | None = None,  # Parámetro figsize opcional
+             show_grid: bool = False,
              line_kws: dict | None = None,
-             font_kws: dict | None = None) -> Axes:
+             font_kws: dict | None = None) -> Axesi:
         """Plot the bandpath using :mod:`matplotlib`.
 
         Parameters
@@ -201,7 +203,8 @@ class BandPath:
         line_kws = line_kws if line_kws else {}
         font_kws = font_kws if font_kws else {}
         if ax is None:
-            _, ax = plt.subplots(figsize=(6.9, 5), layout='constrained')
+            default_figsize = (6.9, 5)
+            _, ax = plt.subplots(figsize=figsize if figsize else default_figsize, layout='constrained')
             assert ax is not None
 
         # Define xticks
@@ -211,6 +214,7 @@ class BandPath:
                 xticks[-1] += f',{path[0]}'
                 xticks.extend(path[1:])
         xticks = list(map(lambda x: x.replace('G', r'$\Gamma$'), xticks))
+
 
         # Make the plot
         xplot = np.arange(self.nkpts)
@@ -232,5 +236,7 @@ class BandPath:
         ax.set_ylim(bottom=emin, top=emax)
         ax.set_xlabel('')
         ax.set_xticks(self.pathidx, xticks, **font_kws)
-
+        if show_grid:
+            grid_style = {'color': 'gray', 'linestyle': '-', 'linewidth': 0.5}
+            ax.grid(True, axis='x', **grid_style)  # Mostrar solo líneas verticales (eje x)
         return ax
