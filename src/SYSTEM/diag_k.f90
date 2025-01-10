@@ -1,13 +1,10 @@
 subroutine diag_k ( )
   use iso_c_binding
-  use M_system, only: iqout, icluster, igamma, Kscf, blowre, bbnkre, blowim, bbnkim, sm12_real, sm12_complex, special_k, norbitals, &
+  use M_system, only: iqout, icluster, igamma, Kscf, blowre, blowim, sm12_real, sm12_complex, special_k, norbitals, &
     & nkpoints, errno
-implicit none
-integer(c_long) ikpoint
-real(c_double), dimension (3) :: k_temp
-
-  if (allocated(bbnkre)) deallocate(bbnkre)
-  allocate (bbnkre (norbitals, norbitals, nkpoints))
+  implicit none
+  integer(c_long) ikpoint
+  real(c_double), dimension (3) :: k_temp
 
   if ((iqout .eq. 1) .or. (iqout .eq. 3)) then
     if (allocated(blowre)) deallocate(blowre)
@@ -18,10 +15,6 @@ real(c_double), dimension (3) :: k_temp
     end if
   end if
 
-  if (icluster .eq. 0 .and. igamma .eq. 0) then
-    if (allocated(bbnkim)) deallocate(bbnkim)
-    allocate (bbnkim (norbitals, norbitals, nkpoints))
-  end if
 
   if (igamma .eq. 0) then
     if (Kscf .eq. 1) then

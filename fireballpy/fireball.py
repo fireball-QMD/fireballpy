@@ -204,6 +204,7 @@ class BaseFireball:
             self.forces = np.zeros((self.natoms, 3), dtype=np.float64, order='C')
             self.shell_charges = np.zeros((self.natoms, self.nshells), dtype=np.float64, order='C')
             self.eigenvalues = np.zeros((self.nkpts, self.nbands), dtype=np.float64, order='C')
+            self.eigenvectors = np.zeros((self.nkpts, self.norbitals, self.norbitals), dtype=np.complex128, order='C')
 
     def run_scf(self, fix_charges: bool = False) -> None:
         """Check if SCF is computed, execute the loop if not,
@@ -220,7 +221,8 @@ class BaseFireball:
             converged, fb_errno, energy, fermi_level, charges = scf(self.verbose,
                                                                     fix_charges,
                                                                     self.shell_charges.T,
-                                                                    self.eigenvalues.T)
+                                                                    self.eigenvalues.T,
+                                                                    self.eigenvectors.T)
             if fb_errno != 0:
                 raise_fb_error(fb_errno)
             if not converged:

@@ -1,6 +1,7 @@
 from __future__ import annotations
 from typing import SupportsFloat
 
+import numpy as np
 from numpy.typing import ArrayLike
 from ase.calculators.calculator import Calculator, PropertyNotPresent, all_changes
 
@@ -89,6 +90,8 @@ class Fireball(Calculator, BaseFireball):
     -------
     get_eigenvalues(kpt=0, spin=0)
         Obtain Hamiltonian eigenvalues in eV.
+    get_eigenvectors(kpt=0, spin=0)
+        Obtain the wavefunction coefficients.
     get_fermi_level()
         Obtain the Fermi energy in eV.
     get_ibz_k_points()
@@ -183,6 +186,34 @@ class Fireball(Calculator, BaseFireball):
         if not self._fb_started:
             raise PropertyNotPresent('eigenvalues')
         return self.eigenvalues[kpt]
+
+    def get_eigenvectors(self, kpt=0, spin=0):
+        """Get the coefficients for each wave function.
+
+        Parameters
+        ----------
+        kpt : int
+            Index of the k-point to obtain the eigenvectors. Check ``Fireball.get_ibz_k_points()``.
+            By default takes the first (``kpt = 0``).
+        spin : int
+            Spin index for the eigenvalues. Currently dummy as no spin polarisation is implemented.
+
+        Returns
+        -------
+        NDArray[float] | NDArray[complex]
+            Matrix with the eigenvectors. Each column are the coefficients of
+            that wavefunction.
+
+        Raises
+        ------
+        PropertyNotPresent
+            If any computation has been done and eigenvectors were not yet computed.
+        IndexError
+            If the an out-of-bounds k-point index is requested.
+        """
+        if not self._fb_started:
+            raise PropertyNotPresent('eigenvectors')
+        return self.eigenvectors[kpt] if not self.kpoints.isgamma else np.real(self.eigenvectors[kpt])
 
     def get_fermi_level(self):
         """Get the Fermi level in electronvolts.

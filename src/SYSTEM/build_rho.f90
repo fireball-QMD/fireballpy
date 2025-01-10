@@ -1,6 +1,6 @@
 subroutine build_rho ()
   use iso_c_binding
-  use M_system, only: iqout, icluster, igamma, tempfe, blowre, bbnkre, blowim, bbnkim, cape, rho, errno, Kscf, max_scf_iterations
+  use M_system, only: iqout, icluster, igamma, tempfe, blowre, blowim, cape, rho, errno, Kscf, max_scf_iterations
   implicit none
   rho = 0.0d0
   cape = 0.0d0
@@ -12,8 +12,6 @@ subroutine build_rho ()
       deallocate (blowim)
     end if
   end if
-  if (icluster .eq. 0 .and. igamma .eq. 0) deallocate (bbnkim)
-  deallocate (bbnkre)
 
   if (errno .ne. 0) return
   if (Kscf .le. max_scf_iterations) call mixer ()

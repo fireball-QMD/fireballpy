@@ -11,7 +11,7 @@ subroutine allocate_system ()
     & rhoij_off, s_mat, sm_mat, spm_mat, rho_on, arho_on, rhoi_on, arhoi_on, arhop_on, rhop_on, arhoij_off, arho_off, arhopij_off, &
     & arhop_off, rhop_off, rhopij_off, vca, ewaldlr, h_mat, t_mat, vna, ewaldqmmm, dipc, xl, fotnl, fanl, fotna, fana, faxc, faxc_ca, &
     & dxcdcc, ft, dusr, fotxc, fotxc_ca, faca, fotca, f3naa, f3nab, f3nac, f3nla, f3nlb, f3nlc, f3caa, f3cab, f3cac, flrew, f3xca_ca, &
-    & f3xcb_ca, f3xcc_ca, f3xca, f3xcb, f3xcc, flrew_qmmm, fro, ftot, dxcv, norbitals_new, qstate
+    & f3xcb_ca, f3xcc_ca, f3xca, f3xcb, f3xcc, flrew_qmmm, fro, ftot, dxcv, norbitals_new, qstate, bbnkre, bbnkim, igamma
   use M_fdata, only: nssh, rcutoff, rc_PP, nspecies, num_orb, Qneutral, lssh, nsshPP, lsshPP,  nsh_max, numXmax, numYmax
 !  use M_fdata, only: numy3c_xc3c, ideriv_max
   implicit none
@@ -523,4 +523,14 @@ subroutine allocate_system ()
   allocate (ftot (3, natoms))
   if (allocated(dxcv)) deallocate(dxcv)
   allocate (dxcv (3, natoms))  
+
+
+  ! kspace variables
+  if (allocated(bbnkre)) deallocate(bbnkre)
+  allocate (bbnkre (norbitals, norbitals, nkpoints))
+  if (icluster .eq. 0 .and. igamma .eq. 0) then
+    if (allocated(bbnkim)) deallocate(bbnkim)
+    allocate (bbnkim (norbitals, norbitals, nkpoints))
+  end if
+
 end subroutine allocate_system

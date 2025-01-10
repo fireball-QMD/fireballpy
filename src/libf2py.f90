@@ -148,17 +148,19 @@ subroutine get_initial_charges(natoms, nsh_max, qinitial)
 end subroutine get_initial_charges
 
 ! Compute the SCF loop
-subroutine scf(natoms, nshell, nkpts, nbands, &
-    & verbose, fix_charges, shell_charges, eigenvalues, &
+subroutine scf(natoms, nshell, nkpts, nbands, norbitals, &
+    & verbose, fix_charges, shell_charges, eigenvalues, eigenvectors, &
     & converged, errno_out, energy, fermi_level, charges)
   use iso_c_binding
-  use M_system, only: errno, scf_achieved, etot, efermi, eigen_k, Qin, imass, ifixcharge
+  use M_system, only: errno, scf_achieved, etot, efermi, eigen_k, Qin, imass, ifixcharge, icluster, &
+    & igamma, bbnkre, bbnkim
   use M_fdata, only: Qneutral, nssh
   implicit none
-  integer(c_long), intent(in) :: natoms, nshell, nkpts, nbands
+  integer(c_long), intent(in) :: natoms, nshell, nkpts, nbands, norbitals
   logical, intent(in) :: verbose, fix_charges
   real(c_double), dimension(nshell, natoms), intent(inout) :: shell_charges
   real(c_double), dimension(nbands, nkpts), intent(inout) :: eigenvalues
+  complex(c_double_complex), dimension(norbitals, norbitals, nkpts), intent(inout) :: eigenvectors
   logical, intent(out) :: converged
   integer(c_long), intent(out) :: errno_out
   real(c_double), intent(out) :: energy, fermi_level
@@ -185,6 +187,11 @@ subroutine scf(natoms, nshell, nkpts, nbands, &
   end do
   shell_charges = Qin
   eigenvalues = eigen_k(1:nbands, :)
+  if (icluster .eq. 0 .and. igamma .eq. 0) then
+    eigenvectors = cmplx(bbnkre, bbnkim, kind=c_double_complex)
+  else
+    eigenvectors = cmplx(bbnkre, kind=c_double_complex)
+  end if
 end subroutine scf
 
 ! Get the forces in each atom
