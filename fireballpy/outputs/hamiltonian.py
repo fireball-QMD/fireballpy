@@ -4,8 +4,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from fireballpy._errors import type_check
-from fireballpy._utils import fbobj_from_obj
-from fireballpy.fireball import BaseFireball
+from fireballpy.fireball import BaseFireball, fbobj_from_obj
 
 from _fireball import get_hs
 

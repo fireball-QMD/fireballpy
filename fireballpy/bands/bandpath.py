@@ -9,10 +9,9 @@ import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 
 from fireballpy._errors import type_check
-from fireballpy._utils import fbobj_from_obj
 from fireballpy.atoms import AtomSystem
 from fireballpy.kpoints import KPoints
-from fireballpy.fireball import BaseFireball
+from fireballpy.fireball import BaseFireball, fbobj_from_obj
 
 from ase import Atoms
 
@@ -171,7 +170,7 @@ class BandPath:
              figsize: tuple[float, float] | None = None,  # Parámetro figsize opcional
              show_grid: bool = False,
              line_kws: dict | None = None,
-             font_kws: dict | None = None) -> Axesi:
+             font_kws: dict | None = None) -> Axes:
         """Plot the bandpath using :mod:`matplotlib`.
 
         Parameters

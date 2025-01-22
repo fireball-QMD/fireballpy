@@ -6,7 +6,8 @@ import importlib as _importlib
 # Expose API to the user
 ## Documentation
 from fireballpy.version import version as __version__
-from fireballpy.fdata import get_fb_home, available_fdatas, FDataFiles, load_fdata
+from fireballpy.utils import get_fb_home
+from fireballpy.fdata import available_fdatas, FDataFiles, load_fdata
 from fireballpy.atoms import AtomSystem
 from fireballpy.kpoints import KPoints
 from fireballpy.fireball import BaseFireball
