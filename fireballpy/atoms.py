@@ -5,7 +5,7 @@ from scipy.linalg import norm, inv
 from scipy.spatial.distance import pdist
 
 from fireballpy._errors import type_check
-from _fireball import set_coords, set_cell, update_coords
+from fireballpy._fireball import set_coords, set_cell, update_coords
 
 TWOPI = 2.0*np.pi
 RECIPROCAL = 1/TWOPI

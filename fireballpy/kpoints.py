@@ -7,7 +7,7 @@ from numpy.linalg import norm
 
 from fireballpy._errors import type_check
 from fireballpy.atoms import AtomSystem
-from _fireball import set_kpoints
+from fireballpy._fireball import set_kpoints
 
 
 class KPoints:

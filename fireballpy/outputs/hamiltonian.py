@@ -6,7 +6,7 @@ from numpy.typing import NDArray
 from fireballpy._errors import type_check
 from fireballpy.fireball import BaseFireball, fbobj_from_obj
 
-from _fireball import get_hs
+from fireballpy._fireball import get_hs
 
 from ase import Atoms
 

@@ -14,13 +14,13 @@ from fireballpy.kpoints import KPoints
 
 from ase import Atoms
 
-from _fireball import (set_options,
-                       set_initial_charges,
-                       call_allocate_system,
-                       scf,
-                       get_sizes,
-                       get_initial_charges,
-                       calc_forces,)
+from fireballpy._fireball import (set_options,
+                                  set_initial_charges,
+                                  call_allocate_system,
+                                  scf,
+                                  get_sizes,
+                                  get_initial_charges,
+                                  calc_forces)
 
 DEFAULT_MIXER = {'method': 'johnson',
                  'max_iter': np.int64(200),

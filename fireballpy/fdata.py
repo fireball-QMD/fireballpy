@@ -14,7 +14,7 @@ else:
 from fireballpy._errors import type_check
 from fireballpy.utils import TIMESTR, get_fb_home, download_check_tar, extract_tar
 from fireballpy.atoms import AtomSystem
-from _fireball import loadfdata_from_path
+from fireballpy._fireball import loadfdata_from_path
 
 _loaded_fdata = ('', '')
 
