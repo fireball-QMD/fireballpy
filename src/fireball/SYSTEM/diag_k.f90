@@ -1,6 +1,6 @@
 subroutine diag_k ( )
   use iso_c_binding
-  use M_system, only: iqout, icluster, igamma, Kscf, blowre, blowim, sm12_real, sm12_complex, special_k, norbitals, &
+  use M_system, only: iqout, igamma, Kscf, blowre, blowim, sm12_real, sm12_complex, special_k, norbitals, &
     & nkpoints, errno
   implicit none
   integer(c_long) ikpoint

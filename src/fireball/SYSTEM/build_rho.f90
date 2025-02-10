@@ -1,6 +1,6 @@
 subroutine build_rho ()
   use iso_c_binding
-  use M_system, only: iqout, icluster, igamma, tempfe, blowre, blowim, cape, rho, errno, Kscf, max_scf_iterations
+  use M_system, only: iqout, igamma, tempfe, blowre, blowim, cape, rho, errno, Kscf, max_scf_iterations
   implicit none
   rho = 0.0d0
   cape = 0.0d0

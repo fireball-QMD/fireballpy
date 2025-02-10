@@ -139,59 +139,59 @@ subroutine assemble_2c ()
 
 
       ! JIMM: we read here the Z,Y,X dipole matrix elements and derivatives for the dipole long-range theory
-      if (idipole .eq. 1 .or. iqout .eq. 7) then
+      !if (idipole .eq. 1 .or. iqout .eq. 7) then
         ! CALL DOSCENTROS AND GET DIP Z
-        isorp = 0
-        interaction = 9
-        in3 = in2
-        call doscentros (interaction, isorp, iforce, in1, in2, in3, y, eps, deps, dipx, dippx)
-        do inu = 1, num_orb(in2)
-          do imu = 1, num_orb(in1)
-            dip(imu,inu,ineigh,iatom) = dipx(imu,inu)
-            dipcm(3,imu,inu) = dipx(imu,inu)
-            if (iforce .eq. 1) then 
-              dippcm(:,3,imu,inu) = dippx(:,imu,inu)
-            end if ! end if iforce = 1
-          end do
+      isorp = 0
+      interaction = 9
+      in3 = in2
+      call doscentros (interaction, isorp, iforce, in1, in2, in3, y, eps, deps, dipx, dippx)
+      do inu = 1, num_orb(in2)
+        do imu = 1, num_orb(in1)
+          dip(imu,inu,ineigh,iatom) = dipx(imu,inu)
+          dipcm(3,imu,inu) = dipx(imu,inu)
+          if (iforce .eq. 1) then 
+            dippcm(:,3,imu,inu) = dippx(:,imu,inu)
+          end if ! end if iforce = 1
         end do
+      end do
 
 
-        ! CALL DOSCENTROS AND GET DIP Y
-        isorp = 0
-        interaction = 10
-        in3 = in2
-        call doscentrosDipY (interaction, isorp, in1, in2, in3, y, eps, deps, dipx, dippx)
-        do inu = 1, num_orb(in2)
-          do imu = 1, num_orb(in1)
-            dipcm(2,imu,inu) = dipx(imu,inu)
-            if (iforce .eq. 1) dippcm(:,2,imu,inu) = dippx(:,imu,inu)
-          end do
+      ! CALL DOSCENTROS AND GET DIP Y
+      isorp = 0
+      interaction = 10
+      in3 = in2
+      call doscentrosDipY (interaction, isorp, in1, in2, in3, y, eps, deps, dipx, dippx)
+      do inu = 1, num_orb(in2)
+        do imu = 1, num_orb(in1)
+          dipcm(2,imu,inu) = dipx(imu,inu)
+          if (iforce .eq. 1) dippcm(:,2,imu,inu) = dippx(:,imu,inu)
         end do
+      end do
 
-        ! CALL DOSCENTROS AND GET DIP X
-        isorp = 0
-        interaction = 11
-        in3 = in2
-        call doscentrosDipX (interaction, isorp, in1, in2, in3, y, eps, deps, dipx, dippx)
-        do inu = 1, num_orb(in2)
-          do imu = 1, num_orb(in1)
-            dipcm(1,imu,inu) = dipx(imu,inu)
-            if (iforce .eq. 1) dippcm(:,1,imu,inu)  = dippx(:,imu,inu)
-          end do
+      ! CALL DOSCENTROS AND GET DIP X
+      isorp = 0
+      interaction = 11
+      in3 = in2
+      call doscentrosDipX (interaction, isorp, in1, in2, in3, y, eps, deps, dipx, dippx)
+      do inu = 1, num_orb(in2)
+        do imu = 1, num_orb(in1)
+          dipcm(1,imu,inu) = dipx(imu,inu)
+          if (iforce .eq. 1) dippcm(:,1,imu,inu)  = dippx(:,imu,inu)
         end do
-        do ix = 1, 3
-          do iy = 1, 3
-            dipc(ix,:,:,ineigh,iatom) = dipc(ix,:,:,ineigh,iatom) + eps(ix,iy) *dipcm(iy,:,:)
+      end do
+      do ix = 1, 3
+        do iy = 1, 3
+          dipc(ix,:,:,ineigh,iatom) = dipc(ix,:,:,ineigh,iatom) + eps(ix,iy) *dipcm(iy,:,:)
+        enddo
+      enddo
+      do ix = 1,3
+        do iy = 1,3
+          do iz = 1,3
+            dippc(ix,iy,:,:,ineigh,iatom) = dippc(ix,iy,:,:,ineigh,iatom)+deps(ix,iy,iz)*dipcm(iz,:,:) + eps(iy,iz)*dippcm(ix,iz,:,:)
           enddo
         enddo
-        do ix = 1,3
-          do iy = 1,3
-            do iz = 1,3
-              dippc(ix,iy,:,:,ineigh,iatom) = dippc(ix,iy,:,:,ineigh,iatom)+deps(ix,iy,iz)*dipcm(iz,:,:) + eps(iy,iz)*dippcm(ix,iz,:,:)
-            enddo
-          enddo
-        enddo
-      end if ! idipole = 1
+      enddo
+      !end if ! idipole = 1
     end do
   end do
 return

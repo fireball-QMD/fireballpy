@@ -1,4 +1,4 @@
-"""Fireball calcculator for ASE interface
+"""Fireball calculator for ASE interface
 """
 
 import importlib as _importlib
@@ -25,6 +25,7 @@ _defineprop('shell_charges', float, shape=('natoms', 'nshells'))
 del _defineprop
 
 submodules = [
+    'basis',
     'bands',
     'outputs',
 ]

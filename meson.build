@@ -7,7 +7,7 @@ project(
   default_options: [
     'buildtype=debugoptimized',
     'c_std=c11',
-    'fortran_std=f2003',
+    'fortran_std=f2008',
     'blas=openblas',
     'lapack=openblas',
   ],
@@ -108,27 +108,8 @@ fortranobject_dep = declare_dependency(
   include_directories: [incdir_numpy, incdir_f2py],
 )
 
-# Build fireball
+# Build fireball, begin and create
 subdir('src')
-
-# Build _fireball
-# --quiet flag to supress stupid non-sense warnings
-# one might have to take it out if it does not work to debug
-fireball_source = custom_target(
-  'fireball_module',
-  input: 'src' / 'libf2py.f90', # No module hence no .f90 wrappers
-  output: ['_fireballmodule.c', '_fireball-f2pywrappers.f'],
-  command: [py, '-m', 'numpy.f2py', '@INPUT@', '-m', '_fireball', '--lower', '--quiet'],
-)
-
-py.extension_module(
-  '_fireball',
-  ['src' / 'libf2py.f90', fireball_source],
-  fortran_args: fflags,
-  dependencies: [fortranobject_dep, blas_dep, fireball_dep],
-  link_language: 'fortran',
-  install: true,
-)
 
 # Build fireballpy
 subdir('fireballpy')
