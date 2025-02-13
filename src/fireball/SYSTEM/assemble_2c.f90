@@ -3,7 +3,7 @@ subroutine assemble_2c ()
   use iso_c_binding
   use M_constants, only: eq2
   use M_system, only: iforce, iqout, idipole, natoms, ratom, imass, dip, neigh_b, neigh_j, neighn, neigh_self, numorb_max, sp_mat, &
-    & tp_mat, dipcm, dippcm, dippc, s_mat, t_mat, vna, dipc, xl
+    & tp_mat, dipcm, dippcm, dippc, s_mat, t_mat, vna, dipc, xl, dipp
   use M_fdata, only: num_orb
   integer(c_long) iatom
   integer(c_long) imu
@@ -139,7 +139,6 @@ subroutine assemble_2c ()
 
 
       ! JIMM: we read here the Z,Y,X dipole matrix elements and derivatives for the dipole long-range theory
-      !if (idipole .eq. 1 .or. iqout .eq. 7) then
         ! CALL DOSCENTROS AND GET DIP Z
       isorp = 0
       interaction = 9
@@ -151,10 +150,12 @@ subroutine assemble_2c ()
           dipcm(3,imu,inu) = dipx(imu,inu)
           if (iforce .eq. 1) then 
             dippcm(:,3,imu,inu) = dippx(:,imu,inu)
+            dipp(:,imu,inu,ineigh,iatom) = dippx(:,imu,inu)
           end if ! end if iforce = 1
         end do
       end do
 
+      if (idipole .eq. 1 .or. iqout .eq. 7) then
 
       ! CALL DOSCENTROS AND GET DIP Y
       isorp = 0
@@ -191,7 +192,7 @@ subroutine assemble_2c ()
           enddo
         enddo
       enddo
-      !end if ! idipole = 1
+      end if ! idipole = 1
     end do
   end do
 return
