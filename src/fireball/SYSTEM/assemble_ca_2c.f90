@@ -2,7 +2,7 @@
 subroutine assemble_ca_2c ()
   use iso_c_binding
   use M_constants, only: eq2
-  use M_system, only: iforce, smt_elect, natoms, ratom, imass, ewaldsr, dip, dipp, neigh_b, neigh_j, neighn, neigh_self, &
+  use M_system, only: iforce, smt_elect, natoms, ratom, imass, ewaldsr, dip, neigh_b, neigh_j, neighn, neigh_self, &
     & numorb_max, Qin, s_mat, vca, xl
   use M_fdata, only: nssh, num_orb, rcutoff, Qneutral, lssh
   implicit none
@@ -43,8 +43,6 @@ subroutine assemble_ca_2c ()
   real(c_double), dimension (3, numorb_max, numorb_max) :: bccapx
   real(c_double), dimension (numorb_max, numorb_max) :: bccax
   real(c_double), dimension (3, 3, 3) :: deps
-  real(c_double), dimension (numorb_max, numorb_max) :: dipx
-  real(c_double), dimension (3, numorb_max, numorb_max) :: dippx
   real(c_double), dimension (numorb_max, numorb_max) :: emnpl
   real(c_double), dimension (numorb_max, numorb_max) :: emnpl_noq
   real(c_double), dimension (3, 3) :: eps
@@ -57,8 +55,6 @@ subroutine assemble_ca_2c ()
 
   vca = 0.0d0
   ewaldsr = 0.0d0
-!  dip = 0.0d0
-!  dipp = 0.0d0
 
   do iatom = 1, natoms
     matom = neigh_self(iatom)
@@ -94,17 +90,6 @@ subroutine assemble_ca_2c ()
       call epsilon (r2, sighat, eps)
       call deps2cent (r1, r2, eps, deps)
  
-      ! CALL DOSCENTROS AND GET DIP
-!      isorp = 0
-!      interaction = 9
-!      in3 = in2
-!      call doscentros (interaction, isorp, iforce, in1, in2, in3, y,  eps, deps, dipx, dippx)
-!      do inu = 1, num_orb(in2)
-!        do imu = 1, num_orb(in1)
-!          dip(imu,inu,ineigh,iatom) = dipx(imu,inu)
-!          if (iforce .eq. 1) dipp(:,imu,inu,ineigh,iatom) = dippx(:,imu,inu)
-!        end do
-!      end do
       dq2 = 0.0d0
       do issh = 1, nssh(in2)
         dq2 = dq2 + (Qin(issh,jatom) - Qneutral(issh,in2))

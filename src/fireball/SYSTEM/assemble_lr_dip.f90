@@ -1,8 +1,8 @@
 subroutine assemble_lr_dip () 
   use iso_c_binding
   use M_constants, only: eq2
-  use M_system, only: natoms, ratom, imass, neigh_self, neigh_pair_a1, neigh_pair_a2, neigh_pair_n1, neigh_pair_n2, &
-    & numorb_max, tot_pairs, Qin, s_mat, ewaldlr, dipc
+  use M_system, only: natoms, xl, ratom, imass, neigh_self, neigh_pair_a1, neigh_pair_a2, neigh_pair_n1, neigh_pair_n2, &
+    & numorb_max, neigh_b, tot_pairs, Qin, s_mat, ewaldlr, dipc
   use M_fdata, only: nssh, Qneutral, num_orb
   implicit none
   integer(c_long) iatom
@@ -13,6 +13,7 @@ subroutine assemble_lr_dip ()
   integer(c_long) ineigh
   integer(c_long) issh
   integer(c_long) jatom
+  integer(c_long) mbeta
   integer(c_long) ialp
   integer(c_long) inalp
   integer(c_long) jneigh
@@ -38,9 +39,11 @@ subroutine assemble_lr_dip ()
     jatom = neigh_pair_a2(ipair)
     ineigh = neigh_pair_n1(ipair)
     jneigh = neigh_pair_n2(ipair)
+    mbeta = neigh_b(ineigh,iatom)
     r1(:) = ratom(:,iatom)
     in1 = imass(iatom)
-    r2(:) = ratom(:,jatom)
+    r2(:) = ratom(:,jatom) + xl(:,mbeta)
+    !r2(:) = ratom(:,jatom)
     in2 = imass(jatom)
     do ialp = 1, natoms    !the ialp is the "distant" atom.
       rna(:) = ratom(:,ialp)

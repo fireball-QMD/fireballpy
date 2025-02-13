@@ -1,13 +1,13 @@
 subroutine mulliken_dipole_charges()                   
   use iso_c_binding
-  use M_system, only: natoms, ratom, imass, dip, neigh_j, neighn, neigh_back, numorb_max, Qout, QMulliken_TOT, rho, s_mat
+  use M_system, only: natoms, ratom, xl, imass, dip, neigh_j, neigh_b, neighn, neigh_back, numorb_max, Qout, QMulliken_TOT, rho, s_mat
   use M_fdata, only: num_orb,nssh,lssh
   implicit none
   integer(c_long) iatom                        
   integer(c_long) imu, inu                   
   integer(c_long) in1, in2                   
   integer(c_long) issh, jssh
-  integer(c_long) ineigh , jatom,jneigh                        
+  integer(c_long) ineigh , jatom,jneigh, mbeta                        
   integer(c_long) mqn                          
   real(c_double) y
   real(c_double), dimension (numorb_max, natoms) :: QMulliken
@@ -19,8 +19,9 @@ subroutine mulliken_dipole_charges()
     r1(:) = ratom(:,iatom)
     do ineigh = 1, neighn(iatom)
        jatom = neigh_j(ineigh,iatom)
+       mbeta = neigh_b(ineigh,iatom)
        in2 = imass(jatom)
-       r2(:) = ratom(:,jatom)
+       r2(:) = ratom(:,jatom) + xl(:,mbeta)
        ! Find r21 = vector pointing from r1 to r2, the two ends of the
        ! bondcharge, and the bc distance, y
        r21(:) = r2(:) - r1(:)
