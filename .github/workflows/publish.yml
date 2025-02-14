@@ -14,7 +14,7 @@ jobs:
       run: |
         docker pull quay.io/pypa/manylinux_2_28_x86_64
         docker run -v $(pwd):/fireballpy quay.io/pypa/manylinux_2_28_x86_64 /bin/bash -c "cd /fireballpy && \
-        yum install -y openblas-devel && \
+        yum install -y openblas-devel openmpi-devel && \
         pipx install build && \
         pyproject-build -w && \
         mkdir wheels && \

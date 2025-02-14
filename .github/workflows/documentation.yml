@@ -29,7 +29,7 @@ jobs:
           python -m pip install jupyterlite-core==0.2.1 jupyterlab~=4.0.9 notebook~=7.0.6 --user
           python -m pip install jupyterlite-pyodide-kernel==0.2.0 --user
       - name: Install OpenBLAS
-        run: sudo apt install libopenblas-dev
+        run: sudo apt install libopenblas-dev libopenmpi-dev
       - name: Build FireballPy
         run: python -m build
       - name: Install FireballPy
