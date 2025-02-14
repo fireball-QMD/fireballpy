@@ -65,6 +65,9 @@ env.append('PKG_CONFIG_PATH', get_option('libdir') / 'pkgconfig')
 add_global_arguments(fflags, language: 'fortran')
 add_global_arguments(cflags, language: 'c')
 
+# Find mpifort
+mpi_dep = dependency('mpi', language: 'fortran')
+
 # Link LAPACK and BLAS (strat from scipy)
 blas_name = get_option('blas')
 lapack_name = get_option('lapack')
@@ -108,7 +111,7 @@ fortranobject_dep = declare_dependency(
   include_directories: [incdir_numpy, incdir_f2py],
 )
 
-# Build fireball, begin and create
+# Build _fireball, _begin and create.x
 subdir('src')
 
 # Build fireballpy

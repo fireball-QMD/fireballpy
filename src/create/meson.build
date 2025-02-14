@@ -28,6 +28,9 @@ initializers_srcs = [
   'broadcast_noMPI.f90',
   'finalize_noMPI.f90',
   'init_noMPI.f90',
+  'broadcast_MPI.f90',
+  'finalize_MPI.f90',
+  'init_MPI.f90',
 ]
 
 integrals_srcs = [
@@ -140,6 +143,10 @@ foreach src : readfiles_srcs
 endforeach
 create_srcs += 'create.f90'
 
-# Build create library
-create_lib = static_library('create', create_srcs)
-create_dep = declare_dependency(link_with: create_lib, sources: create_srcs)
+# Build create executable
+create_exe = executable('create.x',
+  create_srcs,
+  dependencies: mpi_dep,
+  install: true,
+  install_dir: py.get_install_dir() / 'fireballpy' / 'basis',
+)

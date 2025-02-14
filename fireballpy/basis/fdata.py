@@ -2,9 +2,12 @@ import json
 import os
 import pathlib
 import shutil
+import subprocess
+import sys
 import re
 import time
 from enum import IntEnum
+from multiprocessing import cpu_count
 from typing import Annotated
 
 import numpy as np
@@ -22,8 +25,8 @@ from fireballpy.utils import TIMESTR, get_fb_home, download_check_tar, extract_t
 from ase.data import atomic_numbers, atomic_names, atomic_masses, chemical_symbols
 
 from fireballpy import __version__
+from fireballpy.basis import __file__ as __basis_file__
 from fireballpy.basis._begin import generate_wavefunctions, generate_vnn
-from fireballpy.basis._create import generate_basis
 
 
 # Commands preparation
@@ -628,10 +631,10 @@ def write_lines(ele: Element) -> str:
 @app.command
 def basis(folder: Annotated[pathlib.Path, Parameter(validator=Path(exists=True, file_okay=False,
                                                                    dir_okay=True))]=pathlib.Path('cinput'), *,
-          output: Annotated[pathlib.Path, Parameter(validator=Path(exists=False, file_okay=False, dir_okay=False),
-                                                    name=['-o', '--output'])]=pathlib.Path('coutput'),
-          elements: Annotated[list[str] | None, Parameter(name=['-el', '--elements'], show_default=False)]=None,
-          verbose: Annotated[bool, Parameter(negative=False)]=False):
+          output: Annotated[pathlib.Path, Parameter(validator=Path(exists=False, file_okay=False, dir_okay=False))]=pathlib.Path('coutput'),
+          elements: Annotated[list[str] | None, Parameter(show_default=False, negative=False)]=None,
+          verbose: Annotated[bool, Parameter(negative=False)]=False,
+          njobs: Annotated[int, Parameter()]=1):
     """Generate the FData for the elements with computed wavefunctions in FOLDER. This process may take some time.
 
     Parameters
@@ -644,7 +647,12 @@ def basis(folder: Annotated[pathlib.Path, Parameter(validator=Path(exists=True, 
         List of elements (either symbol or atomic number) to consider for the base. [default: all computed in "FOLDER"]
     verbose: bool
         Print which file is being written.
+    njobs: int
+        Number of processors to use. If set to "-1" all available will be used. To use this option "mpirun" must be available.
     """
+    if njobs < 0 and njobs != -1:
+        raise_err(ValueError('Invalid value for "--njobs". Must be positive or -1.'))
+
     folder = folder.absolute()
     metafile = os.path.join(folder, 'meta.json')
     if not os.path.isfile(metafile):
@@ -684,7 +692,7 @@ def basis(folder: Annotated[pathlib.Path, Parameter(validator=Path(exists=True, 
     nowfolder = os.getcwd()
     os.chdir(output)
     with open('create.input', 'w') as fp:
-        fp.write(f'{len(els)}\n')
+        fp.write(f'{len(els)}{os.linesep}')
         for el in els:
             shutil.copy2(folder/el.ppfile, el.ppfile)
             shutil.copy2(folder/el.ppionfile, el.ppionfile)
@@ -695,7 +703,37 @@ def basis(folder: Annotated[pathlib.Path, Parameter(validator=Path(exists=True, 
             fp.write(os.linesep)
 
     os.makedirs('coutput', exist_ok=False)
-    generate_basis(verbose)
+
+    auto = njobs == -1
+    if auto:
+        njobs = cpu_count()
+    try:
+        exepath = os.path.join(os.path.split(__basis_file__)[0], 'create.x')
+        argv = [str(njobs), f'{1 if verbose else 0}']
+        if njobs == 1:
+            p = subprocess.Popen([exepath] + argv, stdout=sys.stdout, stderr=sys.stderr)
+        else:
+            try:
+                p = subprocess.Popen(['mpirun', '-np', str(njobs), exepath] + argv,
+                                     stdout=sys.stdout, stderr=sys.stderr)
+            except FileNotFoundError:
+                os.chdir(nowfolder)
+                shutil.rmtree(output)
+                raise_err(RuntimeError('"mpirun" is not available.'))
+        p.communicate()  # type: ignore
+        if p.returncode != 0 and auto:  # type: ignore
+            p = subprocess.Popen(['mpirun', '-np', str(njobs//2), exepath] + argv,
+                                    stdout=sys.stdout, stderr=sys.stderr)
+            p.communicate()  # type: ignore
+        if p.returncode != 0:  # type: ignore
+            os.chdir(nowfolder)
+            shutil.rmtree(output)
+            raise_err(RuntimeError('Basis creation failed!'))
+    except KeyboardInterrupt:
+        os.chdir(nowfolder)
+        shutil.rmtree(output)
+        raise
+
     os.makedirs('basis')
     shutil.copy2(folder/'meta.json', os.path.join('basis', 'meta.json'))
     shutil.move('create.input', os.path.join('basis', 'create.input'))

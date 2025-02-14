@@ -70,7 +70,7 @@
 !
 ! Program Declaration
 ! ======================================================================
-        subroutine create(signature)
+        program create
         use constants
         use precision
         implicit none
@@ -85,13 +85,14 @@
         include 'pseudopotentials.inc'
 ! Argument Declaration and Description
 ! ======================================================================
-        character(len=70), intent(in) :: signature
  
 ! Local Parameters and Data Declaration
 ! ======================================================================
  
 ! Local Variable Declaration and Description
 ! ======================================================================
+        integer iaux1
+        integer iaux2
         integer ideriv
         integer iderivmin
         integer iderivmax
@@ -246,6 +247,9 @@
         character(len=25) ppfile (nspec_max)
         character(len=25) wavefxn (nspec_max, nsh_max)
         character(len=70) what (nspec_max)
+        character(len=70) :: signature
+        character(len=70) :: argaux
+
  
         logical read_info
  
@@ -255,12 +259,23 @@
  
 ! Procedure
 ! ======================================================================
+        call get_command_argument(1, argaux)
+        read (argaux, *) iaux1
+        call get_command_argument(2, argaux)
+        read (argaux, *) iaux2
+        verbose = .false.
+        if (iaux2 .eq. 1) verbose = .true.
+
 ! Setup the clm coefficients
+        signature = 'FireballPy'
         call setup_clm
  
 ! Initialize MPI
-!        call init_MPI (iammaster, iammpi, my_proc, nproc)
-        call init_noMPI (iammaster, iammpi, my_proc, nproc)
+        if (iaux1 .eq. 1) then
+          call init_noMPI (iammaster, iammpi, my_proc, nproc)
+        else
+          call init_MPI (iammaster, iammpi, my_proc, nproc)
+        end if
  
         if (iammaster) then
 !         write (*,*) '  '
@@ -300,6 +315,11 @@
         end if ! end master
  
 !  MPI Broadcast signature
+        if (iaux1 .eq. 1) then
+          call broadcast_noMPI (signature)
+        else
+          call broadcast_MPI (signature)
+        end if
 !        call signature_MPI (signature)
  
 ! **********************************************************************
@@ -1832,7 +1852,11 @@
  
 ! MPI CLEAN UP
 !        call Finalize_MPI
-        call finalize_noMPI
+        if (iaux1 .eq. 1) then
+          call finalize_noMPI
+        else
+          call finalize_MPI
+        end if
  
 ! Format Statements
 ! ======================================================================
