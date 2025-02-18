@@ -24,14 +24,14 @@ from fireballpy.utils import TIMESTR, get_fb_home, download_check_tar, extract_t
 
 from ase.data import atomic_numbers, atomic_names, atomic_masses, chemical_symbols
 
-from fireballpy import __version__
+from fireballpy import __version__ as __fb_version__
 from fireballpy.basis import __file__ as __basis_file__
 from fireballpy.basis._begin import generate_wavefunctions, generate_vnn
 
 
 # Commands preparation
 console = Console()
-app = App(console=console, version=__version__)
+app = App(console=console, version=__fb_version__)
 
 ## Wavefunctions groups
 pot_help = r'The confining potential has the form: V = [r > r_0] * V_0 * exp[-(r_c - r_0)/(r - r_0)/(r_c - r)]'
@@ -334,6 +334,8 @@ class Element:
         else:
             with open(metafile, 'r') as fp:
                 meta = json.load(fp)
+            if meta['VERSION'] == __fb_version__:
+                return
             vhave = time.strptime(meta['TIME'], TIMESTR)
             vnew = download_check_tar(PPURL, pptar, 'PP files', vhave)
             if vnew != vhave:

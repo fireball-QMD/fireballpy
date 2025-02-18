@@ -13,6 +13,8 @@ from typing import Any
 import requests
 from tqdm import tqdm
 
+from fireballpy import __version__ as __fb_version__
+
 
 ENV_FB_HOME = "FIREBALL_HOME"
 ENV_XDG_CACHE_HOME = "XDG_CACHE_HOME"
@@ -134,6 +136,7 @@ def extract_tar(tarpath: str, fdata_path: str, meta: dict[str, Any],
 
     # Write metadata
     meta['TIME'] = time.strftime(TIMESTR, strtime)
+    meta['VERSION'] = __fb_version__
     with open(os.path.join(fdata_path, 'meta.json'), 'w') as fp:
         json.dump(meta, fp)
 

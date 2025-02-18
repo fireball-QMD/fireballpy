@@ -11,6 +11,7 @@ if sys.version_info >= (3, 11):
 else:
     import tomli as tomllib
 
+from fireballpy import __version__ as __fb_version__
 from fireballpy._errors import type_check
 from fireballpy.utils import TIMESTR, get_fb_home, download_check_tar, extract_tar
 from fireballpy.atoms import AtomSystem
@@ -149,6 +150,8 @@ class FDataFiles:
         # Read metadata
         with open(metafile, 'r') as fp:
             meta = json.load(fp)
+        if meta['VERSION'] == __fb_version__:
+            return
         vhave = time.strptime(meta['TIME'], TIMESTR)
         vnew = download_check_tar(tarurl, tarpath, 'FData', vhave)
         if vnew != vhave:
@@ -160,12 +163,11 @@ class FDataFiles:
             raise ValueError(f'FData {self.path} does not contain all required species')
 
     def _prep_infodat(self) -> None:
-        infodat = []
-        for i, j in self.blocks:
-            if (not self.lazy) or (_get_specie_block(self.infodat, (i, j)) in self.species):
-                infodat.extend(self.infodat[i:j+1])
         infodat = ['   fireballpy_generated ',
-                  f'   {len(self.species)} - Number of species '] + infodat
+                   f'   {len(self.species) if not self.lazy else len(self.species_present)} - Number of species ']
+        for i, j in self.blocks:
+            if (not self.lazy) or (_get_specie_block(self.infodat, (i, j)) in self.species_present):
+                infodat.extend(self.infodat[i:j+1])
         with open(self.pyinfofile, 'w') as fp:
             fp.write(os.linesep.join(infodat))
 
