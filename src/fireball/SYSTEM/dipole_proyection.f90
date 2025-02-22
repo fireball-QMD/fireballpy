@@ -7,7 +7,7 @@ subroutine dipole_proyection()
   use M_fdata, only: num_orb,nssh,Qneutral
   implicit none
   real(c_double), parameter ::  Debye = 0.208194d0
-  real(c_double), parameter ::  klambda = 1.0d0
+  real(c_double), parameter ::  klambda = 1.4d0
   integer(c_long) iatom
   integer(c_long) imu
   integer(c_long) in1, in2
@@ -207,7 +207,7 @@ subroutine dipole_proyection()
       jatom = neigh_j(ineigh,iatom)
       r2(:) = ratom(:,jatom) + xl(:,mbeta)
       in2 = imass(jatom)
-      w_k(ineigh)=exp(-klambda*((r2(1)-r1(1))**2+(r2(2)-r1(2))**2+(r2(3)-r1(3))**2))
+      w_k(ineigh)=exp(-klambda*sqrt((r2(1)-r1(1))**2+(r2(2)-r1(2))**2+(r2(3)-r1(3))**2))
       rmedio = rmedio + w_k(ineigh)*r2
       w_suma = w_suma + w_k(ineigh)
     end do !end ineigh = 1,natoms
