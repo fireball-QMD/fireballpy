@@ -11,7 +11,7 @@ from fireballpy import Fireball
 
 class Test(unittest.TestCase):
     TOL = 1e-8
-    FDATA = 'HCSi'
+    FDATA = 'CHON'
     FILENAME = 'periodic.xyz'
     DATAFILE = 'periodic.json'
     KPTS = (4,4,4)
@@ -31,7 +31,7 @@ class Test(unittest.TestCase):
         cm = 'lowdin'
         for dp in self.dipoles:
             data = self.data[f'{dp}::{cm}']
-            self.atoms.calc = Fireball(fdata='HCSi', kpts=self.KPTS, lazy=False,
+            self.atoms.calc = Fireball(fdata=self.FDATA, kpts=self.KPTS, lazy=False,
                                        charges_method=cm, dipole_method=dp, correction=False)
 
             self.assertAlmostEqual(self.atoms.get_potential_energy(), data['potential_energy'], delta=self.TOL)
@@ -45,7 +45,7 @@ class Test(unittest.TestCase):
         cm = 'weighted_lowdin'
         for dp in self.dipoles:
             data = self.data[f'{dp}::{cm}']
-            self.atoms.calc = Fireball(fdata='HCSi', kpts=self.KPTS, lazy=False,
+            self.atoms.calc = Fireball(fdata=self.FDATA, kpts=self.KPTS, lazy=False,
                                        charges_method=cm, dipole_method=dp, correction=False)
 
             self.assertAlmostEqual(self.atoms.get_potential_energy(), data['potential_energy'], delta=self.TOL)
@@ -59,7 +59,7 @@ class Test(unittest.TestCase):
         cm = 'mulliken'
         for dp in self.dipoles:
             data = self.data[f'{dp}::{cm}']
-            self.atoms.calc = Fireball(fdata='HCSi', kpts=self.KPTS, lazy=False,
+            self.atoms.calc = Fireball(fdata=self.FDATA, kpts=self.KPTS, lazy=False,
                                        charges_method=cm, dipole_method=dp, correction=False)
 
             self.assertAlmostEqual(self.atoms.get_potential_energy(), data['potential_energy'], delta=self.TOL)
@@ -73,7 +73,7 @@ class Test(unittest.TestCase):
         cm = 'mulliken_dipole'
         for dp in self.dipoles:
             data = self.data[f'{dp}::{cm}']
-            self.atoms.calc = Fireball(fdata='HCSi', kpts=self.KPTS, lazy=False,
+            self.atoms.calc = Fireball(fdata=self.FDATA, kpts=self.KPTS, lazy=False,
                                        charges_method=cm, dipole_method=dp, correction=False)
 
             self.assertAlmostEqual(self.atoms.get_potential_energy(), data['potential_energy'], delta=self.TOL)
@@ -87,7 +87,7 @@ class Test(unittest.TestCase):
         cm = 'mulliken_dipole_preserving'
         for dp in self.dipoles:
             data = self.data[f'{dp}::{cm}']
-            self.atoms.calc = Fireball(fdata='HCSi', kpts=self.KPTS, lazy=False,
+            self.atoms.calc = Fireball(fdata=self.FDATA, kpts=self.KPTS, lazy=False,
                                        charges_method=cm, dipole_method=dp, correction=False)
 
             self.assertAlmostEqual(self.atoms.get_potential_energy(), data['potential_energy'], delta=self.TOL)

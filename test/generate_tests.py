@@ -6,7 +6,7 @@ from fireballpy.fdata import load_fdata
 from fireballpy import Fireball
 
 
-FDATA = 'HCSi'
+FDATA = 'CHON'
 CHARGES_METHOD = ['lowdin', 'weighted_lowdin', 'mulliken',
                   'mulliken_dipole', 'mulliken_dipole_preserving']
 
