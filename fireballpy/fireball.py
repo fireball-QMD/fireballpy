@@ -91,7 +91,7 @@ class BaseFireball:
                    "Advances and applications in the FIREBALL ab initio
                    tight-binding molecular-dynamics formalism",
                    *Phys. Status Solidi B*, 248(9):1989-2007, 2011.
-                   `DOI:10.1002/pssb.201147259
+                   DOI: `10.1002/pssb.201147259
                    <https://doi.org/10.1002/pssb.201147259>`_
 
     """

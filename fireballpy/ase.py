@@ -1,5 +1,6 @@
 from __future__ import annotations
 from typing import SupportsFloat
+import warnings
 
 import numpy as np
 from numpy.typing import ArrayLike
@@ -9,6 +10,8 @@ from fireballpy.atoms import AtomSystem
 from fireballpy.fdata import FDataFiles
 from fireballpy.kpoints import KPoints
 from fireballpy.fireball import BaseFireball
+
+from fireballpy._fireball import set_qmmm, update_qmmm, get_qmmm_forces
 
 
 class Fireball(Calculator, BaseFireball):
@@ -342,6 +345,9 @@ class Fireball(Calculator, BaseFireball):
         """
         self.isfix_charges = False
 
+    def embed(self, q_p, rc=0.1, rc2=1e200, width=1.0):
+        return PointChargePotential(q_p, rc=rc, rc2=rc2, width=width)
+
     def calculate(self, atoms=None, properties=['energy'],
                   system_changes=all_changes) -> None:
         Calculator.calculate(self, atoms, properties, system_changes)
@@ -376,3 +382,68 @@ class Fireball(Calculator, BaseFireball):
         if 'forces' in properties:
             self.calc_forces(self.isfix_charges)
             self.results.update({'forces': self.forces})
+
+
+class PointChargePotential:
+    def __init__(self, charges, positions=None, rc=0.2, rc2=np.inf, width=1.0):
+        """Point-charge potential.
+
+        charges: list of float
+            Charges in units of `|e|`.
+        positions: (N, 3)-shaped array-like of float
+            Positions of charges in Angstrom.  Can be set later.
+        rc: float
+            Inner cutoff for Coulomb potential in Angstrom.
+        rc2: float
+            Outer cutoff for Coulomb potential in Angstrom.
+        width: float
+            Width for cutoff function for Coulomb part.
+
+        For r < rc, 1 / r is replaced by a third order polynomial in r^2 that
+        has matching value, first derivative, second derivative and integral.
+
+        For rc2 - width < r < rc2, 1 / r is multiplied by a smooth cutoff
+        function (a third order polynomium in r).
+
+        You can also give rc a negative value.  In that case, this formula
+        is used::
+
+            (r^4 - rc^4) / (r^5 - |rc|^5)
+
+        for all values of r - no cutoff at rc2!
+        """
+        self.charges = np.ascontiguousarray(charges, dtype=np.float64)
+        self.n = self.charges.shape[0]
+        if self.charges.shape != (self.n,):
+            raise ValueError("Parameter ``q_p`` must be an array with natoms elements")
+        self.rc = np.float64(rc)
+        self.rc2 = np.float64(rc2)
+        self.width = np.float64(width)
+
+        self.positions = None
+        if positions is not None:
+            self.set_positions(positions)
+
+        if abs(self.charges).max() < 1e-14:
+            warnings.warn('No charges!')
+        if self.rc < 0.0 and self.rc2 < 1e200:
+            warnings.warn('Long range cutoff chosen but will not be applied\
+                           for negative inner cutoff values!')
+
+    def set_positions(self, positions, **kwargs):
+        """Update positions."""
+        positions = np.ascontiguousarray(positions, dtype=np.float64)
+        if positions.shape != (self.n, 3):
+            raise ValueError("Parameter ``positions`` must be a 2D array with dimensions natoms x 3")
+
+        if self.positions is None:
+            set_qmmm(positions.T, self.charges, self.rc, self.rc2, self.width)
+        else:
+            update_qmmm(positions.T)
+        self.positions = positions
+
+    def get_forces(self, calc: Fireball):
+        """Calculate forces from QM charge density on point-charges."""
+        forces = np.zeros((self.n, 3), dtype=np.float64, order='C')
+        get_qmmm_forces(forces.T)
+        return forces

@@ -3,12 +3,13 @@ subroutine set_options(dipole_method, charges_method, &
     & ismolecule, isgamma, total_charge, mixer_method, &
     & max_iter, mix_order, beta, w0, tol)
   use iso_c_binding
-  use M_system, only: igamma, icluster, idipole, iqout, &
+  use M_system, only: igamma, icluster, idipole, iqout, iqmmm, &
     & qstate, ialgmix, max_scf_iterations, idmix, w02, bmix, sigmatol
   implicit none
   integer(c_long), intent(in) :: dipole_method, charges_method, &
     & ismolecule, isgamma, total_charge, mixer_method, max_iter, mix_order
   real(c_double), intent(in) :: beta, w0, tol
+  iqmmm = 0 ! ensure this is off by default
   idipole = dipole_method
   iqout = charges_method
   icluster = ismolecule
@@ -99,13 +100,47 @@ subroutine set_kpoints(nkpts, kpts, weights)
   special_k = kpts
 end subroutine set_kpoints
 
+! Set MM positions and charges
+! positions are in Angstroms and charges in |e| units
+subroutine set_qmmm(n, pos, qs, rc1, rc2, width)
+  use iso_c_binding
+  use M_system, only: iqmmm, qmmm_qm_natoms, qmmm_qm_xcrd, qmmm_dxyzcl, qmmm_rc1, qmmm_rc2, qmmm_width
+  implicit none
+  integer(c_long), intent(in) :: n
+  real(c_double), dimension(3, n), intent(in) :: pos
+  real(c_double), dimension(n), intent(in) :: qs
+  real(c_double), intent(in) :: rc1, rc2, width
+  if (allocated(qmmm_qm_xcrd)) deallocate(qmmm_qm_xcrd)
+  allocate (qmmm_qm_xcrd(4, n))
+  if (allocated(qmmm_dxyzcl)) deallocate(qmmm_dxyzcl)
+  allocate (qmmm_dxyzcl(3, n))
+  iqmmm = 1_c_long
+  qmmm_qm_natoms = n
+  qmmm_qm_xcrd(1:3, :) = pos
+  qmmm_qm_xcrd(4, :) = qs
+  qmmm_rc1 = rc1
+  qmmm_rc2 = rc2
+  qmmm_width = width
+end subroutine set_qmmm
+
+! Update MM positions
+subroutine update_qmmm(n, pos)
+  use iso_c_binding
+  use M_system, only: iqmmm, qmmm_qm_xcrd
+  implicit none
+  integer(c_long), intent(in) :: n
+  real(c_double), dimension(3, n), intent(in) :: pos
+  iqmmm = 1_c_long ! ensure
+  qmmm_qm_xcrd(1:3, :) = pos
+end subroutine update_qmmm
+
 ! Load FData in the module
 subroutine loadfdata_from_path(fdata_path)
   use iso_c_binding
   use M_fdata, only: fdataLocation
   implicit none
   character(len=400), intent(in) :: fdata_path
-  fdatalocation=trim(fdata_path)
+  fdatalocation = trim(fdata_path)
   call load_fdata()
 end subroutine loadfdata_from_path
  
@@ -207,6 +242,16 @@ subroutine calc_forces(natoms, forces, errno_out)
   errno_out = errno
   forces = ftot
 end subroutine calc_forces
+
+! Get the forces of the QM region on the MM region
+subroutine get_qmmm_forces(natoms, forces)
+  use iso_c_binding
+  use M_system, only : qmmm_dxyzcl
+  implicit none
+  integer(c_long), intent(in) :: natoms
+  real(c_double), dimension(3, natoms), intent(inout) :: forces
+  forces = qmmm_dxyzcl
+end subroutine get_qmmm_forces
 
 ! Get hamiltonian and overlap matrix
 subroutine get_hs(norbitals, natoms, orbitals, sdat, hdat)
