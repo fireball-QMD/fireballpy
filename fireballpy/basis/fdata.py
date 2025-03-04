@@ -334,12 +334,11 @@ class Element:
         else:
             with open(metafile, 'r') as fp:
                 meta = json.load(fp)
-            if meta['VERSION'] == __fb_version__:
-                return
-            vhave = time.strptime(meta['TIME'], TIMESTR)
-            vnew = download_check_tar(PPURL, pptar, 'PP files', vhave)
-            if vnew != vhave:
-                extract_tar(pptar, ppfolder + os.path.sep, meta, vnew)
+            if meta['VERSION'] != __fb_version__:
+                vhave = time.strptime(meta['TIME'], TIMESTR)
+                vnew = download_check_tar(PPURL, pptar, 'PP files', vhave)
+                if vnew != vhave:
+                    extract_tar(pptar, ppfolder + os.path.sep, meta, vnew)
 
         # Use normal file if there is no ion
         self.ppionfile = f'{symchar}++.pp'
@@ -501,8 +500,9 @@ def wavefunctions(element: Annotated[str, Parameter(group=args_grp)],
                                'pmix': ele.cmix[i],
                                'vpot': ele.v0[i],
                                'rpot': ele.r0[i],
-                               'filename_wf': ele.filename_wf[i],
-                               'filename_ewf': ele.filename_ewf[i]}
+                               'filename_wf': ele.filename_wf[i]}
+        if ele.nexcite in [1, 2]:
+            meta[ele.symbol][o]['filename_ewf'] = ele.filename_ewf[i]
 
     generate_wavefunctions(ioption_in=ele.ioption,
                            nexcite_in=ele.nexcite,
@@ -526,6 +526,9 @@ def wavefunctions(element: Annotated[str, Parameter(group=args_grp)],
                            v0_in=ele.v0,
                            filename_wf_in=ele.filename_wf,
                            filename_ewf_in=ele.filename_ewf)
+    if ele.nexcite == 3:
+        for few in ele.filename_ewf:
+            os.remove(os.path.join(output, few))
 
     with open(metafile, 'w') as fp:
         json.dump(meta, fp)
@@ -538,7 +541,8 @@ def wavefunctions(element: Annotated[str, Parameter(group=args_grp)],
         for i, o in enumerate(ele.orbitals):
             meta[ele.symbol]['filename_na0'] = ele.filename_na[0]
             meta[ele.symbol][o]['filename_na'] = ele.filename_na[i+1]
-            meta[ele.symbol][o]['filename_ena'] = ele.filename_ena[i]
+            if ele.nexcite in [1, 2]:
+                meta[ele.symbol][o]['filename_ena'] = ele.filename_ena[i]
         with open(metafile, 'w') as fp:
             json.dump(meta, fp)
 
@@ -576,13 +580,15 @@ def finnish(element: Annotated[str, Parameter(group=args_grp)], *,
     ele.xocc0 = [meta[ele.symbol][o]['nelectrons_neutral'] for o in orbitals]
     ele.rcutoff = [meta[ele.symbol][o]['radius'] for o in orbitals]
     ele.filename_wf = [meta[ele.symbol][o]['filename_wf'] for o in orbitals]
-    ele.filename_ewf = [meta[ele.symbol][o]['filename_ewf'] for o in orbitals]
+    if ele.nexcite in [1, 2]:
+        ele.filename_ewf = [meta[ele.symbol][o]['filename_ewf'] for o in orbitals]
 
     compute_vnn(ele, output)
     for i, o in enumerate(ele.orbitals):
         meta[ele.symbol]['filename_na0'] = ele.filename_na[0]
         meta[ele.symbol][o]['filename_na'] = ele.filename_na[i+1]
-        meta[ele.symbol][o]['filename_ena'] = ele.filename_ena[i]
+        if ele.nexcite in [1, 2]:
+            meta[ele.symbol][o]['filename_ena'] = ele.filename_ena[i]
     with open(metafile, 'w') as fp:
         json.dump(meta, fp)
 
@@ -679,13 +685,14 @@ def basis(folder: Annotated[pathlib.Path, Parameter(validator=Path(exists=True, 
         el.orbitals = ''.join(o for o in ANGULAR_MOMENTUM if o in meta[el.symbol])
         el.xocc0 = [meta[el.symbol][o]['nelectrons_neutral'] for o in el.orbitals]
         el.rcutoff = [meta[el.symbol][o]['radius'] for o in el.orbitals]
+        el.nexcite = meta[el.symbol]['nexcite']
         el.filename_wf = [meta[el.symbol][o]['filename_wf'] for o in el.orbitals]
-        el.filename_ewf = [meta[el.symbol][o]['filename_ewf'] for o in el.orbitals]
         el.filename_na = [meta[el.symbol]['filename_na0']] + [meta[el.symbol][o]['filename_na'] for o in el.orbitals]
-        el.filename_ena = [meta[el.symbol][o]['filename_ena'] for o in el.orbitals]
+        if el.nexcite in [1, 2]:
+            el.filename_ewf = [meta[el.symbol][o]['filename_ewf'] for o in el.orbitals]
+            el.filename_ena = [meta[el.symbol][o]['filename_ena'] for o in el.orbitals]
         el.ppfile = meta[el.symbol]['ppfile']
         el.ppionfile = meta[el.symbol]['ppionfile']
-        el.nexcite = meta[el.symbol]['nexcite']
         els.append(el)
 
     output = output.absolute()
@@ -698,9 +705,13 @@ def basis(folder: Annotated[pathlib.Path, Parameter(validator=Path(exists=True, 
         for el in els:
             shutil.copy2(folder/el.ppfile, el.ppfile)
             shutil.copy2(folder/el.ppionfile, el.ppionfile)
-            for f in el.filename_wf + el.filename_ewf + el.filename_na + el.filename_ena:
+            for f in el.filename_wf + el.filename_na:
                 if os.path.isfile(folder/f):
                     shutil.copy2(folder/f, f)
+            if el.nexcite in [1, 2]:
+                for f in el.filename_ewf + el.filename_ena:
+                    if os.path.isfile(folder/f):
+                        shutil.copy2(folder/f, f)
             fp.write(write_lines(el))
             fp.write(os.linesep)
 
@@ -743,9 +754,13 @@ def basis(folder: Annotated[pathlib.Path, Parameter(validator=Path(exists=True, 
         shutil.move(el.ppfile, os.path.join('basis', el.ppfile))
         shutil.move(el.ppionfile, os.path.join('basis', el.ppionfile))
         shutil.move(f'{el.symbol}.input', os.path.join('basis', f'{el.symbol}.input'))
-        for f in el.filename_wf + el.filename_ewf + el.filename_na + el.filename_ena:
+        for f in el.filename_wf + el.filename_na:
             if os.path.isfile(f):
                 shutil.move(f, os.path.join('basis', f))
+        if el.nexcite in [1, 2]:
+            for f in el.filename_ewf + el.filename_ena:
+                if os.path.isfile(f):
+                    shutil.move(f, os.path.join('basis', f))
 
     for f in filter(lambda x: x.endswith('.dat'), os.listdir('coutput')):
         shutil.move(os.path.join('coutput', f), f)
