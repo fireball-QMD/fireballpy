@@ -8,7 +8,7 @@ import re
 import time
 from enum import IntEnum
 from multiprocessing import cpu_count
-from typing import Annotated
+from typing import Annotated, Optional
 import numpy as np
 from numpy.typing import NDArray
 import matplotlib.pyplot as plt
@@ -405,16 +405,16 @@ def wavefunctions(element: Annotated[str, Parameter(group=args_grp)],
                   orbitals: Annotated[str, Parameter(group=args_grp)], *,
                   nelectrons: Annotated[list[float], Parameter(group=parms_grp, name=['-n', '--nelectrons'])],
                   radius: Annotated[list[float], Parameter(group=parms_grp, name=['-r', '--radius'])],
-                  nelectrons_neutral: Annotated[list[float] | None, Parameter(group=parms_grp, name=['-n0', '--nelectrons-neutral'])]=None,
+                  nelectrons_neutral: Annotated[Optional[list[float]], Parameter(group=parms_grp, name=['-n0', '--nelectrons-neutral'])]=None,
                   exchange_correlation: Annotated[ECEnum, Parameter(group=args_grp, name=['-ec', '--exchange-correlation'])]=ECEnum.BLYP,
                   output: Annotated[pathlib.Path, Parameter(validator=Path(exists=False, file_okay=False, dir_okay=True), group=args_grp,
                                                             name=['-o', '--output'])]=pathlib.Path('cinput'),
                   save: Annotated[str | None, Parameter(group=args_grp, name=['-s', '--save'])]=None,
                   excite: Annotated[ExcitedEnum, Parameter(group=exc_grp, show_default=False)]=ExcitedEnum.NONE,
-                  nmix: Annotated[list[float] | None, Parameter(group=exc_grp, negative='')]=None,
-                  pmix: Annotated[list[float] | None, Parameter(group=exc_grp, negative='')]=None,
-                  vpot: Annotated[list[float] | None, Parameter(group=pot_grp, negative='')]=None,
-                  rpot: Annotated[list[float] | None, Parameter(group=pot_grp, negative='')]=None):
+                  nmix: Annotated[Optional[list[float]], Parameter(group=exc_grp, negative='', consume_multiple=True)]=None,
+                  pmix: Annotated[Optional[list[float]], Parameter(group=exc_grp, negative='', consume_multiple=True)]=None,
+                  vpot: Annotated[Optional[list[float]], Parameter(group=pot_grp, negative='', consume_multiple=True)]=None,
+                  rpot: Annotated[Optional[list[float]], Parameter(group=pot_grp, negative='', consume_multiple=True)]=None):
     """Application to generate wavefunctions for an ELEMENT with specified ORBITALS.
 
     Parameters
@@ -485,6 +485,7 @@ def wavefunctions(element: Annotated[str, Parameter(group=args_grp)],
     ele.pp_filenames(output)
     ele.wf_filenames()
 
+    save_orbs = ''
     meta[ele.symbol]['nexcite'] = ele.nexcite
     meta[ele.symbol]['ioption'] = ele.ioption
     meta[ele.symbol]['ppfile'] = ele.ppfile
@@ -492,6 +493,7 @@ def wavefunctions(element: Annotated[str, Parameter(group=args_grp)],
     for i, o in enumerate(ele.orbitals):
         if not ele.sav[i]:
             continue
+        save_orbs += o
         meta[ele.symbol][o] = {'nelectrons': ele.xocc[i],
                                'nelectrons_neutral': ele.xocc0[i],
                                'radius': ele.rcutoff[i],
@@ -533,7 +535,7 @@ def wavefunctions(element: Annotated[str, Parameter(group=args_grp)],
         json.dump(meta, fp)
 
     if save is not None:
-        info(f'Wavefunctions for element "{ele.provided}", orbital{'s' if len(ele.orbitals) > 1 else ''} "{ele.orbitals}" saved.\n'
+        info(f'Wavefunctions for element "{ele.provided}", orbital{'s' if len(save_orbs) > 1 else ''} "{save_orbs}" saved.\n'
              f'Please remember to run "fdata wavefunctions finnish {ele.provided} -o {output}" once all desired orbitals have been computed.')
     else:
         compute_vnn(ele, output)
@@ -572,6 +574,7 @@ def finnish(element: Annotated[str, Parameter(group=args_grp)], *,
         raise_err(RuntimeError(f'The "meta.json" does not have information about element "{ele.provided}".'))
 
     orbitals = [o for o in ANGULAR_MOMENTUM if o in meta[ele.symbol]]
+    ele.orbitals = ''.join(orbitals)
     ele.nexcite = meta[ele.symbol]['nexcite']
     ele.ioption = meta[ele.symbol]['ioption']
     ele.ppfile = meta[ele.symbol]['ppfile']
@@ -638,7 +641,7 @@ def write_lines(ele: Element) -> str:
 def basis(folder: Annotated[pathlib.Path, Parameter(validator=Path(exists=True, file_okay=False,
                                                                    dir_okay=True))]=pathlib.Path('cinput'), *,
           output: Annotated[pathlib.Path, Parameter(validator=Path(exists=False, file_okay=False, dir_okay=False))]=pathlib.Path('coutput'),
-          elements: Annotated[list[str] | None, Parameter(show_default=False, negative=False)]=None,
+          elements: Annotated[Optional[list[str]], Parameter(show_default=False, negative=False, consume_multiple=True)]=None,
           verbose: Annotated[bool, Parameter(negative=False)]=False,
           njobs: Annotated[int, Parameter()]=1):
     """Generate the FData for the elements with computed wavefunctions in FOLDER. This process may take some time.
@@ -794,6 +797,7 @@ def plot(paths: Annotated[list[pathlib.Path], Parameter(group=parms_grp, name=['
 
     for archivo in files:
       l=0
+      R = 0.0
       y=[]
       x=[]
       for line in open(archivo):
