@@ -596,6 +596,8 @@ def finnish(element: Annotated[str, Parameter(group=args_grp)], *,
 
 
 def compute_vnn(ele: Element, output: pathlib.Path) -> None:
+    if not hasattr(ele, 'filename_ewf'):
+        ele.filename_ewf = [x+'x' for x in ele.filename_wf]
     ele.na_filenames()
     generate_vnn(nexcite_in=ele.nexcite,
                  nznuc_in=ele.nznuc,

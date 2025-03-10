@@ -145,11 +145,11 @@
 !        read (45,*) ioomethod
 !        read (45,*) igauss, ngauss
          itest = 1
-         iharris = 0
-         idogs = 0
+         iharris = 1
+         idogs = 1
          ihubbard = 0
          ispin = 0
-         ixc_opt = 0
+         ixc_opt = 1
          ioomethod = 0
          igauss = 0
 !        close (unit = 45)
