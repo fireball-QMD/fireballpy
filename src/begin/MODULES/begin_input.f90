@@ -2,6 +2,7 @@ module begin_input
   use precision
   implicit none
   integer :: ioption, nexcite, nssh, nznuc, nzval, nzval_ion, ioptim
+  real(kind=long) :: xocc_pp
   character(len=10) :: atomname
   character(len=6) :: ppfile
   character(len=8) :: ppionfile

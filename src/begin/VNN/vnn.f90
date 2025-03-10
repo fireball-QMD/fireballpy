@@ -45,7 +45,7 @@
 !
 ! Program Declaration
 ! ===========================================================================
-        subroutine vnn (etotatom)
+        subroutine vnn ()
         use begin_input
         use constants
         use pp_storage
@@ -54,7 +54,7 @@
 
 ! Argument Declaration and Description
 ! ===========================================================================
-        real(kind=long), intent(in) :: etotatom
+        real(kind=long), parameter :: etotatom = 0.0d0
 
 ! Local Parameters and Data Declaration
 ! ===========================================================================

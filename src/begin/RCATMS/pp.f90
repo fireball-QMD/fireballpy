@@ -161,6 +161,7 @@
 
 ! Read Zval
         read (88,*) Zval
+        if (xocc_pp .gt. 0.0d0) Zval = xocc_pp
         !write (*,*) ' Zval : ', Zval
 
 ! Read in alpha for longranged local part => -Z*e**2*erf(alpha*r)/r

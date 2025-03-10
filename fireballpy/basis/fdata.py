@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 from cyclopts import App, Parameter, Group
 from cyclopts.validators import Path
 from rich import box
-from rich.console import Console
+from rich.console import Console, group
 from rich.panel import Panel
 from rich.text import Text
 
@@ -248,6 +248,16 @@ class Element:
         self._xocc0 = np.ascontiguousarray(value, dtype=np.float64)
 
     @property
+    def xocc_pp(self) -> np.float64:
+        return self._xocc_pp
+
+    @xocc_pp.setter
+    def xocc_pp(self, value: float | None) -> None:
+        if value is None:
+            value = self._nznuc
+        self._xocc_pp = np.float64(value)
+
+    @property
     def ioption(self) -> int:
         return self._ioption
 
@@ -407,6 +417,7 @@ def wavefunctions(element: Annotated[str, Parameter(group=args_grp)],
                   nelectrons: Annotated[list[float], Parameter(group=parms_grp, name=['-n', '--nelectrons'])],
                   radius: Annotated[list[float], Parameter(group=parms_grp, name=['-r', '--radius'])],
                   nelectrons_neutral: Annotated[Optional[list[float]], Parameter(group=parms_grp, name=['-n0', '--nelectrons-neutral'])]=None,
+                  nelectrons_pp: Annotated[Optional[float], Parameter(group=parms_grp, name=['-npp', '--nelectrons-pp'])]=None,
                   exchange_correlation: Annotated[ECEnum, Parameter(group=args_grp, name=['-ec', '--exchange-correlation'])]=ECEnum.BLYP,
                   output: Annotated[pathlib.Path, Parameter(validator=Path(exists=False, file_okay=False, dir_okay=True), group=args_grp,
                                                             name=['-o', '--output'])]=pathlib.Path('cinput'),
@@ -432,6 +443,9 @@ def wavefunctions(element: Annotated[str, Parameter(group=args_grp)],
         Cutoff radius for each of the orbitals in atomic units.
     nelectrons_neutral: list[float] | None
         Number of electrons in the ground state for each of the orbitals. [default: valence electrons]
+    nelectrons_pp: float | None
+        Number of electrons considered for the pseudopotential. Increasing will lead to more constrained orbitals.
+        [default: atomic number]
     exchange_correlation: ECEnum
         Exchange-correlation (EC) functional that will be used.
     output: pathlib.Path
@@ -456,6 +470,7 @@ def wavefunctions(element: Annotated[str, Parameter(group=args_grp)],
     ele.xocc = nelectrons
     ele.rcutoff = radius
     ele.xocc0 = nelectrons_neutral
+    ele.xocc_pp = nelectrons_pp
     ele.ioption = exchange_correlation
     ele.nexcite = excite
     ele.xocc_ion = nmix
@@ -497,6 +512,7 @@ def wavefunctions(element: Annotated[str, Parameter(group=args_grp)],
         save_orbs += o
         meta[ele.symbol][o] = {'nelectrons': ele.xocc[i],
                                'nelectrons_neutral': ele.xocc0[i],
+                               'nelectrons_pp': ele.xocc_pp,
                                'radius': ele.rcutoff[i],
                                'nmix': ele.xocc_ion[i],
                                'pmix': ele.cmix[i],
@@ -523,6 +539,7 @@ def wavefunctions(element: Annotated[str, Parameter(group=args_grp)],
                            xocc_in=ele.xocc,
                            xocc0_in=ele.xocc0,
                            xocc_ion_in=ele.xocc_ion,
+                           xocc_pp_in=ele.xocc_pp,
                            cmix_in=ele.cmix,
                            r0_in=ele.r0,
                            v0_in=ele.v0,
@@ -598,7 +615,7 @@ def finnish(element: Annotated[str, Parameter(group=args_grp)], *,
 
 def compute_vnn(ele: Element, output: pathlib.Path) -> None:
     if not hasattr(ele, 'filename_ewf'):
-        ele.filename_ewf = [x+'x' for x in ele.filename_wf]
+        ele.filename_ewf = [x + 'x' for x in ele.filename_wf]
     ele.na_filenames()
     generate_vnn(nexcite_in=ele.nexcite,
                  nznuc_in=ele.nznuc,
