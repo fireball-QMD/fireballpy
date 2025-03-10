@@ -415,7 +415,7 @@ class PointChargePotential:
         self.charges = np.ascontiguousarray(charges, dtype=np.float64)
         self.n = self.charges.shape[0]
         if self.charges.shape != (self.n,):
-            raise ValueError("Parameter ``q_p`` must be an array with natoms elements")
+            raise ValueError("Parameter ``charges`` must be an array with natoms elements")
         self.rc = np.float64(rc)
         self.rc2 = np.float64(rc2)
         self.width = np.float64(width)
@@ -424,9 +424,9 @@ class PointChargePotential:
         if positions is not None:
             self.set_positions(positions)
 
-        if abs(self.charges).max() < 1e-14:
+        if np.abs(self.charges).max() < 1e-14:
             warnings.warn('No charges!')
-        if self.rc < 0.0 and self.rc2 < 1e200:
+        if self.rc < 0.0 and self.rc2 < np.inf:
             warnings.warn('Long range cutoff chosen but will not be applied\
                            for negative inner cutoff values!')
 

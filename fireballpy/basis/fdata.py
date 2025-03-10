@@ -66,6 +66,7 @@ def raise_err(err: Exception):
 
 PPURL = 'https://fireball.ftmc.uam.es/fireballpy/ppfiles.tar.gz'
 ANGULAR_MOMENTUM = {'s': 0, 'p': 1, 'd': 2, 'f': 3}
+ANGULAR_MOMENTUM_REV = {v: k for k, v in ANGULAR_MOMENTUM.items()}
 A0 = {'s': 2.0, 'p': 1.0, 'd': 0.8, 'f': 0.7}
 ELECTRONS_PER_ORB = {'s': 2, 'p': 6, 'd': 10, 'f': 14}
 ELECTRONIC_CONFIG = '1s,2s,2p,3s,3p,4s,3d,4p,5s,4d,5p,6s,4f,5d,6p,7s,5f,6d,7p,8s'.split(',')
@@ -770,81 +771,50 @@ def basis(folder: Annotated[pathlib.Path, Parameter(validator=Path(exists=True, 
 
 
 @app.command
-def plot(paths: Annotated[list[pathlib.Path], Parameter(group=parms_grp, name=['--paths', '-p'])]):
+def plot(wavefunctions: Annotated[list[pathlib.Path],
+                                  Parameter(negative=False, validator=Path(exists=True, file_okay=True, dir_okay=False))]):
+    """Plot wavefunctions.
 
-    """plot wavefunctions
+    It will generate a matplotlib.pyplot plot of the specified wavefunctions.
+    Options for the style of the plot and file outputs are still under development.
 
     Parameters
     ----------
-    paths: pathlib.Path
-        path where wavefunctions file are located. 
+    wavefunctions: pathlib.Path
+        List of wavefunction files (.wf* or .ewf*) to be plotted. It will raise an exception
+        if unknown file extensions are provided.
     """
-    missing_files = [path for path in paths if not path.exists()]
-    files = [path for path in paths if path.exists()]
-
-    if missing_files:
-        for path in missing_files:
-            print(f"Error: File '{path}' does not exist.")
-
-    for path in files:
-        print(f"Processing: {path}")
-
-    X=[]
-    Y=[]
-    Rg=[]
-
-    tabla=['H', 'He', 'Li', 'Be', 'B', 'C', 'N', 'O', 'F', 'Ne', 'Na', 'Mg', 'Al', 'Si', 'P', 'S', 'Cl', 'Ar', 'K', 'Ca', 'Sc ', 'Ti', 'V', 'Cr', 'Mn', 'Fe', 'Co', 'Ni', 'Cu', 'Zn', 'Ga', 'Ge', ' As', 'Se', 'Br', 'Kr', 'Rb', 'Sr', ' Y', 'Zr', 'Nb', 'Mo', 'Tc', 'Ru', 'Rh', 'Pd', 'Ag', 'Cd', 'In', 'Sn', 'Sb', 'Te', 'I', 'Xe', 'Cs', 'Ba', ' La', 'Ce', 'Pr', 'Nd', 'Pm', 'Sm', 'Eu', 'Gd', 'Tb', 'Dy', 'Ho', 'Er', 'Tm', 'Tb', 'Lu', 'Hf', 'Ta', ' W', 'Re', 'Os', 'Ir', 'Pt', 'Au', 'Hg', 'Tl', 'Pb', 'Bi', 'Po', 'At', 'Rn']
-
-    for archivo in files:
-      l=0
-      R = 0.0
-      y=[]
-      x=[]
-      for line in open(archivo):
-        line = line.split()
-        l=l+1
-        if l ==  3 :
-          N = float(line[0])
-        if l ==  4 :
-          Rg.append(line[0])
-          R=float(line[0])
-        if l > 5 :
-          for i in line:
-            y.append((float(i.replace("D","E"))))
-      for i in range(len(y)):
-        x.append(float(i*R/len(y)))
-      X.append(x)
-      Y.append(y)
+    excited = []
+    for path in wavefunctions:
+        extension = os.path.splitext(path)[1]
+        if extension[:-1] == '.ewf':
+            excited.append(True)
+        elif extension[:-1] == '.wf':
+            excited.append(False)
+        else:
+            raise_err(ValueError(f'Invalid value "{path}" for "wavefunctions". Unrecognized file extension.'))
 
     colors = list(plt.rcParams['axes.prop_cycle'].by_key()['color'])
-    def get_colors(n):
-      return colors * (n // len(colors)) + colors[:n % len(colors)]
+    my_colors = colors * (len(wavefunctions) // len(colors)) + colors[:len(wavefunctions) % len(colors)]
+    fig, ax = plt.subplots(figsize=(6.9, 4.3), layout='constrained')
+    for i, path in enumerate(wavefunctions):
+        with open(path, 'r') as fp:
+            raw = fp.read().splitlines()
+        symbol = chemical_symbols[int(raw[1].split()[0].strip())]
+        rcutoff = float(raw[3].split()[0].strip())
+        orbital = ANGULAR_MOMENTUM_REV[int(raw[4].strip())]
+        y = np.array([x for row in map(lambda s: s.replace('D', 'E').split(), raw[5:]) for x in row], dtype=np.float64)
+        x = np.arange(y.size)*rcutoff/y.size
 
-    orb="p"
-    l=''
+        sub = f'{orbital}{"*" if excited[i] else ""}'
+        label = r'$\phi_{' + sub + r'}(' + symbol + r')\ \ R_c=' + str(rcutoff) + r'$'
+        ax.plot(x, y, lw=2, ls='-', color=my_colors[i], label=label)
 
-    for i in range(len(X)):
-      a=files[i].name
-      if (a.split(".")[1]) == "wf1":
-        l=r'$\phi_s$('
-      if (a.split(".")[1]) == "wf2":
-        l=r'$\phi_p$('
-      if (a.split(".")[1]) == "wf3":
-        l=r'$\phi_d$('
-      if (a.split(".")[1]) == "ewf1":
-        l=r'$\phi_{s*}$('
-      if (a.split(".")[1]) == "ewf2":
-        l=r'$\phi_{p*}$('
-      if (a.split(".")[1]) == "ewf3":
-        l=r'$\phi_{d*}$('
-      l=l+(tabla[int(a.split("_")[0])-1])+')  $R_c=$'+Rg[i][:4]
-      
-      plt.plot(X[i],Y[i], '-',color=get_colors(len(X))[i], linewidth=1.0, label=l)
-    plt.xlabel('Distance (bohr)')
-    plt.ylabel(r'|$\phi$|')
-    plt.legend()
-    plt.axhline(linewidth=0.5, color='black')
-    plt.xlim(left=0)
+    ax.axhline(lw=1, color='k')
+    ax.set_xlabel('Distance ($a_0$)', fontsize=16)
+    ax.set_ylabel(r'$| \phi |$', fontsize=16)
+    ax.set_xlim(left=0)
+    ax.legend(fontsize=14)
     plt.show()
  
 def main():
