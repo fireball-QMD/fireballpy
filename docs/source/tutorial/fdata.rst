@@ -106,7 +106,13 @@ These Hartree potentials are required for calculating Coulombic shell potentials
 
 A set of slightly excited pseudo-atomic Fireball wavefunctions are computed within density-functional theory (using either the local-density approximation or generalized gradient corrections) and a norm-conserving separable pseudo-potential [fhi98PP]_. These wavefunctions are chosen such that they smoothly vanish at the cutoff radius. These pseudopotentials will also be downloaded automatically from here.
 
-Another way to generate orbitals is by using the mixing factor...
+Another way to generate orbitals is by using the mixing factor, optimized wavefunctions mixing ground state and excited states
+
+.. figure:: ../_static/Hmix.png
+    :align: center
+    :alt: H mix (fireball wavefunctions generate them with mixing factor )
+    :figclass: align-center
+
 
 
 
