@@ -132,13 +132,13 @@
      &       psiAmat(inter_max),psiBmat(inter_max)
 !
 !
-      real(kind=long) thfactMU(0:3,-3:3), &   !  dimensions up to f-orbitals
+      real(kind=long) thfactMU(0:3,-3:3), &
      &       thfactNU(0:3,-3:3), &
      &       phifactor(-3:3)
 !
       real(kind=long) avgVmat(0:10,inter_max), fsimp(5000)
 !
-      real(kind=long) inthpR(numInthpR*2+1), inthpTheta(numInthpT*2+1), &
+      real(kind=long) inthpR(numInthpR*2+1), inthpTheta(numInthpT*2+1),  &
      & inthpPhi(numInthpP*2+1)
       real(kind=long) wR(numInthpR*2+1),wTheta(numInthpT*2+1), &
      & wPhi(numInthpP*2+1)
@@ -201,9 +201,9 @@
       paramT = 2.0D0
       paramP = 1.0D0
   
-      nrrinv=1.0d0/dble(irMax-1)
-      ntinv=1.0d0/dble(itMax-1)
-      nphiinv=1.0d0/dble(iphiMax-1)
+      nrrinv=1.0d0/real(irMax-1, kind=long)
+      ntinv=1.0d0/real(itMax-1, kind=long)
+      nphiinv=1.0d0/real(iphiMax-1, kind=long)
 
       HR = (rmax-rmin)*nrrinv
       HT = PI*ntinv
@@ -294,7 +294,7 @@
           if(nm2.eq.0)znormNU(inm)=znormNU(inm)/sq12
           if(nm2.eq.2)znormNU(inm)=znormNU(inm)/sq4
         end if
-313  continue
+ 313  continue
  
 !
 !     isorp=0,1,2,3, for neutral atom, s part, p part, d part.
@@ -302,9 +302,9 @@
 !
  
       if(nphi.gt.numbphi)then
-!        write(*,*)' nphi=',nphi
-!        write(*,*)' numbphi=',numbphi
-!        write(*,*)' In threecenter_integral-- redimension numbphi'
+        write(*,*)' nphi=',nphi
+        write(*,*)' numbphi=',numbphi
+        write(*,*)' In threecenter_integral-- redimension numbphi'
         stop 'error in threecenter_integral'
       end if
 !
@@ -334,13 +334,13 @@
         phi=inthpPhi(ip)
         cphiy(ip)=cos(phi)
         sphiy(ip)=sin(phi)
-7244 continue
+ 7244 continue
 ! ========================================================
  
       do 1451 inm=1,index_max
         do 1451 isorpX=ispmin,ispmax
           gmat(isorpX,inm)=0.0d0
-1451 continue
+ 1451 continue
      
 !
 ! ========================================================
@@ -585,7 +585,7 @@
 !
 ! ===============================================
 !          The end of the phi integral.
-244       continue
+ 244       continue
 ! ===============================================
 !
 ! JOM
@@ -604,16 +604,17 @@
 ! JOM add psiAmat here
 !             stuffmunu=prod*thfactMU(nl1,nm1)*
 !     &                      thfactNU(nl2,nm2)*psiBmat(inm)
-             stuffmunu=prod*thfactMU(nl1,nm1)*thfactNU(nl2,nm2)*psiBmat(inm)*psiAmat(inm)
+             stuffmunu=prod*thfactMU(nl1,nm1)* &
+     &              thfactNU(nl2,nm2)*psiBmat(inm)*psiAmat(inm)
              do 1408 ix=ispmin,ispmax
                thetamat(ix,inm)=thetamat(ix,inm)+ &
      &                          avgVmat(ix,inm)*stuffmunu
-1408        continue
-1407      continue
+ 1408        continue
+ 1407      continue
 !
 !
-! 
-208    continue
+!
+ 208    continue
 !       ========================================
 !       The end of the integral over theta (loop 208).
 !       =====================================================
@@ -633,8 +634,8 @@
         end do
 !
 !
-! 
-310  continue
+!
+ 310  continue
 !
 ! ========================================================
 !     The end of the integral over r (loop 310).

@@ -161,14 +161,14 @@
 ! ===========================================================================
         iounit = ((itype2 - 1)*nspec_max + itype1 - 1) + 36
         if (iammaster) then
-!         write (*,*) '  '
-!         write (*,100)
-!         write (*,*) ' Welcome to the general two-center matrix element'
-!         write (*,*) ' calculator.  This routine can calculate matrix '
-!         write (*,*) ' elements of s, p, d, and f interactions. '
-!         write (*,*) ' Currently the flag interaction = ', interaction
-!         write (*,*) '  '
-!         write (*,*) ' This value of the interaction flag implies '
+         write (*,*) '  '
+         write (*,100)
+         write (*,*) ' Welcome to the general two-center matrix element'
+         write (*,*) ' calculator.  This routine can calculate matrix '
+         write (*,*) ' elements of s, p, d, and f interactions. '
+         write (*,*) ' Currently the flag interaction = ', interaction
+         write (*,*) '  '
+         write (*,*) ' This value of the interaction flag implies '
         end if ! end master
  
 ! *************************************************************************
@@ -192,9 +192,9 @@
 ! *************************************************************************
         if (interaction .eq. 0) then
          if (iammaster) then
-!          write (*,*) ' that the average density matrix elements are '
-!          write (*,*) ' now being calculated. '
-!          write (*,100)
+          write (*,*) ' that the average density matrix elements are '
+          write (*,*) ' now being calculated. '
+          write (*,100)
          end if ! end master
         if (ideriv .eq. 0) then
           ! spherical approx. 
@@ -231,9 +231,9 @@
          endif
         else if (interaction .eq. 1) then
          if (iammaster) then
-!          write (*,*) ' that the overlap matrix elements are now '
-!          write (*,*) ' being calculated. '
-!          write (*,100)
+          write (*,*) ' that the overlap matrix elements are now '
+          write (*,*) ' being calculated. '
+          write (*,100)
          end if ! end master
           ! spherical approx. 
           if(ispher) then 
@@ -245,14 +245,14 @@
          call iofile2c (root, 'dat', nzx1, nzx2, iounit, fname, skip)
         else if (interaction .eq. 2) then
          if (iammaster) then
-!          write (*,*) ' that the (non)-neutral atom potential matrix '
-!          write (*,*) ' elements (ontop) are now being calculated. '
+          write (*,*) ' that the (non)-neutral atom potential matrix '
+          write (*,*) ' elements (ontop) are now being calculated. '
           if (isorp .eq. 0) then
-!           write (*,*) ' Doing neutral potential, isorp = ', isorp
+           write (*,*) ' Doing neutral potential, isorp = ', isorp
           else
-!           write (*,*) ' Doing non-neutral potential, shell = ', isorp
+           write (*,*) ' Doing non-neutral potential, shell = ', isorp
           end if
-!          write (*,100)
+          write (*,100)
          end if ! end master
          if (ideriv .eq. 1) then
           root = 'coutput/vna_ontopl'
@@ -266,13 +266,13 @@
          end if
         else if (interaction .eq. 3) then
          if (iammaster) then
-!          write (*,*) ' that the (non)-neutral atom potential matrix '
-!          write (*,*) ' elements (atom-atom) are now being calculated. '
-!          write (*,100)
+          write (*,*) ' that the (non)-neutral atom potential matrix '
+          write (*,*) ' elements (atom-atom) are now being calculated. '
+          write (*,100)
           if (isorp .eq. 0) then
-!           write (*,*) ' Doing neutral potential, isorp = ', isorp
+           write (*,*) ' Doing neutral potential, isorp = ', isorp
           else
-!           write (*,*) ' Doing non-neutral potential, shell = ', isorp
+           write (*,*) ' Doing non-neutral potential, shell = ', isorp
           end if
          end if ! end master
          root = 'coutput/vna_atom' 
@@ -280,93 +280,93 @@
      &                       fname, skip)
         else if (interaction .eq. 4) then
          if (iammaster) then
-!          write (*,*) ' that the non-local potential matrix elements '
-!          write (*,*) ' are now being calculated. '
-!          write (*,100)
+          write (*,*) ' that the non-local potential matrix elements '
+          write (*,*) ' are now being calculated. '
+          write (*,100)
          end if ! end master
          root = 'coutput/vnl' 
          call iofile2c (root, 'dat', nzx1, nzx2, iounit, fname, skip)
         else if (interaction .eq. 5) then
          if (iammaster) then
-!          write (*,*) ' that the exchange-correlation matrix '
-!          write (*,*) ' elements (ontop) are now being calculated. '
-!          write (*,100)
+          write (*,*) ' that the exchange-correlation matrix '
+          write (*,*) ' elements (ontop) are now being calculated. '
+          write (*,100)
          end if ! end master
          root = 'coutput/xc_ontop'
          call iofile2c_xcna (root, 'dat', ideriv, nzx1, nzx2, iounit,  &
      &                       fname, skip)
         else if (interaction .eq. 6) then
          if (iammaster) then
-!          write (*,*) ' that the exchange-correlation matrix '
-!          write (*,*) ' elements (atom-atom) are now being calculated. '
-!          write (*,100)
+          write (*,*) ' that the exchange-correlation matrix '
+          write (*,*) ' elements (atom-atom) are now being calculated. '
+          write (*,100)
          end if ! end master
          root = 'coutput/xc_atom'
          call iofile2c_xcna (root, 'dat', ideriv, nzx1, nzx2, iounit, &
      &                       fname, skip)
         else if (interaction .eq. 7) then
          if (iammaster) then
-!          write (*,*) ' that the exchange-correlation correction from '
-!          write (*,*) ' double counting is now being calculated. '
-!          write (*,100)
+          write (*,*) ' that the exchange-correlation correction from '
+          write (*,*) ' double counting is now being calculated. '
+          write (*,100)
          end if ! end master
          root = 'coutput/xc_corr'
          call iofile2c_xcna (root, 'dat', ideriv, nzx1, nzx2, iounit, &
      &                       fname, skip)
         else if (interaction .eq. 8) then
          if (iammaster) then
-!          write (*,*) ' that the z-dipole correction is now being '
-!          write (*,*) ' calculated.'
-!          write (*,100)
+          write (*,*) ' that the z-dipole correction is now being '
+          write (*,*) ' calculated.'
+          write (*,100)
          end if ! end master
          root = 'coutput/dipole_z'
          call iofile2c (root, 'dat', nzx1, nzx2, iounit, fname, skip)
         else if (interaction .eq. 9) then
          if (iammaster) then
-!          write (*,*) ' that the y-dipole correction is now being '
-!          write (*,*) ' calculated.'
-!          write (*,100)
+          write (*,*) ' that the y-dipole correction is now being '
+          write (*,*) ' calculated.'
+          write (*,100)
          end if ! end master
          root = 'coutput/dipole_y'
          call iofile2c (root, 'dat', nzx1, nzx2, iounit, fname, skip)
         else if (interaction .eq. 10) then
          if (iammaster) then
-!          write (*,*) ' that the x-dipole correction is now being '
-!          write (*,*) ' calculated.'
-!          write (*,100)
+          write (*,*) ' that the x-dipole correction is now being '
+          write (*,*) ' calculated.'
+          write (*,100)
          end if ! end master
          root = 'coutput/dipole_x'
          call iofile2c (root, 'dat', nzx1, nzx2, iounit, fname, skip)
         else if (interaction .eq. 11) then
          if (iammaster) then
-!          write (*,*) ' that the coulomb correction is now being '
-!          write (*,*) ' calculated.'
-!          write (*,100)
+          write (*,*) ' that the coulomb correction is now being '
+          write (*,*) ' calculated.'
+          write (*,100)
          end if ! end master
          root = 'coutput/coulomb'
          call iofile2c (root, 'dat', nzx1, nzx2, iounit, fname, skip)
         else if (interaction .eq. 12) then
          if (iammaster) then
-!          write (*,*) ' that the nu extended hubbard xc is now being '
-!          write (*,*) ' calculated.'
-!          write (*,100)
+          write (*,*) ' that the nu extended hubbard xc is now being '
+          write (*,*) ' calculated.'
+          write (*,100)
          end if ! end master
          root = 'coutput/nuxc' 
          call iofile2c (root, 'dat', nzx1, nzx2, iounit, fname, skip)
         else if (interaction .eq. 13) then
          if (iammaster) then 
-!          write (*,*) ' that the hubbard xc spin dependent term '     
-!          write (*,*) ' now being calculated.'
-!          write (*,100)
+          write (*,*) ' that the hubbard xc spin dependent term '     
+          write (*,*) ' now being calculated.'
+          write (*,100)
          end if ! end master
          root = 'coutput/nuxcs'
          call iofile2c (root, 'dat', nzx1, nzx2, iounit, fname, skip)
 ! jel-X
         else if (interaction .eq. 14) then
          if (iammaster) then
-!          write (*,*) ' that the mc-weda nuxc2crho is now being '
-!          write (*,*) ' calculated.'
-!          write (*,100)
+          write (*,*) ' that the mc-weda nuxc2crho is now being '
+          write (*,*) ' calculated.'
+          write (*,100)
          end if ! end master
          if (ideriv .eq. 1) then 
           root = 'coutput/dnuxc_ol' 
@@ -383,40 +383,40 @@
         if (skip) return
  
         if (iammaster) then
-!         write (*,*) '  '
-!         write (*,*) ' Integration is done in cylinder coordinates. '
-!         write (*,300) nz, nrho
+         write (*,*) '  '
+         write (*,*) ' Integration is done in cylinder coordinates. '
+         write (*,300) nz, nrho
         end if ! end master
  
 ! *************************************************************************
 ! Check the dimensions.
         dmax = rcutoff1 + rcutoff2
         if (iammaster) then
-!         write (*,*) '  '
-!         write (*,*) ' The maximum distance d (sum of Fireball radii) '
-!         write (*,*) ' between the atom and the neutral atom potential '
-!         write (*,*) ' (in angstroms) is ', dmax
-!         write (*,*) '  '
-!         write (*,*) ' ndd: '
-!         write (*,*) ' The number of points along dna should be >= 107.'
-!         write (*,*) ' ndd = ', ndd
+         write (*,*) '  '
+         write (*,*) ' The maximum distance d (sum of Fireball radii) '
+         write (*,*) ' between the atom and the neutral atom potential '
+         write (*,*) ' (in angstroms) is ', dmax
+         write (*,*) '  '
+         write (*,*) ' ndd: '
+         write (*,*) ' The number of points along dna should be >= 107.'
+         write (*,*) ' ndd = ', ndd
          if (ndd .lt. 107) then
-!          write (*,*) ' You must have at LEAST 107 points. Sorry. '
-!          write (*,*) ' Fixup quadrature.inc: Make ndd >= 107. '
+          write (*,*) ' You must have at LEAST 107 points. Sorry. '
+          write (*,*) ' Fixup quadrature.inc: Make ndd >= 107. '
           stop ' Fixup quadrature.inc: Make ndd >= 107. '
          end if
         end if ! end master
-        dr = dmax/dble(ndd - 1)
+        dr = dmax/real(ndd - 1, kind=long)
         if (iammaster) then
-!         write (*,301) dr
-!         write (*,*) '  '
-!         write (*,*) ' nz: '
-!         write (*,*) ' The number of points is 2*nz + 1 (>= 96) '
-!         write (*,*) ' nz = ', nz
-!         write (*,*) '  '
-!         write (*,*) ' nrho: '
-!         write (*,*) ' The number of points is 2*nrho + 1 (>= 96) '
-!         write (*,*) ' nrho = ', nrho
+         write (*,301) dr
+         write (*,*) '  '
+         write (*,*) ' nz: '
+         write (*,*) ' The number of points is 2*nz + 1 (>= 96) '
+         write (*,*) ' nz = ', nz
+         write (*,*) '  '
+         write (*,*) ' nrho: '
+         write (*,*) ' The number of points is 2*nrho + 1 (>= 96) '
+         write (*,*) ' nrho = ', nrho
         end if ! end master
  
 ! *************************************************************************
@@ -676,7 +676,7 @@
          endif !JOM
          endif !if (nzx1 .and. igrid)
  
-         if (interaction .eq. 11 .or. interaction .eq. 12 .or. &
+         if (interaction .eq. 11 .or. interaction .eq. 12  .or.  &
      &       interaction .eq. 13 ) then
           index_coulomb = 0
           do index = 1, index_max
@@ -692,12 +692,12 @@
         end do
  
         if (iammaster) then
-!         write (*,*) '  '
-!         write (*,700) fname
-!         write (*,*) ' Exchange correlation model = ', iexc
-!         write (*,*) '  '
-!         write (*,100)
-!         write (*,*) '  '
+         write (*,*) '  '
+         write (*,700) fname
+         write (*,*) ' Exchange correlation model = ', iexc
+         write (*,*) '  '
+         write (*,100)
+         write (*,*) '  '
         end if ! end master
  
 ! Format Statements

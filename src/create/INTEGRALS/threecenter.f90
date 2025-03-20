@@ -218,14 +218,14 @@
          nrba = nrba_xc
          nthetaba = nthetaba_xc
         else
-!         write (*,*) ' Interaction error in threecenter'
-!         write (*,*) ' interaction = ', interaction
+         write (*,*) ' Interaction error in threecenter'
+         write (*,*) ' interaction = ', interaction
         end if
  
         iam = (in3 - 1)*nspec_max*nspec_max + (in2 - 1)*nspec_max + in1 - 1
  
         if (interaction .lt. 1 .or. interaction .gt. 3) then
-         stop ' Interaction error in threecenter '
+         stop' Interaction error in threecenter '
         end if
  
         nr = 2*nrba + 1
@@ -257,7 +257,7 @@
           call iofile3c (ftype, 'dat', itheta, isorp, nzx(in1),         &
      &                   nzx(in2), nzx(in3), iounit, fname, skip)
           if (skip) return 
-!          if (iammaster) write (*,*) ' writing to: ', fname
+          if (iammaster) write (*,*) ' writing to: ', fname
  
 ! Write out basic information to files.
 ! Additional writes to specify what combination of atoms for the non-elemental 
@@ -309,7 +309,7 @@
 ! ----------------------------------------------------------------------------
 ! Loop over all bondcharge distances.
         do ibcba = 1, nbcba
-         dbcx = dble(ibcba - 1)*dbc/dble(nbcba - 1)
+         dbcx = real(ibcba - 1, kind=long)*dbc/real(nbcba - 1, kind=long)
  
 ! for all bondcharges-- we set b=dbcx/2.
          distance_bc = dbcx/2.d0
@@ -317,7 +317,7 @@
 ! Loop over all neutral atom distances.
 ! The distance is measured from the bondcharge center (b=dbcx/2)
          do inaba = 1, nnaba
-          dnax = dble(inaba - 1)*dna/dble(nnaba - 1)
+          dnax = real(inaba - 1, kind=long)*dna/real(nnaba - 1, kind=long)
  
 ! ----------------------------------------------------------------------------
 ! 3. Since threecenter_integral internaly loops over ispmin to ispmax.

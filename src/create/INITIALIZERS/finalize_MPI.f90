@@ -60,7 +60,6 @@
 ! Program Declaration
 ! ===========================================================================
       	subroutine finalize_MPI 
-       use precision
       	implicit none
 
         include 'mpif.h'

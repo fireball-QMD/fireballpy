@@ -59,7 +59,6 @@
 ! Program Declaration
 ! ===========================================================================
         subroutine init_MPI(iammaster, iammpi, my_proc, nprocs)
-        use precision
         implicit none
 
         include 'mpif.h'

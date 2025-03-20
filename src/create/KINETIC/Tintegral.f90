@@ -122,14 +122,14 @@
 ! Procedure
 ! ===========================================================================
         if (k .gt. kmax) then
-!         write (*,*) ' The value of k',k,' given to routine integral '
-!         write (*,*) ' is too large, k must be less than or equal to ' &
-!     &               , kmax
+         write (*,*) ' The value of k',k,' given to routine integral '
+         write (*,*) ' is too large, k must be less than or equal to ' &
+     &               , kmax
          stop ' k > kmax in Tintegral.f '
         else if (k .lt. 0) then
-!         write (*,*) ' The value of k ', k, ' given to routine '
-!         write (*,*) ' integral is less than 0, k must be a positive '
-!         write (*,*) ' number for this subroutine. '
+         write (*,*) ' The value of k ', k, ' given to routine '
+         write (*,*) ' integral is less than 0, k must be a positive '
+         write (*,*) ' number for this subroutine. '
          stop ' k < 0 in Tintegral.f '
         end if
  
@@ -154,8 +154,9 @@
 ! Kronecker delta for l or m
 ! ===========================================================================
         function delk(i,j)
- 
         use precision
+        implicit none
+ 
         integer i, j
         real(kind=long) delk
  

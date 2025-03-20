@@ -48,7 +48,6 @@
 ! ===========================================================================
         subroutine onecentervdip (nsh_max, nspec, nspec_max, itype, nsshxc,    &
      &                   lsshxc, drr_rho, rcutoffa_max, what, signature)
-        use constants
         use precision
         implicit none
 
@@ -76,6 +75,7 @@
  
 ! Local Parameters and Data Declaration
 ! ===========================================================================
+        real(kind=long), parameter :: eq2 = 14.39975d0
  
 ! Local Variable Declaration and Description
 ! ===========================================================================
@@ -150,7 +150,6 @@
          filename = append_string (root,extension)
 
          open (unit = 36, file = filename, status = 'unknown')
-         if (verbose) write (*,*) filename
 
 
 ! Set up the header for the output file.
@@ -250,7 +249,7 @@
                allocate(Total(Max_Nlines))
                Total = 0.0d0
                Nlines = 0
-!               write(*,*) 'Hi, nice to see you!' !Ankais
+               write(*,*) 'Hi, nice to see you!' !Ankais
                do imu = 1, num_orb  !(itype)
                do inu = imu, num_orb  !(itype)
                do ialpha = 1, num_orb  !(itype)
@@ -319,9 +318,9 @@ write(36, 500) Orbitals(iline,1), Orbitals(iline,2), Orbitals(iline,3), Orbitals
 !        end do  ! end do itype
 
         !write (36,*) '  '
-!        write (*,*) '  '
-!        write (*,*) ' Writing output to: coutput/vdip_onecenter.dat '
-!        write (*,*) '  '
+        write (*,*) '  '
+        write (*,*) ' Writing output to: coutput/vdip_onecenter.dat '
+        write (*,*) '  '
         close (unit = 36)
 
 ! Format itatements

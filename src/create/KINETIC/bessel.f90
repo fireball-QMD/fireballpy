@@ -81,9 +81,9 @@
 ! Procedure
 ! ===========================================================================
         if (l .gt. 6) then
-!         write (*,*) ' You are trying to calculate a spherical bessel '
-!         write (*,*) ' function for L = 7 or higher.  Currently, terms '
-!         write (*,*) ' for L > 6 are not considered in this function. '
+         write (*,*) ' You are trying to calculate a spherical bessel '
+         write (*,*) ' function for L = 7 or higher.  Currently, terms '
+         write (*,*) ' for L > 6 are not considered in this function. '
          stop 'error in bessel'
         end if
  

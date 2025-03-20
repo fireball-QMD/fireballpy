@@ -1,4 +1,3 @@
         module precision
-         use iso_fortran_env, only: real64
-         integer, parameter :: long = real64
+         integer, parameter :: long = selected_real_kind (4,99)
         end module

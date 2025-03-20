@@ -5,7 +5,7 @@
          integer, parameter :: nqke = 400
          integer, parameter :: nrke = 240
          integer, parameter :: nddke = 107
-         real, parameter :: ecutke = 40.0d3
+         real(kind=long), parameter :: ecutke = 40.0d3
 
 ! Three-center interactions
 ! ****************************************************************************

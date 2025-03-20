@@ -125,16 +125,16 @@
 ! Performs some checks to make sure that the dimensions on rho1c are
 ! alright.
         if (nnrho .gt. wfmax_points) then
-!         write (*,*) ' In rho1c_store.f, nnrho = ', nnrho
-!         write (*,*) ' The dimension nrho_points =', wfmax_points
-!         write (*,*) ' needs to be increased. '
+         write (*,*) ' In rho1c_store.f, nnrho = ', nnrho
+         write (*,*) ' The dimension nrho_points =', wfmax_points
+         write (*,*) ' needs to be increased. '
          stop 'error in rho1c_store'
         end if
 
 ! Here we loop over rho computing the sum of the densities for species
 ! in1 at each value of rho.
         do irho = 1, nnrho
-         rho = rhomin + dble(irho - 1)*drho
+         rho = rhomin + real(irho - 1, kind=long)*drho
 
          dens = 0.0d0
          do issh = 1, nssh
@@ -150,7 +150,7 @@
 
 ! Now calculate the derivatives - rhop1c and rhopp1c
         do irho = 2, nnrho - 1
-         rho = rhomin + dble(irho - 1)*drho
+         rho = rhomin + real(irho - 1, kind=long)*drho
 
 ! First derivatives:
          rhop1c(irho) = (rho1c(irho+1) - rho1c(irho-1))/(2.0d0*drho)

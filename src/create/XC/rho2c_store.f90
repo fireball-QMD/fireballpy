@@ -161,16 +161,16 @@
 ! Performs some checks to make sure that the dimensions on rho2c are
 ! alright.
         if (nnrho .gt. nrho_points) then
-!         write (*,*) ' In rho2c_store.f, nnrho = ', nnrho
-!         write (*,*) ' The dimension nrho_points =', nrho_points
-!         write (*,*) ' needs to be increased. '
+         write (*,*) ' In rho2c_store.f, nnrho = ', nnrho
+         write (*,*) ' The dimension nrho_points =', nrho_points
+         write (*,*) ' needs to be increased. '
          stop 'error in rho2c_store'
         end if
 
         if (nnz .gt. nz_points) then
-!         write (*,*) ' In rho2c_store.f, nnz = ', nnz
-!         write (*,*) ' The dimension nz_points =', nz_points
-!         write (*,*) ' needs to be increased. '
+         write (*,*) ' In rho2c_store.f, nnz = ', nnz
+         write (*,*) ' The dimension nz_points =', nz_points
+         write (*,*) ' needs to be increased. '
          stop 'error in rho2c_store'
         end if
 

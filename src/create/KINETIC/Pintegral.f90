@@ -119,7 +119,7 @@
 !----------------------------------------------------------------------
         do i = 0, kmax
          call Tintegral (l, m, lp, mp, i, sum)
-         theta(i) = dble(sum)
+         theta(i) = real(sum, kind=long)
         end do
  
  
@@ -137,7 +137,7 @@
  
         do i = 2, kmax
          do j = 0,i
-          arg = dble(i)
+          arg = real(i, kind=long)
           pn(i,j+1) = pn(i,j+1) + (2.0d0*arg - 1.0d0)*pn(i-1,j)/arg
           pn(i,j) = pn(i,j) - (arg - 1.0d0)*pn(i-2,j)/arg
          end do

@@ -257,9 +257,9 @@
          deallocate (factor)
         end do
  
-!        write (*,*) '  '
-!        write (*,*) ' Writing output to: coutput/exchange_1c.dat '
-!        write (*,*) '  '
+        write (*,*) '  '
+        write (*,*) ' Writing output to: coutput/exchange_1c.dat '
+        write (*,*) '  '
  
         close (unit = 36)
  

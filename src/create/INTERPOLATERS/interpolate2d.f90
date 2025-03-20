@@ -119,17 +119,17 @@
 ! Check and make sure that the point (r, z) is within the limits of the
 ! stored density.
         if (rhoin .gt. (rhomax + 1.0d-5) .or. rhoin .lt. rhomin) then
-!         write (*,*) ' What the heck is going on in interpolate2d.f !'
-!         write (*,*) ' ************* error !!! ************* '
-!         write (*,*) ' Input rhoin = ', rhoin
-!         write (*,*) ' Max. data = ', rhomax, ' Min. data = ', rhomin
+         write (*,*) ' What the heck is going on in interpolate2d.f !'
+         write (*,*) ' ************* error !!! ************* '
+         write (*,*) ' Input rhoin = ', rhoin
+         write (*,*) ' Max. data = ', rhomax, ' Min. data = ', rhomin
         end if
 
         if (zin .gt. (zmax + 1.0d-5) .or. zin .lt. (zmin - 1.0d-5)) then
-!         write (*,*) ' What the heck is going on in interpolate2d.f !'
-!         write (*,*) ' ************* error !!! ************* '
-!         write (*,*) ' Input zin = ', zin
-!         write (*,*) ' Max. data = ', zmax, ' Min. data = ', zmin
+         write (*,*) ' What the heck is going on in interpolate2d.f !'
+         write (*,*) ' ************* error !!! ************* '
+         write (*,*) ' Input zin = ', zin
+         write (*,*) ' Max. data = ', zmax, ' Min. data = ', zmin
         end if
 
 ! Much of the code in this routine is a dodge to avoid interpolating, even
@@ -147,8 +147,8 @@
         if (imidz .lt. 2) imidz = 2
         if (imidz .gt. nnz) imidz = nnz
 
-        prho = (rhoin - rhomin)/drho - dble(imidrho - 1)
-        pz = (zin - zmin)/dz - dble(imidz - 1)
+        prho = (rhoin - rhomin)/drho - real(imidrho - 1, kind=long)
+        pz = (zin - zmin)/dz - real(imidz - 1, kind=long)
 
         fun(-1,-1) = frho(imidrho - 1,imidz - 1)
         fun(-1, 0) = frho(imidrho - 1,imidz)

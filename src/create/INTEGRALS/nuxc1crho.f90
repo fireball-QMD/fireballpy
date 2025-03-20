@@ -89,8 +89,8 @@
         character (len=70), intent (in) :: signature
 
         character (len=70), intent (in), dimension (nspec_max) :: what
-        character(len=80) ::  root
-        character(len=2) :: auxz 
+        character(80) ::  root
+        character(2) :: auxz 
 ! Output
  
  
@@ -135,7 +135,7 @@
  
         real(kind=long), external :: psiofr
 
-        character(len=80) :: fname
+        character(80) :: fname
          
 ! Procedure
 ! ===========================================================================
@@ -144,9 +144,8 @@
         fname = 'coutput/nuxc1crho.dat'
 
 ! Open the file to store the onecenter data.
-!        write (*,*) ' open file ',fname
+        write (*,*) ' open file ',fname
         open (unit = 36, file = fname , status = 'unknown')
-        if (verbose) write (*,*) fname
 
 ! Set up the header for the output file.
         write (36,100)
@@ -159,7 +158,6 @@
          write (auxz,'(i2.2)') nzx(in2)
          root = 'coutput/nuxc1crho.'//auxz//'.dat'
          open (unit = 360, file = root , status = 'unknown')
-         if (verbose) write (*,*) root
          write (360,100)
          write (360,*) ' All one center matrix elements '
          write (360,*) ' created by: '
@@ -204,7 +202,7 @@
 
           write (auxz,'(i2.2)') nzx(in1)
           root = 'coutput/nuxc1crho.'//auxz//'.dat'
-          open (unit = 360, file = root , position='append', status = 'old')
+          open (unit = 360, file = root , access='append', status = 'old')
           write (360,400)  in1, nssh, lssh
           close(360)
  
@@ -222,7 +220,7 @@
  
 ! Here we loop over rho.
           do irho = 1, nnrho
-           rho = rhomin + dble(irho - 1)*drho
+           rho = rhomin + real(irho - 1, kind=long)*drho
  
            factor = 2.0d0*drho/3.0d0
            if (mod(irho, 2) .eq. 0) factor = 4.0d0*drho/3.0d0
@@ -256,7 +254,7 @@
 
            write (auxz,'(i2.2)') nzx(in1)
            root = 'coutput/nuxc1crho.'//auxz//'.dat'
-           open (unit = 360, file = root , position='append', status = 'old')
+           open (unit = 360, file = root , access='append', status = 'old')
            write (360,500) answer(issh,1:nssh)
            close(360)
 
@@ -266,14 +264,14 @@
          deallocate (xnocc_in)
         end do ! do in1 = 1, ispec
 
-        open (unit = 360, file = root , position='append', status = 'old')
+        open (unit = 360, file = root , access='append', status = 'old')
         write (360,*) '  '
         close(360)
 
         write (36,*) '  '
-!        write (*,*) '  '
-!        write (*,*) ' Writing output to:  coutput/nuxc1crho.dat '
-!        write (*,*) '  '
+        write (*,*) '  '
+        write (*,*) ' Writing output to:  coutput/nuxc1crho.dat '
+        write (*,*) '  '
  
         close (unit = 36)
 

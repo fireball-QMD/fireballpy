@@ -109,12 +109,12 @@
         open (unit = 88, file = filein, status = 'old')
  
         if (iammaster) then
-!         write (*,*) ' '
-!         write (*,*) '*-----------------------------------------------*'
-!         write (*,*) '|               Welcome to READPSI              |'
-!         write (*,*) '| Reading the radial wavefunction of your atom  |'
-!         write (*,*) '*-----------------------------------------------*'
-!         write (*,*) ' '
+         write (*,*) ' '
+         write (*,*) '*-----------------------------------------------*'
+         write (*,*) '|               Welcome to READPSI              |'
+         write (*,*) '| Reading the radial wavefunction of your atom  |'
+         write (*,*) '*-----------------------------------------------*'
+         write (*,*) ' '
         end if ! end master
  
         read (88,90) fileinwf
@@ -122,51 +122,51 @@
         read (88,*) mesh
         read (88,*) rcutoffwf, rc_max, xnoccwf
         read (88,*) lqnwf
-!        if (iammaster) write (*,91) fileinwf
+        if (iammaster) write (*,91) fileinwf
  
 ! Perform some checks
         if (nzxwf .ne. nzx) then
-!         write (*,*) ' nzxwf = ', nzxwf, ' nzx = ', nzx
-!         write (*,*) ' The Z number the wavefunction file, for this '
-!         write (*,*) ' shell, does not match the cutoff radius '
-!         write (*,*) ' that you put into the create.input file. '
-!         write (*,*) ' Double check everything and rerun creator.'
+         write (*,*) ' nzxwf = ', nzxwf, ' nzx = ', nzx
+         write (*,*) ' The Z number the wavefunction file, for this '
+         write (*,*) ' shell, does not match the cutoff radius '
+         write (*,*) ' that you put into the create.input file. '
+         write (*,*) ' Double check everything and rerun creator.'
          stop 'error in readpsi'
         end if
  
         if (rcutoffwf .le. (rcutoff - 1.0d-2) .or. &
      &      rcutoffwf .ge. (rcutoff + 1.0d-2)) then
-!         write (*,*) ' rcutoffwf = ', rcutoffwf, ' rcutoff = ', rcutoff
-!         write (*,*) ' The cutoff radius in the wavefunction file, for '
-!         write (*,*) ' this shell, does not match the cutoff radius '
-!         write (*,*) ' that you put into your create.input file. '
-!         write (*,*) ' Double check everything and rerun creator.'
+         write (*,*) ' rcutoffwf = ', rcutoffwf, ' rcutoff = ', rcutoff
+         write (*,*) ' The cutoff radius in the wavefunction file, for '
+         write (*,*) ' this shell, does not match the cutoff radius '
+         write (*,*) ' that you put into your create.input file. '
+         write (*,*) ' Double check everything and rerun creator.'
          stop 'error in readpsi'
         end if
  
         if (xnoccwf .ne. xnoccin) then
-!         write (*,*) ' xnoccwf = ', xnoccwf, ' xnoccin = ', xnoccin
-!         write (*,*) ' The occupation number in the wavefunction file, '
-!         write (*,*) ' for this shell, does not match the occupation '
-!         write (*,*) ' number that you put into your create.input file.'
-!         write (*,*) ' Double check everything and rerun creator.'
+         write (*,*) ' xnoccwf = ', xnoccwf, ' xnoccin = ', xnoccin
+         write (*,*) ' The occupation number in the wavefunction file, '
+         write (*,*) ' for this shell, does not match the occupation '
+         write (*,*) ' number that you put into your create.input file.'
+         write (*,*) ' Double check everything and rerun creator.'
          stop 'error in readpsi'
         end if
  
         if (lqnwf .ne. lqn) then
-!         write (*,*) ' lqnwf = ', lqnwf, ' lqn = ', lqn
-!         write (*,*) ' The l quantum number in the wavefunction file, '
-!         write (*,*) ' for this shell, does not match the l quantum '
-!         write (*,*) ' number that you put into your create.input file.'
-!         write (*,*) ' Double check everything and rerun creator.'
+         write (*,*) ' lqnwf = ', lqnwf, ' lqn = ', lqn
+         write (*,*) ' The l quantum number in the wavefunction file, '
+         write (*,*) ' for this shell, does not match the l quantum '
+         write (*,*) ' number that you put into your create.input file.'
+         write (*,*) ' Double check everything and rerun creator.'
          stop 'error in readpsi'
         end if
  
         if(mesh .gt. wfmax_points) then
-!         write (*,*) ' Error error ***** in readpsi. '
-!         write (*,*) ' Dimension of wavefunction = ', wfmax_points
-!         write (*,*) ' We are asking for mesh = ', mesh
-!         write (*,*) ' Redimension wfmax_points. '
+         write (*,*) ' Error error ***** in readpsi. '
+         write (*,*) ' Dimension of wavefunction = ', wfmax_points
+         write (*,*) ' We are asking for mesh = ', mesh
+         write (*,*) ' Redimension wfmax_points. '
          stop 'error in readpsi'
         end if
  
@@ -174,31 +174,31 @@
         rc = rcutoffwf*abohr
  
         if (iammaster) then
-!         write (*,*) '  '
-!         write (*,200) rcutoffwf, rc
+         write (*,*) '  '
+         write (*,200) rcutoffwf, rc
         end if ! end master
         npoints(issh,ispec) = mesh
         rrc(issh,ispec) = rc
         if (issh .eq. 1) rrc_rho(ispec) = -1.0d0
         rrc_rho(ispec) = max(rrc_rho(ispec),rc)
  
-        drr(issh,ispec) = rc/dble(mesh - 1)
+        drr(issh,ispec) = rc/real(mesh - 1, kind=long)
         if (issh .eq. 1) drr_rho(ispec) = 99.0d0
         drr_rho(ispec) = min(drr_rho(ispec),drr(issh,ispec))
  
         npoints_rho(ispec) = int(rrc_rho(ispec)/drr_rho(ispec)) + 1
-        rrc_rho(ispec) = dble(npoints_rho(ispec) - 1)*drr_rho(ispec)
+        rrc_rho(ispec) = real(npoints_rho(ispec) - 1, kind=long)*drr_rho(ispec)
  
 ! Shift the rrc_rho value just a little or else the exchange-correlation
 ! interactions for gradients go haywire at the endpoints where rho = 0.0d0
         rrc_rho(ispec) = rrc_rho(ispec) - 1.0d-4
  
         do ipoint = 1, npoints_rho(ispec)
-         rr_rho(ipoint,ispec) = dble(ipoint - 1)*drr_rho(ispec)
+         rr_rho(ipoint,ispec) = real(ipoint - 1, kind=long)*drr_rho(ispec)
         end do
  
 ! Read in the points
-        inum = idint(dble(mesh)/4)
+        inum = idint(real(mesh, kind=long)/4)
         iremainder = mesh - (inum*4)
         do ipoint = 1, mesh - iremainder, 4
          read (88,100) psitemp(ipoint), psitemp(ipoint+1), &
@@ -222,9 +222,9 @@
  
 ! Check normalization
         if (iammaster) then
-!         write (*,*) '  '
-!         write (*,*) ' Checking normalization [NORM(l) should be 1]'
-!         write (*,*) '  '
+         write (*,*) '  '
+         write (*,*) ' Checking normalization [NORM(l) should be 1]'
+         write (*,*) '  '
         end if ! end master
  
         r = - drr(issh,ispec)
@@ -248,10 +248,10 @@
      &                       psi_spline(1,1,issh,ispec), mesh, rcutoff)
  
         if (iammaster) then
-!         write (*,300) issh, sum
-!         write (*,*) '  '
-!         write (*,*) ' *--------------- END READPSI ------------------*'
-!         write (*,*) '  '
+         write (*,300) issh, sum
+         write (*,*) '  '
+         write (*,*) ' *--------------- END READPSI ------------------*'
+         write (*,*) '  '
         end if ! end master
  
 ! Code to just make ftnchek happy, because rc_max is not ever used

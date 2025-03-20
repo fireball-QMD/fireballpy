@@ -59,7 +59,6 @@
 ! ===========================================================================
         subroutine iofile2c_xcna (root, suffix, isorp, index1, index2, iunit,&
      &                            filename, skip)
-        use constants
         use precision
         implicit none
  
@@ -104,8 +103,8 @@
         end do
         ls = i
         if (lr + ls + nplace + 1 .gt. len(filename)) then
-!         write (*,'('' filename too short for input in iofile'')')
-!         write (*,*) root, suffix, isorp, index1, index2, iunit
+         write (*,'('' filename too short for input in iofile'')')
+         write (*,*) root, suffix, isorp, index1, index2, iunit
          stop ' error in iofile2c_xcna.f90 '
         end if
  
@@ -119,8 +118,8 @@
 ! Test to make sure index is not too big
         if (index1 .lt. 0 .or. index2 .lt. 0 .or. isorp .lt. 0 .or.          &
      &      index1 .ge. 10**nplace .or. index2 .ge. 10**nplace) then
-!         write (*,'('' index out of range in iofile'')')
-!         write (*,*) root, suffix, isorp, index1, index2, iunit
+         write (*,'('' index out of range in iofile'')')
+         write (*,*) root, suffix, isorp, index1, index2, iunit
          stop ' error in iofile2c_xcna.f90 '
         end if
  
@@ -151,7 +150,6 @@
         skip = .false.
         inquire (file = filename, exist = skip)
         open (unit = iunit, file = filename, status = 'unknown')
-        if (verbose .and. .not. skip) write (*,*) filename
 
 ! Format Statements
 ! ===========================================================================

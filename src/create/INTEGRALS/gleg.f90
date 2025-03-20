@@ -140,8 +140,8 @@
           if (abs(pl2) .lt. 1.0d-10) exit 
          end do
          if (abs(pl2) .gt. 1.0d-10)                                          &
-!     &    write (*,*) ' Warning no convergence in gleg after', jterm,        &
-!     &                ' iterations'
+     &    write (*,*) ' Warning no convergence in gleg after', jterm,        &
+     &                ' iterations'
          ctheta(iterm) = xx
 
 ! Gauss-Legendre weights

@@ -59,8 +59,7 @@
 ! 
 ! Program Declaration
 ! ===========================================================================
-      	subroutine broadcast_noMPI (signature)
-       use precision
+      	subroutine broadcast_MPI (signature)
       	implicit none
 
 ! Argument Declaration and Description

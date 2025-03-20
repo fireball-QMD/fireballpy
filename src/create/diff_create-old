@@ -1,0 +1,11 @@
+Los ficheros cprogs//create.x y ../create-old/cprogs//create.x son distintos
+diff -r cprogs//INTEGRALS/twocenter.f ../create-old/cprogs//INTEGRALS/twocenter.f
+598c598
+<      2       .or. interaction .eq. 13 ) then
+---
+>      2       .or. interaction .eq. 13 .or. interaction .eq. 14 ) then
+601,604d600
+<          end if
+<          if (interaction .eq. 14 ) then
+<           call rho2c_store (iexc, itype1, itype2, rcutoff1, rcutoff2, d, 
+<      1                              1)

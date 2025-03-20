@@ -87,8 +87,8 @@
           gauntComplex = gauntComplex + ((-1)**m)*YXX(l,l1,l2,-m,m1,m2)*YXX(l,l3,l4,m,m3,m4)
         end do
         if (abs(aimag(gauntComplex)) .gt. 1.0d-04 ) then 
-!         write (*,*) 'sum_m {YXX*YXX}, l1,l2,m1,m2,l3,l4,m3,m4 =',l1,l2,m1,m2,l3,l4,m3,m4 
-!         write (*,*) 'Warning function gauntReal it is not real',gauntComplex
+         write (*,*) 'sum_m {YXX*YXX}, l1,l2,m1,m2,l3,l4,m3,m4 =',l1,l2,m1,m2,l3,l4,m3,m4 
+         write (*,*) 'Warning function gauntReal it is not real',gauntComplex
         end if
         gauntReal = REAL(gauntComplex)
         return 
@@ -117,42 +117,42 @@
         if (m3 < 0 .and. m4 < 0) then 
           aux=-0.50d0*(gaunt(l,l3,l4,m,m3,m4)-((-1)**m4)*gaunt(l,l3,l4,m,m3,-m4) &
           &   -((-1)**m3)*gaunt(l,l3,l4,m,-m3,m4)+((-1)**(m3+m4))*gaunt(l,l3,l4,m,-m3,-m4))
-          YXX = cmplx(aux,0.0d0, kind=long)
+          YXX = cmplx(aux,0.0d0)
         endif 
         if (m3 < 0 .and. m4 == 0) then
-          aux=(2**(-0.5))*(gaunt(l,l3,l4,m,m3,m4)-((-1)**m3)*gaunt(l,l3,l4,m,-m3,m4))
-          YXX = cmplx(0.0d0,aux, kind=long)
+          aux=(2**-0.5)*(gaunt(l,l3,l4,m,m3,m4)-((-1)**m3)*gaunt(l,l3,l4,m,-m3,m4))
+          YXX = cmplx(0.0d0,aux)
         endif 
         if (m3 < 0 .and. m4 > 0) then
           aux = 0.5*(gaunt(l,l3,l4,m,m3,-m4)+((-1)**m4)*gaunt(l,l3,l4,m,m3,m4)     &
           &   -((-1)**m3)*gaunt(l,l3,l4,m,-m3,-m4)-((-1)**(m3+m4))*gaunt(l,l3,l4,m,-m3,m4))
-          YXX = cmplx(0.0d0,aux, kind=long)
+          YXX = cmplx(0.0d0,aux)
         endif 
         if (m3 == 0 .and. m4 < 0) then
-          aux = (2**(-0.5))*(gaunt(l,l3,l4,m,m3,m4)-((-1)**m4)*gaunt(l,l3,l4,m,m3,-m4))
-          YXX = cmplx(0.0d0,aux, kind=long)
+          aux = (2**-0.5)*(gaunt(l,l3,l4,m,m3,m4)-((-1)**m4)*gaunt(l,l3,l4,m,m3,-m4))
+          YXX = cmplx(0.0d0,aux)
         endif 
         if (m3 == 0 .and. m4 == 0) then
           aux = gaunt(l,l3,l4,m,m3,m4)
-          YXX = cmplx(aux,0.0d0, kind=long)
+          YXX = cmplx(aux,0.0d0)
         endif 
          if (m3 == 0 .and. m4 > 0) then
-          aux = (2**(-0.5))*(gaunt(l,l3,l4,m,m3,-m4)+((-1)**m4)*gaunt(l,l3,l4,m,m3,m4))
-          YXX = cmplx(aux,0.0d0, kind=long)
+          aux = (2**-0.5)*(gaunt(l,l3,l4,m,m3,-m4)+((-1)**m4)*gaunt(l,l3,l4,m,m3,m4))
+          YXX = cmplx(aux,0.0d0)
          endif 
          if (m3 > 0 .and. m4 < 0) then
            aux = 0.5*(gaunt(l,l3,l4,m,-m3,m4)-((-1)**m4)*gaunt(l,l3,l4,m,-m3,-m4)     &
            &   +((-1)**m3)*gaunt(l,l3,l4,m,m3,m4)-((-1)**(m3+m4))*gaunt(l,l3,l4,m,m3,-m4))
-           YXX = cmplx(0.0d0,aux, kind=long)
+           YXX = cmplx(0.0d0,aux)
          endif 
          if (m3 > 0 .and. m4 == 0) then
-           aux = (2**(-0.5))*(gaunt(l,l3,l4,m,-m3,m4)+(-1*m3)*gaunt(l,l3,l4,m,m3,m4))
-           YXX = cmplx(aux,0.0d0, kind=long)
+           aux = (2**-0.5)*(gaunt(l,l3,l4,m,-m3,m4)+(-1*m3)*gaunt(l,l3,l4,m,m3,m4))
+           YXX = cmplx(aux,0.0d0)
          endif 
          if (m3 > 0 .and. m4 > 0) then
            aux = 0.5*(gaunt(l,l3,l4,m,-m3,-m4)+((-1)**m4)*gaunt(l,l3,l4,m,-m3,m4)      &
            & +((-1)**m3)*gaunt(l,l3,l4,m,m3,-m4)+((-1)**(m3+m4))*gaunt(l,l3,l4,m,m3,m4))
-           YXX = cmplx(aux,0.0d0, kind=long)
+           YXX = cmplx(aux,0.0d0)
          endif 
          return 
       end function YXX

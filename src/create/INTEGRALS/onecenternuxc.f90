@@ -133,7 +133,6 @@
 ! Open the file to store the onecenter data.
         open (unit = 36, file = 'coutput/nuxc_onecenter.dat',                &
      &        status = 'unknown')
-        if (verbose) write (*,*) 'coutput/nuxc_onecenter.dat'
  
 ! Set up the header for the output file.
         write (36,100)
@@ -186,7 +185,7 @@
  
 ! Here we loop over rho.
          do irho = 1, nnrho
-          rho = rhomin + dble(irho - 1)*drho
+          rho = rhomin + real(irho - 1, kind=long)*drho
  
           factor = 2.0d0*drho/3.0d0
           if (mod(irho, 2) .eq. 0) factor = 4.0d0*drho/3.0d0
@@ -218,9 +217,9 @@
         end do
  
         write (36,*) '  '
-!        write (*,*) '  '
-!        write (*,*) ' Writing output to: coutput/nuxc_onecenter.dat '
-!        write (*,*) '  '
+        write (*,*) '  '
+        write (*,*) ' Writing output to: coutput/nuxc_onecenter.dat '
+        write (*,*) '  '
  
         close (unit = 36)
 

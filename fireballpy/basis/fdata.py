@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 from cyclopts import App, Parameter, Group
 from cyclopts.validators import Path
 from rich import box
-from rich.console import Console, group
+from rich.console import Console
 from rich.panel import Panel
 from rich.text import Text
 
@@ -743,22 +743,27 @@ def basis(folder: Annotated[pathlib.Path, Parameter(validator=Path(exists=True, 
         njobs = cpu_count()
     try:
         exepath = os.path.join(os.path.split(__basis_file__)[0], 'create.x')
-        argv = [str(njobs), f'{1 if verbose else 0}']
+        #argv = [str(njobs), f'{1 if verbose else 0}']
         if njobs == 1:
-            p = subprocess.Popen([exepath] + argv, stdout=sys.stdout, stderr=sys.stderr)
+            #p = subprocess.Popen([exepath] + argv, stdout=sys.stdout, stderr=sys.stderr)
+            if verbose:
+                p = subprocess.Popen(exepath, stdout=sys.stdout, stderr=sys.stderr)
+            else:
+                p = subprocess.Popen(exepath, stdout=subprocess.DEVNULL, stderr=sys.stderr)
         else:
-            try:
-                p = subprocess.Popen(['mpirun', '-np', str(njobs), exepath] + argv,
-                                     stdout=sys.stdout, stderr=sys.stderr)
-            except FileNotFoundError:
-                os.chdir(nowfolder)
-                shutil.rmtree(output)
-                raise_err(RuntimeError('"mpirun" is not available.'))
+            raise RuntimeError('MPI in process')
+            #    try:
+            #        p = subprocess.Popen(['mpirun', '-np', str(njobs), exepath] + argv,
+            #                             stdout=sys.stdout, stderr=sys.stderr)
+            #    except FileNotFoundError:
+            #        os.chdir(nowfolder)
+            #        shutil.rmtree(output)
+            #        raise_err(RuntimeError('"mpirun" is not available.'))
         p.communicate()  # type: ignore
-        if p.returncode != 0 and auto:  # type: ignore
-            p = subprocess.Popen(['mpirun', '-np', str(njobs//2), exepath] + argv,
-                                    stdout=sys.stdout, stderr=sys.stderr)
-            p.communicate()  # type: ignore
+        # if p.returncode != 0 and auto:  # type: ignore
+        #     p = subprocess.Popen(['mpirun', '-np', str(njobs//2), exepath] + argv,
+        #                             stdout=sys.stdout, stderr=sys.stderr)
+        #     p.communicate()  # type: ignore
         if p.returncode != 0:  # type: ignore
             os.chdir(nowfolder)
             shutil.rmtree(output)
@@ -815,7 +820,7 @@ def plot(wavefunctions: Annotated[list[pathlib.Path],
 
     colors = list(plt.rcParams['axes.prop_cycle'].by_key()['color'])
     my_colors = colors * (len(wavefunctions) // len(colors)) + colors[:len(wavefunctions) % len(colors)]
-    fig, ax = plt.subplots(figsize=(6.9, 4.3), layout='constrained')
+    _, ax = plt.subplots(figsize=(6.9, 4.3), layout='constrained')
     for i, path in enumerate(wavefunctions):
         with open(path, 'r') as fp:
             raw = fp.read().splitlines()

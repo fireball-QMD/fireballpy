@@ -135,13 +135,13 @@
 ! ===========================================================================
 ! Write out the initial message.
         if (iammaster) then
-!         write (*,*) '  '
-!         write (*,100)
-!         write (*,*) ' Welcome to the two-center matrix element routine which '
-!         write (*,*) ' calculates the exact exchange interactions for the '
-!         write (*,*) ' ontop (left) case.  This routine can calculate matrix '
-!         write (*,*) ' elements of s, p, d, and f interactions. '
-!         write (*,*) '  '
+         write (*,*) '  '
+         write (*,100)
+         write (*,*) ' Welcome to the two-center matrix element routine which '
+         write (*,*) ' calculates the exact exchange interactions for the '
+         write (*,*) ' ontop (left) case.  This routine can calculate matrix '
+         write (*,*) ' elements of s, p, d, and f interactions. '
+         write (*,*) '  '
         end if
  
 ! Initialize
@@ -152,31 +152,31 @@
         open (unit = iounit, file = fname, status = 'unknown')
  
         if (iammaster) then
-!         write (*,*) '  '
-!         write (*,*) ' Integration is done in cylinder coordinates. '
-!         write (*,300) nz, nrho
+         write (*,*) '  '
+         write (*,*) ' Integration is done in cylinder coordinates. '
+         write (*,300) nz, nrho
         end if
  
 ! *************************************************************************
 ! Check the dimensions.
         dmax = rcutoff1 + rcutoff2
         if (iammaster) then
-!         write (*,*) '  '
-!         write (*,*) ' Maximum distance d (sum of Fireball radii) between the '
-!         write (*,*) ' atom and the exchange potential (angstroms) is ', dmax
-!         write (*,*) '  '
-!         write (*,*) ' ndd: '
-!         write (*,*) ' The number of points along dna should be >= 107. '
-!         write (*,*) ' ndd = ', ndd
+         write (*,*) '  '
+         write (*,*) ' Maximum distance d (sum of Fireball radii) between the '
+         write (*,*) ' atom and the exchange potential (angstroms) is ', dmax
+         write (*,*) '  '
+         write (*,*) ' ndd: '
+         write (*,*) ' The number of points along dna should be >= 107. '
+         write (*,*) ' ndd = ', ndd
          if (ndd .lt. 107) then
-!          write (*,*) ' You must have at LEAST 107 points. Sorry. '
-!          write (*,*) ' Fixup quadrature.inc: Make ndd >= 107. '
-!          write (*,*) ' I will give you an emergency override. Insert -99 now! '
+          write (*,*) ' You must have at LEAST 107 points. Sorry. '
+          write (*,*) ' Fixup quadrature.inc: Make ndd >= 107. '
+          write (*,*) ' I will give you an emergency override. Insert -99 now! '
 ! No override for parallel compiled code.
 !$        stop ' Fixup quadrature.inc: Make ndd >= 107. '
           read (*,*) iemergency
           if (iemergency .eq. -99) then
-!           write (*,*) ' Emergency (emergency) override given. '
+           write (*,*) ' Emergency (emergency) override given. '
           else
            stop ' Fixup quadrature.inc: Make ndd >= 107. '
           end if
@@ -184,15 +184,15 @@
         end if
         dr = dmax/real(ndd - 1)
         if (iammaster) then
-!         write (*,301) dr
-!         write (*,*) '  '
-!         write (*,*) ' nz: '
-!         write (*,*) ' The number of points is 2*nz + 1 (>= 96) '
-!         write (*,*) ' nz = ', nz
-!         write (*,*) '  '
-!         write (*,*) ' nrho: '
-!         write (*,*) ' The number of points is 2*nrho + 1 (>= 96) '
-!         write (*,*) ' nrho = ', nrho
+         write (*,301) dr
+         write (*,*) '  '
+         write (*,*) ' nz: '
+         write (*,*) ' The number of points is 2*nz + 1 (>= 96) '
+         write (*,*) ' nz = ', nz
+         write (*,*) '  '
+         write (*,*) ' nrho: '
+         write (*,*) ' The number of points is 2*nrho + 1 (>= 96) '
+         write (*,*) ' nrho = ', nrho
         end if
  
 ! Set up the header for the output file.
@@ -350,11 +350,11 @@
         end do
  
         if (iammaster) then
-!         write (*,*) '  '
-!         write (*,700) fname
-!         write (*,*) '  '
-!         write (*,100)
-!         write (*,*) '  '
+         write (*,*) '  '
+         write (*,700) fname
+         write (*,*) '  '
+         write (*,100)
+         write (*,*) '  '
         end if
  
 ! Deallocate Arrays

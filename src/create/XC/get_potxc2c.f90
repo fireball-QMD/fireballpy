@@ -275,8 +275,8 @@
 
 ! If the improper iexc option was entered then the program will stop.
         else
-!         write (*,*) ' In get_potxc2c.f90 - '
-!         write (*,*) ' stop: xc option not implemented', iexc
+         write (*,*) ' In get_potxc2c.f90 - '
+         write (*,*) ' stop: xc option not implemented', iexc
          stop
         end if
 

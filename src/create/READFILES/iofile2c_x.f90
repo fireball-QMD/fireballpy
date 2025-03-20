@@ -73,7 +73,7 @@
         character(len=*) suffix
  
 ! Output
-        character(len=40) filename
+        character*40 filename
  
 ! Local Parameters and Data Declaration
 ! ===========================================================================
@@ -91,16 +91,21 @@
 ! Procedure
 ! ===========================================================================
 ! Find true length of root and suffix
+
         lr = len(root)
         do i = lr, 1, -1
-         if (root(i:i) .ne. ' ') go to 20
+          if (root(i:i) .ne. ' ') then
+            lr = i
+            exit
+          end if
         end do
-20      lr = i
         ls = len(suffix)
         do i = ls, 1, -1
-         if (suffix(i:i) .ne. ' ') go to 40
+          if (suffix(i:i) .ne. ' ') then
+            ls = i
+            exit
+          end if
         end do
-40      ls = i
         if (lr + ls + nplace + 1 .gt. len(filename)) then
          write (6,'('' filename too short for input in iofile'')')
          write (6,*) root, suffix, isorp, index1, index2

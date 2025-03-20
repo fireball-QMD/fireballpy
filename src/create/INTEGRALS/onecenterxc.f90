@@ -151,14 +151,13 @@
         real(kind=long) d2vxc(nsh_max,nsh_max,nsh_max,nsh_max)
         integer imask (nsh_max+1)
 
-        character(len=80) ::  root
-        character(len=2) :: auxz
+        character(80) ::  root
+        character(2) :: auxz
  
 ! Procedure
 ! ===========================================================================
 ! Open the file to store the onecenter data.
         open (unit = 36, file = 'coutput/xc_onecenter.dat', status = 'unknown')
-        if (verbose) write (*,*) 'coutput/xc_onecenter.dat'
  
 ! Set up the header for the output file.
         write (36,100)
@@ -213,7 +212,7 @@
  
 ! Here we loop over rho.
           do irho = 1, nnrho
-           rho = rhomin + dble(irho - 1)*drho
+           rho = rhomin + real(irho - 1, kind=long)*drho
  
            factor = 2.0d0*drho/3.0d0
            if (mod(irho, 2) .eq. 0) factor = 4.0d0*drho/3.0d0
@@ -260,9 +259,9 @@
          write (36,600) iderorb(in1), dqorb(in1)
         end do
  
-!        write (*,*) '  '
-!        write (*,*) ' Writing output to: coutput/xc_onecenter.dat '
-!        write (*,*) '  '
+        write (*,*) '  '
+        write (*,*) ' Writing output to: coutput/xc_onecenter.dat '
+        write (*,*) '  '
  
         close (unit = 36)
 
@@ -274,7 +273,6 @@
 ! ***************************************************************************
 ! Open the file to store the onecenter data.
         open (unit = 36, file = 'coutput/xc1c_dqi.dat', status = 'unknown')
-        if (verbose) write (*,*) 'coutput/xc1c_dqi.dat'
  
 ! Set up the header for the output file.
         write (36,100)
@@ -288,7 +286,6 @@
          write (auxz,'(i2.2)') nzx(in1)
          root = 'coutput/xc1c_dqi.'//auxz//'.dat'
          open (unit = 360, file = root , status = 'unknown')
-         if (verbose) write (*,*) root
          write (360,100)
          write (360,*) ' All one center matrix elements '
          write (360,*) ' created by: '
@@ -310,7 +307,7 @@
          write (36,400) in1, nssh
          write (auxz,'(i2.2)') nzx(in1)
          root = 'coutput/xc1c_dqi.'//auxz//'.dat'
-         open (unit = 360, file = root , position='append', status = 'old')
+         open (unit = 360, file = root , access='append', status = 'old')
          write (360,400)  in1, nssh
 
          allocate (xnocc_in (nssh))
@@ -342,7 +339,7 @@
                  
 ! Here we loop over rho.
          do irho = 1, nnrho
-          rho = rhomin + dble(irho - 1)*drho
+          rho = rhomin + real(irho - 1, kind=long)*drho
           factor = 2.0d0*drho/3.0d0
           if (mod(irho, 2) .eq. 0) factor = 4.0d0*drho/3.0d0
           if (irho .eq. 1 .or. irho .eq. nnrho) factor = drho/3.0d0
@@ -396,9 +393,9 @@
 
         end do ! do in1 = 1, nspec
 
-!        write (*,*) '  '
-!        write (*,*) ' Writing output to: coutput/xc1c_dqi.dat '
-!        write (*,*) '  '
+        write (*,*) '  '
+        write (*,*) ' Writing output to: coutput/xc1c_dqi.dat '
+        write (*,*) '  '
         close (unit = 36)
 
 ! Deallocate Arrays

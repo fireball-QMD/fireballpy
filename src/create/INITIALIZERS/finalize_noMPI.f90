@@ -59,8 +59,7 @@
 ! 
 ! Program Declaration
 ! ===========================================================================
-      	subroutine finalize_noMPI 
-       use precision
+      	subroutine finalize_MPI 
       	implicit none
 
 ! Argument Declaration and Description

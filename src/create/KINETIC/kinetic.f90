@@ -184,7 +184,7 @@
 ! Initialize pi
         pi = 3.141592653589793238462643D0
  
-! ang is the Angstrom symbol (Å)
+! ang is the Angstrom symbol (A)
         ang = char(197)
  
 ! Open necessary file
@@ -197,35 +197,35 @@
         qmax = sqrt(ecutke/factor)
  
         if (iammaster) then
-!         write (*,*) '  '
-!         write (*,*) ' *------------------------------------------* '
-!         write (*,*) ' | Welcome to the kinetic-energy subroutine | '
-!         write (*,*) ' *------------------------------------------* '
-!         write (*,*) '  '
-!         write (*,*) ' Who and when: ', signature
-!         write (*,*) '  '
+         write (*,*) '  '
+         write (*,*) ' *------------------------------------------* '
+         write (*,*) ' | Welcome to the kinetic-energy subroutine | '
+         write (*,*) ' *------------------------------------------* '
+         write (*,*) '  '
+         write (*,*) ' Who and when: ', signature
+         write (*,*) '  '
  
-!         write (*,100) itype1, itype2
+         write (*,100) itype1, itype2
  
 ! .............................this gets qmax...............................
-!         write (*,*) '  '
-!         write (*,*) '  '
-!         write (*,101) ecutke
-!         write (*,*) ' (10 keV could be a good choice) '
-!         write (*,*) '  '
-!         write (*,102) qmax, ang
+         write (*,*) '  '
+         write (*,*) '  '
+         write (*,101) ecutke
+         write (*,*) ' (10 keV could be a good choice) '
+         write (*,*) '  '
+         write (*,102) qmax, ang
  
 ! ..............................this gets nq................................
-!         write (*,*) '  '
-!         write (*,103) nqke
-!         write (*,*) ' (a good choice would be 400) '
-!         write (*,*) '  '
+         write (*,*) '  '
+         write (*,103) nqke
+         write (*,*) ' (a good choice would be 400) '
+         write (*,*) '  '
  
 ! ..............................this gets nr................................
-!         write (*,104) nrke
-!         write (*,*) ' (a good choice would be 240) '
-!         write (*,*) '  '
-!         write (*,*) '  '
+         write (*,104) nrke
+         write (*,*) ' (a good choice would be 240) '
+         write (*,*) '  '
+         write (*,*) '  '
         end if  !end master
  
 ! **************************************************************************
@@ -238,10 +238,10 @@
         nrr = 2*nrke + 1
         dq = qmax/real(nqq - 1)
         if (iammaster) then
-!         write (*,105) rmax(1), ang, rmax(2), ang
-!         write (*,*) '  '
-!         write (*,*) ' One moment, we calculate the Fourier transforms of the '
-!         write (*,*) ' radial WF. '
+         write (*,105) rmax(1), ang, rmax(2), ang
+         write (*,*) '  '
+         write (*,*) ' One moment, we calculate the Fourier transforms of the '
+         write (*,*) ' radial WF. '
         end if  !end master
  
 ! This section caculates and stores R0(q), R1(q), R2(q), R3(q).
@@ -266,8 +266,8 @@
          m2 = mright(index)
  
         if(iammaster)then
-!         write (*,601) index, nleft(index), lleft(index), mleft(index),      &
-!     &                        nright(index), lright(index), mright(index)
+         write (*,601) index, nleft(index), lleft(index), mleft(index),      &
+     &                        nright(index), lright(index), mright(index)
         end if  !end master
  
 ! The variable angular(k) is the integral of Ylm*Pk[cos(theta)]*Yl'm'.
@@ -350,24 +350,24 @@
         end do
  
         if (iammaster) then
-!         write (*,*)
-!         write (*,*) ' **** Test normalization in q space **** '
+         write (*,*)
+         write (*,*) ' **** Test normalization in q space **** '
          do iatom = 1, 2
-!          write (*,*) '  '
-!          write (*,200) iatom
+          write (*,*) '  '
+          write (*,200) iatom
           do issh = 1, nssh(inj(iatom))
-!           write (*,*) '  '
-!           write (*,201) issh
-!           write (*,*) '  '
-!           write (*,202) issh
-!           write (*,*) '  '
+           write (*,*) '  '
+           write (*,201) issh
+           write (*,*) '  '
+           write (*,202) issh
+           write (*,*) '  '
            do isplit = 1, 5
-!            write (*,203) qsplit(isplit), esplit(isplit),                   &
-!     &                    xnormq(iatom,issh,isplit)
+            write (*,203) qsplit(isplit), esplit(isplit),                   &
+     &                    xnormq(iatom,issh,isplit)
            end do
           end do
          end do
-!         write (*,*) '  '
+         write (*,*) '  '
         end if  !end master
  
 ! ***************************************************************************
@@ -384,25 +384,25 @@
         d = - dr
  
         if (iammaster) then
-!         write (*,*) ' Now calculate the kinetic matrix element for '
-!         write (*,*) ' each d from 0 to rmax.'
-!         write (*,*) '  '
-!         write (*,300) nddke
-!         write (*,*) ' (107 would have been a good choice, e.g.) '
-!         write (*,*) '  '
-!         write (*,301) rrmax, ang
-!         write (*,*) '  '
-!         write (*,302) dr, ang
-!         write (*,*) '  '
-!         write (*,*) '  '
+         write (*,*) ' Now calculate the kinetic matrix element for '
+         write (*,*) ' each d from 0 to rmax.'
+         write (*,*) '  '
+         write (*,300) nddke
+         write (*,*) ' (107 would have been a good choice, e.g.) '
+         write (*,*) '  '
+         write (*,301) rrmax, ang
+         write (*,*) '  '
+         write (*,302) dr, ang
+         write (*,*) '  '
+         write (*,*) '  '
  
 ! The following section calculates the kinetic energy matrix elements
 ! for all the possible values of d
 ! Some preliminaries. Set up simpson rule factors and eV.
 ! Do a convergence test for d = 0.0
  
-!         write (*,*) ' Convergence tests of Kinetic energy integral '
-!         write (*,*) ' at d = 0.0 <Phi(atom1)| T | Phi(atom2>. '
+         write (*,*) ' Convergence tests of Kinetic energy integral '
+         write (*,*) ' at d = 0.0 <Phi(atom1)| T | Phi(atom2>. '
         end if  !end master
  
 ! eV= ((h/2pi)**2)/m/pi (in eV times angstroms squared)
@@ -444,10 +444,10 @@
          end do
          if (id .eq. 1) then
           if (iammaster) then
-!           write (*,*) '  '
+           write (*,*) '  '
            do isplit = 1, 5
-!            write (*,400) qsplit(isplit), esplit(isplit),                    &
-!     &                    (tkinetic(index,id), index = 1, index_max)
+            write (*,400) qsplit(isplit), esplit(isplit),                    &
+     &                    (tkinetic(index,id), index = 1, index_max)
            end do
           end if  !end master
          end if
@@ -480,7 +480,7 @@
          write (iounit,505) (tkinetic(index,id),index = 1, index_max)
         end do
  
-!        write (*,506) filename
+        write (*,506) filename
  
 ! Format Statements
 ! ===========================================================================

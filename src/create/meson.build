@@ -33,6 +33,10 @@ initializers_srcs = [
   'init_MPI.f90',
 ]
 
+mpi_srcs = [
+  'MPI_stuff.f90',
+]
+
 integrals_srcs = [
   'append_string.f90',
   'exc1crho.f90',
@@ -120,8 +124,11 @@ create_srcs = []
 foreach src : modules_create_srcs
   create_srcs += 'MODULES' / src
 endforeach
-foreach src : initializers_srcs
-  create_srcs += 'INITIALIZERS' / src
+#foreach src : initializers_srcs
+#  create_srcs += 'INITIALIZERS' / src
+#endforeach
+foreach src : mpi_srcs
+  create_srcs += src
 endforeach
 foreach src : xcc_srcs
   create_srcs += 'XC' / src
@@ -146,7 +153,7 @@ create_srcs += 'create.f90'
 # Build create executable
 create_exe = executable('create.x',
   create_srcs,
-  dependencies: mpi_dep,
+  dependencies: [blas_dep, lapack_dep, mpi_dep],
   install: true,
   install_dir: py.get_install_dir() / 'fireballpy' / 'basis',
 )

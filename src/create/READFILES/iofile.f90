@@ -30,7 +30,6 @@
 ! Computer Software clause at 52.227-7013.
  
       subroutine iofile(root,suffix,index,iunit)
-      use constants
       use precision
       implicit none
  
@@ -44,7 +43,7 @@
       parameter (nplace=3,nfile=256)
       character(len=*) root,suffix
       character(len=80) form
-      character(len=(nfile)) filen
+      character(len=nfile) filen
  
 !
 ! If root='junk/junker'
@@ -64,21 +63,25 @@
 !
 ! find true length of root and suffix
 !
-      lr=len(root)
-      do i=lr,1,-1
-       if (root(i:i).ne.' ') go to 20
-      end do
-   20 lr=i
-      ls=len(suffix)
-      do i=ls,1,-1
-       if (suffix(i:i).ne.' ') go to 40
-      end do
-   40 ls=i
-      if (lr+ls+nplace+1.gt.len(filen)) then
-         write (6,*) ' filen too short for input in iofile'
-         write (6,*) root,suffix,index,iunit
+        lr = len(root)
+        do i = lr, 1, -1
+          if (root(i:i) .ne. ' ') then
+            lr = i
+            exit
+          end if
+        end do
+        ls = len(suffix)
+        do i = ls, 1, -1
+          if (suffix(i:i) .ne. ' ') then
+            ls = i
+            exit
+          end if
+        end do
+        if (lr + ls + nplace + 1 .gt. len(filen)) then
+         write (6,'('' filename too short for input in iofile'')')
+         write (6,*) root, suffix, index, iunit
          stop 'error in iofile'
-      endif
+        end if
 !
 ! form file name
 ! fill in root here
@@ -120,7 +123,6 @@
 ! filename is formed, open the file
 !
       open(unit=iunit,file=filen,status='unknown',err=80)
-      if (verbose) write (*,*) filen
       return
    80 write (6,'('' error opening file in iofile '')')
       write (6,*) root,suffix,index,iunit

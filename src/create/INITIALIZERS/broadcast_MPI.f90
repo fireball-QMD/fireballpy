@@ -61,7 +61,6 @@
 ! Program Declaration
 ! ===========================================================================
       	subroutine broadcast_MPI (signature)
-       use precision
       	implicit none
 
         include 'mpif.h'

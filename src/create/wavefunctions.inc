@@ -31,11 +31,10 @@
  
         common /density_limits_rho/ drho, rhomin, rhomax, nnrho
         common /density_limits_z/ dz, zmin, zmax, nnz
-        common /densities/ rho2c, rhop2c, rhopp2c, rhopz2c, rhoz2c, rhozz2c
+        common /densities/ rho2c, rhop2c, rhopp2c, rhopz2c,rhoz2c, rhozz2c
         common /densparam/ drr_rho, rr_rho, rrc_rho, npoints_rho
         common /wavefunctions/ psi, psi_spline
         common /waveparam/ drr, rr, rrc, npoints
  
-!$OMP   THREADPRIVATE(/density_limits_rho/,/density_limits_z/,
-!$OMP1                /densities/)
+!$OMP   THREADPRIVATE(/density_limits_rho/,/density_limits_z/,/densities/)
  

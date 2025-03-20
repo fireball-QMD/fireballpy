@@ -271,11 +271,11 @@
 ! the number of points equivalent for all cases. Change the number of points
 ! to be integrated to be dependent upon the distance between the centers and
 ! this defined density.
-        dz = (rcutoff1 + rcutoff2)/(dble(nz)*2.0d0)
+        dz = (rcutoff1 + rcutoff2)/(real(nz, kind=long)*2.0d0)
         nnz = int((zmax - zmin)/dz)
         if (mod(nnz,2) .eq. 0) nnz = nnz + 1
  
-        drho = max(rcutoff1,rcutoff2)/dble(nrho)
+        drho = max(rcutoff1,rcutoff2)/real(nrho, kind=long)
         nnrho = int((rhomax - rhomin)/drho)
         if (mod(nnrho,2) .eq. 0) nnrho = nnrho + 1
  
@@ -313,10 +313,10 @@
 ! Integration is over z (z-axis points from atom 1 to atom 2) and rho (rho is
 ! radial distance from z-axis).
         do iz = 1, nnz
-         z1 = zmin + dble(iz-1)*dz
+         z1 = zmin + real(iz-1, kind=long)*dz
          z2 = z1 - d
          do irho = 1, nnrho
-          rho = rhomin + dble(irho-1)*drho
+          rho = rhomin + real(irho-1, kind=long)*drho
           r1 = sqrt(z1**2 + rho**2)
           r2 = sqrt(z2**2 + rho**2)
  

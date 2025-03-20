@@ -58,8 +58,7 @@
 !
 ! Program Declaration
 ! ===========================================================================
-        subroutine init_noMPI(iammaster, iammpi, my_proc, nprocs)
-        use precision
+        subroutine init_MPI(iammaster, iammpi, my_proc, nprocs)
         implicit none
 
 ! Argument Declaration and Description

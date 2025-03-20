@@ -131,7 +131,7 @@
         real(kind=long), external :: psiofr
         real(kind=long), external :: dpsiofr
 
-        character(len=80) :: fname
+        character(80) :: fname
          
 ! Procedure
 ! ===========================================================================
@@ -140,9 +140,8 @@
         fname = 'coutput/goverlapf1.dat'
 
 ! Open the file to store the onecenter data.
-!        write (*,*) ' open file ',fname
+        write (*,*) ' open file ',fname
         open (unit = 36, file = fname , status = 'unknown')
-        if (verbose) write (*,*) fname
 
 ! Set up the header for the output file.
         write (36,100)
@@ -160,9 +159,8 @@
         fname = 'coutput/goverlapf2.dat'
 
 ! Open the file to store the onecenter data.
-!        write (*,*) ' open file ',fname
+        write (*,*) ' open file ',fname
         open (unit = 37, file = fname , status = 'unknown')
-        if (verbose) write (*,*) fname
 
 ! Set up the header for the output file.
         write (37,100)
@@ -208,7 +206,7 @@
  
 ! Here we loop over rho.
           do irho = 1, nnrho
-           rho = rhomin + dble(irho - 1)*drho
+           rho = rhomin + real(irho - 1, kind=long)*drho
  
            factor = 2.0d0*drho/3.0d0
            if (mod(irho, 2) .eq. 0) factor = 4.0d0*drho/3.0d0
@@ -216,7 +214,7 @@
  
  
 ! JOM-test
-!            write(*,*)'dpsiofr', rho , psiofr(1,2,rho), dpsiofr(1,2,rho)
+            write(*,*)'dpsiofr', rho , psiofr(1,2,rho), dpsiofr(1,2,rho)
            do issh = 1, nssh
             l1 = lsshxc(in1,issh)
             do jssh = 1, nssh
@@ -238,10 +236,10 @@
         end do ! do in1 = 1, ispec
         write (36,*) '  '
         write (37,*) '  '
-!        write (*,*) '  '
-!        write (*,*) ' Writing output to:  coutput/goverlapf1.dat '
-!        write (*,*) ' Writing output to:  coutput/goverlapf2.dat '
-!        write (*,*) '  '
+        write (*,*) '  '
+        write (*,*) ' Writing output to:  coutput/goverlapf1.dat '
+        write (*,*) ' Writing output to:  coutput/goverlapf2.dat '
+        write (*,*) '  '
  
         close (unit = 36)
         close (unit = 37)

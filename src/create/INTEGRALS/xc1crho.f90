@@ -129,15 +129,14 @@
  
         real(kind=long), external :: psiofr
 
-        character(len=2)  :: shell
-        character(len=80) :: fname
+	character(2)  :: shell
+        character(80) :: fname
          
 ! Procedure
 ! ===========================================================================
 ! Open the file to store the onecenter data.
         open (unit = 36, file = 'coutput/nuxc_onecenter.dat',                &
      &        status = 'unknown')
-        if (verbose) write (*,*) 'coutput/nuxc_onecenter.dat'
  
 ! Set up the header for the output file.
         write (36,100)
@@ -179,16 +178,15 @@
 ! Loop over shell (density)
          do lssh = 1,nsshxc(in1)
 
-!          write (*,*) 'lssh = ',lssh
+          write (*,*) 'lssh = ',lssh
 
 ! create filename
           write (shell,'(i2.2)') lssh
           fname = 'coutput/exc1crho.'//shell//'.dat'
 
 ! Open the file to store the onecenter data.
-!          write (*,*) ' open file ',fname
+          write (*,*) ' open file ',fname
           open (unit = 36, file = fname , status = 'unknown')
-          if (verbose) write (*,*) fname
 
 ! Set up the header for the output file.
           write (36,100)
@@ -216,7 +214,7 @@
  
 ! Here we loop over rho.
           do irho = 1, nnrho
-           rho = rhomin + dble(irho - 1)*drho
+           rho = rhomin + real(irho - 1, kind=long)*drho
  
            factor = 2.0d0*drho/3.0d0
            if (mod(irho, 2) .eq. 0) factor = 4.0d0*drho/3.0d0
@@ -248,9 +246,9 @@
         end do
         deallocate (xnocc_in)
         write (36,*) '  '
-!        write (*,*) '  '
-!        write (*,*) ' Writing output to:  coutput/exc1crho.XX.dat '
-!        write (*,*) '  '
+        write (*,*) '  '
+        write (*,*) ' Writing output to:  coutput/exc1crho.XX.dat '
+        write (*,*) '  '
  
         close (unit = 36)
 

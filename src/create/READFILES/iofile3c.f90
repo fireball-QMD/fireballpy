@@ -59,7 +59,6 @@
 ! ===========================================================================
         subroutine iofile3c (root, suffix, ith, isorp, index1, index2,       &
      &                       index3, iunit, filename, skip)
-        use constants
         use precision
         implicit none
  
@@ -107,8 +106,8 @@
         end do
         ls = i
         if (lr + ls + 5*(nplace + 1) .gt. len(filename)) then
-!         write (*,'('' filename too short for input in iofile'')')
-!         write (*,*) root, suffix, index1, index2, index3, iunit
+         write (*,'('' filename too short for input in iofile'')')
+         write (*,*) root, suffix, index1, index2, index3, iunit
          stop ' error in iofile.f90 '
         end if
  
@@ -122,8 +121,8 @@
         if  (index1 .lt. 0 .or. index2 .lt. 0 .or. index3 .lt. 0 .or.        &
      &       index1 .gt. 10**nplace .or. index1 .gt. 10**nplace .or.         &
      &       index1 .gt. 10**nplace) then
-!         write (*,'('' index out of range in iofile'')')
-!         write (*,*) root, suffix, index1, index2, index3, iunit
+         write (*,'('' index out of range in iofile'')')
+         write (*,*) root, suffix, index1, index2, index3, iunit
          stop ' error in iofile.f90 '
         end if
  
@@ -158,7 +157,6 @@
         skip = .false.
         inquire (file = filename, exist = skip)
         if (.not. skip) open (unit = iunit, file = filename, status = 'unknown')
-        if (verbose .and. .not. skip) write (*,*) filename
  
 ! Format Statements
 ! ===========================================================================

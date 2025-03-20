@@ -71,7 +71,6 @@
 ! Program Declaration
 ! ======================================================================
         program create
-        use constants
         use precision
         implicit none
  
@@ -88,11 +87,11 @@
  
 ! Local Parameters and Data Declaration
 ! ======================================================================
+        real(kind=long) abohr
+        parameter (abohr = 0.529177249d0)
  
 ! Local Variable Declaration and Description
 ! ======================================================================
-        integer iaux1
-        integer iaux2
         integer ideriv
         integer iderivmin
         integer iderivmax
@@ -239,6 +238,7 @@
         real(kind=long) xmass (nspec_max)
  
         character(len=2) atom1, atom2, atom3
+        character(len=70) signature
         character(len=45) time_message
         character(len=70) what1, what2, what3
  
@@ -247,9 +247,6 @@
         character(len=25) ppfile (nspec_max)
         character(len=25) wavefxn (nspec_max, nsh_max)
         character(len=70) what (nspec_max)
-        character(len=70) :: signature
-        character(len=70) :: argaux
-
  
         logical read_info
  
@@ -259,68 +256,51 @@
  
 ! Procedure
 ! ======================================================================
-        call get_command_argument(1, argaux)
-        read (argaux, *) iaux1
-        call get_command_argument(2, argaux)
-        read (argaux, *) iaux2
-        verbose = .false.
-        if (iaux2 .eq. 1) verbose = .true.
-
 ! Setup the clm coefficients
-        signature = 'FireballPy'
         call setup_clm
  
 ! Initialize MPI
-        if (iaux1 .eq. 1) then
-          call init_noMPI (iammaster, iammpi, my_proc, nproc)
-        else
-          call init_MPI (iammaster, iammpi, my_proc, nproc)
-        end if
+        call init_MPI (iammaster, iammpi, my_proc, nproc)
  
         if (iammaster) then
-!         write (*,*) '  '
-!         write (*,100)
-!         write (*,*) '  '
-!         write (*,*) ' ****** Welcome to the creator package ****** '
-!         write (*,*) '          running on ',nproc,' nodes'
-!         write (*,100)
-!         write (*,*) '  '
-!         write (*,*) '               Fireballs-2005 '
-!         write (*,*) '      A fast local orbital QMD Package '
-!         write (*,*) '  '
-!         write (*,*) '          Latest version Jan 10, 2005 '
-!         write (*,*) '          See Copyright information: '
-!         write (*,*) '            !!!Proprietory Code!!! '
-!         write (*,*) '       Usable only with permission from '
-!         write (*,*) '      the Fireball executive committee. '
-!         write (*,*) '  This program is NOT, under any circumstances '
-!         write (*,*) '    to be transfered to an unauthorized user. '
-!         write (*,100)
-!         write (*,*) '  '
+         write (*,*) '  '
+         write (*,100)
+         write (*,*) '  '
+         write (*,*) ' ****** Welcome to the creator package ****** '
+         write (*,*) '          running on ',nproc,' nodes'
+         write (*,100)
+         write (*,*) '  '
+         write (*,*) '               Fireballs-2005 '
+         write (*,*) '      A fast local orbital QMD Package '
+         write (*,*) '  '
+         write (*,*) '          Latest version Jan 10, 2005 '
+         write (*,*) '          See Copyright information: '
+         write (*,*) '            !!!Proprietory Code!!! '
+         write (*,*) '       Usable only with permission from '
+         write (*,*) '      the Fireball executive committee. '
+         write (*,*) '  This program is NOT, under any circumstances '
+         write (*,*) '    to be transfered to an unauthorized user. '
+         write (*,100)
+         write (*,*) '  '
  
 ! Identification of the user:
-!!         write (*,*) '  '
-!!         write (*,*) ' Please insert your name and other messages. '
-!!         write (*,*) '  '
+!         write (*,*) '  '
+!         write (*,*) ' Please insert your name and other messages. '
+!         write (*,*) '  '
          if (.not. iammpi) then
 !          read (*,102) signature
-          !signature = ' dani '
+          signature = ' dani '
          else
 ! You might want to edit this to put your own name in here
-          !signature = ' MPI superhero '
+          signature = ' MPI superhero '
          endif
-!         write (*,*) '  '
-!         write (*,103) signature
-!         write (*,*) '  '
+         write (*,*) '  '
+         write (*,103) signature
+         write (*,*) '  '
         end if ! end master
  
 !  MPI Broadcast signature
-        if (iaux1 .eq. 1) then
-          call broadcast_noMPI (signature)
-        else
-          call broadcast_MPI (signature)
-        end if
-!        call signature_MPI (signature)
+        call signature_MPI (signature)
  
 ! **********************************************************************
 ! Read in create.input and set up some data
@@ -340,7 +320,7 @@
 
 ! **********************************************************************
 
-!        if (iammaster) write (*,*) ' Reading wavefunctions. '
+        if (iammaster) write (*,*) ' Reading wavefunctions. '
         do ispec = 1, nspec
          do issh = 1, nssh(ispec)
           call readpsi (ispec, issh, lssh(ispec,issh), &
@@ -350,7 +330,7 @@
         end do
  
 ! Read in the pseudopotential
-!        if (iammaster) write (*,*) ' Reading pseudopotentials. '
+        if (iammaster) write (*,*) ' Reading pseudopotentials. '
         do ispec = 1, nspec
 ! jel-PP
          call readvpp (ispec, ppfile(ispec), nsshPP, lsshPP, iexc, &
@@ -360,25 +340,25 @@
         if (iexc .eq. 4 .or. iexc .eq. 5 .or. iexc .eq. 6 &
      &      .or. iexc .eq. 10) then
          if (iammaster) then
-!          write (*,*) ' The exchange-correlation option that you chose '
-!          write (*,*) ' has not been implemented into creator yet. '
-!          write (*,*) ' Choose a different one, and restart. '
+          write (*,*) ' The exchange-correlation option that you chose '
+          write (*,*) ' has not been implemented into creator yet. '
+          write (*,*) ' Choose a different one, and restart. '
          end if
          stop
         end if
         if (iexc .ne. 11 .and. (ispin .eq. 1 .or. isnuxc1c .eq. 1 .or. &
      &                                            isnuxc2c .eq. 1)) then
          if (iammaster) then
-!          write (*,*) ' The exchange-correlation option that you chose '
-!          write (*,*) ' has not been implemented for the '
-!          write (*,*) ' spin-polarization case. Only iexc = 11 works! ' 
-!          write (*,*) ' Choose iexc = 11 or ispin = 0, and restart. '
+          write (*,*) ' The exchange-correlation option that you chose '
+          write (*,*) ' has not been implemented for the '
+          write (*,*) ' spin-polarization case. Only iexc = 11 works! ' 
+          write (*,*) ' Choose iexc = 11 or ispin = 0, and restart. '
          end if
          stop 
         end if
  
 ! Read the neutral and non-neutral atom potentials
-!        if (iammaster) write (*,*) ' Reading potentials.'
+        if (iammaster) write (*,*) ' Reading potentials.'
         do ispec = 1, nspec
          call readvnn (ispec, 0, rcutoffa_max(ispec)/abohr, nzx(ispec), &
      &                 napot(ispec,0), etotatom(ispec), iammaster)
@@ -400,35 +380,35 @@
  
 ! Write out the results of mk_index
           if (iammaster) then
-!           write (*,*) '  '
-!           write (*,*) '  '
-!           write (*,*) ' species 1 = ', itype1, ' species 2 = ', itype2
-!           write (*,100)
-!           write (*,*) ' For two-center interactions: '
-!           write (*,*) ' index_max2c = ', index_max2c(itype1,itype2)
-!           write (*,500)
+           write (*,*) '  '
+           write (*,*) '  '
+           write (*,*) ' species 1 = ', itype1, ' species 2 = ', itype2
+           write (*,100)
+           write (*,*) ' For two-center interactions: '
+           write (*,*) ' index_max2c = ', index_max2c(itype1,itype2)
+           write (*,500)
            do index = 1, index_max2c(itype1,itype2)
-!            write (*,501) index, &
-!     &       nleft(itype1,itype2,index), lleft(itype1,itype2,index), &
-!     &       mleft(itype1,itype2,index), nright(itype1,itype2,index), &
-!     &       lright(itype1,itype2,index), mright(itype1,itype2,index)
+            write (*,501) index, &
+     &       nleft(itype1,itype2,index), lleft(itype1,itype2,index), &
+     &       mleft(itype1,itype2,index), nright(itype1,itype2,index), &
+     &       lright(itype1,itype2,index), mright(itype1,itype2,index)
            end do
-!           write (*,*) ' Additionally, for three-center interactions: '
-!           write (*,*) ' index_max3c = ', index_max3c(itype1,itype2)
-!           write (*,500)
+           write (*,*) ' Additionally, for three-center interactions: '
+           write (*,*) ' index_max3c = ', index_max3c(itype1,itype2)
+           write (*,500)
            do index = index_max2c(itype1,itype2) + 1, &
      &                index_max3c(itype1,itype2)
-!            write (*,501) index, &
-!     &       nleft(itype1,itype2,index), lleft(itype1,itype2,index), &
-!     &       mleft(itype1,itype2,index), nright(itype1,itype2,index), &
-!     &       lright(itype1,itype2,index), mright(itype1,itype2,index)
+            write (*,501) index, &
+     &       nleft(itype1,itype2,index), lleft(itype1,itype2,index), &
+     &       mleft(itype1,itype2,index), nright(itype1,itype2,index), &
+     &       lright(itype1,itype2,index), mright(itype1,itype2,index)
            end do
           end if ! end master
           if (index_max3c(itype1,itype2) .gt. inter_max) then
-!           write (*,*) ' index_max3c(itype1,itype2) = ',  &
-!     &                   index_max3c(itype1,itype2)
-!           write (*,*) ' inter_max = ', inter_max
-!           write (*,*) ' Redimension index_max in parameters.inc! '
+           write (*,*) ' index_max3c(itype1,itype2) = ',  &
+     &                   index_max3c(itype1,itype2)
+           write (*,*) ' inter_max = ', inter_max
+           write (*,*) ' Redimension index_max in parameters.inc! '
            stop
           end if
  
@@ -444,47 +424,46 @@
 ! Write out the info file.
 ! Only do this on the master
         if (iammaster) then
-!         write (*,*) '  '
-!         write (*,*) '  '
-!         write (*,*) ' Now we are writing the following to the '
-!         write (*,*) ' info.dat file. '
-!         write (*,*) '  '
+         write (*,*) '  '
+         write (*,*) '  '
+         write (*,*) ' Now we are writing the following to the '
+         write (*,*) ' info.dat file. '
+         write (*,*) '  '
  
 ! First write to the screen
          do ispec = 1, nspec
-!          write (*,100)
-!          write (*,301) ispec
-!          write (*,302) atom(ispec)
-!          write (*,303) nzx(ispec)
-!          write (*,304) xmass(ispec)
-!          write (*,305) nssh(ispec)
-!          write (*,306) (lssh(ispec,issh), issh = 1, nssh(ispec))
-!          write (*,307) nsshPP(ispec)
-!          write (*,308) (lsshPP(ispec,issh), issh = 1, nsshPP(ispec))
+          write (*,100)
+          write (*,301) ispec
+          write (*,302) atom(ispec)
+          write (*,303) nzx(ispec)
+          write (*,304) xmass(ispec)
+          write (*,305) nssh(ispec)
+          write (*,306) (lssh(ispec,issh), issh = 1, nssh(ispec))
+          write (*,307) nsshPP(ispec)
+          write (*,308) (lsshPP(ispec,issh), issh = 1, nsshPP(ispec))
 !jel-PP
-!          write (*,314) (rcPP(ispec))
+          write (*,314) (rcPP(ispec))
 
-!          write (*,309) (xnocc(issh,ispec), issh = 1, nssh(ispec))
-!          write (*,310) (rcutoff(ispec,issh), issh = 1, nssh(ispec))
-!          write (*,311) (wavefxn(ispec,issh), issh = 1, nssh(ispec))
-!          write (*,312) (napot(ispec,issh), issh = 0, nssh(ispec))
-!          write (*,313) etotatom(ispec)
+          write (*,309) (xnocc(issh,ispec), issh = 1, nssh(ispec))
+          write (*,310) (rcutoff(ispec,issh), issh = 1, nssh(ispec))
+          write (*,311) (wavefxn(ispec,issh), issh = 1, nssh(ispec))
+          write (*,312) (napot(ispec,issh), issh = 0, nssh(ispec))
+          write (*,313) etotatom(ispec)
 
-!          write (*,100)
+          write (*,100)
          end do
  
 ! Next write to the info.dat file.
          inquire (file = 'coutput/info.dat', exist = read_info)
          open (unit = 12, file = 'coutput/info.dat', status = 'unknown')
-         if (verbose) write (*,*) 'coutput/info.dat'
  
-!         time_message = ' No time available! '
-!         open (unit = 45, file = 'timecreate', status = 'unknown')
-!         do itmp = 1, 10000
-!          read (45, 106, err = 445, end = 445) time_message
-!         end do
-!445      continue
-!         close (unit = 45)
+         time_message = ' No time available! '
+         open (unit = 45, file = 'timecreate', status = 'unknown')
+         do itmp = 1, 10000
+          read (45, 106, err = 445, end = 445) time_message
+         end do
+445      continue
+         close (unit = 45)
  
          if (.not. read_info) then
           write (12,104) signature
@@ -528,7 +507,7 @@
      &                   ibcna, ibcxc, inuxc1c, inuxc2c, isnuxc1c, &
      &                   isnuxc2c    
          close (unit = 12)
-!         write (*,*) '  '
+         write (*,*) '  '
  
 ! Done with setup, now get to work
 ! ======================================================================
@@ -541,7 +520,7 @@
 ! **********************************************************************
          if (V_intra_dip .eq. 1) then
           do itype = 1,nspec
-!          write(*,*) 'itype= ', itype !Ankais
+          write(*,*) 'itype= ', itype !Ankais
           call onecentervdip (nsh_max, nspec, nspec_max, itype, &
      &               nssh, lssh, drr_rho, rcutoffa_max, what, signature)
           end do !end do itype
@@ -559,7 +538,7 @@
      &                      rcutoffa_max, xnocc, dqorb, iderorb, what,  &
      &                      signature, drr_rho,nzx)
 ! jel-X
-!          write (*,*) 'Call xc1rho ...'
+          write (*,*) 'Call xc1rho ...'
           iexc_new = iexc
           if (iexc .ne. 11) iexc_new = 3
           call exc1crho (nspec, nspec_max, nsh_max, wfmax_points, &
@@ -594,12 +573,12 @@
      &                          rcutoffa_max, xnocc, dqorb, iderorb,     &
      &                          what, signature, drr_rho)
           else 
-!           write (*,*) '  '
-!           write (*,*) ' The spin-polarization option is currently '
-!           write (*,*) ' implemented only for the LSDA-VWN exchange '
-!           write (*,*) ' correlation model. '
-!           write (*,*) ' You have iexc = ', iexc, ' but iexc can only '
-!           write (*,*) ' equal iexc = 11 for spin-polarization! '
+           write (*,*) '  '
+           write (*,*) ' The spin-polarization option is currently '
+           write (*,*) ' implemented only for the LSDA-VWN exchange '
+           write (*,*) ' correlation model. '
+           write (*,*) ' You have iexc = ', iexc, ' but iexc can only '
+           write (*,*) ' equal iexc = 11 for spin-polarization! '
           end if
          end if
  
@@ -616,7 +595,7 @@
 ! Note igauss controls whether or not we ACTUALLY compute the gaussian
 ! integrals EVEN WHEN REQUESTED BY igauss3C. The point is that switch
 ! allows you to NOT compute things EVEN IF YOU NEED THEM!
-        !if (igauss .eq. 1) call gausscreate (ngauss) ! HERE GAUSS HERE
+!        if (igauss .eq. 1) call gausscreate (ngauss)
 
 ! We have calculated BOTH 3XC and 3NA gaussian fits. So we need not
 ! bother with the 3XC or the 3NA parts below.
@@ -631,8 +610,8 @@
 
         if (ibcxc .eq. 1 .and. ixc_opt .eq. 0) then
          if (iammaster) then 
-!          write (*,*) ' Calculating three-center exchange-correlation '
-!          write (*,*) ' interactions (Horsfield). '
+          write (*,*) ' Calculating three-center exchange-correlation '
+          write (*,*) ' interactions (Horsfield). '
          end if
          if (idogs .eq. 1) then
           iderivmin = 1
@@ -650,13 +629,13 @@
          if (iexc .eq. 4 .or. iexc .eq. 5 .or. iexc .eq. 6 &
      &       .or. iexc .eq. 9 .or. iexc .eq. 10) then
           if (iammaster) then
-!           write (*,*) '  '
-!           write (*,*) ' You have chosen to perform a GGA type of '
-!           write (*,*) ' exchange-correlation interaction. However, '
-!           write (*,*) ' currently this capability does not exist '
-!           write (*,*) ' for three-center interactions. By default, '
-!           write (*,*) ' we set the three-center interactions to the '
-!           write (*,*) ' LDA limit - Ceperley-Alder/Perdew-Zunger. '
+           write (*,*) '  '
+           write (*,*) ' You have chosen to perform a GGA type of '
+           write (*,*) ' exchange-correlation interaction. However, '
+           write (*,*) ' currently this capability does not exist '
+           write (*,*) ' for three-center interactions. By default, '
+           write (*,*) ' we set the three-center interactions to the '
+           write (*,*) ' LDA limit - Ceperley-Alder/Perdew-Zunger. '
           end if
           iexc_new = 3
          else
@@ -709,14 +688,14 @@
      &                    abs(rcutoff2 - rcutoff3), &
      &                    abs(rcutoff3 - rcutoff1))
            if (max_diff .gt. 2.0d0) then
-!            write (*,*) ' ************ WARNING ************* '
-!            write (*,*) ' You have at least two species which have '
-!            write (*,*) ' rcutoff''s which differ by more than 2.0 '
-!            write (*,*) ' Angstroms. It is highly advisable that you '
-!            write (*,*) ' increase the number of mesh points, so as to '
-!            write (*,*) ' avoid a case where you may end up with many '
-!            write (*,*) ' zeros, and too few non-zero elements in your '
-!            write (*,*) ' grid. '
+            write (*,*) ' ************ WARNING ************* '
+            write (*,*) ' You have at least two species which have '
+            write (*,*) ' rcutoff''s which differ by more than 2.0 '
+            write (*,*) ' Angstroms. It is highly advisable that you '
+            write (*,*) ' increase the number of mesh points, so as to '
+            write (*,*) ' avoid a case where you may end up with many '
+            write (*,*) ' zeros, and too few non-zero elements in your '
+            write (*,*) ' grid. '
            end if
  
            interaction = 2
@@ -747,8 +726,8 @@
 
         if (ibcxc .eq. 1 .and. ixc_opt .eq. 1 ) then
          if (iammaster) then
-!          write (*,*) ' Calculating three-center exchange-correlation '
-!          write (*,*) ' interactions (SNXC). '
+          write (*,*) ' Calculating three-center exchange-correlation '
+          write (*,*) ' interactions (SNXC). '
          end if
          nstyles = ideriv
          call gleg (ctheta, ctheta_weights, ntheta_max)
@@ -794,14 +773,14 @@
      &                    abs(rcutoff2 - rcutoff3), &
      &                    abs(rcutoff3 - rcutoff1))
            if (max_diff .gt. 2.0d0) then
-!            write (*,*) ' ************ WARNING ************* '
-!            write (*,*) ' You have at least two species which have '
-!            write (*,*) ' rcutoff''s which differ by more than 2.0 '
-!            write (*,*) ' Angstroms. It is highly advisable that you '
-!            write (*,*) ' increase the number of mesh points, so as to '
-!            write (*,*) ' avoid a case where you may end up with many '
-!            write (*,*) ' zeros, and too few non-zero elements in your '
-!            write (*,*) ' grid. '
+            write (*,*) ' ************ WARNING ************* '
+            write (*,*) ' You have at least two species which have '
+            write (*,*) ' rcutoff''s which differ by more than 2.0 '
+            write (*,*) ' Angstroms. It is highly advisable that you '
+            write (*,*) ' increase the number of mesh points, so as to '
+            write (*,*) ' avoid a case where you may end up with many '
+            write (*,*) ' zeros, and too few non-zero elements in your '
+            write (*,*) ' grid. '
            end if
 ! xc3c_SN now we call threecenter() with new option 'interaction=3'
            interaction = 3
@@ -834,8 +813,8 @@
 ! **********************************************************************
         if (ibcna .eq. 1) then
          if (iammaster) then
-!          write (*,*) ' Calculating three-center neutral atom and '
-!          write (*,*) ' charged atom interactions. '
+          write (*,*) ' Calculating three-center neutral atom and '
+          write (*,*) ' charged atom interactions. '
          end if
          call gleg (ctheta, ctheta_weights, ntheta_max)
          do looper3a = 1, nspec*nspec*nspec
@@ -880,14 +859,14 @@
      &                    abs(rcutoff2 - rcutoff3), &
      &                    abs(rcutoff3 - rcutoff1))
            if (max_diff .gt. 2.0d0) then
-!            write (*,*) ' ************ WARNING ************* '
-!            write (*,*) ' You have at least two species which have '
-!            write (*,*) ' rcutoff''s which differ by more than 2.0 '
-!            write (*,*) ' Angstroms. It is highly advisable that you '
-!            write (*,*) ' increase the number of mesh points, so as to '
-!            write (*,*) ' avoid a case where you may end up with many '
-!            write (*,*) ' zeros, and too few non-zero elements in your '
-!            write (*,*) ' grid. '
+            write (*,*) ' ************ WARNING ************* '
+            write (*,*) ' You have at least two species which have '
+            write (*,*) ' rcutoff''s which differ by more than 2.0 '
+            write (*,*) ' Angstroms. It is highly advisable that you '
+            write (*,*) ' increase the number of mesh points, so as to '
+            write (*,*) ' avoid a case where you may end up with many '
+            write (*,*) ' zeros, and too few non-zero elements in your '
+            write (*,*) ' grid. '
            end if
  
            interaction = 1
@@ -1003,8 +982,6 @@
            ispher = .false.  
            call twocenter (interaction, isorp, ideriv, iexc, fraction, &
      &                     itype1, itype2, atom1, atom2, what1, what2, &
-!jel-PP
-!     2                     nzx1, nzx2, rcutoff1, rcutoff2, nssh2PP, &
      &                     nzx1, nzx2, rcutoff1, rcPP(itype2), nssh2PP, &
      &                     nznl, nrhonl, nddnl, index_maxPP, n1PP, l1PP, &
      &                     m1PP, n2PP, l2PP, m2PP, signature, iammaster, &
@@ -1134,8 +1111,8 @@
      &                      nrhoeh, nddeh, index_max, n1, l1, m1, n2,  &
      &                      l2, m2, signature, iammaster, ispher) 
            else 
-!            write(*,*) ' This option is currently implemented only ' 
-!            write(*,*) ' for the LSDAVWN exchange correlation model ' 
+            write(*,*) ' This option is currently implemented only ' 
+            write(*,*) ' for the LSDAVWN exchange correlation model ' 
            end if 
           end if
          end if ! MPI which node end if
@@ -1476,7 +1453,7 @@
           itype2 = 1 + int((itmp - 1)/nspec)
           itmp   = itmp - (itype2 - 1)*nspec
           itype1 = itmp
-!          write(*,*) 'prueba itype', itype1, itype2
+          write(*,*) 'prueba itype', itype1, itype2
  
           nzx1 = nzx(itype1)
           nzx2 = nzx(itype2)
@@ -1538,7 +1515,7 @@
           itype2 = 1 + int((itmp - 1)/nspec)
           itmp   = itmp - (itype2 - 1)*nspec
           itype1 = itmp
-!          write(*,*) 'prueba2 itype', itype1, itype2
+          write(*,*) 'prueba2 itype', itype1, itype2
  
           nzx1 = nzx(itype1)
           nzx2 = nzx(itype2)
@@ -1605,35 +1582,35 @@
  
 ! Write out the results of mk_index
           if (iammaster) then
-!           write (*,*) '  '
-!           write (*,*) '  '
-!           write (*,*) ' species 1 = ', itype1, ' species 2 = ', itype2
-!           write (*,100)
-!           write (*,*) ' For two-center interactions: '
-!           write (*,*) ' index_max2c = ', index_max2c(itype1,itype2)
-!           write (*,500)
+           write (*,*) '  '
+           write (*,*) '  '
+           write (*,*) ' species 1 = ', itype1, ' species 2 = ', itype2
+           write (*,100)
+           write (*,*) ' For two-center interactions: '
+           write (*,*) ' index_max2c = ', index_max2c(itype1,itype2)
+           write (*,500)
            do index = 1, index_max2c(itype1,itype2)
-!            write (*,501) index, &
-!     &       nleft(itype1,itype2,index), lleft(itype1,itype2,index), &
-!     &       mleft(itype1,itype2,index), nright(itype1,itype2,index), &
-!     &       lright(itype1,itype2,index), mright(itype1,itype2,index)
+            write (*,501) index, &
+     &       nleft(itype1,itype2,index), lleft(itype1,itype2,index), &
+     &       mleft(itype1,itype2,index), nright(itype1,itype2,index), &
+     &       lright(itype1,itype2,index), mright(itype1,itype2,index)
            end do
-!           write (*,*) ' Additionally, for three-center interactions: '
-!           write (*,*) ' index_max3c = ', index_max3c(itype1,itype2)
-!           write (*,500)
+           write (*,*) ' Additionally, for three-center interactions: '
+           write (*,*) ' index_max3c = ', index_max3c(itype1,itype2)
+           write (*,500)
            do index = index_max2c(itype1,itype2) + 1, &
      &                index_max3c(itype1,itype2)
-!            write (*,501) index, &
-!     &       nleft(itype1,itype2,index), lleft(itype1,itype2,index), &
-!     &       mleft(itype1,itype2,index), nright(itype1,itype2,index), &
-!     &       lright(itype1,itype2,index), mright(itype1,itype2,index)
+            write (*,501) index, &
+     &       nleft(itype1,itype2,index), lleft(itype1,itype2,index), &
+     &       mleft(itype1,itype2,index), nright(itype1,itype2,index), &
+     &       lright(itype1,itype2,index), mright(itype1,itype2,index)
            end do
           end if ! end master
           if (index_max3c(itype1,itype2) .gt. inter_max) then
-!           write (*,*) ' index_max3c(itype1,itype2) = ',  &
-!     &                   index_max3c(itype1,itype2)
-!           write (*,*) ' inter_max = ', inter_max
-!           write (*,*) ' Redimension index_max in parameters.inc! '
+           write (*,*) ' index_max3c(itype1,itype2) = ',  &
+     &                   index_max3c(itype1,itype2)
+           write (*,*) ' inter_max = ', inter_max
+           write (*,*) ' Redimension index_max in parameters.inc! '
            stop
           end if
  
@@ -1651,8 +1628,8 @@
 
         if (ibcxc .eq. 1 .and. ixc_opt .eq. 1 ) then
         if (iammaster) then
-!          write (*,*) ' Calculating three-center exchange-correlation '
-!          write (*,*) ' interactions (OLSXC). '
+          write (*,*) ' Calculating three-center exchange-correlation '
+          write (*,*) ' interactions (OLSXC). '
         end if
         nstyles = ideriv
         call gleg (ctheta, ctheta_weights, ntheta_max)
@@ -1698,14 +1675,14 @@
      &                    abs(rcutoff2 - rcutoff3), &
      &                    abs(rcutoff3 - rcutoff1))
            if (max_diff .gt. 2.0d0) then
-!            write (*,*) ' ************ WARNING ************* '
-!            write (*,*) ' You have at least two species which have '
-!            write (*,*) ' rcutoff''s which differ by more than 2.0 '
-!            write (*,*) ' Angstroms. It is highly advisable that you '
-!            write (*,*) ' increase the number of mesh points, so as to '
-!            write (*,*) ' avoid a case where you may end up with many '
-!            write (*,*) ' zeros, and too few non-zero elements in your '
-!            write (*,*) ' grid. '
+            write (*,*) ' ************ WARNING ************* '
+            write (*,*) ' You have at least two species which have '
+            write (*,*) ' rcutoff''s which differ by more than 2.0 '
+            write (*,*) ' Angstroms. It is highly advisable that you '
+            write (*,*) ' increase the number of mesh points, so as to '
+            write (*,*) ' avoid a case where you may end up with many '
+            write (*,*) ' zeros, and too few non-zero elements in your '
+            write (*,*) ' grid. '
            end if
 ! xc3c_SN now we call threecenter() with new option 'interaction=3'
            interaction = 3
@@ -1733,7 +1710,7 @@
 
 ! ======================================================================
 ! I.Sp. Compute two center cases (overlap, average density)
-! with spheric approximation.
+! with spheric approxomation.
 ! ======================================================================
         do looper2 = 1, nspec*nspec
          if (mod(looper2,nproc) .eq. my_proc) then
@@ -1851,12 +1828,7 @@
         end do
  
 ! MPI CLEAN UP
-!        call Finalize_MPI
-        if (iaux1 .eq. 1) then
-          call finalize_noMPI
-        else
-          call finalize_MPI
-        end if
+        call Finalize_MPI
  
 ! Format Statements
 ! ======================================================================
@@ -1874,7 +1846,8 @@
 304     format (2x, f7.3, 4x, ' - Atomic Mass ')
 305     format (2x, i2, 9x, ' - Number of shells; L for each shell ')
 306     format (2x, 8(2x,i1))
-307     format (2x, i2, 9x, ' - Number of shells; L for each shell ', ' (Pseudopotential) ')
+307     format (2x, i2, 9x, ' - Number of shells; L for each shell ', &
+     &                      ' (Pseudopotential) ')
 308     format (2x,8(2x,i1))
 309     format (8(2x,f5.2), ' - Occupation numbers ')
 310     format (8(2x,f5.2), ' - Radial cutoffs ')

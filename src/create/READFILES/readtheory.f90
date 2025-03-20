@@ -144,57 +144,58 @@
 !        read (45,*) ixc_opt
 !        read (45,*) ioomethod
 !        read (45,*) igauss, ngauss
-         itest = 1
-         iharris = 1
-         idogs = 1
-         ihubbard = 0
-         ispin = 0
-         ixc_opt = 1
-         ioomethod = 0
-         igauss = 0
 !        close (unit = 45)
+        itest = 1
+        iharris = 1
+        idogs = 1
+        ihubbard = 0
+        ispin = 0
+        ixc_opt = 1
+        ioomethod = 0
+        igauss = 0
+        ngauss = 4
         if (iammaster) then
-!         write (*,*) '  '
-!         write (*,*) ' Read in level of theory from theory.input. '
-!         write (*,*) ' Note that the lowest level of theory is the '
-!         write (*,*) ' default!! '
-!         write (*,*) ' itest = 1 => read switch.input'
-!         write (*,*) ' iharris = 1 => do all harris integrals. '
-!         write (*,*) ' idogs = 1 => do additional dogs integrals. '
-!         write (*,*) ' ihubbard = 1 => do additional hubbard integrals.'
-!         write (*,*) ' ispin = 1 => do additional spin-polarization integrals.'
-!         write (*,*) ' ixc_opt = 1 => do alternative option for '
-!         write (*,*) '                Horsfield approach, based on SNXC'
-!         write (*,*) ' ioomethod = 1 => do additional integrals for the'
-!         write (*,*) '                  orbital occupancy method.'
-!         write (*,*) ' igauss = 1 => compute NA and XC using gaussians '
-!         write (*,*) ' ngauss is  accuracy level (1-4) of the gaussian fits. '
-!         write (*,*) ' Latter options are invoked only if itest .ne. 1!'
-!         write (*,*) '  '
-!         write (*,*) ' Read in theory.input'
-!         write (*,*) ' (itest, iharris, idogs, ihubbard) '
-!         write (*,*) ' Example: 1 0 0 0 means read switch.input. '
-!         write (*,*) ' Example: 0 1 0 0 means do harris integrals. '
-!         write (*,*) ' Example: 0 1 1 0 means all dogs integrals. '
-!         write (*,*) ' Example: 0 0 1 0 means no harris but '
-!         write (*,*) '                  do additional dogs integrals. '
-!         write (*,*) ' Example: 0 1 0 1 means all harris '
-!         write (*,*) '                  + hubbard integrals. '
-!         write (*,*) ' Example: 0 0 0 1 means ONLY hubbard integrals. '
-!         write (*,*) ' Example: 0 0 0 0 means ONLY exchange integrals. '
-!         write (*,*) '  '
-!         write (*,*) ' (1 => compute, 0 => don''t compute)'
-!         write (*,*) '  '
-!         write (*,*) '     Level of Theory: '
-!         write (*,*) ' itest     = ', itest
-!         write (*,*) ' iharris   = ', iharris
-!         write (*,*) ' idogs     = ', idogs
-!         write (*,*) ' ihubbard  = ', ihubbard
-!         write (*,*) ' ispin     = ', ispin
+         write (*,*) '  '
+         write (*,*) ' Read in level of theory from theory.input. '
+         write (*,*) ' Note that the lowest level of theory is the '
+         write (*,*) ' default!! '
+         write (*,*) ' itest = 1 => read switch.input'
+         write (*,*) ' iharris = 1 => do all harris integrals. '
+         write (*,*) ' idogs = 1 => do additional dogs integrals. '
+         write (*,*) ' ihubbard = 1 => do additional hubbard integrals.'
+         write (*,*) ' ispin = 1 => do additional spin-polarization integrals.'
+         write (*,*) ' ixc_opt = 1 => do alternative option for '
+         write (*,*) '                Horsfield approach, based on SNXC'
+         write (*,*) ' ioomethod = 1 => do additional integrals for the'
+         write (*,*) '                  orbital occupancy method.'
+         write (*,*) ' igauss = 1 => compute NA and XC using gaussians '
+         write (*,*) ' ngauss is  accuracy level (1-4) of the gaussian fits. '
+         write (*,*) ' Latter options are invoked only if itest .ne. 1!'
+         write (*,*) '  '
+         write (*,*) ' Read in theory.input'
+         write (*,*) ' (itest, iharris, idogs, ihubbard) '
+         write (*,*) ' Example: 1 0 0 0 means read switch.input. '
+         write (*,*) ' Example: 0 1 0 0 means do harris integrals. '
+         write (*,*) ' Example: 0 1 1 0 means all dogs integrals. '
+         write (*,*) ' Example: 0 0 1 0 means no harris but '
+         write (*,*) '                  do additional dogs integrals. '
+         write (*,*) ' Example: 0 1 0 1 means all harris '
+         write (*,*) '                  + hubbard integrals. '
+         write (*,*) ' Example: 0 0 0 1 means ONLY hubbard integrals. '
+         write (*,*) ' Example: 0 0 0 0 means ONLY exchange integrals. '
+         write (*,*) '  '
+         write (*,*) ' (1 => compute, 0 => don''t compute)'
+         write (*,*) '  '
+         write (*,*) '     Level of Theory: '
+         write (*,*) ' itest     = ', itest
+         write (*,*) ' iharris   = ', iharris
+         write (*,*) ' idogs     = ', idogs
+         write (*,*) ' ihubbard  = ', ihubbard
+         write (*,*) ' ispin     = ', ispin
 ! jel-oslxc
-!         write (*,*) ' ixc_opt   = ', ixc_opt
-!         write (*,*) ' ioomethod = ', ioomethod
-!         write (*,*) ' igauss, Gaussian Accuracy (Default=3) = ', igauss,ngauss
+         write (*,*) ' ixc_opt   = ', ixc_opt
+         write (*,*) ' ioomethod = ', ioomethod
+         write (*,*) ' igauss, Gaussian Accuracy (Default=3) = ', igauss,ngauss
         end if ! end master
  
 ! Doing harris
@@ -259,8 +260,8 @@
 ! Only doing testing. Read switch.input file.
         if (itest .eq. 1) then
          if (iammaster) then
-!          write (*,*) '  '
-!          write (*,*) ' Switches read in from switch.input '
+          write (*,*) '  '
+          write (*,*) ' Switches read in from switch.input '
          end if ! end master
          !open (unit = 45, file = 'switch.input', status = 'old')
          !read (45,*) iswitch(0)
@@ -282,7 +283,7 @@
          imuxc1c = 1
          ikinetic = 1
          do interaction = 1, 10
-          iswitch(interaction) = 1
+           iswitch(interaction) = 1
          end do
          iswitch(11) = 1
          ibcna = 1
@@ -295,48 +296,48 @@
         end if  
  
         if (iammaster) then
-!         write (*,*) '  '
-!         write (*,*) ' (1 => compute, 0 => don''t compute)'
-!         write (*,*) '  '
-!         write (*,*) '        one-center integrals '
-!         write (*,*) ' imuxc1c   = ', imuxc1c
-!         write (*,*) '        two-center integrals '
-!         write (*,*) ' ikinetic  = ', ikinetic
-!         write (*,*) '        gaussian 3C-NA 3C-XC '
-!         write (*,*) ' igauss    = ', igauss
-!         write (*,*) '  '
-!         write (*,*) ' interaction = 0 => do average density '
-!         write (*,*) ' interaction = 1 => do overlap '
-!         write (*,*) ' interaction = 2 => do neutral atom/ontop '
-!         write (*,*) ' interaction = 3 => do neutral atom/atom '
-!         write (*,*) ' interaction = 4 => do non-local '
-!         write (*,*) ' interaction = 5 => do xc ontop function '
-!         write (*,*) ' interaction = 6 => do xc atom function '
-!         write (*,*) ' interaction = 7 => do xc double counting '
-!         write (*,*) ' interaction = 8 => do z-dipole '
-!         write (*,*) ' interaction = 9 => do y-dipole '
-!         write (*,*) ' interaction = 10 => do x-dipole '
-!         write (*,*) ' interaction = 11 => do coulomb '
-!         write (*,*) '  '
+         write (*,*) '  '
+         write (*,*) ' (1 => compute, 0 => don''t compute)'
+         write (*,*) '  '
+         write (*,*) '        one-center integrals '
+         write (*,*) ' imuxc1c   = ', imuxc1c
+         write (*,*) '        two-center integrals '
+         write (*,*) ' ikinetic  = ', ikinetic
+         write (*,*) '        gaussian 3C-NA 3C-XC '
+         write (*,*) ' igauss    = ', igauss
+         write (*,*) '  '
+         write (*,*) ' interaction = 0 => do average density '
+         write (*,*) ' interaction = 1 => do overlap '
+         write (*,*) ' interaction = 2 => do neutral atom/ontop '
+         write (*,*) ' interaction = 3 => do neutral atom/atom '
+         write (*,*) ' interaction = 4 => do non-local '
+         write (*,*) ' interaction = 5 => do xc ontop function '
+         write (*,*) ' interaction = 6 => do xc atom function '
+         write (*,*) ' interaction = 7 => do xc double counting '
+         write (*,*) ' interaction = 8 => do z-dipole '
+         write (*,*) ' interaction = 9 => do y-dipole '
+         write (*,*) ' interaction = 10 => do x-dipole '
+         write (*,*) ' interaction = 11 => do coulomb '
+         write (*,*) '  '
          do interaction = 0, 11
-!          write (*,*) ' interaction = ', interaction,                       &
-!     &                ' iswitch = ', iswitch(interaction)
+          write (*,*) ' interaction = ', interaction,                       &
+     &                ' iswitch = ', iswitch(interaction)
          end do
  
-!         write (*,*) '  '
-!         write (*,*) '      three-center integrals '
-!         write (*,*) ' ibcxc     = ', ibcxc
-!         write (*,*) ' ibcna     = ', ibcna
+         write (*,*) '  '
+         write (*,*) '      three-center integrals '
+         write (*,*) ' ibcxc     = ', ibcxc
+         write (*,*) ' ibcna     = ', ibcna
 
-!         write (*,*) '  '
-!         write (*,*) '  extended-Hubbard integrals '
-!         write (*,*) ' inuxc1c   = ', inuxc1c
-!         write (*,*) ' inuxc2c   = ', inuxc2c
+         write (*,*) '  '
+         write (*,*) '  extended-Hubbard integrals '
+         write (*,*) ' inuxc1c   = ', inuxc1c
+         write (*,*) ' inuxc2c   = ', inuxc2c
 
-!         write (*,*) '  '
-!         write (*,*) '  extended-Hubbard (spin) integrals '
-!         write (*,*) ' isnuxc1c   = ', isnuxc1c
-!         write (*,*) ' isnuxc2c   = ', isnuxc2c
+         write (*,*) '  '
+         write (*,*) '  extended-Hubbard (spin) integrals '
+         write (*,*) ' isnuxc1c   = ', isnuxc1c
+         write (*,*) ' isnuxc2c   = ', isnuxc2c
         end if ! end master
  
 ! Format Statements

@@ -159,7 +159,7 @@
          
 !          
 ! Cubic splines:  One big "super spline"
-!         &
+!        
  1234   continue  
         if (imid .gt. max_points) imid=max_points ! If we have gone off of the end
         aaa=vpp_spline(1,imid,issh,ispec)

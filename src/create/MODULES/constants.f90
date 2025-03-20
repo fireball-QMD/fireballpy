@@ -1,7 +1,6 @@
         module constants
          use precision
          
-         logical :: verbose = .false.
          real(kind=long), parameter :: abohr = 0.529177249d0 
          real(kind=long), parameter :: abohr15 = 0.3849477153d0
          real(kind=long), parameter :: beta = 0.9d0

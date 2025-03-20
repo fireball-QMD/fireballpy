@@ -242,9 +242,9 @@
        END DO
  
         if (inm.gt.inter3max) then
-!        write(*,*)' inm .gt. inter3max (inter_max) in mk_index.f'
-!        write(*,*)' Make inter_max greater than or equal to ',inm
-!        write(*,*)' in parameters.inc!'
+        write(*,*)' inm .gt. inter3max (inter_max) in mk_index.f'
+        write(*,*)' Make inter_max greater than or equal to ',inm
+        write(*,*)' in parameters.inc!'
         stop
         end if
 
