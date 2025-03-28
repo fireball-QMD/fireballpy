@@ -174,7 +174,7 @@
          if (iammaster) then
           write (*,200) ispec, nzx(ispec), atom(ispec), atomcheck
          end if ! end master
-         if (atom(ispec) .ne. atomcheck) stop' wrong nz(nuc) for atom!!'
+         if (atom(ispec) .ne. atomcheck) stop ' wrong nz(nuc) for atom!!'
  
          read (45,*) xmass(ispec)
  

@@ -202,7 +202,7 @@
 
           write (auxz,'(i2.2)') nzx(in1)
           root = 'coutput/nuxc1crho.'//auxz//'.dat'
-          open (unit = 360, file = root , access='append', status = 'old')
+          open (unit = 360, file = root , position='append', status = 'old')
           write (360,400)  in1, nssh, lssh
           close(360)
  
@@ -254,7 +254,7 @@
 
            write (auxz,'(i2.2)') nzx(in1)
            root = 'coutput/nuxc1crho.'//auxz//'.dat'
-           open (unit = 360, file = root , access='append', status = 'old')
+           open (unit = 360, file = root , position='append', status = 'old')
            write (360,500) answer(issh,1:nssh)
            close(360)
 
@@ -264,7 +264,7 @@
          deallocate (xnocc_in)
         end do ! do in1 = 1, ispec
 
-        open (unit = 360, file = root , access='append', status = 'old')
+        open (unit = 360, file = root , position='append', status = 'old')
         write (360,*) '  '
         close(360)
 

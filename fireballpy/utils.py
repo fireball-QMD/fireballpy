@@ -89,6 +89,9 @@ def download_check_tar(url: str, dst: str, filetype: str,
     # in Windows and cover bad downloads
     # Cover the absurd case in which all posible names are
     # already taken (not going to happen)
+    dst_folder = os.path.split(dst)[0]
+    if not os.path.isdir(dst_folder):
+        os.makedirs(dst_folder)
     dst = os.path.expanduser(dst)
     file_size = int(r.headers.get('content-length', 0))
     desc = '(Unknown total file size)' if not file_size else ''

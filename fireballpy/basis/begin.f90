@@ -1,14 +1,14 @@
-subroutine generate_wavefunctions(ioption_in, nexcite_in, nssh_in, nznuc_in, nzval_in, nzval_ion_in, &
+subroutine generate_wavefunctions(ioption_in, nexcite_in, nssh_in, nznuc_in, nzval_in, nzval_ion_in, nzval_pp_in, &
     & ioptim_in, atomname_in, ppfile_in, ppionfile_in, outpath_in, sav_in, lam_in, a0_in, rcutoff_in, &
-    & xocc_in, xocc0_in, xocc_ion_in, xocc_pp_in, cmix_in, r0_in, v0_in, filename_wf_in, filename_ewf_in)
+    & xocc_in, xocc0_in, xocc_ion_in, cmix_in, r0_in, v0_in, filename_wf_in, filename_ewf_in)
   use iso_c_binding
-  use begin_input, only: ioption, nexcite, nssh, nznuc, nzval, nzval_ion, &
+  use begin_input, only: ioption, nexcite, nssh, nznuc, nzval, nzval_ion, nzval_pp, &
     & ioptim, atomname, ppfile, ppionfile, outpath, sav, lam, a0, rcutoff, &
-    & xocc, xocc0, xocc_ion, xocc_pp, cmix, r0, v0, filename_wf, filename_ewf
+    & xocc, xocc0, xocc_ion, cmix, r0, v0, filename_wf, filename_ewf
   implicit none
   integer, intent(in) :: ioption_in, nexcite_in, nssh_in, nznuc_in, &
     & nzval_in, nzval_ion_in, ioptim_in
-  real(c_double), intent(in) :: xocc_pp_in
+  real(c_double), intent(in) :: nzval_pp_in
   character(len=10), intent(in) :: atomname_in
   character(len=6), intent(in) :: ppfile_in
   character(len=8), intent(in) :: ppionfile_in
@@ -38,6 +38,7 @@ subroutine generate_wavefunctions(ioption_in, nexcite_in, nssh_in, nznuc_in, nzv
   nznuc = nznuc_in
   nzval = nzval_in
   nzval_ion = nzval_ion_in
+  nzval_pp = nzval_pp_in
   ioptim = ioptim_in
   atomname = atomname_in
   ppfile = ppfile_in
@@ -49,7 +50,6 @@ subroutine generate_wavefunctions(ioption_in, nexcite_in, nssh_in, nznuc_in, nzv
   rcutoff = rcutoff_in
   xocc0 = xocc0_in
   xocc = xocc_in
-  xocc_pp = xocc_pp_in
   cmix = cmix_in
   filename_wf = filename_wf_in
   filename_ewf = filename_ewf_in
@@ -75,7 +75,7 @@ end subroutine generate_wavefunctions
 subroutine generate_vnn(nexcite_in, nssh_in, nznuc_in, ppfile_in, ppionfile_in, outpath_in, lam_in, rcutoff_in, &
     & filename_wf_in, filename_ewf_in, filename_na_in, filename_ena_in)
   use iso_c_binding
-  use begin_input, only: nexcite, nssh, nznuc, xocc_pp, ppfile, ppionfile, outpath, lam, rcutoff, &
+  use begin_input, only: nexcite, nssh, nznuc, nzval_pp, ppfile, ppionfile, outpath, lam, rcutoff, &
     & filename_wf, filename_ewf, filename_na, filename_ena
   implicit none
   integer, intent(in) :: nexcite_in, nssh_in, nznuc_in
@@ -103,7 +103,7 @@ subroutine generate_vnn(nexcite_in, nssh_in, nznuc_in, ppfile_in, ppionfile_in, 
   outpath = outpath_in
   lam = lam_in
   rcutoff = rcutoff_in
-  xocc_pp = -1.0d0
+  nzval_pp = -1.0d0
   filename_wf = filename_wf_in
   filename_ewf = filename_ewf_in
   filename_na(0:nssh_in) = filename_na_in(0:nssh_in)

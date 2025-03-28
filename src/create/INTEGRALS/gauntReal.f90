@@ -120,7 +120,7 @@
           YXX = cmplx(aux,0.0d0)
         endif 
         if (m3 < 0 .and. m4 == 0) then
-          aux=(2**-0.5)*(gaunt(l,l3,l4,m,m3,m4)-((-1)**m3)*gaunt(l,l3,l4,m,-m3,m4))
+          aux=(sqrt(0.5d0))*(gaunt(l,l3,l4,m,m3,m4)-((-1)**m3)*gaunt(l,l3,l4,m,-m3,m4))
           YXX = cmplx(0.0d0,aux)
         endif 
         if (m3 < 0 .and. m4 > 0) then
@@ -129,7 +129,7 @@
           YXX = cmplx(0.0d0,aux)
         endif 
         if (m3 == 0 .and. m4 < 0) then
-          aux = (2**-0.5)*(gaunt(l,l3,l4,m,m3,m4)-((-1)**m4)*gaunt(l,l3,l4,m,m3,-m4))
+          aux = (sqrt(0.5d0))*(gaunt(l,l3,l4,m,m3,m4)-((-1)**m4)*gaunt(l,l3,l4,m,m3,-m4))
           YXX = cmplx(0.0d0,aux)
         endif 
         if (m3 == 0 .and. m4 == 0) then
@@ -137,7 +137,7 @@
           YXX = cmplx(aux,0.0d0)
         endif 
          if (m3 == 0 .and. m4 > 0) then
-          aux = (2**-0.5)*(gaunt(l,l3,l4,m,m3,-m4)+((-1)**m4)*gaunt(l,l3,l4,m,m3,m4))
+          aux = (sqrt(0.5d0))*(gaunt(l,l3,l4,m,m3,-m4)+((-1)**m4)*gaunt(l,l3,l4,m,m3,m4))
           YXX = cmplx(aux,0.0d0)
          endif 
          if (m3 > 0 .and. m4 < 0) then
@@ -146,7 +146,7 @@
            YXX = cmplx(0.0d0,aux)
          endif 
          if (m3 > 0 .and. m4 == 0) then
-           aux = (2**-0.5)*(gaunt(l,l3,l4,m,-m3,m4)+(-1*m3)*gaunt(l,l3,l4,m,m3,m4))
+           aux = (sqrt(0.5d0))*(gaunt(l,l3,l4,m,-m3,m4)+(-1*m3)*gaunt(l,l3,l4,m,m3,m4))
            YXX = cmplx(aux,0.0d0)
          endif 
          if (m3 > 0 .and. m4 > 0) then

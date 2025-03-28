@@ -307,7 +307,7 @@
          write (36,400) in1, nssh
          write (auxz,'(i2.2)') nzx(in1)
          root = 'coutput/xc1c_dqi.'//auxz//'.dat'
-         open (unit = 360, file = root , access='append', status = 'old')
+         open (unit = 360, file = root , position='append', status = 'old')
          write (360,400)  in1, nssh
 
          allocate (xnocc_in (nssh))

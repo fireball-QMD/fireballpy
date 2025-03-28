@@ -134,7 +134,6 @@ class FDataFiles:
 
     def _from_name(self) -> None:
         self.fdata = get_fdata(self.name)
-        os.makedirs(self.fb_home, exist_ok=True)  # Ensure folder exists
         self.path = os.path.join(self.fb_home, self.name) + os.sep
 
         # Download if not exists
@@ -144,7 +143,7 @@ class FDataFiles:
         if not os.path.isfile(metafile):
             vnew = download_check_tar(tarurl, tarpath, 'FData')
             meta = {'NAME': self.name}
-            extract_tar(tarpath, self.path, meta, vnew)
+            extract_tar(tarpath, self.fb_home, meta, vnew)
             return
 
         # Read metadata

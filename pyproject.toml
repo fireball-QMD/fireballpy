@@ -4,7 +4,7 @@ requires = ['meson-python', 'numpy']
 
 [project]
 name = 'fireballpy'
-version = '0.5.0.dev0'
+version = '0.5.1.dev0'
 license = { file = 'LICENSE' }
 authors = [
   { name = 'José Ortega Mateo', email = 'jose.ortega@uam.es' },
@@ -13,7 +13,7 @@ authors = [
   { name = 'Jorge Vega Martín', email = 'jorge.vega@uam.es' },
   { name = 'C. Roldán Piñero', email = 'carlos.roldanp@uam.es' },
 ]
-description = 'ASE calculator implementing Fireball DFT code'
+description = 'Python interfase to the Fireball DFT code'
 readme = 'README.md'
 requires-python = '>=3.9, <3.13'
 classifiers = [
@@ -43,9 +43,9 @@ dependencies = [
 [project.optional-dependencies]
 docs = [
   'sphinx >= 8.0.0',
-  'sphinx_design >= 0.6.0',
-  'sphinx_copybutton >= 0.15.0',
-  'sphinx_favicon >= 1.0.0',
+  'sphinx-design >= 0.6.0',
+  'sphinx-copybutton >= 0.5.0',
+  'sphinx-favicon >= 1.0.0',
   'numpydoc >= 1.8.0',
   'pydata-sphinx-theme >= 0.15.0',
 ]

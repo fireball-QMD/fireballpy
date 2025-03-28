@@ -225,7 +225,7 @@
         iam = (in3 - 1)*nspec_max*nspec_max + (in2 - 1)*nspec_max + in1 - 1
  
         if (interaction .lt. 1 .or. interaction .gt. 3) then
-         stop' Interaction error in threecenter '
+         stop ' Interaction error in threecenter '
         end if
  
         nr = 2*nrba + 1
