@@ -48,8 +48,9 @@ subroutine generate_wavefunctions(ioption_in, nexcite_in, nssh_in, nznuc_in, nzv
   lam = lam_in
   a0 = a0_in
   rcutoff = rcutoff_in
-  xocc0 = xocc0_in
   xocc = xocc_in
+  xocc0 = xocc0_in
+  xocc_ion = xocc_ion_in
   cmix = cmix_in
   filename_wf = filename_wf_in
   filename_ewf = filename_ewf_in

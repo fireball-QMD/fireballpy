@@ -205,7 +205,7 @@ class Element:
     @nzval_pp.setter
     def nzval_pp(self, value: float | None) -> None:
         if value is None:
-            value = self.nzval
+            value = -1
         self._nzval_pp = np.float64(value)
 
     @property
@@ -314,7 +314,7 @@ class Element:
         if value is None:
             if self._nexcite == 3:
                 raise_err(TypeError('If "--excite mix" is specified, then "--pmix" must be provided.'))
-            self._cmix = np.zeros(len(self._orbitals), dtype=np.float64, order='C')
+            self._cmix = np.ones(len(self._orbitals), dtype=np.float64, order='C')
             return
         if len(value) != len(self._orbitals):
             err = f'Invalid value "{value}" for "--pmix".'
@@ -338,18 +338,18 @@ class Element:
         pptar = os.path.join(fb_home, 'ppfiles.tar.gz')
         ppfile = os.path.join(ppfolder, 'fbppfiles', self.symbol, str(self.ioption), self.ppfile)
         metafile = os.path.join(ppfolder, 'meta.json')
-        if not os.path.isfile(ppfile):
-            vnew = download_check_tar(PPURL, pptar, 'PP files')
-            meta = {'NAME': 'ppfiles'}
-            extract_tar(pptar, fb_home, meta, vnew)
-        else:
-            with open(metafile, 'r') as fp:
-                meta = json.load(fp)
-            if meta['VERSION'] != __fb_version__:
-                vhave = time.strptime(meta['TIME'], TIMESTR)
-                vnew = download_check_tar(PPURL, pptar, 'PP files', vhave)
-                if vnew != vhave:
-                    extract_tar(pptar, fb_home, meta, vnew)
+        #if not os.path.isfile(ppfile):
+        #    vnew = download_check_tar(PPURL, pptar, 'PP files')
+        #    meta = {'NAME': 'ppfiles'}
+        #    extract_tar(pptar, fb_home, meta, vnew)
+        #else:
+        #    with open(metafile, 'r') as fp:
+        #        meta = json.load(fp)
+        #    if meta['VERSION'] != __fb_version__:
+        #        vhave = time.strptime(meta['TIME'], TIMESTR)
+        #        vnew = download_check_tar(PPURL, pptar, 'PP files', vhave)
+        #        if vnew != vhave:
+        #            extract_tar(pptar, fb_home, meta, vnew)
 
         # Use normal file if there is no ion
         self.ppionfile = f'{symchar}++.pp'
@@ -739,40 +739,25 @@ def basis(folder: Annotated[pathlib.Path, Parameter(validator=Path(exists=True, 
 
     os.makedirs('coutput', exist_ok=False)
 
-    auto = njobs == -1
-    if auto:
+    if njobs == -1:
         njobs = cpu_count()
+    stdout = sys.stdout if verbose else subprocess.DEVNULL
     try:
         exepath = os.path.join(os.path.split(__basis_file__)[0], 'create.x')
-        #argv = [str(njobs), f'{1 if verbose else 0}']
         if njobs == 1:
-            #p = subprocess.Popen([exepath] + argv, stdout=sys.stdout, stderr=sys.stderr)
-            if verbose:
-                p = subprocess.Popen(exepath, stdout=sys.stdout, stderr=sys.stderr)
-            else:
-                p = subprocess.Popen(exepath, stdout=subprocess.DEVNULL, stderr=sys.stderr)
+            p = subprocess.Popen(exepath, stdout=stdout, stderr=sys.stderr)
         else:
-            raise RuntimeError('MPI in process')
-            #    try:
-            #        p = subprocess.Popen(['mpirun', '-np', str(njobs), exepath] + argv,
-            #                             stdout=sys.stdout, stderr=sys.stderr)
-            #    except FileNotFoundError:
-            #        os.chdir(nowfolder)
-            #        shutil.rmtree(output)
-            #        raise_err(RuntimeError('"mpirun" is not available.'))
-        p.communicate()  # type: ignore
-        # if p.returncode != 0 and auto:  # type: ignore
-        #     p = subprocess.Popen(['mpirun', '-np', str(njobs//2), exepath] + argv,
-        #                             stdout=sys.stdout, stderr=sys.stderr)
-        #     p.communicate()  # type: ignore
-        if p.returncode != 0:  # type: ignore
+            p = subprocess.Popen(['mpirun', '-np', str(njobs), exepath],
+                                    stdout=stdout, stderr=sys.stderr)
+        p.communicate()
+        if p.returncode != 0:
             os.chdir(nowfolder)
             shutil.rmtree(output)
             raise_err(RuntimeError('Basis creation failed!'))
-    except KeyboardInterrupt:
+    except (KeyboardInterrupt, FileNotFoundError) as e:
         os.chdir(nowfolder)
         shutil.rmtree(output)
-        raise
+        raise e
 
     os.makedirs('basis')
     shutil.copy2(folder/'meta.json', os.path.join('basis', 'meta.json'))

@@ -88,6 +88,7 @@
         elseif (ion .eq. 1) then
           open (unit = 15, file = trim(outpath)//trim(ppionfile), status = 'old')
         else
+          close (unit = 15)
           stop
         end if
 

@@ -1453,7 +1453,6 @@
           itype2 = 1 + int((itmp - 1)/nspec)
           itmp   = itmp - (itype2 - 1)*nspec
           itype1 = itmp
-          write(*,*) 'prueba itype', itype1, itype2
  
           nzx1 = nzx(itype1)
           nzx2 = nzx(itype2)
@@ -1515,7 +1514,6 @@
           itype2 = 1 + int((itmp - 1)/nspec)
           itmp   = itmp - (itype2 - 1)*nspec
           itype1 = itmp
-          write(*,*) 'prueba2 itype', itype1, itype2
  
           nzx1 = nzx(itype1)
           nzx2 = nzx(itype2)

@@ -24,19 +24,6 @@ exx_srcs = [
   'xontopr_2c_rprime.f90',
 ]
 
-initializers_srcs = [
-  'broadcast_noMPI.f90',
-  'finalize_noMPI.f90',
-  'init_noMPI.f90',
-  'broadcast_MPI.f90',
-  'finalize_MPI.f90',
-  'init_MPI.f90',
-]
-
-mpi_srcs = [
-  'MPI_stuff.f90',
-]
-
 integrals_srcs = [
   'append_string.f90',
   'exc1crho.f90',
@@ -124,12 +111,6 @@ create_srcs = []
 foreach src : modules_create_srcs
   create_srcs += 'MODULES' / src
 endforeach
-#foreach src : initializers_srcs
-#  create_srcs += 'INITIALIZERS' / src
-#endforeach
-foreach src : mpi_srcs
-  create_srcs += src
-endforeach
 foreach src : xcc_srcs
   create_srcs += 'XC' / src
 endforeach
@@ -148,6 +129,14 @@ endforeach
 foreach src : readfiles_srcs
   create_srcs += 'READFILES' / src
 endforeach
+
+# Deal with MPI
+if mpi_dep.found()
+  create_srcs += 'MPI.f90'
+else
+  create_srcs += 'noMPI.f90'
+endif
+
 create_srcs += 'create.f90'
 
 # Build create executable

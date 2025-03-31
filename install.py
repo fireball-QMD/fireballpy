@@ -64,16 +64,32 @@ def main():
                         help="Apply non-float-respecting optmisations")
     args = parser.parse_args()
 
+    # Check mpi
+    try:
+        p = subprocess.Popen(['mpirun', '--version'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        _ = p.communicate()
+        ismpi = True
+    except FileNotFoundError:
+        ismpi = 0
+
     env = os.environ.copy()
     meson = [sys.executable, '-m', 'mesonbuild.mesonmain']
     setup_args = ['-Dpython.install_env=auto']
     if args.intel:
-        env['CC'] = 'icx'
-        env['FC'] = 'ifx'
+        if ismpi:
+            env['CC'] = f"mpiicx"
+            env['FC'] = f"mpiifx"
+        else:
+            env['CC'] = 'icx'
+            env['FC'] = 'ifx'
         setup_args += ['-Dblas=mkl-dynamic-lp64-iomp']
     else:
-        env['CC'] = 'gcc'
-        env['FC'] = 'gfortran'
+        if ismpi:
+            env['CC'] = f"mpicc"
+            env['FC'] = f"mpifort"
+        else:
+            env['CC'] = 'gcc'
+            env['FC'] = 'gfortran'
     if args.fast:
         setup_args += ['-Doptimization=3', '-Dbuildtype=custom']
 

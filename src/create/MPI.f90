@@ -57,9 +57,9 @@
 ! Program Declaration
 ! ===========================================================================
         subroutine init_MPI (iammaster, iammpi, my_proc, nproc)
+        use mpi
         implicit none
  
-        include 'mpif.h'
  
 ! Argument Declaration and Description
 ! ===========================================================================
@@ -107,13 +107,13 @@
 ! Program Declaration
 ! ===========================================================================
         subroutine signature_MPI (signature)
+        use mpi
         implicit none
 
-        include 'mpif.h'
 
 ! Argument Declaration and Description
 ! ===========================================================================
-        character*30 signature
+        character(len=30) signature
 
 ! Local Parameters and Data Declaration
 ! ===========================================================================
@@ -136,8 +136,8 @@
 ! Program Declaration
 ! ===========================================================================
         subroutine Finalize_MPI()
+        use mpi
         implicit none
-        include 'mpif.h'
 
 ! Argument Declaration and Description
 ! ===========================================================================

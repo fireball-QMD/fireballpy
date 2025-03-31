@@ -127,6 +127,7 @@
           call get_nlmesh_size (ion, nlmesh)
           open (unit = 88, file = trim(outpath)//trim(ppionfile), status = 'old')
         else
+          close (unit = 88)
           stop
         end if
 
@@ -162,7 +163,7 @@
 ! Read Zval
         read (88,*) Zval
         if (nzval_pp .gt. 0.0d0) Zval = nzval_pp
-        !write (*,*) ' Zval : ', Zval
+        write (*,*) ' Zval : ', Zval
 
 ! Read in alpha for longranged local part => -Z*e**2*erf(alpha*r)/r
         read (88,*) alpha
