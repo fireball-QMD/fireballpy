@@ -182,6 +182,7 @@
          flip = rhopp + 2.0d0*rhop/r
          call corlyp (.true., rho(1), rho(2), rhop(1), rhop(2), flip(1),     &
      &                flip(2), cen, cpot(1), cpot(2))
+         !write (*,*) 'CONA', cen, cpot
         else
          stop 'ggacrad : mode improper'
         end if

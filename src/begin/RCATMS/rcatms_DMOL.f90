@@ -190,7 +190,7 @@
         !write (*,*) '  '
 
 ! Determine the non-local pseudopotential.
-        xnz = real(nzval_ion)
+        xnz = real(nzval_ion, kind=long)
 !        call pp(ppionfile, nssh, mesh, xnz, r, vc, vl, ioptionpp, exmix)
         call pp(1, mesh, r, vc, vl, ioptionpp, exmix)
 
@@ -199,11 +199,11 @@
          !write (*,*) ' pseudopotential file does not match the option chosen '
          !write (*,*) ' by running initial.x! Are you positive that you want '
          !write (*,*) ' to proceed? Enter 1-yes, 0-no. '
-         read (*,*) ioptionpp
-         if (ioptionpp .eq. 0) then
+        ! read (*,*) ioptionpp
+        ! if (ioptionpp .eq. 0) then
           !write (*,*) ' You have chosen to stop! '
           stop
-         end if
+        ! end if
         end if
 
         !write (*,*) ' This program will write out data files containing the '
@@ -239,9 +239,9 @@
               end do ! enddo ipoint
            enddo ! enddo  issh
 ! write vX        
-           do ipoint = 1, mesh
+!           do ipoint = 1, mesh
 !              write (100,*) r(ipoint),(vXe(issh,ipoint),issh=1,nssh)
-           enddo
+!           enddo
         endif ! if(ioptim)
 
 
@@ -267,7 +267,7 @@
         end do
 
 ! Check that int[0,rc] sig(r) dr = z
-        difference = abs(dr*sum(sigma) - real(nzval_ion))
+        difference = abs(dr*sum(sigma) - real(nzval_ion, kind=long))
 !dani.        if (nznuc .ne. 1 .and. difference .gt. tolerance)                    &
 !dani.     &   stop ' Check: Sum of charge density - not equal to nzval_ion '
 

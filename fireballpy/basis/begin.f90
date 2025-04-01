@@ -25,7 +25,7 @@ subroutine generate_wavefunctions(ioption_in, nexcite_in, nssh_in, nznuc_in, nzv
   allocate(lam(nssh_in))
   allocate(a0(nssh_in), rcutoff(nssh_in), xocc(nssh_in), xocc0(nssh_in), xocc_ion(nssh_in), cmix(nssh_in))
   allocate(filename_wf(nssh_in), filename_ewf(nssh_in))
-  if (nexcite_in .eq. 3) then
+  if (nexcite_in .gt. 0) then
     allocate(r0(2*nssh_in), v0(2*nssh_in))
   else
     allocate(r0(nssh_in), v0(nssh_in))
@@ -56,7 +56,7 @@ subroutine generate_wavefunctions(ioption_in, nexcite_in, nssh_in, nznuc_in, nzv
   filename_ewf = filename_ewf_in
   r0(1:nssh_in) = r0_in(1:nssh_in)
   v0(1:nssh_in) = v0_in(1:nssh_in)
-  if (nexcite_in .eq. 3) then
+  if (nexcite_in .gt. 0) then
     r0(nssh_in+1:2*nssh_in) = r0_in(1:nssh_in)
     v0(nssh_in+1:2*nssh_in) = v0_in(1:nssh_in)
   end if

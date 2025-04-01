@@ -69,7 +69,7 @@ ANGULAR_MOMENTUM = {'s': 0, 'p': 1, 'd': 2, 'f': 3}
 ANGULAR_MOMENTUM_REV = {v: k for k, v in ANGULAR_MOMENTUM.items()}
 A0 = {'s': 2.0, 'p': 1.0, 'd': 0.8, 'f': 0.7}
 ELECTRONS_PER_ORB = {'s': 2, 'p': 6, 'd': 10, 'f': 14}
-ELECTRONIC_CONFIG = '1s,2s,2p,3s,3p,4s,3d,4p,5s,4d,5p,6s,4f,5d,6p,7s,5f,6d,7p,8s'.split(',')
+ELECTRONIC_CONFIG = ('1s','2s','2p','3s','3p','4s','3d','4p','5s','4d','5p','6s','4f','5d','6p','7s','5f','6d','7p','8s')
 
 
 class ECEnum(IntEnum):
@@ -90,26 +90,33 @@ class Element:
         pass
 
     def _valence_electrons(self) -> None:
-        maxn = 0
-        zrem = self._nznuc
+        if self.nznuc == 1 or self.nznuc == 2:
+            self._valence = [float(self.nznuc), 0.0, 0.0, 0.0]
+            return
+
         ec = {}
+        zrem = self.nznuc
+        maxn = 0
+        l = ''
         for orb in ELECTRONIC_CONFIG:
-            newn = int(orb[0])
-            nele = ELECTRONS_PER_ORB[orb[1]]
-            if newn > maxn:
-                ec = {}
-                maxn = newn
-            ec[orb[1]] = (newn, min(zrem, nele))
-            if nele < zrem:
-                zrem -= nele
-                continue
-            if newn == maxn:
-                ecorbs = list(ec.keys())
-                for o in ecorbs:
-                    if ec[o][0] < maxn:
-                        del ec[o]
-            break
-        self._valence = [float(ec.get(orb, (0, 0))[1]) for orb in ANGULAR_MOMENTUM]
+            n = int(orb[0])
+            l = orb[1]
+            s = min(zrem, ELECTRONS_PER_ORB[l])
+            if n not in ec:
+                maxn = n
+                ec[n] = {}
+            ec[n][l] = ec[n].get(l, 0.0) + float(s)
+            zrem -= s
+            if zrem == 0:
+                break
+
+        self._valence = [ec[maxn].get('s', 0.0), ec[maxn].get('p', 0.0), 0.0, 0.0]
+        if l == 's' or l == 'p':
+            return
+        self._valence[2] = ec[maxn-1]['d']
+        if l == 'd':
+            return
+        self._valence[3] = ec[maxn-2]['f']
 
     @property
     def nznuc(self) -> int:

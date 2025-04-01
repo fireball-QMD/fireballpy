@@ -124,30 +124,30 @@
         select case (ioption)
 
 ! Wigner
-         case (1)
-          do ipoint = 1, mesh
-           rh = rho(ipoint)
-           call wigner (rh, ex, fx, exc, fxc)
-           uxc(ipoint) = fxc
-           dex(ipoint) = ex
-           dec(ipoint) = exc - ex
-          end do
+!         case (1)
+!          do ipoint = 1, mesh
+!           rh = rho(ipoint)
+!           call wigner (rh, ex, fx, exc, fxc)
+!           uxc(ipoint) = fxc
+!           dex(ipoint) = ex
+!           dec(ipoint) = exc - ex
+!          end do
 
 ! Hedin-Lundqvist
-         case (2)
-          dex = 0.d0
-          uxc = 0.d0
-          do ipoint = 1, mesh
-           rh = rho(ipoint)
-           if (rh .ne. 0.0d0) then
-            rs = 0.62035049d0*rh**(-0.3333333333333333d0)
-            rsx = rs/21.0d0
-            aln = dlog(1.0d0 + 1.0d0/rsx)
-            ecp = aln + (rsx**3*aln - rsx*rsx) + rsx/2 - 1.0d0/3.0d0
-            dex(ipoint) = -0.458175d0/rs - 0.0225d0*ecp
-            uxc(ipoint) = -0.6109d0/rs - 0.0225d0*aln
-           end if
-          end do
+!         case (2)
+!          dex = 0.d0
+!          uxc = 0.d0
+!          do ipoint = 1, mesh
+!           rh = rho(ipoint)
+!           if (rh .ne. 0.0d0) then
+!            rs = 0.62035049d0*rh**(-0.3333333333333333d0)
+!            rsx = rs/21.0d0
+!            aln = dlog(1.0d0 + 1.0d0/rsx)
+!            ecp = aln + (rsx**3*aln - rsx*rsx) + rsx/2 - 1.0d0/3.0d0
+!            dex(ipoint) = -0.458175d0/rs - 0.0225d0*ecp
+!            uxc(ipoint) = -0.6109d0/rs - 0.0225d0*aln
+!           end if
+!          end do
 
 ! Ceperley-Alder
 ! as parameterized by Perdew and Zunger, Phys. Rev. B23, 5048 (1981)
@@ -161,70 +161,70 @@
           end do
 
 ! Perdew exchange, Perdew correlation, generalized gradient approximation 1992
-         case (4)
-          do ipoint = 1, mesh
-           d(1) = 0.5d0*rho(ipoint)
-           dp(1) = 0.5d0*rhop(ipoint)
-           dpp(1) = 0.5d0*rhopp(ipoint)
-           d(2) = 0.5d0*rho(ipoint)
-           dp(2) = 0.5d0*rhop(ipoint)
-           dpp(2) = 0.5d0*rhopp(ipoint)
-           call ggaxrad (3, r(ipoint), d, dp, dpp, xpot, dex(ipoint))
-           call ggacrad (2, r(ipoint), d, dp, dpp, cpot, dec(ipoint))
-           uxc(ipoint) = xpot(1) + cpot(1)
-          end do
+!         case (4)
+!          do ipoint = 1, mesh
+!           d(1) = 0.5d0*rho(ipoint)
+!           dp(1) = 0.5d0*rhop(ipoint)
+!           dpp(1) = 0.5d0*rhopp(ipoint)
+!           d(2) = 0.5d0*rho(ipoint)
+!           dp(2) = 0.5d0*rhop(ipoint)
+!           dpp(2) = 0.5d0*rhopp(ipoint)
+!           call ggaxrad (3, r(ipoint), d, dp, dpp, xpot, dex(ipoint))
+!           call ggacrad (2, r(ipoint), d, dp, dpp, cpot, dec(ipoint))
+!           uxc(ipoint) = xpot(1) + cpot(1)
+!          end do
 
 ! Becke exchange, Perdew correlation, generalized gradient approximation
-         case (5)
-          do ipoint = 1, mesh
-           d(1) = 0.5d0*rho(ipoint)
-           dp(1) = 0.5d0*rhop(ipoint)
-           dpp(1) = 0.5d0*rhopp(ipoint)
-           d(2) = 0.5d0*rho(ipoint)
-           dp(2) = 0.5d0*rhop(ipoint)
-           dpp(2) = 0.5d0*rhopp(ipoint)
-           call ggaxrad (2, r(ipoint), d, dp, dpp, xpot, dex(ipoint))
-           call ggacrad (3, r(ipoint), d, dp, dpp, cpot, dec(ipoint))
-           uxc(ipoint) = xpot(1) + cpot(1)
-          end do
+!         case (5)
+!          do ipoint = 1, mesh
+!           d(1) = 0.5d0*rho(ipoint)
+!           dp(1) = 0.5d0*rhop(ipoint)
+!           dpp(1) = 0.5d0*rhopp(ipoint)
+!           d(2) = 0.5d0*rho(ipoint)
+!           dp(2) = 0.5d0*rhop(ipoint)
+!           dpp(2) = 0.5d0*rhopp(ipoint)
+!           call ggaxrad (2, r(ipoint), d, dp, dpp, xpot, dex(ipoint))
+!           call ggacrad (3, r(ipoint), d, dp, dpp, cpot, dec(ipoint))
+!           uxc(ipoint) = xpot(1) + cpot(1)
+!          end do
 
 ! Burke-Perdew-Ernzerhof generalized gradient approximation (1996)
-         case (6)
-          do ipoint = 1, mesh
-           d(1) = 0.5d0*rho(ipoint)
-           dp(1) = 0.5d0*rhop(ipoint)
-           dpp(1) = 0.5d0*rhopp(ipoint)
-           d(2) = 0.5d0*rho(ipoint)
-           dp(2) = 0.5d0*rhop(ipoint)
-           dpp(2) = 0.5d0*rhopp(ipoint)
-           call ggaxrad (5, r(ipoint), d, dp, dpp, xpot, dex(ipoint))
-           call ggacrad (5, r(ipoint), d, dp, dpp, cpot, dec(ipoint))
-           uxc(ipoint) = xpot(1) + cpot(1)
-          end do
+!         case (6)
+!          do ipoint = 1, mesh
+!           d(1) = 0.5d0*rho(ipoint)
+!           dp(1) = 0.5d0*rhop(ipoint)
+!           dpp(1) = 0.5d0*rhopp(ipoint)
+!           d(2) = 0.5d0*rho(ipoint)
+!           dp(2) = 0.5d0*rhop(ipoint)
+!           dpp(2) = 0.5d0*rhopp(ipoint)
+!           call ggaxrad (5, r(ipoint), d, dp, dpp, xpot, dex(ipoint))
+!           call ggacrad (5, r(ipoint), d, dp, dpp, cpot, dec(ipoint))
+!           uxc(ipoint) = xpot(1) + cpot(1)
+!          end do
 
 ! Wigner-scaled LDA of PRA 46, R5320 (1992)
-         case (7)
-          do ipoint = 1, mesh
-           rh = rho(ipoint)
-           call wigscaled (rh, ex, fx, exc, fxc)
-           uxc(ipoint) = fxc
-           dex(ipoint) = ex
-           dec(ipoint) = exc - ex
-          end do
+!         case (7)
+!          do ipoint = 1, mesh
+!           rh = rho(ipoint)
+!           call wigscaled (rh, ex, fx, exc, fxc)
+!           uxc(ipoint) = fxc
+!           dex(ipoint) = ex
+!           dec(ipoint) = exc - ex
+!          end do
 
 ! Ceperley-Alder as parameterized by Perdew-Wang (1991)
-         case (8)
-          dp(1) = 0.0d0
-          dpp(1) = 0.0d0
-          dp(2) = 0.0d0
-          dpp(2) = 0.0d0
-          do ipoint = 1, mesh
-           d(1) = 0.5d0*rho(ipoint)
-           d(2) = 0.5d0*rho(ipoint)
-           call ggaxrad (1, r(ipoint), d, dp, dpp, xpot, dex(ipoint))
-           call ggacrad (1, r(ipoint), d, dp, dpp, cpot, dec(ipoint))
-           uxc(ipoint) = xpot(1) + cpot(1)
-          end do
+!         case (8)
+!          dp(1) = 0.0d0
+!          dpp(1) = 0.0d0
+!          dp(2) = 0.0d0
+!          dpp(2) = 0.0d0
+!          do ipoint = 1, mesh
+!           d(1) = 0.5d0*rho(ipoint)
+!           d(2) = 0.5d0*rho(ipoint)
+!           call ggaxrad (1, r(ipoint), d, dp, dpp, xpot, dex(ipoint))
+!           call ggacrad (1, r(ipoint), d, dp, dpp, cpot, dec(ipoint))
+!           uxc(ipoint) = xpot(1) + cpot(1)
+!          end do
 
 ! Lee-Yang-Parr correlation
 ! Becke exchange, generalized gradient approximation
@@ -242,43 +242,43 @@
           end do
 
 ! Perdew-Wang exchange, generalized gradient approximation
-         case (10)
-          do ipoint = 1, mesh
-           d(1) = 0.5d0*rho(ipoint)
-           dp(1) = 0.5d0*rhop(ipoint)
-           dpp(1) = 0.5d0*rhopp(ipoint)
-           d(2) = 0.5d0*rho(ipoint)
-           dp(2) = 0.5d0*rhop(ipoint)
-           dpp(2) = 0.5d0*rhopp(ipoint)
-           call ggaxrad (3, r(ipoint), d, dp, dpp, xpot, dex(ipoint))
-           call ggacrad (4, r(ipoint), d, dp, dpp, cpot, dec(ipoint))
-           uxc(ipoint) = xpot(1) + cpot(1)
-          end do
+!         case (10)
+!          do ipoint = 1, mesh
+!           d(1) = 0.5d0*rho(ipoint)
+!           dp(1) = 0.5d0*rhop(ipoint)
+!           dpp(1) = 0.5d0*rhopp(ipoint)
+!           d(2) = 0.5d0*rho(ipoint)
+!           dp(2) = 0.5d0*rhop(ipoint)
+!           dpp(2) = 0.5d0*rhopp(ipoint)
+!           call ggaxrad (3, r(ipoint), d, dp, dpp, xpot, dex(ipoint))
+!           call ggacrad (4, r(ipoint), d, dp, dpp, cpot, dec(ipoint))
+!           uxc(ipoint) = xpot(1) + cpot(1)
+!          end do
 
 ! Volko-Wilk-Nusair exchange-correlation (spin-polarization)
-         case (11)
-          do ipoint = 1, mesh
-           zeta = 0.0d0
-           d(1) = 0.5d0*rho(ipoint)*(1.0d0 + zeta)
-           d(2) = 0.5d0*rho(ipoint)*(1.0d0 - zeta)
-           call lsdavwn (d, dex(ipoint), dec(ipoint), xpot, cpot)
-           uxc(ipoint) = xpot(1) + cpot(1)
-          end do
+!         case (11)
+!          do ipoint = 1, mesh
+!           zeta = 0.0d0
+!           d(1) = 0.5d0*rho(ipoint)*(1.0d0 + zeta)
+!           d(2) = 0.5d0*rho(ipoint)*(1.0d0 - zeta)
+!           call lsdavwn (d, dex(ipoint), dec(ipoint), xpot, cpot)
+!           uxc(ipoint) = xpot(1) + cpot(1)
+!          end do
 
 ! Lee-Yang-Parr correlation
 ! Becke exchange, generalized gradient approximation mixed with exact exchange.
-         case (12)
-          do ipoint = 1, mesh
-           d(1) = 0.5d0*rho(ipoint)
-           dp(1) = 0.5d0*rhop(ipoint)
-           dpp(1) = 0.5d0*rhopp(ipoint)
-           d(2) = 0.5d0*rho(ipoint)
-           dp(2) = 0.5d0*rhop(ipoint)
-           dpp(2) = 0.5d0*rhopp(ipoint)
-           call ggaxrad (2, r(ipoint), d, dp, dpp, xpot, dex(ipoint))
-           call ggacrad (4, r(ipoint), d, dp, dpp, cpot, dec(ipoint))
-           uxc(ipoint) = (1.0d0 - exmix)*xpot(1) + cpot(1)
-          end do
+!         case (12)
+!          do ipoint = 1, mesh
+!           d(1) = 0.5d0*rho(ipoint)
+!           dp(1) = 0.5d0*rhop(ipoint)
+!           dpp(1) = 0.5d0*rhopp(ipoint)
+!           d(2) = 0.5d0*rho(ipoint)
+!           dp(2) = 0.5d0*rhop(ipoint)
+!           dpp(2) = 0.5d0*rhopp(ipoint)
+!           call ggaxrad (2, r(ipoint), d, dp, dpp, xpot, dex(ipoint))
+!           call ggacrad (4, r(ipoint), d, dp, dpp, cpot, dec(ipoint))
+!           uxc(ipoint) = (1.0d0 - exmix)*xpot(1) + cpot(1)
+!          end do
         end select
 
 ! ****************************************************************************
