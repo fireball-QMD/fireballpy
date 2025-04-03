@@ -5,7 +5,6 @@ import shutil
 import subprocess
 import sys
 import re
-import time
 from enum import IntEnum
 from multiprocessing import cpu_count
 from typing import Annotated, Optional
@@ -19,11 +18,10 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.text import Text
 
-from fireballpy.utils import TIMESTR, get_fb_home, download_check_tar, extract_tar
-
 from ase.data import atomic_numbers, atomic_names, atomic_masses, chemical_symbols
 
 from fireballpy import __version__ as __fb_version__
+from fireballpy.utils import get_data_from_url
 from fireballpy.basis import __file__ as __basis_file__
 from fireballpy.basis._begin import generate_wavefunctions, generate_vnn
 
@@ -64,7 +62,7 @@ def raise_err(err: Exception):
     exit(1)
 
 
-PPURL = 'https://fireball.ftmc.uam.es/fireballpy/ppfiles.tar.gz'
+PPURL = 'https://fireball.ftmc.uam.es/fireballpy/ppfiles.tar.xz'
 ANGULAR_MOMENTUM = {'s': 0, 'p': 1, 'd': 2, 'f': 3}
 ANGULAR_MOMENTUM_REV = {v: k for k, v in ANGULAR_MOMENTUM.items()}
 A0 = {'s': 2.0, 'p': 1.0, 'd': 0.8, 'f': 0.7}
@@ -89,7 +87,7 @@ class Element:
     def __init__(self) -> None:
         pass
 
-    def _valence_electrons(self) -> None:
+    def _valence_electrons(self, err: str) -> None:
         if self.nznuc == 1 or self.nznuc == 2:
             self._valence = [float(self.nznuc), 0.0, 0.0, 0.0]
             return
@@ -116,7 +114,8 @@ class Element:
         self._valence[2] = ec[maxn-1]['d']
         if l == 'd':
             return
-        self._valence[3] = ec[maxn-2]['f']
+        # No f orbitals
+        raise_err(ValueError(f'{err} Element with unsupported "f" valence orbitals.'))
 
     @property
     def nznuc(self) -> int:
@@ -133,11 +132,7 @@ class Element:
         self._nznuc = int(value)
         if self._nznuc not in atomic_numbers.values() or self._nznuc < 1:
             raise_err(ValueError(f'{err} Unrecognized element.'))
-        self._valence_electrons()
-
-        # No f orbitals
-        if self._valence.pop(3) != 0.0:
-            raise_err(ValueError(f'{err} Element with unsupported "f" valence orbitals.'))
+        self._valence_electrons(err)
 
     @property
     def atomname(self) -> str:
@@ -197,8 +192,6 @@ class Element:
             err = f'Invalid value "{v}" for "-n" / "--nelectrons".'
             if v < 0.0:
                 raise_err(ValueError(f'{err} Must be >= 0.'))
-            if v >= 10.0:
-                raise_err(ValueError(f'{err} Must be < 10.'))
         self._xocc = np.ascontiguousarray(value, dtype=np.float64)
 
     @property
@@ -260,8 +253,6 @@ class Element:
             err = f'Invalid value "{v}" for "-n0" / "--nelectrons-neutral".'
             if v < 0.0:
                 raise_err(ValueError(f'{err} Must be >= 0.'))
-            if v >= 10.0:
-                raise_err(ValueError(f'{err} Must be < 10.'))
         self._xocc0 = np.ascontiguousarray(value, dtype=np.float64)
 
     @property
@@ -288,24 +279,19 @@ class Element:
     def xocc_ion(self, value: list[float] | None):
         if value is None:
             if self._nexcite == 3:
-                raise_err(TypeError('If "--excite mix" is specified, then "--nmix" must be provided.'))
+                raise_err(TypeError('If "--excite mix" is specified, then "--nion" must be provided.'))
             elif self._nexcite == 2:
-                if len(self._orbitals) == 1:
-                    self._xocc_ion = self.xocc.copy()
-                else:
-                    self._xocc_ion = self.xocc - 1.0
+                raise_err(TypeError('If "--excite dmol" is specified, then "--nion" must be provided.'))
             else:
                 self._xocc_ion = np.zeros(len(self._orbitals), dtype=np.float64, order='C')
             return
         if len(value) != len(self._orbitals):
-            err = f'Invalid value "{value}" for "--nmix".'
+            err = f'Invalid value "{value}" for "--nion".'
             raise_err(ValueError(f'{err} Must provide one value per orbital.'))
         for v in value:
-            err = f'Invalid value "{v}" for "--nmix".'
+            err = f'Invalid value "{v}" for "--nion".'
             if v < 0.0:
                 raise_err(ValueError(f'{err} Must be >= 0.'))
-            if v >= 10.0:
-                raise_err(ValueError(f'{err} Must be < 10.'))
         self._xocc_ion = np.ascontiguousarray(value, dtype=np.float64)
 
     @property
@@ -340,27 +326,12 @@ class Element:
 
         # Download if needed
         self.ppfile = f'{symchar}.pp'
-        fb_home = get_fb_home()
-        ppfolder = os.path.join(fb_home, 'ppfiles')
-        pptar = os.path.join(fb_home, 'ppfiles.tar.gz')
-        ppfile = os.path.join(ppfolder, 'fbppfiles', self.symbol, str(self.ioption), self.ppfile)
-        metafile = os.path.join(ppfolder, 'meta.json')
-        #if not os.path.isfile(ppfile):
-        #    vnew = download_check_tar(PPURL, pptar, 'PP files')
-        #    meta = {'NAME': 'ppfiles'}
-        #    extract_tar(pptar, fb_home, meta, vnew)
-        #else:
-        #    with open(metafile, 'r') as fp:
-        #        meta = json.load(fp)
-        #    if meta['VERSION'] != __fb_version__:
-        #        vhave = time.strptime(meta['TIME'], TIMESTR)
-        #        vnew = download_check_tar(PPURL, pptar, 'PP files', vhave)
-        #        if vnew != vhave:
-        #            extract_tar(pptar, fb_home, meta, vnew)
+        ppfolder = get_data_from_url(PPURL, 'ppfiles', 'Pseudopotential')
+        ppfile = os.path.join(ppfolder, self.symbol, str(self.ioption), self.ppfile)
 
         # Use normal file if there is no ion
         self.ppionfile = f'{symchar}++.pp'
-        ppionfile = os.path.join(ppfolder, 'fbppfiles', self.symbol, str(self.ioption), self.ppionfile)
+        ppionfile = os.path.join(ppfolder, self.symbol, str(self.ioption), self.ppionfile)
         if not os.path.isfile(ppionfile):
             ppionfile = ppfile
 
@@ -431,7 +402,7 @@ def wavefunctions(element: Annotated[str, Parameter(group=args_grp)],
                                                             name=['-o', '--output'])]=pathlib.Path('cinput'),
                   save: Annotated[str | None, Parameter(group=args_grp, name=['-s', '--save'])]=None,
                   excite: Annotated[ExcitedEnum, Parameter(group=exc_grp, show_default=False)]=ExcitedEnum.NONE,
-                  nmix: Annotated[Optional[list[float]], Parameter(group=exc_grp, negative='', consume_multiple=True)]=None,
+                  nion: Annotated[Optional[list[float]], Parameter(group=exc_grp, negative='', consume_multiple=True)]=None,
                   pmix: Annotated[Optional[list[float]], Parameter(group=exc_grp, negative='', consume_multiple=True)]=None,
                   vpot: Annotated[Optional[list[float]], Parameter(group=pot_grp, negative='', consume_multiple=True)]=None,
                   rpot: Annotated[Optional[list[float]], Parameter(group=pot_grp, negative='', consume_multiple=True)]=None):
@@ -463,10 +434,10 @@ def wavefunctions(element: Annotated[str, Parameter(group=args_grp)],
     excite: ExcitedEnum
         If desired, how excited states should be computed: adding a node, using DMOL
         or mixing excited and ground states.
-    nmix: list[float]
-        [Only with '--excite mix'] Number of electrons for each of the excited orbitals.
+    nion: list[float]
+        [Required for '--excite dmol/mix'] Number of electrons for each of the excited orbitals.
     pmix: list[float]
-        [Only with '--excite mix'] Percentage of mixing of the ground state for each of the excited orbitals.
+        [Required for '--excite mix'] Percentage of mixing of the ground state for each of the excited orbitals.
     vpot: list[float]
         Parameter V_0 in volts for each of the orbitals.
     rpot: list[float]
@@ -481,7 +452,7 @@ def wavefunctions(element: Annotated[str, Parameter(group=args_grp)],
     ele.nzval_pp = valence_pp
     ele.ioption = exchange_correlation
     ele.nexcite = excite
-    ele.xocc_ion = nmix
+    ele.xocc_ion = nion
     ele.cmix = pmix
     ele.sav = save
     ele.prep_confining(vpot, rpot)
@@ -510,6 +481,9 @@ def wavefunctions(element: Annotated[str, Parameter(group=args_grp)],
     ele.wf_filenames()
 
     save_orbs = ''
+    if 'commands' not in meta[ele.symbol]:
+        meta[ele.symbol]['commands'] = []
+    meta[ele.symbol]['commands'].append(' '.join(sys.argv))
     meta[ele.symbol]['nexcite'] = ele.nexcite
     meta[ele.symbol]['ioption'] = ele.ioption
     meta[ele.symbol]['ppfile'] = ele.ppfile
@@ -522,7 +496,7 @@ def wavefunctions(element: Annotated[str, Parameter(group=args_grp)],
                                'nelectrons_neutral': ele.xocc0[i],
                                'nzval_pp': ele.nzval_pp,
                                'radius': ele.rcutoff[i],
-                               'nmix': ele.xocc_ion[i],
+                               'nion': ele.xocc_ion[i],
                                'pmix': ele.cmix[i],
                                'vpot': ele.v0[i],
                                'rpot': ele.r0[i],
@@ -703,6 +677,10 @@ def basis(folder: Annotated[pathlib.Path, Parameter(validator=Path(exists=True, 
         for e in elements:
             if e not in meta:
                 raise_err(RuntimeError(f'Element "{e}" was not finalized.'))
+
+    # Sort elements
+    nzs = np.argsort([atomic_numbers[e] for e in elements])
+    elements = [elements[i] for i in nzs]
 
     els = []
     for e in elements:

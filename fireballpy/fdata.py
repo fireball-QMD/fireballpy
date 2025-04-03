@@ -1,9 +1,7 @@
 from __future__ import annotations
 from copy import deepcopy
-import json
 import os
 import sys
-import time
 from typing import Any, Iterable
 
 if sys.version_info >= (3, 11):
@@ -13,7 +11,7 @@ else:
 
 from fireballpy import __version__ as __fb_version__
 from fireballpy._errors import type_check
-from fireballpy.utils import TIMESTR, get_fb_home, download_check_tar, extract_tar
+from fireballpy.utils import get_data_from_url
 from fireballpy.atoms import AtomSystem
 from fireballpy._fireball import loadfdata_from_path
 
@@ -93,8 +91,6 @@ class FDataFiles:
         either the FData is not provided by us or no optimal parameters are recorded.
     """
 
-    fb_home = get_fb_home()
-
     def __init__(self, *, fdata: str, atomsystem: AtomSystem | None = None,
                  fdata_path: str | None = None) -> None:
         type_check(fdata, str, 'fdata')
@@ -134,27 +130,9 @@ class FDataFiles:
 
     def _from_name(self) -> None:
         self.fdata = get_fdata(self.name)
-        self.path = os.path.join(self.fb_home, self.name) + os.sep
-
-        # Download if not exists
-        tarurl = self.fdata['url']
-        tarpath = os.path.join(self.fb_home, f'{self.name}.tar.gz')
-        metafile = os.path.join(self.path, 'meta.json')
-        if not os.path.isfile(metafile):
-            vnew = download_check_tar(tarurl, tarpath, 'FData')
-            meta = {'NAME': self.name}
-            extract_tar(tarpath, self.fb_home, meta, vnew)
-            return
-
-        # Read metadata
-        with open(metafile, 'r') as fp:
-            meta = json.load(fp)
-        if meta['VERSION'] == __fb_version__:
-            return
-        vhave = time.strptime(meta['TIME'], TIMESTR)
-        vnew = download_check_tar(tarurl, tarpath, 'FData', vhave)
-        if vnew != vhave:
-            extract_tar(tarpath, self.path, meta, vnew)
+        self.path = get_data_from_url(self.fdata['url'], self.name, 'FData')
+        if self.path[-1] != os.sep:
+            self.path += os.sep
 
     def _check_species(self) -> None:
         self.species = set(_get_specie_block(self.infodat, b) for b in self.blocks)
@@ -179,6 +157,7 @@ class FDataFiles:
             self._prep_infodat()
             loadfdata_from_path(self.path)
             _loaded_fdata = deepcopy(load_tuple)
+            os.remove(self.pyinfofile)
 
     def get_charges_method(self) -> str:
         """Get the optimal charge method for autoconsistency.
