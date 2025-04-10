@@ -1,26 +1,27 @@
 from __future__ import annotations
-from collections import namedtuple
 import numpy as np
+from numpy.typing import NDArray
 
-from fireballpy._fireball import get_orbitals, get_hs
+from fireballpy._fireball import get_orbitals
 from fireballpy.fireball import BaseFireball, fbobj_from_obj
-from fireballpy.outputs import OrbitalMatrix
+from fireballpy.outputs import OrbitalVector
 
 from ase import Atoms
 
 
-Hamiltonian = namedtuple('Hamiltonian', ['hamiltonian', 'overlap'])
+def get_eigenvectors(*, kpt: int = 0, atoms: Atoms | None = None,
+                    fbobj: BaseFireball | None = None) -> NDArray:
+    """Function to extract the eigenvectors from Fireball.
 
-
-def get_hamiltonian(*, atoms: Atoms | None = None,
-                    fbobj: BaseFireball | None = None) -> Hamiltonian:
-    """Function to extract the hamiltonian and overlap matrices from Fireball.
-
-    This function accepts any fireballpy-like object and returns a named tuple
-    with the hamiltonian and the overlap matrices as :class:`OrbitalMatrix` instances.
+    This function accepts any fireballpy-like object and returns a numpy array
+    with the eigenvectors for each eigenvalue as :class:`OrbitalVector` instances.
+    If they are desired as a matrix, it is better to obtain them directly from the computation API.
 
     Parameters
     ----------
+    kpt : int
+        Index of the k-point to obtain the eigenvectors.
+        By default takes the first (``kpt = 0``).
     atoms : ase.Atoms | None
         An :class:`ase.Atoms` object with a :class:`Fireball` attached as calculator.
         The SCF loop must be computed before.
@@ -33,8 +34,8 @@ def get_hamiltonian(*, atoms: Atoms | None = None,
 
     Returns
     -------
-    Hamiltonian
-        Named tuple with the hamiltonian (``.hamiltonian``) and overlap (``.overlap``) matrices.
+    Eigenvectors
+        Numpy array with the eigenvectors as :class:`OrbitalVector`.
 
     Raises
     ------
@@ -51,14 +52,7 @@ def get_hamiltonian(*, atoms: Atoms | None = None,
 
     # Get from module
     orbitals = np.zeros(fbobj.natoms, dtype=np.int64)
-    smat = np.zeros((fbobj.norbitals, fbobj.norbitals), dtype=np.float64, order='C')
-    hmat = np.zeros((fbobj.norbitals, fbobj.norbitals), dtype=np.float64, order='C')
     get_orbitals(orbitals)
-    get_hs(smat.T, hmat.T)
+    eigenvectors = fbobj.eigenvectors
 
-    # Symmetrise
-    hmat = 0.5*(hmat + hmat.T)
-    smat = 0.5*(smat + smat.T)
-
-    return Hamiltonian(hamiltonian=OrbitalMatrix(matrix=hmat, orbitals=orbitals),
-                       overlap=OrbitalMatrix(matrix=smat, orbitals=orbitals))
+    return np.array([OrbitalVector(vector=ei, orbitals=orbitals) for ei in eigenvectors[kpt]], dtype=OrbitalVector)

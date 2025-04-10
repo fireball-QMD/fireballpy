@@ -254,17 +254,24 @@ subroutine get_qmmm_forces(natoms, forces)
 end subroutine get_qmmm_forces
 
 ! Get hamiltonian and overlap matrix
-subroutine get_hs(norbitals, natoms, orbitals, sdat, hdat)
+subroutine get_orbitals(natoms, orbitals)
   use iso_c_binding
   use M_system, only : imass
   use M_fdata, only : num_orb
   implicit none
-  integer(c_long), intent(in) :: norbitals, natoms
+  integer(c_long), intent(in) :: natoms
   integer(c_long), dimension(natoms), intent(inout) :: orbitals
-  real(c_double), dimension(norbitals, norbitals), intent(inout) :: sdat, hdat
   integer(c_long) :: iatom
-  call geth(sdat, hdat)
   do iatom = 1, natoms
     orbitals(iatom) = num_orb(imass(iatom))
   end do
+end subroutine get_orbitals
+
+! Get hamiltonian and overlap matrix
+subroutine get_hs(norbitals, sdat, hdat)
+  use iso_c_binding
+  implicit none
+  integer(c_long), intent(in) :: norbitals
+  real(c_double), dimension(norbitals, norbitals), intent(inout) :: sdat, hdat
+  call geth(sdat, hdat)
 end subroutine get_hs

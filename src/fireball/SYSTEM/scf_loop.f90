@@ -24,5 +24,11 @@ subroutine scf_loop (verbose)
   end if
   call get_ewald (iforce)
   call assemble_usr ()
+  !if (verbose) then
+  !  write (*,*) 'ebs', ebs
+  !  write (*,*) 'uiiuee', uiiuee
+  !  write (*,*) 'uxcdcc_ols', uxcdcc_ols
+  !  write (*,*) 'etotxc_1c', etotxc_1c
+  !end if
   etot = ebs + uiiuee + uxcdcc_ols + etotxc_1c + eqmmm
 end subroutine scf_loop
