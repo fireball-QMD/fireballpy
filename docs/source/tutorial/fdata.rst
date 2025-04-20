@@ -77,7 +77,7 @@ Another way to modify the shape of the orbitals is to generate them with less ch
 
 .. code-block:: bash
 
-  fdata wavefunctions --element Si --orbitals spd -n 2.00 1.00 0.00 -r 5.00 5.00 5.00
+  fdata wavefunctions --element N --orbitals spd -n 0.00 0.00 0.00 -r 5.00 5.00 5.00
 
 .. figure:: ../_static/N_03.png
     :align: center
@@ -104,20 +104,58 @@ These Hartree potentials are required for calculating Coulombic shell potentials
   \left(-\frac{\hbar}{2m}\nabla^2 + V_{ext}(\mathbf{r}) + \mu_{xc}[\rho_{in}(\mathbf{r})] + \frac{e^2}{2}\int \frac{\rho_{in}(r)}{|\mathbf{r}-\mathbf{r}'|} d^3r' \right) \psi_i(\mathbf{r}) = \epsilon_i \psi_i(\mathbf{r})
 
 
-A set of slightly excited pseudo-atomic Fireball wavefunctions are computed within density-functional theory (using either the local-density approximation or generalized gradient corrections) and a norm-conserving separable pseudo-potential [fhi98PP]_. These wavefunctions are chosen such that they smoothly vanish at the cutoff radius. These pseudopotentials will also be downloaded automatically from here.
+A set of slightly excited pseudo-atomic Fireball wavefunctions are computed within density-functional theory (using either the local-density approximation or generalized gradient corrections) and a norm-conserving separable pseudo-potential :cite:`FUCHS199967` . These wavefunctions are chosen such that they smoothly vanish at the cutoff radius. These pseudopotentials will also be downloaded automatically from here.
 
-Another way to generate orbitals is by using the mixing factor, optimized wavefunctions mixing ground state and excited states
+We can mix orbitals from different calculations. For example, we use charges of 2.0 and 0.2 for the sp orbitals, while for the d orbitals we use 0.0 0.0 0.0.
+
+.. code-block:: bash
+
+  fdata wavefunctions --element C --orbitals spd -n 2.00 0.20 0.0 -r 6.00 6.00 6.00 --save sp
+  fdata wavefunctions --element C --orbitals spd -n 0.00 0.00 0.0 -r 6.00 6.00 6.00 --save d
+  fdata wavefunctions finnish C -o cinput 
+
+.. figure:: ../_static/C0.png
+    :align: center
+    :alt: C (fireball wavefunctions generate from different calculations )
+    :figclass: align-center
+
+Another way to mix orbital calculations is by modifying the charge in the pseudopotential to generate the d orbital.
+
+.. code-block:: bash
+
+  fdata wavefunctions --element C --orbitals spd -n 2.00 0.20 0.0 -r 6.00 6.00 6.00 --save sp
+  fdata wavefunctions --element C --orbitals spd -n 2.00 0.20 0.0 -r 6.00 6.00 6.00 --valence-pp 7.00 --save d
+  fdata wavefunctions finnish C -o cinput
+
+.. figure:: ../_static/C1.png
+    :align: center
+    :alt: C (fireball wavefunctions generate from different calculations )
+    :figclass: align-center
+
+To generate orbitals by using the **mixing factor**, optimized wavefunctions mixing ground state and excited states
+
+.. code-block:: bash
+
+  fdata wavefunctions --element H --orbitals s --excite mix -n 1.0 --pmix <pmix> --nion 1.00 -r 4.00
 
 .. figure:: ../_static/Hmix.png
     :align: center
     :alt: H mix (fireball wavefunctions generate them with mixing factor )
     :figclass: align-center
 
+If we want to obtain excited-state orbitals using the DMOL option, we execute the command:
 
+.. code-block:: bash
 
+  fdata wavefunctions --element C --excite DMOL --orbitals sp -n 2.00 0.20 --nion 0.00 0.00  -r 6.00 6.00
+
+.. figure:: ../_static/CDMOL.png
+    :align: center
+    :alt: C (fireball wavefunctions generate from d--excite DMOL )
+    :figclass: align-center
 
 References
 ----------
 
-.. [fhi98PP]  M. Fuchs, M. Sheffler. "Ab initio pseudopotentials for electronic structure calculations of poly-atomic systems using density-functional theory," Comput. Phys. Comm., 119, 67-98 (1999). `https://doi.org/10.1016/S0010-4655(98)00201-X <https://www.sciencedirect.com/science/article/abs/pii/S001046559800201X>`_
-
+.. bibliography::
+   :cited:

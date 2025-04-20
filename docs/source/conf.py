@@ -39,7 +39,10 @@ extensions = [
     'sphinx_design',
     'sphinx_favicon',
     "sphinx_copybutton",
+    'sphinxcontrib.bibtex', 
 ]
+
+bibtex_bibfiles = ['references.bib']
 
 master_doc = 'index'
 source_suffix = '.rst'
