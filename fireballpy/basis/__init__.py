@@ -1,11 +1,8 @@
-from . import fdata
+from .fdata import app
 
 
-main = fdata.app
-
-
-__all__ = []
+__all__ = ['app']
 
 
 def __dir__():
-    return [main]
+    return __all__

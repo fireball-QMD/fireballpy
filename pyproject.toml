@@ -4,7 +4,7 @@ requires = ['meson-python', 'numpy']
 
 [project]
 name = 'fireballpy'
-version = '0.6.1.dev0'
+version = '0.6.2.dev0'
 license = { file = 'LICENSE' }
 authors = [
   { name = 'José Ortega Mateo', email = 'jose.ortega@uam.es' },
@@ -51,4 +51,4 @@ docs = [
 ]
 
 [project.scripts]
-fdata = 'fireballpy.basis.fdata:main'
+fdata = 'fireballpy.basis.fdata:app'

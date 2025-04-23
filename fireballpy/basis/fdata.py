@@ -7,7 +7,7 @@ import sys
 import re
 from enum import IntEnum
 from multiprocessing import cpu_count
-from typing import Annotated, Optional
+from typing import Annotated, Any, Optional
 import numpy as np
 from numpy.typing import NDArray
 import matplotlib.pyplot as plt
@@ -92,7 +92,7 @@ class Element:
             self._valence = [float(self.nznuc), 0.0, 0.0, 0.0]
             return
 
-        ec = {}
+        ec: dict[int, dict[str, float]] = {}
         zrem = self.nznuc
         maxn = 0
         l = ''
@@ -227,7 +227,7 @@ class Element:
 
     @property
     def rc_max(self) -> float:
-        return max(self._rcutoff)
+        return np.max(self._rcutoff)
 
     @property
     def xocc0(self) -> NDArray[np.float64]:
@@ -235,13 +235,12 @@ class Element:
 
     @xocc0.setter
     def xocc0(self, value: list[float] | None) -> None:
-        valence = []
+        valence: list[float] = []
         for l in ANGULAR_MOMENTUM:
             if l in self._orbitals:
                 valence.append(self._valence[ANGULAR_MOMENTUM[l]])
         if value is None:
-            self._xocc0 = np.ascontiguousarray(valence, dtype=np.float64)
-            return
+            value = valence
         err = f'Invalid value "{value}" for "-n0" / "--nelectrons-neutral".'
         if len(value) != len(self._orbitals):
             raise_err(ValueError('Must provide one value per orbital.'))
@@ -253,7 +252,7 @@ class Element:
             err = f'Invalid value "{v}" for "-n0" / "--nelectrons-neutral".'
             if v < 0.0:
                 raise_err(ValueError(f'{err} Must be >= 0.'))
-        self._xocc0 = np.ascontiguousarray(value, dtype=np.float64)
+        self._xocc0: NDArray[np.float64] = np.ascontiguousarray(value, dtype=np.float64)
 
     @property
     def ioption(self) -> int:
@@ -283,7 +282,7 @@ class Element:
             elif self._nexcite == 2:
                 raise_err(TypeError('If "--excite dmol" is specified, then "--nion" must be provided.'))
             else:
-                self._xocc_ion = np.zeros(len(self._orbitals), dtype=np.float64, order='C')
+                self._xocc_ion = np.ascontiguousarray(len(self._orbitals) * [0.0], dtype=np.float64)
             return
         if len(value) != len(self._orbitals):
             err = f'Invalid value "{value}" for "--nion".'
@@ -307,7 +306,7 @@ class Element:
         if value is None:
             if self._nexcite == 3:
                 raise_err(TypeError('If "--excite mix" is specified, then "--pmix" must be provided.'))
-            self._cmix = np.ones(len(self._orbitals), dtype=np.float64, order='C')
+            self._cmix = np.ascontiguousarray(len(self._orbitals) * [1.0], dtype=np.float64)
             return
         if len(value) != len(self._orbitals):
             err = f'Invalid value "{value}" for "--pmix".'
@@ -361,8 +360,8 @@ class Element:
 
     def prep_confining(self, vpot: list[float] | None, rpot: list[float] | None) -> None:
         if vpot is None and rpot is None:
-            self.v0 = np.zeros(len(self._orbitals), dtype=np.float64, order='C')
-            self.r0 = np.zeros(len(self._orbitals), dtype=np.float64, order='C')
+            self.v0 = np.ascontiguousarray(len(self._orbitals) * [0.0], dtype=np.float64)
+            self.r0 = np.ascontiguousarray(len(self._orbitals) * [0.0], dtype=np.float64)
             self.ioptim = 0
             return
         if vpot is not None and rpot is not None:
@@ -444,7 +443,7 @@ def wavefunctions(element: Annotated[str, Parameter(group=args_grp)],
         Parameter r_0 in atomic units for each of the orbitals.
     """
     ele = Element()
-    ele.nznuc = element
+    ele.nznuc = str(element)
     ele.orbitals = orbitals
     ele.xocc = nelectrons
     ele.rcutoff = radius
@@ -461,7 +460,7 @@ def wavefunctions(element: Annotated[str, Parameter(group=args_grp)],
     output = output.absolute()
     os.makedirs(output, exist_ok=True)
     metafile = os.path.join(output, 'meta.json')
-    meta = {ele.symbol: {}}
+    meta: dict[str, dict[str, Any]] = {ele.symbol: {}}
     if os.path.isfile(metafile):
         with open(metafile, 'r') as fp:
             meta = json.load(fp)
@@ -504,20 +503,20 @@ def wavefunctions(element: Annotated[str, Parameter(group=args_grp)],
         if ele.nexcite in [1, 2]:
             meta[ele.symbol][o]['filename_ewf'] = ele.filename_ewf[i]
 
-    generate_wavefunctions(ioption_in=ele.ioption,
-                           nexcite_in=ele.nexcite,
-                           nznuc_in=ele.nznuc,
-                           nzval_in=ele.nzval,
-                           nzval_ion_in=ele.nzval_ion,
-                           nzval_pp_in=ele.nzval_pp,
-                           ioptim_in=ele.ioptim,
+    generate_wavefunctions(ioption_in=np.int64(ele.ioption),
+                           nexcite_in=np.int64(ele.nexcite),
+                           nznuc_in=np.int64(ele.nznuc),
+                           nzval_in=np.int64(ele.nzval),
+                           nzval_ion_in=np.int64(ele.nzval_ion),
+                           nzval_pp_in=np.int64(ele.nzval_pp),
+                           ioptim_in=np.int64(ele.ioptim),
                            atomname_in=ele.atomname,
                            ppfile_in=ele.ppfile,
                            ppionfile_in=ele.ppionfile,
                            sav_in=ele.sav,
                            outpath_in=str(output) + os.path.sep,
-                           lam_in=ele.lam,
-                           a0_in=ele.a0,
+                           lam_in=np.ascontiguousarray(ele.lam, dtype=np.int64),
+                           a0_in=np.ascontiguousarray(ele.a0, dtype=np.float64),
                            rcutoff_in=ele.rcutoff,
                            xocc_in=ele.xocc,
                            xocc0_in=ele.xocc0,
@@ -599,12 +598,12 @@ def compute_vnn(ele: Element, output: pathlib.Path) -> None:
     if not hasattr(ele, 'filename_ewf'):
         ele.filename_ewf = [x + 'x' for x in ele.filename_wf]
     ele.na_filenames()
-    generate_vnn(nexcite_in=ele.nexcite,
-                 nznuc_in=ele.nznuc,
+    generate_vnn(nexcite_in=np.int64(ele.nexcite),
+                 nznuc_in=np.int64(ele.nznuc),
                  ppfile_in=ele.ppfile,
                  ppionfile_in=ele.ppionfile,
                  outpath_in=str(output) + os.path.sep,
-                 lam_in=ele.lam,
+                 lam_in=np.ascontiguousarray(ele.lam, dtype=np.int64),
                  rcutoff_in=ele.rcutoff,
                  filename_wf_in=ele.filename_wf,
                  filename_ewf_in=ele.filename_ewf,
@@ -682,7 +681,7 @@ def basis(folder: Annotated[pathlib.Path, Parameter(validator=Path(exists=True, 
     nzs = np.argsort([atomic_numbers[e] for e in elements])
     elements = [elements[i] for i in nzs]
 
-    els = []
+    els: list[Element] = []
     for e in elements:
         el = Element()
         el.nznuc = e
@@ -811,10 +810,7 @@ def plot(wavefunctions: Annotated[list[pathlib.Path],
     ax.set_xlim(left=0)
     ax.legend(fontsize=14)
     plt.show()
+
  
-def main():
-    app()
-
-
 if __name__ == '__main__':
-    main()
+    app()

@@ -48,7 +48,6 @@ class KPoints:
                  kpts: ArrayLike | SupportsFloat,
                  atomsystem: AtomSystem,
                  gamma: bool | None = None) -> None:
-
         # Need to initialize
         mp = None
         self.isgamma = False
@@ -62,7 +61,7 @@ class KPoints:
             if kpts.shape != (self.n, 3):
                 raise ValueError("Parameter ``kpts`` if specified as coordinates "
                                  "must be a 2D array with dimensions nkpts x 3")
-            self.weights = np.ones(self.n, dtype=np.float64, order='C')
+            self.weights = np.ascontiguousarray(self.n * [1.0], dtype=np.float64)
             self.kpts = kpts
             self.coords = np.dot(kpts, atomsystem.icell)
             if self.n == 1 and norm(self.kpts[0, :]) < 1e-5:
@@ -110,7 +109,7 @@ class KPoints:
             kpts += 0.5/mp * (atomsystem.pbc * (mp % 2 != bool(gamma)))
         self.kpts = np.ascontiguousarray(kpts, dtype=np.float64)
         self.n = self.kpts.shape[0]
-        self.weights = np.ones(self.n, dtype=np.float64, order='C')
+        self.weights = np.ascontiguousarray(self.n * [1.0], dtype=np.float64)
         self.coords = np.dot(self.kpts, atomsystem.icell)
         self.map = list(range(self.n))
         self._reduce_kpts()
@@ -123,8 +122,8 @@ class KPoints:
         tol : float
             Tolerance for considering two k-points to be symmetric.
         """
-        idx_unique = []
-        cts_unique = []
+        idx_unique: list[int] = []
+        cts_unique: list[int] = []
         for i in range(self.n):
             for j in idx_unique:
                 if norm(self.coords[i] + self.coords[j]) < tol:

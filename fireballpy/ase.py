@@ -53,41 +53,47 @@ class Fireball(Calculator, BaseFireball):
     **kwargs
         Advanced options. May requiere previous experience with DFT computations:
 
-        +--------------------+----------------------+--------------------------------------------------------------------------+
-        | Property           | Type                 | Description                                                              |
-        +====================+======================+==========================================================================+
-        | ``gamma``          | ``bool`` or ``None`` | If the k-points are to be generated from a Monkhorst-Pack or from a      |
-        |                    |                      | k-point density, should the Gamma (``[0, 0, 0]``) point be forcefully    |
-        |                    |                      | included (``True``), forcefully excluded (``False``) or                  |
-        |                    |                      | don't care whether it is included or not (``None``, default)             |
-        +--------------------+----------------------+--------------------------------------------------------------------------+
-        | ``charges_method`` | ``str`` or ``None``  | How the autoconsistency in the charges will be performed.                |
-        |                    |                      | By default depends on the FData (``None``).                              |
-        |                    |                      | If a custom FData is selected, then this parameter must be specified.    |
-        |                    |                      | For more options see :ref:`here <charges_methods>`.                      |
-        +--------------------+----------------------+--------------------------------------------------------------------------+
-        | ``dipole_method``  | ``str``              | Whether to use the improved dipole description (``'improved'``, default) |
-        |                    |                      | or not (``'legacy'``). In periodic systems this is ignored as only       |
-        |                    |                      | the legacy description is implemented.                                   |
-        +--------------------+----------------------+--------------------------------------------------------------------------+
-        | ``fdata_path``     | ``str``              | Path to a custom FData. Ignored unless ``fdata = 'custom'``.             |
-        +--------------------+----------------------+--------------------------------------------------------------------------+
-        | ``total_charge``   | ``int``              | Total charge of the system in elementary charge units                    |
-        |                    |                      | (1 extra electron will be ``total_charge = -1``). Default is 0.          |
-        +--------------------+----------------------+--------------------------------------------------------------------------+
-        | ``correction``     | ``dict`` or ``None`` | By default (``None``) will apply DFT-D3 correction for the selected      |
-        |                    |                      | FData if optimized parameters are available                              |
-        |                    |                      | (see ``available_fdatas()``).                                            |
-        |                    |                      | Also, it may be a dictionary with the parameters for DFT-D3 correction   |
-        |                    |                      | The dictionary must contain the keys ``'kind'`` (right now it can only   |
-        |                    |                      | be ``'dftd3'``), ``'damping'`` and either ``'method'`` or                |
-        |                    |                      | ``'params_tweaks'``. It may be forcefully shut down by providing         |
-        |                    |                      | ``False``. For more information, see                                     |
-        |                    |                      | `Simple DFT-D3 documentation <https://dftd3.readthedocs.io>`_.           |
-        +--------------------+----------------------+--------------------------------------------------------------------------+
-        | ``mixer_kws``      | ``dict``             | Dictionary with the charges mixer options. For reference                 |
-        |                    |                      | see :ref:`here <mixer>`.                                                 |
-        +--------------------+----------------------+--------------------------------------------------------------------------+
+        +---------------------+----------------------+--------------------------------------------------------------------------+
+        | Property            | Type                 | Description                                                              |
+        +=====================+======================+==========================================================================+
+        | ``gamma``           | ``bool`` or ``None`` | If the k-points are to be generated from a Monkhorst-Pack or from a      |
+        |                     |                      | k-point density, should the Gamma (``[0, 0, 0]``) point be forcefully    |
+        |                     |                      | included (``True``), forcefully excluded (``False``) or                  |
+        |                     |                      | don't care whether it is included or not (``None``, default)             |
+        +---------------------+----------------------+--------------------------------------------------------------------------+
+        | ``charges_method``  | ``str`` or ``None``  | How the autoconsistency in the charges will be performed.                |
+        |                     |                      | By default depends on the FData (``None``).                              |
+        |                     |                      | If a custom FData is selected, then this parameter must be specified.    |
+        |                     |                      | For more options see :ref:`here <charges_methods>`.                      |
+        +---------------------+----------------------+--------------------------------------------------------------------------+
+        | ``dipole_method``   | ``str``              | Whether to use the improved dipole description (``'improved'``, default) |
+        |                     |                      | or not (``'legacy'``). In periodic systems this is ignored as only       |
+        |                     |                      | the legacy description is implemented.                                   |
+        +---------------------+----------------------+--------------------------------------------------------------------------+
+        | ``fdata_path``      | ``str``              | Path to a custom FData. Ignored unless ``fdata = 'custom'``.             |
+        +---------------------+----------------------+--------------------------------------------------------------------------+
+        | ``total_charge``    | ``int``              | Total charge of the system in elementary charge units                    |
+        |                     |                      | (1 extra electron will be ``total_charge = -1``). Default is 0.          |
+        +---------------------+----------------------+--------------------------------------------------------------------------+
+        | ``correction``      | ``dict`` or ``None`` | By default (``None``) will apply DFT-D3 correction for the selected      |
+        |                     |                      | FData if optimized parameters are available                              |
+        |                     |                      | (see ``available_fdatas()``).                                            |
+        |                     |                      | Also, it may be a dictionary with the parameters for DFT-D3 correction   |
+        |                     |                      | The dictionary must contain the keys ``'kind'`` (right now it can only   |
+        |                     |                      | be ``'dftd3'``), ``'damping'`` and either ``'method'`` or                |
+        |                     |                      | ``'params_tweaks'``. It may be forcefully shut down by providing         |
+        |                     |                      | ``False``. For more information, see                                     |
+        |                     |                      | `Simple DFT-D3 documentation <https://dftd3.readthedocs.io>`_.           |
+        +---------------------+----------------------+--------------------------------------------------------------------------+
+        | ``initial_charges`` | ``ArrayLike[float]`` | A ``(natoms, nshells)`` array with the charges of each atom shell        |
+        |                     | or ``None``          | (0 if no shell for that atom is defined). Default are neutral charges.   |
+        +---------------------+----------------------+--------------------------------------------------------------------------+
+        | ``fix_charges``     | ``bool``             | If ``True`` there no self-consistent loop on the shell charges           |
+        |                     |                      | will be performed. Default is ``False``.                                 |
+        +---------------------+----------------------+--------------------------------------------------------------------------+
+        | ``mixer_kws``       | ``dict``             | Dictionary with the charges mixer options. For reference                 |
+        |                     |                      | see :ref:`here <mixer>`.                                                 |
+        +---------------------+----------------------+--------------------------------------------------------------------------+
 
     Methods
     -------

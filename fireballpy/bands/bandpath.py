@@ -4,7 +4,7 @@ from typing import SupportsInt
 import re
 import numpy as np
 from numpy.linalg import norm
-from numpy.typing import ArrayLike
+from numpy.typing import ArrayLike, NDArray
 import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 
@@ -112,7 +112,7 @@ class BandPath:
             if len(p) < 2:
                 raise ValueError("Paths must have at least 2 elements.")
 
-        self.pathcoords = [[self.special_points[p] for p in pp] for pp in self.paths]
+        self.pathcoords = np.ascontiguousarray([[self.special_points[p] for p in pp] for pp in self.paths], dtype=np.float64)
         self._paths2kpts(fbobj.atomsystem)
 
         # Compute new eigenvalues
@@ -136,20 +136,20 @@ class BandPath:
         for path in self.pathcoords[:-1]:
             i += len(path)
             lengths[i-1] = np.float64(0.0)
-        totallength = sum(lengths)
+        totallength = np.sum(lengths)
 
         i = 0
-        x0 = 0.0
-        self.pathcoords = []
+        x0 = np.float64(0.0)
+        pathcoords: list[NDArray] = []
         self.pathidx = [0]
         for point, dist, length in zip(points[:-1], dists, lengths):
             diff = totallength - x0
-            if abs(diff) < 1e-6:
+            if np.abs(diff) < 1e-6:
                 n = 0
             else:
-                n = max(2, int(round(length * (self.npoints - len(self.pathcoords)) / diff)))
+                n = max(2, int(round(length * (self.npoints - len(pathcoords)) / diff)))
             for t in np.linspace(0, 1, n)[:-1]:
-                self.pathcoords.append(point + t * dist)
+                pathcoords.append(point + t * dist)
             x0 += length
             if length > 1e-6:
                 self.pathidx.append(self.pathidx[-1] + n - 1 + i)
@@ -157,8 +157,8 @@ class BandPath:
                 i += 1
         if self.pathidx[-1] == self.npoints:
             self.pathidx[-1] -= 1
-        self.pathcoords.append(points[-1])
-        self.pathcoords = np.ascontiguousarray(self.pathcoords, dtype=np.float64)
+        pathcoords.append(points[-1])
+        self.pathcoords = np.ascontiguousarray(pathcoords, dtype=np.float64)
 
     def plot(self, *,
              emin: float | None = None,
@@ -167,7 +167,7 @@ class BandPath:
              fermi_level_fmt: str = '--r',
              center: bool = False,
              ax: Axes | None = None,
-             figsize: tuple[float, float] | None = None,  # Parámetro figsize opcional
+             figsize: tuple[float, float] | None = None,
              show_grid: bool = False,
              line_kws: dict | None = None,
              font_kws: dict | None = None) -> Axes:
@@ -192,6 +192,10 @@ class BandPath:
         ax: plt.Axes | None
             If an instance of :class:`matplotlib.pyplot.Axes` is provided, it will
             be used to draw the bandpath on it.
+        figsize: tuple[float, float] | None
+            Size of the figure (width, height).
+        show_grid: bool
+            Show x axis grid or not (default ``False``).
         line_kws: dict | None
             Extra arguments to provide to the calls of :meth:`matplotlib.pyplot.Axes.plot`.
         font_kws: dict | None
@@ -236,6 +240,5 @@ class BandPath:
         ax.set_xlabel('')
         ax.set_xticks(self.pathidx, xticks, **font_kws)
         if show_grid:
-            grid_style = {'color': 'gray', 'linestyle': '-', 'linewidth': 0.5}
-            ax.grid(True, axis='x', **grid_style)  # Mostrar solo líneas verticales (eje x)
+            ax.grid(True, axis='x', color='gray', linestyles='-', linewidth=0.5)  # Only vertical lines (x axis)
         return ax

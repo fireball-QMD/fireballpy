@@ -169,7 +169,6 @@ subroutine kspace_gamma ()
   end if
   eigen_k(1:norbitals,ikpoint) = eigen(:)
   if ((iqout .eq. 1) .or. (iqout .eq. 3)) blowre(:,:,ikpoint) = real(yyyy(:,:), c_double)
-  call dsymm ( 'L', 'U', norbitals, norbitals, a1, xxxx, norbitals, yyyy, norbitals, a0, zzzz, norbitals )
   if (iqout .ne. 3) then
     call dsymm ( 'L', 'U', norbitals, norbitals, a1, xxxx, norbitals, yyyy, norbitals, a0, zzzz, norbitals )
   else

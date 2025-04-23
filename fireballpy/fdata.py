@@ -15,7 +15,7 @@ from fireballpy.utils import get_data_from_url
 from fireballpy.atoms import AtomSystem
 from fireballpy._fireball import loadfdata_from_path
 
-_loaded_fdata = ('', '')
+_loaded_fdata: tuple[str | None, set[str]] = ('', set(''))
 
 #######################################
 # UTIL FUNCTIONS FOR DOWNLOADING FDATAS
@@ -152,6 +152,7 @@ class FDataFiles:
         """Set Fortran module variables and load the FData into memory.
         """
         global _loaded_fdata
+        assert self.path is not None
         load_tuple = (self.path, self.species_present if self.lazy else self.species)
         if load_tuple != _loaded_fdata:
             self._prep_infodat()

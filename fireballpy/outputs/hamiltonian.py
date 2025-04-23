@@ -50,15 +50,15 @@ def get_hamiltonian(*, atoms: Atoms | None = None,
     fbobj.run_scf(fix_charges=True)
 
     # Get from module
-    orbitals = np.zeros(fbobj.natoms, dtype=np.int64)
-    smat = np.zeros((fbobj.norbitals, fbobj.norbitals), dtype=np.float64, order='C')
-    hmat = np.zeros((fbobj.norbitals, fbobj.norbitals), dtype=np.float64, order='C')
+    orbitals = np.ascontiguousarray(fbobj.natoms * [0], dtype=np.int64)
+    smatt = np.zeros((fbobj.norbitals, fbobj.norbitals), dtype=np.float64, order='C')
+    hmatt = np.zeros((fbobj.norbitals, fbobj.norbitals), dtype=np.float64, order='C')
     get_orbitals(orbitals)
-    get_hs(smat.T, hmat.T)
+    get_hs(smatt.T, hmatt.T)
 
     # Symmetrise
-    hmat = 0.5*(hmat + hmat.T)
-    smat = 0.5*(smat + smat.T)
+    hmat = 0.5*(hmatt + hmatt.T)
+    smat = 0.5*(smatt + smatt.T)
 
     return Hamiltonian(hamiltonian=OrbitalMatrix(matrix=hmat, orbitals=orbitals),
                        overlap=OrbitalMatrix(matrix=smat, orbitals=orbitals))

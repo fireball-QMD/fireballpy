@@ -172,10 +172,10 @@ def get_data_from_url(url: str, name: str, filetype: str) -> str:
 
     dst = dst_have + '.tar.xz'
     if not os.path.isdir(dst_have):
-        dst_have = None
+        dst_have = ''
 
     dst, strtime = download_check_tar(url, dst, filetype, dst_have)
-    if dst_have is not None and dst == dst_have:
+    if dst_have and dst == dst_have:
         return dst_have
 
     tarpath, tarname = os.path.split(dst)

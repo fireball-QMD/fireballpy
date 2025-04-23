@@ -5,13 +5,13 @@ import importlib as _importlib
 
 # Expose API to the user
 ## Documentation
-from fireballpy.version import version as __version__
-from fireballpy.utils import get_fb_home
-from fireballpy.fdata import available_fdatas, FDataFiles, load_fdata
-from fireballpy.atoms import AtomSystem
-from fireballpy.kpoints import KPoints
-from fireballpy.fireball import BaseFireball
-from fireballpy.ase import Fireball
+from .version import version as __version__
+from .utils import get_fb_home
+from .fdata import available_fdatas, FDataFiles, load_fdata
+from .atoms import AtomSystem
+from .kpoints import KPoints
+from .fireball import BaseFireball
+from .ase import Fireball
 
 # Register the calculator as available for ASE
 from ase.calculators.calculator import register_calculator_class  # type: ignore

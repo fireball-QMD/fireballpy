@@ -1,5 +1,6 @@
 from __future__ import annotations
 from copy import deepcopy
+from typing import SupportsFloat, SupportsInt
 import warnings
 
 from numpy.typing import ArrayLike
@@ -127,7 +128,7 @@ class BaseFireball:
         self.verbose = verbose
         self.total_charge = total_charge
         self.charges_method = charges_method
-        self.dipole_method = dipole_method
+        self.dipole_method = 'legacy' if self.atomsystem.isperiodic else dipole_method
 
         # Convenient aliases
         self.natoms = self.atomsystem.n
@@ -161,6 +162,12 @@ class BaseFireball:
                 raise ValueError("Parameter ``mixer_kws`` if specified must contain the key ``'method'``.")
             for prop in ['max_iter', 'mix_order', 'beta', 'tol', 'w0']:
                 self.mixer_kws[prop] = mixer_kws.get(prop, DEFAULT_MIXER[prop])
+        assert isinstance(self.mixer_kws['method'], str)
+        assert isinstance(self.mixer_kws['max_iter'], SupportsInt)
+        assert isinstance(self.mixer_kws['mix_order'], SupportsInt)
+        assert isinstance(self.mixer_kws['beta'], SupportsFloat)
+        assert isinstance(self.mixer_kws['tol'], SupportsFloat)
+        assert isinstance(self.mixer_kws['w0'], SupportsFloat)
 
         # Save variables to modules
         self.fdatafiles.load_fdata()
@@ -169,18 +176,17 @@ class BaseFireball:
         self.atomsystem.set_cell()
 
         # Set Fireball-like options
-        self._options = {'dipole_method': np.int64(0) if self.atomsystem.isperiodic else get_idipole(dipole_method),
-                         'charges_method': get_icharge(self.charges_method),
-                         'ismolecule': np.int64(not self.atomsystem.isperiodic),
-                         'isgamma': np.int64(self.kpoints.isgamma),
-                         'total_charge': np.int64(-self.total_charge),
-                         'mixer_method': get_imixer(self.mixer_kws['method']),
-                         'max_iter': np.int64(self.mixer_kws['max_iter']),
-                         'mix_order': np.int64(self.mixer_kws['mix_order']),
-                         'beta': np.float64(self.mixer_kws['beta']),
-                         'tol': np.float64(self.mixer_kws['tol']),
-                         'w0': np.float64(self.mixer_kws['w0'])}
-        set_options(**self._options)
+        set_options(dipole_method=get_idipole(self.dipole_method),
+                    charges_method=get_icharge(self.charges_method),
+                    ismolecule=np.int64(not self.atomsystem.isperiodic),
+                    isgamma=np.int64(self.kpoints.isgamma),
+                    total_charge=np.int64(-self.total_charge),
+                    mixer_method=get_imixer(self.mixer_kws['method']),
+                    max_iter=np.int64(self.mixer_kws['max_iter']),
+                    mix_order=np.int64(self.mixer_kws['mix_order']),
+                    beta=np.float64(self.mixer_kws['beta']),
+                    tol=np.float64(self.mixer_kws['tol']),
+                    w0=np.float64(self.mixer_kws['w0']))
 
         # Allocate module
         call_allocate_system()
@@ -202,7 +208,7 @@ class BaseFireball:
         self.nshells, self.nbands_new, self.norbitals = get_sizes()
         if self.nbands_new != self.nbands:
             self.nbands = self.nbands_new
-            self.charges = np.zeros(self.natoms, dtype=np.float64, order='C')
+            self.charges = np.ascontiguousarray(self.natoms * [0.0], dtype=np.float64)
             self.forces = np.zeros((self.natoms, 3), dtype=np.float64, order='C')
             self.shell_charges = np.zeros((self.natoms, self.nshells), dtype=np.float64, order='C')
             self.eigenvalues = np.zeros((self.nkpts, self.nbands), dtype=np.float64, order='C')
@@ -270,17 +276,14 @@ class BaseFireball:
 
 
 def fbobj_from_obj(fbobj: BaseFireball | None, atoms: Atoms | None) -> BaseFireball:
-    fbobj_none = fbobj is not None
-    atoms_none = atoms is not None
-
-    nonecount = int(fbobj_none) + int(atoms_none)
+    nonecount = int(fbobj is not None) + int(atoms is not None)
     if nonecount != 1:
         raise ValueError("Only one of the Fireball-providing inputs must be specified.")
 
-    if fbobj_none:
+    if fbobj is not None:
         type_check(fbobj, BaseFireball, 'fbobj')
         return fbobj
-    if atoms_none:
+    if atoms is not None:
         type_check(atoms, Atoms, 'atoms')
         if not hasattr(atoms, 'calc') or not isinstance(atoms.calc, BaseFireball):
             raise ValueError("ASE calculator for parameter ``atoms`` must be ``Fireball``.")
