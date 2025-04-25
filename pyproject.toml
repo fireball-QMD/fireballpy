@@ -4,7 +4,7 @@ requires = ['meson-python', 'numpy']
 
 [project]
 name = 'fireballpy'
-version = '0.6.2.dev0'
+version = '0.6.3.dev0'
 license = { file = 'LICENSE' }
 authors = [
   { name = 'José Ortega Mateo', email = 'jose.ortega@uam.es' },
@@ -46,6 +46,7 @@ docs = [
   'sphinx-design >= 0.6.0',
   'sphinx-copybutton >= 0.5.0',
   'sphinx-favicon >= 1.0.0',
+  'sphinxcontrib-bibtex >= 2.6.0',
   'numpydoc >= 1.8.0',
   'pydata-sphinx-theme >= 0.15.0',
 ]

@@ -1,0 +1,8 @@
+numpy>=2.0.0
+scipy>=1.7.0
+ase>=3.22.0
+tqdm>=4.40.0
+requests>=2.31.0
+dftd3>=1.1.0
+tomli>=1.1.0
+cyclopts>=3.3.0
