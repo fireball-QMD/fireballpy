@@ -55,11 +55,11 @@ def get_fb_home() -> str:
 
 # Reference: https://github.com/pytorch/pytorch/blob/main/torch/hub.py
 def download_check_tar(url: str, dst: str, filetype: str,
-                       dst_have: str | None = None) -> tuple[str, time.struct_time]:
+                       dst_have: str = '') -> tuple[str, time.struct_time]:
 
     # See if download is needed
     meta = {}
-    if dst_have is not None:
+    if dst_have:
         with open(os.path.join(dst_have, 'meta.json'), 'r') as fp:
             meta = json.load(fp)
         if __fb_version__ == meta['VERSION']:
@@ -69,7 +69,7 @@ def download_check_tar(url: str, dst: str, filetype: str,
     try:
         r = requests.get(url, stream=True)
     except requests.exceptions.RequestException:
-        if dst_have is None:
+        if not dst_have:
             raise ConnectionError(f'Could not fetch {filetype}. Please check connection.')
         return dst_have, time.strptime(meta['TIME'], TIMESTR)
     if r.status_code != 200:
@@ -78,7 +78,7 @@ def download_check_tar(url: str, dst: str, filetype: str,
 
     # Check if update is neeeded
     last_mod = time.strptime(r.headers['Last-Modified'], TIMESTR)
-    if dst_have is not None:
+    if dst_have:
         if last_mod == time.strptime(meta['TIME'], TIMESTR):
             # Update version so no more queries are needed
             if __fb_version__ != meta['VERSION']:
