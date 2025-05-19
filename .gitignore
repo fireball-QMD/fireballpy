@@ -12,3 +12,4 @@ fireballpy/version.py
 docs/build
 docs/source/reference/generated
 fbpyenv
+.mypy_cache

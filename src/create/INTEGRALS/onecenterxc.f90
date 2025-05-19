@@ -19,7 +19,6 @@
 ! Ohio University - Dave Drabold
 ! University of Regensburg - Juergen Fritsch
 
-!
 ! fireball-qmd is a free (GPLv3) open project.
 
 ! This program is free software: you can redistribute it and/or modify
@@ -41,379 +40,342 @@
 ! ===========================================================================
 !       This routine calculates the one-center integrals for the exchange-
 ! correlation interactions.
-!
-!   int [n(i) (Exc - Muxc)] and <i.nu | mu[n(i)] | i.nu'>
-!
-!       The full charge transfer OLSXC version calculates exc and 
-!  < imu|muxc|inu> separately. 
 ! ===========================================================================
 ! Original code from Juergen Fritsch
-! 
-! Code rewritten by:
-! James P. Lewis
-! Department of Physics and Astronomy
-! Brigham Young University
-! N233 ESC P.O. Box 24658 
-! Provo, UT 841184602-4658
-! FAX 801-422-2265
-! Office telephone 801-422-7444
-! ===========================================================================
 !
-! Program Declaration
+! Code rewritten by:
+! C. Roldan Pinero
 ! ===========================================================================
-        subroutine onecenterxc (nspec, nspec_max, nsh_max, wfmax_points,     &
-     &                          iexc, fraction, nsshxc, lsshxc, rcutoffa_max,&
-     &                          xnocc, dqorb, iderorb, what, signature,      &
-     &                          drr_rho ,nzx )
-        use constants
-        use precision
-        implicit none
- 
-! Argument Declaration and Description
-! ===========================================================================
-! Input
-        integer, intent (in) :: iexc
-        integer, intent (in) :: nsh_max
-        integer, intent (in) :: nspec
-        integer, intent (in) :: nspec_max
-        integer, intent (in) :: wfmax_points
+subroutine onecenterxc (nspec, nspec_max, nsh_max, wfmax_points,      &
+  &                     iexc, fraction, nsshxc, lsshxc, rcutoffa_max, &
+  &                     xnocc, dqorb, iderorb, what, signature,       &
+  &                     drr_rho, nzx)
+  use constants
+  use precision
+  implicit none
 
-        integer, intent (in), dimension (nspec_max) :: iderorb
-        integer, intent (in), dimension (nspec_max) :: nsshxc
-        integer, intent (in), dimension (nspec_max, nsh_max) :: lsshxc
- 
-        real(kind=long), intent (in) :: fraction
- 
-        real(kind=long), intent (in), dimension (nspec_max) :: dqorb
-        real(kind=long), intent (in), dimension (nspec_max) :: drr_rho
-        real(kind=long), intent (in), dimension (nspec_max) :: rcutoffa_max
-        real(kind=long), intent (in), dimension (nsh_max, nspec_max) :: xnocc
-        integer, intent (in), dimension (nspec_max) :: nzx
-        
-        real(kind=long) tmp
+  ! Argument Declaration and Description
+  ! ===========================================================================
+  integer, intent (in) :: iexc, nsh_max, nspec, nspec_max, wfmax_points
+  real(kind=long), intent (in) :: fraction
+  character (len=70) :: signature
+  integer, intent (in), dimension (nspec_max) :: iderorb, nsshxc, nzx
+  integer, intent (in), dimension (nspec_max, nsh_max) :: lsshxc
+  real(kind=long), intent (in), dimension (nspec_max) :: dqorb, drr_rho, &
+    & rcutoffa_max
+  real(kind=long), intent (in), dimension (nsh_max, nspec_max) :: xnocc
+  character (len=70), intent (in), dimension (nspec_max) :: what
 
-        character (len=70) :: signature
+  ! Local Variable Declaration and Description
+  ! ===========================================================================
+  integer :: irho, issh, jssh, kssh, in1, lssh, nssh, nssh1, ix, ndq, &
+    & nnz, npts, nnrho, lwork, info
+  real(kind=long) :: dnuxc, dnuxcs, drho, exc, dexcc, factor, rcutoff, rho, &
+    & rhomax, rhomin, rh, rhp, rhpp, vxc, ddq, tmp
+  character(2) :: auxz
+  integer, dimension(:), allocatable :: ipiv
+  real(kind=long), dimension(nsh_max) :: xnocc_in
+  real(kind=long), dimension (:), allocatable :: rho1c, rhop1c, rhopp1c, &
+    & work
+  real(kind=long), dimension (:,:), allocatable :: xmatt, eexc, vvxc, tmpmat, &
+    & fite, fitv, dq
+  real(kind=long), dimension(:,:,:), allocatable :: exc1crho, nuxc1crho
+  logical, dimension(:), allocatable :: iszero
+  real(kind=long), external :: psiofr
 
-        character (len=70), intent (in), dimension (nspec_max) :: what
- 
-! Local Parameters and Data Declaration
-! ===========================================================================
- 
-! Local Variable Declaration and Description
-! ===========================================================================
-        integer ideriv
-        integer irho
-        integer issh
-        integer iissh
-        integer in1
-        integer jssh
-        integer jjssh
-        integer L1
-        integer L2
-        integer ndq
-        integer nnrho
-        integer nssh
- 
-        real(kind=long) dnuxc
-        real(kind=long) dnuxcs
-        real(kind=long) dq
-        real(kind=long) drho
-        real(kind=long) exc
-        real(kind=long) dexcc
-        real(kind=long) exc1c_0
-        real(kind=long) factor
-        real(kind=long) rcutoff
-        real(kind=long) rho
-        real(kind=long) rhomax
-        real(kind=long) rhomin
-        real(kind=long) rh
-        real(kind=long) rhp
-        real(kind=long) rhpp
-        real(kind=long) vxc
- 
-        real(kind=long), dimension (:, :), allocatable :: answer
-        real(kind=long), dimension (:), allocatable :: rho1c
-        real(kind=long), dimension (:), allocatable :: rhop1c
-        real(kind=long), dimension (:), allocatable :: rhopp1c
-        real(kind=long), dimension (:), allocatable :: xnocc_in
-        real(kind=long), external :: psiofr
+  ! Procedure
+  ! ===========================================================================
+  ! Allocate known size arrays
+  allocate (rho1c (wfmax_points))
+  allocate (rhop1c (wfmax_points))
+  allocate (rhopp1c (wfmax_points))
 
-        real(kind=long) qa,qb
-        real(kind=long) dq1,dq2,f0,f1,f2
-        real(kind=long) denom
-        real(kind=long) dqi(nsh_max,3)
-        real(kind=long) qmax(nsh_max)
-        real(kind=long) eexc(nsh_max,nsh_max)
-        real(kind=long) dexc(nsh_max)
-        real(kind=long) d2exc(nsh_max,nsh_max)
-        real(kind=long) vvxc(nsh_max,nsh_max)
-        real(kind=long) dvxc(nsh_max,nsh_max,nsh_max)
-        real(kind=long) d2vxc(nsh_max,nsh_max,nsh_max,nsh_max)
-        integer imask (nsh_max+1)
+  ! Set up the header for the output file.
+  open (unit=36, file='coutput/xc1c_dqi.dat', status='unknown')
+  open (unit=37, file='coutput/exc1crho.dat', status='unknown')
+  open (unit=38, file='coutput/nuxc1crho.dat', status='unknown')
+  write (36,100)
+  write (36,*) ' All one center matrix elements '
+  write (36,*) ' created by: '
+  write (36,200) signature
+  write (37,100)
+  write (37,*) ' All one center matrix elements '
+  write (37,*) ' created by: '
+  write (37,200) signature
+  write (38,100)
+  write (38,*) ' All one center matrix elements '
+  write (38,*) ' created by: '
+  write (38,200) signature
+  do in1 = 1, nspec
+    write (36,300) what(in1)
+    write (37,300) what(in1)
+    write (38,300) what(in1)
+    write (auxz,'(i2.2)') nzx(in1)
+    open (unit=360, file='coutput/xc1c_dqi.'//auxz//'.dat', status='unknown')
+    open (unit=370, file='coutput/exc1crho.'//auxz//'.dat', status='unknown')
+    open (unit=380, file='coutput/nuxc1crho.'//auxz//'.dat', status='unknown')
+    write (360,100)
+    write (360,*) ' Z = ', nzx(in1), ' one center matrix elements '
+    write (360,*) ' created by: '
+    write (360,200) signature
+    write (360,300) what(in1)
+    write (360,100)
+    close (360)
+    write (370,100)
+    write (370,*) ' Z = ', nzx(in1), ' one center matrix elements '
+    write (370,*) ' created by: '
+    write (370,200) signature
+    write (370,300) what(in1)
+    write (370,100)
+    close (370)
+    write (380,100)
+    write (380,*) ' Z = ', nzx(in1), ' one center matrix elements '
+    write (380,*) ' created by: '
+    write (380,200) signature
+    write (380,300) what(in1)
+    write (380,100)
+    close (380)
+  end do
+  write (36,100)
+  write (37,100)
+  write (38,100)
+  close (36)
+  close (37)
+  close (38)
 
-        character(80) ::  root
-        character(2) :: auxz
- 
-! Procedure
-! ===========================================================================
-! Open the file to store the onecenter data.
-        open (unit = 36, file = 'coutput/xc_onecenter.dat', status = 'unknown')
- 
-! Set up the header for the output file.
-        write (36,100)
-        write (36,*) ' All one center matrix elements '
-        write (36,*) ' created by: '
-        write (36,200) signature
- 
-        do in1 = 1, nspec
-         write (36,300) what(in1)
-        end do
-        write (36,100)
- 
-! Loop over the different charge types (0, -1, or +1).
-        allocate (rho1c (wfmax_points))
-        allocate (rhop1c (wfmax_points))
-        allocate (rhopp1c (wfmax_points))
-        do ideriv = 0, 2
-         write (36,*) ' derivative ', ideriv
- 
-! Loop over the species
-         do in1 = 1, nspec
-          nssh = nsshxc(in1)
-          write (36,400) in1, nssh
- 
-! Needed for charge corrections:
-          dq = dqorb(in1)
-          jssh = iderorb(in1)
- 
-          drho = drr_rho(in1)
-          rcutoff = rcutoffa_max(in1)
-          allocate (xnocc_in (nssh))
-          xnocc_in(1:nssh) = xnocc(1:nssh,in1)
- 
-! Obtain the density and respective derivatives needed for evaluating the
-! exchange-correlation interactions (LDA or GGA).
-          call rho1c_store (in1, nsh_max, nssh, dq, jssh, drho, rcutoff,     &
-     &                      xnocc_in, ideriv + 1, wfmax_points, rho1c,       &
-     &                      rhop1c, rhopp1c)
- 
-! Integrals <i|exc(i)-mu(i)|i> and <i.nu|mu(i)|i.nu'>
-! ***************************************************************************
-! First initialize the answer array
-          exc1c_0 = 0.0d0
-          allocate (answer (nssh, nssh))
-          answer = 0.0d0
+  do in1 = 1, nspec
+    nssh = nsshxc(in1)
+    nssh1 = nssh + 1
 
-! Fix the endpoints and initialize the increments dz and drho.
-          rhomin = 0.0d0
-          rhomax = rcutoff
- 
-          nnrho = nint((rhomax - rhomin)/drho) + 1
- 
-! Here we loop over rho.
-          do irho = 1, nnrho
-           rho = rhomin + real(irho - 1, kind=long)*drho
- 
-           factor = 2.0d0*drho/3.0d0
-           if (mod(irho, 2) .eq. 0) factor = 4.0d0*drho/3.0d0
-           if (irho .eq. 1 .or. irho .eq. nnrho) factor = drho/3.0d0
- 
-! Compute the exchange correlation potential
-! Convert to atomic units.
-           rho = rho/abohr
-           rh = rho1c(irho)*abohr**3
-           rhp = rhop1c(irho)*abohr**4
-           rhpp = rhopp1c(irho)*abohr**5
-           call get_potxc1c (iexc, fraction, rho, rh, rhp, rhpp, exc, vxc,   &
-     &                       dnuxc, dnuxcs, dexcc)
- 
-! Convert to eV units
-           vxc = hartree*vxc
-           exc = hartree*exc
-           rho = rho*abohr
- 
-! Add to integral -- factor*rho*rho weight factor for the radial integral
-           exc1c_0 = exc1c_0 + 4.0d0*pi*rho1c(irho)*(exc - vxc)*factor*rho**2
-           do issh = 1, nssh
-            L1 = lsshxc(in1,issh)
-            do jssh = 1, nssh
-             L2 = lsshxc(in1,jssh)
-             if (L1 .eq. L2) then
-              answer(issh,jssh) = answer(issh,jssh)                          &
-     &         + psiofr(in1,issh,rho)*vxc*psiofr(in1,jssh,rho)*factor*rho**2
-             end if
-            end do
-           end do
+    ! Needed for charge corrections
+    drho = drr_rho(in1)
+    rcutoff = rcutoffa_max(in1)
+    rhomin = 0.0d0
+    rhomax = rcutoff
+    nnrho = nint((rhomax - rhomin)/drho) + 1
+
+    ! Prepare the increments
+    ndq = 3
+    npts = ndq**nssh
+    nnz = (nssh*(nssh + 1))/2
+    allocate(dq(nssh, ndq))
+    do issh = 1,nssh
+      lssh = lsshxc(in1,issh)
+      if (lssh .eq. 0) then
+        if (issh .eq. 1) then
+          dq(issh,1) = -0.10d0
+          dq(issh,2) = 0.00d0
+          dq(issh,3) = 0.10d0
+        else
+          dq(issh,1) = 0.00d0
+          dq(issh,2) = 0.05d0
+          dq(issh,3) = 0.10d0
+        end if
+      else if (lssh .eq. 1) then
+        if (issh .eq. 2) then
+          dq(issh,1) = -0.20d0
+          dq(issh,2) = 0.00d0
+          dq(issh,3) = 0.20d0
+        else
+          dq(issh,1) = 0.00d0
+          dq(issh,2) = 0.10d0
+          dq(issh,3) = 0.20d0
+        end if
+      else
+        if (issh .eq. 3) then
+          dq(issh,1) = -0.50d0
+          dq(issh,2) = 0.00d0
+          dq(issh,3) = 0.50d0
+        else
+          dq(issh,1) = 0.00d0
+          dq(issh,2) = 0.25d0
+          dq(issh,3) = 0.50d0
+        end if
+      end if
+    end do
+
+    ! We get the full grid of values first
+    allocate(iszero(nnz))
+    iszero = .false.
+    kssh = 0
+    do issh = 1, nssh
+      do jssh = issh, nssh
+        kssh = kssh + 1
+        if (lsshxc(in1, issh) .ne. lsshxc(in1, jssh)) iszero(kssh) = .true.
+      end do
+    end do
+    allocate(eexc(npts, nnz), vvxc(npts, nnz))
+    allocate(xmatt(nssh1, npts))
+    eexc = 0.0d0
+    vvxc = 0.0d0
+    do ix = 1, npts
+      ! Set charges
+      xmatt(1, ix) = 1.0d0
+      do issh = 1, nssh
+        ddq = dq(issh, 1 + mod(ix - 1, ndq**issh)/ndq**(issh - 1))
+        xnocc_in(issh) = xnocc(issh, in1) + ddq
+        xmatt(issh + 1, ix) = ddq
+      end do
+
+      ! Obtain the density and respective derivatives needed for evaluating the
+      ! exchange-correlation interactions (LDA or GGA).
+      ! We have to avoid change xnocc_in !!
+      rho1c = 0.0d0
+      rhop1c = 0.0d0
+      rhopp1c = 0.0d0
+      call rho1c_store (in1, nsh_max, nssh, 0.0d0, 1, drho, rcutoff, &
+        & xnocc_in, 1, wfmax_points, rho1c, rhop1c, rhopp1c)
+
+      ! Integrals <i|exc(i)|i> and <i.nu|mu(i)|i.nu'>
+      do irho = 1, nnrho
+        rho = rhomin + real(irho - 1, kind=long)*drho
+        factor = 0.66666666666666666667d0*drho
+        if (mod(irho, 2) .eq. 0) factor = 2.0d0*factor
+        if (irho .eq. 1 .or. irho .eq. nnrho) factor = 0.5d0*factor
+
+        ! Compute the exchange correlation potential
+        rho = rho/abohr
+        rh = rho1c(irho)*abohr**3
+        rhp = rhop1c(irho)*abohr**4
+        rhpp = rhopp1c(irho)*abohr**5
+        call get_potxc1c (iexc, fraction, rho, rh, rhp, rhpp, exc, vxc, &
+          & dnuxc, dnuxcs, dexcc)
+        vxc = hartree*vxc
+        exc = hartree*exc
+        rho = rho*abohr
+
+        kssh = 0
+        do issh = 1, nssh
+          do jssh = issh, nssh
+            kssh = kssh + 1
+            if (iszero(kssh)) cycle
+            tmp = psiofr(in1, issh, rho)*psiofr(in1, jssh, rho)*factor*rho*rho
+            eexc(ix, kssh) = eexc(ix, kssh) + tmp*exc
+            vvxc(ix, kssh) = vvxc(ix, kssh) + tmp*vxc
           end do
-          write (36,500) exc1c_0
-          do issh = 1, nssh
-           write (36,501) answer(issh,1:nssh)
-          end do
-          deallocate (xnocc_in)
-          deallocate (answer)
-         end do
         end do
- 
-        write (36,*) '  '
-        do in1 = 1, nspec
-         write (36,600) iderorb(in1), dqorb(in1)
+      end do
+    end do
+    deallocate(dq)
+
+    ! Perform the fit. The (XX**T)X may be reutilised
+    allocate(ipiv(nssh1))
+    allocate(tmpmat(nssh1, nssh1))
+    call dgemm('N', 'T', nssh1, nssh1, npts, 1.0d0, xmatt, nssh1, &
+      & xmatt, nssh1, 0.0d0, tmpmat, nssh1)
+    call dgetrf(nssh1, nssh1, tmpmat, nssh1, ipiv, info)
+    if (info .ne. 0) then
+      write (*,*) 'ERROR in onecenterxc.f90'
+    end if
+    allocate(work(1))
+    call dgetri(nssh1, tmpmat, nssh1, ipiv, work, -1, info)
+    lwork = nint(work(1))
+    deallocate(work)
+    allocate(work(lwork))
+    call dgetri(nssh1, tmpmat, nssh1, ipiv, work, lwork, info)
+    if (info .ne. 0) then
+      write (*,*) 'ERROR in onecenterxc.f90'
+    end if
+    call dgemm('N', 'N', nssh1, npts, nssh1, 1.0d0, tmpmat, nssh1, &
+      & xmatt, nssh1, 0.0d0, xmatt, nssh1)
+    deallocate(ipiv, work, tmpmat)
+
+    allocate(fite(nssh1, nnz), fitv(nssh1, nnz))
+    do kssh = 1, nnz
+      if (iszero(kssh)) then
+        fite(:, kssh) = 0.0d0
+        fitv(:, kssh) = 0.0d0
+        cycle
+      end if
+      call dgemv('N', nssh1, npts, 1.0d0, xmatt, nssh1, &
+        & eexc(:, kssh), 1, 0.0d0, fite(:, kssh), 1)
+      call dgemv('N', nssh1, npts, 1.0d0, xmatt, nssh1, &
+        & vvxc(:, kssh), 1, 0.0d0, fitv(:, kssh), 1)
+    end do
+    deallocate(eexc, vvxc, xmatt)
+
+    ! Prepare for output
+    allocate(exc1crho(nssh1,nssh,nssh), nuxc1crho(nssh1,nssh,nssh))
+    exc1crho = 0.0d0
+    nuxc1crho = 0.0d0
+    do ix = 1, nssh1
+      kssh = 0
+      do issh = 1, nssh
+        do jssh = issh, nssh
+          kssh = kssh + 1
+          if (iszero(kssh)) cycle
+          exc1crho(ix, issh, jssh) = fite(ix, kssh)
+          exc1crho(ix, jssh, issh) = fite(ix, kssh)
+          nuxc1crho(ix, issh, jssh) = fitv(ix, kssh)
+          nuxc1crho(ix, jssh, issh) = fitv(ix, kssh)
         end do
- 
-        write (*,*) '  '
-        write (*,*) ' Writing output to: coutput/xc_onecenter.dat '
-        write (*,*) '  '
- 
-        close (unit = 36)
+      end do
+    end do
+    deallocate(iszero, fite, fitv)
 
-! ***************************************************************************
-! OSLXC - charge transfer, <imu|V_xc(rho_0+rho')|inu>
-! We only use charge correction on XC-energy now (2-center Vxc charge 
-! correction must be included). The charge correction is evaluated but is not 
-! used in FIREBALL. The information is read in FIREBALL, but not used.
-! ***************************************************************************
-! Open the file to store the onecenter data.
-        open (unit = 36, file = 'coutput/xc1c_dqi.dat', status = 'unknown')
- 
-! Set up the header for the output file.
-        write (36,100)
-        write (36,*) ' All one center matrix elements '
-        write (36,*) ' created by: '
-        write (36,200) signature
- 
-        do in1 = 1, nspec
-         write (36,300) what(in1)
+    ! Write log
+    write (auxz,'(i2.2)') nzx(in1)
+    write (*,*) '  '
+    write (*,*) ' Writing output to: coutput/xc1c_dqi.'//auxz//'.dat '
+    write (*,*) ' Writing output to: coutput/exc1crho.'//auxz//'.dat '
+    write (*,*) ' Writing output to: coutput/nuxc1crho.'//auxz//'.dat '
+    write (*,*) '  '
 
-         write (auxz,'(i2.2)') nzx(in1)
-         root = 'coutput/xc1c_dqi.'//auxz//'.dat'
-         open (unit = 360, file = root , status = 'unknown')
-         write (360,100)
-         write (360,*) ' All one center matrix elements '
-         write (360,*) ' created by: '
-         write (360,200) signature
-         write (360,300) what(in1)
-         write (360,100)
-         close(360)
+    ! Write output
+    open (unit=36, file='coutput/xc1c_dqi.dat', position='append', status='old')
+    open (unit=360, file='coutput/xc1c_dqi.'//auxz//'.dat', position='append', status='old')
+    write (36,400) in1, nssh
+    write (360,400) in1, nssh
+    do issh = 1, nssh
+      write (36,501) (exc1crho(1,issh,jssh), jssh = 1, nssh)
+      write (360,501) (exc1crho(1,issh,jssh), jssh = 1, nssh)
+    end do
+    write (36,*)
+    write (360,*)
+    do issh = 1, nssh
+      write (36,501) (nuxc1crho(1,issh,jssh), jssh = 1, nssh)
+      write (360,501) (nuxc1crho(1,issh,jssh), jssh = 1, nssh)
+    end do
+    close(36)
+    close(360)
 
-        end do
-        write (36,100)
+    open (unit=37, file='coutput/exc1crho.dat', position='append', status='old')
+    open (unit=38, file='coutput/nuxc1crho.dat', position='append', status='old')
+    open (unit=370, file='coutput/exc1crho.'//auxz//'.dat', position='append', status='old')
+    open (unit=380, file='coutput/nuxc1crho.'//auxz//'.dat', position='append', status='old')
+    do kssh = 1, nssh
+      write (37,410) in1, nssh, kssh
+      write (370,410) in1, nssh, kssh
+      write (38,410) in1, nssh, kssh
+      write (380,410) in1, nssh, kssh
+      do issh = 1, nssh
+        write (37,501) (exc1crho(kssh+1,issh,jssh), jssh = 1, nssh)
+        write (370,501) (exc1crho(kssh+1,issh,jssh), jssh = 1, nssh)
+        write (38,501) (nuxc1crho(kssh+1,issh,jssh), jssh = 1, nssh)
+        write (380,501) (nuxc1crho(kssh+1,issh,jssh), jssh = 1, nssh)
+      end do
+    end do
+    close(37)
+    close(38)
+    close(370)
+    close(380)
+    deallocate(exc1crho, nuxc1crho)
+  end do ! do in1 = 1, nspec
+  deallocate (rho1c, rhop1c, rhopp1c)
 
-! set number of derivatives steps to take
-        ndq = 3 
+  ! Format Statements
+  ! ===========================================================================
+  100     format (70('='))
+  200     format (2x, a45)
+  300     format (a70)
+  400     format (2x, i3, 2x, i3)
+  410     format (2x, i3, 2x, i3, 2x, i3)
+  450     format (2x, i3, 2x, i3, 2x, i3)
+  470     format (2x, f7.3, 1x, f7.3, 1x, f7.3)
+  480     format (2x, i3, 4x, i3, 2x, i3, 2x, i3, 2x, i3, 2x, i3, 2x, i3)
+  500     format (8d20.10)
+  501     format (8d20.10)
+  600     format (1x, i3, 2x, f10.5)
 
-! Loop over the species
-        do in1 = 1, nspec
-         nssh = nsshxc(in1)
-
-         write (36,400) in1, nssh
-         write (auxz,'(i2.2)') nzx(in1)
-         root = 'coutput/xc1c_dqi.'//auxz//'.dat'
-         open (unit = 360, file = root , position='append', status = 'old')
-         write (360,400)  in1, nssh
-
-         allocate (xnocc_in (nssh))
-
-! Needed for charge corrections:
-         drho = drr_rho(in1)
-         rcutoff = rcutoffa_max(in1)
-! Set charges with respect to dqi
-         do jssh = 1, nssh
-          xnocc_in(jssh) = xnocc(jssh,in1)
-         end do
-
-! Obtain the density and respective derivatives needed for evaluating the
-! exchange-correlation interactions (LDA or GGA).
-! We have to avoid change xnocc_in !!
-         call rho1c_store (in1, nsh_max, nssh, 0.0d0, 1, drho, rcutoff,    &
-     &                       xnocc_in, 1, wfmax_points, rho1c, rhop1c, rhopp1c)
- 
-! Integrals <i|exc(i)|i> and <i.nu|mu(i)|i.nu'>
-! ***************************************************************************
-! First initialize the answer array
-         eexc = 0.0d0
-         vvxc = 0.0d0
- 
-! Fix the endpoints and initialize the increments dz and drho.
-         rhomin = 0.0d0
-         rhomax = rcutoff
-         nnrho = nint((rhomax - rhomin)/drho) + 1
-                 
-! Here we loop over rho.
-         do irho = 1, nnrho
-          rho = rhomin + real(irho - 1, kind=long)*drho
-          factor = 2.0d0*drho/3.0d0
-          if (mod(irho, 2) .eq. 0) factor = 4.0d0*drho/3.0d0
-          if (irho .eq. 1 .or. irho .eq. nnrho) factor = drho/3.0d0
- 
-! Compute the exchange correlation potential
-! Convert to atomic units.
-          rho = rho/abohr
-          rh = rho1c(irho)*abohr**3
-          rhp = rhop1c(irho)*abohr**4
-          rhpp = rhopp1c(irho)*abohr**5
-          call get_potxc1c (iexc, fraction, rho, rh, rhp, rhpp, exc, vxc,  &
-   &                        dnuxc, dnuxcs, dexcc)
- 
-! Convert to eV units
-          vxc = hartree*vxc
-          exc = hartree*exc
-          rho = rho*abohr
- 
-! Add to integral -- factor*rho*rho weight factor for the radial integral
-          do issh = 1, nssh
-           L1 = lsshxc(in1,issh)
-            do jssh = 1, nssh
-             L2 = lsshxc(in1,jssh)
-             if (L1 .eq. L2) then
-              vvxc(issh,jssh) =  vvxc(issh,jssh)                           &
-     &          + psiofr(in1,issh,rho)*vxc*psiofr(in1,jssh,rho)*factor*rho**2
-              eexc(issh,jssh) =  eexc(issh,jssh)                           &
-     &          + psiofr(in1,issh,rho)*exc*psiofr(in1,jssh,rho)*factor*rho**2
-             end if
-            end do
-          end do
-         end do ! do irho = 1, nnrho
-
-! Print exc terms
-         do issh = 1, nssh
-          write (36,501) (eexc(issh,jssh),jssh = 1, nssh)
-          write (360,501) (eexc(issh,jssh),jssh = 1, nssh)
-         end do
-
-         write (36,*)
-         write (360,*)
-! Print vxc terms
-         do issh = 1, nssh
-          write (36,501) (vvxc(issh,jssh),jssh = 1, nssh)
-          write (360,501) (vvxc(issh,jssh),jssh = 1, nssh)
-         end do
-
-         deallocate (xnocc_in)
-        
-        close(360)
-
-        end do ! do in1 = 1, nspec
-
-        write (*,*) '  '
-        write (*,*) ' Writing output to: coutput/xc1c_dqi.dat '
-        write (*,*) '  '
-        close (unit = 36)
-
-! Deallocate Arrays
-! ===========================================================================
-        deallocate (rho1c, rhop1c, rhopp1c)
- 
-! Format Statements
-! ===========================================================================
-100     format (70('='))
-200     format (2x, a45)
-300     format (a70)
-400     format (2x, i3, 2x, i3)
-450     format (2x, i3, 2x, i3, 2x, i3)
-470     format (2x, f7.3, 1x, f7.3, 1x, f7.3)
-480     format (2x, i3, 4x, i3, 2x, i3, 2x, i3, 2x, i3, 2x, i3, 2x, i3)
-500     format (8d20.10)
-501     format (8d20.10)
-600     format (1x, i3, 2x, f10.5)
- 
-        return
-      end subroutine onecenterxc
+  return
+end subroutine onecenterxc

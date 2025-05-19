@@ -841,7 +841,7 @@ allocate (xx(mesh))
 !         open (unit = 14, file = filename_ewf(issh), status =
 !         'unknown')
          if(sav(issh)) open (unit = 14, file = trim(outpath)//trim(filename_ewf(issh)), status = 'unknown')
-         if(sav(issh)) write(14,101) filename_ewf(issh)
+         if(sav(issh)) write(14,501) filename_ewf(issh)
          if(sav(issh)) write(14,102) nznuc, atomname
          if(sav(issh)) write(14,103) mesh_new
          zero = 0.0d0
@@ -926,7 +926,7 @@ allocate (xx(mesh))
 ! Format Statements
 ! ===========================================================================
 100     format (2x, 4f6.2)
-101     format (2x, 4(2x,a11))
+101     format (2x, a11)
 102     format (2x, i5, 2x, a11)
 103     format (2x, i8)
 104     format (2x, 2(2x,f7.4), 2x, f7.2)
@@ -939,6 +939,7 @@ allocate (xx(mesh))
      &              ' eigenvalue = ', f12.7)
 400     format (4d18.10)
 401     format (2x, f6.3, 2x, f12.6)
+501     format (2x, a12)
 
         return
         end

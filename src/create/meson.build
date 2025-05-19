@@ -26,7 +26,7 @@ exx_srcs = [
 
 integrals_srcs = [
   'append_string.f90',
-  'exc1crho.f90',
+  #  'exc1crho.f90',
   'gaunt.f90',
   'gauntReal.f90',
   'gleg.f90',
@@ -35,10 +35,10 @@ integrals_srcs = [
   'mk_indexDipX.f90',
   'mk_indexDipY.f90',
   'mk_indexPP.f90',
-  'nuxc1crho.f90',
-  'onecenternuxc.f90',
-  'onecenternuxcs.f90',
-  'onecentervdip.f90',
+  #  'nuxc1crho.f90',
+  #  'onecenternuxc.f90',
+  #  'onecenternuxcs.f90',
+  #  'onecentervdip.f90',
   'onecenterxc.f90',
   'radial_integral.f90',
   'rescaled_psi.f90',
@@ -46,7 +46,7 @@ integrals_srcs = [
   'threecenter_integral.f90',
   'twocenter.f90',
   'twocenter_integral.f90',
-  'xc1crho.f90',
+  #  'xc1crho.f90',
 ]
 
 interpolaters_srcs = [
