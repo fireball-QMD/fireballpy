@@ -553,38 +553,37 @@
 ! Important note. We have ONLY programmed in ldaxc.f the nu potential
 ! (nu = dmu/dn) for iexc = 3. So even if you do a different LDA, or even GGA,
 ! we will use Ceperly/Alder (iexc = 3) for the nu part.
-! CRP: commented, now onecenterxc does all the work
-!         if (inuxc1c .eq. 1) then
-!          iexc_new = iexc
-!          if (iexc .ne. 11) iexc_new = 3
-!          call onecenternuxc (nspec, nspec_max, nsh_max, wfmax_points,  &
-!     &                        iexc_new, fraction, nsshxc, rcutoffa_max,  &
-!     &                        xnocc, dqorb, iderorb, what, signature,  &
-!     &                        drr_rho)
-!! jel-dq
-!         end if
-!
-!         if (isnuxc1c .eq. 1) then
-!          if (iexc .eq. 11) then
-!           call onecenternuxcs (nspec, nspec_max, nsh_max, wfmax_points,  &
-!     &                          iexc_new, fraction, nsshxc,  &
-!     &                          rcutoffa_max, xnocc, dqorb, iderorb,     &
-!     &                          what, signature, drr_rho)
-!          else 
-!           write (*,*) '  '
-!           write (*,*) ' The spin-polarization option is currently '
-!           write (*,*) ' implemented only for the LSDA-VWN exchange '
-!           write (*,*) ' correlation model. '
-!           write (*,*) ' You have iexc = ', iexc, ' but iexc can only '
-!           write (*,*) ' equal iexc = 11 for spin-polarization! '
-!          end if
-!         end if
-! 
-!! JPL 1999 Exact exchange interactions.
-!         if (imuxc1c .eq. 1 .and. iexc .eq. 12) then
-!          call x_1c (nsh_max, nspec, nspec_max, fraction, nssh, lssh, &
-!     &               drr_rho, rcutoffa_max, what, signature)
-!         end if
+         if (inuxc1c .eq. 1) then
+          iexc_new = iexc
+          if (iexc .ne. 11) iexc_new = 3
+          call onecenternuxc (nspec, nspec_max, nsh_max, wfmax_points,  &
+     &                        iexc_new, fraction, nsshxc, rcutoffa_max,  &
+     &                        xnocc, dqorb, iderorb, what, signature,  &
+     &                        drr_rho)
+! jel-dq
+         end if
+
+         if (isnuxc1c .eq. 1) then
+          if (iexc .eq. 11) then
+           call onecenternuxcs (nspec, nspec_max, nsh_max, wfmax_points,  &
+     &                          iexc_new, fraction, nsshxc,  &
+     &                          rcutoffa_max, xnocc, dqorb, iderorb,     &
+     &                          what, signature, drr_rho)
+          else 
+           write (*,*) '  '
+           write (*,*) ' The spin-polarization option is currently '
+           write (*,*) ' implemented only for the LSDA-VWN exchange '
+           write (*,*) ' correlation model. '
+           write (*,*) ' You have iexc = ', iexc, ' but iexc can only '
+           write (*,*) ' equal iexc = 11 for spin-polarization! '
+          end if
+         end if
+ 
+! JPL 1999 Exact exchange interactions.
+         if (imuxc1c .eq. 1 .and. iexc .eq. 12) then
+          call x_1c (nsh_max, nspec, nspec_max, fraction, nssh, lssh, &
+     &               drr_rho, rcutoffa_max, what, signature)
+         end if
         end if ! end master
  
 ! ======================================================================
