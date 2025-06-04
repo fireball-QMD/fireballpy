@@ -12,6 +12,7 @@ from fireballpy._correction import Correction
 from fireballpy.fdata import FDataFiles
 from fireballpy.atoms import AtomSystem
 from fireballpy.kpoints import KPoints
+from fireballpy.orbitals import Orbitals
 
 from ase import Atoms
 
@@ -274,6 +275,9 @@ class BaseFireball:
         self.scf_computed = False
         self.forces_computed = False
 
+    def sph_density(self):
+        self.orbitals = Orbitals(self.atomsystem, self.fdatafiles)
+        return self.orbitals.sph_density(self.shell_charges)
 
 def fbobj_from_obj(fbobj: BaseFireball | None, atoms: Atoms | None) -> BaseFireball:
     nonecount = int(fbobj is not None) + int(atoms is not None)
@@ -289,4 +293,3 @@ def fbobj_from_obj(fbobj: BaseFireball | None, atoms: Atoms | None) -> BaseFireb
             raise ValueError("ASE calculator for parameter ``atoms`` must be ``Fireball``.")
         return atoms.calc
     raise RuntimeError("Fireball-providing inputs could not be identified.")
-

@@ -9,9 +9,13 @@ if sys.version_info >= (3, 11):
 else:
     import tomli as tomllib
 
+import numpy as np
+from scipy.interpolate import CubicSpline
+from ase.units import Bohr
+
 from fireballpy import __version__ as __fb_version__
 from fireballpy._errors import type_check
-from fireballpy.utils import get_data_from_url
+from fireballpy.utils import get_data_from_url, read_wf, read_wf_info, ANGULAR_MOMENTUM_REV
 from fireballpy.atoms import AtomSystem
 from fireballpy._fireball import loadfdata_from_path
 
@@ -93,6 +97,8 @@ class FDataFiles:
 
     def __init__(self, *, fdata: str, atomsystem: AtomSystem | None = None,
                  fdata_path: str | None = None) -> None:
+        self.isloaded = False
+        self.wf_loaded = False
         type_check(fdata, str, 'fdata')
         if fdata != 'custom':
             self.name = fdata
@@ -155,10 +161,41 @@ class FDataFiles:
         assert self.path is not None
         load_tuple = (self.path, self.species_present if self.lazy else self.species)
         if load_tuple != _loaded_fdata:
+            self.wf_loaded = False
             self._prep_infodat()
             loadfdata_from_path(self.path)
             _loaded_fdata = deepcopy(load_tuple)
             os.remove(self.pyinfofile)
+        self.isloaded = True
+
+    def load_wf(self) -> None:
+        if not self.isloaded:
+            self.load_fdata()
+        if self.wf_loaded:
+            return
+        assert self.path is not None
+        self._prep_infodat()
+        self.wfs = {}
+        with open(self.pyinfofile, 'r') as fp:
+            info = fp.read().splitlines()
+        n = int(info[1].split('-')[0].strip())
+        info = info[2:]  # Remove header
+        for _ in range(n):
+            z = int(info[3].split('-')[0].strip())
+            self.wfs[z] = {}
+            pathline = info[12]
+            paths = list(map(lambda x: x.strip(), pathline.split()))
+            for path in paths:
+                x, y = read_wf(os.path.join(self.path, 'basis', path))
+                _, l, _ = read_wf_info(os.path.join(self.path, 'basis', path))
+                cs = CubicSpline(x/Bohr, y, extrapolate=False)
+                orbname = ANGULAR_MOMENTUM_REV[l]
+                if 'e' in path.split('.')[1]:
+                    orbname += '*'
+                self.wfs[z][orbname] = cs
+            info = info[16:]
+        self.wf_loaded = True
+        os.remove(self.pyinfofile)
 
     def get_charges_method(self) -> str:
         """Get the optimal charge method for autoconsistency.

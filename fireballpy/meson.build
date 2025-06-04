@@ -46,6 +46,7 @@ py.install_sources([
     'atoms.py',
     'kpoints.py',
     'fireball.py',
+    'orbitals.py',
     'ase.py',
     'fdata.toml',
   ],
