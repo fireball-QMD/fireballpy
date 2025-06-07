@@ -66,7 +66,7 @@ add_global_arguments(fflags, language: 'fortran')
 add_global_arguments(cflags, language: 'c')
 
 # Find mpifort
-mpi_dep = dependency('mpi', language: 'fortran', required: false)
+#mpi_dep = dependency('mpi', language: 'fortran', required: false)
 
 # Link LAPACK and BLAS (strat from scipy)
 blas_name = get_option('blas')

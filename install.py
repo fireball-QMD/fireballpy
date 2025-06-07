@@ -65,12 +65,13 @@ def main():
     args = parser.parse_args()
 
     # Check mpi
-    try:
-        p = subprocess.Popen(['mpirun', '--version'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        _ = p.communicate()
-        ismpi = True
-    except FileNotFoundError:
-        ismpi = 0
+    ismpi = 0
+    #try:
+    #    p = subprocess.Popen(['mpirun', '--version'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    #    _ = p.communicate()
+    #    ismpi = True
+    #except FileNotFoundError:
+    #    ismpi = 0
 
     env = os.environ.copy()
     meson = [sys.executable, '-m', 'mesonbuild.mesonmain']
