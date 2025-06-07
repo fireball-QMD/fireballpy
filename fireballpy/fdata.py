@@ -188,7 +188,7 @@ class FDataFiles:
             for path in paths:
                 x, y = read_wf(os.path.join(self.path, 'basis', path))
                 _, l, _ = read_wf_info(os.path.join(self.path, 'basis', path))
-                cs = CubicSpline(x/Bohr, y, extrapolate=False)
+                cs = CubicSpline(x*Bohr, y, extrapolate=False)
                 orbname = ANGULAR_MOMENTUM_REV[l]
                 if 'e' in path.split('.')[1]:
                     orbname += '*'

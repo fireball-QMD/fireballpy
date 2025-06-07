@@ -3,6 +3,7 @@ from numpy.typing import NDArray
 from scipy.interpolate import PPoly
 from scipy.integrate import tplquad
 from ase.data import chemical_symbols
+from ase.units import Bohr, Hartree
 
 from fireballpy.atoms import AtomSystem
 from fireballpy.fdata import FDataFiles
@@ -15,47 +16,46 @@ Y00SQRT5 = Y00*np.sqrt(5.0)
 
 def lda_exchange_energy(n):
     def ex(x, y, z):
-        return -0.7385587664*np.cbrt(n(x,y,z))
+        return -0.7385587664*np.cbrt(n(x,y,z))*Bohr*Hartree
     return ex
 
 def lda_exchange_potential(n):
     def fx(x, y, z):
-        return -0.9847450219*np.cbrt(n(x,y,z))
+        return -0.9847450219*np.cbrt(n(x,y,z))*Bohr*Hartree
     return fx
 
 def lda_exchange_correlation_energy(n):
     def exc(x, y, z):
-        ncbrt = np.cbrt(n(x, y, z))
+        ncbrt = np.cbrt(n(x, y, z))*Bohr
         if ncbrt < 1e-16:
             return 0.0
         rs = 0.62035049/ncbrt
         if rs > 1.0:
             sqrs = np.sqrt(rs)
             den = 1.0 + 1.0529*sqrs + 0.3334*rs
-            return -0.4582/rs - 0.1423/den
+            return (-0.4582/rs - 0.1423/den)*Hartree
         lrs = np.log(rs)
-        return -0.4582/rs - 0.0480 + 0.0311*lrs - 0.0116*rs + 0.002*rs*lrs
+        return (-0.4582/rs - 0.0480 + 0.0311*lrs - 0.0116*rs + 0.002*rs*lrs)*Hartree
     return exc
 
 def lda_exchange_correlation_potential(n):
     def fxc(x, y, z):
-        ncbrt = np.cbrt(n(x, y, z))
+        ncbrt = np.cbrt(n(x, y, z))*Bohr
         if ncbrt < 1e-16:
             return 0.0
         rs = 0.62035049/ncbrt
         if rs > 1.0:
             sqrs = np.sqrt(rs)
             den = 1.0 + 1.0529*sqrs + 0.3334*rs
-            return -0.4582/rs - 0.1423/den - rs*(0.15273333/rs**2 + (0.02497128/sqrs + 0.01581427)/den**2)
+            return (-0.4582/rs - 0.1423/den - rs*(0.15273333/rs**2 + (0.02497128/sqrs + 0.01581427)/den**2))*Hartree
         lrs = np.log(rs)
-        return -0.4582/rs - 0.0480 + 0.0311*lrs - 0.0116*rs + 0.002*rs*lrs \
-            - rs*(0.15273333/rs**2 + 0.01036667/rs - 0.003866667 + 0.00066667*(1.0 + lrs))
+        return (-0.4582/rs - 0.0480 + 0.0311*lrs - 0.0116*rs + 0.002*rs*lrs \
+            - rs*(0.15273333/rs**2 + 0.01036667/rs - 0.003866667 + 0.00066667*(1.0 + lrs)))*Hartree
     return fxc
 
 
 def sphham(l: int, m: int, x: np.float64, y: np.float64, z: np.float64) -> np.float64:
     """Factor r^(-l) not included"""
-
     if l == 0:
       return Y00
     if l == 1:
@@ -86,6 +86,8 @@ class Orbital:
         fr = np.float64(self.f(dr))
         if self.m is None or self.l == 0:
             return Y00*fr
+        if dr < 1e-10:
+            return np.float64(0.0)
         fy = sphham(self.l, self.m, d[0], d[1], d[2])
         return fr*fy/dr**self.l
 
@@ -147,6 +149,16 @@ class Orbitals:
             return res
         return n
 
+    def sph_density_atom(self, iatom:int, shell_charges: NDArray[np.float64]):
+        def ni(x, y, z):
+            res = 0.0
+            for j, q in enumerate(shell_charges[iatom]):
+                if np.abs(q) < 1e-8:
+                    continue
+                res += q*self.shells[self.shells_map[iatom][j]](x, y, z)**2
+            return res
+        return ni
+
     def munu_integral(self, f, mu: int, nu: int):
         phimu = self.orbitals[mu]
         phinu = self.orbitals[nu]
@@ -157,18 +169,18 @@ class Orbitals:
             xmax = phimu.rn[0] + phimu.rcutoff
             ymax = phimu.rn[1] + phimu.rcutoff
             zmax = phimu.rn[2] + phimu.rcutoff
-            return tplquad(lambda z, x, y: phimu(x, y, z)*f(x, y, z)*phinu(x, y, z),
-                           xmin, xmax, ymin, ymax, zmin, zmax)[0]
+            return tplquad(lambda z, y, x: phimu(x, y, z)*f(x, y, z)*phinu(x, y, z),
+                           xmin, xmax, ymin, ymax, zmin, zmax, epsabs=1e-2, epsrel=1e-2)
         center = 0.5*(phimu.rn + phinu.rn)
-        disth = 0.5*np.sqrt(np.sum((phimu.rn - phinu.rn)**2))
-        cutsum = phimu.rcutoff + phinu.rcutoff
-        if disth > cutsum:
+        disth = 0.5*np.abs(phimu.rn - phinu.rn)
+        cutmin = np.minimum(phimu.rcutoff, phinu.rcutoff)
+        if 2.0*np.min(disth) > cutmin:
             return np.float64(0.0), np.float64(0.0)
-        xmin = center - disth - cutsum
-        ymin = center - disth - cutsum
-        zmin = center - disth - cutsum
-        xmax = center + disth + cutsum
-        ymax = center + disth + cutsum
-        zmax = center + disth + cutsum
-        return tplquad(lambda z, x, y: phimu(x, y, z)*f(x, y, z)*phinu(x, y, z),
-                       xmin, xmax, ymin, ymax, zmin, zmax)[0]
+        xmin = center[0] - disth[0] - cutmin
+        ymin = center[1] - disth[1] - cutmin
+        zmin = center[2] - disth[2] - cutmin
+        xmax = center[0] + disth[0] + cutmin
+        ymax = center[1] + disth[1] + cutmin
+        zmax = center[2] + disth[2] + cutmin
+        return tplquad(lambda z, y, x: phimu(x, y, z)*f(x, y, z)*phinu(x, y, z),
+                       xmin, xmax, ymin, ymax, zmin, zmax, epsabs=1e-2, epsrel=1e-2)
