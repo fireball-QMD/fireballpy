@@ -27,7 +27,7 @@ subroutine anderson ( x_try, x_old, nmsh )
 
     Xv(:,1) = x_old(:)
     Fv(:,1) = x_try(:) - x_old(:)
-    sigma = dot_product(Fv(:,1), Fv(:,1))
+    sigma = dot_product(Fv(:,1), Fv(:,1))/nmsh
     if(sigma .lt. sigmatol) then
       scf_achieved = .true.
       deallocate(Fv, Xv, delF, delX, r2_sav, x_best, wi)
@@ -42,7 +42,7 @@ subroutine anderson ( x_try, x_old, nmsh )
 
   Xv(:,Kscf) = x_old(:) ! last element is x_old, rest are |U>
   Fv(:,Kscf) = x_try(:) - x_old(:)
-  sigma = dot_product(Fv(:,Kscf), Fv(:,Kscf))
+  sigma = dot_product(Fv(:,Kscf), Fv(:,Kscf))/nmsh
   if(sigma .lt. sigmatol) then
     scf_achieved = .true.
     deallocate(Fv, Xv, delF, delX, r2_sav, wi, x_best)
