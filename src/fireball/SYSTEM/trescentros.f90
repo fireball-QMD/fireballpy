@@ -1,5 +1,5 @@
 subroutine trescentros (interaction, isorp, in1, in2, indna, x, y, cost, eps, bcnax)
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   use M_system, only: numorb_max
   use M_fdata, only: hx_bcna, hy_bcna, hx_den3, hy_den3, numx3c_bcna, numy3c_bcna, &
     & numx3c_den3, numy3c_den3, x3cmax_bcna, y3cmax_bcna, x3cmax_den3, y3cmax_den3, &
@@ -7,33 +7,33 @@ subroutine trescentros (interaction, isorp, in1, in2, indna, x, y, cost, eps, bc
     & den3_01, den3_02, den3_03, den3_04, den3_05, &
     & ntheta, ME3c_max, icon3c, index_max3c, mvalue
   implicit none
-  integer(c_long), intent (in) :: in1
-  integer(c_long), intent (in) :: in2
-  integer(c_long), intent (in) :: indna
-  integer(c_long), intent (in) :: interaction
-  integer(c_long), intent (in) :: isorp
-  real(c_double), intent (in) :: cost
-  real(c_double), intent (in) :: x
-  real(c_double), intent (in) :: y
-  real(c_double), intent (in), dimension (3, 3) :: eps
-  real(c_double), intent (out), dimension (numorb_max, numorb_max) :: bcnax
-  integer(c_long) iME
-  integer(c_long) index
-  integer(c_long) kforce
-  integer(c_long) nl
-  real(c_double) argument
-  real(c_double) cost2
-  real(c_double) dQ_Ldx
-  real(c_double) dQ_Ldy
-  real(c_double) Q_L
-  real(c_double) sint
-  integer(c_long) nx, ny
-  real(c_double) xxmax, yymax
-  real(c_double) hx, hy
-  real(c_double), dimension (0:ntheta - 1, ME3c_max) :: bcnalist
-  real(c_double), dimension (numorb_max, numorb_max) :: bcnam
-  real(c_double), dimension (ME3c_max) :: hlist
-  real(c_double), dimension (0:ntheta - 1) :: p
+  integer, intent (in) :: in1
+  integer, intent (in) :: in2
+  integer, intent (in) :: indna
+  integer, intent (in) :: interaction
+  integer, intent (in) :: isorp
+  real(double), intent (in) :: cost
+  real(double), intent (in) :: x
+  real(double), intent (in) :: y
+  real(double), intent (in), dimension (3, 3) :: eps
+  real(double), intent (out), dimension (numorb_max, numorb_max) :: bcnax
+  integer iME
+  integer index
+  integer kforce
+  integer nl
+  real(double) argument
+  real(double) cost2
+  real(double) dQ_Ldx
+  real(double) dQ_Ldy
+  real(double) Q_L
+  real(double) sint
+  integer nx, ny
+  real(double) xxmax, yymax
+  real(double) hx, hy
+  real(double), dimension (0:ntheta - 1, ME3c_max) :: bcnalist
+  real(double), dimension (numorb_max, numorb_max) :: bcnam
+  real(double), dimension (ME3c_max) :: hlist
+  real(double), dimension (0:ntheta - 1) :: p
   kforce = 0
   index = icon3c(in1,in2,indna)
   if (interaction .eq. 1) then

@@ -1,41 +1,41 @@
 subroutine Dassemble_3c ()
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   use M_constants, only: eq2
   use M_system, only: natoms, ratom, imass, neigh_comb, neigh_comj, neigh_comm, neigh_comn, numorb_max, rho, xl, f3naa, f3nab, f3nac
   use M_fdata, only: num_orb
   implicit none
-  integer(c_long) iatom
-  integer(c_long) ibeta
-  integer(c_long) imu
-  integer(c_long) in1
-  integer(c_long) in2
-  integer(c_long) indna
-  integer(c_long) ineigh
-  integer(c_long) interaction
-  integer(c_long) inu
-  integer(c_long) isorp
-  integer(c_long) ix
-  integer(c_long) jatom
-  integer(c_long) jbeta
-  integer(c_long) mneigh
-  integer(c_long) ialp
-  real(c_double) cost
-  real(c_double) x
-  real(c_double) y
-  real(c_double), dimension (numorb_max, numorb_max) :: bcnax
-  real(c_double), dimension (3, 3, 3) :: depsA
-  real(c_double), dimension (3, 3, 3) :: depsB
-  real(c_double), dimension (3, 3) :: eps
-  real(c_double), dimension (3, numorb_max, numorb_max) :: f3naXa
-  real(c_double), dimension (3, numorb_max, numorb_max) :: f3naXb
-  real(c_double), dimension (3, numorb_max, numorb_max) :: f3naXc
-  real(c_double), dimension (3) :: r1
-  real(c_double), dimension (3) :: r2
-  real(c_double), dimension (3) :: r21
-  real(c_double), dimension (3) :: rhat
-  real(c_double), dimension (3) :: rna
-  real(c_double), dimension (3) :: rnabc
-  real(c_double), dimension (3) :: sighat
+  integer iatom
+  integer ibeta
+  integer imu
+  integer in1
+  integer in2
+  integer indna
+  integer ineigh
+  integer interaction
+  integer inu
+  integer isorp
+  integer ix
+  integer jatom
+  integer jbeta
+  integer mneigh
+  integer ialp
+  real(double) cost
+  real(double) x
+  real(double) y
+  real(double), dimension (numorb_max, numorb_max) :: bcnax
+  real(double), dimension (3, 3, 3) :: depsA
+  real(double), dimension (3, 3, 3) :: depsB
+  real(double), dimension (3, 3) :: eps
+  real(double), dimension (3, numorb_max, numorb_max) :: f3naXa
+  real(double), dimension (3, numorb_max, numorb_max) :: f3naXb
+  real(double), dimension (3, numorb_max, numorb_max) :: f3naXc
+  real(double), dimension (3) :: r1
+  real(double), dimension (3) :: r2
+  real(double), dimension (3) :: r21
+  real(double), dimension (3) :: rhat
+  real(double), dimension (3) :: rna
+  real(double), dimension (3) :: rnabc
+  real(double), dimension (3) :: sighat
   f3naa = 0.0d0
   f3nab = 0.0d0
   f3nac = 0.0d0

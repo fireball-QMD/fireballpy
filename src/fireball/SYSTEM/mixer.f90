@@ -1,17 +1,17 @@
 subroutine mixer ()
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   use M_system, only: sigma, sigmaold, scf_achieved, natoms, imass, Kscf, ztot, nssh_tot, Qin, Qinmixer, Qout, Qoutmixer
   use M_fdata, only: nssh
   implicit none
-  integer(c_long) iatom
-  integer(c_long) in1
-  integer(c_long) issh
-  integer(c_long) imix
-  real(c_double) dqrms
-  real(c_double) dqmax
-  real(c_double) renorm
-  real(c_double) zcheck
-  real(c_double) zouttot
+  integer iatom
+  integer in1
+  integer issh
+  integer imix
+  real(double) dqrms
+  real(double) dqmax
+  real(double) renorm
+  real(double) zcheck
+  real(double) zouttot
   dqrms = 0
   dqmax = -99
   Qinmixer=0.0d0

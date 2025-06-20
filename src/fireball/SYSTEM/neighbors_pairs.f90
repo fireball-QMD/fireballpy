@@ -1,13 +1,13 @@
 subroutine neighbors_pairs ()
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   use M_system, only: icluster, natoms, neigh_j, neighn, neigh_back, neigh_pair_a1, neigh_pair_a2, neigh_pair_n1, neigh_pair_n2, &
     & tot_pairs
   implicit none
-  integer(c_long) :: num_pairs
-  integer(c_long) :: iatom
-  integer(c_long) :: ineigh
-  integer(c_long) :: jatom
-  integer(c_long) :: jneigh
+  integer :: num_pairs
+  integer :: iatom
+  integer :: ineigh
+  integer :: jatom
+  integer :: jneigh
   num_pairs = 0
   if (icluster .eq. 1) then
     do iatom = 1,natoms

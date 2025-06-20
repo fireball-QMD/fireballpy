@@ -50,7 +50,7 @@ def get_hamiltonian(*, atoms: Atoms | None = None,
     fbobj.run_scf(fix_charges=True)
 
     # Get from module
-    orbitals = np.ascontiguousarray(fbobj.natoms * [0], dtype=np.int64)
+    orbitals = np.ascontiguousarray(fbobj.natoms * [0], dtype=np.int32)
     smatt = np.zeros((fbobj.norbitals, fbobj.norbitals), dtype=np.float64, order='C')
     hmatt = np.zeros((fbobj.norbitals, fbobj.norbitals), dtype=np.float64, order='C')
     get_orbitals(orbitals)

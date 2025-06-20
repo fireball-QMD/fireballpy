@@ -1,43 +1,43 @@
 subroutine assemble_3c ()
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   use M_constants, only: eq2
   use M_system, only: natoms, ratom, imass, neigh_comb, neigh_comj, neigh_comm, neigh_comn, neigh_back, numorb_max, vna, xl
   use M_fdata, only: num_orb
   implicit none
 
-  integer(c_long) ialp
-  integer(c_long) iatom
-  integer(c_long) ibeta
-  integer(c_long) imu
-  integer(c_long) in1
-  integer(c_long) in2
-  integer(c_long) indna
-  integer(c_long) ineigh
-  integer(c_long) interaction
-  integer(c_long) inu
-  integer(c_long) isorp
-  integer(c_long) jatom
-  integer(c_long) jbeta
-  integer(c_long) mneigh
-  integer(c_long) jneigh       
+  integer ialp
+  integer iatom
+  integer ibeta
+  integer imu
+  integer in1
+  integer in2
+  integer indna
+  integer ineigh
+  integer interaction
+  integer inu
+  integer isorp
+  integer jatom
+  integer jbeta
+  integer mneigh
+  integer jneigh       
 
-  real(c_double) cost
-  real(c_double) distance_13
-  real(c_double) distance_23
-  real(c_double) x
-  real(c_double) y
+  real(double) cost
+  real(double) distance_13
+  real(double) distance_23
+  real(double) x
+  real(double) y
 
-  real(c_double), dimension (numorb_max, numorb_max) :: bcnax
-  real(c_double), dimension (3, 3) :: eps
-  real(c_double), dimension (3) :: r1
-  real(c_double), dimension (3) :: r2
-  real(c_double), dimension (3) :: r21
-  real(c_double), dimension (3) :: r13
-  real(c_double), dimension (3) :: r23
-  real(c_double), dimension (3) :: rhat
-  real(c_double), dimension (3) :: rna
-  real(c_double), dimension (3) :: rnabc
-  real(c_double), dimension (3) :: sighat
+  real(double), dimension (numorb_max, numorb_max) :: bcnax
+  real(double), dimension (3, 3) :: eps
+  real(double), dimension (3) :: r1
+  real(double), dimension (3) :: r2
+  real(double), dimension (3) :: r21
+  real(double), dimension (3) :: r13
+  real(double), dimension (3) :: r23
+  real(double), dimension (3) :: rhat
+  real(double), dimension (3) :: rna
+  real(double), dimension (3) :: rnabc
+  real(double), dimension (3) :: sighat
 
   do ialp = 1, natoms
     rna(:) = ratom(:,ialp)

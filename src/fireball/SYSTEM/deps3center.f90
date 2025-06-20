@@ -1,19 +1,19 @@
 subroutine deps3center (r1, r2, r21, distance12, ratm, rnabc, eps3, dera3, der13)
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   use M_constants, only: xlevi, delk
   implicit none
-  real(c_double), intent(in) :: distance12 ! distance between atom 1 and atom 2
-  real(c_double), dimension(3, 3), intent(in) :: eps3 ! 3c epsilon matrix z = r2 - r1, x = dhat
-  real(c_double), dimension(3), intent(in) :: r1     ! position of atom 1
-  real(c_double), dimension(3), intent(in) :: r2     ! position of atom 2
-  real(c_double), dimension(3), intent(in) :: r21    ! vector between atom 1 and atom 2
-  real(c_double), dimension(3), intent(in) :: ratm   ! position of the potential
-  real(c_double), dimension(3), intent(in) :: rnabc  ! vector from bond charge to potential
-  real(c_double), dimension(3, 3, 3), intent(out) :: dera3 ! deps/dratm in the 3-center system
-  real(c_double), dimension(3, 3, 3), intent(out) :: der13 ! deps/dr1 in the 3-center system
-  integer(c_long) :: imu, ix
-  real(c_double) :: crossmag, r1dotr2, r1dotratm, r2dotratm, r2mag2, r1mag2, ratmmag2, sum
-  real(c_double), dimension(3) :: crossa
+  real(double), intent(in) :: distance12 ! distance between atom 1 and atom 2
+  real(double), dimension(3, 3), intent(in) :: eps3 ! 3c epsilon matrix z = r2 - r1, x = dhat
+  real(double), dimension(3), intent(in) :: r1     ! position of atom 1
+  real(double), dimension(3), intent(in) :: r2     ! position of atom 2
+  real(double), dimension(3), intent(in) :: r21    ! vector between atom 1 and atom 2
+  real(double), dimension(3), intent(in) :: ratm   ! position of the potential
+  real(double), dimension(3), intent(in) :: rnabc  ! vector from bond charge to potential
+  real(double), dimension(3, 3, 3), intent(out) :: dera3 ! deps/dratm in the 3-center system
+  real(double), dimension(3, 3, 3), intent(out) :: der13 ! deps/dr1 in the 3-center system
+  integer :: imu, ix
+  real(double) :: crossmag, r1dotr2, r1dotratm, r2dotratm, r2mag2, r1mag2, ratmmag2, sum
+  real(double), dimension(3) :: crossa
   
   dera3 = 0.0d0
   der13 = 0.0d0

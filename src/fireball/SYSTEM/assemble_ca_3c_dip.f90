@@ -1,64 +1,64 @@
 subroutine assemble_ca_3c_dip ()
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   use M_constants, only: eq2
   use M_system, only: smt_elect, natoms, ratom, imass, neigh_max, ewaldsr, neigh_b, neigh_j, neighn, neigh_comb, neigh_comj, &
     & neigh_comm, neigh_comn, neigh_back, neigh_self, numorb_max, Qin, s_mat, vca, dipc, xl
   use M_fdata, only: nssh, Qneutral,rcutoff, num_orb
   implicit none
-  integer(c_long) ialp
-  integer(c_long) iatom
-  integer(c_long) ibeta
-  integer(c_long) imu
-  integer(c_long) in1
-  integer(c_long) in2
-  integer(c_long) indna
-  integer(c_long) ineigh
-  integer(c_long) interaction
-  integer(c_long) inu
-  integer(c_long) isorp
-  integer(c_long) issh
-  integer(c_long) jatom
-  integer(c_long) jneigh
-  integer(c_long) jbeta
-  integer(c_long) matom
-  integer(c_long) mbeta
-  integer(c_long) mneigh
-  real(c_double) cost
-  real(c_double) distance_13
-  real(c_double) distance_23
-  real(c_double) dq3
-  real(c_double) dstn_temp
-  real(c_double) dterm
-  real(c_double) dxn
-  real(c_double) rcutoff_ialp
-  real(c_double) rend1
-  real(c_double) rend2
-  real(c_double) sterm
-  real(c_double) stn_temp1
-  real(c_double) stn_temp2
-  real(c_double) x
-  real(c_double) y
-  real(c_double) rcutoff_i
-  real(c_double) rcutoff_j
-  real(c_double), dimension (numorb_max, numorb_max) :: bcca
-  real(c_double), dimension (numorb_max, numorb_max) :: bccax
-  real(c_double), dimension (numorb_max, numorb_max) :: emnpl
-  real(c_double), dimension (numorb_max, numorb_max) :: emnpl_noq
-  real(c_double), dimension (3, 3, 3) :: deps
-  real(c_double), dimension (3, 3) :: eps
-  real(c_double), dimension (3) :: r1
-  real(c_double), dimension (3) :: r2
-  real(c_double), dimension (3) :: r21
-  real(c_double), dimension (3) :: rhat
-  real(c_double), dimension (3) :: rna
-  real(c_double), dimension (3) :: rnabc
-  real(c_double), dimension (3) :: sighat
-  real(c_double) stn1
-  real(c_double) stn2
-  real(c_double), dimension (:,:), allocatable :: smG
-  real(c_double), dimension (:,:,:), allocatable :: spmG
-  real(c_double), dimension (:, :, :, :), allocatable :: smatG
-  real(c_double), dimension (:, :, :, :), allocatable :: spmatG
+  integer ialp
+  integer iatom
+  integer ibeta
+  integer imu
+  integer in1
+  integer in2
+  integer indna
+  integer ineigh
+  integer interaction
+  integer inu
+  integer isorp
+  integer issh
+  integer jatom
+  integer jneigh
+  integer jbeta
+  integer matom
+  integer mbeta
+  integer mneigh
+  real(double) cost
+  real(double) distance_13
+  real(double) distance_23
+  real(double) dq3
+  real(double) dstn_temp
+  real(double) dterm
+  real(double) dxn
+  real(double) rcutoff_ialp
+  real(double) rend1
+  real(double) rend2
+  real(double) sterm
+  real(double) stn_temp1
+  real(double) stn_temp2
+  real(double) x
+  real(double) y
+  real(double) rcutoff_i
+  real(double) rcutoff_j
+  real(double), dimension (numorb_max, numorb_max) :: bcca
+  real(double), dimension (numorb_max, numorb_max) :: bccax
+  real(double), dimension (numorb_max, numorb_max) :: emnpl
+  real(double), dimension (numorb_max, numorb_max) :: emnpl_noq
+  real(double), dimension (3, 3, 3) :: deps
+  real(double), dimension (3, 3) :: eps
+  real(double), dimension (3) :: r1
+  real(double), dimension (3) :: r2
+  real(double), dimension (3) :: r21
+  real(double), dimension (3) :: rhat
+  real(double), dimension (3) :: rna
+  real(double), dimension (3) :: rnabc
+  real(double), dimension (3) :: sighat
+  real(double) stn1
+  real(double) stn2
+  real(double), dimension (:,:), allocatable :: smG
+  real(double), dimension (:,:,:), allocatable :: spmG
+  real(double), dimension (:, :, :, :), allocatable :: smatG
+  real(double), dimension (:, :, :, :), allocatable :: spmatG
   allocate (smG (numorb_max, numorb_max))
   allocate (spmG (3, numorb_max, numorb_max))
   allocate (smatG (numorb_max, numorb_max, neigh_max, natoms))

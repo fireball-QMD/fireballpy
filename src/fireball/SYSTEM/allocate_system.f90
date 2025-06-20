@@ -1,5 +1,5 @@
 subroutine allocate_system ()
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   use M_constants, only: xlevi, delk
   use M_system, only: icluster, natoms, ratom, degelec, imass, mbeta_max, neigh_max, getmssh, getlssh, getissh, vxc_1c, &
     & Q0_TOT, nelectron, eigen_k, norbitals, nkpoints, getiatom, ioccupy_k, ioccupy, foccupy, cape, rhoPP, ztot, nssh_tot, ewald, &
@@ -15,21 +15,21 @@ subroutine allocate_system ()
   use M_fdata, only: nssh, rcutoff, rc_PP, nspecies, num_orb, Qneutral, lssh, nsshPP, lsshPP,  nsh_max, numXmax, numYmax
 !  use M_fdata, only: numy3c_xc3c, ideriv_max
   implicit none
-  integer(c_long):: iatom
-  integer(c_long):: jatom
-  integer(c_long):: iorb
-  integer(c_long):: mbeta
-  integer(c_long):: num_neigh
-  integer(c_long):: in1
-  integer(c_long):: imu
-  integer(c_long):: issh
-  integer(c_long):: in2
-  integer(c_long):: numorb
-  integer(c_long):: numorbPP_max
-  real(c_double) :: rcutoff_i
-  real(c_double) :: rcutoff_j
-  real(c_double) :: distance2
-  real(c_double) :: range2
+  integer:: iatom
+  integer:: jatom
+  integer:: iorb
+  integer:: mbeta
+  integer:: num_neigh
+  integer:: in1
+  integer:: imu
+  integer:: issh
+  integer:: in2
+  integer:: numorb
+  integer:: numorbPP_max
+  real(double) :: rcutoff_i
+  real(double) :: rcutoff_j
+  real(double) :: distance2
+  real(double) :: range2
 
   !Shift the coordinates none of the atoms fall on (0.0, 0.0, 0.0)
   !shifter(1) = 4.0d0*atan(1.0d0)    ! pi
@@ -116,22 +116,22 @@ subroutine allocate_system ()
 
 
   ! By default the input charges are initialized to the neutral atom charges
-  Qin = 0.0d0
-  do iatom = 1, natoms
-    in1 = imass(iatom)
-    do issh = 1, nssh(in1)
-      Qin(issh,iatom) = Qneutral(issh,in1)
-    end do
-  end do
+!  Qin = 0.0d0
+!  do iatom = 1, natoms
+!    in1 = imass(iatom)
+!    do issh = 1, nssh(in1)
+!      Qin(issh,iatom) = Qneutral(issh,in1)
+!    end do
+!  end do
 
 
-  ztot = real(qstate, c_double)
+  ztot = real(qstate, double)
   nelectron = 0.0d0
   do iatom = 1, natoms
    in1 = imass(iatom)
    do issh = 1, nssh(in1)
     ztot = ztot + Qneutral(issh,in1)
-    nelectron(iatom) = nelectron(iatom) + nint(Qneutral(issh,in1), c_long)
+    nelectron(iatom) = nelectron(iatom) + nint(Qneutral(issh,in1))
    end do
   end do
 

@@ -34,17 +34,16 @@ class AtomSystem:
         Number of atoms.
     species : set[str]
         Set with the element names entering the computation.
-    numbers : NDArray[np.int64]
+    numbers : NDArray[np.int32]
         Array with the atomic numbers of each atom.
     positions : NDArray[np.float64]
         A natoms x 3 array with the positions of each atom in angstroms.
-    pbc : NDArray[bool]
-        Array telling whether there are periodic boundary conditions
-        in the x, y or z directions.
-    cell : NDArray[np.float64]
-        Matrix where each row corresponds to each of the lattice vectors.
-    icell : NDArray[np.float64]
-        Matrix where each row corresponds to each of the reciprocal lattice vectors.
+    a1: NDArray[np.float64]
+        First cell vector
+    a2: NDArray[np.float64]
+        Second cell vector
+    a3: NDArray[np.float64]
+        Third cell vector
 
     Methods
     -------
@@ -65,7 +64,7 @@ class AtomSystem:
                  a3: ArrayLike | None = None) -> None:
         # Deal with atom information
         self.species = set(species)
-        self.numbers = np.ascontiguousarray(numbers, dtype=np.int64)
+        self.numbers = np.ascontiguousarray(numbers, dtype=np.int32)
         if len(self.numbers.shape) > 1:
             raise ValueError("Parameter ``numbers`` must be a 1D array")
         self.n = self.numbers.size
@@ -107,7 +106,7 @@ class AtomSystem:
         self._check_positions()
 
     def _needs_shift(self, tol: float = 1e-5) -> bool:
-        return bool(np.any(norm(self._wrap_positions(), axis=1) < tol))
+        return bool(np.any(norm(self.positions, axis=1) < tol))
 
     def _wrap_positions(self, eps: float = 1e-5) -> NDArray[np.float64]:
         if not self.isperiodic:
@@ -116,9 +115,9 @@ class AtomSystem:
         fractional = fractional % 1.0 - eps
         return np.dot(fractional, self.cell.T)
 
-    def _check_positions(self, tol: float = 1e-5, eps: float = 1e-5) -> None:
-        if np.any(pdist(self._wrap_positions(eps=eps)) < tol):
-            raise ValueError("Atom positions are too close! (tolerance 1e-6)")
+    def _check_positions(self, tol: float = 1e-1) -> None:
+        if np.any(pdist(self.positions) < tol):
+            raise ValueError(f"Atom positions are too close! (tolerance: {tol})")
 
     def set_coords(self) -> None:
         """Set the coordinate info in the Fortran module.

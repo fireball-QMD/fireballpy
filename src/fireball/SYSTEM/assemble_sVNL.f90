@@ -1,31 +1,31 @@
 ! This routine assembles all of the two-center sVNL (separable pseudopotential) interactions.
 subroutine assemble_sVNL ()
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   use M_system, only: iforce, natoms, ratom, imass, nPP_b, nPP_j, nPPn, nPP_self, numorb_max, sVNL, spVNL, xl
   use M_fdata, only: num_orbPP, num_orb
   implicit none
  
-  integer(c_long) iatom
-  integer(c_long) imu
-  integer(c_long) in1
-  integer(c_long) in2
-  integer(c_long) ineigh
-  integer(c_long) interaction
-  integer(c_long) inu
-  integer(c_long) isorp
-  integer(c_long) jatom
-  integer(c_long) matom
-  integer(c_long) mbeta
+  integer iatom
+  integer imu
+  integer in1
+  integer in2
+  integer ineigh
+  integer interaction
+  integer inu
+  integer isorp
+  integer jatom
+  integer matom
+  integer mbeta
  
-  real(c_double) y
-  real(c_double), dimension (3, 3) :: eps
-  real(c_double), dimension (3, 3, 3) :: deps
-  real(c_double), dimension (3) :: r1
-  real(c_double), dimension (3) :: r2
-  real(c_double), dimension (3) :: r21
-  real(c_double), dimension (3) :: sighat
-  real(c_double), dimension (numorb_max, numorb_max) :: sVNLx
-  real(c_double), dimension (3, numorb_max, numorb_max) :: spVNLx
+  real(double) y
+  real(double), dimension (3, 3) :: eps
+  real(double), dimension (3, 3, 3) :: deps
+  real(double), dimension (3) :: r1
+  real(double), dimension (3) :: r2
+  real(double), dimension (3) :: r21
+  real(double), dimension (3) :: sighat
+  real(double), dimension (numorb_max, numorb_max) :: sVNLx
+  real(double), dimension (3, numorb_max, numorb_max) :: spVNLx
  
   do iatom = 1, natoms 
     matom = nPP_self(iatom)

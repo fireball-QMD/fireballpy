@@ -1,35 +1,35 @@
 subroutine Dassemble_2c ()
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   use M_constants, only: eq2
   use M_system, only: natoms, ratom, imass, cape, neigh_b, neigh_j, neighn, neigh_self, numorb_max, sp_mat, tp_mat, rho, xl, fotna, &
     & fana, ft, fro
   use M_fdata, only: num_orb
   implicit none
-  integer(c_long) iatom
-  integer(c_long) imu
-  integer(c_long) in1
-  integer(c_long) in2
-  integer(c_long) in3
-  integer(c_long) ineigh
-  integer(c_long) interaction
-  integer(c_long) inu
-  integer(c_long) isorp
-  integer(c_long) ix
-  integer(c_long) jatom
-  integer(c_long) kforce
-  integer(c_long) matom
-  integer(c_long) mbeta
-  real(c_double) sumS
-  real(c_double) sumT
-  real(c_double) y
-  real(c_double), dimension (numorb_max, numorb_max) :: bcnax
-  real(c_double), dimension (3, numorb_max, numorb_max) :: bcnapx
-  real(c_double), dimension (3, 3) :: eps
-  real(c_double), dimension (3, 3, 3) :: deps
-  real(c_double), dimension (3) :: r1
-  real(c_double), dimension (3) :: r2
-  real(c_double), dimension (3) :: r21
-  real(c_double), dimension (3) :: sighat
+  integer iatom
+  integer imu
+  integer in1
+  integer in2
+  integer in3
+  integer ineigh
+  integer interaction
+  integer inu
+  integer isorp
+  integer ix
+  integer jatom
+  integer kforce
+  integer matom
+  integer mbeta
+  real(double) sumS
+  real(double) sumT
+  real(double) y
+  real(double), dimension (numorb_max, numorb_max) :: bcnax
+  real(double), dimension (3, numorb_max, numorb_max) :: bcnapx
+  real(double), dimension (3, 3) :: eps
+  real(double), dimension (3, 3, 3) :: deps
+  real(double), dimension (3) :: r1
+  real(double), dimension (3) :: r2
+  real(double), dimension (3) :: r21
+  real(double), dimension (3) :: sighat
   fana = 0.0d0
   fotna = 0.0d0
   ft = 0.0d0

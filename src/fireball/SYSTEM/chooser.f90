@@ -1,10 +1,10 @@
 subroutine chooser (l, dmat, pmat, rmatrix)
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   implicit none
-  integer(c_long), intent(in) :: l
-  real(c_double), intent(in), dimension(5, 5) :: dmat
-  real(c_double), intent(in), dimension(3, 3) :: pmat
-  real(c_double), intent(out), dimension(5, 5) :: rmatrix
+  integer, intent(in) :: l
+  real(double), intent(in), dimension(5, 5) :: dmat
+  real(double), intent(in), dimension(3, 3) :: pmat
+  real(double), intent(out), dimension(5, 5) :: rmatrix
   rmatrix = 0.0d0
   if (l .eq. 0) then
     rmatrix(1,1) = 1.0d0

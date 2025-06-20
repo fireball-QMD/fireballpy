@@ -1,24 +1,24 @@
 subroutine doscentrosS (interaction, isub, iauxforce, in1, in2, in3, distance, eps, sx, spx)
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   use M_fdata, only: index_maxS,nsh_max,MES_max,nssh
   implicit none
-  integer(c_long), intent (in) :: iauxforce
-  integer(c_long), intent (in) :: interaction
-  integer(c_long), intent (in) :: isub
-  integer(c_long), intent (in) :: in1
-  integer(c_long), intent (in) :: in2
-  integer(c_long), intent (in) :: in3
-  real(c_double), intent (inout) :: distance
-  real(c_double), intent (in), dimension (3, 3) :: eps
-  real(c_double), intent (out), dimension (nsh_max, nsh_max) :: sx
-  real(c_double), intent (out), dimension (3, nsh_max, nsh_max) :: spx
-  integer(c_long) imu
-  integer(c_long) inu
-  integer(c_long) index
-  real(c_double), dimension (3) :: eta
-  real(c_double), dimension (MES_max) :: dslist
-  real(c_double), dimension (MES_max) :: slist
-  real(c_double), dimension (nsh_max,nsh_max) :: spm
+  integer, intent (in) :: iauxforce
+  integer, intent (in) :: interaction
+  integer, intent (in) :: isub
+  integer, intent (in) :: in1
+  integer, intent (in) :: in2
+  integer, intent (in) :: in3
+  real(double), intent (inout) :: distance
+  real(double), intent (in), dimension (3, 3) :: eps
+  real(double), intent (out), dimension (nsh_max, nsh_max) :: sx
+  real(double), intent (out), dimension (3, nsh_max, nsh_max) :: spx
+  integer imu
+  integer inu
+  integer index
+  real(double), dimension (3) :: eta
+  real(double), dimension (MES_max) :: dslist
+  real(double), dimension (MES_max) :: slist
+  real(double), dimension (nsh_max,nsh_max) :: spm
 
   sx = 0.0d0
   if (iauxforce .eq. 1) spm = 0.0d0

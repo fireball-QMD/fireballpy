@@ -12,44 +12,44 @@
 !  n_i ... density on i-site
 ! 
 subroutine build_ca_olsxc_on (in1, iatom, bcxcx, xc)
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   use M_system, only: numorb_max, Qin, rho_on, arho_on, rhoi_on, arhoi_on
   use M_fdata, only: nssh, num_orb,lssh,nsh_max
   implicit none
-  integer(c_long), intent (in) :: in1
-  integer(c_long), intent (in) :: iatom
-  real(c_double), intent (out), dimension (numorb_max, numorb_max) :: bcxcx
-  real(c_double), intent (out) :: xc
+  integer, intent (in) :: in1
+  integer, intent (in) :: iatom
+  real(double), intent (out), dimension (numorb_max, numorb_max) :: bcxcx
+  real(double), intent (out) :: xc
 
-  integer(c_long) imu
-  integer(c_long) ind1
-  integer(c_long) ind2
-  integer(c_long) inu
-  integer(c_long) issh
-  integer(c_long) jssh
-  integer(c_long) l1
-  integer(c_long) l2
-  integer(c_long) n1
-  integer(c_long) n2
+  integer imu
+  integer ind1
+  integer ind2
+  integer inu
+  integer issh
+  integer jssh
+  integer l1
+  integer l2
+  integer n1
+  integer n2
 
-  real(c_double) dexc
-  real(c_double) d2exc 
-  real(c_double) dmuxc
-  real(c_double) d2muxc
-  real(c_double) exc
-  real(c_double) muxc
-  real(c_double) dexci
-  real(c_double) d2exci
-  real(c_double) dmuxci
-  real(c_double) d2muxci
-  real(c_double) exci
-  real(c_double) muxci
-  real(c_double) q_mu
+  real(double) dexc
+  real(double) d2exc 
+  real(double) dmuxc
+  real(double) d2muxc
+  real(double) exc
+  real(double) muxc
+  real(double) dexci
+  real(double) d2exci
+  real(double) dmuxci
+  real(double) d2muxci
+  real(double) exci
+  real(double) muxci
+  real(double) q_mu
 
-  real(c_double), dimension (nsh_max,nsh_max) :: arho
-  real(c_double), dimension (nsh_max,nsh_max) :: arhoi
-  real(c_double), dimension (numorb_max, numorb_max) :: denx
-  real(c_double), dimension (numorb_max, numorb_max) :: deni
+  real(double), dimension (nsh_max,nsh_max) :: arho
+  real(double), dimension (nsh_max,nsh_max) :: arhoi
+  real(double), dimension (numorb_max, numorb_max) :: denx
+  real(double), dimension (numorb_max, numorb_max) :: deni
 
   xc = 0.0d0
   bcxcx = 0.0d0

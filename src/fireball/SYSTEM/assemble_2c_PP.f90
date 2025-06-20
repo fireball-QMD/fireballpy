@@ -1,26 +1,26 @@
 ! This routine assembles all of the two-center and degenerate two-center interactions.
 subroutine assemble_2c_PP ()
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   use M_system, only: natoms, imass, nPP_b, nPP_j, nPP_map, nPPn, nPP_self, nPPx_b, nPPx_j, nPPx_map, nPPx_point, nPPxn, &
     & numorb_max, neighPP_self, sVNL, vnl
   use M_fdata, only: num_orb, num_orbPP
   implicit none
-  integer(c_long) iatom
-  integer(c_long) imu
-  integer(c_long) in1
-  integer(c_long) in2
-  integer(c_long) ineigh
-  integer(c_long) inu
-  integer(c_long) jatom
-  integer(c_long) jneigh
-  integer(c_long) kneigh
-  integer(c_long) matom
-  integer(c_long) mbeta
-  integer(c_long) mneigh_self
-  integer(c_long) ncc
+  integer iatom
+  integer imu
+  integer in1
+  integer in2
+  integer ineigh
+  integer inu
+  integer jatom
+  integer jneigh
+  integer kneigh
+  integer matom
+  integer mbeta
+  integer mneigh_self
+  integer ncc
  
-  real(c_double), dimension (numorb_max) :: cl
-  real(c_double), dimension (numorb_max, numorb_max) :: PPx
+  real(double), dimension (numorb_max) :: cl
+  real(double), dimension (numorb_max, numorb_max) :: PPx
 
   vnl = 0.0d0
 

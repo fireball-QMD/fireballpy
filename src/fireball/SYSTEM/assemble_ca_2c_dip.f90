@@ -1,47 +1,47 @@
 ! This routine assembles all of the two-center and degenerate two-center interactions for DOGS.
 subroutine assemble_ca_2c_dip ()
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   use M_constants, only: eq2
   use M_system, only: smt_elect, natoms, ratom, imass, ewaldsr, neigh_b, neigh_j, neighn, neigh_self, numorb_max, Qin, &
     & s_mat, vca, dipc, xl
   use M_fdata, only: nssh,rcutoff,Qneutral,num_orb
   implicit none
-  integer(c_long) iatom
-  integer(c_long) imu
-  integer(c_long) in1
-  integer(c_long) in2
-  integer(c_long) in3
-  integer(c_long) ineigh
-  integer(c_long) interaction
-  integer(c_long) inu
-  integer(c_long) isorp
-  integer(c_long) issh
-  integer(c_long) jatom
-  integer(c_long) kforce
-  integer(c_long) matom
-  integer(c_long) mbeta
-  real(c_double) dq1
-  real(c_double) dq2
-  real(c_double) dterm
-  real(c_double) dstn_temp
-  real(c_double) dxn
-  real(c_double) rcutoff_j
-  real(c_double) rend
-  real(c_double) y
-  real(c_double) rcutoff_i
-  real(c_double), dimension (numorb_max, numorb_max) :: bcca
-  real(c_double), dimension (3, numorb_max, numorb_max) :: bccapx
-  real(c_double), dimension (numorb_max, numorb_max) :: bccax
-  real(c_double), dimension (3, 3, 3) :: deps
-  real(c_double), dimension (numorb_max, numorb_max) :: emnpl
-  real(c_double), dimension (numorb_max, numorb_max) :: emnpl_noq
-  real(c_double), dimension (3, 3) :: eps
-  real(c_double), dimension (3) :: r1
-  real(c_double), dimension (3) :: r2
-  real(c_double), dimension (3) :: r21
-  real(c_double), dimension (3) :: sighat
-  real(c_double) stn1
-  real(c_double) stn2
+  integer iatom
+  integer imu
+  integer in1
+  integer in2
+  integer in3
+  integer ineigh
+  integer interaction
+  integer inu
+  integer isorp
+  integer issh
+  integer jatom
+  integer kforce
+  integer matom
+  integer mbeta
+  real(double) dq1
+  real(double) dq2
+  real(double) dterm
+  real(double) dstn_temp
+  real(double) dxn
+  real(double) rcutoff_j
+  real(double) rend
+  real(double) y
+  real(double) rcutoff_i
+  real(double), dimension (numorb_max, numorb_max) :: bcca
+  real(double), dimension (3, numorb_max, numorb_max) :: bccapx
+  real(double), dimension (numorb_max, numorb_max) :: bccax
+  real(double), dimension (3, 3, 3) :: deps
+  real(double), dimension (numorb_max, numorb_max) :: emnpl
+  real(double), dimension (numorb_max, numorb_max) :: emnpl_noq
+  real(double), dimension (3, 3) :: eps
+  real(double), dimension (3) :: r1
+  real(double), dimension (3) :: r2
+  real(double), dimension (3) :: r21
+  real(double), dimension (3) :: sighat
+  real(double) stn1
+  real(double) stn2
 
   vca = 0.0d0
   ewaldsr = 0.0d0

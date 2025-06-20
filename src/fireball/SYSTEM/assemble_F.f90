@@ -1,37 +1,37 @@
 subroutine assemble_F ()
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   use M_system, only: natoms, neigh_j, neighn, nPP_j, nPPn, nPPx_j, nPPxn, fotnl, fanl, fotna, fana, faxc, faxc_ca, dxcdcc, ft, dusr, &
     & fotxc, fotxc_ca, faca, fotca, f3naa, f3nab, f3nac, f3nla, f3nlb, f3nlc, f3caa, f3cab, f3cac, flrew, f3xca_ca, f3xcb_ca, f3xcc_ca, &
     & f3xca, f3xcb, f3xcc, flrew_qmmm, fro, ftot, dxcv
   implicit none
-  integer(c_long) iatom
-  integer(c_long) ineigh
-  integer(c_long) jatom
-  integer(c_long) ix
-  real(c_double) rms
-  real(c_double) maximum
-  real(c_double) minimum
-  real(c_double), dimension (3, natoms) :: f3ca       ! three-center charged atom
-  real(c_double), dimension (3, natoms) :: f3na       ! three-center neutral atom
-  real(c_double), dimension (3, natoms) :: f3nl       ! three-center non-local
-  real(c_double), dimension (3, natoms) :: f3xc       ! three-center xc
-  real(c_double), dimension (3, natoms) :: f3xc_ca    ! three-center xc - charges
-  real(c_double), dimension (3, natoms) :: fbs  ! total band-structure force
-  real(c_double), dimension (3, natoms) :: fca  ! total charged atom force
-  real(c_double), dimension (3, natoms) :: fcaatm     ! charged atom/atom force
-  real(c_double), dimension (3, natoms) :: fcaot      ! charged atom/ontop force
-  real(c_double), dimension (3, natoms) :: fna  ! total neutral atom force
-  real(c_double), dimension (3, natoms) :: fnaatm     ! neutral atom/atom force
-  real(c_double), dimension (3, natoms) :: fnaot      ! neutral atom/ontop force
-  real(c_double), dimension (3, natoms) :: fnl  ! total non-local force
-  real(c_double), dimension (3, natoms) :: fnlatm     ! non-local/atom force
-  real(c_double), dimension (3, natoms) :: fnlot      ! non-local/ontop force
-  real(c_double), dimension (3, natoms) :: fxc  ! total xc force
-  real(c_double), dimension (3, natoms) :: fxc_ca     ! total xc force - charges
-  real(c_double), dimension (3, natoms) :: fxcatm     ! xc atm/atm force
-  real(c_double), dimension (3, natoms) :: fxcatm_ca  ! xc atm/atm force - charges
-  real(c_double), dimension (3, natoms) :: fxcot      ! xc ontop force
-  real(c_double), dimension (3, natoms) :: fxcot_ca   ! xc ontop force - charges
+  integer iatom
+  integer ineigh
+  integer jatom
+  integer ix
+  real(double) rms
+  real(double) maximum
+  real(double) minimum
+  real(double), dimension (3, natoms) :: f3ca       ! three-center charged atom
+  real(double), dimension (3, natoms) :: f3na       ! three-center neutral atom
+  real(double), dimension (3, natoms) :: f3nl       ! three-center non-local
+  real(double), dimension (3, natoms) :: f3xc       ! three-center xc
+  real(double), dimension (3, natoms) :: f3xc_ca    ! three-center xc - charges
+  real(double), dimension (3, natoms) :: fbs  ! total band-structure force
+  real(double), dimension (3, natoms) :: fca  ! total charged atom force
+  real(double), dimension (3, natoms) :: fcaatm     ! charged atom/atom force
+  real(double), dimension (3, natoms) :: fcaot      ! charged atom/ontop force
+  real(double), dimension (3, natoms) :: fna  ! total neutral atom force
+  real(double), dimension (3, natoms) :: fnaatm     ! neutral atom/atom force
+  real(double), dimension (3, natoms) :: fnaot      ! neutral atom/ontop force
+  real(double), dimension (3, natoms) :: fnl  ! total non-local force
+  real(double), dimension (3, natoms) :: fnlatm     ! non-local/atom force
+  real(double), dimension (3, natoms) :: fnlot      ! non-local/ontop force
+  real(double), dimension (3, natoms) :: fxc  ! total xc force
+  real(double), dimension (3, natoms) :: fxc_ca     ! total xc force - charges
+  real(double), dimension (3, natoms) :: fxcatm     ! xc atm/atm force
+  real(double), dimension (3, natoms) :: fxcatm_ca  ! xc atm/atm force - charges
+  real(double), dimension (3, natoms) :: fxcot      ! xc ontop force
+  real(double), dimension (3, natoms) :: fxcot_ca   ! xc ontop force - charges
   do iatom = 1, natoms
     f3nl(:,iatom) = f3nla(:,iatom) + f3nlb(:,iatom) + f3nlc(:,iatom)
     f3na(:,iatom) = f3naa(:,iatom) + f3nab(:,iatom) + f3nac(:,iatom)

@@ -1,5 +1,5 @@
 subroutine getforces ()
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   use M_system, only: idipole, iqmmm, flrew_qmmm
   implicit none
   call Dassemble_2c ()

@@ -1,8 +1,8 @@
 pure function sf(d)
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   use M_system, only: qmmm_rc1, qmmm_rc2, qmmm_width
-  real(c_double), intent(in) :: d
-  real(c_double) :: rc12, aux1, aux2, y, sf
+  real(double), intent(in) :: d
+  real(double) :: rc12, aux1, aux2, y, sf
   if (qmmm_rc1 < 0.0d0) then
     aux1 = d*d
     aux1 = aux1*aux1

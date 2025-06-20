@@ -1,15 +1,15 @@
 subroutine mulliken_charges()
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   use M_system, only: natoms, imass, neigh_j, neighn, neigh_back, numorb_max, Qout, QMulliken_TOT, rho, s_mat
  use M_fdata, only: num_orb,nssh,lssh
  implicit none
- integer(c_long) iatom            
- integer(c_long) imu, inu          
- integer(c_long) in1, in2          
- integer(c_long) issh
- integer(c_long) ineigh ,jatom,jneigh          
- integer(c_long) mqn             
- real(c_double), dimension (numorb_max, natoms) :: QMulliken
+ integer iatom            
+ integer imu, inu          
+ integer in1, in2          
+ integer issh
+ integer ineigh ,jatom,jneigh          
+ integer mqn             
+ real(double), dimension (numorb_max, natoms) :: QMulliken
  QMulliken = 0.0d0             
  do iatom = 1, natoms
    in1 = imass(iatom)

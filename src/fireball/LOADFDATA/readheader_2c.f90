@@ -1,12 +1,12 @@
 subroutine readheader_2c (interaction, iounit, nsh_max, numz, rc1, &
     & rc2, zmin, zmax, npseudo, cl_pseudo)
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   implicit none
-  integer(c_long), intent (in) :: interaction, iounit, nsh_max
-  integer(c_long), intent (out) :: npseudo, numz
-  real(c_double), intent (out) :: rc1, rc2, zmin, zmax
-  real(c_double), intent (out), dimension (nsh_max) :: cl_pseudo
-  integer(c_long) :: iline, issh, nucz1, nucz2
+  integer, intent (in) :: interaction, iounit, nsh_max
+  integer, intent (out) :: npseudo, numz
+  real(double), intent (out) :: rc1, rc2, zmin, zmax
+  real(double), intent (out), dimension (nsh_max) :: cl_pseudo
+  integer :: iline, issh, nucz1, nucz2
 
   do iline = 1, 9
       read (iounit,*)

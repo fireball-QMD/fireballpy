@@ -1,9 +1,9 @@
 subroutine make_munuDipY ()
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   use M_fdata, only: ME2cDipY_max, nspecies, nssh, num_orb, lssh, &
     & index_max2cDipY, ME2c_max, muDipY, nuDipY
   implicit none
-  integer(c_long) :: index, in1, in2, issh1, issh2, l1, l2, n1, n2
+  integer :: index, in1, in2, issh1, issh2, l1, l2, n1, n2
 
   ME2cDipY_max = 0
   if (allocated(index_max2cDipY)) deallocate(index_max2cDipY)

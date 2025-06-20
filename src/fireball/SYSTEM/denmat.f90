@@ -1,33 +1,33 @@
 subroutine denmat ()
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   use M_constants, only: spin
   use M_system, only: iqout, icluster, igamma, ifixcharge, natoms, ratom, degelec, imass, ebs, bbnkre, bbnkim, eigen_k, special_k, &
     & norbitals_new, nkpoints, ioccupy_k, foccupy, cape, rhoPP, ztot, weight_k, neigh_b, neigh_j, neighn, neighPPn, &
     & neighPP_b, neighPP_j, Qin, Qout, QLowdin_TOT, dq_DP, rho, xl, errno
   use M_fdata, only: num_orb,nssh
   implicit none
-  integer(c_long) iatom
-  integer(c_long) iband
-  integer(c_long) ikpoint
-  integer(c_long) imu, inu
-  integer(c_long) ineigh
-  integer(c_long) in1, in2
-  integer(c_long) iorbital
-  integer(c_long) issh
-  integer(c_long) jatom
-  integer(c_long) mbeta
-  integer(c_long) mmu
-  integer(c_long) nnu
-  real(c_double) dot
-  real(c_double) gutr
-  real(c_double) ztest
-  real(c_double), dimension (natoms) :: QoutTot
-  real(c_double), dimension (3) :: vec
-  complex(c_double_complex) ai
-  complex(c_double_complex) phase, phasex
-  complex(c_double_complex) step1, step2
+  integer iatom
+  integer iband
+  integer ikpoint
+  integer imu, inu
+  integer ineigh
+  integer in1, in2
+  integer iorbital
+  integer issh
+  integer jatom
+  integer mbeta
+  integer mmu
+  integer nnu
+  real(double) dot
+  real(double) gutr
+  real(double) ztest
+  real(double), dimension (natoms) :: QoutTot
+  real(double), dimension (3) :: vec
+  complex(double) ai
+  complex(double) phase, phasex
+  complex(double) step1, step2
 
-  ai = cmplx(0.0d0,1.0d0,c_double_complex)
+  ai = cmplx(0.0d0,1.0d0,double)
   rhoPP = 0.0d0
   !AQUI  inquire (file = 'OCCUPATION', exist = read_occupy)
 
@@ -42,7 +42,7 @@ subroutine denmat ()
       vec = xl(:,mbeta) + ratom(:,jatom) - ratom(:,iatom)
       do ikpoint = 1, nkpoints
         dot = special_k(1,ikpoint)*vec(1) + special_k(2,ikpoint)*vec(2) + special_k(3,ikpoint)*vec(3)
-        phasex = cmplx(cos(dot),sin(dot),c_double_complex)*weight_k(ikpoint)*spin
+        phasex = cmplx(cos(dot),sin(dot),double)*weight_k(ikpoint)*spin
         if (icluster .eq. 0 .and. igamma .eq. 0) then
           do iband = 1, norbitals_new
             if (ioccupy_k(iband,ikpoint) .ne. 0) then
@@ -53,7 +53,7 @@ subroutine denmat ()
                 do inu = 1, num_orb(in2)
                   nnu = inu + degelec(jatom)
                   step2 = step1*(bbnkre(nnu,iband,ikpoint) + ai*bbnkim(nnu,iband,ikpoint))
-                  gutr = real(step2, c_double)
+                  gutr = real(step2, double)
                   rho(imu,inu,ineigh,iatom) = rho(imu,inu,ineigh,iatom) + gutr
                   cape(imu,inu,ineigh,iatom) = cape(imu,inu,ineigh,iatom) + eigen_k(iband,ikpoint)*gutr
                 end do
@@ -70,7 +70,7 @@ subroutine denmat ()
                 do inu = 1, num_orb(in2)
                   nnu = inu + degelec(jatom)
                   step2 = step1*bbnkre(nnu,iband,ikpoint)
-                  gutr = real(step2, c_double)
+                  gutr = real(step2, double)
                   rho(imu,inu,ineigh,iatom) = rho(imu,inu,ineigh,iatom) + gutr
                   cape(imu,inu,ineigh,iatom) = cape(imu,inu,ineigh,iatom) + eigen_k(iband,ikpoint)*gutr
                 end do
@@ -91,7 +91,7 @@ subroutine denmat ()
       vec = xl(:,mbeta) + ratom(:,jatom) - ratom(:,iatom)
       do ikpoint = 1, nkpoints
         dot = special_k(1,ikpoint)*vec(1) + special_k(2,ikpoint)*vec(2)  + special_k(3,ikpoint)*vec(3)
-        phasex = cmplx(cos(dot),sin(dot),c_double_complex)*weight_k(ikpoint)*spin
+        phasex = cmplx(cos(dot),sin(dot),double)*weight_k(ikpoint)*spin
         if (icluster .eq. 0 .and. igamma .eq. 0) then
           do iband = 1, norbitals_new
             if (ioccupy_k(iband,ikpoint) .ne. 0) then
@@ -102,7 +102,7 @@ subroutine denmat ()
                 do inu = 1, num_orb(in2)
                   nnu = inu + degelec(jatom)
                   step2 = step1*(bbnkre(nnu,iband,ikpoint)  + ai*bbnkim(nnu,iband,ikpoint))
-                  gutr = real(step2, c_double)
+                  gutr = real(step2, double)
                   rhoPP(imu,inu,ineigh,iatom) = rhoPP(imu,inu,ineigh,iatom) + gutr
                 end do
               end do
@@ -118,7 +118,7 @@ subroutine denmat ()
                 do inu = 1, num_orb(in2)
                   nnu = inu + degelec(jatom)
                   step2 = step1*bbnkre(nnu,iband,ikpoint)
-                  gutr = real(step2, c_double)
+                  gutr = real(step2, double)
                   rhoPP(imu,inu,ineigh,iatom) = rhoPP(imu,inu,ineigh,iatom)  + gutr
                 end do
               end do

@@ -1,54 +1,54 @@
 subroutine Dassemble_ca_olsxc_2c ()
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   use M_system, only: natoms, ratom, imass, neigh_b, neigh_j, neighn, neigh_self, numorb_max, sp_mat, Qin, rho, rho_off, rhoij_off, &
     & s_mat, arhoij_off, arho_off, arhopij_off, arhop_off, rhop_off, rhopij_off, xl, fotxc, fotxc_ca
   use M_fdata, only: num_orb, nssh, lssh, Qneutral
   implicit none
-  integer(c_long) iatom
-  integer(c_long) inu
-  integer(c_long) imu
-  integer(c_long) in1
-  integer(c_long) in2
-  integer(c_long) in3
-  integer(c_long) index1
-  integer(c_long) index2
-  integer(c_long) ineigh
-  integer(c_long) interaction
-  integer(c_long) isorp
-  integer(c_long) issh
-  integer(c_long) ix
-  integer(c_long) jatom
-  integer(c_long) jssh
-  integer(c_long) kforce
-  integer(c_long) l1
-  integer(c_long) l2
-  integer(c_long) mbeta
-  integer(c_long) matom
-  integer(c_long) n1
-  integer(c_long) n2
-  real(c_double) y
-  real(c_double) muxc
-  real(c_double) dmuxc
-  real(c_double) d2muxc
-  real(c_double) exc
-  real(c_double) dexc
-  real(c_double) d2exc
-  real(c_double) sx
-  real(c_double) rho_av
-  real(c_double) rhoin
-  real(c_double) dxn
-  real(c_double), dimension (numorb_max, numorb_max) :: bcxcx
-  real(c_double), dimension (3, numorb_max, numorb_max) :: bcxcpx
-  real(c_double), dimension (3, numorb_max, numorb_max) :: mxcb
-  real(c_double), dimension (3) :: rhoinp
-  real(c_double), dimension (3) :: rhop_av
-  real(c_double), dimension (3) :: spx
-  real(c_double), dimension (3, 3) :: eps
-  real(c_double), dimension (3, 3, 3) :: deps
-  real(c_double), dimension (3) :: r1
-  real(c_double), dimension (3) :: r2
-  real(c_double), dimension (3) :: r21
-  real(c_double), dimension (3) :: sighat
+  integer iatom
+  integer inu
+  integer imu
+  integer in1
+  integer in2
+  integer in3
+  integer index1
+  integer index2
+  integer ineigh
+  integer interaction
+  integer isorp
+  integer issh
+  integer ix
+  integer jatom
+  integer jssh
+  integer kforce
+  integer l1
+  integer l2
+  integer mbeta
+  integer matom
+  integer n1
+  integer n2
+  real(double) y
+  real(double) muxc
+  real(double) dmuxc
+  real(double) d2muxc
+  real(double) exc
+  real(double) dexc
+  real(double) d2exc
+  real(double) sx
+  real(double) rho_av
+  real(double) rhoin
+  real(double) dxn
+  real(double), dimension (numorb_max, numorb_max) :: bcxcx
+  real(double), dimension (3, numorb_max, numorb_max) :: bcxcpx
+  real(double), dimension (3, numorb_max, numorb_max) :: mxcb
+  real(double), dimension (3) :: rhoinp
+  real(double), dimension (3) :: rhop_av
+  real(double), dimension (3) :: spx
+  real(double), dimension (3, 3) :: eps
+  real(double), dimension (3, 3, 3) :: deps
+  real(double), dimension (3) :: r1
+  real(double), dimension (3) :: r2
+  real(double), dimension (3) :: r21
+  real(double), dimension (3) :: sighat
   fotxc = 0.0d0
   fotxc_ca = 0.0d0
   do iatom = 1, natoms

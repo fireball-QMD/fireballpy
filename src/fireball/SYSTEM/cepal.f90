@@ -2,37 +2,37 @@
 ! functional is that of Ceperley-Alder as parameterized by Perdew-Zunger.
 ! Phys. Rev. B23, 5048 (1981). Units are Hartree a.u. (but see below)
 subroutine cepal (rh, exc, muxc, dexc, d2exc, dmuxc, d2muxc)
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   use M_constants, only: eq2, abohr
   implicit none
-  real(c_double), intent (in) :: rh
-  real(c_double), intent (out) :: dexc
-  real(c_double), intent (out) :: d2exc
-  real(c_double), intent (out) :: dmuxc
-  real(c_double), intent (out) :: exc
-  real(c_double), intent (out) :: muxc
-  real(c_double), intent (out) :: d2muxc
-  real(c_double), parameter :: eps = 1.0d-3
-  real(c_double), parameter :: delta_rh = 1.0d-6
-  real(c_double) d2nec
-  real(c_double) d2nex
-  real(c_double) d3nec
-  real(c_double) d3nex
-  real(c_double) dec
-  real(c_double) ddec
-  real(c_double) d2dec
-  real(c_double) den
-  real(c_double) dden
-  real(c_double) d2den
-  real(c_double) d3den
-  real(c_double) ex
-  real(c_double) rho_third
-  real(c_double) rho
-  real(c_double) rhx
-  real(c_double) rs
-  real(c_double) rsl
-  real(c_double) sqrs
-  real(c_double) hartree1
+  real(double), intent (in) :: rh
+  real(double), intent (out) :: dexc
+  real(double), intent (out) :: d2exc
+  real(double), intent (out) :: dmuxc
+  real(double), intent (out) :: exc
+  real(double), intent (out) :: muxc
+  real(double), intent (out) :: d2muxc
+  real(double), parameter :: eps = 1.0d-3
+  real(double), parameter :: delta_rh = 1.0d-6
+  real(double) d2nec
+  real(double) d2nex
+  real(double) d3nec
+  real(double) d3nex
+  real(double) dec
+  real(double) ddec
+  real(double) d2dec
+  real(double) den
+  real(double) dden
+  real(double) d2den
+  real(double) d3den
+  real(double) ex
+  real(double) rho_third
+  real(double) rho
+  real(double) rhx
+  real(double) rs
+  real(double) rsl
+  real(double) sqrs
+  real(double) hartree1
  
   exc = 0.0d0
   muxc = 0.0d0

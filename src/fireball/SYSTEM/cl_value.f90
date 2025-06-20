@@ -1,15 +1,15 @@
 subroutine cl_value (itype, cl)
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   use M_system, only: numorb_max
   use M_fdata, only: nsshPP,lsshPP,cl_PP
   implicit none                  
-  integer(c_long), intent (in) :: itype
-  real(c_double), intent (out), dimension (numorb_max) :: cl
-  integer(c_long) imu
-  integer(c_long) index
-  integer(c_long) issh
-  integer(c_long) Lvalue
-  integer(c_long) Lmax
+  integer, intent (in) :: itype
+  real(double), intent (out), dimension (numorb_max) :: cl
+  integer imu
+  integer index
+  integer issh
+  integer Lvalue
+  integer Lmax
   cl(1:numorb_max) = 0.0d0
   index = 0
   do issh = 1, nsshPP(itype)

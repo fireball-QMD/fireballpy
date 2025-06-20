@@ -1,56 +1,26 @@
 subroutine kspace_gamma ()
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   use M_system, only: iqout, natoms, degelec, imass, getlssh, getissh, Kscf, blowre, bbnkre, sm12_real, eigen_k, norbitals, &
-    & norbitals_new, getiatom, neigh_b, neigh_j, neighn, neighPPn, neighPP_b, neighPP_j, vnl, s_mat, h_mat, errno
+    & norbitals_new, getiatom, neigh_b, neigh_j, neighn, neighPPn, neighPP_b, neighPP_j, vnl, s_mat, h_mat, errno, isgeneig
   use M_fdata, only: num_orb, Qneutral
   implicit none
-  real(c_double), parameter :: overtol = 1.0d-4
-  integer(c_long) ikpoint
-  integer(c_long) iatom
-  integer(c_long) imu
-  integer info
-  integer(c_long) inu
-  integer(c_long) in1, in2
-  integer(c_long) ineigh
-  integer(c_long) ishort
-  integer(c_long) jatom
-  integer(c_long) jmu
-  integer(c_long) jnu
-  integer(c_long) mbeta
-  integer(c_long) mineig
-  integer(c_long) lm
-  real(c_double) sqlami
-  real(c_double), dimension (norbitals) :: eigen
-  real(c_double), dimension (norbitals) :: slam
-  real(c_double) a0
-  real(c_double) a1
-  real(c_double), dimension (:, :), allocatable :: xxxx
-  real(c_double), dimension (:, :), allocatable :: yyyy
-  real(c_double), dimension (:, :), allocatable :: zzzz
-  real(c_double), dimension (:, :), allocatable :: ssss
-  real(c_double), dimension (:), allocatable :: ww
-  real(c_double), allocatable, dimension (:) :: work
-  integer(c_long), allocatable, dimension (:) :: iwork
-  integer(c_long) lwork, liwork
+  real(double), parameter :: a0 = 0.0d0
+  real(double), parameter :: a1 = 1.0d0
+  real(double), parameter :: overtol = 1.0d-4
+  integer ikpoint, iatom, imu, inu, in1, in2, ineigh, &
+    & jatom, jmu, jnu, mbeta, mineig, lm
+  real(double), dimension (norbitals) :: eigen
+  real(double), dimension (:), allocatable :: ww, work
+  real(double), dimension (:, :), allocatable :: xxxx, yyyy, zzzz
+  integer :: liwork, lwork, info
+  integer, dimension (:), allocatable :: iwork
   ikpoint = 1
-  a0 = 0.0d0
-  a1 = 1.0d0
-  ishort = 1
-  allocate (xxxx(norbitals,norbitals))
-  allocate (yyyy(norbitals,norbitals))
-  allocate (zzzz(norbitals,norbitals))
-  if (iqout .eq. 3) then
-   allocate (ssss(norbitals,norbitals))
-   allocate (ww(norbitals))
-  endif
-  liwork = 15*norbitals
-  allocate (iwork(liwork))
-  lwork = 1
-  allocate(work(lwork))
-  zzzz = a0
+  allocate(yyyy(norbitals,norbitals))
+  allocate(zzzz(norbitals,norbitals))
   yyyy = a0
-  xxxx = a0
-  if (iqout .eq. 3) then
+
+  if ((Kscf .eq. 1) .and. (iqout .eq. 3)) then
+    allocate(ww(norbitals))
     do inu = 1, norbitals
       imu = getissh(inu)
       iatom = getiatom(inu)
@@ -60,9 +30,36 @@ subroutine kspace_gamma ()
         ww(inu) = 1.0d0
       else
         ww(inu) = 10.0d0
-      endif
-    enddo
-  endif
+      end if
+    end do
+  end if
+
+  if (Kscf .eq. 1) then
+    zzzz = a0
+    do iatom = 1, natoms
+      in1 = imass(iatom)
+      do ineigh = 1, neighn(iatom)
+        mbeta = neigh_b(ineigh,iatom)
+        jatom = neigh_j(ineigh,iatom)
+        in2 = imass(jatom)
+        do inu = 1, num_orb(in2)
+          jnu = inu + degelec(jatom)
+          do imu = 1, num_orb(in1)
+            jmu = imu + degelec(iatom)
+            zzzz(jmu,jnu) = zzzz(jmu,jnu) + s_mat(imu,inu,ineigh,iatom)
+          end do
+        end do
+      end do
+    end do ! do iatom
+    if (iqout .eq. 3) then
+      do inu = 1, norbitals
+        do imu = 1, norbitals
+          zzzz(inu,imu) = zzzz(inu,imu)*ww(inu)*ww(imu)
+        end do
+      end do
+    end if
+    sm12_real(:,:) = zzzz(:,:)
+  end if
 
   do iatom = 1, natoms
     in1 = imass(iatom)
@@ -74,10 +71,9 @@ subroutine kspace_gamma ()
         jnu = inu + degelec(jatom)
         do imu = 1, num_orb(in1)
           jmu = imu + degelec(iatom)
-          zzzz(jmu,jnu) = zzzz(jmu,jnu) + s_mat(imu,inu,ineigh,iatom)
           yyyy(jmu,jnu) = yyyy(jmu,jnu) + h_mat(imu,inu,ineigh,iatom)
-        end do 
-      end do 
+        end do
+      end do
     end do
     do ineigh = 1, neighPPn(iatom)
       mbeta = neighPP_b(ineigh,iatom)
@@ -87,102 +83,120 @@ subroutine kspace_gamma ()
         jnu = inu + degelec(jatom)
         do imu = 1, num_orb(in1)
           jmu = imu + degelec(iatom)
-          yyyy(jmu,jnu) = yyyy(jmu,jnu) + vnl(imu,inu,ineigh,iatom) 
-        end do 
-      end do 
+          yyyy(jmu,jnu) = yyyy(jmu,jnu) + vnl(imu,inu,ineigh,iatom)
+        end do
+      end do
     end do
-
   end do ! do iatom
 
-  if (iqout .eq. 3) then
-    do inu = 1, norbitals
-      do imu = 1, norbitals
-        ssss(inu,imu) = zzzz(inu,imu)
-      end do
-    end do
-    do inu = 1, norbitals
-      do imu = 1, norbitals
-        zzzz(inu,imu) = zzzz(inu,imu)*ww(inu)*ww(imu)
-      end do
-    end do
-  endif 
-
-  if (Kscf .eq. 1 .or. iqout .eq. 3) then
-    call dsyev ('V', 'U', norbitals, zzzz, norbitals, slam, work, -1_c_long, info)
-    lwork = nint(work(1), c_long)
-    deallocate (work)
+  if (isgeneig) then
+    zzzz(:,:) = sm12_real(:,:)
+    allocate(xxxx(norbitals,norbitals))
+    xxxx(:,:) = yyyy(:,:)
+    allocate(work(1))
+    call dsygv(1, 'V', 'U', norbitals, yyyy, norbitals, zzzz, norbitals, eigen, work, -1, info)
+    lwork = work(1)
+    deallocate(work)
     allocate(work(lwork))
-    call dsyev ('V', 'U', norbitals, zzzz, norbitals, slam, work,lwork, info )
+    call dsygv(1, 'V', 'U', norbitals, yyyy, norbitals, zzzz, norbitals, eigen, work, lwork, info)
+    deallocate(work)
+    !allocate(work(1), iwork(1))
+    !call dsygvd(1, 'V', 'U', norbitals, yyyy, norbitals, zzzz, norbitals, eigen, work, -1, iwork, -1, info)
+    !lwork = work(1)
+    !liwork = iwork(1)
+    !deallocate(work, iwork)
+    !allocate(work(lwork))
+    !allocate(iwork(liwork))
+    !call dsygv(1, 'V', 'U', norbitals, yyyy, norbitals, zzzz, norbitals, eigen, work, lwork, iwork, liwork, info)
+    !deallocate(work, iwork)
+    if (info .eq. 0) then
+      norbitals_new = norbitals
+      eigen_k(:,ikpoint) = eigen(:)
+      bbnkre(:,:,ikpoint) = real(yyyy(:,:), double)
+      deallocate (xxxx)
+      deallocate (yyyy)
+      deallocate (zzzz)
+      return
+    end if
+    if (info .le. norbitals) then
+      write (*,*) 'me muero'
+      open (unit=360, file='ham.dat', status='unknown')
+      do inu = 1, norbitals
+        do imu = 1, norbitals
+      write(360,*) xxxx(imu,inu), zzzz(imu,inu)
+      end do
+      end do
+      close(360)
+      errno = -info
+      return
+    end if
+    isgeneig = .false.
+  end if
+
+  if (Kscf .eq. 1) then
+    allocate(work(1))
+    call dsyev('V', 'U', norbitals, zzzz, norbitals, eigen, work, -1, info)
+    lwork = work(1)
+    deallocate(work)
+    allocate(work(lwork))
+    call dsyev('V', 'U', norbitals, zzzz, norbitals, eigen, work, lwork, info)
+    deallocate(work)
     if (info .ne. 0) then
       errno = -info
       return
     end if
     mineig = 0
     do imu = 1, norbitals
-      if (slam(imu) .lt. overtol) mineig = imu
+      if (eigen(imu) .lt. overtol) mineig = imu
     end do
     mineig = mineig + 1
     norbitals_new = norbitals + 1 - mineig
-    if (norbitals_new .ne. norbitals) then
+    if ((norbitals_new .ne. norbitals) .and. ((iqout .eq. 1) .or. (iqout .eq. 3))) then
+      errno = 13
+      return
+    end if
+    allocate(xxxx(norbitals, norbitals_new))
+    if ((iqout .eq. 1) .or. (iqout .eq. 3)) then
+      do imu = 1, norbitals
+        zzzz(:,imu) = zzzz(:,imu)*eigen(imu)**(-0.25d0)
+      end do
+      call dgemm('N', 'C', norbitals, norbitals, norbitals, a1, zzzz, norbitals, zzzz, norbitals, a0, xxxx, norbitals)
+      if (iqout .eq. 3) then
+        do imu=1, norbitals
+          xxxx(imu,:)=xxxx(imu,:)*ww(imu)
+        end do
+      end if
+    else
       do imu = mineig, norbitals
-        jmu = imu - mineig + 1
-        zzzz(:,jmu) = zzzz(:,imu)
-        slam(jmu) = slam(imu)
+        xxxx(:,imu-mineig+1) = zzzz(:,imu)*eigen(imu)**(-0.5d0)
       end do
     end if
-    do imu = 1, norbitals_new
-      sqlami = slam(imu)**(-0.25d0)
-      zzzz(:,imu) = zzzz(:,imu)*sqlami
-    end do
-    call dgemm ('N', 'C', norbitals, norbitals, norbitals_new, a1, zzzz, norbitals, zzzz, norbitals, a0, xxxx, norbitals)
-    if (iqout .eq. 3) then
-      do imu=1, norbitals
-        xxxx(imu,:)=xxxx(imu,:)*ww(imu)
-      end do
-    endif
-    do inu = 1, norbitals
-      do imu = 1, norbitals
-        sm12_real(imu,inu) = xxxx(imu,inu)
-      end do
-    end do
-  else ! (if Kscf .eq. 1 .and iqout .ne. 3)
-    xxxx(:,:) = sm12_real(:,:)
-  end if
-  if (iqout .ne. 3) then
-    call dsymm ( 'R', 'U', norbitals, norbitals, a1, xxxx, norbitals, yyyy, norbitals, a0, zzzz, norbitals )
-    call dsymm ( 'L', 'U', norbitals, norbitals, a1, xxxx, norbitals, zzzz, norbitals, a0, yyyy, norbitals )
+    sm12_real(:,1:norbitals_new) = xxxx(:,:)
   else
-    call dgemm ( 'C', 'N', norbitals, norbitals, norbitals, a1, xxxx, norbitals, yyyy, norbitals, a0, zzzz, norbitals )
-    call dgemm ( 'N', 'N', norbitals, norbitals, norbitals, a1, zzzz, norbitals, xxxx, norbitals, a0, yyyy, norbitals )
-  endif
-  lwork = 1
-  deallocate (work)
-  allocate (work(lwork))
-  call dsyev ('V', 'U', norbitals, yyyy, norbitals, eigen, work, -1_c_long, info)
-  lwork = nint(work(1), c_long)
-  deallocate (work)
+    allocate(xxxx(norbitals, norbitals_new))
+    xxxx(:,:) = sm12_real(:,1:norbitals_new)
+  end if
+  call dgemm('C', 'N', norbitals_new, norbitals, norbitals, a1, xxxx, norbitals_new, yyyy, norbitals, a0, zzzz(1:norbitals_new,:), norbitals_new)
+  call dgemm('N', 'N', norbitals_new, norbitals_new, norbitals, a1, zzzz(1:norbitals_new,:), norbitals_new, xxxx, norbitals, a0, yyyy(1:norbitals_new,1:norbitals_new), norbitals_new)
+  allocate(work(1))
+  call dsyev('V', 'U', norbitals_new, yyyy, norbitals_new, eigen(1:norbitals_new), work, -1, info)
+  lwork = work(1)
+  deallocate(work)
   allocate(work(lwork))
-  call dsyev ('V', 'U', norbitals, yyyy, norbitals, eigen, work, lwork, info )
+  call dsyev('V', 'U', norbitals_new, yyyy, norbitals_new, eigen(1:norbitals_new), work, lwork, info)
+  deallocate(work)
   if (info .ne. 0) then
     errno = -info
     return
   end if
-  eigen_k(1:norbitals,ikpoint) = eigen(:)
-  if ((iqout .eq. 1) .or. (iqout .eq. 3)) blowre(:,:,ikpoint) = real(yyyy(:,:), c_double)
-  if (iqout .ne. 3) then
-    call dsymm ( 'L', 'U', norbitals, norbitals, a1, xxxx, norbitals, yyyy, norbitals, a0, zzzz, norbitals )
-  else
-    call dgemm ( 'N', 'N', norbitals, norbitals, norbitals, a1, xxxx, norbitals, yyyy, norbitals, a0, zzzz, norbitals )
-  end if
-  bbnkre(:,:,ikpoint) = real(zzzz(:,:), c_double)
+  eigen_k(1:norbitals_new,ikpoint) = eigen(1:norbitals_new)
+  call dgemm('N', 'N', norbitals, norbitals_new, norbitals_new, a1, xxxx, norbitals, yyyy(1:norbitals_new,1:norbitals_new), norbitals_new, a0, zzzz(:,1:norbitals_new), norbitals)
+  bbnkre(:,1:norbitals_new,ikpoint) = real(zzzz(:,1:norbitals_new), double)
+  if ((iqout .eq. 1) .or. (iqout .eq. 3)) blowre(:,:,ikpoint) = real(yyyy(:,:), double)
   deallocate (xxxx)
   deallocate (yyyy)
   deallocate (zzzz)
-  if (iqout .eq. 3) then
+  if ((Kscf .eq. 1) .and. (iqout .eq. 3)) then
     deallocate (ww)
-    deallocate (ssss)
-  endif
-  deallocate (work)
-  deallocate (iwork)
-  return
+  end if
 end subroutine kspace_gamma

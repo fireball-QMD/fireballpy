@@ -17,32 +17,32 @@
 ! xl(:,neighbPP(iatom,ineigh)) + ratom(:,neighjPP(iatom,ineigh)).
 
 subroutine neighborsPP ()
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   use M_system, only: icluster, natoms, ratom, imass, mbeta_max, nPP_b, nPP_j, nPP_map, nPPn, nPP_self, nPPx_b, &
-    & nPPx_j, nPPx_map, nPPx_point, nPPxn, nPPx_self, neighPPn, neighPP_b, neighPP_j, xl
+    & nPPx_j, nPPx_map, nPPx_point, nPPxn, nPPx_self, neighPPn, neighPP_b, neighPP_j, xl, neighPP_max, errno
   use M_fdata,only : nssh, rcutoff, rc_PP    
   implicit none
-  integer(c_long) iatom
-  integer(c_long) ineigh
-  integer(c_long) ibeta
-  integer(c_long) imu
-  integer(c_long) in1
-  integer(c_long) in2
-  integer(c_long) jatom
-  integer(c_long) jneigh
-  integer(c_long) jbeta
-  integer(c_long) katom
-  integer(c_long) kneigh
-  integer(c_long) kbeta
-  integer(c_long) ialp
-  integer(c_long) mbeta
-  integer(c_long) num_neigh
-  real(c_double) distance
-  real(c_double) distance2
-  real(c_double) range2
-  real(c_double) rcutoff_i
-  real(c_double) rcutoff_j
-  real(c_double), dimension (3) :: vec1, vec2, vec3, vec
+  integer iatom
+  integer ineigh
+  integer ibeta
+  integer imu
+  integer in1
+  integer in2
+  integer jatom
+  integer jneigh
+  integer jbeta
+  integer katom
+  integer kneigh
+  integer kbeta
+  integer ialp
+  integer mbeta
+  integer num_neigh
+  real(double) distance
+  real(double) distance2
+  real(double) range2
+  real(double) rcutoff_i
+  real(double) rcutoff_j
+  real(double), dimension (3) :: vec1, vec2, vec3, vec
   logical flag
 
   neighPP_j = 0.0d0
@@ -122,11 +122,15 @@ subroutine neighborsPP ()
        vec3(:) = xl(:,jbeta) + xl(:,ibeta)
        do mbeta = 0 , mbeta_max
          vec(:) = xl(:,mbeta)
-         distance = sqrt( ( vec(1) - vec3(1) )**2.0d0  +   &
-                &         ( vec(2) - vec3(2) )**2.0d0  +   &
-                &         ( vec(3) - vec3(3) )**2.0d0  ) 
+         distance = sqrt( ( vec(1) - vec3(1) )**2  +   &
+                &         ( vec(2) - vec3(2) )**2  +   &
+                &         ( vec(3) - vec3(3) )**2  ) 
          if(distance .lt. 0.0001) exit
        enddo
+       if (mbeta .gt. mbeta_max) then 
+         errno = 2
+         return
+       end if
        flag = .false.  
        do kneigh = 1, num_neigh
          katom = neighPP_j(kneigh,iatom)
@@ -135,6 +139,10 @@ subroutine neighborsPP ()
        enddo ! do kneigh
        if(.not. flag ) then 
          num_neigh = num_neigh + 1
+         if (num_neigh .gt. neighPP_max**2) then
+           errno = 2
+           return
+         end if
          neighPP_j(num_neigh,iatom) = jatom
          neighPP_b(num_neigh,iatom) = mbeta
        endif ! if(flag)
@@ -151,9 +159,9 @@ subroutine neighborsPP ()
          katom = nPP_j(kneigh,jatom)
          kbeta = nPP_b(kneigh,jatom)
          vec2(:) = ratom(:,katom) + xl(:,kbeta) + xl(:,jbeta)
-         distance = sqrt( ( vec1(1) - vec2(1) )**2.0d0  +      &
-               &          ( vec1(2) - vec2(2) )**2.0d0  +      &
-               &          ( vec1(3) - vec2(3) )**2.0d0  )
+         distance = sqrt( ( vec1(1) - vec2(1) )**2  +      &
+               &          ( vec1(2) - vec2(2) )**2  +      &
+               &          ( vec1(3) - vec2(3) )**2  )
          if (distance .lt. 0.0001d0) then
            nPPx_point(ineigh,iatom) = kneigh
            exit
@@ -203,7 +211,7 @@ subroutine neighborsPP ()
     end do
   end do
 
-  !   SELF nPP_self 
+  !   SELF nPPx_self 
   nPPx_self = -999
   do iatom = 1, natoms
     do ineigh = 1, nPPxn(iatom)

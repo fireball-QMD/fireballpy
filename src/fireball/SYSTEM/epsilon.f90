@@ -31,16 +31,16 @@
 !
 ! ===========================================================================
 subroutine epsilon(R1,R2,spe)
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   implicit none
  
-  real(c_double), intent(in) :: r1(3)
-  real(c_double), intent(in) :: r2(3)
-  real(c_double), intent(out) :: spe(3,3)
+  real(double), intent(in) :: r1(3)
+  real(double), intent(in) :: r2(3)
+  real(double), intent(out) :: spe(3,3)
  
-  integer(c_long) i,j,ii,jj,kk,ix
-  real(c_double) r1mag,r2mag,ypmag,unit
-  real(c_double) XPHAT(3),YPHAT(3),ZPHAT(3),R1HAT(3)
+  integer i,j,ii,jj,kk,ix
+  real(double) r1mag,r2mag,ypmag,unit
+  real(double) XPHAT(3),YPHAT(3),ZPHAT(3),R1HAT(3)
  
   r1mag=sqrt(r1(1)*r1(1)+r1(2)*r1(2)+r1(3)*r1(3))
   r2mag=sqrt(r2(1)*r2(1)+r2(2)*r2(2)+r2(3)*r2(3))

@@ -1,37 +1,37 @@
 subroutine dipole_proyection()
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   use M_system, only: natoms, ratom, imass, neigh_max, Q0_TOT, neigh_b, neigh_j, neighn, neigh_self, Qin, Qout, dip_x, &
     & dipQout_x, dipTot_x, dipIntra_x, dip_res_x, dipQin_x, dipRes_x, dip_y, dipQout_y, dipTot_y, dipIntra_y, dip_res_y, dipQin_y, &
     & dipRes_y, dip_z, dipQout_z, dipTot_z, dipIntra_z, dip_res_z, dipQin_z, dipRes_z, dip_tot, dip_proy, dipQin_tot, dipTot_tot, &
     & dipIntra_tot, dipQout_tot, dip_res_tot, dipRes_tot, dq_DP, rho, s_mat, dipc, xl
   use M_fdata, only: num_orb,nssh,Qneutral
   implicit none
-  real(c_double), parameter ::  Debye = 0.208194d0
-  real(c_double), parameter ::  klambda = 1.4d0
-  integer(c_long) iatom
-  integer(c_long) imu
-  integer(c_long) in1, in2
-  integer(c_long) ineigh
-  integer(c_long) inu
-  integer(c_long) issh
-  integer(c_long) jatom
-  integer(c_long) mbeta
-  real(c_double)      Qtot, Qtot1, Qtot2
-  real(c_double), dimension(3) :: r1,r2,Rbc,u21
-  real(c_double), dimension(3) :: rmedio, raux
-  real(c_double)      w_suma  
-  real(c_double), dimension(3,3) :: bwrr, bwrr_inv, u_bwrr, ut_bwrr, v_bwrr, vt_bwrr, zero_bwrr
-  real(c_double), dimension (natoms) :: c_k
-  real(c_double), dimension (neigh_max) :: w_k
-  real(c_double), dimension(3,natoms) :: intra_dip, res_dip
-  real(c_double), dimension(3,1) :: intra_dip_aux, delta_ck
-  integer(c_long) :: n_bwrr = 3
-  integer(c_long) :: lda_bwrr = 3
-  integer(c_long) :: lwork = 15 !MAX(1,3*MIN(M,N) + MAX(M,N),5*MIN(M,N)) 
-  integer(c_long) i
+  real(double), parameter ::  Debye = 0.208194d0
+  real(double), parameter ::  klambda = 1.4d0
+  integer iatom
+  integer imu
+  integer in1, in2
+  integer ineigh
+  integer inu
+  integer issh
+  integer jatom
+  integer mbeta
+  real(double)      Qtot, Qtot1, Qtot2
+  real(double), dimension(3) :: r1,r2,Rbc,u21
+  real(double), dimension(3) :: rmedio, raux
+  real(double)      w_suma  
+  real(double), dimension(3,3) :: bwrr, bwrr_inv, u_bwrr, ut_bwrr, v_bwrr, vt_bwrr, zero_bwrr
+  real(double), dimension (natoms) :: c_k
+  real(double), dimension (neigh_max) :: w_k
+  real(double), dimension(3,natoms) :: intra_dip, res_dip
+  real(double), dimension(3,1) :: intra_dip_aux, delta_ck
+  integer :: n_bwrr = 3
+  integer :: lda_bwrr = 3
+  integer :: lwork = 15 !MAX(1,3*MIN(M,N) + MAX(M,N),5*MIN(M,N)) 
+  integer i
   integer :: info
-  real(c_double), dimension(3) :: s_bwrr
-  real(c_double), dimension(15) :: dummy
+  real(double), dimension(3) :: s_bwrr
+  real(double), dimension(15) :: dummy
   do iatom = 1, natoms
     Q0_TOT(iatom) = 0
     in1 = imass(iatom)
@@ -278,9 +278,9 @@ subroutine dipole_proyection()
 end subroutine dipole_proyection
 
 function get_min_parabola(x1,x2,x3,y1,y2,y3)
-  use iso_c_binding
-  real(c_double),intent(in) :: x1,x2,x3,y1,y2,y3
-  real(c_double) a,b,c,get_min_parabola
+  use, intrinsic :: iso_fortran_env, only: double => real64
+  real(double),intent(in) :: x1,x2,x3,y1,y2,y3
+  real(double) a,b,c,get_min_parabola
   b=(y2-y3)-(y1-y2)*(x2**2-x3**2)/(x1**2-x2**2)
   b=b/( (x2-x3)-(x1-x2)*(x2**2-x3**2)/(x1**2-x2**2) )
   a=(y1-y2)/(x1**2-x2**2)-b*(x1-x2)/(x1**2-x2**2)

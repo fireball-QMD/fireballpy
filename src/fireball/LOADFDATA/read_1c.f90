@@ -1,9 +1,9 @@
 subroutine read_1c ()
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   use M_fdata, only: nspecies, nzx, fdataLocation, onecfname, exc1c0, nuxc1c, &
     & dnuxc1c, dexc1c, d2exc1c, d2nuxc1c, nsh_max, nssh
   implicit none
-  integer(c_long) :: iline, in1, issh, itype, jssh, kssh, kkssh, numsh
+  integer :: iline, in1, issh, itype, jssh, kssh, kkssh, numsh
   character (len=3) :: auxz
   character (len=1000) :: root
 

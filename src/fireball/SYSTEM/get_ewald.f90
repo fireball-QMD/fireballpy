@@ -1,53 +1,53 @@
 ! This routine calculates the Ewald sum for a crystal with a given basis. This is specially designed for molecules with a given dipole moment.
 subroutine get_ewald (iauxforce)
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   use M_constants, only: pi
   use M_system, only: icluster, natoms, ratom, imass, ewald, dewald, fewald, Qin, a1vec, a2vec, a3vec
   use M_fdata, only: nssh, Qneutral
   implicit none
-  integer(c_long), intent (in) :: iauxforce
-  integer(c_long) iatom
-  integer(c_long) ig1
-  integer(c_long) ig2
-  integer(c_long) ig3
-  integer(c_long) ig1mx
-  integer(c_long) ig2mx
-  integer(c_long) ig3mx
-  integer(c_long) il1
-  integer(c_long) il2
-  integer(c_long) il3
-  integer(c_long) il1mx
-  integer(c_long) il2mx
-  integer(c_long) il3mx
-  integer(c_long) in1
-  integer(c_long) issh
-  integer(c_long) ix
-  integer(c_long) jatom
-  real(c_double) argument
-  real(c_double) my_erfc
-  real(c_double) derfcdr
-  real(c_double) distance
-  real(c_double) factor
-  real(c_double) factorf
-  real(c_double) g1mag2, g2mag2, g3mag2
-  real(c_double) gdotb
-  real(c_double) gmax
-  real(c_double) gmin2
-  real(c_double) gsq
-  real(c_double) kappa
-  real(c_double) QQ
-  real(c_double) r1mag2, r2mag2, r3mag2
-  real(c_double) rmax
-  real(c_double) rmin2
-  real(c_double) stuff
-  real(c_double) volcel
-  real(c_double), dimension (3) :: cvec
-  real(c_double), dimension (3) :: eta
-  real(c_double), dimension (3, natoms) :: fewald1, fewald2
-  real(c_double), dimension (3) :: g
-  real(c_double), dimension (3) :: g1, g2, g3
-  real(c_double), dimension (natoms) :: Q, Q0
-  real(c_double), dimension (3) :: vecl
+  integer, intent (in) :: iauxforce
+  integer iatom
+  integer ig1
+  integer ig2
+  integer ig3
+  integer ig1mx
+  integer ig2mx
+  integer ig3mx
+  integer il1
+  integer il2
+  integer il3
+  integer il1mx
+  integer il2mx
+  integer il3mx
+  integer in1
+  integer issh
+  integer ix
+  integer jatom
+  real(double) argument
+  real(double) my_erfc
+  real(double) derfcdr
+  real(double) distance
+  real(double) factor
+  real(double) factorf
+  real(double) g1mag2, g2mag2, g3mag2
+  real(double) gdotb
+  real(double) gmax
+  real(double) gmin2
+  real(double) gsq
+  real(double) kappa
+  real(double) QQ
+  real(double) r1mag2, r2mag2, r3mag2
+  real(double) rmax
+  real(double) rmin2
+  real(double) stuff
+  real(double) volcel
+  real(double), dimension (3) :: cvec
+  real(double), dimension (3) :: eta
+  real(double), dimension (3, natoms) :: fewald1, fewald2
+  real(double), dimension (3) :: g
+  real(double), dimension (3) :: g1, g2, g3
+  real(double), dimension (natoms) :: Q, Q0
+  real(double), dimension (3) :: vecl
   ewald = 0.0d0
   if (iauxforce .eq. 1) dewald = 0.0d0
   if (iauxforce .eq. 1) fewald = 0.0d0
@@ -83,15 +83,15 @@ subroutine get_ewald (iauxforce)
   if (g2mag2 .lt. gmin2) gmin2 = g2mag2
   if (g3mag2 .lt. gmin2) gmin2 = g3mag2
   kappa = sqrt(sqrt(gmin2/(4.0d0*rmin2)))
-  ig1mx = nint(gmax * sqrt(4.0d0*kappa**2/g1mag2) + 1.0d0, c_long)
-  ig2mx = nint(gmax * sqrt(4.0d0*kappa**2/g2mag2) + 1.0d0, c_long)
-  ig3mx = nint(gmax * sqrt(4.0d0*kappa**2/g3mag2) + 1.0d0, c_long)
+  ig1mx = nint(gmax * sqrt(4.0d0*kappa**2/g1mag2) + 1.0d0)
+  ig2mx = nint(gmax * sqrt(4.0d0*kappa**2/g2mag2) + 1.0d0)
+  ig3mx = nint(gmax * sqrt(4.0d0*kappa**2/g3mag2) + 1.0d0)
   if (ig1mx .le. 1) ig1mx = 2
   if (ig2mx .le. 1) ig2mx = 2
   if (ig3mx .le. 1) ig3mx = 2
-  il1mx = nint(rmax * sqrt(1.0d0/(kappa**2*r1mag2)) + 1.0d0, c_long)
-  il2mx = nint(rmax * sqrt(1.0d0/(kappa**2*r2mag2)) + 1.0d0, c_long)
-  il3mx = nint(rmax * sqrt(1.0d0/(kappa**2*r3mag2)) + 1.0d0, c_long)
+  il1mx = nint(rmax * sqrt(1.0d0/(kappa**2*r1mag2)) + 1.0d0)
+  il2mx = nint(rmax * sqrt(1.0d0/(kappa**2*r2mag2)) + 1.0d0)
+  il3mx = nint(rmax * sqrt(1.0d0/(kappa**2*r3mag2)) + 1.0d0)
   if (il1mx .le. 1) il1mx = 2
   if (il2mx .le. 1) il2mx = 2
   if (il3mx .le. 1) il3mx = 2
@@ -191,11 +191,11 @@ subroutine get_ewald (iauxforce)
 end subroutine get_ewald
 
 subroutine cross (a, b, c)
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   implicit none
-  real(c_double), intent(in), dimension(3) :: a
-  real(c_double), intent(in), dimension(3) :: b
-  real(c_double), intent(out), dimension(3) :: c
+  real(double), intent(in), dimension(3) :: a
+  real(double), intent(in), dimension(3) :: b
+  real(double), intent(out), dimension(3) :: c
   c(1) = a(2)*b(3) - a(3)*b(2)
   c(2) = a(3)*b(1) - a(1)*b(3)
   c(3) = a(1)*b(2) - a(2)*b(1)
@@ -203,10 +203,10 @@ subroutine cross (a, b, c)
 end subroutine cross
 
 function my_erfc (x)
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   implicit none
-  real(c_double), intent(in) :: x
-  real(c_double) :: s, ax, t, my_erfc
+  real(double), intent(in) :: x
+  real(double) :: s, ax, t, my_erfc
 
   ax = abs(x)
   if( ax .lt. 1.0d-10) then

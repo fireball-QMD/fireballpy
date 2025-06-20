@@ -1,9 +1,9 @@
 subroutine buildh ()
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   use M_system, only: natoms, imass, vxc_1c, ewaldsr, neigh_j, neighn, vxc, vxc_ca, vca, ewaldlr, h_mat, t_mat, vna, ewaldqmmm
   use M_fdata, only: num_orb
   implicit none
-  integer(c_long) :: iatom, jatom, imu, inu, ineigh, in1, in2
+  integer :: iatom, jatom, imu, inu, ineigh, in1, in2
 
   h_mat = 0.0d0
   do iatom = 1, natoms

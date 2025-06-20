@@ -1,25 +1,25 @@
 subroutine assemble_lr () 
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   use M_constants, only: eq2
   use M_system, only: natoms, ratom, imass, ewald, dip, neigh_b, neigh_j, neighn, Qin, s_mat, ewaldlr, xl
   use M_fdata, only: nssh,Qneutral,num_orb
   implicit none
-  integer(c_long) iatom
-  integer(c_long) imu
-  integer(c_long) inu
-  integer(c_long) in1
-  integer(c_long) in2
-  integer(c_long) ineigh
-  integer(c_long) issh
-  integer(c_long) jatom
-  integer(c_long) mbeta
-  real(c_double) distance12
-  real(c_double) dq1
-  real(c_double) dterm
-  real(c_double) sterm
-  real(c_double), dimension (3) :: r1
-  real(c_double), dimension (3) :: r2
-  real(c_double), dimension (natoms) :: sub_ewald
+  integer iatom
+  integer imu
+  integer inu
+  integer in1
+  integer in2
+  integer ineigh
+  integer issh
+  integer jatom
+  integer mbeta
+  real(double) distance12
+  real(double) dq1
+  real(double) dterm
+  real(double) sterm
+  real(double), dimension (3) :: r1
+  real(double), dimension (3) :: r2
+  real(double), dimension (natoms) :: sub_ewald
   ewaldlr = 0.0d0
   sub_ewald = 0.0d0
   do iatom = 1, natoms

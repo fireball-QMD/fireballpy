@@ -1,22 +1,22 @@
 subroutine unocentros (in1, iatom, exc_1c, muexc_1c, dccexc_1c, mu1xc)
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   use M_system, only: degelec, getmssh, getlssh, getissh, numorb_max, Qin
   use M_fdata, only: nsh_max, nssh, num_orb, nuxc1c, dnuxc1c, exc1c0, dexc1c, Qneutral
   implicit none
-  integer(c_long), intent(in) :: iatom
-  integer(c_long), intent(in) :: in1
-  real(c_double), intent(out) :: exc_1c  ! XC energy term of DCC
-  real(c_double), intent(out) :: muexc_1c      ! XC potential term of DCC
-  real(c_double), intent(out) :: dccexc_1c     ! XC DCC term
-  real(c_double), intent(out), dimension (numorb_max, numorb_max) :: mu1xc
-  integer(c_long) imu
-  integer(c_long) issh
-  integer(c_long) l1, l2
-  integer(c_long) m1, m2
-  integer(c_long) inu
-  integer(c_long) jssh
-  integer(c_long) kssh
-  real(c_double), dimension (nsh_max) :: dqi
+  integer, intent(in) :: iatom
+  integer, intent(in) :: in1
+  real(double), intent(out) :: exc_1c  ! XC energy term of DCC
+  real(double), intent(out) :: muexc_1c      ! XC potential term of DCC
+  real(double), intent(out) :: dccexc_1c     ! XC DCC term
+  real(double), intent(out), dimension (numorb_max, numorb_max) :: mu1xc
+  integer imu
+  integer issh
+  integer l1, l2
+  integer m1, m2
+  integer inu
+  integer jssh
+  integer kssh
+  real(double), dimension (nsh_max) :: dqi
 
   exc_1c = 0.0d0
   dccexc_1c = 0.0d0

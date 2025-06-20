@@ -21,9 +21,14 @@ from rich.text import Text
 from ase.data import atomic_numbers, atomic_names, atomic_masses, chemical_symbols
 
 from fireballpy import __version__ as __fb_version__
-from fireballpy.utils import get_data_from_url
+from fireballpy.utils import get_data_from_url, read_wf, read_wf_info, ANGULAR_MOMENTUM, ANGULAR_MOMENTUM_REV
 from fireballpy.basis import __file__ as __basis_file__
 from fireballpy.basis._begin import generate_wavefunctions, generate_vnn
+
+PPURL = 'https://fireball.ftmc.uam.es/fireballpy/ppfiles.tar.xz'
+A0 = {'s': 2.0, 'p': 1.0, 'd': 0.8, 'f': 0.7}
+ELECTRONS_PER_ORB = {'s': 2, 'p': 6, 'd': 10, 'f': 14}
+ELECTRONIC_CONFIG = ('1s','2s','2p','3s','3p','4s','3d','4p','5s','4d','5p','6s','4f','5d','6p','7s','5f','6d','7p','8s')
 
 
 # Commands preparation
@@ -60,14 +65,6 @@ def raise_err(err: Exception):
     )
     console.print(panel)
     exit(1)
-
-
-PPURL = 'https://fireball.ftmc.uam.es/fireballpy/ppfiles.tar.xz'
-ANGULAR_MOMENTUM = {'s': 0, 'p': 1, 'd': 2, 'f': 3}
-ANGULAR_MOMENTUM_REV = {v: k for k, v in ANGULAR_MOMENTUM.items()}
-A0 = {'s': 2.0, 'p': 1.0, 'd': 0.8, 'f': 0.7}
-ELECTRONS_PER_ORB = {'s': 2, 'p': 6, 'd': 10, 'f': 14}
-ELECTRONIC_CONFIG = ('1s','2s','2p','3s','3p','4s','3d','4p','5s','4d','5p','6s','4f','5d','6p','7s','5f','6d','7p','8s')
 
 
 class ECEnum(IntEnum):
@@ -503,19 +500,19 @@ def wavefunctions(element: Annotated[str, Parameter(group=args_grp)],
         if ele.nexcite in [1, 2]:
             meta[ele.symbol][o]['filename_ewf'] = ele.filename_ewf[i]
 
-    generate_wavefunctions(ioption_in=np.int64(ele.ioption),
-                           nexcite_in=np.int64(ele.nexcite),
-                           nznuc_in=np.int64(ele.nznuc),
-                           nzval_in=np.int64(ele.nzval),
-                           nzval_ion_in=np.int64(ele.nzval_ion),
-                           nzval_pp_in=np.int64(ele.nzval_pp),
-                           ioptim_in=np.int64(ele.ioptim),
+    generate_wavefunctions(ioption_in=int(ele.ioption),
+                           nexcite_in=int(ele.nexcite),
+                           nznuc_in=ele.nznuc,
+                           nzval_in=ele.nzval,
+                           nzval_ion_in=ele.nzval_ion,
+                           nzval_pp_in=int(ele.nzval_pp),
+                           ioptim_in=ele.ioptim,
                            atomname_in=ele.atomname,
                            ppfile_in=ele.ppfile,
                            ppionfile_in=ele.ppionfile,
                            sav_in=ele.sav,
                            outpath_in=str(output) + os.path.sep,
-                           lam_in=np.ascontiguousarray(ele.lam, dtype=np.int64),
+                           lam_in=np.ascontiguousarray(ele.lam, dtype=np.int32),
                            a0_in=np.ascontiguousarray(ele.a0, dtype=np.float64),
                            rcutoff_in=ele.rcutoff,
                            xocc_in=ele.xocc,
@@ -598,12 +595,12 @@ def compute_vnn(ele: Element, output: pathlib.Path) -> None:
     if not hasattr(ele, 'filename_ewf'):
         ele.filename_ewf = [x + 'x' for x in ele.filename_wf]
     ele.na_filenames()
-    generate_vnn(nexcite_in=np.int64(ele.nexcite),
-                 nznuc_in=np.int64(ele.nznuc),
+    generate_vnn(nexcite_in=int(ele.nexcite),
+                 nznuc_in=ele.nznuc,
                  ppfile_in=ele.ppfile,
                  ppionfile_in=ele.ppionfile,
                  outpath_in=str(output) + os.path.sep,
-                 lam_in=np.ascontiguousarray(ele.lam, dtype=np.int64),
+                 lam_in=np.ascontiguousarray(ele.lam, dtype=np.int32),
                  rcutoff_in=ele.rcutoff,
                  filename_wf_in=ele.filename_wf,
                  filename_ewf_in=ele.filename_ewf,
@@ -792,13 +789,10 @@ def plot(wavefunctions: Annotated[list[pathlib.Path],
     my_colors = colors * (len(wavefunctions) // len(colors)) + colors[:len(wavefunctions) % len(colors)]
     _, ax = plt.subplots(figsize=(6.9, 4.3), layout='constrained')
     for i, path in enumerate(wavefunctions):
-        with open(path, 'r') as fp:
-            raw = fp.read().splitlines()
-        symbol = chemical_symbols[int(raw[1].split()[0].strip())]
-        rcutoff = float(raw[3].split()[0].strip())
-        orbital = ANGULAR_MOMENTUM_REV[int(raw[4].strip())]
-        y = np.array([x for row in map(lambda s: s.replace('D', 'E').split(), raw[5:]) for x in row], dtype=np.float64)
-        x = np.arange(y.size)*rcutoff/y.size
+        z, l, rcutoff = read_wf_info(path)
+        x, y = read_wf(path)
+        symbol = chemical_symbols[z]
+        orbital = ANGULAR_MOMENTUM_REV[l]
 
         sub = f'{orbital}{"*" if excited[i] else ""}'
         label = r'$\phi_{' + sub + r'}(' + symbol + r')\ \ R_c=' + str(rcutoff) + r'$'

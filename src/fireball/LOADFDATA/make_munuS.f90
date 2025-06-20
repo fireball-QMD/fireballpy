@@ -1,8 +1,8 @@
 subroutine make_munuS ()
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   use M_fdata, only: MES_max, nspecies, nssh, index_maxS, muS, mvalueS, nuS
   implicit none
-  integer(c_long) :: index, in1, in2, issh1, issh2, n1, n2
+  integer :: index, in1, in2, issh1, issh2, n1, n2
 
   MES_max = 0
   if (allocated(index_maxS)) deallocate(index_maxS)

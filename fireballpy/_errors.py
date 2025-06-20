@@ -21,3 +21,15 @@ def raise_fb_error(fb_errno):
         raise RuntimeError("Total charge is not being conserved, most "
                            "probably for rounding errors. "
                            "Try running again")
+
+    # Neighbours error
+    if fb_errno == 2:
+        raise RuntimeError("Neighbours could not be correctly found. "
+                           "Please check your system and, if the error "
+                           "persists, contact the developers")
+
+    # Linear dependence error
+    if fb_errno == 13:
+        raise RuntimeError("Linear dependence in basis found which is "
+                           "not compatible with Lowdin symmetric orthogonalization. "
+                           "Please select another charge projection method.")

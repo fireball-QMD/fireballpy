@@ -1,25 +1,25 @@
 subroutine common_neighbors ()
-  use iso_c_binding
-  use M_system, only: natoms, ratom, imass, neigh_b, neigh_j, neighn, neigh_comb, neigh_comj, neigh_comm, neigh_comn, xl
+  use, intrinsic :: iso_fortran_env, only: double => real64
+  use M_system, only: natoms, ratom, imass, neigh_b, neigh_j, neighn, neigh_comb, neigh_comj, neigh_comm, neigh_comn, xl, errno
   use M_fdata, only: nssh, rcutoff
-  integer(c_long) ialp
-  integer(c_long) iatom
-  integer(c_long) ibeta
-  integer(c_long) imu
-  integer(c_long) in1, in2
-  integer(c_long) ineigh
-  integer(c_long) jatom
-  integer(c_long) jbeta
-  integer(c_long) jneigh
-  integer(c_long) katom
-  integer(c_long) kbeta
-  integer(c_long) kneigh
-  integer(c_long) num_neigh
-  real(c_double) distance2
-  real(c_double) range2
-  real(c_double) rcutoff_i, rcutoff_j
-  real(c_double), dimension (3) :: diff
-  real(c_double), dimension (3) :: vec, vec1, vec2
+  integer ialp
+  integer iatom
+  integer ibeta
+  integer imu
+  integer in1, in2
+  integer ineigh
+  integer jatom
+  integer jbeta
+  integer jneigh
+  integer katom
+  integer kbeta
+  integer kneigh
+  integer num_neigh
+  real(double) distance2
+  real(double) range2
+  real(double) rcutoff_i, rcutoff_j
+  real(double), dimension (3) :: diff
+  real(double), dimension (3) :: vec, vec1, vec2
   do ialp = 1,natoms
     num_neigh = 0
     do ineigh = 1, neighn(ialp)
@@ -46,6 +46,10 @@ subroutine common_neighbors ()
            range2 = (rcutoff_i + rcutoff_j - 0.01d0)**2
            if (distance2 .le. range2) then
              num_neigh = num_neigh + 1
+             if (num_neigh .gt. neigh_max**2) then
+               errno = 2
+               return
+             end if
              neigh_comj(1,num_neigh,ialp) = iatom
              neigh_comb(1,num_neigh,ialp) = ibeta
              neigh_comj(2,num_neigh,ialp) = jatom

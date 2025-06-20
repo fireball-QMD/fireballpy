@@ -1,16 +1,16 @@
 subroutine Dassemble_qmmm ()
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   use M_constants, only: eq2
   use M_system, only: natoms, ratom, imass, dip, dipp, neigh_b, neigh_j, neighn, sp_mat, rho, s_mat, &
     & xl, flrew_qmmm, qmmm_qm_mm_pairs, qmmm_dxyzcl, qmmm_qm_xcrd
   use M_fdata, only  : nssh, Qneutral, num_orb
   implicit none
-  integer(c_long) :: iatom, imu, in1, in2, in3, ineigh, inu, issh, jatom, jmu, katom, mbeta
-  real(c_double) :: distance12, dij, dq3, dterm, sterm
-  real(c_double), dimension (3) :: dewaldlr_i_qmmm, dewaldlr_j_qmmm, dpterm, r1, r2, rhat12, spterm, vij
-  real(c_double), dimension (natoms) :: sub_ewaldqmmm
-  real(c_double), dimension (3, natoms) :: sub_dewaldqmmm
-  real(c_double), dimension (3, natoms, qmmm_qm_mm_pairs) :: dqmmm
+  integer :: iatom, imu, in1, in2, in3, ineigh, inu, issh, jatom, jmu, katom, mbeta
+  real(double) :: distance12, dij, dq3, dterm, sterm
+  real(double), dimension (3) :: dewaldlr_i_qmmm, dewaldlr_j_qmmm, dpterm, r1, r2, rhat12, spterm, vij
+  real(double), dimension (natoms) :: sub_ewaldqmmm
+  real(double), dimension (3, natoms) :: sub_dewaldqmmm
+  real(double), dimension (3, natoms, qmmm_qm_mm_pairs) :: dqmmm
 
   flrew_qmmm = 0.0d0
   sub_ewaldqmmm = 0.0d0

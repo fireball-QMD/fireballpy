@@ -51,7 +51,7 @@ def get_eigenvectors(*, kpt: int = 0, atoms: Atoms | None = None,
     fbobj.run_scf(fix_charges=True)
 
     # Get from module
-    orbitals = np.zeros(fbobj.natoms, dtype=np.int64)
+    orbitals = np.zeros(fbobj.natoms, dtype=np.int32)
     get_orbitals(orbitals)
     eigenvectors = fbobj.eigenvectors[kpt] if not fbobj.kpoints.isgamma else np.real(fbobj.eigenvectors[kpt])
     return np.array([OrbitalVector(vector=ei, orbitals=orbitals) for ei in eigenvectors], dtype=OrbitalVector)

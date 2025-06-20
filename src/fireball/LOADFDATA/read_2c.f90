@@ -1,12 +1,12 @@
 subroutine read_2c (interaction)
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   use M_fdata, only: fdataLocation, twocfname, nspecies, nssh, nsshPP, nzx, nfofx, cl_PP, &
     & ind2c, index_max2c, index_maxS, index_maxPP, index_max2cDipX, index_max2cDipY, z2cmax, numz2c, nsh_max
   implicit none
-  integer(c_long), intent (in) :: interaction
-  integer(c_long) :: in1, in2, initype, iounit, isorp, issh, isub2c, itype, npseudo, num_nonzero, numz, nzx1, nzx2
-  real(c_double) :: rc1, rc2, zmax, zmin
-  real(c_double), dimension (nsh_max) :: cl_pseudo
+  integer, intent (in) :: interaction
+  integer :: in1, in2, initype, iounit, isorp, issh, isub2c, itype, npseudo, num_nonzero, numz, nzx1, nzx2
+  real(double) :: rc1, rc2, zmax, zmin
+  real(double), dimension (nsh_max) :: cl_pseudo
   character (len = 1000) :: extension, filename, root, root_isorp
 
   iounit = 71

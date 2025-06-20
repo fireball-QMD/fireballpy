@@ -1,13 +1,13 @@
 subroutine buildspline_1d (integral, numz, itype, in1, in2, zmax, interaction, xintegral_2c)
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   use M_fdata, only: ind2c, ME2c_max, nfofx, splineint_2c
   implicit none
-  integer(c_long), intent(in) :: integral, numz, itype, in1, in2, interaction
-  real(c_double), intent(in) :: zmax
-  real(c_double), dimension(ME2c_max,nfofx), intent(in) :: xintegral_2c
-  integer(c_long) :: iorder, numz_used
-  real(c_double) :: h, hi, zmin, w
-  real(c_double), dimension (numz) :: b, d, z
+  integer, intent(in) :: integral, numz, itype, in1, in2, interaction
+  real(double), intent(in) :: zmax
+  real(double), dimension(ME2c_max,nfofx), intent(in) :: xintegral_2c
+  integer :: iorder, numz_used
+  real(double) :: h, hi, zmin, w
+  real(double), dimension (numz) :: b, d, z
 
   zmin = 0.0d0
   h = (zmax - zmin)/(numz - 1)

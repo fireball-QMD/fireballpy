@@ -1,10 +1,10 @@
 subroutine readdata_3c (iounit, numx, numy, num_nonzero, isorp, maxtype, index, xintegral)
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   use M_fdata, only: numXmax, numYmax, ME3c_max, nspecies
   implicit none
-  integer(c_long), intent (in) :: index, iounit, isorp, maxtype, num_nonzero, numx, numy
-  real(c_double), intent (out), dimension (numXmax, numYmax, ME3c_max, 0:maxtype, nspecies**3) :: xintegral
-  integer(c_long) :: ipoint, integral, jpoint
+  integer, intent (in) :: index, iounit, isorp, maxtype, num_nonzero, numx, numy
+  real(double), intent (out), dimension (numXmax, numYmax, ME3c_max, 0:maxtype, nspecies**3) :: xintegral
+  integer :: ipoint, integral, jpoint
 
   do jpoint = 1, numy
     do ipoint = 1, numx

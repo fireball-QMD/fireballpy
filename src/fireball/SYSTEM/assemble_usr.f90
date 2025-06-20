@@ -1,41 +1,41 @@
 subroutine assemble_usr ()
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   use M_constants, only: eq2
   use M_system, only: iforce, natoms, ratom, imass, neigh_max, uiiuee, ewald, fewald, neigh_b, neigh_j, neighn, Qin, dq, xl, dusr, dxcv
   use M_fdata, only: nsh_max, ME2c_max, nssh, Qneutral
-  integer(c_long) iatom
-  integer(c_long) ideriv
-  integer(c_long) in1, in2
-  integer(c_long) index
-  integer(c_long) index_coulomb
-  integer(c_long) ineigh
-  integer(c_long) interaction
-  integer(c_long) issh
-  integer(c_long) jatom
-  integer(c_long) jssh
-  integer(c_long) mbeta
-  integer(c_long) n1, n2
-  real(c_double) distance
-  real(c_double) dq1
-  real(c_double) dqi
-  real(c_double) eklr
-  real(c_double) qi, qj
-  real(c_double) QQ
-  real(c_double) u0tot
-  real(c_double) ue0tot
-  real(c_double) xforce
-  real(c_double) Zi, Zj
-  real(c_double), dimension (natoms, neigh_max) :: corksr
-  real(c_double), dimension (nsh_max, nsh_max) :: coulomb
-  real(c_double), dimension (nsh_max, nsh_max) :: coulombD
-  real(c_double), dimension (3) :: dcorksr
-  real(c_double), dimension (ME2c_max) :: dslist
-  real(c_double), dimension (3) :: eta
-  real(c_double), dimension (natoms) :: Q, Q0
-  real(c_double), dimension (3) :: r1, r2
-  real(c_double), dimension (ME2c_max) :: slist
-  real(c_double), dimension (natoms, neigh_max) :: u0
-  real(c_double), dimension (natoms) :: uee00
+  integer iatom
+  integer ideriv
+  integer in1, in2
+  integer index
+  integer index_coulomb
+  integer ineigh
+  integer interaction
+  integer issh
+  integer jatom
+  integer jssh
+  integer mbeta
+  integer n1, n2
+  real(double) distance
+  real(double) dq1
+  real(double) dqi
+  real(double) eklr
+  real(double) qi, qj
+  real(double) QQ
+  real(double) u0tot
+  real(double) ue0tot
+  real(double) xforce
+  real(double) Zi, Zj
+  real(double), dimension (natoms, neigh_max) :: corksr
+  real(double), dimension (nsh_max, nsh_max) :: coulomb
+  real(double), dimension (nsh_max, nsh_max) :: coulombD
+  real(double), dimension (3) :: dcorksr
+  real(double), dimension (ME2c_max) :: dslist
+  real(double), dimension (3) :: eta
+  real(double), dimension (natoms) :: Q, Q0
+  real(double), dimension (3) :: r1, r2
+  real(double), dimension (ME2c_max) :: slist
+  real(double), dimension (natoms, neigh_max) :: u0
+  real(double), dimension (natoms) :: uee00
   dusr = 0.0d0
   dxcv = 0.0d0
   u0 = 0.0d0

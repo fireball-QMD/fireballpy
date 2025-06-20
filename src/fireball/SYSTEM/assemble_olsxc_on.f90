@@ -1,14 +1,14 @@
 subroutine assemble_olsxc_on ()
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   use M_system, only: natoms, imass, uxcdcc_ols, neigh_self, numorb_max, vxc, vxc_ca
   use M_fdata, only: num_orb
   implicit none
-  integer(c_long) iatom, matom
-  integer(c_long) imu
-  integer(c_long) in1, in3
-  integer(c_long) inu
-  real(c_double), dimension (numorb_max, numorb_max) :: bcxcx
-  real(c_double) xc
+  integer iatom, matom
+  integer imu
+  integer in1, in3
+  integer inu
+  real(double), dimension (numorb_max, numorb_max) :: bcxcx
+  real(double) xc
   vxc = 0.0d0
   vxc_ca = 0.0d0
   uxcdcc_ols = 0.0d0

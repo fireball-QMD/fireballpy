@@ -1,39 +1,39 @@
 subroutine trescentrosS ( isorp, in1, in2, indna, x, y, cost, bcnax)
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   use M_system, only: ithetamax
   use M_fdata, only: hx_den3, hy_den3, numx3c_den3, numy3c_den3, x3cmax_den3, y3cmax_den3, &
     & den3S_01, den3S_02, den3S_03, den3S_04, den3S_05, &
     & ntheta, MES_max, icon3c, index_maxS, mvalueS, nsh_max, nssh
   implicit none
-  integer(c_long), intent (in) :: in1
-  integer(c_long), intent (in) :: in2
-  integer(c_long), intent (in) :: indna
-  integer(c_long), intent (in) :: isorp
-  real(c_double), intent (in) :: cost
-  real(c_double), intent (in) :: x
-  real(c_double), intent (in) :: y
-  real(c_double), intent (out), dimension (nsh_max, nsh_max) :: bcnax
-  integer(c_long) imu
-  integer(c_long) iME
-  integer(c_long) index
-  integer(c_long) inu
-  integer(c_long) kforce
-  integer(c_long) nl
-  integer(c_long) nx
-  integer(c_long) ny
-  real(c_double) argument
-  real(c_double) cost2
-  real(c_double) dQ_Ldx
-  real(c_double) dQ_Ldy
-  real(c_double) Q_L
-  real(c_double) sint
-  real(c_double) xxmax
-  real(c_double) yymax
-  real(c_double) hx
-  real(c_double) hy
-  real(c_double), dimension (0:ithetamax - 1, MES_max) :: bcnalist
-  real(c_double), dimension (MES_max) :: hlist
-  real(c_double), dimension (0:ithetamax - 1) :: p
+  integer, intent (in) :: in1
+  integer, intent (in) :: in2
+  integer, intent (in) :: indna
+  integer, intent (in) :: isorp
+  real(double), intent (in) :: cost
+  real(double), intent (in) :: x
+  real(double), intent (in) :: y
+  real(double), intent (out), dimension (nsh_max, nsh_max) :: bcnax
+  integer imu
+  integer iME
+  integer index
+  integer inu
+  integer kforce
+  integer nl
+  integer nx
+  integer ny
+  real(double) argument
+  real(double) cost2
+  real(double) dQ_Ldx
+  real(double) dQ_Ldy
+  real(double) Q_L
+  real(double) sint
+  real(double) xxmax
+  real(double) yymax
+  real(double) hx
+  real(double) hy
+  real(double), dimension (0:ithetamax - 1, MES_max) :: bcnalist
+  real(double), dimension (MES_max) :: hlist
+  real(double), dimension (0:ithetamax - 1) :: p
   do inu = 1, nssh(in2)
     do imu = 1, nssh(in1)
       bcnax(imu,inu) = 0.0d0

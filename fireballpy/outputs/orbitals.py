@@ -35,13 +35,13 @@ class OrbitalVector:
     """
     def __init__(self, *,
                  vector: NDArray,
-                 orbitals: NDArray[np.int64]) -> None:
+                 orbitals: NDArray[np.int32]) -> None:
         type_check(vector, np.ndarray, 'NDArray')
         type_check(orbitals, np.ndarray, 'NDArray')
         self.vector = np.ascontiguousarray(vector, dtype=vector.dtype)
         if len(self.vector.shape) != 1:
             raise ValueError("Parameter ``vector`` is not a vector.")
-        self.orbitals = np.ascontiguousarray(orbitals, dtype=np.int64)
+        self.orbitals = np.ascontiguousarray(orbitals, dtype=np.int32)
 
         # Compute the slices for the different atoms
         self.slices = [slice(0, self.orbitals[0])]
@@ -121,13 +121,13 @@ class OrbitalMatrix:
     """
     def __init__(self, *,
                  matrix: NDArray,
-                 orbitals: NDArray[np.int64]) -> None:
+                 orbitals: NDArray[np.int32]) -> None:
         type_check(matrix, np.ndarray, 'NDArray')
         type_check(orbitals, np.ndarray, 'NDArray')
         self.matrix = np.ascontiguousarray(matrix, dtype=matrix.dtype)
         if len(self.matrix.shape) != 2 or (matrix.shape[0] != matrix.shape[1]):
             raise ValueError("Parameter ``matrix`` is not a matrix.")
-        self.orbitals = np.ascontiguousarray(orbitals, dtype=np.int64)
+        self.orbitals = np.ascontiguousarray(orbitals, dtype=np.int32)
 
         # Compute the slices for the different atoms
         self.slices = [slice(0, self.orbitals[0])]

@@ -1,19 +1,20 @@
 subroutine assemble_mcweda ()
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   use M_system, only: idipole, iqmmm, natoms, eqmmm, Kscf, neigh_b, neigh_j, neighn, neigh_self, neighPP_self, neighPPn, &
-    & neighPP_b, neighPP_j, ewaldqmmm
+    & neighPP_b, neighPP_j, ewaldqmmm, errno
   implicit none
-  integer(c_long) :: iatom, jatom, ineigh, mbeta, kforce
+  integer :: iatom, jatom, ineigh, mbeta, kforce
   if (Kscf .eq. 1) then
 
     call neighbors()
     call neighborsPP()
     call num_neigh_tot ()
-    call initneighbors ()
+    !call initneighbors ()
     call backnay ()
     call neighbors_pairs()
     call common_neighbors ()
     call common_neighborsPP ()
+    if (errno .ne. 0) return
     kforce = 0
     call get_ewald (kforce) 
   end if ! end if (Kscf .eq. 1)

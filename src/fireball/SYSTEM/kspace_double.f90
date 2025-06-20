@@ -1,44 +1,44 @@
 subroutine kspace_double (ikpoint, sks)
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   use M_system, only: iqout, icluster, igamma, natoms, ratom, degelec, imass, getlssh, getissh, Kscf, blowre, bbnkre, blowim, bbnkim, &
     & sm12_complex, eigen_k, norbitals, norbitals_new, getiatom, neigh_b, neigh_j, neighn, neighPPn, neighPP_b, neighPP_j, vnl, s_mat, &
     & h_mat, xl, errno
   use M_fdata, only: num_orb, Qneutral
   implicit none
-  integer(c_long), intent (in) :: ikpoint
-  real(c_double), intent (in), dimension (3) :: sks
-  real(c_double), parameter :: overtol = 1.0d-4
-  integer(c_long) iatom
-  integer(c_long) imu
+  integer, intent (in) :: ikpoint
+  real(double), intent (in), dimension (3) :: sks
+  real(double), parameter :: overtol = 1.0d-4
+  integer iatom
+  integer imu
   integer info
-  integer(c_long) inu
-  integer(c_long) in1, in2
-  integer(c_long) ineigh
-  integer(c_long) jatom
-  integer(c_long) jmu
-  integer(c_long) jnu
-  integer(c_long) mbeta
-  integer(c_long) mineig
-  integer(c_long) lm
-  real(c_double) dot
-  real(c_double) sqlami
-  real(c_double), dimension (norbitals) :: eigen
-  real(c_double), dimension (norbitals) :: slam
-  real(c_double), dimension (3) :: vec
-  complex(c_double_complex) a0
-  complex(c_double_complex) a1
-  complex(c_double_complex) phase
-  complex(c_double_complex), dimension (:, :), allocatable :: xxxx
-  complex(c_double_complex), dimension (:, :), allocatable :: yyyy
-  complex(c_double_complex), dimension (:, :), allocatable :: zzzz
-  complex(c_double_complex), dimension (:, :), allocatable :: ssss
-  real(c_double), dimension (:), allocatable :: ww
-  complex(c_double_complex), allocatable, dimension (:) :: work
-  real(c_double), allocatable, dimension (:) :: rwork
-  integer(c_long) lwork, lrwork
+  integer inu
+  integer in1, in2
+  integer ineigh
+  integer jatom
+  integer jmu
+  integer jnu
+  integer mbeta
+  integer mineig
+  integer lm
+  real(double) dot
+  real(double) sqlami
+  real(double), dimension (norbitals) :: eigen
+  real(double), dimension (norbitals) :: slam
+  real(double), dimension (3) :: vec
+  complex(double) a0
+  complex(double) a1
+  complex(double) phase
+  complex(double), dimension (:, :), allocatable :: xxxx
+  complex(double), dimension (:, :), allocatable :: yyyy
+  complex(double), dimension (:, :), allocatable :: zzzz
+  complex(double), dimension (:, :), allocatable :: ssss
+  real(double), dimension (:), allocatable :: ww
+  complex(double), allocatable, dimension (:) :: work
+  real(double), allocatable, dimension (:) :: rwork
+  integer lwork, lrwork
 
-  a0 = cmplx(0.0d0,0.0d0,c_double_complex)
-  a1 = cmplx(1.0d0,0.0d0,c_double_complex)
+  a0 = cmplx(0.0d0,0.0d0,double)
+  a1 = cmplx(1.0d0,0.0d0,double)
   allocate (xxxx(norbitals,norbitals))
   allocate (yyyy(norbitals,norbitals))
   allocate (zzzz(norbitals,norbitals))
@@ -47,7 +47,7 @@ subroutine kspace_double (ikpoint, sks)
    allocate (ww(norbitals))
   endif
 
-  lwork = 1_c_long
+  lwork = 1
   allocate (work(lwork))
   lrwork = 3*norbitals - 2
   allocate (rwork(lrwork))
@@ -77,7 +77,7 @@ subroutine kspace_double (ikpoint, sks)
     in2 = imass(jatom)
     vec(:) = xl(:,mbeta) + ratom(:,jatom) - ratom(:,iatom)
     dot = sks(1)*vec(1) + sks(2)*vec(2) + sks(3)*vec(3)
-    phase = cmplx(cos(dot),sin(dot),c_double_complex)
+    phase = cmplx(cos(dot),sin(dot),double)
     do inu = 1, num_orb(in2)
      jnu = inu + degelec(jatom)
      do imu = 1, num_orb(in1)
@@ -94,7 +94,7 @@ subroutine kspace_double (ikpoint, sks)
     in2 = imass(jatom)
     vec(:) = xl(:,mbeta) + ratom(:,jatom) - ratom(:,iatom)
     dot = sks(1)*vec(1) + sks(2)*vec(2) + sks(3)*vec(3)
-    phase = cmplx(cos(dot),sin(dot),c_double_complex)
+    phase = cmplx(cos(dot),sin(dot),double)
     do inu = 1, num_orb(in2)
      jnu = inu + degelec(jatom)
      do imu = 1, num_orb(in1)
@@ -121,8 +121,8 @@ subroutine kspace_double (ikpoint, sks)
   endif  
 
   if (Kscf .eq. 1 .or. iqout .eq. 3) then
-   call zheev ('V', 'U', norbitals, zzzz, norbitals, slam, work, -1_c_long, rwork, info)
-   lwork = nint(real(work(1), c_double), c_long)
+   call zheev ('V', 'U', norbitals, zzzz, norbitals, slam, work, -1, rwork, info)
+   lwork = real(work(1), double)
    deallocate (work)
    allocate (work(lwork))
    call zheev ('V', 'U', norbitals, zzzz, norbitals, slam, work, lwork, rwork , info)
@@ -165,17 +165,17 @@ subroutine kspace_double (ikpoint, sks)
    call zhemm ( 'R', 'U', norbitals, norbitals, a1, xxxx, norbitals, yyyy, norbitals, a0, zzzz, norbitals )
    call zhemm ( 'L', 'U', norbitals, norbitals, a1, xxxx, norbitals, zzzz, norbitals, a0, yyyy, norbitals )
   else
-   call zgemm ('C', 'N', norbitals, norbitals, norbitals, a1, xxxx, norbitals, ssss, norbitals, a0, zzzz, norbitals)
-   call zgemm ('N', 'N', norbitals, norbitals, norbitals, a1, zzzz, norbitals, xxxx, norbitals, a0, zzzz, norbitals)
+   !call zgemm ('C', 'N', norbitals, norbitals, norbitals, a1, xxxx, norbitals, ssss, norbitals, a0, zzzz, norbitals)
+   !call zgemm ('N', 'N', norbitals, norbitals, norbitals, a1, zzzz, norbitals, xxxx, norbitals, a0, zzzz, norbitals)
    call zgemm ( 'C', 'N', norbitals, norbitals, norbitals, a1, xxxx, norbitals, yyyy, norbitals, a0, zzzz, norbitals )
    call zgemm ( 'N', 'N', norbitals, norbitals, norbitals, a1, zzzz, norbitals, xxxx, norbitals, a0, yyyy, norbitals )
   endif     
 
-  lwork = 1_c_long
+  lwork = 1
   deallocate (work)
   allocate (work(lwork))
-  call zheev ('V', 'U', norbitals, yyyy, norbitals, eigen, work, -1_c_long, rwork, info)
-  lwork = nint(real(work(1), c_double), c_long)
+  call zheev ('V', 'U', norbitals, yyyy, norbitals, eigen, work, -1, rwork, info)
+  lwork = real(work(1), double)
   deallocate (work)
   allocate (work(lwork))
   call zheev ('V', 'U', norbitals, yyyy, norbitals, eigen, work, lwork, rwork, info)
@@ -185,9 +185,9 @@ subroutine kspace_double (ikpoint, sks)
   end if
   eigen_k(1:norbitals,ikpoint) = eigen(:)
   if ((iqout .eq. 1) .or. (iqout .eq. 3)) then
-    blowre(:,:,ikpoint) = real(yyyy(:,:), c_double)
+    blowre(:,:,ikpoint) = real(yyyy(:,:), double)
     if (igamma .eq. 0) then
-      blowim(:,:,ikpoint) = real(aimag(yyyy(:,:)), c_double)
+      blowim(:,:,ikpoint) = real(aimag(yyyy(:,:)), double)
     end if
   end if
   if (iqout .ne. 3) then
@@ -195,8 +195,8 @@ subroutine kspace_double (ikpoint, sks)
   else
    call zgemm ( 'N', 'N', norbitals, norbitals, norbitals, a1, xxxx, norbitals, yyyy, norbitals, a0, zzzz, norbitals )
   end if
-  bbnkre(:,:,ikpoint) = real(zzzz(:,:), c_double)
-  if (icluster .eq. 0 .and. igamma .eq. 0) bbnkim(:,:,ikpoint) = real(aimag(zzzz(:,:)), c_double)
+  bbnkre(:,:,ikpoint) = real(zzzz(:,:), double)
+  if (icluster .eq. 0 .and. igamma .eq. 0) bbnkim(:,:,ikpoint) = real(aimag(zzzz(:,:)), double)
   deallocate (xxxx)
   deallocate (yyyy)
   deallocate (zzzz)

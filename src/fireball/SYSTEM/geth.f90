@@ -1,11 +1,11 @@
 subroutine geth (overlap, hamiltonian)
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   use M_system, only: natoms, imass, neighn, neigh_j, h_mat, s_mat, neighPP_j, neighn, neighPPn, &
     & vnl, degelec, norbitals
   use M_fdata, only: num_orb
   implicit none
-  integer(c_long) :: iatom, jatom, imu, inu, in1, in2, ineigh, jmu, jnu
-  real(c_double), dimension (norbitals, norbitals), intent(out) :: overlap, hamiltonian
+  integer :: iatom, jatom, imu, inu, in1, in2, ineigh, jmu, jnu
+  real(double), dimension (norbitals, norbitals), intent(out) :: overlap, hamiltonian
 
   overlap = 0.0d0
   hamiltonian = 0.0d0

@@ -1,9 +1,9 @@
 subroutine make_munuPP ()
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   use M_fdata, only: nspecies, num_orbPP, lssh, lsshPP, ME2cPP_max, ME2c_max, &
     & index_maxPP, num_orbPP, muPP, nuPP, nssh, nsshPP
   implicit none
-  integer(c_long) :: imu, index, in1, in2, issh1, issh2, l1, l2, n1, n2
+  integer :: imu, index, in1, in2, issh1, issh2, l1, l2, n1, n2
 
   if (allocated(index_maxPP)) deallocate(index_maxPP)
   if (allocated(num_orbPP)) deallocate(num_orbPP)

@@ -73,7 +73,7 @@ class KPoints:
 
         # If tuple or list then they are indices
         if isinstance(kpts, (tuple, list)):
-            mp = np.ascontiguousarray(kpts, dtype=np.int64)
+            mp = np.ascontiguousarray(kpts, dtype=np.int32)
             if (mp < 1).any():
                 raise ValueError("Parameter ``kpts`` if specified is Monkhorst-Pack indices "
                                  "must have values greater or equal than 1")
@@ -81,12 +81,12 @@ class KPoints:
         # If it is a number then it should be a density
         if isinstance(kpts, SupportsFloat):
             kpts = float(kpts)
-            mp = np.array([1, 1, 1], dtype=np.int64)
+            mp = np.array([1, 1, 1], dtype=np.int32)
             for i, p in enumerate(atomsystem.pbc):
                 if not p:
                     continue
                 k = norm(atomsystem.icell[i])*kpts
-                mp[i] = np.int64(np.ceil(k))
+                mp[i] = np.int32(np.ceil(k))
 
         # Cover the case the reading capacity of the user is non-optimal
         if mp is None:

@@ -1,58 +1,58 @@
 ! This routine calculates the average densities with charge transfer.
 subroutine average_ca_rho ()
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   use M_system, only: iforce, xc_overtol, natoms, ratom, imass, neigh_max, Kscf, neigh_b, neigh_j, neighn, neigh_comb, neigh_comj, &
     & neigh_comm, neigh_comn, neigh_back, numorb_max, Qin, rho_off, rhoij_off, sm_mat, spm_mat, rho_on, arho_on, rhoi_on, &
     & arhoi_on, arhop_on, rhop_on, arhoij_off, arho_off, arhopij_off, arhop_off, rhop_off, rhopij_off, xl
   use M_fdata, only: nssh, num_orb, nsh_max
   implicit none
-  integer(c_long) iatom
-  integer(c_long) ibeta
-  integer(c_long) imu
-  integer(c_long) in1
-  integer(c_long) in2
-  integer(c_long) in3
-  integer(c_long) indna
-  integer(c_long) ineigh
-  integer(c_long) interaction
-  integer(c_long) interaction0
-  integer(c_long) inu
-  integer(c_long) isorp, ialp
-  integer(c_long) issh
-  integer(c_long) jatom
-  integer(c_long) jneigh
-  integer(c_long) jbeta
-  integer(c_long) jssh
-  integer(c_long) mbeta
-  integer(c_long) mneigh
-  real(c_double) cost
-  real(c_double) x
-  real(c_double) y
-  real(c_double), dimension (3, 3, 3) :: deps
-  real(c_double), dimension (3, 3) :: eps
-  real(c_double), dimension (3) :: r1
-  real(c_double), dimension (3) :: r2
-  real(c_double), dimension (3) :: r21
-  real(c_double), dimension (3) :: rhat
+  integer iatom
+  integer ibeta
+  integer imu
+  integer in1
+  integer in2
+  integer in3
+  integer indna
+  integer ineigh
+  integer interaction
+  integer interaction0
+  integer inu
+  integer isorp, ialp
+  integer issh
+  integer jatom
+  integer jneigh
+  integer jbeta
+  integer jssh
+  integer mbeta
+  integer mneigh
+  real(double) cost
+  real(double) x
+  real(double) y
+  real(double), dimension (3, 3, 3) :: deps
+  real(double), dimension (3, 3) :: eps
+  real(double), dimension (3) :: r1
+  real(double), dimension (3) :: r2
+  real(double), dimension (3) :: r21
+  real(double), dimension (3) :: rhat
   ! crystaline matrices
-  real(c_double), dimension (numorb_max, numorb_max) :: rho_2c
-  real(c_double), dimension (numorb_max, numorb_max) :: rhoi_2c
+  real(double), dimension (numorb_max, numorb_max) :: rho_2c
+  real(double), dimension (numorb_max, numorb_max) :: rhoi_2c
   ! molecular spehrical matrices
-  real(c_double), dimension (numorb_max, numorb_max) :: rhomx
-  real(c_double), dimension (3, numorb_max, numorb_max) :: rhompx
-  real(c_double), dimension (nsh_max, nsh_max) :: rhom_2c
-  real(c_double), dimension (nsh_max, nsh_max) :: rhomi_2c
-  real(c_double), dimension (3, nsh_max, nsh_max) :: rhomp_2c
-  real(c_double), dimension (:, :, :, :), allocatable :: rhom_3c
-  real(c_double), dimension (nsh_max, nsh_max) :: rhomm
-  real(c_double), dimension (3, nsh_max, nsh_max) :: rhompm
-  real(c_double), dimension (3) :: rnabc
-  real(c_double), dimension (3) :: rna
-  real(c_double), dimension (3) :: sighat
-  real(c_double), dimension (nsh_max, nsh_max) :: sm
-  real(c_double), dimension (3, nsh_max, nsh_max) :: spm
+  real(double), dimension (numorb_max, numorb_max) :: rhomx
+  real(double), dimension (3, numorb_max, numorb_max) :: rhompx
+  real(double), dimension (nsh_max, nsh_max) :: rhom_2c
+  real(double), dimension (nsh_max, nsh_max) :: rhomi_2c
+  real(double), dimension (3, nsh_max, nsh_max) :: rhomp_2c
+  real(double), dimension (:, :, :, :), allocatable :: rhom_3c
+  real(double), dimension (nsh_max, nsh_max) :: rhomm
+  real(double), dimension (3, nsh_max, nsh_max) :: rhompm
+  real(double), dimension (3) :: rnabc
+  real(double), dimension (3) :: rna
+  real(double), dimension (3) :: sighat
+  real(double), dimension (nsh_max, nsh_max) :: sm
+  real(double), dimension (3, nsh_max, nsh_max) :: spm
   !
-  real(c_double) rho_modified
+  real(double) rho_modified
 
   rhomx=0.0d0
   rhompx=0.0d0

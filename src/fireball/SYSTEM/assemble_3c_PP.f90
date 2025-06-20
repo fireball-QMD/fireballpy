@@ -1,33 +1,33 @@
 subroutine assemble_3c_PP ()
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   use M_system, only: natoms, ratom, imass, numorb_max, sVNL, vnl, neighPP_comn, neighPP_comm, neighPP_comj, neighPP_comb, xl
   use M_fdata, only: num_orb, num_orbPP 
   implicit none
-  integer(c_long) ialp
-  integer(c_long) iatom
-  integer(c_long) ibeta
-  integer(c_long) imu
-  integer(c_long) in1
-  integer(c_long) in2
-  integer(c_long) indna
-  integer(c_long) ineigh
-  integer(c_long) inu
-  integer(c_long) jatom
-  integer(c_long) jbeta
-  integer(c_long) m31
-  integer(c_long) m32
-  integer(c_long) mneigh
-  integer(c_long) ncc
+  integer ialp
+  integer iatom
+  integer ibeta
+  integer imu
+  integer in1
+  integer in2
+  integer indna
+  integer ineigh
+  integer inu
+  integer jatom
+  integer jbeta
+  integer m31
+  integer m32
+  integer mneigh
+  integer ncc
  
-  integer(c_long), external :: mpairnay
+  integer, external :: mpairnay
 
-  real(c_double), dimension (numorb_max, numorb_max) :: bcnlx
-  real(c_double), dimension (numorb_max) :: cl
-  real(c_double), dimension (3) :: r1
-  real(c_double), dimension (3) :: r2
-  real(c_double), dimension (3) :: r31
-  real(c_double), dimension (3) :: r32
-  real(c_double), dimension (3) :: rna
+  real(double), dimension (numorb_max, numorb_max) :: bcnlx
+  real(double), dimension (numorb_max) :: cl
+  real(double), dimension (3) :: r1
+  real(double), dimension (3) :: r2
+  real(double), dimension (3) :: r31
+  real(double), dimension (3) :: r32
+  real(double), dimension (3) :: rna
   do ialp = 1, natoms
     rna(:) = ratom(:,ialp)
     indna = imass(ialp)

@@ -1,13 +1,13 @@
 subroutine recover_PP (in1, in2, hlist, hbox)
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   use M_system, only: numorb_max
   use M_fdata, only: ME2c_max,num_orbPP,num_orb,index_maxPP,nuPP,muPP
   implicit none
-  integer(c_long), intent(in) :: in1, in2
-  real(c_double), intent(in), dimension (ME2c_max) :: hlist
-  real(c_double), intent(out), dimension (numorb_max, numorb_max) :: hbox
-  integer(c_long) imu, inu
-  integer(c_long) index
+  integer, intent(in) :: in1, in2
+  real(double), intent(in), dimension (ME2c_max) :: hlist
+  real(double), intent(out), dimension (numorb_max, numorb_max) :: hbox
+  integer imu, inu
+  integer index
   do inu = 1, num_orbPP(in2)
    do imu = 1, num_orb(in1)
     hbox(imu,inu) = 0.0d0

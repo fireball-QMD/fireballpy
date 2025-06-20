@@ -1,57 +1,57 @@
 ! This routine assembles all of the two-center and degenerate two-center interactions for DOGS.
 subroutine assemble_ca_2c ()
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   use M_constants, only: eq2
   use M_system, only: smt_elect, natoms, ratom, imass, ewaldsr, dip, neigh_b, neigh_j, neighn, neigh_self, &
     & numorb_max, Qin, s_mat, vca, xl
   use M_fdata, only: nssh, num_orb, rcutoff, Qneutral, lssh
   implicit none
-  integer(c_long) iatom
-  integer(c_long) icount
-  integer(c_long) icount_sav
-  integer(c_long) imu
-  integer(c_long) in1
-  integer(c_long) in2
-  integer(c_long) in3
-  integer(c_long) ineigh
-  integer(c_long) interaction
-  integer(c_long) inu
-  integer(c_long) isorp
-  integer(c_long) issh
-  integer(c_long) jatom
-  integer(c_long) jcount
-  integer(c_long) jcount_sav
-  integer(c_long) jssh
-  integer(c_long) kforce
-  integer(c_long) matom
-  integer(c_long) mbeta
-  real(c_double) dq1
-  real(c_double) dq2
-  real(c_double) dterm_1
-  real(c_double) dterm_2
-  real(c_double) dstn_temp
-  real(c_double) dxn
-  real(c_double) rcutoff_j
-  real(c_double) rend
-  real(c_double) sterm_1
-  real(c_double) sterm_2
-  real(c_double) stn_temp1
-  real(c_double) stn_temp2
-  real(c_double) y
-  real(c_double) rcutoff_i
-  real(c_double), dimension (numorb_max, numorb_max) :: bcca
-  real(c_double), dimension (3, numorb_max, numorb_max) :: bccapx
-  real(c_double), dimension (numorb_max, numorb_max) :: bccax
-  real(c_double), dimension (3, 3, 3) :: deps
-  real(c_double), dimension (numorb_max, numorb_max) :: emnpl
-  real(c_double), dimension (numorb_max, numorb_max) :: emnpl_noq
-  real(c_double), dimension (3, 3) :: eps
-  real(c_double), dimension (3) :: r1
-  real(c_double), dimension (3) :: r2
-  real(c_double), dimension (3) :: r21
-  real(c_double), dimension (3) :: sighat
-  real(c_double), dimension (numorb_max, numorb_max) :: stn1
-  real(c_double), dimension (numorb_max, numorb_max) :: stn2
+  integer iatom
+  integer icount
+  integer icount_sav
+  integer imu
+  integer in1
+  integer in2
+  integer in3
+  integer ineigh
+  integer interaction
+  integer inu
+  integer isorp
+  integer issh
+  integer jatom
+  integer jcount
+  integer jcount_sav
+  integer jssh
+  integer kforce
+  integer matom
+  integer mbeta
+  real(double) dq1
+  real(double) dq2
+  real(double) dterm_1
+  real(double) dterm_2
+  real(double) dstn_temp
+  real(double) dxn
+  real(double) rcutoff_j
+  real(double) rend
+  real(double) sterm_1
+  real(double) sterm_2
+  real(double) stn_temp1
+  real(double) stn_temp2
+  real(double) y
+  real(double) rcutoff_i
+  real(double), dimension (numorb_max, numorb_max) :: bcca
+  real(double), dimension (3, numorb_max, numorb_max) :: bccapx
+  real(double), dimension (numorb_max, numorb_max) :: bccax
+  real(double), dimension (3, 3, 3) :: deps
+  real(double), dimension (numorb_max, numorb_max) :: emnpl
+  real(double), dimension (numorb_max, numorb_max) :: emnpl_noq
+  real(double), dimension (3, 3) :: eps
+  real(double), dimension (3) :: r1
+  real(double), dimension (3) :: r2
+  real(double), dimension (3) :: r21
+  real(double), dimension (3) :: sighat
+  real(double), dimension (numorb_max, numorb_max) :: stn1
+  real(double), dimension (numorb_max, numorb_max) :: stn2
 
   vca = 0.0d0
   ewaldsr = 0.0d0

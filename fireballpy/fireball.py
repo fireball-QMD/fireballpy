@@ -12,7 +12,6 @@ from fireballpy._correction import Correction
 from fireballpy.fdata import FDataFiles
 from fireballpy.atoms import AtomSystem
 from fireballpy.kpoints import KPoints
-from fireballpy.orbitals import Orbitals
 
 from ase import Atoms
 
@@ -20,13 +19,12 @@ from fireballpy._fireball import (set_options,
                                   set_initial_charges,
                                   call_allocate_system,
                                   scf,
-                                  get_sizes,
                                   get_initial_charges,
                                   calc_forces)
 
 DEFAULT_MIXER = {'method': 'johnson',
-                 'max_iter': np.int64(200),
-                 'mix_order': np.int64(6),
+                 'max_iter': 200,
+                 'mix_order': 6,
                  'beta': np.float64(0.1),
                  'tol': np.float64(1e-8),
                  'w0': np.float64(0.01)}
@@ -121,7 +119,6 @@ class BaseFireball:
         type_check(total_charge, int, 'total_charge')
         type_check(dipole_method, str, 'dipole_method')
 
-
         # Save everything to self
         self.fdatafiles = fdatafiles
         self.atomsystem = atomsystem
@@ -179,20 +176,21 @@ class BaseFireball:
         # Set Fireball-like options
         set_options(dipole_method=get_idipole(self.dipole_method),
                     charges_method=get_icharge(self.charges_method),
-                    ismolecule=np.int64(not self.atomsystem.isperiodic),
-                    isgamma=np.int64(self.kpoints.isgamma),
-                    total_charge=np.int64(-self.total_charge),
+                    ismolecule=int(not self.atomsystem.isperiodic),
+                    isgamma=int(self.kpoints.isgamma),
+                    total_charge=-self.total_charge,
                     mixer_method=get_imixer(self.mixer_kws['method']),
-                    max_iter=np.int64(self.mixer_kws['max_iter']),
-                    mix_order=np.int64(self.mixer_kws['mix_order']),
+                    max_iter=int(self.mixer_kws['max_iter']),
+                    mix_order=int(self.mixer_kws['mix_order']),
                     beta=np.float64(self.mixer_kws['beta']),
                     tol=np.float64(self.mixer_kws['tol']),
                     w0=np.float64(self.mixer_kws['w0']))
 
-        # Allocate module
-        call_allocate_system()
-        self.nbands = 0
+        # Know system size
+        self.nshells = max([self.fdatafiles.nshells[z] for z in self.atomsystem.numbers])
+        self.norbitals = sum([self.fdatafiles.norbitals[z] for z in self.atomsystem.numbers])
         self._alloc_arrays()
+
         if initial_charges is not None:
             if not isinstance(initial_charges, (tuple, list, np.ndarray)):
                 raise ValueError("Parameter ``initial_charges`` need to be coerced into an array.")
@@ -204,16 +202,13 @@ class BaseFireball:
         else:
             self.initial_charges = np.zeros((self.natoms, self.nshells), dtype=np.float64, order='C')
             get_initial_charges(self.initial_charges.T)
+        self.shell_charges = self.initial_charges.copy()
 
     def _alloc_arrays(self) -> None:
-        self.nshells, self.nbands_new, self.norbitals = get_sizes()
-        if self.nbands_new != self.nbands:
-            self.nbands = self.nbands_new
-            self.charges = np.ascontiguousarray(self.natoms * [0.0], dtype=np.float64)
-            self.forces = np.zeros((self.natoms, 3), dtype=np.float64, order='C')
-            self.shell_charges = np.zeros((self.natoms, self.nshells), dtype=np.float64, order='C')
-            self.eigenvalues = np.zeros((self.nkpts, self.nbands), dtype=np.float64, order='C')
-            self.eigenvectors = np.zeros((self.nkpts, self.norbitals, self.norbitals), dtype=np.complex128, order='C')
+        self.charges = np.ascontiguousarray(self.natoms * [0.0], dtype=np.float64)
+        self.forces = np.zeros((self.natoms, 3), dtype=np.float64, order='C')
+        self.eigenvalues = np.zeros((self.nkpts, self.norbitals), dtype=np.float64, order='C')
+        self.eigenvectors = np.zeros((self.nkpts, self.norbitals, self.norbitals), dtype=np.complex128, order='C')
 
     def run_scf(self, fix_charges: bool = False) -> None:
         """Check if SCF is computed, execute the loop if not,
@@ -227,15 +222,18 @@ class BaseFireball:
             In general it is useful to fix the charges when making postprocessing.
         """
         if not self.scf_computed:
-            converged, fb_errno, energy, fermi_level, charges = scf(self.verbose,
-                                                                    fix_charges,
-                                                                    self.shell_charges.T,
-                                                                    self.eigenvalues.T,
-                                                                    self.eigenvectors.T)
+            set_initial_charges(self.shell_charges.T)
+            call_allocate_system()
+            converged, nbands, fb_errno, energy, fermi_level, charges = scf(self.verbose,
+                                                                            fix_charges,
+                                                                            self.shell_charges.T,
+                                                                            self.eigenvalues.T,
+                                                                            self.eigenvectors.T)
             if fb_errno != 0:
                 raise_fb_error(fb_errno)
             if not converged:
                 warnings.warn("SCF loop did not converge. Try incrementing ``'max_iter'`` in ``mixer_kws``", UserWarning)
+            self.nbands = nbands
             self.energy = float(energy)
             self.fermi_level = float(fermi_level)
             self.charges = charges
@@ -274,10 +272,6 @@ class BaseFireball:
             self._correction.update_coords(self.atomsystem)  # type: ignore
         self.scf_computed = False
         self.forces_computed = False
-
-    def sph_density(self):
-        self.orbitals = Orbitals(self.atomsystem, self.fdatafiles)
-        return self.orbitals.sph_density(self.shell_charges)
 
 def fbobj_from_obj(fbobj: BaseFireball | None, atoms: Atoms | None) -> BaseFireball:
     nonecount = int(fbobj is not None) + int(atoms is not None)

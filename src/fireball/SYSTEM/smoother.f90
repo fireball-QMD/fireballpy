@@ -1,18 +1,18 @@
 subroutine smoother (r, rend, xi, stn, dstn)
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   implicit none
-  real(c_double), intent (in) :: r
-  real(c_double), intent (in) :: rend
-  real(c_double), intent (in) :: xi
-  real(c_double), intent (out) :: stn
-  real(c_double), intent (out) :: dstn
-  integer(c_long), parameter :: npower = 2
-  integer(c_long), parameter :: mpower = 2
-  integer(c_long), parameter :: scaler = 0
+  real(double), intent (in) :: r
+  real(double), intent (in) :: rend
+  real(double), intent (in) :: xi
+  real(double), intent (out) :: stn
+  real(double), intent (out) :: dstn
+  integer, parameter :: npower = 2
+  integer, parameter :: mpower = 2
+  integer, parameter :: scaler = 0
   logical, parameter :: old_method = .true.
-  real(c_double) frac
-  real(c_double) rbegin
-  real(c_double) dum
+  real(double) frac
+  real(double) rbegin
+  real(double) dum
   rbegin = xi*rend
   if (r .gt. rend) then
     stn = 0.0d0

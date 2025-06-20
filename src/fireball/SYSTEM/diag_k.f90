@@ -1,10 +1,10 @@
 subroutine diag_k ( )
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   use M_system, only: iqout, igamma, Kscf, blowre, blowim, sm12_real, sm12_complex, special_k, norbitals, &
     & nkpoints, errno
   implicit none
-  integer(c_long) ikpoint
-  real(c_double), dimension (3) :: k_temp
+  integer ikpoint
+  real(double), dimension (3) :: k_temp
 
   if ((iqout .eq. 1) .or. (iqout .eq. 3)) then
     if (allocated(blowre)) deallocate(blowre)

@@ -69,7 +69,7 @@ subroutine onecenterxc (nspec, nspec_max, nsh_max, wfmax_points,      &
   ! Local Variable Declaration and Description
   ! ===========================================================================
   integer :: irho, issh, jssh, kssh, in1, lssh, nssh, nssh1, ix, ndq, &
-    & nnz, npts, nnrho, lwork, info
+    & nnz, nnzz, npts, nnrho, lwork, info
   real(kind=long) :: dnuxc, dnuxcs, drho, exc, dexcc, factor, rcutoff, rho, &
     & rhomax, rhomin, rh, rhp, rhpp, vxc, ddq, tmp
   character(2) :: auxz
@@ -77,9 +77,8 @@ subroutine onecenterxc (nspec, nspec_max, nsh_max, wfmax_points,      &
   real(kind=long), dimension(nsh_max) :: xnocc_in
   real(kind=long), dimension (:), allocatable :: rho1c, rhop1c, rhopp1c, &
     & work
-  real(kind=long), dimension (:,:), allocatable :: xmatt, eexc, vvxc, tmpmat, &
-    & fite, fitv, dq
-  real(kind=long), dimension(:,:,:), allocatable :: exc1crho, nuxc1crho
+  real(kind=long), dimension (:,:), allocatable :: xmatte, xmattv, dq, excc, vxcc, fite, fitv
+  real(kind=long), dimension(:,:,:), allocatable :: exc1crho, nuxc1crho, munue, munuv
   logical, dimension(:), allocatable :: iszero
   real(kind=long), external :: psiofr
 
@@ -194,27 +193,35 @@ subroutine onecenterxc (nspec, nspec_max, nsh_max, wfmax_points,      &
       end if
     end do
 
-    ! We get the full grid of values first
+    ! Find how many non-zero elements there are
     allocate(iszero(nnz))
-    iszero = .false.
-    kssh = 0
+    iszero = .true.
+    kssh = 1
+    nnzz = 0
     do issh = 1, nssh
       do jssh = issh, nssh
+        if (lsshxc(in1, issh) .eq. lsshxc(in1, jssh)) then
+          iszero(kssh) = .false.
+          nnzz = nnzz + 1
+        end if
         kssh = kssh + 1
-        if (lsshxc(in1, issh) .ne. lsshxc(in1, jssh)) iszero(kssh) = .true.
       end do
     end do
-    allocate(eexc(npts, nnz), vvxc(npts, nnz))
-    allocate(xmatt(nssh1, npts))
-    eexc = 0.0d0
-    vvxc = 0.0d0
+
+    ! We get the full grid of values first
+    allocate(excc(npts, nnzz), vxcc(npts, nnzz))
+    allocate(xmatte(nssh1, npts), xmattv(nssh1, npts))
+    excc = 0.0d0
+    vxcc = 0.0d0
     do ix = 1, npts
       ! Set charges
-      xmatt(1, ix) = 1.0d0
+      xmatte(1, ix) = 1.0d0
+      xmattv(1, ix) = 1.0d0
       do issh = 1, nssh
         ddq = dq(issh, 1 + mod(ix - 1, ndq**issh)/ndq**(issh - 1))
         xnocc_in(issh) = xnocc(issh, in1) + ddq
-        xmatt(issh + 1, ix) = ddq
+        xmatte(issh + 1, ix) = ddq
+        xmattv(issh + 1, ix) = ddq
       end do
 
       ! Obtain the density and respective derivatives needed for evaluating the
@@ -245,73 +252,61 @@ subroutine onecenterxc (nspec, nspec_max, nsh_max, wfmax_points,      &
         rho = rho*abohr
 
         kssh = 0
+        lssh = 1
         do issh = 1, nssh
           do jssh = issh, nssh
             kssh = kssh + 1
             if (iszero(kssh)) cycle
             tmp = psiofr(in1, issh, rho)*psiofr(in1, jssh, rho)*factor*rho*rho
-            eexc(ix, kssh) = eexc(ix, kssh) + tmp*exc
-            vvxc(ix, kssh) = vvxc(ix, kssh) + tmp*vxc
+            excc(ix, lssh) = excc(ix, lssh) + tmp*exc
+            vxcc(ix, lssh) = vxcc(ix, lssh) + tmp*vxc
+            lssh = lssh + 1
           end do
         end do
       end do
     end do
     deallocate(dq)
 
-    ! Perform the fit. The (XX**T)X may be reutilised
-    allocate(ipiv(nssh1))
-    allocate(tmpmat(nssh1, nssh1))
-    call dgemm('N', 'T', nssh1, nssh1, npts, 1.0d0, xmatt, nssh1, &
-      & xmatt, nssh1, 0.0d0, tmpmat, nssh1)
-    call dgetrf(nssh1, nssh1, tmpmat, nssh1, ipiv, info)
-    if (info .ne. 0) then
-      write (*,*) 'ERROR in onecenterxc.f90'
-    end if
+    ! Perform the fit
     allocate(work(1))
-    call dgetri(nssh1, tmpmat, nssh1, ipiv, work, -1, info)
+    call dgels('T', nssh1, npts, nnzz, xmatte, nssh1, excc, npts, work, -1, info)
     lwork = nint(work(1))
     deallocate(work)
     allocate(work(lwork))
-    call dgetri(nssh1, tmpmat, nssh1, ipiv, work, lwork, info)
+    call dgels('T', nssh1, npts, nnzz, xmatte, nssh1, excc, npts, work, lwork, info)
     if (info .ne. 0) then
-      write (*,*) 'ERROR in onecenterxc.f90'
+      write (*, *) '[ERROR] in onecenterxc.f90: constrained least squares'
+      write (*, *) 'info:', info
+      stop
     end if
-    call dgemm('N', 'N', nssh1, npts, nssh1, 1.0d0, tmpmat, nssh1, &
-      & xmatt, nssh1, 0.0d0, xmatt, nssh1)
-    deallocate(ipiv, work, tmpmat)
-
-    allocate(fite(nssh1, nnz), fitv(nssh1, nnz))
-    do kssh = 1, nnz
-      if (iszero(kssh)) then
-        fite(:, kssh) = 0.0d0
-        fitv(:, kssh) = 0.0d0
-        cycle
-      end if
-      call dgemv('N', nssh1, npts, 1.0d0, xmatt, nssh1, &
-        & eexc(:, kssh), 1, 0.0d0, fite(:, kssh), 1)
-      call dgemv('N', nssh1, npts, 1.0d0, xmatt, nssh1, &
-        & vvxc(:, kssh), 1, 0.0d0, fitv(:, kssh), 1)
-    end do
-    deallocate(eexc, vvxc, xmatt)
+    call dgels('T', nssh1, npts, nnzz, xmattv, nssh1, vxcc, npts, work, lwork, info)
+    if (info .ne. 0) then
+      write (*, *) '[ERROR] in onecenterxc.f90: constrained least squares'
+      write (*, *) 'info:', info
+      stop
+    end if
+    deallocate(xmatte, xmattv, work)
 
     ! Prepare for output
-    allocate(exc1crho(nssh1,nssh,nssh), nuxc1crho(nssh1,nssh,nssh))
+    allocate(exc1crho(0:nssh,nssh,nssh), nuxc1crho(0:nssh,nssh,nssh))
     exc1crho = 0.0d0
     nuxc1crho = 0.0d0
-    do ix = 1, nssh1
-      kssh = 0
-      do issh = 1, nssh
-        do jssh = issh, nssh
-          kssh = kssh + 1
-          if (iszero(kssh)) cycle
-          exc1crho(ix, issh, jssh) = fite(ix, kssh)
-          exc1crho(ix, jssh, issh) = fite(ix, kssh)
-          nuxc1crho(ix, issh, jssh) = fitv(ix, kssh)
-          nuxc1crho(ix, jssh, issh) = fitv(ix, kssh)
+    kssh = 0
+    lssh = 1
+    do issh = 1, nssh
+      do jssh = issh, nssh
+        kssh = kssh + 1
+        if (iszero(kssh)) cycle
+        do ix = 0, nssh
+          exc1crho(ix, issh, jssh) = excc(ix + 1, lssh)
+          exc1crho(ix, jssh, issh) = excc(ix + 1, lssh)
+          nuxc1crho(ix, issh, jssh) = vxcc(ix + 1, lssh)
+          nuxc1crho(ix, jssh, issh) = vxcc(ix + 1, lssh)
         end do
+        lssh = lssh + 1
       end do
     end do
-    deallocate(iszero, fite, fitv)
+    deallocate(iszero, excc, vxcc)
 
     ! Write log
     write (auxz,'(i2.2)') nzx(in1)
@@ -327,14 +322,14 @@ subroutine onecenterxc (nspec, nspec_max, nsh_max, wfmax_points,      &
     write (36,400) in1, nssh
     write (360,400) in1, nssh
     do issh = 1, nssh
-      write (36,501) (exc1crho(1,issh,jssh), jssh = 1, nssh)
-      write (360,501) (exc1crho(1,issh,jssh), jssh = 1, nssh)
+      write (36,501) (exc1crho(0,issh,jssh), jssh = 1, nssh)
+      write (360,501) (exc1crho(0,issh,jssh), jssh = 1, nssh)
     end do
     write (36,*)
     write (360,*)
     do issh = 1, nssh
-      write (36,501) (nuxc1crho(1,issh,jssh), jssh = 1, nssh)
-      write (360,501) (nuxc1crho(1,issh,jssh), jssh = 1, nssh)
+      write (36,501) (nuxc1crho(0,issh,jssh), jssh = 1, nssh)
+      write (360,501) (nuxc1crho(0,issh,jssh), jssh = 1, nssh)
     end do
     close(36)
     close(360)
@@ -349,10 +344,10 @@ subroutine onecenterxc (nspec, nspec_max, nsh_max, wfmax_points,      &
       write (38,410) in1, nssh, kssh
       write (380,410) in1, nssh, kssh
       do issh = 1, nssh
-        write (37,501) (exc1crho(kssh+1,issh,jssh), jssh = 1, nssh)
-        write (370,501) (exc1crho(kssh+1,issh,jssh), jssh = 1, nssh)
-        write (38,501) (nuxc1crho(kssh+1,issh,jssh), jssh = 1, nssh)
-        write (380,501) (nuxc1crho(kssh+1,issh,jssh), jssh = 1, nssh)
+        write (37,501) (exc1crho(kssh,issh,jssh), jssh = 1, nssh)
+        write (370,501) (exc1crho(kssh,issh,jssh), jssh = 1, nssh)
+        write (38,501) (nuxc1crho(kssh,issh,jssh), jssh = 1, nssh)
+        write (380,501) (nuxc1crho(kssh,issh,jssh), jssh = 1, nssh)
       end do
     end do
     close(37)

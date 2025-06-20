@@ -1,5 +1,5 @@
 subroutine build_rho ()
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   use M_system, only: iqout, igamma, tempfe, blowre, blowim, cape, rho, errno, Kscf, max_scf_iterations
   implicit none
   rho = 0.0d0

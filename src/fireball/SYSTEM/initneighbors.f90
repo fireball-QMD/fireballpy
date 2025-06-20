@@ -2,13 +2,13 @@
 ! old neighbor file exists, then this will be used to determine the neighbors
 ! If not, then the neighbors will be calculated as normal. 
 subroutine initneighbors ()
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   use M_system, only: natoms, nPP_b, nPP_j, nPPn, nPP_self, nPPx_b, nPPx_j, nPPxn, nPPx_self
   implicit none
-  integer(c_long) :: iatom
-  integer(c_long) :: ineigh
-  integer(c_long) :: jatom
-  integer(c_long) :: mbeta
+  integer :: iatom
+  integer :: ineigh
+  integer :: jatom
+  integer :: mbeta
   !   SELF nPP_self  
   ! What's the neighbor of the atom itself?
   nPP_self = -999

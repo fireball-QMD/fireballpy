@@ -1,13 +1,13 @@
   subroutine initboxes ()
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   use M_system, only: mbeta_max, xl, a1vec, a2vec, a3vec
   implicit none
-  integer(c_long) lbeta
-  integer(c_long) ix, iy
-  integer(c_long) mbeta
-  integer(c_long) midl
-  real(c_double), save, dimension (3, 0:728) :: xxl ! cube 9x9x9
-  integer(c_long), parameter :: mbox = 4
+  integer lbeta
+  integer ix, iy
+  integer mbeta
+  integer midl
+  real(double), save, dimension (3, 0:728) :: xxl ! cube 9x9x9
+  integer, parameter :: mbox = 4
   xxl (:,:) = 0.0d0
   xxl (1,1) = 1.0d0
   xxl (1,2) = -1.0d0
@@ -53,24 +53,24 @@
   do ix = -mbox, mbox
     do iy = -mbox, mbox
       lbeta = lbeta + 1
-      xxl(1,lbeta) = real(ix, c_double)
-      xxl(2,lbeta) = real(iy, c_double)
+      xxl(1,lbeta) = real(ix, double)
+      xxl(2,lbeta) = real(iy, double)
       xxl(3,lbeta) = -4.0d0
     end do
   end do
   do ix = -mbox, mbox
     do iy = -mbox, mbox
       lbeta = lbeta + 1
-      xxl(1,lbeta) = real(ix, c_double)
-      xxl(2,lbeta) = real(iy, c_double)
+      xxl(1,lbeta) = real(ix, double)
+      xxl(2,lbeta) = real(iy, double)
       xxl(3,lbeta) = -3.0d0
     end do
   end do
   do ix = -mbox, mbox
     do iy = -mbox, mbox
       lbeta = lbeta + 1
-      xxl(1,lbeta) = real(ix, c_double)
-      xxl(2,lbeta) = real(iy, c_double)
+      xxl(1,lbeta) = real(ix, double)
+      xxl(2,lbeta) = real(iy, double)
       xxl(3,lbeta) = -2.0d0
     end do
   end do
@@ -79,9 +79,9 @@
      do iy = -mbox, mbox
        if (abs(ix) .gt. 1 .or. abs(iy) .gt. 1) then
         lbeta = lbeta + 1
-        xxl(1,lbeta) = real(ix, c_double)
-        xxl(2,lbeta) = real(iy, c_double)
-        xxl(3,lbeta) = real(midl, c_double)
+        xxl(1,lbeta) = real(ix, double)
+        xxl(2,lbeta) = real(iy, double)
+        xxl(3,lbeta) = real(midl, double)
        end if
      end do
    end do
@@ -89,24 +89,24 @@
   do ix = -mbox, mbox
    do iy = -mbox, mbox
      lbeta = lbeta + 1
-     xxl(1,lbeta) = real(ix, c_double)
-     xxl(2,lbeta) = real(iy, c_double)
+     xxl(1,lbeta) = real(ix, double)
+     xxl(2,lbeta) = real(iy, double)
      xxl(3,lbeta) = 2.0d0
    end do
   end do
   do ix = -mbox, mbox
   do iy = -mbox, mbox
     lbeta = lbeta + 1
-     xxl(1,lbeta) = real(ix, c_double)
-     xxl(2,lbeta) = real(iy, c_double)
+     xxl(1,lbeta) = real(ix, double)
+     xxl(2,lbeta) = real(iy, double)
      xxl(3,lbeta) = 3.0d0
    end do
   end do
   do ix = -mbox, mbox
     do iy = -mbox, mbox
       lbeta = lbeta + 1
-      xxl(1,lbeta) = real(ix, c_double)
-      xxl(2,lbeta) = real(iy, c_double)
+      xxl(1,lbeta) = real(ix, double)
+      xxl(2,lbeta) = real(iy, double)
        xxl(3,lbeta) = 4.0d0
      end do
     end do

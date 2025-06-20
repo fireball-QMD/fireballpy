@@ -1,11 +1,11 @@
 subroutine initamat()
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   use M_constants, only: haveDorbitals
   use M_system, only: amat
   use M_fdata, only: nspecies,lsshPP,nsshPP,lssh,nssh
   implicit none
-  integer(c_long) :: in1
-  integer(c_long) :: issh
+  integer :: in1
+  integer :: issh
   haveDorbitals = .false.
   do in1 = 1, nspecies
    do issh = 1, nssh(in1)

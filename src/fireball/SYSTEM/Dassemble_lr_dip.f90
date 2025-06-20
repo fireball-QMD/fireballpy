@@ -1,44 +1,44 @@
 subroutine Dassemble_lr_dip ()
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   use M_constants, only: eq2
   use M_system, only: natoms, ratom, imass, neigh_self, neigh_pair_a1, neigh_pair_a2, neigh_pair_n1, neigh_pair_n2, &
     & numorb_max, tot_pairs, sp_mat, dippc, Qin, rho, s_mat, dipc, flrew
   use M_fdata, only: nssh, Qneutral,num_orb
   implicit none
-  integer(c_long) iatom
-  integer(c_long) imu
-  integer(c_long) in1
-  integer(c_long) in2
-  integer(c_long) ineigh
-  integer(c_long) inu
-  integer(c_long) issh
-  integer(c_long) jatom
-  integer(c_long) ialp
-  integer(c_long) inalp
-  integer(c_long) ix
-  integer(c_long) jneigh
-  integer(c_long) ipair
-  real(c_double) dist13
-  real(c_double) dist23
-  real(c_double) dq3
-  real(c_double) dterm 
-  real(c_double) x
-  real(c_double) sterm
-  real(c_double), dimension(3)  :: rnabc
-  real(c_double), dimension(3)  :: r13
-  real(c_double), dimension(3)  :: r23
-  real(c_double), dimension(3)  :: r21
-  real(c_double), dimension(3)  :: ddterm
-  real(c_double), dimension(3)  :: dptermA
-  real(c_double), dimension(3)  :: dptermB
-  real(c_double), dimension(3)  :: rna
-  real(c_double), dimension (3) :: r1
-  real(c_double), dimension (3) :: r2
-  real(c_double), dimension (3) :: spterm
-  real(c_double), dimension (numorb_max, numorb_max) :: emnpl
-  real(c_double), dimension (3, numorb_max, numorb_max) :: demnplA
-  real(c_double), dimension (3, numorb_max, numorb_max) :: demnplB
-  real(c_double), dimension (3, numorb_max, numorb_max) :: demnplC
+  integer iatom
+  integer imu
+  integer in1
+  integer in2
+  integer ineigh
+  integer inu
+  integer issh
+  integer jatom
+  integer ialp
+  integer inalp
+  integer ix
+  integer jneigh
+  integer ipair
+  real(double) dist13
+  real(double) dist23
+  real(double) dq3
+  real(double) dterm 
+  real(double) x
+  real(double) sterm
+  real(double), dimension(3)  :: rnabc
+  real(double), dimension(3)  :: r13
+  real(double), dimension(3)  :: r23
+  real(double), dimension(3)  :: r21
+  real(double), dimension(3)  :: ddterm
+  real(double), dimension(3)  :: dptermA
+  real(double), dimension(3)  :: dptermB
+  real(double), dimension(3)  :: rna
+  real(double), dimension (3) :: r1
+  real(double), dimension (3) :: r2
+  real(double), dimension (3) :: spterm
+  real(double), dimension (numorb_max, numorb_max) :: emnpl
+  real(double), dimension (3, numorb_max, numorb_max) :: demnplA
+  real(double), dimension (3, numorb_max, numorb_max) :: demnplB
+  real(double), dimension (3, numorb_max, numorb_max) :: demnplC
 
   flrew = 0.0d0
   do ipair = 1,tot_pairs

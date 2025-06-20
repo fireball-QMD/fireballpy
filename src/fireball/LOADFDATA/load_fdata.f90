@@ -1,14 +1,14 @@
 subroutine load_fdata()
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   use M_constants, only: abohr
   use M_fdata, only: fdataLocation, infofname, nsh_max, nshPP_max, nspecies, nzx, symbolA, &
     & etotatom, smass, rc_PP, rcutoff, cl_PP, nssh, lssh, nsshPP, lsshPP, Qneutral, wavefxn, &
     & napot, ind2c, icon3c, splineint_2c, numz2c, z2cmax, interactions2c_max, &
     & isorpmax, isorpmax_xc, ME2c_max, nfofx
   implicit none
-  integer(c_long) :: in1, in2, in3, ispec, issh, aux, icount, isorp, &
+  integer :: in1, in2, in3, ispec, issh, aux, icount, isorp, &
     & interaction, mintype, maxtype
-  real(c_double), dimension (:,:), allocatable :: rcutoff_temp
+  real(double), dimension (:,:), allocatable :: rcutoff_temp
 
   ! Find nsh_max and nsh_max_PP
   nsh_max = 0

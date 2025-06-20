@@ -1,37 +1,37 @@
 subroutine Dassemble_lr ()
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   use M_constants, only: eq2
   use M_system, only: natoms, ratom, imass, ewald, dewald, dip, dipp, neigh_b, neigh_j, neighn, sp_mat, Qin, rho, s_mat, xl, flrew
   use M_fdata, only: num_orb,nssh,Qneutral
   implicit none
-  integer(c_long) iatom
-  integer(c_long) imu
-  integer(c_long) in1
-  integer(c_long) in2
-  integer(c_long) in3
-  integer(c_long) ineigh
-  integer(c_long) inu
-  integer(c_long) issh
-  integer(c_long) jatom
-  integer(c_long) jmu
-  integer(c_long) katom
-  integer(c_long) mbeta
-  real(c_double) distance12
-  real(c_double) dq1
-  real(c_double) dq2
-  real(c_double) dq3
-  real(c_double) dterm
-  real(c_double) sterm
-  real(c_double), dimension (3) :: dewaldlr_i
-  real(c_double), dimension (3) :: dewaldlr_j
-  real(c_double), dimension (3) :: dewaldlr_k
-  real(c_double), dimension (3) :: dpterm
-  real(c_double), dimension (3) :: r1
-  real(c_double), dimension (3) :: r2
-  real(c_double), dimension (3) :: rhat12
-  real(c_double), dimension (3) :: spterm
-  real(c_double), dimension (natoms) :: sub_ewald
-  real(c_double), dimension (3, natoms) :: sub_dewald
+  integer iatom
+  integer imu
+  integer in1
+  integer in2
+  integer in3
+  integer ineigh
+  integer inu
+  integer issh
+  integer jatom
+  integer jmu
+  integer katom
+  integer mbeta
+  real(double) distance12
+  real(double) dq1
+  real(double) dq2
+  real(double) dq3
+  real(double) dterm
+  real(double) sterm
+  real(double), dimension (3) :: dewaldlr_i
+  real(double), dimension (3) :: dewaldlr_j
+  real(double), dimension (3) :: dewaldlr_k
+  real(double), dimension (3) :: dpterm
+  real(double), dimension (3) :: r1
+  real(double), dimension (3) :: r2
+  real(double), dimension (3) :: rhat12
+  real(double), dimension (3) :: spterm
+  real(double), dimension (natoms) :: sub_ewald
+  real(double), dimension (3, natoms) :: sub_dewald
   flrew = 0.0d0
   sub_ewald = 0.0d0
   sub_dewald = 0.0d0

@@ -1,14 +1,14 @@
 subroutine twisterd (eps, deps, ddmat, dpmat)
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   use M_constants, only: haveDorbitals
   use M_system, only: amat
   implicit none
-  real(c_double), dimension(3, 3), intent(in) :: eps
-  real(c_double), dimension(3, 3, 3), intent(in) :: deps
-  real(c_double), dimension(3, 5, 5), intent(out) :: ddmat
-  real(c_double), dimension(3, 3, 3), intent(out) :: dpmat
-  integer(c_long) :: imu, ix, jx, kx
-  real(c_double) :: aterm12, aterm32, aterm33, aterm13, aterm11, amat_term
+  real(double), dimension(3, 3), intent(in) :: eps
+  real(double), dimension(3, 3, 3), intent(in) :: deps
+  real(double), dimension(3, 5, 5), intent(out) :: ddmat
+  real(double), dimension(3, 3, 3), intent(out) :: dpmat
+  integer :: imu, ix, jx, kx
+  real(double) :: aterm12, aterm32, aterm33, aterm13, aterm11, amat_term
 
   do ix = 1, 3
    dpmat(ix,1,1) = deps(ix,2,2)

@@ -1,25 +1,25 @@
 subroutine Dassemble_2c_PP ()
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   use M_system, only: natoms, imass, rhoPP, nPP_b, nPP_j, nPPn, nPP_self, nPPx_b, nPPx_j, nPPx_map, nPPx_point, nPPxn, &
     & numorb_max, neighPP_self, sVNL, spVNL, fotnl, fanl
   use M_fdata, only: num_orb, num_orbPP
   implicit none
-  integer(c_long) iatom
-  integer(c_long) imu
-  integer(c_long) in1
-  integer(c_long) in2
-  integer(c_long) ineigh
-  integer(c_long) inu
-  integer(c_long) ix
-  integer(c_long) jatom
-  integer(c_long) jneigh
-  integer(c_long) kneigh
-  integer(c_long) matom
-  integer(c_long) mbeta
-  integer(c_long) mneigh_self
-  integer(c_long) ncc
-  real(c_double), dimension (numorb_max) :: cl
-  real(c_double), dimension (3, numorb_max, numorb_max) :: fnlb
+  integer iatom
+  integer imu
+  integer in1
+  integer in2
+  integer ineigh
+  integer inu
+  integer ix
+  integer jatom
+  integer jneigh
+  integer kneigh
+  integer matom
+  integer mbeta
+  integer mneigh_self
+  integer ncc
+  real(double), dimension (numorb_max) :: cl
+  real(double), dimension (3, numorb_max, numorb_max) :: fnlb
   fanl = 0.0d0
   fotnl = 0.0d0
   do iatom = 1, natoms

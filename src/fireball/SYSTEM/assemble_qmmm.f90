@@ -1,14 +1,14 @@
 subroutine assemble_qmmm ()
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   use M_constants, only: eq2
   use M_system, only: natoms, ratom, imass, eqmmm, dip, neigh_b, neigh_j, neighn, s_mat, ewaldqmmm, xl, qmmm_qm_mm_pairs, &
     & qmmm_qm_xcrd
   use M_fdata, only: nssh, Qneutral, num_orb
   implicit none
-  integer(c_long) :: iatom, imu, inu, in1, in2, in3, ineigh, issh, jatom, katom, mbeta
-  real(c_double) :: distance12, dij, dterm, sterm, dq3
-  real(c_double), dimension (3) :: r1, r2
-  real(c_double), dimension (natoms) :: sub_ewaldqmmm
+  integer :: iatom, imu, inu, in1, in2, in3, ineigh, issh, jatom, katom, mbeta
+  real(double) :: distance12, dij, dterm, sterm, dq3
+  real(double), dimension (3) :: r1, r2
+  real(double), dimension (natoms) :: sub_ewaldqmmm
 
   ewaldqmmm = 0.0d0
   sub_ewaldqmmm = 0.0d0

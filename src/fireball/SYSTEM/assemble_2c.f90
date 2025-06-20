@@ -1,43 +1,43 @@
 ! This routine assembles all of the two-center and degenerate two-center interactions.
 subroutine assemble_2c ()
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   use M_constants, only: eq2
   use M_system, only: iforce, iqout, idipole, natoms, ratom, imass, dip, dipp, neigh_b, neigh_j, neighn, neigh_self, numorb_max, sp_mat, &
     & tp_mat, dipcm, dippcm, dippc, s_mat, t_mat, vna, dipc, xl
   use M_fdata, only: num_orb
-  integer(c_long) iatom
-  integer(c_long) imu
-  integer(c_long) in1
-  integer(c_long) in2
-  integer(c_long) in3
-  integer(c_long) ineigh
-  integer(c_long) interaction
-  integer(c_long) inu
-  integer(c_long) isorp
-  integer(c_long) jatom
-  integer(c_long) kforce
-  integer(c_long) matom
-  integer(c_long) mbeta
-  integer(c_long) ix
-  integer(c_long) iy
-  integer(c_long) iz
+  integer iatom
+  integer imu
+  integer in1
+  integer in2
+  integer in3
+  integer ineigh
+  integer interaction
+  integer inu
+  integer isorp
+  integer jatom
+  integer kforce
+  integer matom
+  integer mbeta
+  integer ix
+  integer iy
+  integer iz
  
-  real(c_double) y
-  real(c_double), dimension (numorb_max, numorb_max) :: bcna
-  real(c_double), dimension (3, numorb_max, numorb_max) :: bcnapx
-  real(c_double), dimension (numorb_max, numorb_max) :: bcnax
-  real(c_double), dimension (3, 3, 3) :: deps
-  real(c_double), dimension (3, 3) :: eps
-  real(c_double), dimension (3) :: r1
-  real(c_double), dimension (3) :: r2
-  real(c_double), dimension (3) :: r21
-  real(c_double), dimension (3) :: sighat
-  real(c_double), dimension (numorb_max, numorb_max) :: sx
-  real(c_double), dimension (3, numorb_max, numorb_max) :: spx
-  real(c_double), dimension (numorb_max, numorb_max) :: tx
-  real(c_double), dimension (3, numorb_max, numorb_max) :: tpx
-  real(c_double), dimension (numorb_max, numorb_max) :: dipx
-  real(c_double), dimension (3, numorb_max, numorb_max) :: dippx
+  real(double) y
+  real(double), dimension (numorb_max, numorb_max) :: bcna
+  real(double), dimension (3, numorb_max, numorb_max) :: bcnapx
+  real(double), dimension (numorb_max, numorb_max) :: bcnax
+  real(double), dimension (3, 3, 3) :: deps
+  real(double), dimension (3, 3) :: eps
+  real(double), dimension (3) :: r1
+  real(double), dimension (3) :: r2
+  real(double), dimension (3) :: r21
+  real(double), dimension (3) :: sighat
+  real(double), dimension (numorb_max, numorb_max) :: sx
+  real(double), dimension (3, numorb_max, numorb_max) :: spx
+  real(double), dimension (numorb_max, numorb_max) :: tx
+  real(double), dimension (3, numorb_max, numorb_max) :: tpx
+  real(double), dimension (numorb_max, numorb_max) :: dipx
+  real(double), dimension (3, numorb_max, numorb_max) :: dippx
 
   vna = 0.0d0
   s_mat = 0.0d0

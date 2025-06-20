@@ -1,18 +1,18 @@
-integer(c_long) function mpairnay (iatom, jatom, rdiff)
-  use iso_c_binding
+integer function mpairnay (iatom, jatom, rdiff)
+  use, intrinsic :: iso_fortran_env, only: double => real64
   use M_system, only: ratom, nPP_b, nPP_j, nPPn, xl
   implicit none
-  integer(c_long), intent(in) :: iatom
-  integer(c_long), intent(in) :: jatom
-  real(c_double), intent(in), dimension (3) :: rdiff
-  integer(c_long) imatch
-  integer(c_long) ineigh
-  integer(c_long) jjatom
-  integer(c_long) mbeta
-  real(c_double) diff
-  real(c_double), dimension (3) :: r1
-  real(c_double), dimension (3) :: r2
-  real(c_double), dimension (3) :: r21
+  integer, intent(in) :: iatom
+  integer, intent(in) :: jatom
+  real(double), intent(in), dimension (3) :: rdiff
+  integer imatch
+  integer ineigh
+  integer jjatom
+  integer mbeta
+  real(double) diff
+  real(double), dimension (3) :: r1
+  real(double), dimension (3) :: r2
+  real(double), dimension (3) :: r21
   mpairnay = 0
   r1(:) = ratom(:,iatom)
   imatch = 0

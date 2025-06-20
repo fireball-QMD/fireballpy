@@ -6,7 +6,7 @@ subroutine set_options(dipole_method, charges_method, &
   use M_system, only: igamma, icluster, idipole, iqout, iqmmm, &
     & qstate, ialgmix, max_scf_iterations, idmix, w02, bmix, sigmatol
   implicit none
-  integer(c_long), intent(in) :: dipole_method, charges_method, &
+  integer, intent(in) :: dipole_method, charges_method, &
     & ismolecule, isgamma, total_charge, mixer_method, max_iter, mix_order
   real(c_double), intent(in) :: beta, w0, tol
   iqmmm = 0 ! ensure this is off by default
@@ -40,10 +40,10 @@ subroutine set_coords(naux, z, xyz)
   use M_system, only: natoms, ratom, symbol, imass
   use M_fdata, only : symbolA, nspecies, nzx
   implicit none
-  integer(c_long), intent(in) :: naux
-  integer(c_long), dimension(naux), intent(in) :: z
+  integer, intent(in) :: naux
+  integer, dimension(naux), intent(in) :: z
   real(c_double), dimension(3, naux), intent(in) :: xyz
-  integer(c_long) :: iatom, ispec
+  integer :: iatom, ispec
   natoms = naux
   if (allocated(ratom)) deallocate(ratom)
   if (allocated(symbol)) deallocate(symbol)
@@ -68,7 +68,7 @@ subroutine set_initial_charges(natoms, nsh_max, qinput)
   use iso_c_binding
   use M_system, only : Qin
   implicit none
-  integer(c_long), intent(in) :: nsh_max, natoms
+  integer, intent(in) :: nsh_max, natoms
   real(c_double), dimension(nsh_max, natoms), intent(in) :: qinput
   Qin = qinput
 end subroutine set_initial_charges
@@ -78,7 +78,7 @@ subroutine update_coords(natoms, xyz)
   use iso_c_binding
   use M_system, only: ratom
   implicit none
-  integer(c_long), intent(in) :: natoms
+  integer, intent(in) :: natoms
   real(c_double), dimension(3, natoms), intent(in) :: xyz
   ratom = xyz
 end subroutine update_coords
@@ -88,7 +88,7 @@ subroutine set_kpoints(nkpts, kpts, weights)
   use iso_c_binding
   use M_system, only: nkpoints, special_k, weight_k
   implicit none
-  integer(c_long), intent(in) :: nkpts
+  integer, intent(in) :: nkpts
   real(c_double), dimension(3, nkpts), intent(in) :: kpts
   real(c_double), dimension(nkpts), intent(in) :: weights
   if (allocated(special_k)) deallocate(special_k)
@@ -106,7 +106,7 @@ subroutine set_qmmm(n, pos, qs, rc1, rc2, width)
   use iso_c_binding
   use M_system, only: iqmmm, qmmm_qm_natoms, qmmm_qm_xcrd, qmmm_dxyzcl, qmmm_rc1, qmmm_rc2, qmmm_width
   implicit none
-  integer(c_long), intent(in) :: n
+  integer, intent(in) :: n
   real(c_double), dimension(3, n), intent(in) :: pos
   real(c_double), dimension(n), intent(in) :: qs
   real(c_double), intent(in) :: rc1, rc2, width
@@ -114,7 +114,7 @@ subroutine set_qmmm(n, pos, qs, rc1, rc2, width)
   allocate (qmmm_qm_xcrd(4, n))
   if (allocated(qmmm_dxyzcl)) deallocate(qmmm_dxyzcl)
   allocate (qmmm_dxyzcl(3, n))
-  iqmmm = 1_c_long
+  iqmmm = 1
   qmmm_qm_natoms = n
   qmmm_qm_xcrd(1:3, :) = pos
   qmmm_qm_xcrd(4, :) = qs
@@ -128,9 +128,9 @@ subroutine update_qmmm(n, pos)
   use iso_c_binding
   use M_system, only: iqmmm, qmmm_qm_xcrd
   implicit none
-  integer(c_long), intent(in) :: n
+  integer, intent(in) :: n
   real(c_double), dimension(3, n), intent(in) :: pos
-  iqmmm = 1_c_long ! ensure
+  iqmmm = 1
   qmmm_qm_xcrd(1:3, :) = pos
 end subroutine update_qmmm
 
@@ -151,26 +151,15 @@ subroutine call_allocate_system()
   call allocate_system()
 end subroutine call_allocate_system
 
-! Get util system size information
-subroutine get_sizes(nsh, norbs_new, norbs)
-  use iso_c_binding
-  use M_system, only: norbitals_new, norbitals
-  use M_fdata, only: nsh_max
-  integer(c_long), intent(out) :: nsh, norbs_new, norbs
-  nsh = nsh_max
-  norbs_new = norbitals_new
-  norbs = norbitals
-end subroutine get_sizes
-
 ! Return initial charges
 subroutine get_initial_charges(natoms, nsh_max, qinitial)
   use iso_c_binding
   use M_fdata, only : Qneutral, nssh
   use M_system, only : imass
   implicit none
-  integer(c_long), intent(in) :: nsh_max, natoms
+  integer, intent(in) :: nsh_max, natoms
   real(c_double), dimension(nsh_max, natoms), intent(inout) :: qinitial
-  integer(c_long) :: iatom, issh, in1
+  integer :: iatom, issh, in1
   do iatom=1,natoms
     in1 = imass(iatom)
     do issh=1,nssh(in1)
@@ -183,30 +172,29 @@ subroutine get_initial_charges(natoms, nsh_max, qinitial)
 end subroutine get_initial_charges
 
 ! Compute the SCF loop
-subroutine scf(natoms, nshell, nkpts, nbands, norbitals, &
+subroutine scf(natoms, nshell, nkpts, norbitals, &
     & verbose, fix_charges, shell_charges, eigenvalues, eigenvectors, &
-    & converged, errno_out, energy, fermi_level, charges)
+    & nbands, converged, errno_out, energy, fermi_level, charges)
   use iso_c_binding
   use M_system, only: errno, scf_achieved, etot, efermi, eigen_k, Qin, imass, ifixcharge, icluster, &
-    & igamma, bbnkre, bbnkim
+    & igamma, bbnkre, bbnkim, norbitals_new
   use M_fdata, only: Qneutral, nssh
   implicit none
-  integer(c_long), intent(in) :: natoms, nshell, nkpts, nbands, norbitals
+  integer, intent(in) :: natoms, nshell, nkpts, norbitals
   logical, intent(in) :: verbose, fix_charges
   real(c_double), dimension(nshell, natoms), intent(inout) :: shell_charges
-  real(c_double), dimension(nbands, nkpts), intent(inout) :: eigenvalues
+  real(c_double), dimension(norbitals, nkpts), intent(inout) :: eigenvalues
   complex(c_double_complex), dimension(norbitals, norbitals, nkpts), intent(inout) :: eigenvectors
   logical, intent(out) :: converged
-  integer(c_long), intent(out) :: errno_out
+  integer, intent(out) :: errno_out, nbands
   real(c_double), intent(out) :: energy, fermi_level
   real(c_double), dimension(natoms), intent(out) :: charges
-  integer(c_long) :: iatom, issh, in1
-
+  integer :: iatom, issh, in1
   errno = 0
   if(fix_charges) then
-    ifixcharge = 1_c_long
+    ifixcharge = 1
   else
-    ifixcharge = 0_c_long
+    ifixcharge = 0
   end if
   call scf_loop (verbose)
   converged = scf_achieved
@@ -221,12 +209,13 @@ subroutine scf(natoms, nshell, nkpts, nbands, norbitals, &
     end do
   end do
   shell_charges = Qin
-  eigenvalues = eigen_k(1:nbands, :)
+  eigenvalues = eigen_k(:, :)
   if (icluster .eq. 0 .and. igamma .eq. 0) then
     eigenvectors = cmplx(bbnkre, bbnkim, kind=c_double_complex)
   else
     eigenvectors = cmplx(bbnkre, kind=c_double_complex)
   end if
+  nbands = norbitals_new
 end subroutine scf
 
 ! Get the forces in each atom
@@ -234,9 +223,9 @@ subroutine calc_forces(natoms, forces, errno_out)
   use iso_c_binding
   use M_system, only : ftot, errno
   implicit none
-  integer(c_long), intent(in) :: natoms
+  integer, intent(in) :: natoms
   real(c_double), dimension(3, natoms), intent(inout) :: forces
-  integer(c_long), intent(out) :: errno_out
+  integer, intent(out) :: errno_out
   errno = 0
   call getforces()
   errno_out = errno
@@ -248,7 +237,7 @@ subroutine get_qmmm_forces(natoms, forces)
   use iso_c_binding
   use M_system, only : qmmm_dxyzcl
   implicit none
-  integer(c_long), intent(in) :: natoms
+  integer, intent(in) :: natoms
   real(c_double), dimension(3, natoms), intent(inout) :: forces
   forces = qmmm_dxyzcl
 end subroutine get_qmmm_forces
@@ -259,9 +248,9 @@ subroutine get_orbitals(natoms, orbitals)
   use M_system, only : imass
   use M_fdata, only : num_orb
   implicit none
-  integer(c_long), intent(in) :: natoms
-  integer(c_long), dimension(natoms), intent(inout) :: orbitals
-  integer(c_long) :: iatom
+  integer, intent(in) :: natoms
+  integer, dimension(natoms), intent(inout) :: orbitals
+  integer :: iatom
   do iatom = 1, natoms
     orbitals(iatom) = num_orb(imass(iatom))
   end do
@@ -271,7 +260,7 @@ end subroutine get_orbitals
 subroutine get_hs(norbitals, sdat, hdat)
   use iso_c_binding
   implicit none
-  integer(c_long), intent(in) :: norbitals
+  integer, intent(in) :: norbitals
   real(c_double), dimension(norbitals, norbitals), intent(inout) :: sdat, hdat
   call geth(sdat, hdat)
 end subroutine get_hs

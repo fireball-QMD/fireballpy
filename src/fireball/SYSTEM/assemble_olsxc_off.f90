@@ -1,34 +1,34 @@
 ! This routine assembles the two & three-center exchange-correlation for the average density approximation. 
 subroutine assemble_olsxc_off ()
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   use M_system, only: natoms, ratom, imass, neigh_b, neigh_j, neighn, neigh_self, numorb_max, Qin, vxc, vxc_ca, rho_off, &
     & rhoij_off, s_mat, xl
   use M_fdata, only: num_orb,nssh,Qneutral
   implicit none
-  integer(c_long) iatom
-  integer(c_long) imu
-  integer(c_long) in1, in2, in3
-  integer(c_long) ineigh
-  integer(c_long) interaction
-  integer(c_long) inu
-  integer(c_long) isorp
-  integer(c_long) jatom
-  integer(c_long) kforce
-  integer(c_long) matom
-  integer(c_long) mbeta
+  integer iatom
+  integer imu
+  integer in1, in2, in3
+  integer ineigh
+  integer interaction
+  integer inu
+  integer isorp
+  integer jatom
+  integer kforce
+  integer matom
+  integer mbeta
 
-  real(c_double)  y 
-  real(c_double) dxn
-  real(c_double), dimension (numorb_max, numorb_max) :: bcxcx
-  real(c_double), dimension (numorb_max, numorb_max) :: denmx
-  real(c_double), dimension (numorb_max, numorb_max) :: den1x
-  real(c_double), dimension (numorb_max, numorb_max) :: rhomx
-  real(c_double), dimension (3, numorb_max, numorb_max) :: rhompx
-  real(c_double), dimension (3, 3) :: eps
-  real(c_double), dimension (3, 3, 3) :: deps
-  real(c_double), dimension (3) :: r1, r2, r21
-  real(c_double), dimension (3) :: sighat
-  real(c_double), dimension (numorb_max, numorb_max) :: sx
+  real(double)  y 
+  real(double) dxn
+  real(double), dimension (numorb_max, numorb_max) :: bcxcx
+  real(double), dimension (numorb_max, numorb_max) :: denmx
+  real(double), dimension (numorb_max, numorb_max) :: den1x
+  real(double), dimension (numorb_max, numorb_max) :: rhomx
+  real(double), dimension (3, numorb_max, numorb_max) :: rhompx
+  real(double), dimension (3, 3) :: eps
+  real(double), dimension (3, 3, 3) :: deps
+  real(double), dimension (3) :: r1, r2, r21
+  real(double), dimension (3) :: sighat
+  real(double), dimension (numorb_max, numorb_max) :: sx
 
   do iatom = 1, natoms
     matom = neigh_self(iatom)

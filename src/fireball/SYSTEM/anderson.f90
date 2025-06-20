@@ -1,19 +1,19 @@
 subroutine anderson ( x_try, x_old, nmsh )
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   use M_system, only: ialgmix, idmix, max_scf_iterations, bmix, sigma, sigmatol, sigmabest, w02, scf_achieved, Kscf, Fv, Xv, delF, delX, &
     & r2_sav, wi, x_best, Kbest
   implicit none
-  integer(c_long), intent(in) :: nmsh    ! Size of vectors being optimized
-  real(c_double), intent(in), dimension(nmsh) :: x_try ! potential new vector on input
-  real(c_double), intent(inout), dimension(nmsh) :: x_old ! old vector in input, real(c_double) new vector on output
-  integer(c_long) :: iloop, jloop, mix_order, imix, Kscfm1
-  real(c_double), allocatable, dimension(:) :: delF_F    ! <delF|F> in Eq. 5.31
-  real(c_double), allocatable, dimension(:,:) :: a_matrix
+  integer, intent(in) :: nmsh    ! Size of vectors being optimized
+  real(double), intent(in), dimension(nmsh) :: x_try ! potential new vector on input
+  real(double), intent(inout), dimension(nmsh) :: x_old ! old vector in input, real(double) new vector on output
+  integer :: iloop, jloop, mix_order, imix, Kscfm1
+  real(double), allocatable, dimension(:) :: delF_F    ! <delF|F> in Eq. 5.31
+  real(double), allocatable, dimension(:,:) :: a_matrix
   ! BLAS stuff
-  integer(c_long) :: lwork
+  integer :: lwork
   integer :: info
-  integer(c_long), allocatable, dimension(:) :: ipiv
-  real(c_double), allocatable, dimension(:) :: work
+  integer, allocatable, dimension(:) :: ipiv
+  real(double), allocatable, dimension(:) :: work
 
   if(Kscf .eq. 1)then
     allocate (Fv(nmsh,max_scf_iterations))
@@ -28,15 +28,14 @@ subroutine anderson ( x_try, x_old, nmsh )
     Xv(:,1) = x_old(:)
     Fv(:,1) = x_try(:) - x_old(:)
     sigma = dot_product(Fv(:,1), Fv(:,1))/nmsh
-    if(sigma .lt. sigmatol) then
-      scf_achieved = .true.
-      deallocate(Fv, Xv, delF, delX, r2_sav, x_best, wi)
-      return
-    end if
     x_old(:) = x_old(:) + bmix*Fv(:,1)
     r2_sav(1) = sigma
     sigmabest = sigma
     Kbest = 1
+    if(sigma .lt. sigmatol) then
+      scf_achieved = .true.
+      deallocate(Fv, Xv, delF, delX, r2_sav, x_best, wi)
+    end if
     return
   end if
 
@@ -60,14 +59,14 @@ subroutine anderson ( x_try, x_old, nmsh )
 
   Kscfm1 = Kscf - 1
   if (ialgmix .eq. 2) then
-    wi(Kscfm1) = real(nmsh, c_double) / r2_sav(Kscfm1)
+    wi(Kscfm1) = real(nmsh, double) / r2_sav(Kscfm1)
   end if
 
   delX(:,Kscfm1) = wi(Kscfm1)*(x_old(:) - Xv(:,Kscfm1))
   delF(:,Kscfm1) = wi(Kscfm1)*(Fv(:,Kscf) - Fv(:,Kscfm1))
   Xv(:,Kscfm1) = bmix*delF(:,Kscfm1) + delX(:,Kscfm1)
 
-  imix = max(1_c_long, Kscf - idmix + 1)
+  imix = max(1, Kscf - idmix + 1)
   mix_order = min(Kscf, idmix) - 1
   if (imix .gt. 1) then
     if (r2_sav(imix-1) .lt. minval(r2_sav(imix:Kscf))) then
@@ -89,8 +88,8 @@ subroutine anderson ( x_try, x_old, nmsh )
     a_matrix(jloop,jloop) = a_matrix(jloop,jloop) + w02
   end do
   allocate(work(1), ipiv(mix_order))
-  call dsysv('U',mix_order,1,a_matrix,mix_order,ipiv,delF_F,mix_order,work,-1_c_long,info)
-  lwork = nint(work(1), c_long)
+  call dsysv('U',mix_order,1,a_matrix,mix_order,ipiv,delF_F,mix_order,work,-1,info)
+  lwork = work(1)
   deallocate(work)
   allocate(work(lwork))
   call dsysv('U',mix_order,1,a_matrix,mix_order,ipiv,delF_F,mix_order,work,lwork,info)

@@ -1,23 +1,23 @@
 subroutine common_neighborsPP ()
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   use M_system, only: icluster, natoms, ratom, imass, mbeta_max, nPPx_b, nPPx_j, nPPxn, neighPPn, neighPP_b, neighPP_j, neighPP_comn, &
-    & neighPP_comm, neighPP_comj, neighPP_comb, xl
+    & neighPP_comm, neighPP_comj, neighPP_comb, xl, neighPP_max, errno
   implicit none
-  integer(c_long) ialp
-  integer(c_long) iatom
-  integer(c_long) ibeta
-  integer(c_long) in1, in2
-  integer(c_long) ineigh
-  integer(c_long) jatom
-  integer(c_long) jbeta
-  integer(c_long) jneigh
-  integer(c_long) katom
-  integer(c_long) kbeta
-  integer(c_long) kneigh
-  integer(c_long) num_neigh
+  integer ialp
+  integer iatom
+  integer ibeta
+  integer in1, in2
+  integer ineigh
+  integer jatom
+  integer jbeta
+  integer jneigh
+  integer katom
+  integer kbeta
+  integer kneigh
+  integer num_neigh
 
-  real(c_double), dimension (3) :: diff
-  real(c_double), dimension (3) :: vec1, vec2, vec3, vec
+  real(double), dimension (3) :: diff
+  real(double), dimension (3) :: vec1, vec2, vec3, vec
 
   if(icluster .eq. 1) mbeta_max = 0
   do ialp = 1, natoms
@@ -36,6 +36,10 @@ subroutine common_neighborsPP ()
           if (.not. (jatom .eq. ialp .and. jbeta .eq. 0) .and. (ineigh .ne. jneigh)) then
             vec3(:) = ratom(:,jatom) + xl(:,jbeta)
             num_neigh = num_neigh + 1
+            if (num_neigh .gt. neighPP_max**2) then
+              errno = 2
+              return
+            end if
             neighPP_comj(1,num_neigh,ialp) = iatom
             neighPP_comb(1,num_neigh,ialp) = ibeta
             neighPP_comj(2,num_neigh,ialp) = jatom

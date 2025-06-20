@@ -1,15 +1,15 @@
 ! We assume we do not go outside the range NEVER
 subroutine interpolate_1d (interaction, isub, in1, in2, non2c, ioption, xin, yout, dfdx)
-  use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: double => real64
   use M_fdata, only: ind2c, numz2c, z2cmax, splineint_2c
   implicit none
-  integer(c_long), intent(in) :: interaction, isub, in1, in2, non2c, ioption ! Derivative or not
-  real(c_double), intent(in)  :: xin
-  real(c_double), intent(out) :: yout, dfdx
-  real(c_double), parameter :: tol=1.0d-5
-  integer(c_long) :: i, jxx, nnum
-  real(c_double) xmax, xmin, x, h, hi
-  real(c_double) :: a, b, c, d
+  integer, intent(in) :: interaction, isub, in1, in2, non2c, ioption ! Derivative or not
+  real(double), intent(in)  :: xin
+  real(double), intent(out) :: yout, dfdx
+  real(double), parameter :: tol=1.0d-5
+  integer :: i, jxx, nnum
+  real(double) xmax, xmin, x, h, hi
+  real(double) :: a, b, c, d
 
   xmin = 0.0d0
   dfdx = 0.0d0
@@ -39,7 +39,7 @@ subroutine interpolate_1d (interaction, isub, in1, in2, non2c, ioption, xin, you
 
   x = hi*(xin - xmin)
   i = int(x) + 1
-  x = x - real(i - 1, c_double)
+  x = x - real(i - 1, double)
 
   a = splineint_2c(1,non2c,i,jxx,in1,in2)
   b = splineint_2c(2,non2c,i,jxx,in1,in2)
