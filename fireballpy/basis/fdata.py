@@ -110,6 +110,8 @@ class Element:
             return
         self._valence[2] = ec[maxn-1]['d']
         if l == 'd':
+            if self.nznuc in [29, 47, 79, 111]:
+                self._valence = [1.0, 0.0, 10.0, 0.0]
             return
         # No f orbitals
         raise_err(ValueError(f'{err} Element with unsupported "f" valence orbitals.'))

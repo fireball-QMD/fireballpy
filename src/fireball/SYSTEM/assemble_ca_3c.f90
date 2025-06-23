@@ -180,7 +180,6 @@ subroutine assemble_ca_3c ()
         end do
         do inu = 1, num_orb(in2)
           do imu = 1, num_orb(in1)
-            !if (y .lt. 1d-8) cycle  ! No sé que mierdas pasa
             sterm = dq3*s_mat(imu,inu,mneigh,iatom)/2.0d0
             dterm = dq3*dip(imu,inu,mneigh,iatom)/y
             emnpl(imu,inu) = (sterm - dterm)/distance_13  + (sterm + dterm)/distance_23

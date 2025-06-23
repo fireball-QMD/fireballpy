@@ -11,12 +11,10 @@ subroutine kspace_gamma ()
     & jatom, jmu, jnu, mbeta, mineig, lm
   real(double), dimension (norbitals) :: eigen
   real(double), dimension (:), allocatable :: ww, work
-  real(double), dimension (:, :), allocatable :: xxxx, yyyy, zzzz
-  integer :: liwork, lwork, info
-  integer, dimension (:), allocatable :: iwork
+  real(double), dimension (norbitals, norbitals) :: yyyy, zzzz
+  real(double), dimension (:, :), allocatable :: xxxx
+  integer :: lwork, info
   ikpoint = 1
-  allocate(yyyy(norbitals,norbitals))
-  allocate(zzzz(norbitals,norbitals))
   yyyy = a0
 
   if ((Kscf .eq. 1) .and. (iqout .eq. 3)) then
@@ -91,8 +89,6 @@ subroutine kspace_gamma ()
 
   if (isgeneig) then
     zzzz(:,:) = sm12_real(:,:)
-    allocate(xxxx(norbitals,norbitals))
-    xxxx(:,:) = yyyy(:,:)
     allocate(work(1))
     call dsygv(1, 'V', 'U', norbitals, yyyy, norbitals, zzzz, norbitals, eigen, work, -1, info)
     lwork = work(1)
@@ -100,33 +96,13 @@ subroutine kspace_gamma ()
     allocate(work(lwork))
     call dsygv(1, 'V', 'U', norbitals, yyyy, norbitals, zzzz, norbitals, eigen, work, lwork, info)
     deallocate(work)
-    !allocate(work(1), iwork(1))
-    !call dsygvd(1, 'V', 'U', norbitals, yyyy, norbitals, zzzz, norbitals, eigen, work, -1, iwork, -1, info)
-    !lwork = work(1)
-    !liwork = iwork(1)
-    !deallocate(work, iwork)
-    !allocate(work(lwork))
-    !allocate(iwork(liwork))
-    !call dsygv(1, 'V', 'U', norbitals, yyyy, norbitals, zzzz, norbitals, eigen, work, lwork, iwork, liwork, info)
-    !deallocate(work, iwork)
     if (info .eq. 0) then
       norbitals_new = norbitals
       eigen_k(:,ikpoint) = eigen(:)
-      bbnkre(:,:,ikpoint) = real(yyyy(:,:), double)
-      deallocate (xxxx)
-      deallocate (yyyy)
-      deallocate (zzzz)
+      bbnkre(:,:,ikpoint) = yyyy(:,:)
       return
     end if
     if (info .le. norbitals) then
-      write (*,*) 'me muero'
-      open (unit=360, file='ham.dat', status='unknown')
-      do inu = 1, norbitals
-        do imu = 1, norbitals
-      write(360,*) xxxx(imu,inu), zzzz(imu,inu)
-      end do
-      end do
-      close(360)
       errno = -info
       return
     end if
@@ -191,11 +167,9 @@ subroutine kspace_gamma ()
   end if
   eigen_k(1:norbitals_new,ikpoint) = eigen(1:norbitals_new)
   call dgemm('N', 'N', norbitals, norbitals_new, norbitals_new, a1, xxxx, norbitals, yyyy(1:norbitals_new,1:norbitals_new), norbitals_new, a0, zzzz(:,1:norbitals_new), norbitals)
-  bbnkre(:,1:norbitals_new,ikpoint) = real(zzzz(:,1:norbitals_new), double)
-  if ((iqout .eq. 1) .or. (iqout .eq. 3)) blowre(:,:,ikpoint) = real(yyyy(:,:), double)
+  bbnkre(:,1:norbitals_new,ikpoint) = zzzz(:,1:norbitals_new)
+  if ((iqout .eq. 1) .or. (iqout .eq. 3)) blowre(:,:,ikpoint) = yyyy(:,:)
   deallocate (xxxx)
-  deallocate (yyyy)
-  deallocate (zzzz)
   if ((Kscf .eq. 1) .and. (iqout .eq. 3)) then
     deallocate (ww)
   end if

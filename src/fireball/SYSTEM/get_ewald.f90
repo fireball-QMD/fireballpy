@@ -24,7 +24,6 @@ subroutine get_ewald (iauxforce)
   integer ix
   integer jatom
   real(double) argument
-  real(double) my_erfc
   real(double) derfcdr
   real(double) distance
   real(double) factor
@@ -159,9 +158,9 @@ subroutine get_ewald (iauxforce)
        distance = sqrt(eta(1)**2 + eta(2)**2 + eta(3)**2)
        if (distance .gt. 0.0001d0) then
         argument = kappa*distance
-        ewald(iatom,jatom) =  ewald(iatom,jatom) + factor*my_erfc(argument)/distance
-        ewald(jatom,iatom) =  ewald(jatom,iatom) + factor*my_erfc(argument)/distance
-        derfcdr = (2.0d0*exp(-argument**2)*kappa/sqrt(pi) + my_erfc(argument)/distance)/distance**2
+        ewald(iatom,jatom) =  ewald(iatom,jatom) + factor*erfc(argument)/distance
+        ewald(jatom,iatom) =  ewald(jatom,iatom) + factor*erfc(argument)/distance
+        derfcdr = (2.0d0*exp(-argument**2)*kappa/sqrt(pi) + erfc(argument)/distance)/distance**2
         if (iauxforce .eq. 1) then
 
          do ix = 1, 3
@@ -201,19 +200,3 @@ subroutine cross (a, b, c)
   c(3) = a(1)*b(2) - a(2)*b(1)
   return
 end subroutine cross
-
-function my_erfc (x)
-  use, intrinsic :: iso_fortran_env, only: double => real64
-  implicit none
-  real(double), intent(in) :: x
-  real(double) :: s, ax, t, my_erfc
-
-  ax = abs(x)
-  if( ax .lt. 1.0d-10) then
-    my_erfc = 1.0d0
-    return
-  end if
-  s = x/ax
-  t = 1.0d0/(1.0d0 + 0.3275911d0*ax)
-  my_erfc = 1.0d0 - s*(1.0d0 - exp(-ax*ax)*t*(0.254829592d0 + t*(-0.284496736d0 + t*(1.421413741d0 + t*(-1.453152027d0 + t*1.061405429d0)))))
-end function my_erfc

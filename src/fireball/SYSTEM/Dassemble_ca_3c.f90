@@ -182,7 +182,6 @@ subroutine Dassemble_ca_3c ()
      dstnA = - dstnB - dstnC
      do inu = 1, num_orb(in2)
       do imu = 1, num_orb(in1)
-            !if (y .lt. 1d-8) cycle  ! No sé que mierdas pasa
        sterm = dq3*s_mat(imu,inu,mneigh,iatom)/2.0d0
        dterm = dq3*dip(imu,inu,mneigh,iatom)/y
        spterm(:) = dq3*sp_mat(:,imu,inu,mneigh,iatom)/2.0d0
