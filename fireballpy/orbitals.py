@@ -127,8 +127,8 @@ class Orbitals:
         self.shell_charges = fbobj.shell_charges
         self.nums = fbobj.atomsystem.numbers
 
-        self.xs = np.zeros((fbobj.natoms, fbobj.nshells, 1001), dtype=np.float64)
-        self.cs = np.zeros((fbobj.natoms, fbobj.nshells, 4, 1000), dtype=np.float64)
+        self.xs = np.zeros((fbobj.natoms, fbobj.maxshells, 1001), dtype=np.float64)
+        self.cs = np.zeros((fbobj.natoms, fbobj.maxshells, 4, 1000), dtype=np.float64)
         self.aslm = np.zeros((fbobj.norbitals, 4), dtype=np.int32)
         k = 0
         for i, z in enumerate(self.nums):

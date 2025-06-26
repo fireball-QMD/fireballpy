@@ -69,7 +69,7 @@ class BaseFireball:
         the improved dipole description.
         By default ``'improved'`` except for periodic systems as it is not yet implemented and thus it will be ignored.
     initial_charges : ArrayLike[float], optional
-        A (natoms, nshells) array with the charges of each of the atom shells (0 if no shell for that atom is defined).
+        A (natoms, maxshells) array with the charges of each of the atom shells (0 if no shell for that atom is defined).
     mixer_kws : dict, optional
         Dictionary with the mixer parameters.
         More information :ref:`here <mixer>`.
@@ -187,20 +187,20 @@ class BaseFireball:
                     w0=np.float64(self.mixer_kws['w0']))
 
         # Know system size
-        self.nshells = max([self.fdatafiles.nshells[z] for z in self.fdatafiles.nshells])
-        self.norbitals = sum([self.fdatafiles.norbitals[z] for z in self.fdatafiles.norbitals])
+        self.maxshells = max([self.fdatafiles.nshells[z] for z in self.fdatafiles.nshells])
+        self.norbitals = sum([self.fdatafiles.norbitals[z] for z in self.atomsystem.numbers])
         self._alloc_arrays()
 
         if initial_charges is not None:
             if not isinstance(initial_charges, (tuple, list, np.ndarray)):
                 raise ValueError("Parameter ``initial_charges`` need to be coerced into an array.")
             self.initial_charges = np.ascontiguousarray(initial_charges, dtype=np.float64)
-            if self.initial_charges.shape != (self.natoms, self.nshells):
-                raise ValueError("Parameter ``initial_charges`` must be a natoms x nshells array. "
+            if self.initial_charges.shape != (self.natoms, self.maxshells):
+                raise ValueError("Parameter ``initial_charges`` must be a natoms x maxshells array. "
                                  f"Got shape {self.initial_charges.shape}")
             set_initial_charges(self.initial_charges.T)
         else:
-            self.initial_charges = np.zeros((self.natoms, self.nshells), dtype=np.float64, order='C')
+            self.initial_charges = np.zeros((self.natoms, self.maxshells), dtype=np.float64, order='C')
             get_initial_charges(self.initial_charges.T)
         self.shell_charges = self.initial_charges.copy()
 
