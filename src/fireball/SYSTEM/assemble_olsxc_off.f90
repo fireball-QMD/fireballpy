@@ -58,6 +58,7 @@ subroutine assemble_olsxc_off ()
       else
         ! This is the ontop case for the exchange-correlation energy
         ! Horsfield like term <i mu|Vxc(rho_i+j)| j nu>
+        !PENSAR borrar interaction 7
         isorp = 0
         interaction = 6
         in3 = in2
@@ -67,43 +68,43 @@ subroutine assemble_olsxc_off ()
             vxc(imu,inu,ineigh,iatom) =  vxc(imu,inu,ineigh,iatom) + rhomx(imu,inu)
           end do
         end do
-        interaction = 18
-        in3 = in2
-        do isorp = 1, nssh(in1)
-          call doscentros (interaction, isorp, kforce, in1, in1, in3, y,  eps, deps, rhomx, rhompx)
-          dxn = (Qin(isorp,iatom) - Qneutral(isorp,in1))
-          do inu = 1, num_orb(in3)
-            do imu = 1, num_orb(in1)
-              vxc_ca(imu,inu,ineigh,iatom) = vxc_ca(imu,inu,ineigh,iatom) + rhomx(imu,inu)*dxn
-            end do
-          end do
-        end do
-        interaction = 19
-        in3 = in2
-        do isorp = 1, nssh(in2)
-          call doscentros (interaction, isorp, kforce, in1, in2, in3, y, eps, deps, rhomx, rhompx)
-          dxn = (Qin(isorp,jatom) - Qneutral(isorp,in2))
-          do inu = 1, num_orb(in3)
-            do imu = 1, num_orb(in1)
-              vxc_ca(imu,inu,ineigh,iatom) =  vxc_ca(imu,inu,ineigh,iatom) + rhomx(imu,inu)*dxn
-            end do
-          end do
-        end do
-        do inu = 1, num_orb(in3)
-          do imu = 1, num_orb(in1)
-            denmx(imu,inu) = rho_off(imu,inu,ineigh,iatom)
-            den1x(imu,inu) = rhoij_off(imu,inu,ineigh,iatom)
-            sx(imu,inu) = s_mat(imu,inu,ineigh,iatom)
-          end do
-        end do
+        !interaction = 18
+        !in3 = in2
+        !do isorp = 1, nssh(in1)
+        !  call doscentros (interaction, isorp, kforce, in1, in1, in3, y,  eps, deps, rhomx, rhompx)
+        !  dxn = (Qin(isorp,iatom) - Qneutral(isorp,in1))
+        !  do inu = 1, num_orb(in3)
+        !    do imu = 1, num_orb(in1)
+        !      vxc_ca(imu,inu,ineigh,iatom) = vxc_ca(imu,inu,ineigh,iatom) + rhomx(imu,inu)*dxn
+        !    end do
+        !  end do
+        !end do
+        !interaction = 19
+        !in3 = in2
+        !do isorp = 1, nssh(in2)
+        !  call doscentros (interaction, isorp, kforce, in1, in2, in3, y, eps, deps, rhomx, rhompx)
+        !  dxn = (Qin(isorp,jatom) - Qneutral(isorp,in2))
+        !  do inu = 1, num_orb(in3)
+        !    do imu = 1, num_orb(in1)
+        !      vxc_ca(imu,inu,ineigh,iatom) =  vxc_ca(imu,inu,ineigh,iatom) + rhomx(imu,inu)*dxn
+        !    end do
+        !  end do
+        !end do
+        !do inu = 1, num_orb(in3)
+        !  do imu = 1, num_orb(in1)
+        !    denmx(imu,inu) = rho_off(imu,inu,ineigh,iatom)
+        !    den1x(imu,inu) = rhoij_off(imu,inu,ineigh,iatom)
+        !    sx(imu,inu) = s_mat(imu,inu,ineigh,iatom)
+        !  end do
+        !end do
 
         ! Calculate <i| V_xc(n) |j> and <i|V_xc(n_i+n_j)|j>        
-        call build_olsxc_off (in1, in2, den1x, denmx, sx, ineigh, iatom, bcxcx)
-        do inu = 1, num_orb(in2)
-          do imu = 1, num_orb(in1)
-            vxc_ca(imu,inu,ineigh,iatom) = vxc_ca(imu,inu,ineigh,iatom) + bcxcx(imu,inu)
-          end do
-        end do
+        !call build_olsxc_off (in1, in2, den1x, denmx, sx, ineigh, iatom, bcxcx)
+        !do inu = 1, num_orb(in2)
+        !  do imu = 1, num_orb(in1)
+        !    vxc_ca(imu,inu,ineigh,iatom) = vxc_ca(imu,inu,ineigh,iatom) + bcxcx(imu,inu)
+        !  end do
+        !end do
       end if
     end do
   end do
