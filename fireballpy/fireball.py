@@ -187,8 +187,8 @@ class BaseFireball:
                     w0=np.float64(self.mixer_kws['w0']))
 
         # Know system size
-        self.nshells = max([self.fdatafiles.nshells[z] for z in self.atomsystem.numbers])
-        self.norbitals = sum([self.fdatafiles.norbitals[z] for z in self.atomsystem.numbers])
+        self.nshells = max([self.fdatafiles.nshells[z] for z in self.fdatafiles.nshells])
+        self.norbitals = sum([self.fdatafiles.norbitals[z] for z in self.fdatafiles.norbitals])
         self._alloc_arrays()
 
         if initial_charges is not None:

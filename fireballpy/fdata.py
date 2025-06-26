@@ -154,7 +154,7 @@ class FDataFiles:
         with open(self.pyinfofile, 'w') as fp:
             fp.write(os.linesep.join(infodat))
 
-        # Find sizes
+    def _find_sizes(self) -> None:
         self.nshells: dict[int, int] = {}
         self.norbitals: dict[int, int] = {}
         with open(self.pyinfofile, 'r') as fp:
@@ -163,7 +163,7 @@ class FDataFiles:
         info = info[2:]  # Remove header
         for _ in range(n):
             z = int(info[3].split('-')[0].strip())
-            shellline = info[8]
+            shellline = info[6]
             shells = list(map(lambda x: int(x.strip()), shellline.split()))
             self.nshells[z] = len(shells)
             self.norbitals[z] = sum([2*l + 1 for l in shells])
@@ -180,7 +180,7 @@ class FDataFiles:
             self._prep_infodat()
             loadfdata_from_path(self.path)
             _loaded_fdata = deepcopy(load_tuple)
-            os.remove(self.pyinfofile)
+        self._find_sizes()
         self.isloaded = True
 
     def load_wf(self) -> None:
