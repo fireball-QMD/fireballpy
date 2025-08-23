@@ -3,7 +3,8 @@ from fireballpy import Fireball
 from fireballpy.outputs import get_hamiltonian
 
 atoms = molecule('CH4')
-atoms.calc = Fireball('biology', verbose=True)
+atoms.calc = Fireball('biology', verbose=True, charges_method='mulliken')
+#atoms.calc = Fireball(fdata='custom', fdata_path='/home/dani/test_fireballpy/05-forces_basis/fdata_doble_LDA', verbose=True, charges_method='lowdin')
 
 print("=== COORDINATES ===")
 for z, c in zip(atoms.get_chemical_symbols(), atoms.get_positions()):

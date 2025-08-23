@@ -118,6 +118,7 @@ def orbital(x, y, z, fcoefs, fxs, rn, l, m):
     fy = sphham(l, m, dx, dy, dz)
     return fr*fy/dr**l
 
+
 class Orbitals:
     def __init__(self, fbobj: BaseFireball) -> None:
         # Save to self for convenience
@@ -520,3 +521,129 @@ class Orbitals:
             return res
         return tplquad(ifun4, x0-xmax, x0+xmax, y0-ymax, y0+ymax, z0-zmax, z0+zmax, epsabs=1e-4, epsrel=1e-4,
                        args=(scs, aslm, fcs, fxs, rns, mu, nu))[0]
+
+
+
+class Fireball_Orbitals:
+
+    class atom_orb_info:
+        def __init__(self, zatom: int, iatom : int , l_name: str ,l: int, ml : int ):
+            self.zatom = zatom
+            self.iatom = iatom
+            self.l_name=l_name
+            self.l = l
+            self.ml = ml
+        def info(self):
+            print(self.zatom,self.iatom,self.l_name,self.l,self.ml)
+    
+    def __init__(self, fbobj: BaseFireball) -> None:
+        fbobj.fdatafiles.load_wf()
+        self.atomsystem = fbobj.atomsystem
+        self.wfs = fbobj.fdatafiles.wfs
+        self.info_atom_orb=self.load_atom_orbital_info()
+        self.fermi_energy = fbobj.get_fermi_level()
+        self.eigenvectors = fbobj.get_eigenvectors()
+        self.eigenvalues = fbobj.eigenvalues[0]
+        self.norb=len(self.eigenvalues)
+        self.f, self.fermi = self.load_fermi_level()
+
+
+    def load_fermi_level(self):
+        f = np.zeros(self.norb)
+        fermi_level=0
+        for i in range(self.norb):
+            if self.eigenvalues[i] < self.fermi_energy:
+               f[i] = 2  # Occupied molecular orbital (spin-paired)
+               fermi_level+=1
+            else:
+                f[i] = 0  # Unoccupied molecular orbital
+        return f, fermi_level
+
+        
+    def load_atom_orbital_info(self):
+        aux=[]
+        for iatom,zatom in zip(range(self.atomsystem.n),self.atomsystem.numbers):
+            for l in self.wfs[zatom]:
+                for ml in range(-ANGULAR_MOMENTUM[l],ANGULAR_MOMENTUM[l]+1):
+                    aux.append(self.atom_orb_info(int(zatom),iatom,l,ANGULAR_MOMENTUM[l],ml))
+        return aux 
+
+    def phi1D(self, ini: np.ndarray, fin: np.ndarray, num_puntos: int = 200):
+        """
+        Función para calcular puntos en 1D entre dos puntos con número de puntos opcional.
+    
+        Parámetros:
+        ini (np.ndarray): Punto inicial (obligatorio)
+        fin (np.ndarray): Punto final (obligatorio) 
+        num_puntos (int): Número de puntos (opcional, por defecto 200)
+        """
+        self.ini = ini
+        self.fin = fin
+        self.num_puntos = num_puntos
+        
+        puntos = np.array([
+            np.linspace(ini[0], fin[0], num_puntos),  # Valores de x
+            np.linspace(ini[1], fin[1], num_puntos),  # Valores de y
+            np.linspace(ini[2], fin[2], num_puntos)   # Valores de z
+        ]).T  # Transponer para obtener formato [ [x1,y1,z1], [x2,y2,z2], ... ]
+
+        r = np.arange(num_puntos)
+        phi=[] 
+
+        for iorb in range(self.norb):
+            Y = np.zeros(num_puntos)
+            for j in range(num_puntos):
+                for jorb in range(self.norb):
+                    # orbital(x, y, z, fcoefs, fxs, rn, l, m):
+                    aux = orbital(puntos[j][0], puntos[j][1], puntos[j][2],                            
+                                  self.wfs[self.info_atom_orb[jorb].zatom][self.info_atom_orb[jorb].l_name].c,
+                                  self.wfs[self.info_atom_orb[jorb].zatom][self.info_atom_orb[jorb].l_name].x,
+                                  self.atomsystem.positions[self.info_atom_orb[jorb].iatom],
+                                  self.info_atom_orb[jorb].l,
+                                  self.info_atom_orb[jorb].ml)
+                    Y[j] += self.eigenvectors[iorb][jorb]*aux
+            phi.append(Y)
+            
+        rho = np.zeros(num_puntos)
+        for iorb in range(self.norb):
+            for j in range(num_puntos):
+                rho[j] += self.f[iorb]*(phi[iorb][j])**2  
+                
+        return phi,rho
+
+    def phi2D(self, A: np.ndarray, B: np.ndarray,  C: np.ndarray, D: np.ndarray,  num_puntos: int = 100):
+        from mpl_toolkits.mplot3d import Axes3D  # Necesario para 3D
+        x = np.linspace(0, 1, num_puntos)  # 50 puntos entre -5 y 5
+        y = np.linspace(0, 1, num_puntos)  # 50 puntos entre -5 y 5
+        X, Y = np.meshgrid(x, y)
+
+        R = np.empty((num_puntos, num_puntos), dtype=object)
+        for i in range(num_puntos):
+          for j in range(num_puntos):
+            R[i,j] = A*(X[i,j]-1)*(Y[i,j]-1)+B*X[i,j]*(Y[i,j]-1)+C*X[i,j]*Y[i,j]+D*(X[i,j]-1)*Y[i,j]
+              
+        phi=[] 
+        for iorb in range(self.norb):
+            Z = np.zeros((num_puntos, num_puntos))
+            for i in range(num_puntos):
+                for j in range(num_puntos):
+                    for jorb in range(self.norb):
+                        aux = orbital(R[i,j][0], R[i,j][1], R[i,j][2],                            
+                              self.wfs[self.info_atom_orb[jorb].zatom][self.info_atom_orb[jorb].l_name].c,
+                              self.wfs[self.info_atom_orb[jorb].zatom][self.info_atom_orb[jorb].l_name].x,
+                              self.atomsystem.positions[self.info_atom_orb[jorb].iatom],
+                              self.info_atom_orb[jorb].l,
+                              self.info_atom_orb[jorb].ml)
+                     
+                        Z[i, j] += self.eigenvectors[iorb][jorb]*aux
+            phi.append(Z)
+
+        rho =  np.zeros((num_puntos, num_puntos))
+        for iorb in range(self.norb):
+            for i in range(num_puntos):
+                for j in range(num_puntos):
+                    rho[i,j] += self.f[iorb]*(phi[iorb][i,j])**2  
+            
+        return X,Y,phi,rho
+
+    
