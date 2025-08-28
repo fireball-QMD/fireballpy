@@ -527,19 +527,21 @@ class Orbitals:
 class Fireball_Orbitals:
 
     class atom_orb_info:
-        def __init__(self, zatom: int, iatom : int , l_name: str ,l: int, ml : int ):
+        def __init__(self, zatom: int, iatom : int , shell_charge : float, l_name: str ,l: int, ml : int ):
             self.zatom = zatom
             self.iatom = iatom
             self.l_name=l_name
             self.l = l
             self.ml = ml
+            self.shell_charge = shell_charge
         def info(self):
-            print(self.zatom,self.iatom,self.l_name,self.l,self.ml)
+            print(self.zatom,self.iatom,self.shell_charge, self.l_name,self.l,self.ml)
     
     def __init__(self, fbobj: BaseFireball) -> None:
         fbobj.fdatafiles.load_wf()
         self.atomsystem = fbobj.atomsystem
         self.wfs = fbobj.fdatafiles.wfs
+        self.shell_charges = fbobj.get_shell_charges()
         self.info_atom_orb=self.load_atom_orbital_info()
         self.fermi_energy = fbobj.get_fermi_level()
         self.eigenvectors = fbobj.get_eigenvectors()
@@ -564,8 +566,9 @@ class Fireball_Orbitals:
         aux=[]
         for iatom,zatom in zip(range(self.atomsystem.n),self.atomsystem.numbers):
             for l in self.wfs[zatom]:
-                for ml in range(-ANGULAR_MOMENTUM[l],ANGULAR_MOMENTUM[l]+1):
-                    aux.append(self.atom_orb_info(int(zatom),iatom,l,ANGULAR_MOMENTUM[l],ml))
+                intl=ANGULAR_MOMENTUM[l]
+                for ml in range(-intl,intl+1):
+                    aux.append(self.atom_orb_info(int(zatom),iatom,(1/(2*intl+1))*(self.shell_charges[iatom][intl]),l,intl,ml))
         return aux 
 
     def phi1D(self, ini: np.ndarray, fin: np.ndarray, num_puntos: int = 200):
@@ -609,7 +612,23 @@ class Fireball_Orbitals:
             for j in range(num_puntos):
                 rho[j] += self.f[iorb]*(phi[iorb][j])**2  
                 
-        return phi,rho
+        rho_q = np.zeros(num_puntos)
+        for iorb in range(self.norb):
+            for j in range(num_puntos):
+                q=self.info_atom_orb[iorb].shell_charge
+                orb_aux = orbital(puntos[j][0], puntos[j][1], puntos[j][2],                            
+                            self.wfs[self.info_atom_orb[iorb].zatom][self.info_atom_orb[iorb].l_name].c,
+                            self.wfs[self.info_atom_orb[iorb].zatom][self.info_atom_orb[iorb].l_name].x,
+                            self.atomsystem.positions[self.info_atom_orb[iorb].iatom],
+                            self.info_atom_orb[iorb].l,
+                            self.info_atom_orb[iorb].ml)
+                rho_q[j] += q*orb_aux**2
+        
+        return {
+            'phi': phi,
+            'rho': rho,
+            'rho_q': rho_q,
+        }
 
     def phi2D(self, A: np.ndarray, B: np.ndarray,  C: np.ndarray, D: np.ndarray,  num_puntos: int = 100):
         from mpl_toolkits.mplot3d import Axes3D  # Necesario para 3D
@@ -644,6 +663,11 @@ class Fireball_Orbitals:
                 for j in range(num_puntos):
                     rho[i,j] += self.f[iorb]*(phi[iorb][i,j])**2  
             
-        return X,Y,phi,rho
+        return {
+            'X': X,
+            'Y': Y, 
+            'phi': phi,
+            'rho': rho,
+        }
 
     
