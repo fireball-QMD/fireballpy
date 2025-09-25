@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 _icharge_table = {'lowdin': 1, 'mulliken': 2,
-                 'weighted_lowdin': 3, 'mulliken_dipole': 4,
+                 'weighted_lowdin': 3, 'mulliken_dipole': 4, 'stationary_charges': 6,
                  'mulliken_dipole_preserving': 7}
 
 _idipole_table = {'improved': 1, 'legacy': 0}

@@ -49,6 +49,7 @@ system_srcs = [
   'dipole_proyection.f90',
   'mulliken_charges.f90',
   'mulliken_dipole_charges.f90',
+  'stationary_charges.f90',
   'lowdin_charges.f90',
   'neighbors.f90',
   'initboxes.f90',
