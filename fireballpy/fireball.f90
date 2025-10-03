@@ -73,6 +73,21 @@ subroutine set_initial_charges(natoms, nsh_max, qinput)
   Qin = qinput
 end subroutine set_initial_charges
 
+subroutine set_fix_shell_charge(nsh_max, fix_shell_charge_aux)
+  use iso_c_binding
+  use M_system, only : fix_shell_charge
+  implicit none
+  integer, intent(in) :: nsh_max
+  real(c_double), dimension(nsh_max), intent(in) :: fix_shell_charge_aux
+  integer :: iatom, issh
+  if (allocated(fix_shell_charge)) deallocate(fix_shell_charge)
+  allocate (fix_shell_charge(nsh_max))
+  do issh=1,nsh_max
+    fix_shell_charge(issh)=fix_shell_charge_aux(issh)
+  end do  
+end subroutine set_fix_shell_charge
+
+
 ! Faster set coordinates for simulations
 subroutine update_coords(natoms, xyz)
   use iso_c_binding
@@ -264,3 +279,5 @@ subroutine get_hs(norbitals, sdat, hdat)
   real(c_double), dimension(norbitals, norbitals), intent(inout) :: sdat, hdat
   call geth(sdat, hdat)
 end subroutine get_hs
+
+

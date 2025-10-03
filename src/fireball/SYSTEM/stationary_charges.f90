@@ -1,6 +1,6 @@
 subroutine stationary_charges()
   use, intrinsic :: iso_fortran_env, only: double => real64
-  use M_system, only: natoms, imass, neigh_j, neighn, numorb_max, Qout, rho, nssh_tot, neigh_self,neigh_b
+  use M_system, only: natoms, imass, neigh_j, neighn, numorb_max, Qout, rho, nssh_tot, neigh_self,neigh_b, fix_shell_charge
   use M_fdata, only: num_orb,nssh,lssh
   implicit none
   integer iatom            
@@ -18,6 +18,18 @@ subroutine stationary_charges()
   SQ = 0.0d0
   c = 0.0d0
   alpha = 0
+
+!Borrar es solo para hacer test----------
+  !do issh=1,nsh_max
+  !  fix_shell_charge(issh)=fix_shell_charge_aux(issh)
+  !end do
+  !lo usamos para H2O HsHsOsp
+  !                   s s s p 
+  fix_shell_charge = [0,0,1,0]
+!-----------------------------------------
+! Mx=B x carga en shells q^mu
+! B^mu = sum_ij [ P^mu_ij (g_h^mu_ij +g_xc^mu_ij) + exc_aa^mu -  vxc_aamu
+! M_mu_i = D^mu_ii = g_h^i_mumu + g_xc^mu_ii + g_xc^i_mumu - f_xc^mu_ii - f_xc^i_mumu
   do ialp = 1, natoms
     ina = imass(ialp)
     do issh = 1, nssh(ina)
@@ -33,7 +45,12 @@ subroutine stationary_charges()
           mu_min = inumorb
           mu_max = mu_min+2*l
           do imu = mu_min, mu_max
-            auxgS =  auxgS  + 0.0 !  gvhxc(imu,imu,issh,ialp,matom,iatom)
+            auxgS =  auxgS  + 0.0 ! g_h(imu,imu,issh,ialp,matom,iatom) &
+!            &               + g_xc(imu,imu,issh,ialp,matom,iatom) &
+!            &               + g_
+
+            !g_h^i_mumu + g_xc^mu_ii + g_xc^i_mumu - f_xc^mu_ii - f_xc^i_mumu
+            ! antes sumamba :  gvhxc(imu,imu,issh,ialp,matom,iatom)
             auxgS = auxgS/(2*l+1) 
             !M(alpha,beta) =  auxgS
             A(alpha,beta) = auxgS
