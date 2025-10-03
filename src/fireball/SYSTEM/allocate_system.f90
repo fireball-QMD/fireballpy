@@ -544,5 +544,4 @@ subroutine allocate_system ()
   allocate (exc_aa(numorb_max,natoms,neigh_max,natoms))
   if (allocated(vxc_aa)) deallocate(vxc_aa)
   allocate (vxc_aa(numorb_max,natoms,neigh_max,natoms))
-
 end subroutine allocate_system

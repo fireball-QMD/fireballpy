@@ -273,5 +273,5 @@ module M_system
   real(double), dimension (:,:,:,:,:), allocatable :: f_xc
   real(double), dimension (:,:,:,:), allocatable :: exc_aa
   real(double), dimension (:,:,:,:), allocatable :: vxc_aa
-
+  integer, dimension (:), allocatable :: fix_shell_charge 
 end module M_system
