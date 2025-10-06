@@ -12,7 +12,7 @@ subroutine allocate_system ()
     & arhop_off, rhop_off, rhopij_off, vca, ewaldlr, h_mat, t_mat, vna, ewaldqmmm, dipc, xl, fotnl, fanl, fotna, fana, faxc, faxc_ca, &
     & dxcdcc, ft, dusr, fotxc, fotxc_ca, faca, fotca, f3naa, f3nab, f3nac, f3nla, f3nlb, f3nlc, f3caa, f3cab, f3cac, flrew, f3xca_ca, &
     & f3xcb_ca, f3xcc_ca, f3xca, f3xcb, f3xcc, flrew_qmmm, fro, ftot, dxcv, norbitals_new, qstate, bbnkre, bbnkim, igamma, &
-    & g_h, g_xc, f_xc, exc_aa, vxc_aa
+    & g_h, g_xc, f_xc, exc_aa, vxc_aa, getimu, getlimu
   use M_fdata, only: nssh, rcutoff, rc_PP, nspecies, num_orb, Qneutral, lssh, nsshPP, lsshPP,  nsh_max, numXmax, numYmax
 !  use M_fdata, only: numy3c_xc3c, ideriv_max
   implicit none
@@ -23,6 +23,7 @@ subroutine allocate_system ()
   integer:: num_neigh
   integer:: in1
   integer:: imu
+  integer:: alpha
   integer:: issh
   integer:: in2
   integer:: numorb
@@ -159,20 +160,28 @@ subroutine allocate_system ()
   allocate (getlssh(norbitals))
   if (allocated(getissh)) deallocate(getissh)
   allocate (getissh(norbitals))
+  if (allocated(getimu)) deallocate(getimu)
+  allocate (getimu(nssh_tot))
+  if (allocated(getlimu)) deallocate(getlimu)
+  allocate (getlimu(nssh_tot))
   if (allocated(getiatom)) deallocate(getiatom)
   allocate (getiatom(norbitals))
  
 
              
-  imu=0
+  imu = 0
+  alpha = 0 
   do iatom=1,natoms
     do issh=1,nssh(imass(iatom))
+      alpha = alpha + 1
+      getimu(alpha) = imu
+      getlimu(alpha) = lssh(issh,imass(iatom))
       do iorb = 1, 2*lssh(issh,imass(iatom))+1 
         imu=imu+1
         getissh(imu)=issh
         getlssh(imu)=lssh(issh,imass(iatom))
         getiatom(imu)=iatom
-        getmssh(imu)=iorb 
+        getmssh(imu)=iorb
       end do
    end do
   end do
