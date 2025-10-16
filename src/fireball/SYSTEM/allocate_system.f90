@@ -12,7 +12,7 @@ subroutine allocate_system ()
     & arhop_off, rhop_off, rhopij_off, vca, ewaldlr, h_mat, t_mat, vna, ewaldqmmm, dipc, xl, fotnl, fanl, fotna, fana, faxc, faxc_ca, &
     & dxcdcc, ft, dusr, fotxc, fotxc_ca, faca, fotca, f3naa, f3nab, f3nac, f3nla, f3nlb, f3nlc, f3caa, f3cab, f3cac, flrew, f3xca_ca, &
     & f3xcb_ca, f3xcc_ca, f3xca, f3xcb, f3xcc, flrew_qmmm, fro, ftot, dxcv, norbitals_new, qstate, bbnkre, bbnkim, igamma, &
-    & g_h, g_xc, f_xc, exc_aa, vxc_aa, getimu, getlimu
+    & g_h, g_xc, f_xc, exc_aa, vxc_aa, get_orb_ofshell, get_l_ofshell, get_issh_ofshell, get_iatom_ofshell
   use M_fdata, only: nssh, rcutoff, rc_PP, nspecies, num_orb, Qneutral, lssh, nsshPP, lsshPP,  nsh_max, numXmax, numYmax
 !  use M_fdata, only: numy3c_xc3c, ideriv_max
   implicit none
@@ -160,22 +160,38 @@ subroutine allocate_system ()
   allocate (getlssh(norbitals))
   if (allocated(getissh)) deallocate(getissh)
   allocate (getissh(norbitals))
-  if (allocated(getimu)) deallocate(getimu)
-  allocate (getimu(nssh_tot))
-  if (allocated(getlimu)) deallocate(getlimu)
-  allocate (getlimu(nssh_tot))
   if (allocated(getiatom)) deallocate(getiatom)
   allocate (getiatom(norbitals))
+  if (allocated(get_orb_ofshell)) deallocate(get_orb_ofshell)
+  allocate (get_orb_ofshell(nssh_tot))
+  if (allocated(get_issh_ofshell)) deallocate(get_issh_ofshell)
+  allocate (get_issh_ofshell(nssh_tot))
+  if (allocated(get_l_ofshell)) deallocate(get_l_ofshell)
+  allocate (get_l_ofshell(nssh_tot))
+  if (allocated(get_iatom_ofshell)) deallocate(get_iatom_ofshell)
+  allocate (get_iatom_ofshell(nssh_tot))
  
 
-             
+   alpha = 0 
+   imu=1
+   print*,'alpha,imu,iatom,issh,lssh'
+   do iatom=1,natoms
+    do issh=1,nssh(imass(iatom))
+      alpha = alpha + 1
+      print '(5I6)', alpha, imu, iatom, issh, lssh(issh, imass(iatom))      
+      get_orb_ofshell(alpha) = imu
+      get_iatom_ofshell(alpha) = iatom
+      get_issh_ofshell(alpha) = issh
+      get_l_ofshell(alpha) = lssh(issh,imass(iatom))
+      imu = imu + ( 2*lssh(issh,imass(iatom))+1 )
+     end do
+    end do
+
+           
   imu = 0
-  alpha = 0 
   do iatom=1,natoms
     do issh=1,nssh(imass(iatom))
       alpha = alpha + 1
-      getimu(alpha) = imu
-      getlimu(alpha) = lssh(issh,imass(iatom))
       do iorb = 1, 2*lssh(issh,imass(iatom))+1 
         imu=imu+1
         getissh(imu)=issh

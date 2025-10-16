@@ -51,8 +51,10 @@ module M_system
   integer, dimension (:), allocatable :: getmssh
   integer, dimension (:), allocatable :: getlssh
   integer, dimension (:), allocatable :: getissh
-  integer, dimension (:), allocatable :: getimu
-  integer, dimension (:), allocatable :: getlimu
+  integer, dimension (:), allocatable :: get_orb_ofshell
+  integer, dimension (:), allocatable :: get_iatom_ofshell
+  integer, dimension (:), allocatable :: get_issh_ofshell
+  integer, dimension (:), allocatable :: get_l_ofshell 
 
   ! --- ETOT ----
   real(double) :: etot
