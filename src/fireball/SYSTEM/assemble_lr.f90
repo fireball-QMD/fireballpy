@@ -1,7 +1,8 @@
 subroutine assemble_lr () 
   use, intrinsic :: iso_fortran_env, only: double => real64
   use M_constants, only: eq2
-  use M_system, only: natoms, ratom, imass, ewald, dip, neigh_b, neigh_j, neighn, Qin, s_mat, ewaldlr, xl
+  use M_system, only: natoms, ratom, imass, ewald, dip, neigh_b, neigh_j, neighn, Qin, s_mat, ewaldlr, xl, &
+                    & g_h, iqout, kscf
   use M_fdata, only: nssh,Qneutral,num_orb
   implicit none
   integer iatom
@@ -9,10 +10,12 @@ subroutine assemble_lr ()
   integer inu
   integer in1
   integer in2
+  integer in3
   integer ineigh
   integer issh
   integer jatom
   integer mbeta
+  integer katom
   real(double) distance12
   real(double) dq1
   real(double) dterm
@@ -50,6 +53,14 @@ subroutine assemble_lr ()
             dterm = 0.0d0
           endif
           ewaldlr(imu,inu,ineigh,iatom) = ewaldlr(imu,inu,ineigh,iatom)  + (sterm - dterm)*sub_ewald(iatom)*eq2  + (sterm + dterm)*sub_ewald(jatom)*eq2
+          if (Kscf .eq. 1 .and. iqout .eq. 6) then
+            do katom = 1,natoms
+              in3 = imass(katom)
+              do issh = 1, nssh(in3)
+                g_h(imu,inu,issh,katom,ineigh,iatom) = g_h(imu,inu,issh,katom,ineigh,iatom) + (sterm - dterm)*ewald(iatom,katom)*eq2 + (sterm + dterm)*ewald(jatom,katom)*eq2 
+              end do
+            end do
+          endif
        end do
       end do
     end do

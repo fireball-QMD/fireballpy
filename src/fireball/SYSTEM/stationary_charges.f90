@@ -2,7 +2,8 @@ subroutine stationary_charges()
   use, intrinsic :: iso_fortran_env, only: double => real64
   use M_system, only: natoms, imass, neigh_j, neighn, numorb_max, Qin, Qout, &
   & rho, nssh_tot, neigh_self,neigh_b, fix_shell_charge, get_l_ofshell, &
-  & get_orb_ofshell, get_issh_ofshell, g_h, g_xc, get_iatom_ofshell, ztot
+  & get_orb_ofshell, get_issh_ofshell, g_h, g_xc, get_iatom_ofshell, ztot, &
+  & g_h_shell, g_xc_shell
   use M_fdata, only: num_orb,nssh,lssh
   implicit none
   integer beta_iatom            
@@ -17,7 +18,7 @@ subroutine stationary_charges()
   integer issh1, mu_min, mu_max, l, inumorb
   real aux
   integer :: beta, alpha, alpha_iatom, ina, matom 
-  integer :: alpha_iatomha2, alpha2, nssh_tot2
+  integer :: alpha_iatom2, alpha2, nssh_tot2
   integer, dimension (:), allocatable :: mapindex
   integer, dimension (:), allocatable :: B
   integer, dimension (:,:), allocatable :: M
@@ -38,13 +39,11 @@ subroutine stationary_charges()
   allocate(M(nssh_tot2+1,nssh_tot2+1))
   allocate(B(nssh_tot2+1))
 
-  alpha_iatomha2 = 0 
+  alpha_iatom2 = 0 
   
-  print*,'alpha,alpha_iatomha2'
   do alpha = 1, nssh_tot
-    if (fix_shell_charge(alpha) .eq. 0) alpha_iatomha2=alpha_iatomha2+1
-    mapindex(alpha)=alpha_iatomha2
-    print*,alpha,alpha_iatomha2
+    if (fix_shell_charge(alpha) .eq. 0) alpha_iatom2=alpha_iatom2+1
+    mapindex(alpha)=alpha_iatom2
   end do
 
   do alpha = 1, nssh_tot
@@ -56,9 +55,9 @@ subroutine stationary_charges()
         if (fix_shell_charge(beta) .eq. 0) then
           print '(A,I0,A,I0,A,I0,A,I0,A)', 'M(', mapindex(alpha), ',', mapindex(beta), ') = f(', beta, ',', alpha, ')'
           M(mapindex(alpha),mapindex(beta)) = M(mapindex(alpha),mapindex(beta)) & 
-                      & + gshell_hh(beta , alpha ,alpha_iatom, matom, beta_iatom) &
-                      & + gshell_xc(beta , alpha ,alpha_iatom, matom, beta_iatom) &
-                      & + gshell_xc(alpha, beta  ,alpha_iatom, matom, beta_iatom) &
+                      & +  g_h_shell(beta , alpha ) &
+                      & + g_xc_shell(beta , alpha ) &
+                      & + g_xc_shell(alpha, beta  ) &
                       & - fshell_xc(beta , alpha ,alpha_iatom, matom, beta_iatom) &
                       & - fshell_xc(alpha, beta  ,alpha_iatom, matom, beta_iatom) 
           do ineigh = 1, neighn(beta_iatom)
@@ -80,12 +79,12 @@ subroutine stationary_charges()
         if (fix_shell_charge(beta) .eq. 1) then
           print '(A,I0,A,I0,A,I0,A,F8.4)', '*B*(', mapindex(alpha),') = f(', beta, ',', alpha, ')', Qin(get_issh_ofshell(beta),beta_iatom)
           B(mapindex(alpha)) = B(mapindex(alpha))- Qin(get_issh_ofshell(beta),beta_iatom)*( &
-                      & + gshell_hh(beta , alpha ,alpha_iatom, matom, beta_iatom) &
-                      & + gshell_xc(beta , alpha ,alpha_iatom, matom, beta_iatom) &
-                      & + gshell_xc(alpha, beta  ,alpha_iatom, matom, beta_iatom) &
+                      & +  g_h_shell(beta , alpha ) &
+                      & + g_xc_shell(beta , alpha ) &
+                      & + g_xc_shell(alpha, beta  ) &
                       & - fshell_xc(beta , alpha ,alpha_iatom, matom, beta_iatom) &
-                      & - fshell_xc(alpha, beta  ,alpha_iatom, matom, beta_iatom))&
-                     & + exc_shell_aa(alpha)- vxc_shell_aa(alpha)  
+                      & - fshell_xc(alpha, beta  ,alpha_iatom, matom, beta_iatom))!&
+!                     & + exc_shell_aa(alpha)- vxc_shell_aa(alpha)  
           
         endif !fix_shell_charge(beta) = 1
       end do !beta
@@ -109,33 +108,6 @@ subroutine stationary_charges()
     !call sgesv(nssh_tot,1,M,nssh_tot,ipiv,B,nssh_tot,info )
   stop    
   contains
-    real function gshell_hh(alpha, beta, alpha_iatom, neigh_beta_iatom, beta_iatom)
-      use M_system, only: g_h, get_orb_ofshell, get_l_ofshell, get_issh_ofshell
-      implicit none
-      integer, intent(in) :: alpha, beta, alpha_iatom, neigh_beta_iatom, beta_iatom
-      integer :: mu_min, mu_max, imu_local
-      gshell_hh = 0.0
-      mu_min = get_orb_ofshell(alpha)
-      mu_max = mu_min + 2*get_l_ofshell(alpha)
-      do imu_local = mu_min, mu_max
-        gshell_hh = gshell_hh + g_h(imu_local, imu_local, get_issh_ofshell(beta), alpha_iatom, neigh_beta_iatom, beta_iatom)
-      end do
-      gshell_hh = gshell_hh /  (2*get_l_ofshell(alpha) + 1)
-    end function gshell_hh
- 
-    real function gshell_xc(alpha, beta, alpha_iatom, neigh_beta_iatom, beta_iatom)
-      use M_system, only: g_xc, get_orb_ofshell, get_l_ofshell, get_issh_ofshell
-      implicit none
-      integer, intent(in) :: alpha, beta, alpha_iatom, neigh_beta_iatom, beta_iatom
-      integer :: mu_min, mu_max, imu_local
-      gshell_xc = 0.0
-      mu_min = get_orb_ofshell(alpha)
-      mu_max = mu_min + 2*get_l_ofshell(alpha)
-      do imu_local = mu_min, mu_max
-        gshell_xc = gshell_xc + g_xc(imu_local, imu_local, get_issh_ofshell(beta), alpha_iatom, neigh_beta_iatom, beta_iatom)
-      end do
-      gshell_xc = gshell_xc /  (2*get_l_ofshell(alpha) + 1)
-    end function gshell_xc
 
     real function fshell_xc(alpha, beta, alpha_iatom, neigh_beta_iatom, beta_iatom)
       use M_system, only: f_xc, get_orb_ofshell, get_l_ofshell, get_issh_ofshell

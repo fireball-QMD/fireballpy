@@ -55,6 +55,7 @@ module M_system
   integer, dimension (:), allocatable :: get_iatom_ofshell
   integer, dimension (:), allocatable :: get_issh_ofshell
   integer, dimension (:), allocatable :: get_l_ofshell 
+  integer, dimension (:), allocatable :: get_shell_oforb
 
   ! --- ETOT ----
   real(double) :: etot
@@ -277,5 +278,10 @@ module M_system
   real(double), dimension (:,:,:,:,:), allocatable :: f_xc
   real(double), dimension (:,:,:,:), allocatable :: exc_aa
   real(double), dimension (:,:,:,:), allocatable :: vxc_aa
+  real(double), dimension (:,:), allocatable :: g_h_shell
+  real(double), dimension (:,:), allocatable :: g_xc_shell  
+  real(double), dimension (:,:), allocatable :: f_xc_shell
+  real(double), dimension (:,:), allocatable :: exc_aa_shell
+  real(double), dimension (:,:), allocatable :: vxc_aa_shell
   integer, dimension (:), allocatable :: fix_shell_charge 
 end module M_system

@@ -3,7 +3,7 @@ subroutine assemble_ca_2c ()
   use, intrinsic :: iso_fortran_env, only: double => real64
   use M_constants, only: eq2
   use M_system, only: smt_elect, natoms, ratom, imass, ewaldsr, dip, neigh_b, neigh_j, neighn, neigh_self, &
-    & numorb_max, Qin, s_mat, vca, xl
+    & numorb_max, Qin, s_mat, vca, xl, g_h, kscf, iqout
   use M_fdata, only: nssh, num_orb, rcutoff, Qneutral, lssh
   implicit none
   integer iatom
@@ -25,6 +25,8 @@ subroutine assemble_ca_2c ()
   integer kforce
   integer matom
   integer mbeta
+  integer alpha, beta
+  real(double) aux
   real(double) dq1
   real(double) dq2
   real(double) dterm_1
@@ -55,7 +57,9 @@ subroutine assemble_ca_2c ()
 
   vca = 0.0d0
   ewaldsr = 0.0d0
-
+  if (Kscf .eq. 1 .and. iqout .eq. 6) then
+    g_h  = 0.0d0
+  end if
   do iatom = 1, natoms
     matom = neigh_self(iatom)
     r1(:) = ratom(:,iatom)
@@ -122,6 +126,15 @@ subroutine assemble_ca_2c ()
             emnpl(imu,inu) = (s_mat(imu,inu,matom,iatom)/y)*dq2
             emnpl_noq(imu,inu) = (s_mat(imu,inu,matom,iatom)/y)
             ewaldsr(imu,inu,matom,iatom) =  ewaldsr(imu,inu,matom,iatom) + emnpl(imu,inu)*eq2
+            if (Kscf .eq. 1 .and. iqout .eq. 6) then
+              do issh = 1, nssh(in2)
+                g_h(imu,inu,issh,jatom,matom,iatom)  =  g_h(imu,inu,issh,jatom,matom,iatom) - emnpl_noq(imu,inu)*eq2
+                !alpha=get_shell_oforb(imu)
+                !beta=get_shell_oforb(inu) 
+                !aux=(2*get_l_ofshell(alpha) + 1)*(2*get_l_ofshell(beta) + 1) 
+                !g_h_shell(alpha,beta)  =  g_h(imu,inu,issh,jatom,matom,iatom) - emnpl_noq(imu,inu)*eq2*aux
+              end do 
+            end if
           end do
         end do
       end if
@@ -136,6 +149,9 @@ subroutine assemble_ca_2c ()
         do inu = 1, num_orb(in3)
           do imu = 1, num_orb(in1)
             bcca(imu,inu) = bcca(imu,inu) + bccax(imu,inu)*dxn
+            if (Kscf .eq. 1 .and. iqout .eq. 6) then
+              g_h(imu,inu,isorp,jatom,matom,iatom)  =  g_h(imu,inu,isorp,jatom,matom,iatom) + (stn1(imu,inu)*bccax(imu,inu) + stn2(imu,inu)*emnpl_noq(imu,inu))*eq2
+            end if
           end do
         end do
       end do
@@ -153,7 +169,17 @@ subroutine assemble_ca_2c ()
             dterm_1 = eq2*dip(imu,inu,ineigh,iatom)/(y*y)
             dterm_2 = eq2*dip(imu,inu,ineigh,iatom)/(y*y)
             ewaldsr(imu,inu,ineigh,iatom) = ewaldsr(imu,inu,ineigh,iatom) + (dq1*sterm_1 + dq1*dterm_1) + (dq2*sterm_2 - dq2*dterm_2)
-         end do
+            if (Kscf .eq. 1 .and. iqout .eq. 6) then
+              do issh = 1, nssh(in2)
+                emnpl_noq(imu,inu) = sterm_1-dterm_1  ! on top right
+                g_h(imu,inu,issh,jatom,ineigh,iatom)  =  g_h(imu,inu,issh,jatom,ineigh,iatom) - emnpl_noq(imu,inu)
+              end do
+              do issh = 1, nssh(in1)
+                emnpl_noq(imu,inu) = sterm_1+dterm_1  ! on top left
+                g_h(imu,inu,issh,jatom,ineigh,iatom)  =  g_h(imu,inu,issh,jatom,ineigh,iatom) - emnpl_noq(imu,inu)
+              end do
+            end if
+          end do
         end do
       end if
    
@@ -170,6 +196,9 @@ subroutine assemble_ca_2c ()
           do inu = 1, num_orb(in3)
             do imu = 1, num_orb(in1)
               bcca(imu,inu) = bcca(imu,inu) + dxn*bccax(imu,inu)
+              if (Kscf .eq. 1 .and. iqout .eq. 6) then
+                g_h(imu,inu,isorp,iatom,ineigh,iatom)  =  g_h(imu,inu,isorp,iatom,ineigh,iatom) + bccax(imu,inu)*eq2
+              end if
             end do
           end do
         end do
@@ -181,6 +210,9 @@ subroutine assemble_ca_2c ()
           do inu = 1, num_orb(in3)
             do imu = 1, num_orb(in1)
               bcca(imu,inu) = bcca(imu,inu) + dxn*bccax(imu,inu)
+              if (Kscf .eq. 1 .and. iqout .eq. 6) then
+                g_h(imu,inu,isorp,jatom,ineigh,iatom)  =  g_h(imu,inu,isorp,jatom,ineigh,iatom) + bccax(imu,inu)*eq2
+              end if
             end do
           end do
         end do
