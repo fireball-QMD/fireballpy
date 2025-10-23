@@ -12,7 +12,8 @@ subroutine allocate_system ()
     & arhop_off, rhop_off, rhopij_off, vca, ewaldlr, h_mat, t_mat, vna, ewaldqmmm, dipc, xl, fotnl, fanl, fotna, fana, faxc, faxc_ca, &
     & dxcdcc, ft, dusr, fotxc, fotxc_ca, faca, fotca, f3naa, f3nab, f3nac, f3nla, f3nlb, f3nlc, f3caa, f3cab, f3cac, flrew, f3xca_ca, &
     & f3xcb_ca, f3xcc_ca, f3xca, f3xcb, f3xcc, flrew_qmmm, fro, ftot, dxcv, norbitals_new, qstate, bbnkre, bbnkim, igamma, &
-    & g_h, g_xc, f_xc, exc_aa, vxc_aa, get_orb_ofshell, get_l_ofshell, get_issh_ofshell, get_iatom_ofshell
+    & g_h, g_xc, f_xc, exc_aa, vxc_aa, get_orb_ofshell, get_l_ofshell, get_issh_ofshell, get_iatom_ofshell, get_shell_oforb, &
+    & g_h_shell, g_xc_shell, f_xc_shell, exc_aa_shell, vxc_aa_shell
   use M_fdata, only: nssh, rcutoff, rc_PP, nspecies, num_orb, Qneutral, lssh, nsshPP, lsshPP,  nsh_max, numXmax, numYmax
 !  use M_fdata, only: numy3c_xc3c, ideriv_max
   implicit none
@@ -162,6 +163,8 @@ subroutine allocate_system ()
   allocate (getissh(norbitals))
   if (allocated(getiatom)) deallocate(getiatom)
   allocate (getiatom(norbitals))
+  if (allocated(get_shell_oforb)) deallocate(get_shell_oforb)
+  allocate (get_shell_oforb(norbitals))
   if (allocated(get_orb_ofshell)) deallocate(get_orb_ofshell)
   allocate (get_orb_ofshell(nssh_tot))
   if (allocated(get_issh_ofshell)) deallocate(get_issh_ofshell)
@@ -189,6 +192,7 @@ subroutine allocate_system ()
 
            
   imu = 0
+  alpha = 0 
   do iatom=1,natoms
     do issh=1,nssh(imass(iatom))
       alpha = alpha + 1
@@ -198,6 +202,7 @@ subroutine allocate_system ()
         getlssh(imu)=lssh(issh,imass(iatom))
         getiatom(imu)=iatom
         getmssh(imu)=iorb
+        get_shell_oforb(imu)=alpha
       end do
    end do
   end do
@@ -569,4 +574,15 @@ subroutine allocate_system ()
   allocate (exc_aa(numorb_max,natoms,neigh_max,natoms))
   if (allocated(vxc_aa)) deallocate(vxc_aa)
   allocate (vxc_aa(numorb_max,natoms,neigh_max,natoms))
+
+  if (allocated(g_h_shell)) deallocate(g_h_shell)
+  allocate (g_h_shell(nsh_max,nsh_max))
+  if (allocated(g_xc_shell)) deallocate(g_xc_shell)
+  allocate (g_xc_shell(nsh_max,nsh_max))
+  if (allocated(f_xc_shell)) deallocate(f_xc_shell)
+  allocate (f_xc_shell(nsh_max,nsh_max))
+  if (allocated(exc_aa_shell)) deallocate(exc_aa_shell)
+  allocate (exc_aa_shell(nsh_max,nsh_max))
+  if (allocated(vxc_aa_shell)) deallocate(vxc_aa_shell)
+  allocate (vxc_aa_shell(nsh_max,nsh_max))
 end subroutine allocate_system

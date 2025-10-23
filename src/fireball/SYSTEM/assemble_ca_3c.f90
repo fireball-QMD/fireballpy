@@ -2,7 +2,7 @@ subroutine assemble_ca_3c ()
   use, intrinsic :: iso_fortran_env, only: double => real64
   use M_constants, only: eq2
   use M_system, only: smt_elect, natoms, ratom, imass, neigh_max, ewaldsr, dip, neigh_b, neigh_j, neighn, neigh_comb, neigh_comj, &
-    & neigh_comm, neigh_comn, neigh_back, neigh_self, numorb_max, Qin, s_mat, vca, xl
+    & neigh_comm, neigh_comn, neigh_back, neigh_self, numorb_max, Qin, s_mat, vca, xl,  g_h, kscf, iqout
   use M_fdata, only: nssh, Qneutral, rcutoff, lssh, num_orb
   implicit none
   integer ialp
@@ -28,7 +28,7 @@ subroutine assemble_ca_3c ()
   integer matom
   integer mbeta
   integer mneigh
- 
+  integer alpha, beta 
   real(double) cost
   real(double) distance_13
   real(double) distance_23
@@ -185,6 +185,12 @@ subroutine assemble_ca_3c ()
             emnpl(imu,inu) = (sterm - dterm)/distance_13  + (sterm + dterm)/distance_23
             emnpl_noq(imu,inu) = ((s_mat(imu,inu,mneigh,iatom)/2.0d0)- (dip(imu,inu,mneigh,iatom)/y))/distance_13+  ((s_mat(imu,inu,mneigh,iatom)/2.0d0)+ (dip(imu,inu,mneigh,iatom)/y))/distance_23
             ewaldsr(imu,inu,mneigh,iatom) =  ewaldsr(imu,inu,mneigh,iatom) + emnpl(imu,inu)*eq2
+              if (Kscf .eq. 1 .and. iqout .eq. 6) then
+                do issh = 1, nssh(indna)
+                  g_h(imu,inu,issh,ialp,mneigh,iatom)  =  g_h(imu,inu,issh,ialp,mneigh,iatom) - emnpl_noq(imu,inu)*eq2
+                  g_h(inu,imu,issh,ialp,jneigh,jatom)  =  g_h(imu,inu,issh,ialp,mneigh,iatom)
+                end do
+              end if
             ewaldsr(inu,imu,jneigh,jatom)=ewaldsr(imu,inu,mneigh,iatom)
           end do
         end do
@@ -197,6 +203,10 @@ subroutine assemble_ca_3c ()
           do inu = 1, num_orb(in2)
             do imu = 1, num_orb(in1)
               bcca(imu,inu) = bcca(imu,inu) + bccax(imu,inu)*dxn
+              if (Kscf .eq. 1 .and. iqout .eq. 6) then
+                g_h(imu,inu,isorp,ialp,mneigh,iatom)  =  g_h(imu,inu,isorp,ialp,mneigh,iatom) + (stn1(imu,inu)*bccax(imu,inu) + stn2(imu,inu)*emnpl_noq(imu,inu))*eq2
+                g_h(inu,imu,isorp,ialp,jneigh,jatom)  =  g_h(imu,inu,isorp,ialp,mneigh,iatom)
+              end if
             end do
           end do
         end do ! end do of isorp loop
