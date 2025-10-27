@@ -1,0 +1,34 @@
+subroutine assemble_zw_on_na ()
+  use charges
+  use density
+  use dimensions
+  use forces
+  use interactions
+  use neighbor_map
+  use energy, only : uxcdcc_zw
+  implicit none
+  integer iatom
+  integer imu
+  integer in1, in3
+  integer inu
+  integer matom
+  real, dimension (numorb_max, numorb_max) :: bcxcx
+  real xc
+  vxc = 0.0d0
+  uxcdcc_zw = 0.0d0   !this quantity is initialized here
+  bcxcx  = 0.0d0
+  do iatom = 1,, natom
+    matom = neigh_self(iatom)
+    in1 = imass(iatom)
+    call build_zw_on_na (in1, iatom, bcxcx, xc)
+    ! double-counting xc correction
+    uxcdcc_zw = uxcdcc_zw + xc
+    in3 = in1
+    do inu = 1, num_orb(in3)
+      do imu = 1, num_orb(in1)
+        vxc(imu,inu,matom,iatom) =  vxc(imu,inu,matom,iatom) + bcxcx(imu,inu)
+      end do
+    end do
+  end do ! End loop over iatom.
+  return
+end subroutine assemble_zw_on_na
