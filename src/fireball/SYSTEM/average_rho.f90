@@ -1,4 +1,7 @@
-subroutine average_rho (nprocs, Kscf, iforce, iordern, igauss)
+subroutine average_rho ()
+  use, intrinsic :: iso_fortran_env, only: double => real64
+  use M_system, only: Kscf, iforce, natoms, numorb_max, neigh_max, ratom, imass, Qneutral, neighn, neigh_b, neigh_j, neigh_comn, neigh_comm, neigh_comj, neigh_comb, neigh_back, xl, xc_overtol, xc_overtolG, rcutoff, sm_mat, spm_mat, arho_on, arhoi_on, rho_on, rhoi_on, arhop_on, rhop_on, arhoij_off, arhopij_off, arho_off, arhop_off, rho_off, rhop_off, rhoij_off, rhopij_off, doscentros, doscentrosS, deps2cent, epsilon, trescentros, trescentrosS, trescentrosG_VXC, trescentrosGS_VXC, doscentrosGS_overlap
+  use M_fdata, only: nssh, num_orb, nsh_max, nspecies, isorpmax
   implicit none
   integer ialp
   integer iatom

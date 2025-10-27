@@ -1,4 +1,7 @@
 subroutine assemble_zw_3c_ct (nprocs, iordern, igauss)
+  use, intrinsic :: iso_fortran_env, only: double => real64
+  use M_system, only: numorb_max, natoms, neigh_comn, neigh_comm, neigh_comj, neigh_comb, neigh_com_ng, neigh_back, imass, ratom, xl, nssh, Qneutral, Qin, orb2shell, s_mat, dip, vxc_ca, g2nu, gvhxc, iqout, Kscf
+
   implicit none
   integer ialp
   integer iatom
