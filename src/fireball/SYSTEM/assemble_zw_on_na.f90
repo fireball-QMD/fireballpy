@@ -1,11 +1,6 @@
 subroutine assemble_zw_on_na ()
-  use charges
-  use density
-  use dimensions
-  use forces
-  use interactions
-  use neighbor_map
-  use energy, only : uxcdcc_zw
+  use, intrinsic :: iso_fortran_env, only: double => real64
+  use M_system, only: numorb_max, natom, neigh_self, imass, num_orb, vxc, uxcdcc_zw
   implicit none
   integer iatom
   integer imu

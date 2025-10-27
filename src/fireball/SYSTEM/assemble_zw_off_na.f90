@@ -1,4 +1,7 @@
 subroutine assemble_zw_off_na ()
+  use, intrinsic :: iso_fortran_env, only: double => real64
+  use M_system, only: numorb_max, natoms, neigh_self, ratom, imass, neighn, neigh_b, neigh_j, xl, vxc, rho_off, rhoij_off, s_mat
+
   implicit none
   integer iatom
   integer iatomstart

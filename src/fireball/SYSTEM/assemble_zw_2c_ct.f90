@@ -1,4 +1,7 @@
-subroutine assemble_zw_2c_ct (nprocs, iforce, iordern)
+subroutine assemble_zw_2c_ct ()
+  use, intrinsic :: iso_fortran_env, only: double => real64
+  use M_system, only: numorb_max, nsh_max, natoms, neigh_self, neighn, neigh_b, neigh_j, imass, ratom, xl, nssh, Qneutral, Qin, orb2shell, s_mat, dip, vxc_ca, g2nu,
+
   implicit none
   integer iatom
   integer icount

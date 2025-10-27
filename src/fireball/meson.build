@@ -72,9 +72,9 @@ system_srcs = [
   'assemble_mcweda.f90',
   'assemble_olsxc_1c.f90',
   'unocentros.f90',
-  'assemble_olsxc_on.f90',
-  'assemble_olsxc_off.f90',
-  'average_ca_rho.f90',
+  #'assemble_olsxc_on.f90',
+  #'assemble_olsxc_off.f90',
+  #'average_ca_rho.f90',
   'assemble_ca_2c.f90',
   'assemble_ca_3c.f90',
   'assemble_lr.f90',
@@ -101,7 +101,6 @@ system_srcs = [
   'doscentros.f90',
   'doscentrosS.f90',
   'build_olsxc_off.f90',
-  'average_ca_rho.f90',
   'trescentros.f90',
   'trescentrosS.f90',
   'smoother.f90',
@@ -134,6 +133,13 @@ system_srcs = [
   'doscentrosDipY.f90',
   'cepal.f90',
   'geth.f90',
+  'assemble_xczw.f90',
+  'assemble_zw_1c_na.f90',
+  'average_rho.f90',
+  'assemble_zw_on_na.f90',
+  'assemble_zw_off_na.f90',
+  'assemble_zw_2c_ct.f90',
+  'assemble_zw_3c_ct.f90'
 ]
 
 fireball_srcs = []
