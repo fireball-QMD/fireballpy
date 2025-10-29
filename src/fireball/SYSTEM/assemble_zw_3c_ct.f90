@@ -1,7 +1,7 @@
-subroutine assemble_zw_3c_ct (nprocs, iordern, igauss)
+subroutine assemble_zw_3c_ct ()
   use, intrinsic :: iso_fortran_env, only: double => real64
-  use M_system, only: numorb_max, natoms, neigh_comn, neigh_comm, neigh_comj, neigh_comb, neigh_com_ng, neigh_back, imass, ratom, xl, nssh, Qneutral, Qin, orb2shell, s_mat, dip, vxc_ca, g2nu, gvhxc, iqout, Kscf
-
+  use M_system, only: numorb_max, natoms, neigh_comn, neigh_comm, neigh_comj, neigh_comb, neigh_com_ng, neigh_back, imass, ratom, xl, Qin, orb2shell, s_mat, dip, vxc_ca, g_h, iqout, Kscf, neigh_max
+  use M_fdata, only: nssh, Qneutral, num_orb, nsh_max
   implicit none
   integer ialp
   integer iatom
@@ -37,7 +37,7 @@ subroutine assemble_zw_3c_ct (nprocs, iordern, igauss)
   integer natomsp
   integer ix
   integer j
-   
+  
   real cost
   real distance_13
   real distance_23
@@ -78,7 +78,13 @@ subroutine assemble_zw_3c_ct (nprocs, iordern, igauss)
   real, dimension (:,:,:), allocatable :: spmG
   real, dimension (:, :, :, :), allocatable :: smatG
   real, dimension (:, :, :, :), allocatable :: spmatG
-        
+       
+
+  real, dimension (nsh_max,nsh_max,neigh_max,natoms) :: g2nu
+  real, dimension (3,nsh_max,nsh_max,neigh_max,natoms) :: g2nup
+  g2nu=0.0
+  g2nup=0.0
+  
   do ialp = 1, natoms
     rna(:) = ratom(:,ialp)
     indna = imass(ialp)
@@ -136,8 +142,8 @@ subroutine assemble_zw_3c_ct (nprocs, iordern, igauss)
               B=0.5*s_mat(imu,inu,mneigh,iatom)+dip(imu,inu,mneigh,iatom)/y  
               bccax(imu,inu) = bccax(imu,inu)+ (A*g2nu(isorp,issh1,ineigh1,ialp)+B*g2nu(isorp,issh2,ineigh2,ialp))*dxn
               if (Kscf .eq. 1 .and. iqout .eq. 6) then 
-                gvhxc(imu,inu,isorp,ialp,mneigh,iatom) = gvhxc(imu,inu,isorp,ialp,mneigh,iatom) + A*g2nu(isorp,issh1,ineigh1,ialp)+B*g2nu(isorp,issh2,ineigh2,ialp)
-                gvhxc(inu,imu,isorp,ialp,jneigh,jatom) = gvhxc(imu,inu,isorp,ialp,mneigh,iatom)
+                g_h(imu,inu,isorp,ialp,mneigh,iatom) = g_h(imu,inu,isorp,ialp,mneigh,iatom) + A*g2nu(isorp,issh1,ineigh1,ialp)+B*g2nu(isorp,issh2,ineigh2,ialp)
+                g_h(inu,imu,isorp,ialp,jneigh,jatom) = g_h(imu,inu,isorp,ialp,mneigh,iatom)
             end if 
             end do 
           end do 

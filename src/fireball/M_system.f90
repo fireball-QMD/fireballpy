@@ -23,6 +23,7 @@ module M_system
 
   integer :: ialgmix  = 2 !1:anderson 2:johnson 3:custom
   real(double), parameter :: xc_overtol = 5.0d-5
+  real(double), parameter :: xc_overtolG = 5.0d-5
   real(double), parameter :: smt_elect = 0.8d0 ! Ewald and electrostatic
   integer, parameter :: ithetamax = 5
   integer :: idmix = 6
@@ -64,6 +65,7 @@ module M_system
   real(double) :: atomic_energy, efermi
   real(double) :: uiiuee
   real(double) :: uxcdcc
+  real(double) :: uxcdcc_zw
   real(double) :: uxcdcc_ols
   real(double) :: etotxc_1c
   real(double) :: ebs
@@ -244,6 +246,7 @@ module M_system
   real(double), dimension (:, :, :), allocatable :: faxc 
   real(double), dimension (:, :, :), allocatable :: faxc_ca 
   real(double), dimension (:, :, :), allocatable :: dxcdcc
+  real(double), dimension (:, :, :), allocatable :: dxcdcc_zw
   real(double), dimension (:, :), allocatable :: ft
   real(double), dimension (:, :), allocatable :: dusr
   real(double), dimension (:, :, :), allocatable :: fotxc 
@@ -284,4 +287,5 @@ module M_system
   real(double), dimension (:,:), allocatable :: exc_aa_shell
   real(double), dimension (:,:), allocatable :: vxc_aa_shell
   integer, dimension (:), allocatable :: fix_shell_charge 
+  integer, dimension(:,:), allocatable :: orb2shell
 end module M_system

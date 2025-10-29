@@ -1,7 +1,7 @@
 subroutine assemble_zw_2c_ct ()
   use, intrinsic :: iso_fortran_env, only: double => real64
-  use M_system, only: numorb_max, nsh_max, natoms, neigh_self, neighn, neigh_b, neigh_j, imass, ratom, xl, nssh, Qneutral, Qin, orb2shell, s_mat, dip, vxc_ca, g2nu,
-
+  use M_system, only: numorb_max, natoms, neigh_self, neighn, neigh_b, neigh_j, imass, ratom, xl,  Qin, orb2shell, s_mat, dip, vxc_ca, dxcdcc_zw, Kscf, iqout, g_h, uxcdcc_zw, neigh_max
+  use M_fdata, only: num_orb, nsh_max, Qneutral, nssh
   implicit none
   integer iatom
   integer icount
@@ -60,6 +60,12 @@ subroutine assemble_zw_2c_ct ()
   real, dimension (3) :: sighat
   real stn1
   real stn2
+  
+  real, dimension (nsh_max,nsh_max,neigh_max,natoms) :: g2nu
+  real, dimension (3,nsh_max,nsh_max,neigh_max,natoms) :: g2nup
+  g2nu=0.0
+  g2nup=0.0
+     
   dxcdcc_zw = 0.0d0
   bcca = 0.0d0
   bccax = 0.0d0
@@ -104,7 +110,7 @@ subroutine assemble_zw_2c_ct ()
         else 
           do issh1 = 1, nssh(in1)
             do issh2 = 1, nssh(in2)
-              g2nu(issh1,issh2,matom,iatom) = xcnu1c(issh1,issh2,in1)
+              g2nu(issh1,issh2,matom,iatom) = 0.0d0 !xcnu1c(issh1,issh2,in1)
             end do 
           end do 
         end if 
@@ -137,7 +143,7 @@ subroutine assemble_zw_2c_ct ()
           issh1=orb2shell(imu,in1)
           bcca(imu,imu) = bcca(imu,imu) + g2nu(issh1,isorp,ineigh,iatom)*dxn
           if (Kscf .eq. 1 .and. iqout .eq. 6) then 
-            gvhxc(imu,imu,isorp,jatom,matom,iatom) = gvhxc(imu,imu,isorp,jatom,matom,iatom) + g2nu(issh1,isorp,ineigh,iatom)
+            g_h(imu,imu,isorp,jatom,matom,iatom) = g_h(imu,imu,isorp,jatom,matom,iatom) + g2nu(issh1,isorp,ineigh,iatom)
           end if 
         end do 
         do issh1 = 1,nssh(in1)
@@ -168,8 +174,8 @@ subroutine assemble_zw_2c_ct ()
               bcca(imu,inu) = bcca(imu,inu)+ &
               & A*g2nu(issh1,isorp,matom,iatom)*dxn+B*g2nu(isorp,issh2,ineigh,iatom)*dxn
               if (Kscf .eq. 1 .and. iqout .eq. 6) then 
-                gvhxc(imu,inu,isorp,iatom,ineigh,iatom) = &  
-                & gvhxc(imu,inu,isorp,iatom,ineigh,iatom) + &
+                g_h(imu,inu,isorp,iatom,ineigh,iatom) = &  
+                & g_h(imu,inu,isorp,iatom,ineigh,iatom) + &
                 & A*g2nu(issh1,isorp,matom,iatom)+B*g2nu(isorp,issh2,ineigh,iatom)
               end if 
             end do 
@@ -187,7 +193,7 @@ subroutine assemble_zw_2c_ct ()
               bcca(imu,inu) = bcca(imu,inu)+ &
               & A*g2nu(issh1,isorp,ineigh,iatom)*dxn+B*g2nu(issh2,isorp,matom2,jatom)*dxn     
               if (Kscf .eq. 1 .and. iqout .eq. 6) then 
-                gvhxc(imu,inu,isorp,jatom,ineigh,iatom) =  gvhxc(imu,inu,isorp,jatom,ineigh,iatom) + &
+                g_h(imu,inu,isorp,jatom,ineigh,iatom) =  g_h(imu,inu,isorp,jatom,ineigh,iatom) + &
                 & A*g2nu(issh1,isorp,ineigh,iatom)+B*g2nu(issh2,isorp,matom2,jatom)
               end if 
             end do 
