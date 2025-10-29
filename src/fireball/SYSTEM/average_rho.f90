@@ -1,7 +1,12 @@
 subroutine average_rho ()
   use, intrinsic :: iso_fortran_env, only: double => real64
-  use M_system, only: Kscf, iforce, natoms, numorb_max, neigh_max, ratom, imass, Qneutral, neighn, neigh_b, neigh_j, neigh_comn, neigh_comm, neigh_comj, neigh_comb, neigh_back, xl, xc_overtol, xc_overtolG, rcutoff, sm_mat, spm_mat, arho_on, arhoi_on, rho_on, rhoi_on, arhop_on, rhop_on, arhoij_off, arhopij_off, arho_off, arhop_off, rho_off, rhop_off, rhoij_off, rhopij_off, doscentros, doscentrosS, deps2cent, epsilon, trescentros, trescentrosS, trescentrosG_VXC, trescentrosGS_VXC, doscentrosGS_overlap
-  use M_fdata, only: nssh, num_orb, nsh_max, nspecies, isorpmax
+  use M_system, only: Kscf, iforce, natoms, numorb_max, neigh_max, ratom, &
+  & imass, neighn, neigh_b, neigh_j, neigh_comn, neigh_comm, neigh_comj,  &
+  & neigh_comb, neigh_back, xl, xc_overtol, xc_overtolG, sm_mat,          & 
+  & spm_mat, arho_on, arhoi_on, rho_on, rhoi_on, arhop_on, rhop_on,       &
+  & arhoij_off, arhopij_off, arho_off, arhop_off, rho_off, rhop_off,      &
+  & rhoij_off, rhopij_off, xc_overtolG
+  use M_fdata, only: nssh, num_orb, nsh_max, nspecies, isorpmax, Qneutral, rcutoff
   implicit none
   integer ialp
   integer iatom
@@ -13,7 +18,6 @@ subroutine average_rho ()
   integer in2
   integer in3
   integer indna
-  integer index
   integer ineigh
   integer interaction
   integer interaction0
@@ -59,6 +63,10 @@ subroutine average_rho ()
   real, dimension (nsh_max, nsh_max) :: smGS
   real, dimension (3, nsh_max, nsh_max) :: spmGS
   real rho_modified
+  
+  integer igauss 
+  igauss= 0
+
   allocate (rhom_3c (nsh_max, nsh_max, neigh_max, natoms))
   if (Kscf .eq. 1) sm_mat = 0.0d0
   if (Kscf .eq. 1 .and. iforce .eq. 1) spm_mat = 0.0d0

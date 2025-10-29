@@ -12,7 +12,7 @@ subroutine allocate_system ()
     & arhop_off, rhop_off, rhopij_off, vca, ewaldlr, h_mat, t_mat, vna, ewaldqmmm, dipc, xl, fotnl, fanl, fotna, fana, faxc, faxc_ca, &
     & dxcdcc, ft, dusr, fotxc, fotxc_ca, faca, fotca, f3naa, f3nab, f3nac, f3nla, f3nlb, f3nlc, f3caa, f3cab, f3cac, flrew, f3xca_ca, &
     & f3xcb_ca, f3xcc_ca, f3xca, f3xcb, f3xcc, flrew_qmmm, fro, ftot, dxcv, norbitals_new, qstate, bbnkre, bbnkim, igamma, &
-    & g_h, g_xc, f_xc, exc_aa, vxc_aa, get_orb_ofshell, get_l_ofshell, get_issh_ofshell, get_iatom_ofshell, get_shell_oforb, &
+    & g_h, g_xc, f_xc, exc_aa, vxc_aa, get_orb_ofshell, get_l_ofshell, get_issh_ofshell, get_iatom_ofshell, get_shell_oforb, orb2shell, &
     & g_h_shell, g_xc_shell, f_xc_shell, exc_aa_shell, vxc_aa_shell
   use M_fdata, only: nssh, rcutoff, rc_PP, nspecies, num_orb, Qneutral, lssh, nsshPP, lsshPP,  nsh_max, numXmax, numYmax
 !  use M_fdata, only: numy3c_xc3c, ideriv_max
@@ -29,6 +29,7 @@ subroutine allocate_system ()
   integer:: in2
   integer:: numorb
   integer:: numorbPP_max
+  integer:: counter,counter_ini,l 
   real(double) :: rcutoff_i
   real(double) :: rcutoff_j
   real(double) :: distance2
@@ -585,4 +586,19 @@ subroutine allocate_system ()
   allocate (exc_aa_shell(nsh_max,nsh_max))
   if (allocated(vxc_aa_shell)) deallocate(vxc_aa_shell)
   allocate (vxc_aa_shell(nsh_max,nsh_max))
+  if (allocated(orb2shell)) deallocate(orb2shell)
+  allocate (orb2shell (numorb_max,nspecies) )
+
+  do in1 = 1,nspecies
+    counter = 1
+    do issh = 1,nssh(in1)
+      counter_ini = counter
+      l = lssh(issh,in1)
+      do imu = counter_ini,counter_ini+2*l
+        orb2shell(imu,in1) = issh
+        counter = imu+1
+      end do !end imu
+    end do ! end do issh = 1,nssh(in1)   
+  end do ! end do in1 = 1,nspecies
+
 end subroutine allocate_system

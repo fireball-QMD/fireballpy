@@ -1,6 +1,7 @@
 subroutine assemble_zw_on_na ()
   use, intrinsic :: iso_fortran_env, only: double => real64
-  use M_system, only: numorb_max, natom, neigh_self, imass, num_orb, vxc, uxcdcc_zw
+  use M_system, only: numorb_max, natoms, neigh_self, imass, vxc, uxcdcc_zw
+  use M_fdata, only: num_orb
   implicit none
   integer iatom
   integer imu
@@ -12,7 +13,7 @@ subroutine assemble_zw_on_na ()
   vxc = 0.0d0
   uxcdcc_zw = 0.0d0   !this quantity is initialized here
   bcxcx  = 0.0d0
-  do iatom = 1,, natom
+  do iatom = 1, natoms
     matom = neigh_self(iatom)
     in1 = imass(iatom)
     call build_zw_on_na (in1, iatom, bcxcx, xc)
