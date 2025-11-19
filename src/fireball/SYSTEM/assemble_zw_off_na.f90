@@ -56,7 +56,7 @@ subroutine assemble_zw_off_na ()
         do inu = 1, num_orb(in3)
           do imu = 1, num_orb(in1)
             vxc(imu,inu,ineigh,iatom) = vxc(imu,inu,ineigh,iatom) + rhomx(imu,inu)
-            end do
+          end do
         end do
         do inu = 1, num_orb(in3)
           do imu = 1, num_orb(in1)
