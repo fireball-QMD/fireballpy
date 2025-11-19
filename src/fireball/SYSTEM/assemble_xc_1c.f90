@@ -1,4 +1,4 @@
-subroutine assemble_zw_1c_na ()
+subroutine assemble_xc_1c ()
   use, intrinsic :: iso_fortran_env, only: double => real64
   use M_constants, only: eq2
   use M_system, only: natoms, neigh_self, imass, numorb_max, &
@@ -23,7 +23,7 @@ subroutine assemble_zw_1c_na ()
    matom = neigh_self(iatom)
    in1 = imass(iatom)
    ixc = 4
-   call unocentros (in1, iatom, exc_1c, muexc_1c, dccexc_1c, mu1xc)
+   call unocentros (in1, iatom, dccexc_1c, mu1xc)
    etotxc_1c = etotxc_1c + dccexc_1c
    do imu = 1, num_orb(in1)
     do inu = 1, num_orb(in1)
@@ -32,5 +32,5 @@ subroutine assemble_zw_1c_na ()
    end do
   end do
   return
-end subroutine assemble_zw_1c_na
+end subroutine assemble_xc_1c
  

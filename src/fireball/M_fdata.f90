@@ -53,12 +53,16 @@ module M_fdata
   !TODO idipole, icluster, siempre lee interaccion 10 y 11
 
   ! One center integrals
-  character (len=9), dimension (3), parameter :: onecfname = (/'xc1c_dqi ','nuxc1crho','exc1crho '/)
-  real(double), dimension (:,:), allocatable :: exc1c_0
-  real(double), dimension (:,:,:), allocatable :: xcnu1c
-  real(double), dimension (:,:,:), allocatable :: xcnu1cs, exc1c0, nuxc1c, d2exc1c
-  real(double), dimension (:,:,:,:), allocatable :: exc1c, dexc1c, dnuxc1c
-  real(double), dimension (:,:,:,:,:), allocatable :: d2nuxc1c
+  !character (len=9), dimension (3), parameter :: onecfname = (/'xc1c_dqi ','nuxc1crho','exc1crho '/)
+  character (len=9), dimension (3), parameter :: onecfname = (/'onecenter_xc'/)
+  real(double), dimension (:,:), allocatable :: exc_1c_0
+  real(double), dimension (:,:,:), allocatable :: vxc_1c_0, fxc_1c
+  real(double), dimension (:,:,:,:), allocatable :: gxc_1c
+!  real(double), dimension (:,:), allocatable :: exc1c_0
+!  real(double), dimension (:,:,:), allocatable :: xcnu1c
+!  real(double), dimension (:,:,:), allocatable :: xcnu1cs, exc1c0, nuxc1c, d2exc1c
+!  real(double), dimension (:,:,:,:), allocatable :: exc1c, dexc1c, dnuxc1c
+!  real(double), dimension (:,:,:,:,:), allocatable :: d2nuxc1c
 
   ! Two center integrals
   integer, parameter :: nfofx = 207 ! AQUI
