@@ -57,9 +57,10 @@ subroutine assemble_xczw ()
   if (idipole .eq. 1) call assemble_ca_2c_dip ()
   
 
-  call assemble_zw_on_na() !AQUI vxc = 0.0d0
-  call assemble_zw_off_na() !AQUI
-  call assemble_zw_2c_ct() !AQUI
+  !call assemble_zw_on_na() !AQUI vxc = 0.0d0
+  !call assemble_zw_off_na() !AQUI
+  !call assemble_zw_2c_ct() !AQUI
+  call assemble_xc_2c()
   !-------------------- assemble_3c -------------------------
   if (Kscf .eq. 1) then
     call assemble_3c ()
