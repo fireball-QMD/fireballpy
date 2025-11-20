@@ -1,3 +1,4 @@
+
 module M_fdata
   use, intrinsic :: iso_fortran_env, only: double => real64
 
@@ -8,7 +9,26 @@ module M_fdata
   logical :: debug = .True.
   character(len=100) :: infofname = 'info.py.dat'
   !===================================
-  
+  !  1 = overlap 
+  !  2 = vna_ontopl
+  !  3 = vna_ontopr
+  !  4 = vna_atom
+  !  5 = vnl
+  !  6 = vxc_2c       **Carlos
+  !  7 = vxc_2c_ol    **
+  !  8 = vxc_2c_or    **
+  !  9 = dipole_z
+  ! 10 = dipole_y
+  ! 11 = dipole_x
+  ! 12 = coulomb
+  ! 13 = kinetic
+  ! 14 = den_ontopl
+  ! 15 = den_ontopr
+  ! 16 = den_atom
+  ! 17 = denS_ontopl
+  ! 18 = denS_ontopr
+  ! 19 = denS_atom
+  ! 20 = overlapS  
   ! info.dat variables
   integer :: nsh_max, nshPP_max, isorpmax, isorpmax_xc, nspecies
   character (len=1000) fdataLocation
@@ -66,12 +86,23 @@ module M_fdata
 
   ! Two center integrals
   integer, parameter :: nfofx = 207 ! AQUI
-  character (len=11), dimension (23), parameter :: twocfname = (/'overlap    ','vna_ontopl ','vna_ontopr ', &
-    & 'vna_atom   ','vnl        ','xc_ontop   ','xc_atom    ','xc_corr    ','dipole_z   ','dipole_y   ','dipole_x   ', &
-    & 'coulomb    ','kinetic    ','nuxc       ','den_ontopl ','den_ontopr ','den_atom   ','dnuxc_ol   ','dnuxc_or   ', &
-    & 'denS_ontopl','denS_ontopr','denS_atom  ','overlapS   '/)
-  integer :: interactions2c_max
-  integer, dimension (1:23,0:8) :: ind2c
+!  character (len=11), dimension (23), parameter :: twocfname = (/'overlap    ','vna_ontopl ','vna_ontopr ', &
+!    & 'vna_atom   ','vnl        ','xc_ontop   ','xc_atom    ','xc_corr    ','dipole_z   ','dipole_y   ','dipole_x   ', &
+!    & 'coulomb    ','kinetic    ','nuxc       ','den_ontopl ','den_ontopr ','den_atom   ','dnuxc_ol   ','dnuxc_or   ', &
+!    & 'denS_ontopl','denS_ontopr','denS_atom  ','overlapS   '/)
+  character (len=11), dimension (20), parameter :: twocfname = (/'overlap    ','vna_ontopl  ','vna_ontopr ',              &
+       & 'vna_atom   ','vnl        ','vxc_2c     ','vxc_2c_ol  ','vxc_2c_or  ','dipole_z    ','dipole_y   ','dipole_x   ',&
+       & 'coulomb    ','kinetic    ','den_ontopl ','den_ontopr ','den_atom   ', 'denS_ontopl','denS_ontopr','denS_atom  ',&
+       & 'overlapS   '/)
+
+  integer, parameter :: initype(20) =  (/ &
+     0, 0, 0, 0, 0, 0, &   ! 1–6
+     1, 1,               & ! 7–8
+     0, 0, 0, 0, 0,      & ! 9–13
+     1, 1, 1, 1, 1, 1,   & ! 14–19
+     0  /)                 ! 20
+
+  integer, dimension (1:20,0:8) :: ind2c
   integer, dimension (:,:,:), allocatable :: numz2c
   real(double), dimension (:,:,:), allocatable :: z2cmax
   real(double), dimension (:,:,:,:,:,:), allocatable :: splineint_2c
