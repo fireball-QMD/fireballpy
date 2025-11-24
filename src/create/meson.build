@@ -26,7 +26,7 @@ exx_srcs = [
 
 integrals_srcs = [
   'append_string.f90',
-  #  'exc1crho.f90',
+  'exc1crho.f90',
   'gaunt.f90',
   'gauntReal.f90',
   'gleg.f90',
@@ -35,10 +35,8 @@ integrals_srcs = [
   'mk_indexDipX.f90',
   'mk_indexDipY.f90',
   'mk_indexPP.f90',
-  #  'nuxc1crho.f90',
-  'onecenternuxc.f90',
-  'onecenternuxcs.f90',
-  #  'onecentervdip.f90',
+  'nuxc1crho.f90',
+  'onecentervdip.f90',
   'onecenterxc.f90',
   'radial_integral.f90',
   'rescaled_psi.f90',
@@ -46,7 +44,6 @@ integrals_srcs = [
   'threecenter_integral.f90',
   'twocenter.f90',
   'twocenter_integral.f90',
-  #  'xc1crho.f90',
 ]
 
 interpolaters_srcs = [
@@ -131,25 +128,18 @@ foreach src : readfiles_srcs
 endforeach
 
 # Deal with MPI
-#if mpi_dep.found()
-#  create_srcs += 'MPI.f90'
-#else
-#  create_srcs += 'noMPI.f90'
-#endif
-create_srcs += 'noMPI.f90'
+if mpi_dep.found()
+  create_srcs += 'MPI.f90'
+else
+  create_srcs += 'noMPI.f90'
+endif
 
 create_srcs += 'create.f90'
 
 # Build create executable
-#create_exe = executable('create.x',
-#  create_srcs,
-#  dependencies: [blas_dep, lapack_dep, mpi_dep],
-#  install: true,
-#  install_dir: py.get_install_dir() / 'fireballpy' / 'basis',
-#)
 create_exe = executable('create.x',
   create_srcs,
-  dependencies: [blas_dep, lapack_dep],
+  dependencies: [blas_dep, lapack_dep, mpi_dep],
   install: true,
   install_dir: py.get_install_dir() / 'fireballpy' / 'basis',
 )

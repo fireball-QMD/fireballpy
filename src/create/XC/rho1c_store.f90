@@ -73,23 +73,23 @@
 ! Input Declaration and Description
 ! ====================================================================
 ! Input
-        integer ix
-        integer in1
-        integer jssh
-        integer nsh_max
-        integer nssh
-        integer wfmax_points
+        integer, intent(in) :: ix
+        integer, intent(in) :: in1
+        integer, intent(in) :: jssh
+        integer, intent(in) :: nsh_max
+        integer, intent(in) :: nssh
+        integer, intent(in) :: wfmax_points
 
-        real(kind=long) dq
-        real(kind=long) drho
-        real(kind=long) rcutoff
+        real(kind=long), intent(in) :: dq
+        real(kind=long), intent(in) :: drho
+        real(kind=long), intent(in) :: rcutoff
 
-        real(kind=long) xnocc (nsh_max)
+        real(kind=long), dimension(nsh_max), intent(in) :: xnocc
 
 ! Output
-        real(kind=long) rho1c (wfmax_points)
-        real(kind=long) rhop1c (wfmax_points)
-        real(kind=long) rhopp1c (wfmax_points)
+        real(kind=long), dimension(wfmax_points), intent(out) :: rho1c
+        real(kind=long), dimension(wfmax_points), intent(out) :: rhop1c
+        real(kind=long), dimension(wfmax_points), intent(out) :: rhopp1c
 
 ! Local Parameters and Data Declaration
 ! ====================================================================
