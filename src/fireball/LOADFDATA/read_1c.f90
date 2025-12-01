@@ -9,8 +9,8 @@ subroutine read_1c ()
 
   if (allocated(exc_1c_0)) deallocate(exc_1c_0)
   if (allocated(vxc_1c_0)) deallocate(vxc_1c_0)
-  if (allocated(gxc_1c)) deallocate(dexc1c)
-  if (allocated(fxc_1c)) deallocate(d2exc1c)
+  if (allocated(gxc_1c)) deallocate(gxc_1c)
+  if (allocated(fxc_1c)) deallocate(fxc_1c)
   allocate(exc_1c_0 (nspecies,nsh_max))
   allocate(gxc_1c (nspecies,nsh_max,nsh_max,nsh_max))
   allocate(vxc_1c_0 (nspecies,nsh_max,nsh_max))
@@ -43,5 +43,6 @@ subroutine read_1c ()
       read (36,*)
     end do
     read (36,*)
-  close (unit = 36)
+    close (unit = 36)
+  end do
 end subroutine read_1c

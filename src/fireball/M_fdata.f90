@@ -74,7 +74,7 @@ module M_fdata
 
   ! One center integrals
   !character (len=9), dimension (3), parameter :: onecfname = (/'xc1c_dqi ','nuxc1crho','exc1crho '/)
-  character (len=9), dimension (3), parameter :: onecfname = (/'onecenter_xc'/)
+  character (len=12), dimension (1), parameter :: onecfname = (/'onecenter_xc'/)
   real(double), dimension (:,:), allocatable :: exc_1c_0
   real(double), dimension (:,:,:), allocatable :: vxc_1c_0, fxc_1c
   real(double), dimension (:,:,:,:), allocatable :: gxc_1c
@@ -90,10 +90,12 @@ module M_fdata
 !    & 'vna_atom   ','vnl        ','xc_ontop   ','xc_atom    ','xc_corr    ','dipole_z   ','dipole_y   ','dipole_x   ', &
 !    & 'coulomb    ','kinetic    ','nuxc       ','den_ontopl ','den_ontopr ','den_atom   ','dnuxc_ol   ','dnuxc_or   ', &
 !    & 'denS_ontopl','denS_ontopr','denS_atom  ','overlapS   '/)
-  character (len=11), dimension (20), parameter :: twocfname = (/'overlap    ','vna_ontopl  ','vna_ontopr ',              &
-       & 'vna_atom   ','vnl        ','vxc_2c     ','vxc_2c_ol  ','vxc_2c_or  ','dipole_z    ','dipole_y   ','dipole_x   ',&
-       & 'coulomb    ','kinetic    ','den_ontopl ','den_ontopr ','den_atom   ', 'denS_ontopl','denS_ontopr','denS_atom  ',&
-       & 'overlapS   '/)
+
+  character (len=11), dimension (20), parameter :: twocfname = (/ &
+    'overlap    ','vna_ontopl ','vna_ontopr ','vna_atom   ','vnl        ', &
+    'vxc_2c     ','vxc_2c_ol  ','vxc_2c_or  ','dipole_z   ','dipole_y   ', &
+    'dipole_x   ','coulomb    ','kinetic    ','den_ontopl ','den_ontopr ', &
+    'den_atom   ','denS_ontopl','denS_ontopr','denS_atom  ','overlapS   ' /)
 
   integer, parameter :: initype(20) =  (/ &
      0, 0, 0, 0, 0, 0, &   ! 1–6

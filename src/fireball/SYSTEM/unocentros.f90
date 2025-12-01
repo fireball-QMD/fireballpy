@@ -19,6 +19,8 @@ subroutine unocentros (in1, iatom, dccexc_1c, mu1xc)
   integer jssh
   integer kssh
 !  real(double), dimension (nsh_max) :: dqi
+  real(double), dimension (nsh_max) :: V_aux
+  real(double), dimension (nsh_max) :: E_aux
 
 !  exc_1c = 0.0d0
   dccexc_1c = 0.0d0
@@ -30,6 +32,7 @@ subroutine unocentros (in1, iatom, dccexc_1c, mu1xc)
     !dqi(issh) =0.0d0 !assemble_xczw
   !end do
 
+  print*,'---- unocentros --',in1, iatom, num_orb(in1)
 
   do imu = 1,num_orb(in1)
     m1   = getmssh(degelec(iatom)+imu)
@@ -49,8 +52,6 @@ subroutine unocentros (in1, iatom, dccexc_1c, mu1xc)
       endif
     end do
   end do
-
-
   v_aux = 0.d0
   do issh = 1,nssh(in1)
     v_aux(issh) = vxc_1c_0(in1,issh,issh)
@@ -58,8 +59,6 @@ subroutine unocentros (in1, iatom, dccexc_1c, mu1xc)
       v_aux(issh) = v_aux(issh) + Qin(kssh,iatom) * gxc_1c(in1,issh,issh,kssh)
     enddo
   enddo
-  
-
   e_aux = 0.d0  
   do issh = 1,nssh(in1)
     e_aux(issh) = exc_1c_0(in1,issh) 
@@ -68,9 +67,6 @@ subroutine unocentros (in1, iatom, dccexc_1c, mu1xc)
     enddo
   enddo
 
-  
-
-  
   do issh = 1,nssh(in1)
     dccexc_1c = dccexc_1c + (e_aux(issh) - v_aux(issh))*Qin(issh,iatom)    
   enddo

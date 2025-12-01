@@ -1,7 +1,7 @@
 subroutine assemble_xc_2c ()
   use, intrinsic :: iso_fortran_env, only: double => real64
-  use M_system, only: numorb_max, natoms, neigh_self, ratom, imass, neighn, neigh_b, neigh_j, xl, vxc, rho_off, rhoij_off, s_mat
-  use M_fdata, only: num_orb
+  use M_system, only: numorb_max, natoms, neigh_self, ratom, imass, neighn, neigh_b, neigh_j, xl, vxc, rho_off, rhoij_off, s_mat, Kscf, g_xc, Qin
+  use M_fdata, only: num_orb, nssh
   implicit none
   integer iatom
   integer iatomstart
