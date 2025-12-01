@@ -27,6 +27,8 @@ subroutine read_2c (interaction)
       if (interaction .eq. 17) isub2c = nssh(in1)
       if (interaction .eq. 18) isub2c = nssh(in2)
       if (interaction .eq. 19) isub2c = nssh(in2)
+      write(*,'("Read interaction ",I0," in read2c  isub2c=",I0, " twocf=",A)') &
+      & interaction, isub2c, trim(twocfname(interaction))
       do isorp = initype(interaction), isub2c
         root_isorp = root
         if (isub2c .ge. 1) then  
@@ -50,13 +52,13 @@ subroutine read_2c (interaction)
         z2cmax(itype,in1,in2) = zmax
         numz2c(itype,in1,in2) = numz
         num_nonzero = index_max2c(in1,in2)
-        if (interaction .eq. 4) num_nonzero = index_max2c(in1,in1)
-        if (interaction .eq. 5) num_nonzero = index_maxPP(in1,in2)
+        if (interaction .eq. 4)   num_nonzero = index_max2c(in1,in1)
+        if (interaction .eq. 5)   num_nonzero = index_maxPP(in1,in2)
         if (interaction .eq. 10)  num_nonzero = index_max2cDipY(in1,in2)
         if (interaction .eq. 11)  num_nonzero = index_max2cDipX(in1,in2)
         if (interaction .eq. 16)  num_nonzero = index_max2c(in1,in1)
         if (interaction .eq. 19)  num_nonzero = index_maxS(in1,in1)
-        if (interaction .eq. 12) num_nonzero = nssh(in1)*nssh(in2)
+        if (interaction .eq. 12)  num_nonzero = nssh(in1)*nssh(in2)
         if (interaction .eq. 17 .or. interaction .eq. 18) num_nonzero = index_maxS(in1,in2)
         if (interaction .eq. 20) num_nonzero = index_maxS(in1,in2)
 

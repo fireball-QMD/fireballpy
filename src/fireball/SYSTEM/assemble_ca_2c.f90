@@ -129,10 +129,6 @@ subroutine assemble_ca_2c ()
             if (Kscf .eq. 1 .and. iqout .eq. 6) then
               do issh = 1, nssh(in2)
                 g_h(imu,inu,issh,jatom,matom,iatom)  =  g_h(imu,inu,issh,jatom,matom,iatom) - emnpl_noq(imu,inu)*eq2
-                !alpha=get_shell_oforb(imu)
-                !beta=get_shell_oforb(inu) 
-                !aux=(2*get_l_ofshell(alpha) + 1)*(2*get_l_ofshell(beta) + 1) 
-                !g_h_shell(alpha,beta)  =  g_h(imu,inu,issh,jatom,matom,iatom) - emnpl_noq(imu,inu)*eq2*aux
               end do 
             end if
           end do

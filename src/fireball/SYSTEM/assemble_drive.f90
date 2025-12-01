@@ -1,4 +1,4 @@
-subroutine assemble_xczw ()
+subroutine assemble_drive()
   use, intrinsic :: iso_fortran_env, only: double => real64
   use M_system, only: idipole, iqmmm, natoms, eqmmm, Kscf, neigh_b, neigh_j, neighn, neigh_self, neighPP_self, neighPPn, &
     & neighPP_b, neighPP_j, ewaldqmmm, errno
@@ -38,15 +38,20 @@ subroutine assemble_xczw ()
 
   ! assemble_1c
   !call assemble_zw_1c_na () !AQUI
+  print*,'assemble_xc_1c'
   call assemble_xc_1c () !AQUI
 
   !  ----------------- assemble_2c ------------------------
   if (Kscf .eq. 1) then
+    print*,'assemble_sVNL'
     call assemble_sVNL ()
+    print*,'assemble_2c'
     call assemble_2c ()
+    print*,'assemble_2c_PP'
     call assemble_2c_PP ()
   end if ! end if of Kscf = 1
-
+  
+  print*,'average_rho'
   call average_rho() !AQUI
 
   !call average_ca_rho ()
@@ -60,6 +65,7 @@ subroutine assemble_xczw ()
   !call assemble_zw_on_na() !AQUI vxc = 0.0d0
   !call assemble_zw_off_na() !AQUI
   !call assemble_zw_2c_ct() !AQUI
+  print*,'assemble_xc_2c'
   call assemble_xc_2c()
   !-------------------- assemble_3c -------------------------
   if (Kscf .eq. 1) then
@@ -84,4 +90,4 @@ subroutine assemble_xczw ()
   !Build H
   call buildh ()
 
-end subroutine assemble_xczw
+end subroutine assemble_drive

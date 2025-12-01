@@ -9,8 +9,7 @@ subroutine scf_loop (verbose)
   isgeneig = .true.
   if ((iqout .eq. 1) .or. (iqout .eq. 3)) isgeneig = .false.
   do Kscf=1,max_scf_iterations+1
-    !call assemble_mcweda ()
-    call assemble_xczw ()
+    call assemble_drive ()
     if (errno .ne. 0) return
     call diag_k ()
     if (errno .ne. 0) return
