@@ -135,8 +135,8 @@ system_srcs = [
   'assemble_drive.f90',
   'assemble_xc_1c.f90',
   'average_rho.f90',
-  'assemble_zw_3c_ct.f90',
-  'build_zw_on_na.f90'
+#  'assemble_zw_3c_ct.f90',
+#  'build_zw_on_na.f90'
 ]
 
 fireball_srcs = []

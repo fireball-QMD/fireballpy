@@ -51,8 +51,9 @@ subroutine assemble_drive()
     call assemble_2c_PP ()
   end if ! end if of Kscf = 1
   
-  print*,'average_rho'
+  print*,'average_rho...'
   call average_rho() !AQUI
+  print*,'...average_rho'
 
   !call average_ca_rho ()
   !call assemble_olsxc_on ()
@@ -65,11 +66,14 @@ subroutine assemble_drive()
   !call assemble_zw_on_na() !AQUI vxc = 0.0d0
   !call assemble_zw_off_na() !AQUI
   !call assemble_zw_2c_ct() !AQUI
-  print*,'assemble_xc_2c'
+  print*,'assemble_xc_2c..'
   call assemble_xc_2c()
+  print*,'...assemble_xc_2c'
   !-------------------- assemble_3c -------------------------
   if (Kscf .eq. 1) then
+    print*,'assemble_3c'
     call assemble_3c ()
+    print*,'assemble_3c_PP'
     call assemble_3c_PP ()
     if (iqmmm .eq.1 ) then
       if (idipole .eq. 0) call assemble_qmmm ()
@@ -84,8 +88,9 @@ subroutine assemble_drive()
   if (idipole .eq. 0) call assemble_lr ()
   if (idipole .eq. 1) call assemble_lr_dip ()
 
-
-  call assemble_zw_3c_ct() !AQUI
+  print*,'assemble_zw_3c_ct... comentado !!!'
+  !call assemble_zw_3c_ct() !AQUI
+  print*,'...assemble_zw_3c_ct'
 
   !Build H
   call buildh ()

@@ -14,7 +14,7 @@ subroutine readheader_2c (interaction, iounit, nsh_max, numz, rc1, &
   read (iounit,*) nucz1, rc1
   read (iounit,*) nucz2, rc2
 
-  if (interaction .eq. 5) then
+  if (interaction .eq. 5 .or. interaction .eq. 6) then
       read (iounit,*) npseudo
       read (iounit,*) (cl_pseudo(issh), issh = 1, npseudo)
   end if
