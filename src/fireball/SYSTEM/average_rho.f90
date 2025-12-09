@@ -12,7 +12,6 @@ subroutine average_rho ()
   integer iatom
   integer iatomstart
   integer ibeta
-  integer ierror
   integer imu
   integer in1
   integer in2

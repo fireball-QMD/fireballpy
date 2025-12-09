@@ -65,7 +65,7 @@ subroutine assemble_xc_2c ()
           do inu = 1, num_orb(in3)
             do imu = 1, num_orb(in1)
               vxc(imu,inu,ineigh,iatom) = vxc(imu,inu,ineigh,iatom) + rhomx(imu,inu)*Qin(isorp,iatom)
-              if (Kscf .eq. 1) then 
+              if (Kscf .eq. 1) then
                 g_xc(imu,inu,isorp,iatom,ineigh,iatom) = g_xc(imu,inu,isorp,iatom,ineigh,iatom) + rhomx(imu,inu)
               end if
             end do

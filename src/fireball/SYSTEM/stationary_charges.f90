@@ -14,7 +14,7 @@ subroutine stationary_charges()
   integer mbeta
   real,dimension(nssh_tot,nssh_tot) :: A
   real,dimension(nssh_tot) :: c, SQ ! carga
-  real :: diff_err,Ep2
+  real :: Ep2
   integer issh1, mu_min, mu_max, l, inumorb
   real aux
   integer :: beta, alpha, alpha_iatom, ina, matom 
