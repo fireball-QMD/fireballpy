@@ -2,7 +2,7 @@ subroutine assemble_xc_1c ()
   use, intrinsic :: iso_fortran_env, only: double => real64
   use M_constants, only: eq2
   use M_system, only: natoms, neigh_self, imass, numorb_max, &
-                    etotxc_1c, Uexc_1c, Umuxc_1c, vxc_1c
+                    etotxc_1c, Uexc_1c, Umuxc_1c, vxc_1c,g_xc
   use M_fdata, only: num_orb
   implicit none
  
@@ -19,6 +19,7 @@ subroutine assemble_xc_1c ()
   Uexc_1c = 0.0d0
   Umuxc_1c = 0.0d0
   vxc_1c = 0.0d0
+  g_xc = 0.0d0
   do iatom = 1, natoms
    matom = neigh_self(iatom)
    in1 = imass(iatom)

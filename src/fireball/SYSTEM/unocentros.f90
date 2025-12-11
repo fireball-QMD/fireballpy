@@ -1,7 +1,7 @@
 !subroutine unocentros (in1, iatom, exc_1c, muexc_1c, dccexc_1c, mu1xc)
 subroutine unocentros (in1, iatom, dccexc_1c, mu1xc)
   use, intrinsic :: iso_fortran_env, only: double => real64
-  use M_system, only: degelec, getmssh, getlssh, getissh, numorb_max, Qin
+  use M_system, only: degelec, getmssh, getlssh, getissh, numorb_max, Qin, neigh_self, g_xc
   use M_fdata, only: nsh_max, nssh, num_orb, Qneutral, exc_1c_0, vxc_1c_0, gxc_1c, fxc_1c
 !borrar nuxc1c, dnuxc1c, exc1c0, dexc1c, 
   implicit none
@@ -48,6 +48,8 @@ subroutine unocentros (in1, iatom, dccexc_1c, mu1xc)
         do kssh = 1,nssh(in1)
           !mu1xc(inu,imu) = mu1xc(inu,imu) +  dnuxc1c(in1,jssh,issh,kssh)*dqi(kssh)
           mu1xc(inu,imu) = mu1xc(inu,imu) + Qin(kssh,iatom) * gxc_1c(in1,jssh,issh,kssh)
+          g_xc(inu,imu,kssh,iatom,neigh_self(iatom),iatom) = &
+          & g_xc(inu,imu,kssh,iatom,neigh_self(iatom),iatom) + gxc_1c(in1,jssh,issh,kssh)
         enddo 
       endif
     end do

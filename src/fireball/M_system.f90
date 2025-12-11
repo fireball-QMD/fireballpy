@@ -284,8 +284,8 @@ module M_system
   real(double), dimension (:,:), allocatable :: g_h_shell
   real(double), dimension (:,:), allocatable :: g_xc_shell  
   real(double), dimension (:,:), allocatable :: f_xc_shell
-  real(double), dimension (:,:), allocatable :: exc_aa_shell
-  real(double), dimension (:,:), allocatable :: vxc_aa_shell
+  real(double), dimension (:), allocatable :: exc_aa_shell
+  real(double), dimension (:), allocatable :: vxc_aa_shell
   integer, dimension (:), allocatable :: fix_shell_charge 
   integer, dimension(:,:), allocatable :: orb2shell
 end module M_system

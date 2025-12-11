@@ -26,6 +26,7 @@ subroutine stationary_charges()
   SQ = 0.0d0
   c = 0.0d0
   alpha = 0
+  call load_M()
   !Borrar es solo para hacer test----------
   !do issh=1,nsh_max
   !  fix_shell_charge(issh)=fix_shell_charge_aux(issh)
@@ -39,6 +40,7 @@ subroutine stationary_charges()
   allocate(M(nssh_tot2+1,nssh_tot2+1))
   allocate(B(nssh_tot2+1))
 
+ 
   alpha_iatom2 = 0 
   
   do alpha = 1, nssh_tot
@@ -153,7 +155,35 @@ subroutine stationary_charges()
       vxc_shell_aa = vxc_shell_aa /  (2*get_l_ofshell(alpha) + 1)
     end function vxc_shell_aa
 
+    subroutine load_M()
+      use M_system, only: g_xc_shell,f_xc_shell,imass,vxc_aa_shell,exc_aa_shell,nssh_tot
+      use M_fdata, only: gxc_1c,fxc_1c,exc_1c_0,vxc_1c_0
+      implicit none
+      integer :: iatom,count ,issh,kssh,alpha,beta
+      g_xc_shell=0.0d0
+      f_xc_shell=0.0d0
+      gxc_1c=22.00
+      count=0
+      print*,'alpha,beta,count,issh,kssh,iatom  '
+      do iatom=1,natoms
+        do issh=1,nssh(imass(iatom))
+          alpha = count + issh          
+          do kssh=1, nssh(imass(iatom))
+            beta = count + kssh
+            print*,alpha,beta,count,issh,kssh,iatom  
+            g_xc_shell(alpha,beta) = gxc_1c(imass(iatom),issh,issh,kssh)
+            f_xc_shell(alpha,beta) = fxc_1c(imass(iatom),issh,kssh)
+          end do
+          exc_aa_shell(alpha) = exc_1c_0(imass(iatom),issh)
+          vxc_aa_shell(alpha) = vxc_1c_0(imass(iatom),issh,issh)
+        end do
+        count = count + nssh(imass(iatom))
+      end do
 
-
+    do alpha = 1, nssh_tot
+        write(*,'(4F10.2)') (g_xc_shell(alpha,beta), beta=1,nssh_tot)
+    end do
+     
+    end subroutine 
 
 end subroutine stationary_charges
