@@ -111,6 +111,21 @@ subroutine stationary_charges()
   stop    
   contains
 
+    real function g_h_shell(alpha, beta, alpha_iatom, neigh_beta_iatom, beta_iatom)
+      use M_system, only: f_xc, get_orb_ofshell, get_l_ofshell, get_issh_ofshell
+      implicit none
+      integer, intent(in) :: alpha, beta, alpha_iatom, neigh_beta_iatom, beta_iatom
+      integer :: mu_min, mu_max, imu_local
+      g_h_shell = 0.0
+      mu_min = get_orb_ofshell(alpha)
+      mu_max = mu_min + 2*get_l_ofshell(alpha)
+      do imu_local = mu_min, mu_max
+        g_h_shell = g_h_shell + g_h(imu_local, get_issh_ofshell(beta), alpha_iatom, neigh_beta_iatom, beta_iatom)
+      end do
+      g_h_shell = g_h_shell /  (2*get_l_ofshell(alpha) + 1)
+    end function g_h_shell 
+
+
     real function fshell_xc(alpha, beta, alpha_iatom, neigh_beta_iatom, beta_iatom)
       use M_system, only: f_xc, get_orb_ofshell, get_l_ofshell, get_issh_ofshell
       implicit none
@@ -141,6 +156,8 @@ subroutine stationary_charges()
     end function exc_shell_aa
 
 
+
+
     real function vxc_shell_aa(alpha, alpha_iatom, neigh_beta_iatom, beta_iatom)
       use M_system, only: vxc_aa, get_orb_ofshell, get_l_ofshell, get_issh_ofshell
       implicit none
@@ -155,7 +172,7 @@ subroutine stationary_charges()
       vxc_shell_aa = vxc_shell_aa /  (2*get_l_ofshell(alpha) + 1)
     end function vxc_shell_aa
 
-    subroutine load_M()
+    subroutine load_M() !Mx=B
       use M_system, only: g_xc_shell,f_xc_shell,imass,vxc_aa_shell,exc_aa_shell,nssh_tot
       use M_fdata, only: gxc_1c,fxc_1c,exc_1c_0,vxc_1c_0
       implicit none
