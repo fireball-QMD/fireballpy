@@ -26,6 +26,7 @@ subroutine stationary_charges()
   SQ = 0.0d0
   c = 0.0d0
   alpha = 0
+  call load_g_h_shell()
   call load_M()
   !Borrar es solo para hacer test----------
   !do issh=1,nsh_max
@@ -111,21 +112,6 @@ subroutine stationary_charges()
   stop    
   contains
 
-    real function g_h_shell(alpha, beta, alpha_iatom, neigh_beta_iatom, beta_iatom)
-      use M_system, only: f_xc, get_orb_ofshell, get_l_ofshell, get_issh_ofshell
-      implicit none
-      integer, intent(in) :: alpha, beta, alpha_iatom, neigh_beta_iatom, beta_iatom
-      integer :: mu_min, mu_max, imu_local
-      g_h_shell = 0.0
-      mu_min = get_orb_ofshell(alpha)
-      mu_max = mu_min + 2*get_l_ofshell(alpha)
-      do imu_local = mu_min, mu_max
-        g_h_shell = g_h_shell + g_h(imu_local, get_issh_ofshell(beta), alpha_iatom, neigh_beta_iatom, beta_iatom)
-      end do
-      g_h_shell = g_h_shell /  (2*get_l_ofshell(alpha) + 1)
-    end function g_h_shell 
-
-
     real function fshell_xc(alpha, beta, alpha_iatom, neigh_beta_iatom, beta_iatom)
       use M_system, only: f_xc, get_orb_ofshell, get_l_ofshell, get_issh_ofshell
       implicit none
@@ -174,7 +160,7 @@ subroutine stationary_charges()
 
     subroutine load_M() !Mx=B
       use M_system, only: g_xc_shell,f_xc_shell,imass,vxc_aa_shell,exc_aa_shell,nssh_tot
-      use M_fdata, only: gxc_1c,fxc_1c,exc_1c_0,vxc_1c_0
+      use M_fdata, only: gxc_1c,fxc_1c,exc_1c_0,vxc_1c_0, nssh
       implicit none
       integer :: iatom,count ,issh,kssh,alpha,beta
       g_xc_shell=0.0d0
@@ -202,5 +188,26 @@ subroutine stationary_charges()
     end do
      
     end subroutine 
+
+    subroutine load_g_h_shell()
+      use M_system, only: g_h_shell, natoms, get_shell_ofatom_imu, get_shell_ofatom_issh
+      use M_fdata, only: nssh
+      implicit none
+      integer :: iatom, imu, alpha, matom, katom, kssh, beta
+      g_h_shell = 0.0
+      do iatom = 1, natoms
+        do imu=1,  num_orb(imass(iatom))
+          alpha = get_shell_ofatom_imu(iatom,imu) 
+          matom=neigh_self(iatom) 
+          do katom = 1, natoms
+            do kssh = 1, nssh(imass(katom))
+              beta = get_shell_ofatom_issh(katom,kssh)
+              g_h_shell(alpha,beta) = g_h_shell(alpha,beta) +&
+              & g_h(imu,imu, kssh, katom, matom, iatom) / (2*get_l_ofshell(alpha) + 1)
+            end do
+          end do
+        end do
+      end do
+    end subroutine  load_g_h_shell
 
 end subroutine stationary_charges

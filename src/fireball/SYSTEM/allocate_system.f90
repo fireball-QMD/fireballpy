@@ -13,7 +13,7 @@ subroutine allocate_system ()
     & dxcdcc, ft, dusr, fotxc, fotxc_ca, faca, fotca, f3naa, f3nab, f3nac, f3nla, f3nlb, f3nlc, f3caa, f3cab, f3cac, flrew, f3xca_ca, &
     & f3xcb_ca, f3xcc_ca, f3xca, f3xcb, f3xcc, flrew_qmmm, fro, ftot, dxcv, norbitals_new, qstate, bbnkre, bbnkim, igamma, &
     & g_h, g_xc, f_xc, exc_aa, vxc_aa, get_orb_ofshell, get_l_ofshell, get_issh_ofshell, get_iatom_ofshell, get_shell_oforb, orb2shell, &
-    & g_h_shell, g_xc_shell, f_xc_shell, exc_aa_shell, vxc_aa_shell
+    & g_h_shell, g_xc_shell, f_xc_shell, exc_aa_shell, vxc_aa_shell, get_shell_ofatom_imu, get_shell_ofatom_issh
   use M_fdata, only: nssh, rcutoff, rc_PP, nspecies, num_orb, Qneutral, lssh, nsshPP, lsshPP,  nsh_max, numXmax, numYmax
 !  use M_fdata, only: numy3c_xc3c, ideriv_max
   implicit none
@@ -29,7 +29,7 @@ subroutine allocate_system ()
   integer:: in2
   integer:: numorb
   integer:: numorbPP_max
-  integer:: counter,counter_ini,l 
+  integer:: counter,counter_ini,l,imu_aux 
   real(double) :: rcutoff_i
   real(double) :: rcutoff_j
   real(double) :: distance2
@@ -174,31 +174,57 @@ subroutine allocate_system ()
   allocate (get_l_ofshell(nssh_tot))
   if (allocated(get_iatom_ofshell)) deallocate(get_iatom_ofshell)
   allocate (get_iatom_ofshell(nssh_tot))
- 
+  if (allocated(get_shell_ofatom_imu)) deallocate(get_shell_ofatom_imu) 
+  allocate (get_shell_ofatom_imu(natoms,numorb_max))
+  if (allocated(get_shell_ofatom_issh)) deallocate(get_shell_ofatom_issh) 
+  allocate (get_shell_ofatom_issh(natoms,nsh_max))
 
-   alpha = 0 
-   imu=1
-   print*,'alpha,imu,iatom,issh,lssh'
-   do iatom=1,natoms
-    do issh=1,nssh(imass(iatom))
+  alpha = 0 
+  imu=1
+  print*,'alpha,imu,iatom,issh,lssh'
+  do iatom=1,natoms
+   do issh=1,nssh(imass(iatom))
       alpha = alpha + 1
+      get_shell_ofatom_issh(iatom,issh)=alpha
       print '(5I6)', alpha, imu, iatom, issh, lssh(issh, imass(iatom))      
       get_orb_ofshell(alpha) = imu
       get_iatom_ofshell(alpha) = iatom
       get_issh_ofshell(alpha) = issh
       get_l_ofshell(alpha) = lssh(issh,imass(iatom))
       imu = imu + ( 2*lssh(issh,imass(iatom))+1 )
-     end do
     end do
+   end do
 
            
   imu = 0
   alpha = 0 
+
+  alpha = 0 
+  imu=1
+  print*,'alpha,imu,iatom,issh,lssh'
   do iatom=1,natoms
+   do issh=1,nssh(imass(iatom))
+     alpha = alpha + 1
+     get_shell_ofatom_issh(iatom,issh)=alpha
+     print '(5I6)', alpha, imu, iatom, issh, lssh(issh, imass(iatom))      
+     get_orb_ofshell(alpha) = imu
+     get_iatom_ofshell(alpha) = iatom
+     get_issh_ofshell(alpha) = issh
+     get_l_ofshell(alpha) = lssh(issh,imass(iatom))
+     imu = imu + ( 2*lssh(issh,imass(iatom))+1 )
+   end do
+  end do
+           
+  imu = 0
+  alpha = 0 
+  do iatom=1,natoms
+    imu_aux=0
     do issh=1,nssh(imass(iatom))
       alpha = alpha + 1
       do iorb = 1, 2*lssh(issh,imass(iatom))+1 
         imu=imu+1
+        imu_aux=imu_aux+1
+        get_shell_ofatom_imu(iatom,imu_aux)=alpha
         getissh(imu)=issh
         getlssh(imu)=lssh(issh,imass(iatom))
         getiatom(imu)=iatom
