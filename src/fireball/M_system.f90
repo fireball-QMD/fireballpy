@@ -57,6 +57,8 @@ module M_system
   integer, dimension (:), allocatable :: get_issh_ofshell
   integer, dimension (:), allocatable :: get_l_ofshell 
   integer, dimension (:), allocatable :: get_shell_oforb
+  integer, dimension (:,:), allocatable :: get_shell_ofatom_imu
+  integer, dimension (:,:), allocatable :: get_shell_ofatom_issh
 
   ! --- ETOT ----
   real(double) :: etot
