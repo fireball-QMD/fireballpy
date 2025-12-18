@@ -87,8 +87,8 @@ module M_fdata
   ! Two center integrals
   integer, parameter :: nfofx = 207 ! AQUI
 !  character (len=11), dimension (23), parameter :: twocfname = (/'overlap    ','vna_ontopl ','vna_ontopr ', &
-!    & 'vna_atom   ','vnl        ','xc_ontop   ','xc_atom    ','xc_corr    ','dipole_z   ','dipole_y   ','dipole_x   ', &
-!    & 'coulomb    ','kinetic    ','nuxc       ','den_ontopl ','den_ontopr ','den_atom   ','dnuxc_ol   ','dnuxc_or   ', &
+!    & 'vna_atom   ','vnl        ','(igual orden)xc_ontop   ','xc_atom    ','xc_corr    ','dipole_z   ','dipole_y   ','dipole_x   ', &
+!    & 'coulomb    ','kinetic    ','nuxc       ','den_ontopl ','den_ontopr ','den_atom   ','*dnuxc_ol*   ','*dnuxc_or*   ', &
 !    & 'denS_ontopl','denS_ontopr','denS_atom  ','overlapS   '/)
 
   character (len=11), dimension (20), parameter :: twocfname = (/ &
