@@ -88,7 +88,7 @@ subroutine assemble_drive()
   if (idipole .eq. 0) call assemble_lr ()
   if (idipole .eq. 1) call assemble_lr_dip ()
 
-  print*,'assemble_zw_3c_ct... comentado !!!'
+  print*,'assemble_zw_3c_ct comentado !!!'
   !call assemble_zw_3c_ct() !AQUI
 
   !Build H
