@@ -90,7 +90,6 @@ subroutine assemble_drive()
 
   print*,'assemble_zw_3c_ct... comentado !!!'
   !call assemble_zw_3c_ct() !AQUI
-  print*,'...assemble_zw_3c_ct'
 
   !Build H
   call buildh ()
