@@ -47,9 +47,10 @@
 ! C. Roldan Pinero
 ! ===========================================================================
 subroutine onecenterxc (nspec, nspec_max, nsh_max, wfmax_points,      &
-&                     iexc, inux, isnux, fraction, nsshxc, lsshxc,  &
-&                     rcutoffa_max, xnocc, dqorb, iderorb, what,    &
-&                     signature, drr_rho, nzx)
+&                       iexc, inux, isnux, fraction, nsshxc, lsshxc,  &
+&                       rcutoffa_max, xnocc, dqorb, iderorb, what,    &
+&                       signature, drr_rho, nzx)
+  use iso_fortran_env, only: error_unit
   use constants, only: abohr, hartree
   use precision, only: long
   implicit none
@@ -83,6 +84,7 @@ subroutine onecenterxc (nspec, nspec_max, nsh_max, wfmax_points,      &
   & nuxc_onecenter, nuxcs_onecenter
   logical, dimension(:), allocatable :: iszero
   real(kind=long), external :: psiofr
+  character(256) :: errmsg
 
   ! Procedure
   ! ===========================================================================
@@ -92,6 +94,7 @@ subroutine onecenterxc (nspec, nspec_max, nsh_max, wfmax_points,      &
   allocate (rhopp1c (wfmax_points))
 
   ! There is one additional condition for nuxcs which we need to ensure...
+  inuxs = 0
   if (isnux == 1) then
     if (iexc == 11) then
       inuxs = 1
@@ -287,7 +290,7 @@ subroutine onecenterxc (nspec, nspec_max, nsh_max, wfmax_points,      &
       rhop1c = 0.0_long
       rhopp1c = 0.0_long
       call rho1c_store (in1, nsh_max, nssh, 0.0_long, 1, drho, rcutoff, &
-      & xnocc_in, 1, wfmax_points, rho1c, rhop1c, rhopp1c)
+      &                 xnocc_in, 1, wfmax_points, rho1c, rhop1c, rhopp1c)
 
       ! Integrals <i|exc(i)|i> and <i.nu|mu(i)|i.nu'>
       do irho = 1, nnrho
@@ -302,7 +305,7 @@ subroutine onecenterxc (nspec, nspec_max, nsh_max, wfmax_points,      &
         rhp = rhop1c(irho)*abohr**4
         rhpp = rhopp1c(irho)*abohr**5
         call get_potxc1c (iexc, fraction, rho, rh, rhp, rhpp, exc, vxc, &
-        & dnuxc, dnuxcs, dexcc)
+        &                 dnuxc, dnuxcs, dexcc)
         vxc = hartree*vxc
         exc = hartree*exc
         rho = rho*abohr
@@ -377,17 +380,17 @@ subroutine onecenterxc (nspec, nspec_max, nsh_max, wfmax_points,      &
       deallocate(ddnuxcs)
     end if
 
-    allocate(work(1))
-    call dgelst('T', nssh1, npts, nrhs*nnz, xmatt, nssh1, tmpmat, npts, work, -1, info)
-    lwork = nint(work(1))
-    deallocate(work)
+    ! Query does not work, don't ask why
+    lwork = nssh1 + max(nssh1, nrhs*nnz)
+    lwork = ibset(0, bit_size(lwork) - leadz(lwork))
     allocate(work(lwork))
     call dgelst('T', nssh1, npts, nrhs*nnz, xmatt, nssh1, tmpmat, npts, work, lwork, info)
     deallocate(work, xmatt)
     if (info /= 0) then
       deallocate(tmpmat, iszero, rho1c, rhop1c, rhopp1c)
-      write (*,*) 'ERROR in fitting in onecenterxc.f90'
-      stop
+      errmsg = 'INTEGRALS/onecenterxc.f90: call to `dgelst` failed with info = '
+      write (error_unit, '(a)') errmsg
+      stop info
     end if
 
     ! Prepare for output
@@ -437,7 +440,7 @@ subroutine onecenterxc (nspec, nspec_max, nsh_max, wfmax_points,      &
         end do
       end do
     end if
-    deallocate(tmpmat)
+    deallocate(tmpmat, iszero)
 
     ! Write log
     write (auxz,'(i2.2)') nzx(in1)

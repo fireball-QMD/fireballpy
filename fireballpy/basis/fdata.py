@@ -533,7 +533,7 @@ def wavefunctions(element: Annotated[str, Parameter(group=args_grp)],
         json.dump(meta, fp)
 
     if save is not None:
-        info(f'Wavefunctions for element "{ele.provided}", orbital{'s' if len(save_orbs) > 1 else ''} "{save_orbs}" saved.\n'
+        info(f'Wavefunctions for element "{ele.provided}", orbital{"s" if len(save_orbs) > 1 else ""} "{save_orbs}" saved.\n'
              f'Please remember to run "fdata wavefunctions finnish {ele.provided} -o {output}" once all desired orbitals have been computed.')
     else:
         compute_vnn(ele, output)

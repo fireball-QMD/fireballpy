@@ -210,7 +210,6 @@ class FDataFiles:
                 self.wfs[z][orbname] = cs
             info = info[16:]
         self.wf_loaded = True
-        os.remove(self.pyinfofile)
 
     def get_charges_method(self) -> str:
         """Get the optimal charge method for autoconsistency.

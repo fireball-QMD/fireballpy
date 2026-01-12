@@ -4,7 +4,6 @@ modules_create_srcs = [
   'dimensions.f90',
   'precision.f90',
   'quadrature.f90',
-  'wavefunctions.f90',
   'x_exact.f90',
 ]
 
@@ -26,7 +25,6 @@ exx_srcs = [
 
 integrals_srcs = [
   'append_string.f90',
-  'exc1crho.f90',
   'gaunt.f90',
   'gauntReal.f90',
   'gleg.f90',
@@ -35,7 +33,6 @@ integrals_srcs = [
   'mk_indexDipX.f90',
   'mk_indexDipY.f90',
   'mk_indexPP.f90',
-  'nuxc1crho.f90',
   'onecentervdip.f90',
   'onecenterxc.f90',
   'radial_integral.f90',
@@ -128,18 +125,19 @@ foreach src : readfiles_srcs
 endforeach
 
 # Deal with MPI
-if mpi_dep.found()
-  create_srcs += 'MPI.f90'
-else
+# if mpi_dep.found()
+#   create_srcs += 'MPI.f90'
+# else
   create_srcs += 'noMPI.f90'
-endif
+# endif
 
 create_srcs += 'create.f90'
 
 # Build create executable
 create_exe = executable('create.x',
   create_srcs,
-  dependencies: [blas_dep, lapack_dep, mpi_dep],
+  # dependencies: [blas_dep, lapack_dep, mpi_dep],
+  dependencies: [blas_dep, lapack_dep],
   install: true,
   install_dir: py.get_install_dir() / 'fireballpy' / 'basis',
 )
