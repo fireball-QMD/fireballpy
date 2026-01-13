@@ -344,7 +344,7 @@ program create
       write (*,*) ' has not been implemented into creator yet. '
       write (*,*) ' Choose a different one, and restart. '
     end if
-    stop
+    stop 1
   end if
   if (iexc .ne. 11 .and. (ispin .eq. 1 .or. isnuxc1c .eq. 1 .or. &
   &                                            isnuxc2c .eq. 1)) then
@@ -354,7 +354,7 @@ program create
       write (*,*) ' spin-polarization case. Only iexc = 11 works! '
       write (*,*) ' Choose iexc = 11 or ispin = 0, and restart. '
     end if
-    stop
+    stop 1
   end if
 
 ! Read the neutral and non-neutral atom potentials
@@ -409,7 +409,7 @@ program create
         &                   index_max3c(itype1,itype2)
         write (*,*) ' inter_max = ', inter_max
         write (*,*) ' Redimension index_max in parameters.inc! '
-        stop
+        stop 1
       end if
 
 ! For the pseudopotential call a different mk_index routine
@@ -534,9 +534,9 @@ program create
       &                      signature, drr_rho)
 ! JOM-end
       call onecenterxc (nspec, nspec_max, nsh_max, wfmax_points,  &
-      &                      iexc, inuxc1c, isnuxc1c, fraction, nsshxc, lsshxc,  &
-      &                      rcutoffa_max, xnocc, dqorb, iderorb, what,  &
-      &                      signature, drr_rho, nzx)
+      &                      iexc, fraction, nsshxc, lsshxc,  &
+      &                      rcutoffa_max, xnocc, dqorb, iderorb,  &
+      &                      drr_rho, nzx)
     end if
 
 ! JPL 1999 Exact exchange interactions.
@@ -1566,7 +1566,7 @@ program create
      &                   index_max3c(itype1,itype2)
            write (*,*) ' inter_max = ', inter_max
            write (*,*) ' Redimension index_max in parameters.inc! '
-           stop
+           stop 1
           end if
 
          end do
