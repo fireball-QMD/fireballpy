@@ -59,7 +59,7 @@
 ! ===========================================================================
         subroutine x_1c (nsh_max, nspec, nspec_max, fraction, nsshxc,       &
      &                   lsshxc, drr_rho, rcutoffa_max, what, signature)
-        use precision
+        use precision, only: wp
         implicit none
  
 ! Argument Declaration and Description
@@ -72,10 +72,10 @@
         integer, intent (in), dimension (nspec_max, nsh_max) :: lsshxc
         integer, intent (in), dimension (nspec_max) :: nsshxc
  
-        real(kind=long), intent (in) :: fraction
+        real(kind=wp), intent (in) :: fraction
  
-        real(kind=long), intent (in), dimension (nspec_max) :: drr_rho
-        real(kind=long), intent (in), dimension (nspec_max) :: rcutoffa_max
+        real(kind=wp), intent (in), dimension (nspec_max) :: drr_rho
+        real(kind=wp), intent (in), dimension (nspec_max) :: rcutoffa_max
  
         character (len=70), intent (in) :: signature
  
@@ -85,7 +85,7 @@
 ! ===========================================================================
         integer, parameter :: lmax = 3
  
-        real(kind=long), parameter :: eq2 = 14.39975d0
+        real(kind=wp), parameter :: eq2 = 14.39975d0
  
 ! Local Variable Declaration and Description
 ! ===========================================================================
@@ -102,29 +102,29 @@
         integer mqn
         integer nnrho
  
-        real(kind=long) coefficient
-        real(kind=long) cg1
-        real(kind=long) cg2
-        real(kind=long) cg3
-        real(kind=long) cg4
-        real(kind=long) drho
-        real(kind=long) psi1
-        real(kind=long) psi2
-        real(kind=long) psi3
-        real(kind=long) psi4
-        real(kind=long) r
-        real(kind=long) rp
-        real(kind=long) rhomax
-        real(kind=long) rhomin
-        real(kind=long) sumr
-        real(kind=long) sumrp
+        real(kind=wp) coefficient
+        real(kind=wp) cg1
+        real(kind=wp) cg2
+        real(kind=wp) cg3
+        real(kind=wp) cg4
+        real(kind=wp) drho
+        real(kind=wp) psi1
+        real(kind=wp) psi2
+        real(kind=wp) psi3
+        real(kind=wp) psi4
+        real(kind=wp) r
+        real(kind=wp) rp
+        real(kind=wp) rhomax
+        real(kind=wp) rhomin
+        real(kind=wp) sumr
+        real(kind=wp) sumrp
  
-        real(kind=long), dimension (-lmax:lmax) :: answer
-        real(kind=long), dimension (:), allocatable :: factor
-        real(kind=long), dimension (:), allocatable :: rpoint
+        real(kind=wp), dimension (-lmax:lmax) :: answer
+        real(kind=wp), dimension (:), allocatable :: factor
+        real(kind=wp), dimension (:), allocatable :: rpoint
  
-        real(kind=long), external :: clebsch_gordon
-        real(kind=long), external :: psiofr
+        real(kind=wp), external :: clebsch_gordon
+        real(kind=wp), external :: psiofr
  
 ! Procedure
 ! ===========================================================================

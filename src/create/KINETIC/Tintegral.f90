@@ -82,7 +82,7 @@
 ! Program Declaration
 ! ===========================================================================
         subroutine Tintegral (l1, m1, l2, m2, k, sum)
-        use precision
+        use precision, only: wp
         implicit none
  
 ! Argument Declaration and Description
@@ -95,7 +95,7 @@
         integer k
  
 ! Output:
-        complex(kind=long) sum             ! value of the integral
+        complex(kind=wp) sum             ! value of the integral
  
 ! Local Parameters and Data Declaration
 ! ===========================================================================
@@ -113,9 +113,9 @@
  
         integer iyl (0:maxnode)
  
-        real(kind=long) delk
+        real(kind=wp) delk
  
-        complex(kind=long) cl (0:maxnode)
+        complex(kind=wp) cl (0:maxnode)
  
         external delk
  
@@ -154,11 +154,11 @@
 ! Kronecker delta for l or m
 ! ===========================================================================
         function delk(i,j)
-        use precision
+        use precision, only: wp
         implicit none
  
         integer i, j
-        real(kind=long) delk
+        real(kind=wp) delk
  
         if (i .eq. j) then
          delk = 1.0d0

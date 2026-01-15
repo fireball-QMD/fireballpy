@@ -71,7 +71,7 @@
 ! Program Declaration
 ! ======================================================================
 program create
-  use precision
+  use precision, only: wp
   implicit none
 
   include 'parameters.inc'
@@ -87,7 +87,7 @@ program create
 
 ! Local Parameters and Data Declaration
 ! ======================================================================
-  real(kind=long) abohr
+  real(kind=wp) abohr
   parameter (abohr = 0.529177249d0)
 
 ! Local Variable Declaration and Description
@@ -115,8 +115,8 @@ program create
   integer nstyles
 
 ! Needed for determing expansion of Legendre polynomials.
-  real(kind=long) ctheta (ntheta_max)
-  real(kind=long) ctheta_weights (ntheta_max)
+  real(kind=wp) ctheta (ntheta_max)
+  real(kind=wp) ctheta_weights (ntheta_max)
 
 ! The two center interactions are defined as follows:
 ! ontop => orbitals at two different sites
@@ -221,21 +221,21 @@ program create
   integer nsshPP (nspec_max)             ! number of shells for PP
   integer nzx (nspec_max)
 
-  real(kind=long) fraction
-  real(kind=long) max_diff
-  real(kind=long) rcutoff1
-  real(kind=long) rcutoff2
-  real(kind=long) rcutoff3
+  real(kind=wp) fraction
+  real(kind=wp) max_diff
+  real(kind=wp) rcutoff1
+  real(kind=wp) rcutoff2
+  real(kind=wp) rcutoff3
 
 ! distances needed for three center integrals
-  real(kind=long) dbc                      ! maximal bond charge distance
-  real(kind=long) dna                      ! maximal neutral atom distance
+  real(kind=wp) dbc                      ! maximal bond charge distance
+  real(kind=wp) dna                      ! maximal neutral atom distance
 
-  real(kind=long) etotatom (nspec_max)
-  real(kind=long) rcutoff (nspec_max, nsh_max) ! cutoff radius in bohr
-  real(kind=long) rcutoffa (nspec_max, nsh_max)! cutoff radius in angstroms
-  real(kind=long) rcutoffa_max (nspec_max)     ! cutoff radius in angstroms
-  real(kind=long) xmass (nspec_max)
+  real(kind=wp) etotatom (nspec_max)
+  real(kind=wp) rcutoff (nspec_max, nsh_max) ! cutoff radius in bohr
+  real(kind=wp) rcutoffa (nspec_max, nsh_max)! cutoff radius in angstroms
+  real(kind=wp) rcutoffa_max (nspec_max)     ! cutoff radius in angstroms
+  real(kind=wp) xmass (nspec_max)
 
   character(len=2) atom1, atom2, atom3
   character(len=70) signature

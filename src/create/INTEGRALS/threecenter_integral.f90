@@ -47,7 +47,7 @@
 !
 !     ------------------------------------------------------------
 !
-      use precision
+      use precision, only: wp
       implicit none
 !
       include '../parameters.inc'
@@ -85,24 +85,24 @@
       integer m1 (inter_max)   ! m-value in that shell
       integer m2 (inter_max)   !
 !
-      real(kind=long) rc1           ! i=1,2,3  for left,right, neutral atm
-      real(kind=long) rc2
+      real(kind=wp) rc1           ! i=1,2,3  for left,right, neutral atm
+      real(kind=wp) rc2
 !
-      real(kind=long) h
-      real(kind=long) HR,HT,HP
+      real(kind=wp) h
+      real(kind=wp) HR,HT,HP
       integer tempR, tempT, tempP
  
-      real(kind=long) dbcx          ! bond charge distance  (A)
-      real(kind=long) rna(3)        ! neutral atom location (A)
+      real(kind=wp) dbcx          ! bond charge distance  (A)
+      real(kind=wp) rna(3)        ! neutral atom location (A)
 !
       integer tmpImid,imid
-      real(kind=long) xmin
-      real(kind=long) xxp
-      real(kind=long) psipsi
+      real(kind=wp) xmin
+      real(kind=wp) xxp
+      real(kind=wp) psipsi
 !
-      real(kind=long) gmat(0:10,inter_max)   ! result from the integrator
+      real(kind=wp) gmat(0:10,inter_max)   ! result from the integrator
 !
-      real(kind=long) psiofr,vpot,vnnaofr,dvxc3c
+      real(kind=wp) psiofr,vpot,vnnaofr,dvxc3c
       external dvxc3c, vnnaofr,psiofr
 !
 !     ............................................................
@@ -126,43 +126,43 @@
 !     Internal variables:
 !
 !
-      real(kind=long) thetamat(0:10,inter_max)
+      real(kind=wp) thetamat(0:10,inter_max)
 !
-      real(kind=long) znormMU(inter_max),znormNU(inter_max), &
+      real(kind=wp) znormMU(inter_max),znormNU(inter_max), &
      &       psiAmat(inter_max),psiBmat(inter_max)
 !
 !
-      real(kind=long) thfactMU(0:3,-3:3), &
+      real(kind=wp) thfactMU(0:3,-3:3), &
      &       thfactNU(0:3,-3:3), &
      &       phifactor(-3:3)
 !
-      real(kind=long) avgVmat(0:10,inter_max), fsimp(5000)
+      real(kind=wp) avgVmat(0:10,inter_max), fsimp(5000)
 !
-      real(kind=long) inthpR(numInthpR*2+1), inthpTheta(numInthpT*2+1),  &
+      real(kind=wp) inthpR(numInthpR*2+1), inthpTheta(numInthpT*2+1),  &
      & inthpPhi(numInthpP*2+1)
-      real(kind=long) wR(numInthpR*2+1),wTheta(numInthpT*2+1), &
+      real(kind=wp) wR(numInthpR*2+1),wTheta(numInthpT*2+1), &
      & wPhi(numInthpP*2+1)
 !
       integer   numbphi
       integer irMax, itMax,iPhiMax
       parameter (numbphi=5000)
-      real(kind=long)  paramR, paramT, paramP
-      real(kind=long)    phiy(numbphi), &
+      real(kind=wp)  paramR, paramT, paramP
+      real(kind=wp)    phiy(numbphi), &
      &          cphiy(numbphi),sphiy(numbphi)
 
-      real(kind=long) w1, w2
+      real(kind=wp) w1, w2
 !
       integer nn1,nl1,nm1,nn2,nl2,nm2,i,ir,ix,ix1,it,ip,inm, &
      &        nmax,isorpX, NinthpR, NinthpT, NinthpP
 !
 ! JOM r1
-      real(kind=long)  r1
-      real(kind=long)  sq3,sq15,pi,dr,dtheta,dphi,r,theta,phi, &
+      real(kind=wp)  r1
+      real(kind=wp)  sq3,sq15,pi,dr,dtheta,dphi,r,theta,phi, &
      &        rmin,rmax,dc1,ds1,dc,ds,zr,r2,dc2,ds2,xr,yr,r3, &
      &        cphi,sphi,simp,simp2,simpson, &
      &        averagephi,averagetheta, &
      &        prod,prod2,dsth,stuffmunu,thrd,nrrinv,ntinv,nphiinv
-      real(kind=long) sq12,sq4,hunderedfortieth
+      real(kind=wp) sq12,sq4,hunderedfortieth
 !
 ! =====================================================================
 !     The size of the matrix is determined by Nsh(in1) and Nsh(in2)
@@ -201,9 +201,9 @@
       paramT = 2.0D0
       paramP = 1.0D0
   
-      nrrinv=1.0d0/real(irMax-1, kind=long)
-      ntinv=1.0d0/real(itMax-1, kind=long)
-      nphiinv=1.0d0/real(iphiMax-1, kind=long)
+      nrrinv=1.0d0/real(irMax-1, kind=wp)
+      ntinv=1.0d0/real(itMax-1, kind=wp)
+      nphiinv=1.0d0/real(iphiMax-1, kind=wp)
 
       HR = (rmax-rmin)*nrrinv
       HT = PI*ntinv

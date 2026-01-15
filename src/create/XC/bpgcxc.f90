@@ -27,11 +27,11 @@
 
       subroutine xbecke(d,s,u,v,ex,vx)
 
-      use precision
+      use precision, only: wp
       implicit none
 
-      real(kind=long) d,s,u,v,ex,vx,c,b,bb,ax,thrd,thrd4
-      real(kind=long) dd1,ddi,f,fac,fs,fss,g,g1,x,y0,y1,y2
+      real(kind=wp) d,s,u,v,ex,vx,c,b,bb,ax,thrd,thrd4
+      real(kind=wp) dd1,ddi,f,fac,fs,fss,g,g1,x,y0,y1,y2
 
       data c / .779555417944150792d1/
       data b / .42d-2/
@@ -92,14 +92,14 @@
 !
       subroutine corga86(d1,d2,dp11,dp22,dp12,uu,vv,dec,dvcup,dvcdn)
 !
-      use precision
+      use precision, only: wp
       implicit none
 
-      real(kind=long) d1,d2,dp11,dp22,dp12,uu,vv,dec,dvcup,dvcdn
-      real(kind=long) a1,a2,a3,a4,a5,a6,a7
-      real(kind=long) t13,t23,t43,t53,t76,crt2
-      real(kind=long) c,c1,c2,cp,d,d43,dd,dm13,dpnorm,dpnorm2,fi
-      real(kind=long) uuu,vvv,www,zzz,zet,zz1,zz2
+      real(kind=wp) d1,d2,dp11,dp22,dp12,uu,vv,dec,dvcup,dvcdn
+      real(kind=wp) a1,a2,a3,a4,a5,a6,a7
+      real(kind=wp) t13,t23,t43,t53,t76,crt2
+      real(kind=wp) c,c1,c2,cp,d,d43,dd,dm13,dpnorm,dpnorm2,fi
+      real(kind=wp) uuu,vvv,www,zzz,zet,zz1,zz2
 !
       data a1,a2,a3,a4,a5,a6,a7/ 2.568d-3 &
      &,                           1.443307452d-2 &

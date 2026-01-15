@@ -62,7 +62,7 @@
 ! ======================================================================
         subroutine density_calc (iexc, ix, ispec, itype1, itype2, &
      &                           itype3, r, dr, dens, ddens, dddens)
-        use precision
+        use precision, only: wp
         implicit none
         include '../parameters.inc'
         include '../exchange.inc'
@@ -77,13 +77,13 @@
         integer itype3
         integer ix
 
-        real(kind=long) r
-        real(kind=long) dr
+        real(kind=wp) r
+        real(kind=wp) dr
 
 ! Output
-        real(kind=long) dens
-        real(kind=long) ddens
-        real(kind=long) dddens
+        real(kind=wp) dens
+        real(kind=wp) ddens
+        real(kind=wp) dddens
 
 ! Local Parameters and Data Declaration
 ! ===========================================================================
@@ -103,11 +103,11 @@
 
         integer in (3)
 
-        real(kind=long) densdr
-        real(kind=long) dens2dr
-        real(kind=long) dens_dr
-        real(kind=long) psiofr
-        real(kind=long) xinv4pi
+        real(kind=wp) densdr
+        real(kind=wp) dens2dr
+        real(kind=wp) dens_dr
+        real(kind=wp) psiofr
+        real(kind=wp) xinv4pi
 
         external psiofr
 

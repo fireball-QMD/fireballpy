@@ -61,7 +61,7 @@
 ! ===========================================================================
         subroutine xontopr_2c_rprime (nspec_max, nssh, nalpha, itype,       &
     &                                 rcutoff, d, nrho, nz, lmax)
-        use precision
+        use precision, only: wp
         use x_exact
         implicit none
  
@@ -77,8 +77,8 @@
  
         integer, intent (in) :: nssh (nspec_max)
  
-        real(kind=long), intent (in) :: d
-        real(kind=long), intent (in) :: rcutoff
+        real(kind=wp), intent (in) :: d
+        real(kind=wp), intent (in) :: rcutoff
  
 ! Local Parameters and Data Declaration
 ! ===========================================================================
@@ -92,25 +92,25 @@
         integer lqn
         integer nnz
  
-        real(kind=long) dzp
-        real(kind=long) psi3
-        real(kind=long) psi4
-        real(kind=long) r
-        real(kind=long) rho
-        real(kind=long) rhomax
-        real(kind=long) rhomin
-        real(kind=long) rp1
-        real(kind=long) rp2
-        real(kind=long) sumrp
-        real(kind=long) zmax
-        real(kind=long) zmin
-        real(kind=long) zp1
-        real(kind=long) zp2
+        real(kind=wp) dzp
+        real(kind=wp) psi3
+        real(kind=wp) psi4
+        real(kind=wp) r
+        real(kind=wp) rho
+        real(kind=wp) rhomax
+        real(kind=wp) rhomin
+        real(kind=wp) rp1
+        real(kind=wp) rp2
+        real(kind=wp) sumrp
+        real(kind=wp) zmax
+        real(kind=wp) zmin
+        real(kind=wp) zp1
+        real(kind=wp) zp2
  
-        real(kind=long), dimension (:), allocatable :: rhopmult
-        real(kind=long), dimension (:), allocatable :: zpmult
+        real(kind=wp), dimension (:), allocatable :: rhopmult
+        real(kind=wp), dimension (:), allocatable :: zpmult
  
-        real(kind=long), external :: psiofr
+        real(kind=wp), external :: psiofr
  
 ! Allocate Arrays
 ! ===========================================================================

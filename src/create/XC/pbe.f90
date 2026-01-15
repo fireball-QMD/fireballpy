@@ -52,11 +52,11 @@
 ! uk, ul defined after [a](13)
 !----------------------------------------------------------------------
 !----------------------------------------------------------------------
-      use precision
+      use precision, only: wp
       IMPLICIT NONE
 
-      real(kind=long) AX,EX,EXUNIF,FS,FSS,FXPBE,P0,RHO,S
-      real(kind=long) s2,thrd,thrd4,u,uk,ul,um,v,vx
+      real(kind=wp) AX,EX,EXUNIF,FS,FSS,FXPBE,P0,RHO,S
+      real(kind=wp) s2,thrd,thrd4,u,uk,ul,um,v,vx
 
       integer  LGGA,LPOT
 
@@ -128,16 +128,16 @@
 ! [c] J. P. Perdew and Y. Wang, Phys. Rev. B {\bf 45}, 13244 (1992).
 !----------------------------------------------------------------------
 !----------------------------------------------------------------------
-      use precision
+      use precision, only: wp
       IMPLICIT NONE
 
-      real(kind=long) ALFM,ALFRSM,B,B2,BEC,BET,BG,COMM,DELT,DVCDN
-      real(kind=long) DVCUP,EC,ECRS,ECZET,EP,EPRS,ETA,EU,EURS,F,FAC
-      real(kind=long) FACT0,FACT1,FACT2,FACT3,FACT5,FZ,FZZ,G,G3,G4
-      real(kind=long) GAM,GAMMA,GZ,H,HB,HBT,HRS,HRST,HT,HTT,HZ,HZT
-      real(kind=long) Q4,Q5,Q8,Q9,RS,RSTHRD,RTRS,SIXTHM,T,T2,T4
-      real(kind=long) T6,THRD,THRD2,THRD4,THRDM,UU,VCDN,VCUP,VV,WW,Z4,ZET
-      real(kind=long) PON,PREF
+      real(kind=wp) ALFM,ALFRSM,B,B2,BEC,BET,BG,COMM,DELT,DVCDN
+      real(kind=wp) DVCUP,EC,ECRS,ECZET,EP,EPRS,ETA,EU,EURS,F,FAC
+      real(kind=wp) FACT0,FACT1,FACT2,FACT3,FACT5,FZ,FZZ,G,G3,G4
+      real(kind=wp) GAM,GAMMA,GZ,H,HB,HBT,HRS,HRST,HT,HTT,HZ,HZT
+      real(kind=wp) Q4,Q5,Q8,Q9,RS,RSTHRD,RTRS,SIXTHM,T,T2,T4
+      real(kind=wp) T6,THRD,THRD2,THRD4,THRDM,UU,VCDN,VCUP,VV,WW,Z4,ZET
+      real(kind=wp) PON,PREF
 
       INTEGER LGGA,LPOT
 
@@ -252,10 +252,10 @@
 ! J. P. Perdew and Y. Wang, Phys. Rev. B {\bf 45}, 13244 (1992).
 ! K. Burke, May 11, 1996.
 
-      use precision
+      use precision, only: wp
       IMPLICIT NONE
 
-      real(kind=long) A,A1,B1,B2,B3,B4,rtrs,GG,GGRS,Q0,Q1,Q2,Q3
+      real(kind=wp) A,A1,B1,B2,B3,B4,rtrs,GG,GGRS,Q0,Q1,Q2,Q3
 
       Q0 = -2.D0*A*(1.D0+A1*rtrs*rtrs)
       Q1 = 2.D0*A*rtrs*(B1+rtrs*(B2+rtrs*(B3+B4*rtrs)))

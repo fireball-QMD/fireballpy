@@ -4,10 +4,10 @@
 !***********************************************************************
       subroutine xlda(d,vx,ex)
 !
-      use precision
+      use precision, only: wp
       implicit none
 
-      real(kind=long) AX,D,EPS,EX,THD,THD4,VX
+      real(kind=wp) AX,D,EPS,EX,THD,THD4,VX
 
       data ax,thd,thd4,eps/-.738558766382022406d0 &
      &,                     .333333333333333333d0 &
@@ -32,10 +32,10 @@
 !***********************************************************************
 !
       subroutine wigner(rh,ex,fx,exc,fxc)
-      use precision
+      use precision, only: wp
       implicit none
 
-      real(kind=long) AX,EPS,EX,EXC,FX,FXC,PIF,RH,RS,THRD,W1,W2,X,Y
+      real(kind=wp) AX,EPS,EX,EXC,FX,FXC,PIF,RH,RS,THRD,W1,W2,X,Y
 
       data thrd,w1,w2,ax,pif,eps/.333333333333333333d0 &
      &,                         -.44d0 &
@@ -83,10 +83,10 @@
 ! Martin Fuchs, FHI der MPG, Berlin, 01-1993
 !c**********************************************************************
       subroutine wigscaled(rh,ex,fx,exc,fxc)
-      use precision
+      use precision, only: wp
       implicit none
 
-      real(kind=long) AA,AX,BB,EX,EXC,FX,FXC,RH,THRD,X,XYLN,Y,Z
+      real(kind=wp) AA,AX,BB,EX,EXC,FX,FXC,RH,THRD,X,XYLN,Y,Z
 
       data thrd,aa,bb,ax    /.333333333333333333d0 &
      &,                      .93222d0 &

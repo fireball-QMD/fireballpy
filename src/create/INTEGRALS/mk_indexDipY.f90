@@ -37,7 +37,7 @@
      &                        NSSH, LSSH, NLEFT3, LLEFT3, MLEFT3, &
      &                        NRIGHT3, LRIGHT3, MRIGHT3, &
      &                        index_max2c, index_max3c)
-       use precision
+       use precision, only: wp
        IMPLICIT NONE
  
        INTEGER in1,in2,inm, nshmax, nspecmax, inter3max

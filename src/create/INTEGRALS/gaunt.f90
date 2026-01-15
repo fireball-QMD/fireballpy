@@ -34,8 +34,8 @@
 
 ! Program Declaration
 ! ===========================================================================
-        real(kind=long) function gaunt(l1, l2 , l3 , m1 , m2 , m3)
-        use precision
+        real(kind=wp) function gaunt(l1, l2 , l3 , m1 , m2 , m3)
+        use precision, only: wp
         implicit none
 
 ! Argument Declaration and Description
@@ -47,7 +47,7 @@
         integer, intent (in) :: m2
         integer, intent (in) :: m3
         integer, parameter :: lmax = 3
-        real(kind=long), DIMENSION(0:lmax,0:lmax,0:lmax,-lmax:lmax,-lmax:lmax,-lmax:lmax) :: C
+        real(kind=wp), DIMENSION(0:lmax,0:lmax,0:lmax,-lmax:lmax,-lmax:lmax,-lmax:lmax) :: C
         C(0,0,0,0,0,0)=0.282094791773878
         C(0,1,1,0,-1,1)=-0.282094791773878
         C(0,1,1,0,0,0)=0.282094791773878

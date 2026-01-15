@@ -60,7 +60,7 @@
      &                                 fraction, n1, l1, m1, n2, l2, m2, &
      &                                 nz, nrho, d, itype1, itype2, &
      &                                 rcutoff1, rcutoff2, sum, ispher)
-        use precision
+        use precision, only: wp
         implicit none
         include '../parameters.inc'
         include '../exchange.inc'
@@ -97,12 +97,12 @@
         integer nz              ! number of z-points on grid
         logical ispher          ! spherical approx.
  
-        real(kind=long) d
-        real(kind=long) fraction
-        real(kind=long) rcutoff1, rcutoff2
+        real(kind=wp) d
+        real(kind=wp) fraction
+        real(kind=wp) rcutoff1, rcutoff2
  
 ! Output
-        real(kind=long) sum
+        real(kind=wp) sum
  
 ! Local Parameters and Data Declaration
 ! ===========================================================================
@@ -125,40 +125,40 @@
         integer nnz
  
 ! These are the factors which come from the coefficient in the Ylm
-        real(kind=long) clm (0:lmax, -lmax:lmax)
+        real(kind=wp) clm (0:lmax, -lmax:lmax)
  
-        real(kind=long) density1
-        real(kind=long) density2
-        real(kind=long) density3
-        real(kind=long) dexc
-        real(kind=long) dpotxc12
-        real(kind=long) dpotxc12s
-        real(kind=long) drho
-        real(kind=long) dvxc
-        real(kind=long) dz
-        real(kind=long) factor
-        real(kind=long) phifactor
-        real(kind=long) pi
-        real(kind=long) psi1
-        real(kind=long) psi2
-        real(kind=long) psi3
-        real(kind=long) psiofr
-        real(kind=long) r1, r2
-        real(kind=long) rescaled_psi
-        real(kind=long) rho
-        real(kind=long) rhomax
-        real(kind=long) rhomin
-        real(kind=long) vofr
-        real(kind=long) vnnaofr
-        real(kind=long) vppofr
-        real(kind=long) vxc
-        real(kind=long) z1
-        real(kind=long) z2
-        real(kind=long) zmax
-        real(kind=long) zmin
+        real(kind=wp) density1
+        real(kind=wp) density2
+        real(kind=wp) density3
+        real(kind=wp) dexc
+        real(kind=wp) dpotxc12
+        real(kind=wp) dpotxc12s
+        real(kind=wp) drho
+        real(kind=wp) dvxc
+        real(kind=wp) dz
+        real(kind=wp) factor
+        real(kind=wp) phifactor
+        real(kind=wp) pi
+        real(kind=wp) psi1
+        real(kind=wp) psi2
+        real(kind=wp) psi3
+        real(kind=wp) psiofr
+        real(kind=wp) r1, r2
+        real(kind=wp) rescaled_psi
+        real(kind=wp) rho
+        real(kind=wp) rhomax
+        real(kind=wp) rhomin
+        real(kind=wp) vofr
+        real(kind=wp) vnnaofr
+        real(kind=wp) vppofr
+        real(kind=wp) vxc
+        real(kind=wp) z1
+        real(kind=wp) z2
+        real(kind=wp) zmax
+        real(kind=wp) zmin
  
-        real(kind=long) rhomult (max_points)
-        real(kind=long) zmult (max_points)
+        real(kind=wp) rhomult (max_points)
+        real(kind=wp) zmult (max_points)
  
         external dexc
         external dpotxc12
@@ -271,11 +271,11 @@
 ! the number of points equivalent for all cases. Change the number of points
 ! to be integrated to be dependent upon the distance between the centers and
 ! this defined density.
-        dz = (rcutoff1 + rcutoff2)/(real(nz, kind=long)*2.0d0)
+        dz = (rcutoff1 + rcutoff2)/(real(nz, kind=wp)*2.0d0)
         nnz = int((zmax - zmin)/dz)
         if (mod(nnz,2) .eq. 0) nnz = nnz + 1
  
-        drho = max(rcutoff1,rcutoff2)/real(nrho, kind=long)
+        drho = max(rcutoff1,rcutoff2)/real(nrho, kind=wp)
         nnrho = int((rhomax - rhomin)/drho)
         if (mod(nnrho,2) .eq. 0) nnrho = nnrho + 1
  
@@ -313,10 +313,10 @@
 ! Integration is over z (z-axis points from atom 1 to atom 2) and rho (rho is
 ! radial distance from z-axis).
         do iz = 1, nnz
-         z1 = zmin + real(iz-1, kind=long)*dz
+         z1 = zmin + real(iz-1, kind=wp)*dz
          z2 = z1 - d
          do irho = 1, nnrho
-          rho = rhomin + real(irho-1, kind=long)*drho
+          rho = rhomin + real(irho-1, kind=wp)*drho
           r1 = sqrt(z1**2 + rho**2)
           r2 = sqrt(z2**2 + rho**2)
  

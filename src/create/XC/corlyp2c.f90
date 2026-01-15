@@ -85,7 +85,7 @@
         subroutine corlyp2c (tpot, r, pa, pb, dpaofr, dpbofr, d2paofr,     &
      &                       d2pbofr, dpaofz, dpbofz, d2paofz, d2pbofz,    &
      &                       ec, vp)
-        use precision
+        use precision, only: wp
         implicit none
 
 ! Argument Declaration and Description
@@ -93,76 +93,76 @@
 ! Input
         logical  tpot
 
-        real(kind=long) r
-        real(kind=long) pa
-        real(kind=long) pb
-        real(kind=long) dpaofr
-        real(kind=long) dpaofz
-        real(kind=long) dpbofr
-        real(kind=long) dpbofz
-        real(kind=long) d2paofr
-        real(kind=long) d2paofz
-        real(kind=long) d2pbofr
-        real(kind=long) d2pbofz
+        real(kind=wp) r
+        real(kind=wp) pa
+        real(kind=wp) pb
+        real(kind=wp) dpaofr
+        real(kind=wp) dpaofz
+        real(kind=wp) dpbofr
+        real(kind=wp) dpbofz
+        real(kind=wp) d2paofr
+        real(kind=wp) d2paofz
+        real(kind=wp) d2pbofr
+        real(kind=wp) d2pbofz
 
 ! Output
-        real(kind=long) ec
-        real(kind=long) vp
+        real(kind=wp) ec
+        real(kind=wp) vp
 
 ! Local Parameters and Data Declaration
 ! ===========================================================================
-        real(kind=long), parameter :: aa = 0.04918d0
-        real(kind=long), parameter :: bb = 0.132d0
-        real(kind=long), parameter :: cc = 0.2533d0
-        real(kind=long), parameter :: dd = 0.349d0
-        real(kind=long), parameter :: t13 = 1.0d0/3.0d0
-        real(kind=long), parameter :: t23 = 2.0d0/3.0d0
-        real(kind=long), parameter :: t43 = 4.0d0/3.0d0
-        real(kind=long), parameter :: t53 = 5.0d0/3.0d0
-        real(kind=long), parameter :: t73 = 7.0d0/3.0d0
-        real(kind=long), parameter :: t83 = 8.0d0/3.0d0
+        real(kind=wp), parameter :: aa = 0.04918d0
+        real(kind=wp), parameter :: bb = 0.132d0
+        real(kind=wp), parameter :: cc = 0.2533d0
+        real(kind=wp), parameter :: dd = 0.349d0
+        real(kind=wp), parameter :: t13 = 1.0d0/3.0d0
+        real(kind=wp), parameter :: t23 = 2.0d0/3.0d0
+        real(kind=wp), parameter :: t43 = 4.0d0/3.0d0
+        real(kind=wp), parameter :: t53 = 5.0d0/3.0d0
+        real(kind=wp), parameter :: t73 = 7.0d0/3.0d0
+        real(kind=wp), parameter :: t83 = 8.0d0/3.0d0
 
 ! Local Variable Delcaration and Descrition
 ! ======================================================================
 ! constants
-        real(kind=long) Cf
-        real(kind=long) pi
-        real(kind=long) dep
-        real(kind=long) dp_one
-        real(kind=long) ep
+        real(kind=wp) Cf
+        real(kind=wp) pi
+        real(kind=wp) dep
+        real(kind=wp) dp_one
+        real(kind=wp) ep
 
 ! density and derivatives
-        real(kind=long) p             ! Sum of spin up and spin down densities
-        real(kind=long) dpr           ! Sum of spin up and down partials wrt r
-        real(kind=long) dpz           ! Sum of spin up and down partials wrt z
-        real(kind=long) d2pr          ! Sum of spin 2nd partials wrt r
-        real(kind=long) d2pz          ! Sum of spin 2nd partials wrt z
+        real(kind=wp) p             ! Sum of spin up and spin down densities
+        real(kind=wp) dpr           ! Sum of spin up and down partials wrt r
+        real(kind=wp) dpz           ! Sum of spin up and down partials wrt z
+        real(kind=wp) d2pr          ! Sum of spin 2nd partials wrt r
+        real(kind=wp) d2pz          ! Sum of spin 2nd partials wrt z
 
-        real(kind=long) gamma
-        real(kind=long) dgammap       ! partial derivative of gamma wrt pa
-        real(kind=long) dgammar       ! partial derivative of gamma wrt r
-        real(kind=long) dgammaz       ! partial derivative of gamma wrt z
-        real(kind=long) d2gammaz      ! 2nd Partial derivative of gamma wrt z
-        real(kind=long) d2gammar      ! 2nd Partial derivative of gamma wrt r
+        real(kind=wp) gamma
+        real(kind=wp) dgammap       ! partial derivative of gamma wrt pa
+        real(kind=wp) dgammar       ! partial derivative of gamma wrt r
+        real(kind=wp) dgammaz       ! partial derivative of gamma wrt z
+        real(kind=wp) d2gammaz      ! 2nd Partial derivative of gamma wrt z
+        real(kind=wp) d2gammar      ! 2nd Partial derivative of gamma wrt r
 
-        real(kind=long) Fofp
-        real(kind=long) dFofp         ! partial derivative of Fofp wrt pa
-        real(kind=long) dFofpz        ! partial derivative of Fofp wrt z
-        real(kind=long) dFofpr        ! partial derivative of Fofp wrt r
-        real(kind=long) d2Fofpr       ! 2nd Partial derivative of F wrt r
-        real(kind=long) d2Fofpz       ! 2nd Partial derivative of F wrt z
+        real(kind=wp) Fofp
+        real(kind=wp) dFofp         ! partial derivative of Fofp wrt pa
+        real(kind=wp) dFofpz        ! partial derivative of Fofp wrt z
+        real(kind=wp) dFofpr        ! partial derivative of Fofp wrt r
+        real(kind=wp) d2Fofpr       ! 2nd Partial derivative of F wrt r
+        real(kind=wp) d2Fofpz       ! 2nd Partial derivative of F wrt z
 
-        real(kind=long) Gofp
-        real(kind=long) dGofp         ! partial derivative of Gofp wrt pa
-        real(kind=long) dGofpz        ! partial of Gofp wrt z
-        real(kind=long) dGofpr        ! partial of Gofp wrt r
-        real(kind=long) d2Gofpr       ! 2nd partial of Gofp wrt r
-        real(kind=long) d2Gofpz       ! 2nd partial of Gofp wrt z
-        real(kind=long) d2Gofp        ! Laplacian of Gofp
+        real(kind=wp) Gofp
+        real(kind=wp) dGofp         ! partial derivative of Gofp wrt pa
+        real(kind=wp) dGofpz        ! partial of Gofp wrt z
+        real(kind=wp) dGofpr        ! partial of Gofp wrt r
+        real(kind=wp) d2Gofpr       ! 2nd partial of Gofp wrt r
+        real(kind=wp) d2Gofpz       ! 2nd partial of Gofp wrt z
+        real(kind=wp) d2Gofp        ! Laplacian of Gofp
 
-        real(kind=long) tW            ! Weizsacker kinetic-energy density for p
-        real(kind=long) taW           ! Weizsacker K.E. dens. for spin up
-        real(kind=long) tbW           ! Weizsacker K.E. dens. for spin down
+        real(kind=wp) tW            ! Weizsacker kinetic-energy density for p
+        real(kind=wp) taW           ! Weizsacker K.E. dens. for spin up
+        real(kind=wp) tbW           ! Weizsacker K.E. dens. for spin down
 
 ! Procedure
 ! ===========================================================================

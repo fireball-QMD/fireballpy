@@ -54,9 +54,9 @@
 ! ===========================================================================
         function rprimeofr(r, lqn, mqnorn, rcutoff)
         use x_exact
-        use precision
+        use precision, only: wp
         implicit none
-        real(kind=long) rprimeofr
+        real(kind=wp) rprimeofr
 
 ! Argument Declaration and Description
 ! ===========================================================================
@@ -64,8 +64,8 @@
         integer lqn
         integer mqnorn
 
-        real(kind=long) r
-        real(kind=long) rcutoff
+        real(kind=wp) r
+        real(kind=wp) rcutoff
 
 ! Local Parameters and Data Declaration
 ! ===========================================================================
@@ -80,13 +80,13 @@
         integer ileft, imid
         integer max_points
 
-        real(kind=long) L(0:norder),mu(0:norder),Z(0:norder),alpha(0:norder)
-        real(kind=long) a(0:norder),b(0:norder),c(0:norder),d(0:norder)
-        real(kind=long) h
+        real(kind=wp) L(0:norder),mu(0:norder),Z(0:norder),alpha(0:norder)
+        real(kind=wp) a(0:norder),b(0:norder),c(0:norder),d(0:norder)
+        real(kind=wp) h
         integer iam
         integer i,j
-        real(kind=long) xmin
-        real(kind=long) xxp
+        real(kind=wp) xmin
+        real(kind=wp) xxp
 
 ! Procedure
 ! ===========================================================================

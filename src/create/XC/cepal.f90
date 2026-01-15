@@ -58,46 +58,46 @@
 ! ===========================================================================
         subroutine cepal (rh, exc, muxc, dexc, d2exc, dmuxc, d2muxc)
         use constants
-        use precision
+        use precision, only: wp
         implicit none
  
 ! Argument Declaration and Description
 ! ===========================================================================
 ! Input
-        real(kind=long), intent (in) :: rh
+        real(kind=wp), intent (in) :: rh
 
 ! Output
-        real(kind=long), intent (out) :: dexc
-        real(kind=long), intent (out) :: d2exc
-        real(kind=long), intent (out) :: dmuxc
-        real(kind=long), intent (out) :: exc
-        real(kind=long), intent (out) :: muxc
-        real(kind=long), intent (out) :: d2muxc
+        real(kind=wp), intent (out) :: dexc
+        real(kind=wp), intent (out) :: d2exc
+        real(kind=wp), intent (out) :: dmuxc
+        real(kind=wp), intent (out) :: exc
+        real(kind=wp), intent (out) :: muxc
+        real(kind=wp), intent (out) :: d2muxc
  
 ! Local Parameters and Data Declaration
 ! ===========================================================================
-        real(kind=long), parameter :: eps = 1.0d-3
+        real(kind=wp), parameter :: eps = 1.0d-3
  
 ! Local Variable Declaration and Description
 ! ===========================================================================
-        real(kind=long) d2nec
-        real(kind=long) d2nex
-        real(kind=long) d3nec
-        real(kind=long) d3nex
-        real(kind=long) dec
-        real(kind=long) ddec
-        real(kind=long) d2dec
-        real(kind=long) den
-        real(kind=long) dden
-        real(kind=long) d2den
-        real(kind=long) d3den
-        real(kind=long) ex
-        real(kind=long) rho_third
-        real(kind=long) rho
-        real(kind=long) rs
-        real(kind=long) rsl
-        real(kind=long) sqrs
-        real(kind=long) hartree1
+        real(kind=wp) d2nec
+        real(kind=wp) d2nex
+        real(kind=wp) d3nec
+        real(kind=wp) d3nex
+        real(kind=wp) dec
+        real(kind=wp) ddec
+        real(kind=wp) d2dec
+        real(kind=wp) den
+        real(kind=wp) dden
+        real(kind=wp) d2den
+        real(kind=wp) d3den
+        real(kind=wp) ex
+        real(kind=wp) rho_third
+        real(kind=wp) rho
+        real(kind=wp) rs
+        real(kind=wp) rsl
+        real(kind=wp) sqrs
+        real(kind=wp) hartree1
  
 ! Allocate Arrays
 ! ===========================================================================

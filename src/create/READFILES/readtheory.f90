@@ -74,7 +74,7 @@
      &                         imuxc1c, inuxc1c, inuxc2c, isnuxc1c, isnuxc2c,&
      &                         V_intra_dip, itest, idogs, iharris, ihubbard, ispin,    &
      &                         ioomethod, ixc_opt, igauss, ngauss)
-        use precision
+        use precision, only: wp
         implicit none
  
 ! Argument Declaration and Description

@@ -73,7 +73,7 @@
 ! ====================================================================
         subroutine rho2c_store (iexc, itype1, itype2, rcutoff1, &
      &                          rcutoff2, d, ix)
-        use precision
+        use precision, only: wp
         implicit none
 
         include '../parameters.inc'
@@ -89,9 +89,9 @@
         integer itype1
         integer itype2
 
-        real(kind=long) d
-        real(kind=long) rcutoff1
-        real(kind=long) rcutoff2
+        real(kind=wp) d
+        real(kind=wp) rcutoff1
+        real(kind=wp) rcutoff2
 
 ! Local Parameters and Data Declaration
 ! ====================================================================
@@ -112,16 +112,16 @@
 
         integer in (2)
 
-        real(kind=long) dens
-        real(kind=long) dzraw
-        real(kind=long) psiofr
-        real(kind=long) r
-        real(kind=long) r1
-        real(kind=long) r2
-        real(kind=long) rho
-        real(kind=long) xinv4pi
-        real(kind=long) z1
-        real(kind=long) z2
+        real(kind=wp) dens
+        real(kind=wp) dzraw
+        real(kind=wp) psiofr
+        real(kind=wp) r
+        real(kind=wp) r1
+        real(kind=wp) r2
+        real(kind=wp) rho
+        real(kind=wp) xinv4pi
+        real(kind=wp) z1
+        real(kind=wp) z2
 
         external psiofr
 

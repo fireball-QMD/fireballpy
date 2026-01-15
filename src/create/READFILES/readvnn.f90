@@ -59,7 +59,7 @@
 ! ===========================================================================
         subroutine readvnn (ispec, issh, rcutoff, nzx, filein, etotatom, &
      &                      iammaster)
-        use precision
+        use precision, only: wp
         implicit none
  
         include '../parameters.inc'
@@ -71,8 +71,8 @@
         integer issh
         integer nzx
  
-        real(kind=long) etotatom
-        real(kind=long) rcutoff
+        real(kind=wp) etotatom
+        real(kind=wp) rcutoff
  
         character(len=25) filein
  
@@ -87,7 +87,7 @@
         integer mesh
         integer nzxvnn
  
-        real(kind=long) rcutoffvnn
+        real(kind=wp) rcutoffvnn
  
         character(len=25) fileinvnn
  

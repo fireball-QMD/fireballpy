@@ -59,8 +59,8 @@
 !
 ! Program Declaration
 ! ===========================================================================
-        real(kind=long) function clebsch_gordon (l1, m1, l2, m2, l, m)
-        use precision
+        real(kind=wp) function clebsch_gordon (l1, m1, l2, m2, l, m)
+        use precision, only: wp
         implicit none
  
 ! Argument Declaration and Description
@@ -82,11 +82,11 @@
 ! ===========================================================================
         integer iz
  
-        real(kind=long) piece1
-        real(kind=long) piece2
-        real(kind=long) piece3
+        real(kind=wp) piece1
+        real(kind=wp) piece2
+        real(kind=wp) piece3
  
-        real(kind=long), external :: factorial
+        real(kind=wp), external :: factorial
  
 ! Procedure
 ! ===========================================================================

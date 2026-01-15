@@ -1,3 +1,5 @@
+! TODO: E en shells, V tienen que ser cero los ortogonales con misma L
+
 ! copyright info:
 !
 !                             @Copyright 2004
@@ -31,7 +33,7 @@
 ! GNU General Public License for more details.
 !
 ! You should have received a copy of the GNU General Public License
-! adp with this program.  If not, see <http://www.gnu.org/licenses/>.
+! awp with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
 ! onecenterxc.f90
@@ -49,9 +51,10 @@ subroutine onecenterxc (nspec, nspec_max, nsh_max, wfmax_points,               &
 &                       iexc, fraction, nsshxc, lsshxc,                        &
 &                       rcutoffa_max, xnocc, dqorb, iderorb,                   &
 &                       drr_rho, nzx)
-  use iso_fortran_env, only: stderr => error_unit, stdout => output_unit,      &
-  &                          dp => real64
+  use iso_fortran_env, only: stderr => error_unit, stdout => output_unit
+  use precision, only: wp
   use constants, only: abohr, hartree
+  use math, only: math_lstsq
   implicit none
 
   ! Argument Declaration and Description
@@ -59,23 +62,23 @@ subroutine onecenterxc (nspec, nspec_max, nsh_max, wfmax_points,               &
   integer, intent (in) :: iexc, nsh_max, nspec, nspec_max, wfmax_points,       &
   & iderorb(nspec_max), nsshxc(nspec_max), nzx(nspec_max),                     &
   & lsshxc(nspec_max, nsh_max)
-  real(kind=dp), intent (in) :: fraction, dqorb(nspec_max),                    &
+  real(kind=wp), intent (in) :: fraction, dqorb(nspec_max),                    &
   & drr_rho(nspec_max), rcutoffa_max(nspec_max), xnocc(nsh_max, nspec_max)
 
   ! Local Variable Declaration and Description
   ! ============================================================================
   integer :: irho, issh, jssh, kssh, in1, ilssh, jlssh, iorb, jorb,            &
-  & nssh, nssh1, ix, ndq, nnz, npts, nnrho, nrhs, lwork, info, norbs
-  real(kind=dp) :: dnuxc, dnuxcs, drho, exc, dexcc, factor, rcutoff, rho,      &
+  & nssh, nssh1, ix, ndq, nnz, npts, nnrho, nrhs, info, norbs, im
+  real(kind=wp) :: dnuxc, dnuxcs, drho, exc, dexcc, factor, rcutoff, rho,      &
   & rhomax, rhomin, rh, rhp, rhpp, vxc, ddq, tmp, xnocc_in(nsh_max),           &
   & rho1c(wfmax_points), rhop1c(wfmax_points), rhopp1c(wfmax_points)
   character(len=2) :: auxz
   character(len=256) :: errmsg
   logical, allocatable :: iszero(:)
-  integer, allocatable :: orb2ssh(:)
-  real(kind=dp), allocatable :: work(:), xmatt(:,:), eexc(:,:), vvxc(:,:),     &
-  & tmpmat(:,:), dq(:,:), exc1crho(:,:,:), nuxc1crho(:,:,:)
-  real(kind=dp), external :: psiofr
+  integer, allocatable :: orb2ssh(:), morbs(:)
+  real(kind=wp), allocatable :: xmatt(:,:), eexc(:,:), vvxc(:,:), tmpmat(:,:), &
+  & dq(:,:), exc1crho(:,:,:), nuxc1crho(:,:,:)
+  real(kind=wp), external :: psiofr
 
   ! Procedure
   ! ============================================================================
@@ -86,7 +89,7 @@ subroutine onecenterxc (nspec, nspec_max, nsh_max, wfmax_points,               &
     ! Needed for charge corrections
     drho = drr_rho(in1)
     rcutoff = rcutoffa_max(in1)
-    rhomin = 0.0_dp
+    rhomin = 0.0_wp
     rhomax = rcutoff
     nnrho = nint((rhomax - rhomin)/drho) + 1
 
@@ -96,36 +99,36 @@ subroutine onecenterxc (nspec, nspec_max, nsh_max, wfmax_points,               &
     nnz = (nssh*(nssh + 1))/2
     allocate(dq(nssh, ndq))
     do issh = 1,nssh
-      ilssh = lsshxc(in1,issh)
+      ilssh = lsshxc(in1, issh)
       if (ilssh == 0) then
         if (issh == 1) then
-          dq(issh,1) = -0.10_dp
-          dq(issh,2) = 0.00_dp
-          dq(issh,3) = 0.10_dp
+          dq(issh,1) = -0.10_wp
+          dq(issh,2) = 0.00_wp
+          dq(issh,3) = 0.10_wp
         else
-          dq(issh,1) = 0.00_dp
-          dq(issh,2) = 0.05_dp
-          dq(issh,3) = 0.10_dp
+          dq(issh,1) = 0.00_wp
+          dq(issh,2) = 0.05_wp
+          dq(issh,3) = 0.10_wp
         end if
       else if (ilssh == 1) then
         if (issh == 2) then
-          dq(issh,1) = -0.20_dp
-          dq(issh,2) = 0.00_dp
-          dq(issh,3) = 0.20_dp
+          dq(issh,1) = -0.20_wp
+          dq(issh,2) = 0.00_wp
+          dq(issh,3) = 0.20_wp
         else
-          dq(issh,1) = 0.00_dp
-          dq(issh,2) = 0.10_dp
-          dq(issh,3) = 0.20_dp
+          dq(issh,1) = 0.00_wp
+          dq(issh,2) = 0.10_wp
+          dq(issh,3) = 0.20_wp
         end if
       else
         if (issh == 3) then
-          dq(issh,1) = -0.50_dp
-          dq(issh,2) = 0.00_dp
-          dq(issh,3) = 0.50_dp
+          dq(issh,1) = -0.50_wp
+          dq(issh,2) = 0.00_wp
+          dq(issh,3) = 0.50_wp
         else
-          dq(issh,1) = 0.00_dp
-          dq(issh,2) = 0.25_dp
-          dq(issh,3) = 0.50_dp
+          dq(issh,1) = 0.00_wp
+          dq(issh,2) = 0.25_wp
+          dq(issh,3) = 0.50_wp
         end if
       end if
     end do
@@ -136,7 +139,7 @@ subroutine onecenterxc (nspec, nspec_max, nsh_max, wfmax_points,               &
     kssh = 0
     norbs = 0
     do issh = 1, nssh
-      ilssh = lsshxc(in1,issh)
+      ilssh = lsshxc(in1, issh)
       norbs = norbs + (2*ilssh + 1)
       do jssh = issh, nssh
         kssh = kssh + 1
@@ -144,12 +147,12 @@ subroutine onecenterxc (nspec, nspec_max, nsh_max, wfmax_points,               &
       end do
     end do
     allocate(eexc(npts, nnz), vvxc(npts, nnz))
-    eexc = 0.0_dp
-    vvxc = 0.0_dp
+    eexc = 0.0_wp
+    vvxc = 0.0_wp
     allocate(xmatt(nssh1, npts))
     do ix = 1, npts
       ! Set charges
-      xmatt(1, ix) = 1.0_dp
+      xmatt(1, ix) = 1.0_wp
       do issh = 1, nssh
         ddq = dq(issh, 1 + mod(ix - 1, ndq**issh)/ndq**(issh - 1))
         xnocc_in(issh) = xnocc(issh, in1) + ddq
@@ -159,18 +162,18 @@ subroutine onecenterxc (nspec, nspec_max, nsh_max, wfmax_points,               &
       ! Obtain the density and respective derivatives needed for evaluating the
       ! exchange-correlation interactions (LDA or GGA).
       ! We have to avoid change xnocc_in !!
-      rho1c = 0.0_dp
-      rhop1c = 0.0_dp
-      rhopp1c = 0.0_dp
-      call rho1c_store (in1, nsh_max, nssh, 0.0_dp, 1, drho, rcutoff, &
+      rho1c = 0.0_wp
+      rhop1c = 0.0_wp
+      rhopp1c = 0.0_wp
+      call rho1c_store (in1, nsh_max, nssh, 0.0_wp, 1, drho, rcutoff, &
       &                 xnocc_in, 1, wfmax_points, rho1c, rhop1c, rhopp1c)
 
       ! Integrals <i|exc(i)|i> and <i.nu|mu(i)|i.nu'>
       do irho = 1, nnrho
-        rho = rhomin + real(irho - 1, kind=dp)*drho
-        factor = 0.66666666666666666667_dp*drho
-        if (mod(irho, 2) == 0) factor = 2.0_dp*factor
-        if (irho == 1 .or. irho == nnrho) factor = 0.5_dp*factor
+        rho = rhomin + real(irho - 1, kind=wp)*drho
+        factor = 0.66666666666666666667_wp*drho
+        if (mod(irho, 2) == 0) factor = 2.0_wp*factor
+        if (irho == 1 .or. irho == nnrho) factor = 0.5_wp*factor
 
         ! Compute the exchange correlation potential
         rho = rho/abohr
@@ -203,24 +206,19 @@ subroutine onecenterxc (nspec, nspec_max, nsh_max, wfmax_points,               &
     tmpmat(:, 1:nnz) = eexc
     tmpmat(:, nnz+1:2*nnz) = vvxc
     deallocate(eexc, vvxc)
-
-    ! Query does not work, don't ask why
-    lwork = nssh1 + max(nssh1, nrhs*nnz)
-    lwork = ibset(0, bit_size(lwork) - leadz(lwork))
-    allocate(work(lwork))
-    call dgelst('T', nssh1, npts, nrhs*nnz, xmatt, nssh1, tmpmat, npts, work, lwork, info)
-    deallocate(work, xmatt)
+    call math_lstsq(xmatt, tmpmat, is_a_trans=.true., info=info)
+    deallocate(xmatt)
     if (info /= 0) then
       deallocate(tmpmat, iszero)
-      errmsg = 'INTEGRALS/onecenterxc.f90: call to `dgelst` failed with info = '
+      errmsg = 'INTEGRALS/onecenterxc.f90: call to `(x)gelst` failed with info = '
       write (stderr, '(a)') errmsg
       stop info
     end if
 
     ! Prepare for output
     allocate(exc1crho(0:nssh,nssh,nssh), nuxc1crho(0:nssh,nssh,nssh))
-    exc1crho = 0.0_dp
-    nuxc1crho = 0.0_dp
+    exc1crho = 0.0_wp
+    nuxc1crho = 0.0_wp
     do ix = 0, nssh
       kssh = 0
       do issh = 1, nssh
@@ -237,12 +235,15 @@ subroutine onecenterxc (nspec, nspec_max, nsh_max, wfmax_points,               &
     deallocate(tmpmat, iszero)
 
     ! Useful mapping
-    allocate(orb2ssh(norbs))
+    allocate(orb2ssh(norbs), morbs(norbs))
     iorb = 0
     do issh = 1, nssh
+      im = -lsshxc(in1, issh)
       do ilssh = 1, (2*lsshxc(in1, issh) + 1)
         iorb = iorb + 1
         orb2ssh(iorb) = issh
+        morbs(iorb) = im
+        im = im + 1
       end do
     end do
 
@@ -255,15 +256,23 @@ subroutine onecenterxc (nspec, nspec_max, nsh_max, wfmax_points,               &
     write (360,'(2i4)') nssh, norbs
     do ix = 0, nssh
       do iorb = 1, norbs
-        write (360,'(100ES15.7)') (nuxc1crho(ix,orb2ssh(iorb),orb2ssh(jorb)), jorb = 1, norbs)
+        do jorb = 1, norbs
+          if (morbs(iorb) == morbs(jorb)) then
+            write (360,'(ES15.7)', advance='no') nuxc1crho(ix, orb2ssh(iorb), orb2ssh(jorb))
+          else
+            write (360,'(ES15.7)', advance='no') 0.0_wp
+          end if
+        end do
+        write (360,'(a)') ''
       end do
       write (360,'(a)') ''
     end do
+    write (360,'(a)') ''
     do ix = 0, nssh
-      write (360,'(100ES15.7)') (exc1crho(ix,orb2ssh(iorb),orb2ssh(iorb)), iorb = 1, norbs)
+      write (360,'(100ES15.7)') (exc1crho(ix, issh, issh), issh = 1, nssh)
       write (360,'(a)') ''
     end do
     close(360)
-    deallocate(orb2ssh, exc1crho, nuxc1crho)
+    deallocate(orb2ssh, morbs, exc1crho, nuxc1crho)
   end do ! do in1 = 1, nspec
 end subroutine onecenterxc

@@ -86,7 +86,7 @@
 ! ===========================================================================
         subroutine get_potxc2c (iexc, fraction, r, rho, rhop, rhopp, rhoz,  &
      &                          rhozz, rhopz, newexc, vpxc, dnuxc, dnuxcs)
-        use precision
+        use precision, only: wp
         implicit none
 
 ! Argument Declaration and Description
@@ -94,20 +94,20 @@
 ! Input
         integer iexc
 
-        real(kind=long), intent(in) :: fraction
-        real(kind=long), intent(inout) :: r
-        real(kind=long), intent(inout) :: rho
-        real(kind=long), intent(in) :: rhop
-        real(kind=long), intent(in) :: rhopp
-        real(kind=long), intent(in) :: rhopz
-        real(kind=long), intent(in) :: rhoz
-        real(kind=long), intent(in) :: rhozz
+        real(kind=wp), intent(in) :: fraction
+        real(kind=wp), intent(inout) :: r
+        real(kind=wp), intent(inout) :: rho
+        real(kind=wp), intent(in) :: rhop
+        real(kind=wp), intent(in) :: rhopp
+        real(kind=wp), intent(in) :: rhopz
+        real(kind=wp), intent(in) :: rhoz
+        real(kind=wp), intent(in) :: rhozz
 
 ! Output
-        real(kind=long), intent(out) :: dnuxc
-        real(kind=long), intent(out) :: dnuxcs
-        real(kind=long), intent(out) :: newexc
-        real(kind=long), intent(out) :: vpxc
+        real(kind=wp), intent(out) :: dnuxc
+        real(kind=wp), intent(out) :: dnuxcs
+        real(kind=wp), intent(out) :: newexc
+        real(kind=wp), intent(out) :: vpxc
 
 ! Local Parameters and Data Declaration
 ! ===========================================================================
@@ -116,27 +116,27 @@
 ! ===========================================================================
         integer ix
 
-        real(kind=long) aln
-        real(kind=long) dec
-        real(kind=long) dex
-        real(kind=long) drvexc
-        real(kind=long) ecp
-        real(kind=long) ex
-        real(kind=long) exc
-        real(kind=long) fx
-        real(kind=long) fxc
-        real(kind=long) rs
-        real(kind=long) x
-        real(kind=long) zeta
+        real(kind=wp) aln
+        real(kind=wp) dec
+        real(kind=wp) dex
+        real(kind=wp) drvexc
+        real(kind=wp) ecp
+        real(kind=wp) ex
+        real(kind=wp) exc
+        real(kind=wp) fx
+        real(kind=wp) fxc
+        real(kind=wp) rs
+        real(kind=wp) x
+        real(kind=wp) zeta
 
-        real(kind=long), dimension (2) :: cpot
-        real(kind=long), dimension (2) :: d
-        real(kind=long), dimension (2) :: dp
-        real(kind=long), dimension (2) :: dpp
-        real(kind=long), dimension (2) :: dpz
-        real(kind=long), dimension (2) :: dz
-        real(kind=long), dimension (2) :: dzz
-        real(kind=long), dimension (2) :: xpot
+        real(kind=wp), dimension (2) :: cpot
+        real(kind=wp), dimension (2) :: d
+        real(kind=wp), dimension (2) :: dp
+        real(kind=wp), dimension (2) :: dpp
+        real(kind=wp), dimension (2) :: dpz
+        real(kind=wp), dimension (2) :: dz
+        real(kind=wp), dimension (2) :: dzz
+        real(kind=wp), dimension (2) :: xpot
 
 ! Procedure
 ! ===========================================================================

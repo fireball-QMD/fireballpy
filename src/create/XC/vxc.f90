@@ -94,8 +94,8 @@
 !
 ! Program Declaration
 ! ======================================================================
-        real(kind=long) function vxc (r, z, iexc, fraction)
-        use precision
+        real(kind=wp) function vxc (r, z, iexc, fraction)
+        use precision, only: wp
         implicit none
 
         include '../parameters.inc'
@@ -106,29 +106,29 @@
 ! Input
         integer iexc
 
-        real(kind=long) fraction
-        real(kind=long) r
-        real(kind=long) z
+        real(kind=wp) fraction
+        real(kind=wp) r
+        real(kind=wp) z
 
 ! Local Parameters and Data Declaration
 ! ======================================================================
-        real(kind=long) abohr
+        real(kind=wp) abohr
         parameter (abohr = 0.529177249d0)
 
 ! Local Variable Declaration and Description
 ! ======================================================================
-        real(kind=long) dens
-        real(kind=long) densp
-        real(kind=long) denspp
-        real(kind=long) densz
-        real(kind=long) denszz
-        real(kind=long) denspz
-        real(kind=long) dnuxc2c
-        real(kind=long) dnuxcs2c
-        real(kind=long) exc2c
-        real(kind=long) hartree
-        real(kind=long) rin
-        real(kind=long) vxc2c
+        real(kind=wp) dens
+        real(kind=wp) densp
+        real(kind=wp) denspp
+        real(kind=wp) densz
+        real(kind=wp) denszz
+        real(kind=wp) denspz
+        real(kind=wp) dnuxc2c
+        real(kind=wp) dnuxcs2c
+        real(kind=wp) exc2c
+        real(kind=wp) hartree
+        real(kind=wp) rin
+        real(kind=wp) vxc2c
 
 ! Procedure
 ! ======================================================================

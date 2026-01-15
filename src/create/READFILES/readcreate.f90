@@ -51,7 +51,7 @@
      &                         nssh, lssh, nzx, rcutoff, rcutoffa, &
      &                         rcutoffa_max, xmass, ppfile, napot, &
      &                         wavefxn)
-        use precision
+        use precision, only: wp
         implicit none
  
         include '../parameters.inc'
@@ -70,10 +70,10 @@
         integer nssh (nspec_max)               ! number of shells
         integer nzx (nspec_max)
  
-        real(kind=long) rcutoff (nspec_max, nsh_max) ! cutoff radius in bohr
-        real(kind=long) rcutoffa (nspec_max, nsh_max)! cutoff radius in angstroms
-        real(kind=long) rcutoffa_max (nspec_max)     ! cutoff radius in angstroms
-        real(kind=long) xmass (nspec_max)
+        real(kind=wp) rcutoff (nspec_max, nsh_max) ! cutoff radius in bohr
+        real(kind=wp) rcutoffa (nspec_max, nsh_max)! cutoff radius in angstroms
+        real(kind=wp) rcutoffa_max (nspec_max)     ! cutoff radius in angstroms
+        real(kind=wp) xmass (nspec_max)
  
         character(len=2) atom (nspec_max)
         character(len=25) napot (nspec_max, 0:nsh_max)
@@ -98,7 +98,7 @@
      &       'Ac', 'Th', 'Pa', 'U ', 'Np', 'Pu', 'Am', 'Cm', 'Bk', 'Cf', &
      &       'Es', 'Fm', 'Md', 'No', 'Lw' /
  
-        real(kind=long) abohr
+        real(kind=wp) abohr
         parameter (abohr = 0.529177249d0)
  
 ! Local Variable Declaration and Description
@@ -107,7 +107,7 @@
         integer issh
         integer ispec
  
-        real(kind=long) add
+        real(kind=wp) add
  
         character(len=2) atomcheck
  

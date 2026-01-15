@@ -69,7 +69,7 @@
      &                        index_max, nleft, lleft, mleft, nright,  &
      &                        lright, mright, signature, iammaster,  &
      &                        ispher)
-        use precision
+        use precision, only: wp
         implicit none
  
         include '../parameters.inc'
@@ -118,9 +118,9 @@
         integer nleft  (inter_max)
         integer nright (inter_max)
  
-        real(kind=long) fraction
-        real(kind=long) rcutoff1
-        real(kind=long) rcutoff2
+        real(kind=wp) fraction
+        real(kind=wp) rcutoff1
+        real(kind=wp) rcutoff2
  
         character(len=20) root
         character(len=70) signature
@@ -145,14 +145,14 @@
         integer n1, n2
         integer iounit
  
-        real(kind=long) d
-        real(kind=long) dmax
-        real(kind=long) dr
-        real(kind=long) sum
+        real(kind=wp) d
+        real(kind=wp) dmax
+        real(kind=wp) dr
+        real(kind=wp) sum
  
-        real(kind=long) coulomb_hold (inter_max)
-        real(kind=long) hold (inter_max)
-        real(kind=long) ahold (nssh2)
+        real(kind=wp) coulomb_hold (inter_max)
+        real(kind=wp) hold (inter_max)
+        real(kind=wp) ahold (nssh2)
         integer lsh (nssh2)
  
         character(len=40) fname
@@ -406,7 +406,7 @@
           stop ' Fixup quadrature.inc: Make ndd >= 107. '
          end if
         end if ! end master
-        dr = dmax/real(ndd - 1, kind=long)
+        dr = dmax/real(ndd - 1, kind=wp)
         if (iammaster) then
          write (*,301) dr
          write (*,*) '  '

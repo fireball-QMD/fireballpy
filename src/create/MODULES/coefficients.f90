@@ -1,8 +1,8 @@
         module coefficients 
-         use precision
+         use precision, only: wp
 
 ! These are the factors which come from the coefficient in the Ylm
-         real(kind=long), dimension (:,:), allocatable :: clm
+         real(kind=wp), dimension (:,:), allocatable :: clm
 
 ! These are the factors which come from the coefficients for the Legendre
 ! polynomials

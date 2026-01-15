@@ -57,7 +57,7 @@
 ! ===========================================================================
         subroutine readpsi (ispec, issh, lqn, rcutoff, xnoccin, nzx, &
      &                      filein, iammaster)
-        use precision
+        use precision, only: wp
         implicit none
  
         include '../parameters.inc'
@@ -71,8 +71,8 @@
         integer lqn
         integer nzx
  
-        real(kind=long) rcutoff
-        real(kind=long) xnoccin
+        real(kind=wp) rcutoff
+        real(kind=wp) xnoccin
  
         character(len=25) filein
  
@@ -80,7 +80,7 @@
  
 ! Local Parameters and Data Declaration
 ! ===========================================================================
-        real(kind=long) abohr
+        real(kind=wp) abohr
         parameter (abohr = 0.529177249d0)
  
 ! Local Variable Declaration and Description
@@ -92,14 +92,14 @@
         integer mesh
         integer nzxwf
  
-        real(kind=long) r
-        real(kind=long) rc
-        real(kind=long) rc_max
-        real(kind=long) rcutoffwf
-        real(kind=long) sum
-        real(kind=long) xnoccwf
+        real(kind=wp) r
+        real(kind=wp) rc
+        real(kind=wp) rc_max
+        real(kind=wp) rcutoffwf
+        real(kind=wp) sum
+        real(kind=wp) xnoccwf
  
-        real(kind=long) psitemp(wfmax_points)
+        real(kind=wp) psitemp(wfmax_points)
  
         character(len=25) fileinwf
  
@@ -182,23 +182,23 @@
         if (issh .eq. 1) rrc_rho(ispec) = -1.0d0
         rrc_rho(ispec) = max(rrc_rho(ispec),rc)
  
-        drr(issh,ispec) = rc/real(mesh - 1, kind=long)
+        drr(issh,ispec) = rc/real(mesh - 1, kind=wp)
         if (issh .eq. 1) drr_rho(ispec) = 99.0d0
         drr_rho(ispec) = min(drr_rho(ispec),drr(issh,ispec))
  
         npoints_rho(ispec) = int(rrc_rho(ispec)/drr_rho(ispec)) + 1
-        rrc_rho(ispec) = real(npoints_rho(ispec) - 1, kind=long)*drr_rho(ispec)
+        rrc_rho(ispec) = real(npoints_rho(ispec) - 1, kind=wp)*drr_rho(ispec)
  
 ! Shift the rrc_rho value just a little or else the exchange-correlation
 ! interactions for gradients go haywire at the endpoints where rho = 0.0d0
         rrc_rho(ispec) = rrc_rho(ispec) - 1.0d-4
  
         do ipoint = 1, npoints_rho(ispec)
-         rr_rho(ipoint,ispec) = real(ipoint - 1, kind=long)*drr_rho(ispec)
+         rr_rho(ipoint,ispec) = real(ipoint - 1, kind=wp)*drr_rho(ispec)
         end do
  
 ! Read in the points
-        inum = idint(real(mesh, kind=long)/4)
+        inum = idint(real(mesh, kind=wp)/4)
         iremainder = mesh - (inum*4)
         do ipoint = 1, mesh - iremainder, 4
          read (88,100) psitemp(ipoint), psitemp(ipoint+1), &

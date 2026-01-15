@@ -59,63 +59,63 @@
 ! ===========================================================================
         subroutine lsdavwn (rho, ex, ec, xpot, cpot, dnuxc, dnuxcs)
         use constants
-        use precision
+        use precision, only: wp
         implicit none
 
 ! Argument Declaration and Description
 ! ===========================================================================
 ! Input
-        real(kind=long), intent (in), dimension (2) :: rho
+        real(kind=wp), intent (in), dimension (2) :: rho
 
 ! Output
-        real(kind=long), intent (out) :: dnuxc
-        real(kind=long), intent (out) :: dnuxcs
-        real(kind=long), intent (out) :: ec
-        real(kind=long), intent (out) :: ex
+        real(kind=wp), intent (out) :: dnuxc
+        real(kind=wp), intent (out) :: dnuxcs
+        real(kind=wp), intent (out) :: ec
+        real(kind=wp), intent (out) :: ex
 
-        real(kind=long), intent (out), dimension (2) :: cpot
-        real(kind=long), intent (out), dimension (2) :: xpot
+        real(kind=wp), intent (out), dimension (2) :: cpot
+        real(kind=wp), intent (out), dimension (2) :: xpot
 
 ! Local Parameters and Data Declaration
 ! ===========================================================================
-        real(kind=long), parameter :: Ap = 0.0621814d0
-        real(kind=long), parameter :: bp = 3.72744d0
-        real(kind=long), parameter :: cp = 12.9352d0
-        real(kind=long), parameter :: x0p = -0.10498d0
+        real(kind=wp), parameter :: Ap = 0.0621814d0
+        real(kind=wp), parameter :: bp = 3.72744d0
+        real(kind=wp), parameter :: cp = 12.9352d0
+        real(kind=wp), parameter :: x0p = -0.10498d0
 
-        real(kind=long), parameter :: Aa = 0.033773728d0
-        real(kind=long), parameter :: ba = 1.13107d0
-        real(kind=long), parameter :: ca = 13.0045d0
-        real(kind=long), parameter :: x0a = -0.00475840d0
+        real(kind=wp), parameter :: Aa = 0.033773728d0
+        real(kind=wp), parameter :: ba = 1.13107d0
+        real(kind=wp), parameter :: ca = 13.0045d0
+        real(kind=wp), parameter :: x0a = -0.00475840d0
 
-        real(kind=long), parameter :: Af = 0.01554535d0
-        real(kind=long), parameter :: bf = 7.06042d0
-        real(kind=long), parameter :: cf = 18.0578d0
-        real(kind=long), parameter :: x0f = -0.32500d0
+        real(kind=wp), parameter :: Af = 0.01554535d0
+        real(kind=wp), parameter :: bf = 7.06042d0
+        real(kind=wp), parameter :: cf = 18.0578d0
+        real(kind=wp), parameter :: x0f = -0.32500d0
 
-        real(kind=long), parameter :: epsilon = 1.0d-10
+        real(kind=wp), parameter :: epsilon = 1.0d-10
 
 ! Local Variable Declaration and Description
 ! ===========================================================================
-        real(kind=long) density
-        real(kind=long) densitys
+        real(kind=wp) density
+        real(kind=wp) densitys
 
-        real(kind=long), dimension (3) :: cdpot
-        real(kind=long), dimension (3) :: xdpot
+        real(kind=wp), dimension (3) :: cdpot
+        real(kind=wp), dimension (3) :: xdpot
 
 ! spin polarization and derivatives
-        real(kind=long) zeta, zp1, zp2, zp1p2, zpp1, zpp2
-        real(kind=long) x, xp, xpp
-        real(kind=long) g, gp, gpp
-        real(kind=long) XXp, XXf, XXa , Qp, Qf, Qa, jp, jf, ja
-        real(kind=long) ecP, ecF, ecA, ecPp, ecFp, ecAp, ecPpp, ecFpp, ecApp
-        real(kind=long) cte, h, hp, hpp
-        real(kind=long) ecpx, ecpz, ecppx, ecppz, ecpxpz
-        real(kind=long) d1ec, d2ec, dd1ec, dd2ec, d1d2ec
-        real(kind=long) exP, exPp, exPpp
-        real(kind=long) expd, expz, exppd, exppz, expdpz
-        real(kind=long) d1ex, d2ex, dd1ex, dd2ex, d1d2ex
-        real(kind=long) F, Fs
+        real(kind=wp) zeta, zp1, zp2, zp1p2, zpp1, zpp2
+        real(kind=wp) x, xp, xpp
+        real(kind=wp) g, gp, gpp
+        real(kind=wp) XXp, XXf, XXa , Qp, Qf, Qa, jp, jf, ja
+        real(kind=wp) ecP, ecF, ecA, ecPp, ecFp, ecAp, ecPpp, ecFpp, ecApp
+        real(kind=wp) cte, h, hp, hpp
+        real(kind=wp) ecpx, ecpz, ecppx, ecppz, ecpxpz
+        real(kind=wp) d1ec, d2ec, dd1ec, dd2ec, d1d2ec
+        real(kind=wp) exP, exPp, exPpp
+        real(kind=wp) expd, expz, exppd, exppz, expdpz
+        real(kind=wp) d1ex, d2ex, dd1ex, dd2ex, d1d2ex
+        real(kind=wp) F, Fs
 
 ! Allocate Arrays
 ! ===========================================================================

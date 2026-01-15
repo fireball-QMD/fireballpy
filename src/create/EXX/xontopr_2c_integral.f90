@@ -66,7 +66,7 @@
      &                                  n1, l1, m1, n2, l2, m2, nz, nrho,   &
      &                                  d, itype1, itype2, rcutoff1,        &
      &                                  rcutoff2, lmax, sum)
-        use precision
+        use precision, only: wp
         use coefficients
         implicit none
  
@@ -86,17 +86,17 @@
         integer, intent (in) :: nrho        ! number of rho-points on grid
         integer, intent (in) :: nz          ! number of z-points on grid
  
-        real(kind=long), intent (in) :: d
-        real(kind=long), intent (in) :: fraction
-        real(kind=long), intent (in) :: rcutoff1
-        real(kind=long), intent (in) :: rcutoff2
+        real(kind=wp), intent (in) :: d
+        real(kind=wp), intent (in) :: fraction
+        real(kind=wp), intent (in) :: rcutoff1
+        real(kind=wp), intent (in) :: rcutoff2
  
 ! Output
-        real(kind=long), intent (out) :: sum
+        real(kind=wp), intent (out) :: sum
  
 ! Local Parameters and Data Declaration
 ! ===========================================================================
-        real(kind=long), parameter :: eq2 = 14.39975d0
+        real(kind=wp), parameter :: eq2 = 14.39975d0
  
 ! Local Variable Declaration and Description
 ! ===========================================================================
@@ -107,32 +107,32 @@
         integer nnrho
         integer nnz
  
-        real(kind=long) cg1
-        real(kind=long) cg2
-        real(kind=long) drho
-        real(kind=long) dz
-        real(kind=long) factor
-        real(kind=long) phifactor
-        real(kind=long) psi1
-        real(kind=long) psi2
-        real(kind=long) r1, r2
-        real(kind=long) rho
-        real(kind=long) rhomax
-        real(kind=long) rhomin
-        real(kind=long) sumrp
-        real(kind=long) vofr
-        real(kind=long) z1, z2
-        real(kind=long) zmax
-        real(kind=long) zmin
+        real(kind=wp) cg1
+        real(kind=wp) cg2
+        real(kind=wp) drho
+        real(kind=wp) dz
+        real(kind=wp) factor
+        real(kind=wp) phifactor
+        real(kind=wp) psi1
+        real(kind=wp) psi2
+        real(kind=wp) r1, r2
+        real(kind=wp) rho
+        real(kind=wp) rhomax
+        real(kind=wp) rhomin
+        real(kind=wp) sumrp
+        real(kind=wp) vofr
+        real(kind=wp) z1, z2
+        real(kind=wp) zmax
+        real(kind=wp) zmin
  
-        real(kind=long), dimension (:), allocatable :: rhomult
-        real(kind=long), dimension (:), allocatable :: zmult
+        real(kind=wp), dimension (:), allocatable :: rhomult
+        real(kind=wp), dimension (:), allocatable :: zmult
  
-        real(kind=long), external :: clebsch_gordon
-        real(kind=long), external :: delk
-        real(kind=long), external :: psiofr
-        real(kind=long), external :: rescaled_psi
-        real(kind=long), external :: rprimeofr
+        real(kind=wp), external :: clebsch_gordon
+        real(kind=wp), external :: delk
+        real(kind=wp), external :: psiofr
+        real(kind=wp), external :: rescaled_psi
+        real(kind=wp), external :: rprimeofr
  
 ! Allocate Arrays
 ! ===========================================================================

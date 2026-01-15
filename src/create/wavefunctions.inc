@@ -7,27 +7,27 @@
         integer nnrho
         integer nnz
  
-        real(kind=long) drho
-        real(kind=long) dz
-        real(kind=long) rhomax
-        real(kind=long) rhomin
-        real(kind=long) zmax
-        real(kind=long) zmin
+        real(kind=wp) drho
+        real(kind=wp) dz
+        real(kind=wp) rhomax
+        real(kind=wp) rhomin
+        real(kind=wp) zmax
+        real(kind=wp) zmin
  
-        real(kind=long) drr (nsh_max, nspec_max)               ! spacing between points
-        real(kind=long) drr_rho (nspec_max)                    ! spacing between points
-        real(kind=long) rr (wfmax_points, nsh_max, nspec_max)
-        real(kind=long) rr_rho (wfmax_points, nspec_max)
-        real(kind=long) rrc (nsh_max, nspec_max)               ! cutoff points
-        real(kind=long) rrc_rho (nspec_max)                    ! maximum cutoff points
-        real(kind=long) psi (wfmax_points, nsh_max, nspec_max)
-        real(kind=long) psi_spline (4,wfmax_points, nsh_max, nspec_max)
-        real(kind=long) rho2c (nrho_points, nz_points)
-        real(kind=long) rhop2c (nrho_points, nz_points)
-        real(kind=long) rhopp2c (nrho_points, nz_points)
-        real(kind=long) rhopz2c (nrho_points, nz_points)
-        real(kind=long) rhoz2c (nrho_points, nz_points)
-        real(kind=long) rhozz2c (nrho_points, nz_points)
+        real(kind=wp) drr (nsh_max, nspec_max)               ! spacing between points
+        real(kind=wp) drr_rho (nspec_max)                    ! spacing between points
+        real(kind=wp) rr (wfmax_points, nsh_max, nspec_max)
+        real(kind=wp) rr_rho (wfmax_points, nspec_max)
+        real(kind=wp) rrc (nsh_max, nspec_max)               ! cutoff points
+        real(kind=wp) rrc_rho (nspec_max)                    ! maximum cutoff points
+        real(kind=wp) psi (wfmax_points, nsh_max, nspec_max)
+        real(kind=wp) psi_spline (4,wfmax_points, nsh_max, nspec_max)
+        real(kind=wp) rho2c (nrho_points, nz_points)
+        real(kind=wp) rhop2c (nrho_points, nz_points)
+        real(kind=wp) rhopp2c (nrho_points, nz_points)
+        real(kind=wp) rhopz2c (nrho_points, nz_points)
+        real(kind=wp) rhoz2c (nrho_points, nz_points)
+        real(kind=wp) rhozz2c (nrho_points, nz_points)
  
         common /density_limits_rho/ drho, rhomin, rhomax, nnrho
         common /density_limits_z/ dz, zmin, zmax, nnz

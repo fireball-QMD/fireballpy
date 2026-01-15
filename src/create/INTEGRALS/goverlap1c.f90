@@ -64,7 +64,7 @@
      &                            nsshxc, lsshxc, rcutoffa_max, what,   &
      &                            signature, drr_rho)
         use constants
-        use precision
+        use precision, only: wp
         implicit none
  
 ! Argument Declaration and Description
@@ -79,8 +79,8 @@
 	integer, intent (in), dimension (nspec_max, nsh_max) :: lsshxc
  
  
-        real(kind=long), intent (in), dimension (nspec_max) :: drr_rho
-        real(kind=long), intent (in), dimension (nspec_max) :: rcutoffa_max
+        real(kind=wp), intent (in), dimension (nspec_max) :: drr_rho
+        real(kind=wp), intent (in), dimension (nspec_max) :: rcutoffa_max
  
         character (len=70), intent (in) :: signature
 
@@ -105,31 +105,31 @@
         integer l1
         integer l2
  
-        real(kind=long) dnuxc
-        real(kind=long) dnuxcs
-        real(kind=long) dq
-        real(kind=long) drho
-        real(kind=long) exc
-        real(kind=long) dexc
-        real(kind=long) factor
-        real(kind=long) rcutoff
-        real(kind=long) rho
-        real(kind=long) rhomin
-        real(kind=long) rhomax
-        real(kind=long) rh
-        real(kind=long) rhp
-        real(kind=long) rhpp
-        real(kind=long) vxc
+        real(kind=wp) dnuxc
+        real(kind=wp) dnuxcs
+        real(kind=wp) dq
+        real(kind=wp) drho
+        real(kind=wp) exc
+        real(kind=wp) dexc
+        real(kind=wp) factor
+        real(kind=wp) rcutoff
+        real(kind=wp) rho
+        real(kind=wp) rhomin
+        real(kind=wp) rhomax
+        real(kind=wp) rh
+        real(kind=wp) rhp
+        real(kind=wp) rhpp
+        real(kind=wp) vxc
  
-        real(kind=long), dimension (:, :), allocatable :: answer1
-        real(kind=long), dimension (:, :), allocatable :: answer2
-        real(kind=long), dimension (:), allocatable :: rho1c
-        real(kind=long), dimension (:), allocatable :: rhop1c
-        real(kind=long), dimension (:), allocatable :: rhopp1c
-        real(kind=long), dimension (:), allocatable :: xnocc_in
+        real(kind=wp), dimension (:, :), allocatable :: answer1
+        real(kind=wp), dimension (:, :), allocatable :: answer2
+        real(kind=wp), dimension (:), allocatable :: rho1c
+        real(kind=wp), dimension (:), allocatable :: rhop1c
+        real(kind=wp), dimension (:), allocatable :: rhopp1c
+        real(kind=wp), dimension (:), allocatable :: xnocc_in
  
-        real(kind=long), external :: psiofr
-        real(kind=long), external :: dpsiofr
+        real(kind=wp), external :: psiofr
+        real(kind=wp), external :: dpsiofr
 
         character(80) :: fname
          
@@ -206,7 +206,7 @@
  
 ! Here we loop over rho.
           do irho = 1, nnrho
-           rho = rhomin + real(irho - 1, kind=long)*drho
+           rho = rhomin + real(irho - 1, kind=wp)*drho
  
            factor = 2.0d0*drho/3.0d0
            if (mod(irho, 2) .eq. 0) factor = 4.0d0*drho/3.0d0

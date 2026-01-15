@@ -72,7 +72,7 @@
 ! Program Declaration
 ! ===========================================================================
         subroutine ggacrad1c (mode, rin, rho, rhop, rhopp, cpot, cen)
-        use precision
+        use precision, only: wp
         implicit none
 
 ! Argument Declaration and Description
@@ -80,55 +80,55 @@
 ! Input
         integer, intent (in) :: mode
 
-        real(kind=long), intent (in) :: rin
+        real(kind=wp), intent (in) :: rin
 
-        real(kind=long), intent (in), dimension (2) :: rho
-        real(kind=long), intent (in), dimension (2) :: rhop
-        real(kind=long), intent (in), dimension (2) :: rhopp
+        real(kind=wp), intent (in), dimension (2) :: rho
+        real(kind=wp), intent (in), dimension (2) :: rhop
+        real(kind=wp), intent (in), dimension (2) :: rhopp
 
 ! Output
-        real(kind=long), intent (out) :: cen
+        real(kind=wp), intent (out) :: cen
 
-        real(kind=long), intent (out), dimension (2) :: cpot
+        real(kind=wp), intent (out), dimension (2) :: cpot
 
 ! Local Parameters and Data Declaration
 ! ===========================================================================
-        real(kind=long), parameter :: crs = 1.91915829267751281d0
-        real(kind=long), parameter :: eps = 1.0d-15
-        real(kind=long), parameter :: pi  = 3.14159265358979312d0
-        real(kind=long), parameter :: thrd = 0.333333333333333333d0
-        real(kind=long), parameter :: pisq3 = 29.6088132032680740d0
+        real(kind=wp), parameter :: crs = 1.91915829267751281d0
+        real(kind=wp), parameter :: eps = 1.0d-15
+        real(kind=wp), parameter :: pi  = 3.14159265358979312d0
+        real(kind=wp), parameter :: thrd = 0.333333333333333333d0
+        real(kind=wp), parameter :: pisq3 = 29.6088132032680740d0
 
 ! Local Variable Declaration and Description
 ! ===========================================================================
-        real(kind=long) alfc
-        real(kind=long) density
-        real(kind=long) densityp
-        real(kind=long) densityp11
-        real(kind=long) densityp12
-        real(kind=long) densityp22
-        real(kind=long) densitypp
-        real(kind=long) ec
-        real(kind=long) ecrs
-        real(kind=long) eczet
-        real(kind=long) fermik
-        real(kind=long) g
-        real(kind=long) gsfermik
-        real(kind=long) h
-        real(kind=long) r
-        real(kind=long) rs
-        real(kind=long) sfermik
-        real(kind=long) t
-        real(kind=long) uu
-        real(kind=long) vv
-        real(kind=long) ww
-        real(kind=long) zet
-        real(kind=long) ztp
-        real(kind=long) fk
-        real(kind=long) sk
+        real(kind=wp) alfc
+        real(kind=wp) density
+        real(kind=wp) densityp
+        real(kind=wp) densityp11
+        real(kind=wp) densityp12
+        real(kind=wp) densityp22
+        real(kind=wp) densitypp
+        real(kind=wp) ec
+        real(kind=wp) ecrs
+        real(kind=wp) eczet
+        real(kind=wp) fermik
+        real(kind=wp) g
+        real(kind=wp) gsfermik
+        real(kind=wp) h
+        real(kind=wp) r
+        real(kind=wp) rs
+        real(kind=wp) sfermik
+        real(kind=wp) t
+        real(kind=wp) uu
+        real(kind=wp) vv
+        real(kind=wp) ww
+        real(kind=wp) zet
+        real(kind=wp) ztp
+        real(kind=wp) fk
+        real(kind=wp) sk
 
-        real(kind=long), dimension (2) :: dvc, vc
-        real(kind=long), dimension (2) :: flip
+        real(kind=wp), dimension (2) :: dvc, vc
+        real(kind=wp), dimension (2) :: flip
 
 ! Allocate Arrays
 ! ===========================================================================

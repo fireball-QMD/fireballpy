@@ -58,7 +58,7 @@
 ! ===========================================================================
         subroutine readvpp (ispec, filein, nsshPP, lsshPP, iexc, &
      &                      fraction, iammaster)
-        use precision
+        use precision, only: wp
         implicit none
  
         include '../parameters.inc'
@@ -79,7 +79,7 @@
         integer nsshPP (nspec_max)
         integer lsshPP (nspec_max, nsh_max)
  
-        real(kind=long) fraction
+        real(kind=wp) fraction
  
 ! Local Parameters and Data Declaration
 ! ===========================================================================
@@ -91,13 +91,13 @@
         integer issh
         integer mesh
  
-        real(kind=long) alpha
-        real(kind=long) rshort
-        real(kind=long) vshort
+        real(kind=wp) alpha
+        real(kind=wp) rshort
+        real(kind=wp) vshort
 
-        real(kind=long) Z_val
+        real(kind=wp) Z_val
 
-        real(kind=long) rcutoff
+        real(kind=wp) rcutoff
  
 ! Procedure
 ! ===========================================================================

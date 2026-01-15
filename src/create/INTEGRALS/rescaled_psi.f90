@@ -59,9 +59,9 @@
 ! Program Declaration
 ! ===========================================================================
         function rescaled_psi (l, m, rho, r, z, psi)
-        use precision
+        use precision, only: wp
         implicit none
-        real(kind=long) rescaled_psi
+        real(kind=wp) rescaled_psi
  
 ! Argument Declaration and Description
 ! ===========================================================================
@@ -69,10 +69,10 @@
         integer, intent (in) :: l
         integer, intent (in) :: m
  
-        real(kind=long), intent (in) :: r
-        real(kind=long), intent (in) :: rho
-        real(kind=long), intent (in) :: z
-        real(kind=long), intent (in) :: psi
+        real(kind=wp), intent (in) :: r
+        real(kind=wp), intent (in) :: rho
+        real(kind=wp), intent (in) :: z
+        real(kind=wp), intent (in) :: psi
  
 ! Local Parameters and Data Declaration
 ! ===========================================================================

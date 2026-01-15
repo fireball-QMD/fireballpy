@@ -53,7 +53,7 @@
 ! Office telephone 801-585-1078
 ! ===========================================================================
         subroutine gleg (ctheta, ctheta_weights, ntheta_max)
-        use precision
+        use precision, only: wp
         implicit none
  
 ! Argument Declaration and Description
@@ -62,8 +62,8 @@
         integer, intent (in) :: ntheta_max
 
 ! Output
-        real(kind=long), intent (out), dimension (ntheta_max) :: ctheta 
-        real(kind=long), intent (out), dimension (ntheta_max) :: ctheta_weights 
+        real(kind=wp), intent (out), dimension (ntheta_max) :: ctheta 
+        real(kind=wp), intent (out), dimension (ntheta_max) :: ctheta_weights 
 
 ! ===========================================================================
 
@@ -76,12 +76,12 @@
         integer ndown, nup
         integer node
 
-        real(kind=long) pl1
-        real(kind=long) pl2
-        real(kind=long) pl3
-        real(kind=long) plp
-        real(kind=long) pdown, pup
-        real(kind=long) xx
+        real(kind=wp) pl1
+        real(kind=wp) pl2
+        real(kind=wp) pl3
+        real(kind=wp) plp
+        real(kind=wp) pdown, pup
+        real(kind=wp) xx
 
 ! Procedure
 ! ===========================================================================
