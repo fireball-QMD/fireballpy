@@ -1,5 +1,3 @@
-! TODO: E en shells, V tienen que ser cero los ortogonales con misma L
-
 ! copyright info:
 !
 !                             @Copyright 2004
@@ -36,10 +34,10 @@
 ! awp with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-! onecenterxc.f90
+! onecenter.f90
 ! Program Description
 ! ==============================================================================
-!       This routine calculates the one-center integrals for the exchange-
+!       This module calculates the one-center integrals for the exchange-
 ! correlation interactions.
 ! ==============================================================================
 ! Original code from Juergen Fritsch
@@ -47,88 +45,138 @@
 ! Code rewritten by:
 ! C. Roldan Pinero
 ! ==============================================================================
-subroutine onecenterxc (nspec, nspec_max, nsh_max, wfmax_points,               &
-&                       iexc, fraction, nsshxc, lsshxc,                        &
-&                       rcutoffa_max, xnocc, dqorb, iderorb,                   &
-&                       drr_rho, nzx)
+module onecenter
   use iso_fortran_env, only: stderr => error_unit, stdout => output_unit
   use precision, only: wp
   use constants, only: abohr, hartree
   use math, only: math_lstsq
   implicit none
+  private
+  public :: onecenter_init
+  public :: onecenter_calc
 
-  ! Argument Declaration and Description
-  ! ============================================================================
-  integer, intent (in) :: iexc, nsh_max, nspec, nspec_max, wfmax_points,       &
-  & iderorb(nspec_max), nsshxc(nspec_max), nzx(nspec_max),                     &
-  & lsshxc(nspec_max, nsh_max)
-  real(kind=wp), intent (in) :: fraction, dqorb(nspec_max),                    &
-  & drr_rho(nspec_max), rcutoffa_max(nspec_max), xnocc(nsh_max, nspec_max)
+  integer :: iexc_, nsh_max_, nspec_, nspec_max_, wfmax_points_
+  integer, allocatable :: iderorb_(:), nsshxc_(:), nzx_(:), lsshxc_(:,:)
+  real(kind=wp) :: fraction_
+  real(kind=wp), allocatable :: dqorb_(:), drr_rho_(:), rcutoffa_max_(:),      &
+  & xnocc_(:,:)
 
-  ! Local Variable Declaration and Description
-  ! ============================================================================
-  integer :: irho, issh, jssh, kssh, in1, ilssh, jlssh, iorb, jorb,            &
-  & nssh, nssh1, ix, ndq, nnz, npts, nnrho, nrhs, info, norbs, im
-  real(kind=wp) :: dnuxc, dnuxcs, drho, exc, dexcc, factor, rcutoff, rho,      &
-  & rhomax, rhomin, rh, rhp, rhpp, vxc, ddq, tmp, xnocc_in(nsh_max),           &
-  & rho1c(wfmax_points), rhop1c(wfmax_points), rhopp1c(wfmax_points)
-  character(len=2) :: auxz
-  character(len=256) :: errmsg
-  logical, allocatable :: iszero(:)
-  integer, allocatable :: orb2ssh(:), morbs(:)
-  real(kind=wp), allocatable :: xmatt(:,:), eexc(:,:), vvxc(:,:), tmpmat(:,:), &
-  & dq(:,:), exc1crho(:,:,:), nuxc1crho(:,:,:)
-  real(kind=wp), external :: psiofr
+contains
 
-  ! Procedure
-  ! ============================================================================
-  do in1 = 1, nspec
-    nssh = nsshxc(in1)
+  ! TODO: all these things should be read from a module
+  integer function onecenter_init(nspec, nspec_max, nsh_max, wfmax_points,     &
+  & iexc, fraction, nsshxc, lsshxc, rcutoffa_max, xnocc, dqorb, iderorb,       &
+  & drr_rho, nzx)
+    integer, intent (in) :: iexc, nsh_max, nspec, nspec_max, wfmax_points,     &
+    & iderorb(nspec_max), nsshxc(nspec_max), nzx(nspec_max),                   &
+    & lsshxc(nspec_max, nsh_max)
+    real(kind=wp), intent (in) :: fraction, dqorb(nspec_max),                  &
+    & drr_rho(nspec_max), rcutoffa_max(nspec_max), xnocc(nsh_max, nspec_max)
+
+    iexc_ = iexc
+    nsh_max_ = nsh_max
+    nspec_ = nspec
+    nspec_max_ = nspec_max
+    wfmax_points_ = wfmax_points
+    fraction_ = fraction
+
+    allocate(iderorb_(nspec_max), nsshxc_(nspec_max), nzx_(nspec_max),         &
+    & lsshxc_(nspec_max, nsh_max), dqorb_(nspec_max), drr_rho_(nspec_max),     &
+    & rcutoffa_max_(nspec_max), xnocc_(nsh_max, nspec_max), stat=onecenter_init)
+    if (onecenter_init /= 0) then
+      write(stderr, '(a)') '[ERROR] onecenter.f90: failed allocation'
+      return
+    end if
+
+    iderorb_ = iderorb
+    nsshxc_ = nsshxc
+    nzx_ = nzx
+    lsshxc_ = lsshxc
+    dqorb_ = dqorb
+    drr_rho_ = drr_rho
+    rcutoffa_max_ = rcutoffa_max
+    xnocc_ = xnocc
+
+    onecenter_init = 0
+    return
+  end function onecenter_init
+
+  integer function onecenter_calc()
+    integer :: ispec
+    do ispec = 1, nspec_
+      onecenter_calc = onecenter_spec_calc(ispec)
+      if (onecenter_calc /= 0) then
+        write(stderr, '(a,i4)') '[ERROR] onecenter.f90: failed calc for ispec =', ispec
+        return
+      end if
+    end do
+    onecenter_calc = 0
+    return
+  end function onecenter_calc
+
+  integer function onecenter_spec_calc(ispec)
+    integer, intent(in) :: ispec
+    integer :: irho, issh, jssh, kssh, ilssh, jlssh, iorb, jorb,               &
+    & nssh, nssh1, ix, ndq, nnz, npts, nnrho, nrhs, norbs, im
+    real(kind=wp) :: dnuxc, dnuxcs, drho, exc, dexcc, factor, rcutoff, rho,    &
+    & rhomax, rhomin, rh, rhp, rhpp, vxc, ddq, tmp, xnocc_in(nsh_max_),        &
+    & rho1c(wfmax_points_), rhop1c(wfmax_points_), rhopp1c(wfmax_points_)
+    character(len=2) :: auxz
+    character(len=256) :: errmsg
+    logical, allocatable :: iszero(:)
+    integer, allocatable :: orb2ssh(:), morbs(:)
+    real(kind=wp), allocatable :: xmatt(:,:), eexc(:,:), vvxc(:,:),            &
+    & tmpmat(:,:), dq(:,:), exc1crho(:,:,:), nuxc1crho(:,:,:)
+    real(kind=wp), external :: psiofr
+
+    nssh = nsshxc_(ispec)
     nssh1 = nssh + 1
 
     ! Needed for charge corrections
-    drho = drr_rho(in1)
-    rcutoff = rcutoffa_max(in1)
+    drho = drr_rho_(ispec)
+    rcutoff = rcutoffa_max_(ispec)
     rhomin = 0.0_wp
     rhomax = rcutoff
     nnrho = nint((rhomax - rhomin)/drho) + 1
 
+    ! TODO: this should come from somewhere else
+    ! Also this is not good excited detection
     ! Prepare the increments
     ndq = 3
     npts = ndq**nssh
     nnz = (nssh*(nssh + 1))/2
     allocate(dq(nssh, ndq))
-    do issh = 1,nssh
-      ilssh = lsshxc(in1, issh)
+    do issh = 1, nssh
+      ilssh = lsshxc_(ispec, issh)
       if (ilssh == 0) then
         if (issh == 1) then
-          dq(issh,1) = -0.10_wp
-          dq(issh,2) = 0.00_wp
-          dq(issh,3) = 0.10_wp
+          dq(issh, 1) = -0.10_wp
+          dq(issh, 2) = 0.00_wp
+          dq(issh, 3) = 0.10_wp
         else
-          dq(issh,1) = 0.00_wp
-          dq(issh,2) = 0.05_wp
-          dq(issh,3) = 0.10_wp
+          dq(issh, 1) = 0.00_wp
+          dq(issh, 2) = 0.05_wp
+          dq(issh, 3) = 0.10_wp
         end if
       else if (ilssh == 1) then
         if (issh == 2) then
-          dq(issh,1) = -0.20_wp
-          dq(issh,2) = 0.00_wp
-          dq(issh,3) = 0.20_wp
+          dq(issh, 1) = -0.20_wp
+          dq(issh, 2) = 0.00_wp
+          dq(issh, 3) = 0.20_wp
         else
-          dq(issh,1) = 0.00_wp
-          dq(issh,2) = 0.10_wp
-          dq(issh,3) = 0.20_wp
+          dq(issh, 1) = 0.00_wp
+          dq(issh, 2) = 0.10_wp
+          dq(issh, 3) = 0.20_wp
         end if
       else
         if (issh == 3) then
-          dq(issh,1) = -0.50_wp
-          dq(issh,2) = 0.00_wp
-          dq(issh,3) = 0.50_wp
+          dq(issh, 1) = -0.50_wp
+          dq(issh, 2) = 0.00_wp
+          dq(issh, 3) = 0.50_wp
         else
-          dq(issh,1) = 0.00_wp
-          dq(issh,2) = 0.25_wp
-          dq(issh,3) = 0.50_wp
+          dq(issh, 1) = 0.00_wp
+          dq(issh, 2) = 0.25_wp
+          dq(issh, 3) = 0.50_wp
         end if
       end if
     end do
@@ -139,11 +187,11 @@ subroutine onecenterxc (nspec, nspec_max, nsh_max, wfmax_points,               &
     kssh = 0
     norbs = 0
     do issh = 1, nssh
-      ilssh = lsshxc(in1, issh)
+      ilssh = lsshxc_(ispec, issh)
       norbs = norbs + (2*ilssh + 1)
       do jssh = issh, nssh
         kssh = kssh + 1
-        if (ilssh /= lsshxc(in1, jssh)) iszero(kssh) = .true.
+        if (ilssh /= lsshxc_(ispec, jssh)) iszero(kssh) = .true.
       end do
     end do
     allocate(eexc(npts, nnz), vvxc(npts, nnz))
@@ -155,7 +203,7 @@ subroutine onecenterxc (nspec, nspec_max, nsh_max, wfmax_points,               &
       xmatt(1, ix) = 1.0_wp
       do issh = 1, nssh
         ddq = dq(issh, 1 + mod(ix - 1, ndq**issh)/ndq**(issh - 1))
-        xnocc_in(issh) = xnocc(issh, in1) + ddq
+        xnocc_in(issh) = xnocc_(issh, ispec) + ddq
         xmatt(issh + 1, ix) = ddq
       end do
 
@@ -165,8 +213,8 @@ subroutine onecenterxc (nspec, nspec_max, nsh_max, wfmax_points,               &
       rho1c = 0.0_wp
       rhop1c = 0.0_wp
       rhopp1c = 0.0_wp
-      call rho1c_store (in1, nsh_max, nssh, 0.0_wp, 1, drho, rcutoff, &
-      &                 xnocc_in, 1, wfmax_points, rho1c, rhop1c, rhopp1c)
+      call rho1c_store (ispec, nsh_max_, nssh, 0.0_wp, 1, drho, rcutoff,       &
+      &                 xnocc_in, 1, wfmax_points_, rho1c, rhop1c, rhopp1c)
 
       ! Integrals <i|exc(i)|i> and <i.nu|mu(i)|i.nu'>
       do irho = 1, nnrho
@@ -180,7 +228,7 @@ subroutine onecenterxc (nspec, nspec_max, nsh_max, wfmax_points,               &
         rh = rho1c(irho)*abohr**3
         rhp = rhop1c(irho)*abohr**4
         rhpp = rhopp1c(irho)*abohr**5
-        call get_potxc1c (iexc, fraction, rho, rh, rhp, rhpp, exc, vxc, &
+        call get_potxc1c (iexc_, fraction_, rho, rh, rhp, rhpp, exc, vxc,      &
         &                 dnuxc, dnuxcs, dexcc)
         vxc = hartree*vxc
         exc = hartree*exc
@@ -191,7 +239,7 @@ subroutine onecenterxc (nspec, nspec_max, nsh_max, wfmax_points,               &
           do jssh = issh, nssh
             kssh = kssh + 1
             if (iszero(kssh)) cycle
-            tmp = psiofr(in1, issh, rho)*psiofr(in1, jssh, rho)*factor*rho*rho
+            tmp = psiofr(ispec, issh, rho)*psiofr(ispec, jssh, rho)*factor*rho*rho
             eexc(ix, kssh) = eexc(ix, kssh) + tmp*exc
             vvxc(ix, kssh) = vvxc(ix, kssh) + tmp*vxc
           end do
@@ -206,13 +254,13 @@ subroutine onecenterxc (nspec, nspec_max, nsh_max, wfmax_points,               &
     tmpmat(:, 1:nnz) = eexc
     tmpmat(:, nnz+1:2*nnz) = vvxc
     deallocate(eexc, vvxc)
-    call math_lstsq(xmatt, tmpmat, is_a_trans=.true., info=info)
+    call math_lstsq(xmatt, tmpmat, is_a_trans=.true., info=onecenter_spec_calc)
     deallocate(xmatt)
-    if (info /= 0) then
+    if (onecenter_spec_calc /= 0) then
       deallocate(tmpmat, iszero)
-      errmsg = 'INTEGRALS/onecenterxc.f90: call to `(x)gelst` failed with info = '
-      write (stderr, '(a)') errmsg
-      stop info
+      write (stderr, '(a,i4)') '[ERROR] onecenter.f90: call to `(x)gelst` failed with info =', &
+      &                        onecenter_spec_calc
+      return
     end if
 
     ! Prepare for output
@@ -238,8 +286,8 @@ subroutine onecenterxc (nspec, nspec_max, nsh_max, wfmax_points,               &
     allocate(orb2ssh(norbs), morbs(norbs))
     iorb = 0
     do issh = 1, nssh
-      im = -lsshxc(in1, issh)
-      do ilssh = 1, (2*lsshxc(in1, issh) + 1)
+      im = -lsshxc_(ispec, issh)
+      do ilssh = 1, (2*lsshxc_(ispec, issh) + 1)
         iorb = iorb + 1
         orb2ssh(iorb) = issh
         morbs(iorb) = im
@@ -248,7 +296,7 @@ subroutine onecenterxc (nspec, nspec_max, nsh_max, wfmax_points,               &
     end do
 
     ! Write log
-    write (auxz,'(i2.2)') nzx(in1)
+    write (auxz,'(i2.2)') nzx_(ispec)
     write (stdout,'(a)') 'Writing output to: coutput/onecenter_xc.'//auxz//'.dat'
 
     ! Write output
@@ -274,5 +322,8 @@ subroutine onecenterxc (nspec, nspec_max, nsh_max, wfmax_points,               &
     end do
     close(360)
     deallocate(orb2ssh, morbs, exc1crho, nuxc1crho)
-  end do ! do in1 = 1, nspec
-end subroutine onecenterxc
+
+    onecenter_spec_calc = 0
+    return
+  end function onecenter_spec_calc
+end module onecenter

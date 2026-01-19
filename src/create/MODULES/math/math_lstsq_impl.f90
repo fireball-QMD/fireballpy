@@ -68,7 +68,7 @@ contains
     allocate(work(lwork), stat=stat)
     if(present(info)) info = stat
     if(stat /= 0) return
-    call sgels(ctrans, nrows, ncols, nrhs, a, nrows, b, nobs, work, lwork, stat)
+    call dgels(ctrans, nrows, ncols, nrhs, a, nrows, b, nobs, work, lwork, stat)
     deallocate(work)
     if(present(info)) info = stat
     if(stat /= 0) return

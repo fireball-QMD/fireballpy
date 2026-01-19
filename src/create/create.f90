@@ -72,6 +72,7 @@
 ! ======================================================================
 program create
   use precision, only: wp
+  use onecenter, only: onecenter_init, onecenter_calc
   implicit none
 
   include 'parameters.inc'
@@ -533,10 +534,10 @@ program create
       &                      nssh, lssh, rcutoffa_max, what,  &
       &                      signature, drr_rho)
 ! JOM-end
-      call onecenterxc (nspec, nspec_max, nsh_max, wfmax_points,  &
-      &                      iexc, fraction, nsshxc, lsshxc,  &
-      &                      rcutoffa_max, xnocc, dqorb, iderorb,  &
-      &                      drr_rho, nzx)
+      if (onecenter_init(nspec, nspec_max, nsh_max, wfmax_points, iexc,        &
+      &                  fraction, nsshxc, lsshxc, rcutoffa_max, xnocc, dqorb, &
+      &                  iderorb, drr_rho, nzx) /= 0) stop 1
+      if (onecenter_calc() /= 0) stop 1
     end if
 
 ! JPL 1999 Exact exchange interactions.
