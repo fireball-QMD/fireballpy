@@ -1,7 +1,7 @@
 subroutine make_munu ()
   use, intrinsic :: iso_fortran_env, only: double => real64
   use M_fdata, only: ME2c_max, ME3c_max, num_orb, index_max2c, index_max3c, &
-    & nspecies, lssh, nssh, mu, nu, mvalue
+    & nspecies, lssh, nssh, mu, nu, mvalue, numorb_max
   implicit none
   integer :: imu, index, in1, in2, issh1, issh2, l1, l2, n1, n2
 
@@ -20,6 +20,8 @@ subroutine make_munu ()
       num_orb(in1) = num_orb(in1) + 2*l1 + 1
     end do
   end do
+
+  numorb_max=maxval(num_orb)
 
   do in1 = 1, nspecies
     do in2 = 1, nspecies
