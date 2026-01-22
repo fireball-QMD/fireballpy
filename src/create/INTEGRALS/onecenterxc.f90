@@ -68,17 +68,9 @@ contains
   & iexc, fraction, nsshxc, lsshxc, rcutoffa_max, xnocc, dqorb, iderorb,       &
   & drr_rho, nzx)
     integer, intent (in) :: iexc, nsh_max, nspec, nspec_max, wfmax_points,     &
-    & iderorb(nspec_max), nsshxc(nspec_max), nzx(nspec_max),                   &
-    & lsshxc(nspec_max, nsh_max)
-    real(kind=wp), intent (in) :: fraction, dqorb(nspec_max),                  &
-    & drr_rho(nspec_max), rcutoffa_max(nspec_max), xnocc(nsh_max, nspec_max)
-
-    iexc_ = iexc
-    nsh_max_ = nsh_max
-    nspec_ = nspec
-    nspec_max_ = nspec_max
-    wfmax_points_ = wfmax_points
-    fraction_ = fraction
+    & iderorb(:), nsshxc(:), nzx(:), lsshxc(:,:)
+    real(kind=wp), intent (in) :: fraction, dqorb(:), drr_rho(:),              &
+    & rcutoffa_max(:), xnocc(:,:)
 
     allocate(iderorb_(nspec_max), nsshxc_(nspec_max), nzx_(nspec_max),         &
     & lsshxc_(nspec_max, nsh_max), dqorb_(nspec_max), drr_rho_(nspec_max),     &
@@ -88,6 +80,12 @@ contains
       return
     end if
 
+    iexc_ = iexc
+    nsh_max_ = nsh_max
+    nspec_ = nspec
+    nspec_max_ = nspec_max
+    wfmax_points_ = wfmax_points
+    fraction_ = fraction
     iderorb_ = iderorb
     nsshxc_ = nsshxc
     nzx_ = nzx
@@ -106,16 +104,19 @@ contains
     do ispec = 1, nspec_
       onecenter_calc = onecenter_spec_calc(ispec)
       if (onecenter_calc /= 0) then
+        call onecenter_free()
         write(stderr, '(a,i4)') '[ERROR] onecenter.f90: failed calc for ispec =', ispec
         return
       end if
     end do
+    call onecenter_free()
     onecenter_calc = 0
     return
   end function onecenter_calc
 
   integer function onecenter_spec_calc(ispec)
     integer, intent(in) :: ispec
+    logical :: first_orb(0:2)
     integer :: irho, issh, jssh, kssh, ilssh, jlssh, iorb, jorb,               &
     & nssh, nssh1, ix, ndq, nnz, npts, nnrho, nrhs, norbs, im
     real(kind=wp) :: dnuxc, dnuxcs, drho, exc, dexcc, factor, rcutoff, rho,    &
@@ -140,8 +141,8 @@ contains
     nnrho = nint((rhomax - rhomin)/drho) + 1
 
     ! TODO: this should come from somewhere else
-    ! Also this is not good excited detection
     ! Prepare the increments
+    first_orb = .true.
     ndq = 3
     npts = ndq**nssh
     nnz = (nssh*(nssh + 1))/2
@@ -149,30 +150,33 @@ contains
     do issh = 1, nssh
       ilssh = lsshxc_(ispec, issh)
       if (ilssh == 0) then
-        if (issh == 1) then
+        if (first_orb(ilssh)) then
           dq(issh, 1) = -0.10_wp
           dq(issh, 2) = 0.00_wp
           dq(issh, 3) = 0.10_wp
+          first_orb(ilssh) = .false.
         else
           dq(issh, 1) = 0.00_wp
           dq(issh, 2) = 0.05_wp
           dq(issh, 3) = 0.10_wp
         end if
       else if (ilssh == 1) then
-        if (issh == 2) then
+        if (first_orb(ilssh)) then
           dq(issh, 1) = -0.20_wp
           dq(issh, 2) = 0.00_wp
           dq(issh, 3) = 0.20_wp
+          first_orb(ilssh) = .false.
         else
           dq(issh, 1) = 0.00_wp
           dq(issh, 2) = 0.10_wp
           dq(issh, 3) = 0.20_wp
         end if
       else
-        if (issh == 3) then
+        if (first_orb(ilssh)) then
           dq(issh, 1) = -0.50_wp
           dq(issh, 2) = 0.00_wp
           dq(issh, 3) = 0.50_wp
+          first_orb(ilssh) = .false.
         else
           dq(issh, 1) = 0.00_wp
           dq(issh, 2) = 0.25_wp
@@ -254,7 +258,7 @@ contains
     tmpmat(:, 1:nnz) = eexc
     tmpmat(:, nnz+1:2*nnz) = vvxc
     deallocate(eexc, vvxc)
-    call math_lstsq(xmatt, tmpmat, is_a_trans=.true., info=onecenter_spec_calc)
+    onecenter_spec_calc = math_lstsq(xmatt, tmpmat, is_a_trans=.true.)
     deallocate(xmatt)
     if (onecenter_spec_calc /= 0) then
       deallocate(tmpmat, iszero)
@@ -326,4 +330,8 @@ contains
     onecenter_spec_calc = 0
     return
   end function onecenter_spec_calc
+
+  subroutine onecenter_free()
+    deallocate(iderorb_, nsshxc_, nzx_, lsshxc_, dqorb_, drr_rho_, rcutoffa_max_, xnocc_)
+  end subroutine onecenter_free
 end module onecenter
