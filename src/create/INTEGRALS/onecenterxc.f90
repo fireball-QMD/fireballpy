@@ -319,7 +319,6 @@ contains
       end do
       write (360,'(a)') ''
     end do
-    write (360,'(a)') ''
     do ix = 0, nssh
       write (360,'(100ES15.7)') (exc1crho(ix, issh, issh), issh = 1, nssh)
       write (360,'(a)') ''
