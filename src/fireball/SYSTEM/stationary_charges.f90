@@ -26,7 +26,6 @@ subroutine stationary_charges()
   SQ = 0.0d0
   c = 0.0d0
   alpha = 0
-  call load_g_h_shell()
   call load_M()
   !Borrar es solo para hacer test----------
   !do issh=1,nsh_max
@@ -159,44 +158,30 @@ subroutine stationary_charges()
     end function vxc_shell_aa
 
     subroutine load_M() !Mx=B
-      use M_system, only: g_xc_shell,f_xc_shell,imass,vxc_aa_shell,exc_aa_shell,nssh_tot
+      use M_system, only: g_xc_shell,f_xc_shell,imass,vxc_aa_shell,exc_aa_shell,nssh_tot, &
+      & g_h_shell, natoms, get_shell_ofatom_imu, get_shell_ofatom_issh
       use M_fdata, only: gxc_1c,fxc_1c,exc_1c_0,vxc_1c_0, nssh
       implicit none
-      integer :: iatom,count ,issh,kssh,alpha,beta
-      g_xc_shell=0.0d0
+      integer :: iatom,count ,issh,kssh,alpha,beta,imu, matom, katom 
       f_xc_shell=0.0d0
       gxc_1c=22.00
       count=0
-      print*,'alpha,beta,count,issh,kssh,iatom  '
       do iatom=1,natoms
         do issh=1,nssh(imass(iatom))
           alpha = count + issh          
           do kssh=1, nssh(imass(iatom))
             beta = count + kssh
-            print*,alpha,beta,count,issh,kssh,iatom  
-            g_xc_shell(alpha,beta) = gxc_1c(imass(iatom),issh,issh,kssh)
             f_xc_shell(alpha,beta) = fxc_1c(imass(iatom),issh,kssh)
           end do
           exc_aa_shell(alpha) = exc_1c_0(imass(iatom),issh)
-          vxc_aa_shell(alpha) = vxc_1c_0(imass(iatom),issh,issh)
         end do
         count = count + nssh(imass(iatom))
       end do
 
-    do alpha = 1, nssh_tot
-        write(*,'(4F10.2)') (g_xc_shell(alpha,beta), beta=1,nssh_tot)
-    end do
-     
-    end subroutine 
-
-    subroutine load_g_h_shell()
-      use M_system, only: g_h_shell, natoms, get_shell_ofatom_imu, get_shell_ofatom_issh
-      use M_fdata, only: nssh
-      implicit none
-      integer :: iatom, imu, alpha, matom, katom, kssh, beta
       g_h_shell = 0.0
+      g_xc_shell=0.0d0
       do iatom = 1, natoms
-        do imu=1,  num_orb(imass(iatom))
+        do imu=1,num_orb(imass(iatom))
           alpha = get_shell_ofatom_imu(iatom,imu) 
           matom=neigh_self(iatom) 
           do katom = 1, natoms
@@ -204,10 +189,12 @@ subroutine stationary_charges()
               beta = get_shell_ofatom_issh(katom,kssh)
               g_h_shell(alpha,beta) = g_h_shell(alpha,beta) +&
               & g_h(imu,imu, kssh, katom, matom, iatom) / (2*get_l_ofshell(alpha) + 1)
+              g_xc_shell(alpha,beta) = gxc_1c(imass(iatom),imu,issh,kssh) / (2*get_l_ofshell(alpha) + 1)
             end do
           end do
+          vxc_aa_shell(alpha) = vxc_1c_0(imass(iatom),imu,imu) / (2*get_l_ofshell(alpha) + 1)
         end do
       end do
-    end subroutine  load_g_h_shell
+    end subroutine  load_M
 
 end subroutine stationary_charges
