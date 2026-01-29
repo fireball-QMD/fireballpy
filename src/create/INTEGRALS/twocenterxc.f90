@@ -42,7 +42,7 @@
 ! ===========================================================================
 ! Code written by C. Roldán Piñero
 ! ===========================================================================
-module twocenter
+module twocenterxc
   use iso_fortran_env, only: stderr => error_unit, stdout => output_unit
   use precision, only: wp
   implicit none
@@ -298,8 +298,8 @@ contains
       &        stat=twocenter_calc)
       if (twocenter_calc /= 0) return
       io = 3610
-      write (fname1, '(a,i2.2,a,i2.2,a)') 'vxc_2c.', ispec1_, '.',             &
-      &     ispec2_, '.dat'
+      write (fname1, '(a,i2.2,a,i2.2,a)') 'vxc_2c.', nzx1_, '.',             &
+      &     nzx2_, '.dat'
       write (stdout, '(a)') 'Computing '//trim(fname1)//'...'
       open (unit=io, file='coutput/'//trim(fname1), status='new',              &
       &     action='write', iostat=twocenter_calc)
@@ -312,8 +312,8 @@ contains
       close(io)
       if (ispec1_ /= ispec2_) then
         io = 3620
-        write (fname2, '(a,i2.2,a,i2.2,a)') 'vxc_2c.', ispec2_, '.',           &
-        &     ispec1_, '.dat'
+        write (fname2, '(a,i2.2,a,i2.2,a)') 'vxc_2c.', nzx2_, '.',           &
+        &     nzx1_, '.dat'
         write (stdout, '(a)') 'Computing '//trim(fname2)//'...'
         open (unit=io, file='coutput/'//trim(fname2), status='new',            &
         &     action='write', iostat=twocenter_calc)
@@ -328,7 +328,7 @@ contains
       do issh = 1, nssh1
         io = 3710 + issh
         write (fnamel1(issh), '(a,i2.2,a,i2.2,a,i2.2,a)') 'vxc_2c_ol.', issh,  &
-        &     '.', ispec1_, '.', ispec2_, '.dat'
+        &     '.', nzx1_, '.', nzx2_, '.dat'
         write (stdout, '(a)') 'Computing '//trim(fnamel1(issh))//'...'
         open (unit=io, file='coutput/'//trim(fnamel1(issh)), status='new',     &
         &     action='write', iostat=twocenter_calc)
@@ -342,7 +342,7 @@ contains
         if (ispec1_ /= ispec2_) then
           io = 3720 + issh
           write (fnamer2(issh), '(a,i2.2,a,i2.2,a,i2.2,a)') 'vxc_2c_or.',      &
-          &     issh, '.', ispec2_, '.', ispec1_, '.dat'
+          &     issh, '.', nzx2_, '.', nzx1_, '.dat'
           write (stdout, '(a)') 'Computing '//trim(fnamer2(issh))//'...'
           open (unit=io, file='coutput/'//trim(fnamer2(issh)), status='new',   &
           &     action='write', iostat=twocenter_calc)
@@ -358,7 +358,7 @@ contains
       do issh = 1, nssh2
         io = 3810 + issh
         write (fnamer1(issh), '(a,i2.2,a,i2.2,a,i2.2,a)') 'vxc_2c_or.', issh,  &
-        &     '.', ispec1_, '.', ispec2_, '.dat'
+        &     '.', nzx1_, '.', nzx2_, '.dat'
         write (stdout, '(a)') 'Computing '//trim(fnamer1(issh))//'...'
         open (unit=io, file='coutput/'//trim(fnamer1(issh)), status='new',     &
         &     action='write', iostat=twocenter_calc)
@@ -372,7 +372,7 @@ contains
         if (ispec1_ /= ispec2_) then
           io = 3820 + issh
           write (fnamel2(issh), '(a,i2.2,a,i2.2,a,i2.2,a)') 'vxc_2c_ol.',      &
-          &     issh, '.', ispec2_, '.', ispec1_, '.dat'
+          &     issh, '.', nzx2_, '.', nzx1_, '.dat'
           write (stdout, '(a)') 'Computing '//trim(fnamel2(issh))//'...'
           open (unit=io, file='coutput/'//trim(fnamel2(issh)), status='new',   &
           &     action='write', iostat=twocenter_calc)
@@ -541,7 +541,7 @@ contains
         end do
       end do ! grid
       xnocc = xnocc_backup
-      deallocate(ahold, dq1, dq2, vvxc, xmatt)
+      deallocate(ahold, dq1, dq2, vvxc, xmatt, fnamel1, fnamel2, fnamer1, fnamer2)
     end if
 
     deallocate(lsh)
@@ -554,18 +554,23 @@ contains
     use math, only: math_Ylm
     include '../parameters.inc'
     include '../exchange.inc'
+    include '../wavefunctions.inc'
     integer, intent(in) :: n1, l1, m1, n2, l2, m2
     real(kind=wp), intent(in) :: d
-    integer :: irho, iz, nnz
-    real(kind=wp) :: dz, factor, factor2, factor4, phifactor, psi1, psi2,      &
-    &                psiofr, rescaled_psi, r1, r2, rho, rho2, z1, z2, vxc,     &
-    &                zmax, zmin
+    integer :: irho, iz
+    real(kind=wp) :: factor, factor2, factor4, phifactor, psi1, psi2,      &
+    &                psiofr, rescaled_psi, r1, r2, rho, rho2, z1, z2, vxc
     real(kind=wp), allocatable :: rhomult(:), zmult(:)
 
     zmin = max(-rcutoff1_, d - rcutoff2_)
     zmax = min(rcutoff1_, d + rcutoff2_)
-    nnz = int((zmax - zmin)/dz_)
+    dz = dz_
+    nnz = int((zmax - zmin)/dz)
     if (iand(nnz, 1) == 0) nnz = nnz + 1
+    rhomin = rhomin_
+    rhomax = rhomax_
+    drho = drho_
+    nnrho = nnrho_
 
     allocate(zmult(nnz))
     factor = 0.33333333333333333333_wp*dz
@@ -573,20 +578,20 @@ contains
     factor4 = 2.0_wp*factor2
     zmult(1) = factor
     do iz = 2, nnz - 3, 2
-     zmult(iz) = factor4
-     zmult(iz+1) = factor2
+      zmult(iz) = factor4
+      zmult(iz+1) = factor2
     end do
     zmult(nnz - 1) = factor2
     zmult(nnz) = factor
 
     allocate(rhomult(nnrho_))
-    factor = 0.33333333333333333333_wp*drho_
+    factor = 0.33333333333333333333_wp*drho
     factor2 = 2.0_wp*factor
     factor4 = 2.0_wp*factor2
     rhomult(1) = factor
-    do irho = 2, nnrho_ - 3, 2
-     rhomult(irho) = factor4
-     rhomult(irho+1) = factor2
+    do irho = 2, nnrho - 3, 2
+      rhomult(irho) = factor4
+      rhomult(irho+1) = factor2
     end do
     rhomult(nnrho_ - 1) = factor2
     rhomult(nnrho_) = factor
@@ -596,7 +601,7 @@ contains
       z1 = zmin + real(iz - 1, kind=wp)*dz
       z2 = z1 - d
       do irho = 1, nnrho_
-        rho = rhomin_ + real(irho - 1, kind=wp)*drho_
+        rho = rhomin_ + real(irho - 1, kind=wp)*drho
         rho2 = rho*rho
         r1 = sqrt(z1*z1 + rho2)
         if (r1 >= rcutoff1_) cycle
@@ -615,4 +620,4 @@ contains
     deallocate(zmult, rhomult)
     return
   end function twocenter_integral_fit
-end module twocenter
+end module twocenterxc

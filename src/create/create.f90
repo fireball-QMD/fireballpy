@@ -73,7 +73,7 @@
 program create
   use precision, only: wp
   use onecenter, only: onecenter_init, onecenter_calc
-  use twocenter, only: twocenter_init, twocenter_calc, TWOCENTER_XC
+  use twocenterxc, only: twocenter_init, twocenter_calc, TWOCENTER_XC
   implicit none
 
   include 'parameters.inc'
