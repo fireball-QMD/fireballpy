@@ -3,7 +3,7 @@ subroutine stationary_charges()
   use M_system, only: natoms, imass, neigh_j, neighn, numorb_max, Qin, Qout, &
   & rho, nssh_tot, neigh_self,neigh_b, fix_shell_charge, get_l_ofshell, &
   & get_orb_ofshell, get_issh_ofshell, g_h, g_xc, get_iatom_ofshell, ztot, &
-  & g_h_shell, g_xc_shell
+  & g_h_shell, g_xc_shell,f_xc_shell,exc_aa_shell,vxc_aa_shell
   use M_fdata, only: num_orb,nssh,lssh
   implicit none
   integer beta_iatom            
@@ -55,13 +55,9 @@ subroutine stationary_charges()
         beta_iatom = get_iatom_ofshell(beta)
         matom = neigh_self(beta_iatom)
         if (fix_shell_charge(beta) .eq. 0) then
-          print '(A,I0,A,I0,A,I0,A,I0,A)', 'M(', mapindex(alpha), ',', mapindex(beta), ') = f(', beta, ',', alpha, ')'
           M(mapindex(alpha),mapindex(beta)) = M(mapindex(alpha),mapindex(beta)) & 
-                      & +  g_h_shell(beta , alpha ) &
-                      & + g_xc_shell(beta , alpha ) &
-                      & + g_xc_shell(alpha, beta  ) &
-                      & - fshell_xc(beta , alpha ,alpha_iatom, matom, beta_iatom) &
-                      & - fshell_xc(alpha, beta  ,alpha_iatom, matom, beta_iatom) 
+          & +  g_h_shell(beta , alpha ) + g_xc_shell(beta , alpha ) + g_xc_shell(alpha, beta  ) &
+          & - f_xc_shell(beta , alpha ) - f_xc_shell(alpha, beta  )!&
           do ineigh = 1, neighn(beta_iatom)
             mbeta = neigh_b(ineigh,beta_iatom)
             jatom = neigh_j(ineigh,beta_iatom)
@@ -71,25 +67,17 @@ subroutine stationary_charges()
               do inu = 1, num_orb(in2)
                 aux = g_h(imu,inu,issh,alpha_iatom,ineigh,beta_iatom) + g_xc(imu,inu,issh,alpha_iatom,ineigh,beta_iatom)
                 B(mapindex(alpha)) = B(mapindex(alpha)) + rho(imu,inu,ineigh,beta_iatom)*aux
-              end do ! end do inu
-            end do ! end do imu
-            !B(mapindex(alpha)) = B(mapindex(alpha)) & 
-            !           & + exc_shell_aa(alpha, alpha_iatom, neigh_beta_iatom, beta_iatom) &
-            !           & - vxc_shell_aa(alpha, alpha_iatom, neigh_beta_iatom, beta_iatom)
-          end do ! end do ineigh
+              end do ! inu
+            end do ! imu
+          end do ! ineigh
         endif !fix_shell_charge(beta) = 0
         if (fix_shell_charge(beta) .eq. 1) then
-          print '(A,I0,A,I0,A,I0,A,F8.4)', '*B*(', mapindex(alpha),') = f(', beta, ',', alpha, ')', Qin(get_issh_ofshell(beta),beta_iatom)
           B(mapindex(alpha)) = B(mapindex(alpha))- Qin(get_issh_ofshell(beta),beta_iatom)*( &
-                      & +  g_h_shell(beta , alpha ) &
-                      & + g_xc_shell(beta , alpha ) &
-                      & + g_xc_shell(alpha, beta  ) &
-                      & - fshell_xc(beta , alpha ,alpha_iatom, matom, beta_iatom) &
-                      & - fshell_xc(alpha, beta  ,alpha_iatom, matom, beta_iatom))!&
-!                     & + exc_shell_aa(alpha)- vxc_shell_aa(alpha)  
-          
+          & +  g_h_shell(beta , alpha ) + g_xc_shell(beta , alpha ) + g_xc_shell(alpha, beta  ) &
+          & - f_xc_shell(beta , alpha ) - f_xc_shell(alpha, beta  ))!&
         endif !fix_shell_charge(beta) = 1
       end do !beta
+      B(mapindex(alpha)) = B(mapindex(alpha)) + exc_aa_shell(alpha) - vxc_aa_shell(alpha)
      end if !fix_shell_charge(alpha) = 0
     end do !alpha
 
@@ -111,52 +99,6 @@ subroutine stationary_charges()
   stop    
   contains
 
-    real function fshell_xc(alpha, beta, alpha_iatom, neigh_beta_iatom, beta_iatom)
-      use M_system, only: f_xc, get_orb_ofshell, get_l_ofshell, get_issh_ofshell
-      implicit none
-      integer, intent(in) :: alpha, beta, alpha_iatom, neigh_beta_iatom, beta_iatom
-      integer :: mu_min, mu_max, imu_local
-      fshell_xc = 0.0
-      mu_min = get_orb_ofshell(alpha)
-      mu_max = mu_min + 2*get_l_ofshell(alpha)
-      do imu_local = mu_min, mu_max
-        fshell_xc = fshell_xc + f_xc(imu_local, get_issh_ofshell(beta), alpha_iatom, neigh_beta_iatom, beta_iatom)
-      end do
-      fshell_xc = fshell_xc /  (2*get_l_ofshell(alpha) + 1)
-    end function fshell_xc
-
-    real function exc_shell_aa(alpha, alpha_iatom, neigh_beta_iatom, beta_iatom)
-      use M_system, only: exc_aa, get_orb_ofshell, get_l_ofshell, get_issh_ofshell
-      implicit none
-      integer, intent(in) :: alpha,alpha_iatom, neigh_beta_iatom, beta_iatom
-      integer :: mu_min, mu_max, imu_local
-      exc_shell_aa = 0.0
-      mu_min = get_orb_ofshell(alpha)
-      mu_max = mu_min + 2*get_l_ofshell(alpha)
-      do imu_local = mu_min, mu_max
-        !carlos exc_aa(imu)
-        exc_shell_aa = exc_shell_aa + exc_aa(imu_local, alpha_iatom, neigh_beta_iatom, beta_iatom)
-      end do
-      exc_shell_aa = exc_shell_aa /  (2*get_l_ofshell(alpha) + 1)
-    end function exc_shell_aa
-
-
-
-
-    real function vxc_shell_aa(alpha, alpha_iatom, neigh_beta_iatom, beta_iatom)
-      use M_system, only: vxc_aa, get_orb_ofshell, get_l_ofshell, get_issh_ofshell
-      implicit none
-      integer, intent(in) :: alpha,alpha_iatom, neigh_beta_iatom, beta_iatom
-      integer :: mu_min, mu_max, imu_local
-      vxc_shell_aa = 0.0
-      mu_min = get_orb_ofshell(alpha)
-      mu_max = mu_min + 2*get_l_ofshell(alpha)
-      do imu_local = mu_min, mu_max
-        vxc_shell_aa = vxc_shell_aa + vxc_aa(imu_local, alpha_iatom, neigh_beta_iatom, beta_iatom)
-      end do
-      vxc_shell_aa = vxc_shell_aa /  (2*get_l_ofshell(alpha) + 1)
-    end function vxc_shell_aa
-
     subroutine load_M() !Mx=B
       use M_system, only: g_xc_shell,f_xc_shell,imass,vxc_aa_shell,exc_aa_shell,nssh_tot, &
       & g_h_shell, natoms, get_shell_ofatom_imu, get_shell_ofatom_issh
@@ -164,7 +106,6 @@ subroutine stationary_charges()
       implicit none
       integer :: iatom,count ,issh,kssh,alpha,beta,imu, matom, katom 
       f_xc_shell=0.0d0
-      gxc_1c=22.00
       count=0
       do iatom=1,natoms
         do issh=1,nssh(imass(iatom))
@@ -180,6 +121,7 @@ subroutine stationary_charges()
 
       g_h_shell = 0.0
       g_xc_shell=0.0d0
+      vxc_aa_shell = 0.0d0
       do iatom = 1, natoms
         do imu=1,num_orb(imass(iatom))
           alpha = get_shell_ofatom_imu(iatom,imu) 
@@ -192,7 +134,7 @@ subroutine stationary_charges()
               g_xc_shell(alpha,beta) = gxc_1c(imass(iatom),imu,issh,kssh) / (2*get_l_ofshell(alpha) + 1)
             end do
           end do
-          vxc_aa_shell(alpha) = vxc_1c_0(imass(iatom),imu,imu) / (2*get_l_ofshell(alpha) + 1)
+          vxc_aa_shell(alpha) = vxc_aa_shell(alpha) + vxc_1c_0(imass(iatom),imu,imu) / (2*get_l_ofshell(alpha) + 1)
         end do
       end do
     end subroutine  load_M
