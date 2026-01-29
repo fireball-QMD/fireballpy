@@ -174,10 +174,9 @@
 ! ===========================================================================
 ! The variable iwftype defines where the potential is located, and the type
 ! of integral we are doing; iwftype 0 => ontop, iwftype 1 => atom
-        if (interaction .ne. 0 .and. interaction .ne. 3 .and.  &
-     &      interaction .ne. 4 .and. interaction .ne. 6) then
+        if (interaction .ne. 0 .and. interaction .ne. 3 .and. interaction .ne. 4) then
          iwftype = 0
-        else if (interaction .eq. 3 .or. interaction .eq. 6) then
+        else if (interaction .eq. 3) then
          iwftype = 1
         else if (interaction .eq. 4) then
          iwftype = 2
@@ -185,11 +184,6 @@
         else if ((interaction .eq. 0) .and. (ideriv.eq.0)) then 
            iwftype = 1
         else if ((interaction .eq. 0) .and. (ideriv.ne.0)) then 
-           iwftype = 0
-! Mc-Weda: ontop_right and ontop_left 2c density charge transfer correction
-        else if ((interaction .eq. 14) .and. (ideriv.eq.0)) then 
-           iwftype = 1
-        else if ((interaction .eq. 14) .and. (ideriv.ne.0)) then 
            iwftype = 0
         end if
 
@@ -303,8 +297,7 @@
 ! and after the factor of pi is multiplied out after the phi integration.
 ! For the coulomb case, we need spherically symmetric charge densities,
 ! so add up all m's squared
-        if (interaction .eq. 7 .or. interaction .eq. 11 &
-     &        .or. interaction .eq. 12 .or. interaction .eq. 13) then
+        if (interaction .eq. 11 .or. interaction .eq. 12 .or. interaction .eq. 13) then
          phifactor = 2.0d0*pi
         else
          phifactor = clm(l1,m1)*clm(l2,m2)/2.0d0
@@ -411,14 +404,8 @@
             if (ideriv .eq. 2) vofr = vnnaofr (itype2, isorp, r2)
            else if (interaction .eq. 3) then
             vofr = vnnaofr (itype2, isorp, r2)
-           else if (interaction .eq. 5) then
-            vofr = vxc (rho, z1, iexc, fraction)
-           else if (interaction .eq. 6) then
-            vofr = dvxc (itype1, itype2, rho, z1, r1, iexc, fraction, &
-     &                   ix)
-           else if (interaction .eq. 7) then
-            vofr = dexc (itype1, itype2, rho, z1, r1, r2, iexc, &
-     &                   fraction, ix)
+           ! else if (interaction .eq. 5) then
+           !  vofr = vxc (rho, z1, iexc, fraction)
            else if (interaction .eq. 8) then
             vofr = z1 - 0.5d0*d
            else if (interaction .eq. 9) then
@@ -432,23 +419,11 @@
             vofr = dpotxc12 (rho, z1, iexc, fraction)
            else if (interaction .eq. 13) then
             vofr = dpotxc12s (rho, z1, iexc, fraction) 
-! McWeda charge transfer correction
-           else if (interaction .eq. 14 .and. ideriv .eq. 1) then
-	     vofr = dpotxc12 (rho, z1, iexc, fraction)
-             psi3 = psiofr (itype1, isorp, r1)
-             ! density psi**2/const
-             vofr = psi3**2/(4.0d0*pi)*vofr
-           else if (interaction .eq. 14 .and. ideriv .eq. 2) then
-	     vofr = dpotxc12 (rho, z1, iexc, fraction)
-             psi3 = psiofr (itype2, isorp, r2)
-             ! density psi**2/const
-             vofr = psi3**2/(4.0d0*pi)*vofr
            end if
  
 ! Let's skip over all this stuff if we are NOT using wavefunctions.
 ! There may be other cases where we can skip all this stuff also.
-           if (interaction .ne. 7 .and. interaction .ne. 11 .and. &
-     &         interaction .ne. 12 .and. interaction .ne. 13) then
+           if (interaction .ne. 11 .and. interaction .ne. 12 .and. interaction .ne. 13) then
  
 ! *************************************************************************
 ! Add magic factors based on what type of orbital is involved in the integration
@@ -467,9 +442,6 @@
 ! set the wavefunctions to 1.0d0. This term is not a matrix element, but
 ! rather a correction to the over counting which occured in the matrix
 ! elements evaluation.
-           else if (interaction .eq. 7) then
-            psi1 = 1.0d0
-            psi2 = 1.0d0
            else if (interaction .eq. 11) then
             psi1 = density1
             psi2 = 1.0d0

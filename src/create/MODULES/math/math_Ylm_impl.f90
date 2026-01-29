@@ -1,4 +1,4 @@
-submodule (math) math_lstsq_impl
+submodule (math) math_Ylm_impl
   implicit none
 
 contains
@@ -61,4 +61,4 @@ contains
     end if
   end function dYlm
 
-end submodule math_lstsq_impl
+end submodule math_Ylm_impl
