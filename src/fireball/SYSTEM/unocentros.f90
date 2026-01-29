@@ -19,7 +19,7 @@ subroutine unocentros (in1, iatom, dccexc_1c, mu1xc)
   integer jssh
   integer kssh
 !  real(double), dimension (nsh_max) :: dqi
-  real(double), dimension (nsh_max) :: V_aux
+  real(double), dimension (numorb_max) :: V_aux
   real(double), dimension (nsh_max) :: E_aux
 
 !  exc_1c = 0.0d0
@@ -34,31 +34,59 @@ subroutine unocentros (in1, iatom, dccexc_1c, mu1xc)
 
   print*,'---- unocentros --',in1, iatom, num_orb(in1)
 
+!  do imu = 1,num_orb(in1)
+!    m1   = getmssh(degelec(iatom)+imu)
+!    l1   = getlssh(degelec(iatom)+imu)
+!    issh = getissh(degelec(iatom)+imu)
+!    do inu = 1,num_orb(in1)
+!      m2   = getmssh(degelec(iatom)+inu) 
+!      l2   = getlssh(degelec(iatom)+inu)
+!      jssh = getissh(degelec(iatom)+inu)
+!      if( m1 .eq. m2 .and. l1 .eq. l2 ) then
+!        !mu1xc(inu,imu) = nuxc1c(in1,jssh,issh)
+!        mu1xc(inu,imu) = vxc_1c_0(in1,jssh,issh)  
+!        do kssh = 1,nssh(in1)
+!          !mu1xc(inu,imu) = mu1xc(inu,imu) +  dnuxc1c(in1,jssh,issh,kssh)*dqi(kssh)
+!          mu1xc(inu,imu) = mu1xc(inu,imu) + Qin(kssh,iatom) * gxc_1c(in1,jssh,issh,kssh)
+!          g_xc(inu,imu,kssh,iatom,neigh_self(iatom),iatom) = &
+!          & g_xc(inu,imu,kssh,iatom,neigh_self(iatom),iatom) + gxc_1c(in1,jssh,issh,kssh)
+!        enddo 
+!      endif
+!    end do
+!  end do
+!  v_aux = 0.d0
+!  do issh = 1,nssh(in1)
+!    v_aux(issh) = vxc_1c_0(in1,issh,issh)
+!    do kssh = 1,nssh(in1)
+!      v_aux(issh) = v_aux(issh) + Qin(kssh,iatom) * gxc_1c(in1,issh,issh,kssh)
+!    enddo
+!  enddo
+!  e_aux = 0.d0  
+!  do issh = 1,nssh(in1)
+!    e_aux(issh) = exc_1c_0(in1,issh) 
+!    do kssh = 1,nssh(in1)
+!      e_aux(issh) = e_aux(issh) + Qin(kssh,iatom) * fxc_1c(in1,issh,kssh)
+!    enddo
+!  enddo
+!
+
   do imu = 1,num_orb(in1)
-    m1   = getmssh(degelec(iatom)+imu)
-    l1   = getlssh(degelec(iatom)+imu)
-    issh = getissh(degelec(iatom)+imu)
     do inu = 1,num_orb(in1)
-      m2   = getmssh(degelec(iatom)+inu) 
-      l2   = getlssh(degelec(iatom)+inu)
-      jssh = getissh(degelec(iatom)+inu)
-      if( m1 .eq. m2 .and. l1 .eq. l2 ) then
-        !mu1xc(inu,imu) = nuxc1c(in1,jssh,issh)
-        mu1xc(inu,imu) = vxc_1c_0(in1,jssh,issh)  
+        mu1xc(inu,imu) = vxc_1c_0(in1,inu,imu) 
+!!!!OJO con el if 
         do kssh = 1,nssh(in1)
           !mu1xc(inu,imu) = mu1xc(inu,imu) +  dnuxc1c(in1,jssh,issh,kssh)*dqi(kssh)
-          mu1xc(inu,imu) = mu1xc(inu,imu) + Qin(kssh,iatom) * gxc_1c(in1,jssh,issh,kssh)
+          mu1xc(inu,imu) = mu1xc(inu,imu) + Qin(kssh,iatom) * gxc_1c(in1,inu,imu,kssh)
           g_xc(inu,imu,kssh,iatom,neigh_self(iatom),iatom) = &
-          & g_xc(inu,imu,kssh,iatom,neigh_self(iatom),iatom) + gxc_1c(in1,jssh,issh,kssh)
+          & g_xc(inu,imu,kssh,iatom,neigh_self(iatom),iatom) + gxc_1c(in1,inu,imu,kssh)
         enddo 
-      endif
     end do
   end do
-  v_aux = 0.d0
-  do issh = 1,nssh(in1)
-    v_aux(issh) = vxc_1c_0(in1,issh,issh)
+  V_aux = 0.d0
+  do imu = 1,num_orb(in1)
+    V_aux(imu) = vxc_1c_0(in1,imu,imu)
     do kssh = 1,nssh(in1)
-      v_aux(issh) = v_aux(issh) + Qin(kssh,iatom) * gxc_1c(in1,issh,issh,kssh)
+      V_aux(imu) = V_aux(imu) + Qin(kssh,iatom) * gxc_1c(in1,imu,imu,kssh)
     enddo
   enddo
   e_aux = 0.d0  

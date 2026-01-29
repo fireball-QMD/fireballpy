@@ -53,6 +53,7 @@ module M_fdata
   integer :: MES_max
 
   integer, dimension (:), allocatable :: num_orb
+  integer :: numorb_max
   integer, dimension (:,:), allocatable :: index_max2c, index_max2cDipX, index_max2cDipY, index_max3c
   integer, dimension (:,:,:), allocatable :: mu, nu, mvalue, muDipX, nuDipX, muDipY, nuDipY
 
