@@ -73,6 +73,7 @@
 program create
   use precision, only: wp
   use onecenter, only: onecenter_init, onecenter_calc
+  use twocenter, only: twocenter_init, twocenter_calc, TWOCENTER_XC
   implicit none
 
   include 'parameters.inc'
@@ -541,11 +542,39 @@ program create
     end if
 
 ! JPL 1999 Exact exchange interactions.
-    if (imuxc1c .eq. 1 .and. iexc .eq. 12) then
-      call x_1c (nsh_max, nspec, nspec_max, fraction, nssh, lssh, &
-      &               drr_rho, rcutoffa_max, what, signature)
-    end if
+    ! if (imuxc1c .eq. 1 .and. iexc .eq. 12) then
+    !   call x_1c (nsh_max, nspec, nspec_max, fraction, nssh, lssh, &
+    !   &               drr_rho, rcutoffa_max, what, signature)
+    ! end if
+
+    ! Two center
+    do itype1 = 1, nspec
+      do itype2 = itype1, nspec
+        index_max = index_max2c(itype1,itype1)
+        do index = 1, index_max
+          n1(index) = nleft(itype1,itype2,index)
+          l1(index) = lleft(itype1,itype2,index)
+          m1(index) = mleft(itype1,itype2,index)
+          n2(index) = nright(itype1,itype2,index)
+          l2(index) = lright(itype1,itype2,index)
+          m2(index) = mright(itype1,itype2,index)
+        end do
+        atom1 = atom(itype1)
+        atom2 = atom(itype2)
+        what1 = what(itype1)
+        what2 = what(itype2)
+        nzx1 = nzx(itype1)
+        nzx2 = nzx(itype2)
+        rcutoff1 = rcutoffa_max(itype1)
+        rcutoff2 = rcutoffa_max(itype2)
+        if (twocenter_init(iexc, fraction, itype1, itype2, atom1, atom2, what1,     &
+        &                  what2, nzx1, nzx2, rcutoff1, rcutoff2, nzs, nrhos, ndds, &
+        &                  index_max, n1, l1, m1, n2, l2, m2, signature) /= 0) stop 1
+        if (twocenter_calc(TWOCENTER_XC) /= 0) stop 1
+      end do
+    end do
   end if ! end master
+    stop
 
 ! ======================================================================
 ! I. Perform three-center calculations
@@ -948,49 +977,6 @@ program create
 
 ! **********************************************************************
 !
-!  =====>         4. Exchange-correlation over counting correction
-!
-! **********************************************************************
-! We calculate  (n1+n2)*(exc(1+2)-muxc(1+2)) - n1*(exc(1)-xcmu(1))
-!                                            - n2*(exc(2)-xcmu(2))
-          if (iswitch(7) .eq. 1) then
-           interaction = 7            ! atom/atom
-           isorp = 0
-
-! This is not a matrix element, but an over-counting correction to the
-! exchange-correlation interaction, so set index_max = 1
-           index_maxsp = 1            ! only one term
-           n1sp(1) = 1
-           l1sp(1) = 0
-           m1sp(1) = 0
-           n2sp(1) = 1
-           l2sp(1) = 0
-           m2sp(1) = 0
-
-! Here is the loop over the key.
-! Only do derivatives for idogs .eq. 1
-           if (idogs .eq. 1) then
-            minderiv2c = 1
-            maxderiv2c = 4
-           else
-            minderiv2c = 0
-            maxderiv2c = 0
-           end if
-           if (iharris .eq. 1) minderiv2c = 0
-           ispher = .false.
-           do ideriv = minderiv2c, maxderiv2c
-            call twocenter (interaction, isorp, ideriv, iexc, fraction, &
-     &                      itype1, itype2, atom1, atom2, what1, what2, &
-     &                      nzx1, nzx2, rcutoff1, rcutoff2, nssh2, &
-     &                      nzxco, nrhoxco, nddxco, index_maxsp, n1sp, &
-     &                      l1sp, m1sp, n2sp, l2sp, m2sp, signature, &
-     &                      iammaster, ispher)
-           end do
-          end if
-
-
-! **********************************************************************
-!
 !  =====>         5. Dipole
 !
 ! **********************************************************************
@@ -1165,25 +1151,6 @@ program create
      &                      m2, signature, iammaster, ispher)
               end do
            end do
-! McWeda charge transfer correction terms
-           interaction = 14
-           do ideriv = 1,2
-
-! Even in case of harris option we need all interactions
-            isorpmin = 1
-            if (ideriv .eq. 1) isorpmax = nssh(itype1)
-            if (ideriv .eq. 2) isorpmax = nssh(itype2)
-
-            do isorp = isorpmin, isorpmax
-            call twocenter (interaction, isorp, ideriv, iexc, fraction, &
-     &                      itype1, itype2, atom1, atom2, what1, what2, &
-     &                      nzx1, nzx2, rcutoff1, rcutoff2, nssh2, nzs, &
-     &                      nrhos, ndds, index_max, n1, l1, m1, n2, l2, &
-     &                      m2, signature, iammaster, ispher)
-            end do
-           end do
-
-
           end if
 
 
@@ -1216,58 +1183,6 @@ program create
 !                                   |
 !                                   +(0-) KEY=4
 !                                   |
-          if (iswitch(5) .eq. 1) then
-           interaction = 5            ! atom/ontop
-
-! Only do derivatives for idogs .eq. 1
-           if (idogs .eq. 1) then
-            minderiv2c = 1
-            maxderiv2c = 4
-           else
-            minderiv2c = 0
-            maxderiv2c = 0
-           end if
-           if (iharris .eq. 1) minderiv2c = 0
-           ispher = .false.
-           do ideriv = minderiv2c, maxderiv2c
-            call twocenter (interaction, isorp, ideriv, iexc, fraction, &
-     &                      itype1, itype2, atom1, atom2, what1, what2, &
-     &                      nzx1, nzx2, rcutoff1, rcutoff2, nssh2, &
-     &                      nzxco, nrhoxco, nddxco, index_max, n1, &
-     &                      l1, m1, n2, l2, m2, signature, iammaster, &
-     &                      ispher)
-           end do
-
-! JPL 1999 Calculate exact exchange if requested.
-           if (iexc .eq. 12) then
-
-! The exchange interaction involves a sum (alpha) over all the orbitals of the
-! atom in the potential.  The orbitals are taken as those for the atom on
-! the "ket" or left side of the matrix element. Store each term in the sum in
-! a separate file.
-            isorp = 0
-            do nalpha = 1, nssh(itype2)
-             lalpha = lssh(itype2,nalpha)
-             do malpha = -lalpha, lalpha
-              isorp = isorp + 1
-              call xontopl_2c (nspec_max, isorp, fraction, &
-     &                         nssh, itype1, itype2, atom1, atom2, &
-     &                         what1, what2, nzx1, nzx2, rcutoff1, &
-     &                         rcutoff2, nzexo, nrhoexo, nddexo, &
-     &                         index_max, inter_max, nalpha, lalpha, &
-     &                         malpha, n1, l1, m1, n2, l2, m2, &
-     &                         signature, iammaster)
-              call xontopr_2c (nspec_max, isorp, fraction, &
-     &                         nssh, itype1, itype2, atom1, atom2, &
-     &                         what1, what2, nzx1, nzx2, rcutoff1, &
-     &                         rcutoff2, nzexo, nrhoexo, nddexo, &
-     &                         index_max, inter_max, nalpha, lalpha, &
-     &                         malpha, n1, l1, m1, n2, l2, m2, &
-     &                         signature, iammaster)
-             end do
-            end do
-           end if
-          end if
 
 ! For the atom/atom interactions, the number of non-zero matrix elements
 ! is dependent entirely on one atom. Both wavefunctions are located at
@@ -1337,57 +1252,6 @@ program create
 !  =====>         6. Exchange-correlation atom/atom matrix elements
 !
 ! **********************************************************************
-! We calculate vxc(n1+n2) - vxc(n1) matrix elements.
-          if (iswitch(6) .eq. 1) then
-           interaction = 6            ! atom/atom
-           isorp = 0
-
-! Only do derivatives for idogs .eq. 1
-           if (idogs .eq. 1) then
-            minderiv2c = 1
-            maxderiv2c = 4
-           else
-            minderiv2c = 0
-            maxderiv2c = 0
-           end if
-           if (iharris .eq. 1) minderiv2c = 0
-           ispher = .false.
-           do ideriv = minderiv2c, maxderiv2c
-            call twocenter (interaction, isorp, ideriv, iexc, fraction, &
-     &                      itype1, itype2, atom1, atom2, what1, what2, &
-     &                      nzx1, nzx2, rcutoff1, rcutoff2, nssh2, &
-     &                      nzxca, nrhoxca, nddxca, index_max, n1, &
-     &                      l1, m1, n2, l2, m2, signature, iammaster, &
-     &                      ispher)
-           end do
-
-! Calculate exact exchange for doing hybrid exchange interactions.
-           if (iexc .eq. 12) then
-
-! The exchange interaction involves a sum (alpha) over all the orbitals of the
-! atom in the potential.  The orbitals are taken as those for the atom on
-! the "ket" or left side of the matrix element. Store each term in the sum in
-! a separate file.
-            isorp = 0
-            do nalpha = 1, nssh(itype2)
-             lalpha = lssh(itype2,nalpha)
-             do malpha = -lalpha, lalpha
-              isorp = isorp + 1
-              call xatom_2c (nspec_max, isorp, fraction, &
-     &                       itype1, itype2, atom1, atom2, what1, &
-     &                       what2, nzx1, nzx2, rcutoff1, rcutoff2, &
-     &                       nzexa, nrhoexa, nddexa, index_max, &
-     &                       inter_max, nalpha, lalpha, malpha, n1, l1, &
-     &                       m1, n2, l2, m2, signature, iammaster)
-             end do
-            end do
-           end if
-
-! Calculate the exact exchange-type interactions, etc. for the orbital
-! occupancy method of Pou et al. PRB 62:4309 (2000).
-           if (ioomethod .eq. 1) then
-           end if
-          end if
 
          end if ! MPI which node end if
         end do

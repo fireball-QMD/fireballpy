@@ -76,7 +76,7 @@ contains
     & lsshxc_(nspec_max, nsh_max), dqorb_(nspec_max), drr_rho_(nspec_max),     &
     & rcutoffa_max_(nspec_max), xnocc_(nsh_max, nspec_max), stat=onecenter_init)
     if (onecenter_init /= 0) then
-      write(stderr, '(a)') '[ERROR] onecenter.f90: failed allocation'
+      write(stderr, '(a)') '[ERROR] onecenterxc.f90: failed allocation'
       return
     end if
 
@@ -105,7 +105,7 @@ contains
       onecenter_calc = onecenter_spec_calc(ispec)
       if (onecenter_calc /= 0) then
         call onecenter_free()
-        write(stderr, '(a,i4)') '[ERROR] onecenter.f90: failed calc for ispec =', ispec
+        write(stderr, '(a,i4)') '[ERROR] onecenterxc.f90: failed calc for ispec =', ispec
         return
       end if
     end do
@@ -118,7 +118,7 @@ contains
     integer, intent(in) :: ispec
     logical :: first_orb(0:2)
     integer :: irho, issh, jssh, kssh, ilssh, jlssh, iorb, jorb,               &
-    & nssh, nssh1, ix, ndq, nnz, npts, nnrho, nrhs, norbs, im
+    & nssh, nssh1, ix, ndq, nnz, npts, nnrho, nrhs, norbs, im, io
     real(kind=wp) :: dnuxc, dnuxcs, drho, exc, dexcc, factor, rcutoff, rho,    &
     & rhomax, rhomin, rh, rhp, rhpp, vxc, ddq, tmp, xnocc_in(nsh_max_),        &
     & rho1c(wfmax_points_), rhop1c(wfmax_points_), rhopp1c(wfmax_points_)
@@ -129,6 +129,9 @@ contains
     real(kind=wp), allocatable :: xmatt(:,:), eexc(:,:), vvxc(:,:),            &
     & tmpmat(:,:), dq(:,:), exc1crho(:,:,:), nuxc1crho(:,:,:)
     real(kind=wp), external :: psiofr
+
+    write (auxz,'(i2.2)') nzx_(ispec)
+    write (stdout,'(a)') 'Computing onecenter_xc.'//auxz//'.dat...'
 
     nssh = nsshxc_(ispec)
     nssh1 = nssh + 1
@@ -262,7 +265,7 @@ contains
     deallocate(xmatt)
     if (onecenter_spec_calc /= 0) then
       deallocate(tmpmat, iszero)
-      write (stderr, '(a,i4)') '[ERROR] onecenter.f90: call to `(x)gelst` failed with info =', &
+      write (stderr, '(a,i4)') '[ERROR] onecenterxc.f90: fit failed with info = ', &
       &                        onecenter_spec_calc
       return
     end if
@@ -299,33 +302,36 @@ contains
       end do
     end do
 
-    ! Write log
-    write (auxz,'(i2.2)') nzx_(ispec)
-    write (stdout,'(a)') 'Writing output to: coutput/onecenter_xc.'//auxz//'.dat'
-
     ! Write output
-    open (unit=360, file='coutput/onecenter_xc.'//auxz//'.dat', status='unknown')
-    write (360,'(2i4)') nssh, norbs
+    io = 360
+    open (unit=io, file='coutput/onecenter_xc.'//auxz//'.dat', status='new',   &
+    &     action='write', iostat=onecenter_spec_calc)
+    if (onecenter_spec_calc /= 0) then
+      write (stderr, '(a)') '[ERROR] failed to open onecenter_xc.'//auxz//'.dat'
+      return
+    end if
+    write (io,'(2i4)') nssh, norbs
     do ix = 0, nssh
       do iorb = 1, norbs
         do jorb = 1, norbs
           if (morbs(iorb) == morbs(jorb)) then
-            write (360,'(ES15.7)', advance='no') nuxc1crho(ix, orb2ssh(iorb), orb2ssh(jorb))
+            write (io,'(ES15.7)', advance='no') nuxc1crho(ix, orb2ssh(iorb), orb2ssh(jorb))
           else
-            write (360,'(ES15.7)', advance='no') 0.0_wp
+            write (io,'(ES15.7)', advance='no') 0.0_wp
           end if
         end do
-        write (360,'(a)') ''
+        write (io,'(a)') ''
       end do
-      write (360,'(a)') ''
+      write (io,'(a)') ''
     end do
     do ix = 0, nssh
-      write (360,'(100ES15.7)') (exc1crho(ix, issh, issh), issh = 1, nssh)
-      write (360,'(a)') ''
+      write (io,'(100ES15.7)') (exc1crho(ix, issh, issh), issh = 1, nssh)
+      write (io,'(a)') ''
     end do
-    close(360)
+    close(io)
     deallocate(orb2ssh, morbs, exc1crho, nuxc1crho)
 
+    write (stdout,'(a)') 'Done'
     onecenter_spec_calc = 0
     return
   end function onecenter_spec_calc

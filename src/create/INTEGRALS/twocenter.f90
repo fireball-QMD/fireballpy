@@ -91,16 +91,12 @@
                                 !   2 = vna ontop
                                 !   3 = vna atom
                                 !   4 = non-local
-                                !   5 = xc ontop
-                                !   6 = xc atom-atom
-                                !   7 = xc correction
                                 !   8 = z-dipole
                                 !   9 = y-dipole
                                 !  10 = x-dipole
                                 !  11 = coulomb
                                 !  12 = extended hubbard (n1*n2 dmuxc(n1+n2)/dn)
                                 !  13 = extended hubbard spin dependent term
-                                !  14 = olscx (charge transfer correction)
  
         integer ndd             ! number of grid points along dna
         integer nssh2
@@ -179,206 +175,154 @@
 ! interaction = 2 => do neutral atom/ontop function => vneutral
 ! interaction = 3 => do neutral atom/atom
 ! interaction = 4 => do non-local
-! interaction = 5 => do xc ontop function => vxc
-! interaction = 6 => do xc atom-atom function => dvxc
-! interaction = 7 => do xc double counting correction function => dexc
 ! interaction = 8 => do z-dipole
 ! interaction = 9 => do y-dipole
 ! interaction = 10 => do x-dipole
 ! interaction = 11 => do coulomb
 ! interaction = 12 => do extended hubbard (n1*n2 dmuxc(n1+n2)/dn)
 ! interaction = 13 => do extended hubbard spin dependent term
-! interaction = 14 => do McWeda charge transfer correction terms
 ! *************************************************************************
         if (interaction .eq. 0) then
-         if (iammaster) then
-          write (*,*) ' that the average density matrix elements are '
-          write (*,*) ' now being calculated. '
-          write (*,100)
-         end if ! end master
-        if (ideriv .eq. 0) then
-          ! spherical approx. 
-          if(ispher) then 
-             root = 'coutput/denS_atom'
-          else
-          ! NOT spherical approx. 
-             root = 'coutput/den_atom'
-          endif
-          call iofile2c_xcna (root, 'dat', isorp, nzx1, nzx2, iounit,  &
-     &                       fname, skip)
-         endif
-         if (ideriv .eq. 1) then
-          ! spherical approx. 
-          if(ispher) then 
-             root = 'coutput/denS_ontopl'
-          else
-          ! NOT spherical approx. 
-             root = 'coutput/den_ontopl'          
-          endif
-          call iofile2c_xcna (root, 'dat', isorp, nzx1, nzx2, iounit,  &
-     &                        fname, skip)
-         end if
-         if (ideriv .eq. 2) then
-          ! spherical approx. 
-          if(ispher) then 
-             root = 'coutput/denS_ontopr'
-          else
-          ! NOT spherical approx. 
-             root = 'coutput/den_ontopr'
-          endif
-          call iofile2c_xcna (root, 'dat', isorp, nzx1, nzx2, iounit, &
-     &                        fname, skip)
-         endif
+          if (iammaster) then
+            write (*,*) ' that the average density matrix elements are '
+            write (*,*) ' now being calculated. '
+            write (*,100)
+          end if ! end master
+          if (ideriv .eq. 0) then
+            ! spherical approx. 
+            if(ispher) then 
+              root = 'coutput/denS_atom'
+            else
+              ! NOT spherical approx. 
+              root = 'coutput/den_atom'
+            end if
+            call iofile2c_xcna (root, 'dat', isorp, nzx1, nzx2, iounit,  &
+            &                   fname, skip)
+          else if (ideriv .eq. 1) then
+            ! spherical approx. 
+            if(ispher) then 
+              root = 'coutput/denS_ontopl'
+            else
+              ! NOT spherical approx. 
+              root = 'coutput/den_ontopl'          
+            end if
+            call iofile2c_xcna (root, 'dat', isorp, nzx1, nzx2, iounit,  &
+            &                   fname, skip)
+          else if (ideriv .eq. 2) then
+            ! spherical approx. 
+            if(ispher) then 
+              root = 'coutput/denS_ontopr'
+            else
+              ! NOT spherical approx. 
+              root = 'coutput/den_ontopr'
+            end if
+            call iofile2c_xcna (root, 'dat', isorp, nzx1, nzx2, iounit, &
+            &                   fname, skip)
+          end if
         else if (interaction .eq. 1) then
-         if (iammaster) then
-          write (*,*) ' that the overlap matrix elements are now '
-          write (*,*) ' being calculated. '
-          write (*,100)
-         end if ! end master
+          if (iammaster) then
+            write (*,*) ' that the overlap matrix elements are now '
+            write (*,*) ' being calculated. '
+            write (*,100)
+          end if ! end master
           ! spherical approx. 
           if(ispher) then 
-             root = 'coutput/overlapS'
+            root = 'coutput/overlapS'
           else
-          ! NOT spherical approx. 
-             root = 'coutput/overlap'
-          endif
-         call iofile2c (root, 'dat', nzx1, nzx2, iounit, fname, skip)
+            ! NOT spherical approx. 
+            root = 'coutput/overlap'
+          end if
+          call iofile2c (root, 'dat', nzx1, nzx2, iounit, fname, skip)
         else if (interaction .eq. 2) then
-         if (iammaster) then
-          write (*,*) ' that the (non)-neutral atom potential matrix '
-          write (*,*) ' elements (ontop) are now being calculated. '
-          if (isorp .eq. 0) then
-           write (*,*) ' Doing neutral potential, isorp = ', isorp
-          else
-           write (*,*) ' Doing non-neutral potential, shell = ', isorp
+          if (iammaster) then
+            write (*,*) ' that the (non)-neutral atom potential matrix '
+            write (*,*) ' elements (ontop) are now being calculated. '
+            if (isorp .eq. 0) then
+              write (*,*) ' Doing neutral potential, isorp = ', isorp
+            else
+              write (*,*) ' Doing non-neutral potential, shell = ', isorp
+            end if
+            write (*,100)
+          end if ! end master
+          if (ideriv .eq. 1) then
+            root = 'coutput/vna_ontopl'
+            call iofile2c_xcna (root, 'dat', isorp, nzx1, nzx2, iounit,  &
+            &                   fname, skip)
+          else if (ideriv .eq. 2) then
+            root = 'coutput/vna_ontopr'
+            call iofile2c_xcna (root, 'dat', isorp, nzx1, nzx2, iounit, &
+            &                   fname, skip)
           end if
-          write (*,100)
-         end if ! end master
-         if (ideriv .eq. 1) then
-          root = 'coutput/vna_ontopl'
-          call iofile2c_xcna (root, 'dat', isorp, nzx1, nzx2, iounit,  &
-     &                        fname, skip)
-         end if
-         if (ideriv .eq. 2) then
-          root = 'coutput/vna_ontopr'
-          call iofile2c_xcna (root, 'dat', isorp, nzx1, nzx2, iounit, &
-     &                        fname, skip)
-         end if
         else if (interaction .eq. 3) then
-         if (iammaster) then
-          write (*,*) ' that the (non)-neutral atom potential matrix '
-          write (*,*) ' elements (atom-atom) are now being calculated. '
-          write (*,100)
-          if (isorp .eq. 0) then
-           write (*,*) ' Doing neutral potential, isorp = ', isorp
-          else
-           write (*,*) ' Doing non-neutral potential, shell = ', isorp
-          end if
-         end if ! end master
-         root = 'coutput/vna_atom' 
-         call iofile2c_xcna (root, 'dat', isorp, nzx1, nzx2, iounit, &
-     &                       fname, skip)
-        else if (interaction .eq. 4) then
-         if (iammaster) then
-          write (*,*) ' that the non-local potential matrix elements '
-          write (*,*) ' are now being calculated. '
-          write (*,100)
-         end if ! end master
-         root = 'coutput/vnl' 
-         call iofile2c (root, 'dat', nzx1, nzx2, iounit, fname, skip)
-        else if (interaction .eq. 5) then
-         if (iammaster) then
-          write (*,*) ' that the exchange-correlation matrix '
-          write (*,*) ' elements (ontop) are now being calculated. '
-          write (*,100)
-         end if ! end master
-         root = 'coutput/xc_ontop'
-         call iofile2c_xcna (root, 'dat', ideriv, nzx1, nzx2, iounit,  &
-     &                       fname, skip)
-        else if (interaction .eq. 6) then
-         if (iammaster) then
-          write (*,*) ' that the exchange-correlation matrix '
-          write (*,*) ' elements (atom-atom) are now being calculated. '
-          write (*,100)
-         end if ! end master
-         root = 'coutput/xc_atom'
-         call iofile2c_xcna (root, 'dat', ideriv, nzx1, nzx2, iounit, &
-     &                       fname, skip)
-        else if (interaction .eq. 7) then
-         if (iammaster) then
-          write (*,*) ' that the exchange-correlation correction from '
-          write (*,*) ' double counting is now being calculated. '
-          write (*,100)
-         end if ! end master
-         root = 'coutput/xc_corr'
-         call iofile2c_xcna (root, 'dat', ideriv, nzx1, nzx2, iounit, &
-     &                       fname, skip)
-        else if (interaction .eq. 8) then
-         if (iammaster) then
-          write (*,*) ' that the z-dipole correction is now being '
-          write (*,*) ' calculated.'
-          write (*,100)
-         end if ! end master
-         root = 'coutput/dipole_z'
-         call iofile2c (root, 'dat', nzx1, nzx2, iounit, fname, skip)
-        else if (interaction .eq. 9) then
-         if (iammaster) then
-          write (*,*) ' that the y-dipole correction is now being '
-          write (*,*) ' calculated.'
-          write (*,100)
-         end if ! end master
-         root = 'coutput/dipole_y'
-         call iofile2c (root, 'dat', nzx1, nzx2, iounit, fname, skip)
-        else if (interaction .eq. 10) then
-         if (iammaster) then
-          write (*,*) ' that the x-dipole correction is now being '
-          write (*,*) ' calculated.'
-          write (*,100)
-         end if ! end master
-         root = 'coutput/dipole_x'
-         call iofile2c (root, 'dat', nzx1, nzx2, iounit, fname, skip)
-        else if (interaction .eq. 11) then
-         if (iammaster) then
-          write (*,*) ' that the coulomb correction is now being '
-          write (*,*) ' calculated.'
-          write (*,100)
-         end if ! end master
-         root = 'coutput/coulomb'
-         call iofile2c (root, 'dat', nzx1, nzx2, iounit, fname, skip)
-        else if (interaction .eq. 12) then
-         if (iammaster) then
-          write (*,*) ' that the nu extended hubbard xc is now being '
-          write (*,*) ' calculated.'
-          write (*,100)
-         end if ! end master
-         root = 'coutput/nuxc' 
-         call iofile2c (root, 'dat', nzx1, nzx2, iounit, fname, skip)
-        else if (interaction .eq. 13) then
-         if (iammaster) then 
-          write (*,*) ' that the hubbard xc spin dependent term '     
-          write (*,*) ' now being calculated.'
-          write (*,100)
-         end if ! end master
-         root = 'coutput/nuxcs'
-         call iofile2c (root, 'dat', nzx1, nzx2, iounit, fname, skip)
-! jel-X
-        else if (interaction .eq. 14) then
-         if (iammaster) then
-          write (*,*) ' that the mc-weda nuxc2crho is now being '
-          write (*,*) ' calculated.'
-          write (*,100)
-         end if ! end master
-         if (ideriv .eq. 1) then 
-          root = 'coutput/dnuxc_ol' 
+          if (iammaster) then
+            write (*,*) ' that the (non)-neutral atom potential matrix '
+            write (*,*) ' elements (atom-atom) are now being calculated. '
+            write (*,100)
+            if (isorp .eq. 0) then
+              write (*,*) ' Doing neutral potential, isorp = ', isorp
+            else
+              write (*,*) ' Doing non-neutral potential, shell = ', isorp
+            end if
+          end if ! end master
+          root = 'coutput/vna_atom' 
           call iofile2c_xcna (root, 'dat', isorp, nzx1, nzx2, iounit, &
-     &                        fname, skip)
-         endif
-         if (ideriv .eq. 2) then 
-          root = 'coutput/dnuxc_or' 
-          call iofile2c_xcna (root, 'dat', isorp, nzx1, nzx2, iounit,  &
-     &                        fname, skip)
-         endif
-! end jel-X
+          &                   fname, skip)
+        else if (interaction .eq. 4) then
+          if (iammaster) then
+            write (*,*) ' that the non-local potential matrix elements '
+            write (*,*) ' are now being calculated. '
+            write (*,100)
+          end if ! end master
+          root = 'coutput/vnl' 
+          call iofile2c (root, 'dat', nzx1, nzx2, iounit, fname, skip)
+        else if (interaction .eq. 8) then
+          if (iammaster) then
+            write (*,*) ' that the z-dipole correction is now being '
+            write (*,*) ' calculated.'
+            write (*,100)
+          end if ! end master
+          root = 'coutput/dipole_z'
+          call iofile2c (root, 'dat', nzx1, nzx2, iounit, fname, skip)
+        else if (interaction .eq. 9) then
+          if (iammaster) then
+            write (*,*) ' that the y-dipole correction is now being '
+            write (*,*) ' calculated.'
+            write (*,100)
+          end if ! end master
+          root = 'coutput/dipole_y'
+          call iofile2c (root, 'dat', nzx1, nzx2, iounit, fname, skip)
+        else if (interaction .eq. 10) then
+          if (iammaster) then
+            write (*,*) ' that the x-dipole correction is now being '
+            write (*,*) ' calculated.'
+            write (*,100)
+          end if ! end master
+          root = 'coutput/dipole_x'
+          call iofile2c (root, 'dat', nzx1, nzx2, iounit, fname, skip)
+        else if (interaction .eq. 11) then
+          if (iammaster) then
+            write (*,*) ' that the coulomb correction is now being '
+            write (*,*) ' calculated.'
+            write (*,100)
+          end if ! end master
+          root = 'coutput/coulomb'
+          call iofile2c (root, 'dat', nzx1, nzx2, iounit, fname, skip)
+        else if (interaction .eq. 12) then
+          if (iammaster) then
+            write (*,*) ' that the nu extended hubbard xc is now being '
+            write (*,*) ' calculated.'
+            write (*,100)
+          end if ! end master
+          root = 'coutput/nuxc' 
+          call iofile2c (root, 'dat', nzx1, nzx2, iounit, fname, skip)
+        else if (interaction .eq. 13) then
+          if (iammaster) then 
+            write (*,*) ' that the hubbard xc spin dependent term '     
+            write (*,*) ' now being calculated.'
+            write (*,100)
+          end if ! end master
+          root = 'coutput/nuxcs'
+          call iofile2c (root, 'dat', nzx1, nzx2, iounit, fname, skip)
         end if
         if (skip) return
  
@@ -437,12 +381,6 @@
      &             ' (Non)-neutral atom potential (atom) two-center'
         else if (interaction .eq. 4) then
          write (iounit,*) ' Non-local pseudopotential matrix elements '
-        else if (interaction .eq. 5) then
-         write (iounit,*)' Matrix elements for the xc potential (ontop)'
-        else if (interaction .eq. 6) then
-         write (iounit,*) ' Matrix elements for the xc potential (atom)'
-        else if (interaction .eq. 7) then
-         write (iounit,*) ' The xc correction for over counting '
         else if (interaction .eq. 8) then
          write (iounit,*) ' Matrix elements for the z-dipole '
         else if (interaction .eq. 9) then
@@ -457,9 +395,6 @@
         else if (interaction .eq. 13) then
          write (iounit,*)  &
      &          ' Spin extended Hubbard: nu12s=int[n1*n2*nus(n1+n2)]'
-        else if (interaction .eq. 14) then
-         write (iounit,*)  &
-     &          ' McWeda charge transfer: nu12 = int[n1*n2*nu(n1+n2)] ' 
         end if
  
         write (iounit,*) ' created by: '
@@ -595,15 +530,9 @@
 ! orbitals, i.e. this is dna.
         do igrid = 1, ndd
          d = d + dr
-         if (interaction .eq. 5 .or. interaction .eq. 6 .or.  &
-     &       interaction .eq. 7 .or. interaction .eq. 12 &
-     &       .or. interaction .eq. 13 ) then
+         if (interaction .eq. 12 .or. interaction .eq. 13 ) then
           call rho2c_store (iexc, itype1, itype2, rcutoff1, rcutoff2, d, &
      &                      ideriv + 1)
-         end if
-         if (interaction .eq. 14 ) then
-          call rho2c_store (iexc, itype1, itype2, rcutoff1, rcutoff2, d,  &
-     &                              1)
          end if
          do index = 1, index_max
           n1 = nleft(index)
