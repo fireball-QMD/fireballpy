@@ -45,6 +45,7 @@
 module twocenterxc
   use iso_fortran_env, only: stderr => error_unit, stdout => output_unit
   use precision, only: wp
+  use utils, only: utils_progress_bar, utils_clean_progress_bar
   implicit none
   private
 
@@ -272,7 +273,7 @@ contains
     include '../pseudopotentials.inc'
     integer :: igrid, index, index_coulomb, issh, l1, l2, m1, m2, n1, n2,      &
     &          io, ix, ix1, ix2, ndq, npts, npts1, npts2, nssh1, nssh2
-    real(kind=wp) :: d, dmax, dr, sum, ddq, xnocc_backup(nsh_max, nspec_max)
+    real(kind=wp) :: d, dmax, dr, sum, xnocc_backup(nsh_max, nspec_max)
     character(len=40) :: fname1, fname2
     integer, allocatable :: lsh(:)
     real(kind=wp), allocatable :: dq1(:,:), dq2(:,:), ahold(:,:), xmatt(:,:),  &
@@ -401,6 +402,7 @@ contains
       xnocc_backup = xnocc
 
       do igrid = 1, ndd_
+        call utils_progress_bar(igrid, ndd_, 60, stdout)
         d = d + dr
         do index = 1, index_max_
           n1 = nleft_(index)
@@ -411,24 +413,24 @@ contains
           m2 = mright_(index)
           ix = 1
           do ix1 = 1, npts1
+            do issh = 1, nssh1
+              xnocc(issh, ispec1_) = xnocc_backup(issh, ispec1_) + &
+              &                      dq1(issh, 1 + mod(ix1 - 1, ndq**issh)/ndq**(issh - 1))
+            end do
             do ix2 = 1, npts2
               xmatt(1, ix) = 1.0_wp
-              do issh = 1, nssh1
-                ddq = dq1(issh, 1 + mod(ix1 - 1, ndq**issh)/ndq**(issh - 1))
-                xmatt(issh + 1, ix) = ddq
-                xnocc(issh, ispec1_) = xnocc_backup(issh, ispec1_) + xmatt(issh + 1, ix)
-              end do
               do issh = 1, nssh2
-                ddq = dq2(issh, 1 + mod(ix2 - 1, ndq**issh)/ndq**(issh - 1))
-                xmatt(nssh1 + issh + 1, ix) = ddq
-                xnocc(issh, ispec2_) = xnocc_backup(issh, ispec2_) + xmatt(nssh1 + issh + 1, ix)
+                xnocc(issh, ispec2_) = xnocc_backup(issh, ispec2_) + &
+                &                      dq2(issh, 1 + mod(ix2 - 1, ndq**issh)/ndq**(issh - 1))
               end do
+              xmatt(2:(nssh1+1), ix) = xnocc(:,ispec1_) - xnocc_backup(:,ispec1_)
+              xmatt((nssh1+2):(nssh1+nssh2+1), ix) = xnocc(:,ispec2_) - xnocc_backup(:,ispec2_)
               ! We call a very stripped version of the integral function
               ! The idea is to reduce the computation at a minimum because
               ! we will be making lots of them.
               vvxc(ix, index) = twocenter_integral_fit(n1, l1, m1, n2, l2, m2, d)
               ix = ix + 1
-            end do ! ix 2
+            end do ! ix2
           end do ! ix1
         end do ! index
         ! End of the disaster
@@ -540,6 +542,7 @@ contains
           end if
         end do
       end do ! grid
+      call utils_clean_progress_bar(60, stdout)
       xnocc = xnocc_backup
       deallocate(ahold, dq1, dq2, vvxc, xmatt, fnamel1, fnamel2, fnamer1, fnamer2)
     end if
