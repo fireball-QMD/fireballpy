@@ -275,9 +275,7 @@ contains
     &          io, ix, ix1, ix2, ndq, npts, npts1, npts2, nssh1, nssh2
     real(kind=wp) :: d, dmax, dr, sum, xnocc_backup(nsh_max, nspec_max)
     character(len=40) :: fname1, fname2
-    integer, allocatable :: lsh(:)
-    real(kind=wp), allocatable :: dq1(:,:), dq2(:,:), ahold(:,:), xmatt(:,:),  &
-    &                             vvxc(:,:)
+    real(kind=wp), allocatable :: dq1(:,:), dq2(:,:), xmatt(:,:), vvxc(:,:)
     character(len=40), allocatable :: fnamel1(:), fnamer1(:), fnamel2(:),      &
     &                                 fnamer2(:)
 
@@ -289,8 +287,6 @@ contains
 
     nssh1 = nsshxc(ispec1_)
     nssh2 = nsshxc(ispec2_)
-    allocate(lsh(nssh2), stat=twocenter_calc)
-    if (twocenter_calc /= 0) return
     dmax = rcutoff1_ + rcutoff2_
     dr = dmax/real(ndd_ - 1, kind=wp)
 
@@ -395,8 +391,7 @@ contains
       npts2 = ndq**nssh2
       npts = npts1*npts2
       allocate(dq1(nssh1, ndq), dq2(nssh2, ndq), xmatt(nssh1+nssh2+1, npts),   &
-      &        vvxc(npts, index_max_), ahold(npts, index_max_),                &
-      &        stat=twocenter_calc)
+      &        vvxc(npts, index_max_), stat=twocenter_calc)
       if (twocenter_calc /= 0) return
       call twocenter_charge_grid(dq1, dq2)
       xnocc_backup = xnocc
@@ -435,42 +430,11 @@ contains
         end do ! index
         ! End of the disaster
 
-        ! symmetrize diagonal terms at distance = 0
-        if (ispec1_ /= ispec2_ .or. igrid > 1) cycle
-        lsh = 0
-        ahold = 0.0_wp
-        do index = 1, index_max_
-          n1 = nleft_(index)
-          l1 = lleft_(index)
-          m1 = mleft_(index)
-          n2 = nright_(index)
-          l2 = lright_(index)
-          m2 = mright_(index)
-          if (n1 == n2 .and. l1 == l2 .and. m1 == m2) then
-            ahold(:, n1) = ahold(:, n1) + vvxc(:, index)
-            lsh(n1) = lsh(n1) + 1
-          end if
-        end do ! index
-        do issh = 1, nssh2
-          ahold(:, issh) = ahold(:, issh)/lsh(issh)
-        end do
-        do index = 1, index_max_
-          n1 = nleft_(index)
-          l1 = lleft_(index)
-          m1 = mleft_(index)
-          n2 = nright_(index)
-          l2 = lright_(index)
-          m2 = mright_(index)
-          if (n1 == n2 .and. l1 == l2 .and. m1 == m2) then
-            vvxc(:, index) = ahold(:, n1)
-          end if
-        end do ! index
-
         ! Now we do the fit
         twocenter_calc =  math_lstsq(xmatt, vvxc, is_a_trans=.true.)
         if (twocenter_calc /= 0) then
           xnocc = xnocc_backup
-          deallocate(xmatt, dq1, dq2, lsh, vvxc, fnamel1, fnamel2, fnamer1, fnamer2)
+          deallocate(xmatt, dq1, dq2, vvxc, fnamel1, fnamel2, fnamer1, fnamer2)
           write (stderr, '(a,i4)') '[ERROR] twocenterxc.f90: fit failed with info = ', &
           &     twocenter_calc
           return
@@ -544,10 +508,9 @@ contains
       end do ! grid
       call utils_clean_progress_bar(60, stdout)
       xnocc = xnocc_backup
-      deallocate(ahold, dq1, dq2, vvxc, xmatt, fnamel1, fnamel2, fnamer1, fnamer2)
+      deallocate(dq1, dq2, vvxc, xmatt, fnamel1, fnamel2, fnamer1, fnamer2)
     end if
 
-    deallocate(lsh)
     write (stdout, '(a)') 'Done'
     twocenter_calc = 0
     return
