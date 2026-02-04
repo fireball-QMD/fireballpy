@@ -120,28 +120,28 @@
 ! We now read in a create.input file. This determines the number of atoms
 ! and the types of atoms.
         if (iammaster) then
-         write (*,*) '  '
-         write (*,*) ' Carefully edit create.input for your situation.'
-         write (*,*) '  '
-         write (*,*) ' We now read create.input! '
-         write (*,*) '  '
+         ! write (*,*) '  '
+         ! write (*,*) ' Carefully edit create.input for your situation.'
+         ! write (*,*) '  '
+         ! write (*,*) ' We now read create.input! '
+         ! write (*,*) '  '
         end if ! end master
  
         open (unit = 44, file = 'create.input', status = 'old')
         read (44,*) nspec
         if (nspec .gt. nspec_max) then
-         write (*,*) '  '
-         write (*,*) ' nspec > nspec_max '
-         write (*,*) ' Redimension creator! '
+         ! write (*,*) '  '
+         ! write (*,*) ' nspec > nspec_max '
+         ! write (*,*) ' Redimension creator! '
          stop 'error in readcreate'
         end if
  
         if (iammaster) then
-         write (*,*) '  '
-         write (*,*) ' Use the same convention for numbering as '
-         write (*,*) ' the dynamics: Z1 < Z2 < Z3 < ... < Z(nspec) '
-         write (*,*) ' where Z is atomic number for each of the atoms. '
-         write (*,*) '  '
+         ! write (*,*) '  '
+         ! write (*,*) ' Use the same convention for numbering as '
+         ! write (*,*) ' the dynamics: Z1 < Z2 < Z3 < ... < Z(nspec) '
+         ! write (*,*) ' where Z is atomic number for each of the atoms. '
+         ! write (*,*) '  '
         end if ! end master
  
         nzx_max = 0
@@ -151,8 +151,8 @@
          if (read_input) then
           open (unit = 45, file = inputfile(ispec), status = 'old')
          else
-          write (*,*) ' The following input file does not exist! '
-          write (*,104) inputfile(ispec)
+          ! write (*,*) ' The following input file does not exist! '
+          ! write (*,104) inputfile(ispec)
           stop 'error in readcreate'
          end if
  
@@ -161,10 +161,10 @@
  
          nzx_max = max(nzx(ispec),nzx_max)
          if (nzx(ispec) .lt. nzx_max) then
-          write (*,*) ' ispec = ', ispec
-          write (*,*) ' Z(ispec) .lt. Z(ispec-1) '
-          write (*,*) ' nzx(ispec) = ', nzx(ispec)
-          write (*,*) ' nzx(ispec-1) = ', nzx(ispec-1)
+          ! write (*,*) ' ispec = ', ispec
+          ! write (*,*) ' Z(ispec) .lt. Z(ispec-1) '
+          ! write (*,*) ' nzx(ispec) = ', nzx(ispec)
+          ! write (*,*) ' nzx(ispec-1) = ', nzx(ispec-1)
           stop ' Must stop bad order.  Z1 < Z2 < Z3 ... violated'
          end if
  
@@ -172,7 +172,7 @@
 ! Go through the periodic table and check.
          atomcheck = periodic(nzx(ispec))
          if (iammaster) then
-          write (*,200) ispec, nzx(ispec), atom(ispec), atomcheck
+          ! write (*,200) ispec, nzx(ispec), atom(ispec), atomcheck
          end if ! end master
          if (atom(ispec) .ne. atomcheck) stop ' wrong nz(nuc) for atom!!'
  
@@ -207,12 +207,12 @@
           add = add + xnocc(issh,ispec)
          end do
          if (add .gt. nzx(ispec)) then
-          write (*,*) ' xnocc = ', &
-     &                 (xnocc(issh,ispec), issh = 1, nssh(ispec))
-          write (*,*) ' Nuclear Z = ', nzx(ispec)
-          write (*,*) ' Huh? Does this make sense? '
-          write (*,*) ' Sorry I must stop. How can the number of '
-          write (*,*) ' electrons be larger than nuclear Z? '
+          ! write (*,*) ' xnocc = ', &
+     ! &                 (xnocc(issh,ispec), issh = 1, nssh(ispec))
+          ! write (*,*) ' Nuclear Z = ', nzx(ispec)
+          ! write (*,*) ' Huh? Does this make sense? '
+          ! write (*,*) ' Sorry I must stop. How can the number of '
+          ! write (*,*) ' electrons be larger than nuclear Z? '
           stop 'error in readcreate'
          end if
  
@@ -237,15 +237,15 @@
         close (unit = 45)
  
         if (iammaster) then
-         write (*,*) '  '
-         write (*,*) ' Done reading in create.input'
-         write (*,*) ' Please check it and if it looks OK, proceed. '
-         write (*,*) '  '
-         write (*,*) ' Number of species = ', nspec
-         write (*,*) ' '
+         ! write (*,*) '  '
+         ! write (*,*) ' Done reading in create.input'
+         ! write (*,*) ' Please check it and if it looks OK, proceed. '
+         ! write (*,*) '  '
+         ! write (*,*) ' Number of species = ', nspec
+         ! write (*,*) ' '
  
 ! Check for continuation.
-!         write (*,*) ' Insert 0 to continue if the above is OK. '
+!         ! write (*,*) ' Insert 0 to continue if the above is OK. '
 !         if (.not. iammpi) read (*,*) icontinue
         end if ! end master
 !        if (iammpi) icontinue = 0
@@ -269,11 +269,11 @@
      &     max(rcutoffa_max(ispec),rcutoffa(ispec,issh))
          end do
          if (iammaster) then
-          write (*,*) '  '
-          write (*,*) ' For ispec = ', ispec
-          write (*,*) ' Largest rcutoffa_max (Angstrom)= ',  &
-     &  rcutoffa_max(ispec)
-          write (*,*) '  '
+          ! write (*,*) '  '
+          ! write (*,*) ' For ispec = ', ispec
+          ! write (*,*) ' Largest rcutoffa_max (Angstrom)= ',  &
+     ! &  rcutoffa_max(ispec)
+          ! write (*,*) '  '
          end if ! end master
         end do
  

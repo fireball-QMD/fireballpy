@@ -9,7 +9,11 @@ contains
     integer :: i, percentage, len_done
     percentage = (100*iteration)/max_iterations
     len_done = nint(length*percentage/100.0)
-    if (iteration > 1) call utils_clean_progress_bar(length, unit)
+    if (iteration > 1) then
+      do i = 1, length + 17
+        write (unit, '(a)', advance='no') achar(8)
+      end do
+    end if
     write (unit, '(i3,a)', advance='no') percentage, '% |'
     do i = 1, len_done
       write (unit, '(a)', advance='no') '#'
@@ -18,6 +22,7 @@ contains
       write (unit, '(a)', advance='no') ' '
     end do
     write (unit, '(a,i4,a,i4)', advance='no') '| ', iteration, '/', max_iterations
+    flush(unit)
   end subroutine utils_progress_bar
 
   subroutine utils_clean_progress_bar(length, unit)
@@ -26,6 +31,13 @@ contains
     do i = 1, length + 17
       write (unit, '(a)', advance='no') achar(8)
     end do
+    do i = 1, length + 17
+      write (unit, '(a)', advance='no') ' '
+    end do
+    do i = 1, length + 17
+      write (unit, '(a)', advance='no') achar(8)
+    end do
+    flush(unit)
   end subroutine utils_clean_progress_bar
 
 end module utils

@@ -102,49 +102,49 @@
         read (88,*) mesh
  
         if (iammaster) then
-         write (*,*) '  '
-         write (*,*) '*-----------------------------------------------*'
-         write (*,*) '|               Welcome to READVNN              |'
-         write (*,*) '|  Reading (non)-neutral potential of the atom  |'
-         write (*,*) '*-----------------------------------------------*'
-         write (*,*) '  '
-         write (*,91) fileinvnn
+         ! write (*,*) '  '
+         ! write (*,*) '*-----------------------------------------------*'
+         ! write (*,*) '|               Welcome to READVNN              |'
+         ! write (*,*) '|  Reading (non)-neutral potential of the atom  |'
+         ! write (*,*) '*-----------------------------------------------*'
+         ! write (*,*) '  '
+         ! write (*,91) fileinvnn
         end if ! end master
  
 ! We now add the total energy of the atom to the vna data file
 ! (Only na, not charged parts)
         if (issh .eq. 0) then
          read (88,*) etotatom
-         if (iammaster) write (*,*) ' Atomic total energy for species:', &
-     &                   ispec,' is',etotatom
+         ! if (iammaster) ! write (*,*) ' Atomic total energy for species:', &
+     ! &                   ispec,' is',etotatom
         end if
  
 ! Perform some checks
         if (mesh .gt. max_points_na) then
-         write (*,*) ' max_points_na = ', max_points_na, &
-     &               ' mesh = ', mesh
-         write (*,*) ' The number of mesh points in your file is '
-         write (*,*) ' greater than the dimensioned number of points.'
-         write (*,*) ' Double check everything and rerun creator.'
+         ! write (*,*) ' max_points_na = ', max_points_na, &
+     ! &               ' mesh = ', mesh
+         ! write (*,*) ' The number of mesh points in your file is '
+         ! write (*,*) ' greater than the dimensioned number of points.'
+         ! write (*,*) ' Double check everything and rerun creator.'
          stop 'error in readvnn'
         end if
  
         if (nzxvnn .ne. nzx) then
-         write (*,*) ' nzxvnn = ', nzxvnn, ' nzx = ', nzx
-         write (*,*) ' The cutoff radius in the wavefunction file, '
-         write (*,*) ' for this shell, does not match the cutoff '
-         write (*,*) ' radius that you put into the create.input file. '
-         write (*,*) ' Double check everything and rerun creator.'
+         ! write (*,*) ' nzxvnn = ', nzxvnn, ' nzx = ', nzx
+         ! write (*,*) ' The cutoff radius in the wavefunction file, '
+         ! write (*,*) ' for this shell, does not match the cutoff '
+         ! write (*,*) ' radius that you put into the create.input file. '
+         ! write (*,*) ' Double check everything and rerun creator.'
          stop 'error in readvnn'
         end if
  
         if (abs(rcutoffvnn - rcutoff) .gt. 1.0d-5) then
-         write (*,*) ' rcutoffvnn = ', rcutoffvnn, &
-     &               ' rcutoff = ', rcutoff
-         write (*,*) ' The cutoff radius in the wavefunction file, for '
-         write (*,*) ' this shell, does not match the cutoff radius '
-         write (*,*) ' that you put into your create.input file. '
-         write (*,*) ' Double check everything and rerun creator.'
+         ! write (*,*) ' rcutoffvnn = ', rcutoffvnn, &
+     ! &               ' rcutoff = ', rcutoff
+         ! write (*,*) ' The cutoff radius in the wavefunction file, for '
+         ! write (*,*) ' this shell, does not match the cutoff radius '
+         ! write (*,*) ' that you put into your create.input file. '
+         ! write (*,*) ' Double check everything and rerun creator.'
          stop 'error in readvnn'
         end if
  
@@ -161,9 +161,9 @@
         close (unit = 88)
  
         if (iammaster) then
-         write (*,*) '  '
-         write (*,*) ' *---------------- END READVNN -----------------*'
-         write (*,*) '  '
+         ! write (*,*) '  '
+         ! write (*,*) ' *---------------- END READVNN -----------------*'
+         ! write (*,*) '  '
         end if ! end master
  
 ! Format Statements

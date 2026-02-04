@@ -168,14 +168,11 @@
 !
  1234   continue 
         if (imid .gt. max_points) imid=max_points ! If we have gone off of the end
-        aaa=psi_spline(1,imid,issh,ispec)
-        bbb=psi_spline(2,imid,issh,ispec)
-        ccc=psi_spline(3,imid,issh,ispec)
-        ddd=psi_spline(4,imid,issh,ispec)
- 
         xxp=r-(imid-1)*h
- 
-        psiofr=aaa+bbb*xxp+ccc*xxp**2+ddd*xxp**3
+        psiofr = psi_spline(4,imid,issh,ispec)
+        do j = 3, 1, -1
+          psiofr = xxp*psiofr + psi_spline(j,imid,issh,ispec)
+        end do
 
 ! Format Statements
 ! ===========================================================================

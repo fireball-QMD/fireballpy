@@ -105,13 +105,13 @@
         open (unit = 88, file = filein, status = 'old')
  
         if (iammaster) then
-         write (*,*) '  '
-         write (*,*) ' *---------------------------------------------* '
-         write (*,*) ' |               Welcome to READVPP            | '
-         write (*,*) ' | Reading (non)-neutral potential of the atom | '
-         write (*,*) ' *---------------------------------------------* '
-         write (*,*) '  '
-         write (*,91) filein
+         ! write (*,*) '  '
+         ! write (*,*) ' *---------------------------------------------* '
+         ! write (*,*) ' |               Welcome to READVPP            | '
+         ! write (*,*) ' | Reading (non)-neutral potential of the atom | '
+         ! write (*,*) ' *---------------------------------------------* '
+         ! write (*,*) '  '
+         ! write (*,91) filein
         end if ! end master
  
 ! There are 14 message lines in each pseudopotential file
@@ -131,35 +131,35 @@
         end if
  
         if (iammaster) then
-        write (*,*) ' We are reading in iexc from the pseudopotential '
-        write (*,*) ' file. This tells us which exchange-correlation '
-        write (*,*) ' approximation we are using. '
-        write (*,*) ' You have chosen iexc = ', iexc
-        write (*,*) ' The options that available are: '
-        write (*,*) ' 1  LDA Wigner'
-        write (*,*) ' 2  LDA Hedin/Lundqvist'
-        write (*,*) &
-     &  ' 3  LDA Ceperley/Alder Perdew/Zunger (1980) *** default'
-        write (*,*) ' 4  GGA Perdew/Wang (1991)'
-        write (*,*) ' 5  GGA Becke (1988) X, Perdew (1986)'
-        write (*,*) ' 6  GGA Perdew/Burke/Ernzerhof (1996)'
-        write (*,*) ' 7  LDA Zhao/Parr'
-        write (*,*) ' 8  LDA Ceperley/Alder Perdew/Wang (1991)'
-        write (*,*) ' 9  GGA Becke (1988) X, Lee/Yang/Parr (1988)'
-        write (*,*) ' 10 GGA Perdew/Wang (1991) X, Lee/Yang/Parr (1988)'
-        write (*,*) ' 11 LDA exchange only'
-        write (*,*) ' 12 GGA Becke (1988) X, Lee/Yang/Parr (1988), but '
-        write (*,*) '    with mixing of exact exchange. '
+        ! write (*,*) ' We are reading in iexc from the pseudopotential '
+        ! write (*,*) ' file. This tells us which exchange-correlation '
+        ! write (*,*) ' approximation we are using. '
+        ! write (*,*) ' You have chosen iexc = ', iexc
+        ! write (*,*) ' The options that available are: '
+        ! write (*,*) ' 1  LDA Wigner'
+        ! write (*,*) ' 2  LDA Hedin/Lundqvist'
+        ! write (*,*) &
+     ! &  ' 3  LDA Ceperley/Alder Perdew/Zunger (1980) *** default'
+        ! write (*,*) ' 4  GGA Perdew/Wang (1991)'
+        ! write (*,*) ' 5  GGA Becke (1988) X, Perdew (1986)'
+        ! write (*,*) ' 6  GGA Perdew/Burke/Ernzerhof (1996)'
+        ! write (*,*) ' 7  LDA Zhao/Parr'
+        ! write (*,*) ' 8  LDA Ceperley/Alder Perdew/Wang (1991)'
+        ! write (*,*) ' 9  GGA Becke (1988) X, Lee/Yang/Parr (1988)'
+        ! write (*,*) ' 10 GGA Perdew/Wang (1991) X, Lee/Yang/Parr (1988)'
+        ! write (*,*) ' 11 LDA exchange only'
+        ! write (*,*) ' 12 GGA Becke (1988) X, Lee/Yang/Parr (1988), but '
+        ! write (*,*) '    with mixing of exact exchange. '
         end if ! end master
  
 ! Read the number of shells
         read (88,*) nsshPP(ispec)
         read (88,*) (lsshPP(ispec,issh), issh = 1, nsshPP(ispec))
         if (iammaster) then
-         write (*,*) '  '
-         write (*,*) ' # of pseudopotential shells = ', nsshPP(ispec)
-         write (*,*) ' The L values = ', &
-     &    (lsshPP(ispec,issh), issh = 1, nsshPP(ispec))
+         ! write (*,*) '  '
+         ! write (*,*) ' # of pseudopotential shells = ', nsshPP(ispec)
+         ! write (*,*) ' The L values = ', &
+     ! &    (lsshPP(ispec,issh), issh = 1, nsshPP(ispec))
         end if ! end master
  
 ! jel-PP
@@ -191,11 +191,11 @@
         do issh = 1, nsshPP(ispec)
          read (88,200) mesh, cl_pp(issh,ispec)
          if (mesh .gt. max_points_pp) then
-          write (*,*) ' max_points_pp = ', max_points_pp, &
-     &                ' mesh = ', mesh
-          write (*,*) ' The number of mesh points in your file is '
-          write (*,*) ' greater than the dimensioned number of points.'
-          write (*,*) ' Double check everything and rerun creator.'
+          ! write (*,*) ' max_points_pp = ', max_points_pp, &
+     ! &                ' mesh = ', mesh
+          ! write (*,*) ' The number of mesh points in your file is '
+          ! write (*,*) ' greater than the dimensioned number of points.'
+          ! write (*,*) ' Double check everything and rerun creator.'
           stop 'error in readvpp'
          end if
  
@@ -217,9 +217,9 @@
 
  
       if (iammaster) then
-       write (*,*) '  '
-       write (*,*) ' *---------------- END READVPP -------------------*'
-       write (*,*) '  '
+       ! write (*,*) '  '
+       ! write (*,*) ' *---------------- END READVPP -------------------*'
+       ! write (*,*) '  '
       end if ! end master
  
 ! Code to just make ftnchek happy, because these are not ever used

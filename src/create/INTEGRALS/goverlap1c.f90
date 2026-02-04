@@ -140,7 +140,7 @@
         fname = 'coutput/goverlapf1.dat'
 
 ! Open the file to store the onecenter data.
-        write (*,*) ' open file ',fname
+        ! write (*,*) ' open file ',fname
         open (unit = 36, file = fname , status = 'unknown')
 
 ! Set up the header for the output file.
@@ -159,7 +159,7 @@
         fname = 'coutput/goverlapf2.dat'
 
 ! Open the file to store the onecenter data.
-        write (*,*) ' open file ',fname
+        ! write (*,*) ' open file ',fname
         open (unit = 37, file = fname , status = 'unknown')
 
 ! Set up the header for the output file.
@@ -214,7 +214,7 @@
  
  
 ! JOM-test
-            write(*,*)'dpsiofr', rho , psiofr(1,2,rho), dpsiofr(1,2,rho)
+            ! write(*,*)'dpsiofr', rho , psiofr(1,2,rho), dpsiofr(1,2,rho)
            do issh = 1, nssh
             l1 = lsshxc(in1,issh)
             do jssh = 1, nssh

@@ -13,8 +13,7 @@
 !
 ! University of Regensburg - Juergen Fritsch
 !
-! University of Utah - James P. Lewis
-!                      Kurt R. Glaesemann
+! University of Utah - James P. Lewis Kurt R. Glaesemann
 !
 ! Universidad de Madrid - Jose Ortega
 !
@@ -150,12 +149,12 @@ contains
 
   ! TODO: this should come from somewhere else
   subroutine twocenter_charge_grid(dq1, dq2)
-    real(kind=wp), intent(in out) :: dq1(:,:), dq2(:,:)
+    real(kind=wp), intent(out) :: dq1(:,:), dq2(:,:)
     include '../parameters.inc'
     include '../exchange.inc'
     logical :: first_orb(0:3)
     integer :: issh, ilssh, ndq
-    ndq = 3
+    ndq = 2
 
     ! ispec1
     first_orb = .true.
@@ -164,35 +163,35 @@ contains
       if (ilssh == 0) then
         if (first_orb(ilssh)) then
           dq1(issh, 1) = -0.10_wp
-          dq1(issh, 2) = 0.00_wp
-          dq1(issh, 3) = 0.10_wp
+          ! dq1(issh, 2) = 0.00_wp
+          dq1(issh, 2) = 0.10_wp
           first_orb(ilssh) = .false.
         else
           dq1(issh, 1) = 0.00_wp
-          dq1(issh, 2) = 0.05_wp
-          dq1(issh, 3) = 0.10_wp
+          ! dq1(issh, 2) = 0.05_wp
+          dq1(issh, 2) = 0.10_wp
         end if
       else if (ilssh == 1) then
         if (first_orb(ilssh)) then
           dq1(issh, 1) = -0.20_wp
-          dq1(issh, 2) = 0.00_wp
-          dq1(issh, 3) = 0.20_wp
+          ! dq1(issh, 2) = 0.00_wp
+          dq1(issh, 2) = 0.20_wp
           first_orb(ilssh) = .false.
         else
           dq1(issh, 1) = 0.00_wp
-          dq1(issh, 2) = 0.10_wp
-          dq1(issh, 3) = 0.20_wp
+          ! dq1(issh, 2) = 0.10_wp
+          dq1(issh, 2) = 0.20_wp
         end if
       else
         if (first_orb(ilssh)) then
           dq1(issh, 1) = -0.50_wp
-          dq1(issh, 2) = 0.00_wp
-          dq1(issh, 3) = 0.50_wp
+          ! dq1(issh, 2) = 0.00_wp
+          dq1(issh, 2) = 0.50_wp
           first_orb(ilssh) = .false.
         else
           dq1(issh, 1) = 0.00_wp
-          dq1(issh, 2) = 0.25_wp
-          dq1(issh, 3) = 0.50_wp
+          ! dq1(issh, 2) = 0.25_wp
+          dq1(issh, 2) = 0.50_wp
         end if
       end if
     end do
@@ -204,35 +203,35 @@ contains
       if (ilssh == 0) then
         if (first_orb(ilssh)) then
           dq2(issh, 1) = -0.10_wp
-          dq2(issh, 2) = 0.00_wp
-          dq2(issh, 3) = 0.10_wp
+          ! dq2(issh, 2) = 0.00_wp
+          dq2(issh, 2) = 0.10_wp
           first_orb(ilssh) = .false.
         else
           dq2(issh, 1) = 0.00_wp
-          dq2(issh, 2) = 0.05_wp
-          dq2(issh, 3) = 0.10_wp
+          ! dq2(issh, 2) = 0.05_wp
+          dq2(issh, 2) = 0.10_wp
         end if
       else if (ilssh == 1) then
         if (first_orb(ilssh)) then
           dq2(issh, 1) = -0.20_wp
-          dq2(issh, 2) = 0.00_wp
-          dq2(issh, 3) = 0.20_wp
+          ! dq2(issh, 2) = 0.00_wp
+          dq2(issh, 2) = 0.20_wp
           first_orb(ilssh) = .false.
         else
           dq2(issh, 1) = 0.00_wp
-          dq2(issh, 2) = 0.10_wp
-          dq2(issh, 3) = 0.20_wp
+          ! dq2(issh, 2) = 0.10_wp
+          dq2(issh, 2) = 0.20_wp
         end if
       else
         if (first_orb(ilssh)) then
           dq2(issh, 1) = -0.50_wp
-          dq2(issh, 2) = 0.00_wp
-          dq2(issh, 3) = 0.50_wp
+          ! dq2(issh, 2) = 0.00_wp
+          dq2(issh, 2) = 0.50_wp
           first_orb(ilssh) = .false.
         else
           dq2(issh, 1) = 0.00_wp
-          dq2(issh, 2) = 0.25_wp
-          dq2(issh, 3) = 0.50_wp
+          ! dq2(issh, 2) = 0.25_wp
+          dq2(issh, 2) = 0.50_wp
         end if
       end if
     end do
@@ -273,7 +272,7 @@ contains
     include '../pseudopotentials.inc'
     integer :: igrid, index, index_coulomb, issh, l1, l2, m1, m2, n1, n2,      &
     &          io, ix, ix1, ix2, ndq, npts, npts1, npts2, nssh1, nssh2
-    real(kind=wp) :: d, dmax, dr, sum, xnocc_backup(nsh_max, nspec_max)
+    real(kind=wp) :: d, dmax, dr, ddq, xnocc_in(nsh_max, 2)
     character(len=40) :: fname1, fname2
     real(kind=wp), allocatable :: dq1(:,:), dq2(:,:), xmatt(:,:), vvxc(:,:)
     character(len=40), allocatable :: fnamel1(:), fnamer1(:), fnamel2(:),      &
@@ -295,7 +294,7 @@ contains
       &        stat=twocenter_calc)
       if (twocenter_calc /= 0) return
       io = 3610
-      write (fname1, '(a,i2.2,a,i2.2,a)') 'vxc_2c.', nzx1_, '.',             &
+      write (fname1, '(a,i2.2,a,i2.2,a)') 'vxc_2c.', nzx1_, '.',               &
       &     nzx2_, '.dat'
       write (stdout, '(a)') 'Computing '//trim(fname1)//'...'
       open (unit=io, file='coutput/'//trim(fname1), status='new',              &
@@ -309,7 +308,7 @@ contains
       close(io)
       if (ispec1_ /= ispec2_) then
         io = 3620
-        write (fname2, '(a,i2.2,a,i2.2,a)') 'vxc_2c.', nzx2_, '.',           &
+        write (fname2, '(a,i2.2,a,i2.2,a)') 'vxc_2c.', nzx2_, '.',             &
         &     nzx1_, '.dat'
         write (stdout, '(a)') 'Computing '//trim(fname2)//'...'
         open (unit=io, file='coutput/'//trim(fname2), status='new',            &
@@ -386,7 +385,7 @@ contains
       ! TODO: this is a disaster but for now is what we have
       ! THIS MUST BE DONE ON THE MASTER
       ! MAJOR RECODING NEEDS TO HAPPEN BEFORE THIS IS AVOIDED
-      ndq = 3
+      ndq = 2
       npts1 = ndq**nssh1
       npts2 = ndq**nssh2
       npts = npts1*npts2
@@ -394,46 +393,49 @@ contains
       &        vvxc(npts, index_max_), stat=twocenter_calc)
       if (twocenter_calc /= 0) return
       call twocenter_charge_grid(dq1, dq2)
-      xnocc_backup = xnocc
 
+      d = 0.0_wp
       do igrid = 1, ndd_
         call utils_progress_bar(igrid, ndd_, 60, stdout)
         d = d + dr
-        do index = 1, index_max_
-          n1 = nleft_(index)
-          l1 = lleft_(index)
-          m1 = mleft_(index)
-          n2 = nright_(index)
-          l2 = lright_(index)
-          m2 = mright_(index)
-          ix = 1
-          do ix1 = 1, npts1
+        ix = 1
+        do ix1 = 1, npts1
+          do ix2 = 1, npts2
+            call utils_progress_bar(ix, npts, 30, stdout)
+            xmatt(1, ix) = 1.0_wp
             do issh = 1, nssh1
-              xnocc(issh, ispec1_) = xnocc_backup(issh, ispec1_) + &
-              &                      dq1(issh, 1 + mod(ix1 - 1, ndq**issh)/ndq**(issh - 1))
+              ddq = dq1(issh, 1 + mod(ix1 - 1, ndq**issh)/ndq**(issh - 1))
+              xnocc_in(issh, 1) = xnocc(issh, ispec1_) + ddq
+              xmatt(issh+1, ix) = ddq
             end do
-            do ix2 = 1, npts2
-              xmatt(1, ix) = 1.0_wp
-              do issh = 1, nssh2
-                xnocc(issh, ispec2_) = xnocc_backup(issh, ispec2_) + &
-                &                      dq2(issh, 1 + mod(ix2 - 1, ndq**issh)/ndq**(issh - 1))
-              end do
-              xmatt(2:(nssh1+1), ix) = xnocc(:,ispec1_) - xnocc_backup(:,ispec1_)
-              xmatt((nssh1+2):(nssh1+nssh2+1), ix) = xnocc(:,ispec2_) - xnocc_backup(:,ispec2_)
+            do issh = 1, nssh2
+              ddq = dq2(issh, 1 + mod(ix2 - 1, ndq**issh)/ndq**(issh - 1))
+              xnocc_in(issh, 2) = xnocc(issh, ispec2_) + ddq
+              xmatt(issh+1+nssh1, ix) = ddq
+            end do
+            twocenter_calc = twocenter_rho2c(d, xnocc_in)
+            if (twocenter_calc /= 0) return
+            do index = 1, index_max_
+              n1 = nleft_(index)
+              l1 = lleft_(index)
+              m1 = mleft_(index)
+              n2 = nright_(index)
+              l2 = lright_(index)
+              m2 = mright_(index)
               ! We call a very stripped version of the integral function
               ! The idea is to reduce the computation at a minimum because
               ! we will be making lots of them.
               vvxc(ix, index) = twocenter_integral_fit(n1, l1, m1, n2, l2, m2, d)
-              ix = ix + 1
-            end do ! ix2
-          end do ! ix1
-        end do ! index
+            end do ! index
+            ix = ix + 1
+          end do ! ix2
+        end do ! ix1
+        call utils_clean_progress_bar(30, stdout)
         ! End of the disaster
 
         ! Now we do the fit
         twocenter_calc =  math_lstsq(xmatt, vvxc, is_a_trans=.true.)
         if (twocenter_calc /= 0) then
-          xnocc = xnocc_backup
           deallocate(xmatt, dq1, dq2, vvxc, fnamel1, fnamel2, fnamer1, fnamer2)
           write (stderr, '(a,i4)') '[ERROR] twocenterxc.f90: fit failed with info = ', &
           &     twocenter_calc
@@ -507,7 +509,6 @@ contains
         end do
       end do ! grid
       call utils_clean_progress_bar(60, stdout)
-      xnocc = xnocc_backup
       deallocate(dq1, dq2, vvxc, xmatt, fnamel1, fnamel2, fnamer1, fnamer2)
     end if
 
@@ -525,8 +526,11 @@ contains
     real(kind=wp), intent(in) :: d
     integer :: irho, iz
     real(kind=wp) :: factor, factor2, factor4, phifactor, psi1, psi2,      &
-    &                psiofr, rescaled_psi, r1, r2, rho, rho2, z1, z2, vxc
+    &                r1, r2, rho, rho2, z1, z2, z12, z22
+    real(kind=wp), external :: vxc, psiofr, rescaled_psi
     real(kind=wp), allocatable :: rhomult(:), zmult(:)
+
+    twocenter_integral_fit = 0.0_wp
 
     zmin = max(-rcutoff1_, d - rcutoff2_)
     zmax = min(rcutoff1_, d + rcutoff2_)
@@ -547,10 +551,10 @@ contains
       zmult(iz) = factor4
       zmult(iz+1) = factor2
     end do
-    zmult(nnz - 1) = factor2
+    if (nnz > 1) zmult(nnz - 1) = factor2
     zmult(nnz) = factor
 
-    allocate(rhomult(nnrho_))
+    allocate(rhomult(nnrho))
     factor = 0.33333333333333333333_wp*drho
     factor2 = 2.0_wp*factor
     factor4 = 2.0_wp*factor2
@@ -562,16 +566,17 @@ contains
     rhomult(nnrho_ - 1) = factor2
     rhomult(nnrho_) = factor
 
-    twocenter_integral_fit = 0.0_wp
     do iz = 1, nnz
       z1 = zmin + real(iz - 1, kind=wp)*dz
       z2 = z1 - d
+      z12 = z1*z1
+      z22 = z2*z2
       do irho = 1, nnrho_
         rho = rhomin_ + real(irho - 1, kind=wp)*drho
         rho2 = rho*rho
-        r1 = sqrt(z1*z1 + rho2)
+        r1 = sqrt(z12 + rho2)
         if (r1 >= rcutoff1_) cycle
-        r2 = sqrt(z2*z2 + rho2)
+        r2 = sqrt(z22 + rho2)
         factor = zmult(iz)*rhomult(irho)
         psi1 = psiofr(ispec1_, n1, r1)
         psi1 = rescaled_psi(l1, m1, rho, r1, z1, psi1)
@@ -586,4 +591,95 @@ contains
     deallocate(zmult, rhomult)
     return
   end function twocenter_integral_fit
+
+  integer function twocenter_rho2c (d, xnocc_in)
+    use constants, only: inv4pi
+    include '../parameters.inc'
+    include '../exchange.inc'
+    include '../quadrature.inc'
+    include '../wavefunctions.inc'
+    real(kind=wp), intent(in) :: d, xnocc_in(:,:)
+    integer :: irho, issh, iz
+    real(kind=wp) :: dens, dzraw, r, r1, r2, rho, rho2, z1, z2, z12, z22
+    real(kind=wp), external :: psiofr
+
+    zmin = max(-rcutoff1_, d - rcutoff2_)
+    zmax = min(rcutoff1_, d + rcutoff2_)
+    rhomin = 0.0_wp
+    rhomax = min(rcutoff1_, rcutoff2_)
+    dzraw = min(drr_rho(ispec1_),drr_rho(ispec2_))
+    dz = dzraw*ixcgridfactor
+    if (dz > 0.05_wp) dz = 0.05_wp
+    if (dz < 0.002_wp) dz = 0.002_wp
+    nnz = int((zmax - zmin)/dz) + 1
+    drho = dz
+    nnrho = int((rhomax - rhomin)/drho) + 1
+    if (nnrho > nrho_points) then
+      write (stderr, '(a)') '[ERROR] twocenterxc.f90: nnrho > nrho_points'
+      twocenter_rho2c = 1
+      return
+    end if
+    if (nnz > nz_points) then
+      write (stderr, '(a)') '[ERROR] twocenterxc.f90: nnz > nz_points'
+      twocenter_rho2c = 1
+      return
+    end if
+
+    do iz = 1, nnz
+      z1 = zmin + (iz-1)*dz
+      z2 = z1 - d
+      z12 = z1*z1
+      z22 = z2*z2
+      do irho = 1, nnrho
+        rho = rhomin + (irho-1)*drho
+        rho2 = rho*rho
+        r1 = sqrt(z12 + rho2)
+        r2 = sqrt(z22 + rho2)
+        dens = 0.0_wp
+        do issh = 1, nsshxc(ispec1_)
+          dens = dens + xnocc_in(issh,1)*psiofr(ispec1_,issh,r1)**2
+        end do
+        do issh = 1, nsshxc(ispec2_)
+          dens = dens + xnocc_in(issh,2)*psiofr(ispec2_,issh,r2)**2
+        end do
+        rho2c(irho,iz) = dens*inv4pi
+      end do
+    end do
+
+    twocenter_rho2c = 0
+    if (iexc_ /= 4 .and. iexc_ /= 5 .and. iexc_ /= 6 .and. iexc_ /= 9 .and. iexc_ /= 10) return
+    twocenter_rho2c = 1
+
+    do iz = 1, nnz
+      do irho = 2, nnrho - 1
+        rhop2c(irho,iz) = (rho2c(irho+1,iz) - rho2c(irho-1,iz))/(2.0_wp*drho)
+        rhopp2c(irho,iz) = (rho2c(irho+1,iz) - 2.0_wp*rho2c(irho,iz) + rho2c(irho-1,iz))/(drho**2)
+      end do
+      rhop2c(1,iz) = 2.0_wp*rhop2c(2,iz) - rhop2c(3,iz)
+      rhop2c(nnrho,iz) = 2.0_wp*rhop2c(nnrho-1,iz) - rhop2c(nnrho-2,iz)
+      rhopp2c(1,iz) = 2.0_wp*rhopp2c(2,iz) - rhopp2c(3,iz)
+      rhopp2c(nnrho,iz) = 2.0_wp*rhopp2c(nnrho-1,iz) - rhopp2c(nnrho-2,iz)
+    end do
+    do irho = 1, nnrho
+      do iz = 2, nnz - 1
+        rhoz2c(irho,iz) = (rho2c(irho,iz+1) - rho2c(irho,iz-1))/(2.0d0*dz)
+        rhozz2c(irho,iz) = (rho2c(irho,iz+1) - 2.0d0*rho2c(irho,iz) + rho2c(irho,iz-1))/(dz**2)
+      end do
+      rhoz2c(irho,1) = 2.0d0*rhoz2c(irho,2) - rhoz2c(irho,3)
+      rhoz2c(irho,nnz) = 2.0d0*rhoz2c(irho,nnz-1) - rhoz2c(irho,nnz-2)
+      rhozz2c(irho,1) = 2.0d0*rhozz2c(irho,2) - rhozz2c(irho,3)
+      rhozz2c(irho,nnz) = 2.0d0*rhozz2c(irho,nnz-1) - rhozz2c(irho,nnz-2)
+    end do
+    do irho = 1, nnrho
+      do iz = 2, nnz - 1
+        rhopz2c(irho,iz) = (rhop2c(irho,iz+1) - rhop2c(irho,iz-1))/(2.0d0*dz)
+      end do
+      rhopz2c(irho,1) = 2.0d0*rhopz2c(irho,2) - rhopz2c(irho,3)
+      rhopz2c(irho,nnz) = 2.0d0*rhopz2c(irho,nnz-1) - rhopz2c(irho,nnz-2)
+    end do
+
+    twocenter_rho2c = 0
+    return
+  end function twocenter_rho2c
 end module twocenterxc
+

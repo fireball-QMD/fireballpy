@@ -71,6 +71,7 @@
 ! Program Declaration
 ! ======================================================================
 program create
+  use iso_fortran_env, only: stderr => error_unit
   use precision, only: wp
   use onecenter, only: onecenter_init, onecenter_calc
   use twocenterxc, only: twocenter_init, twocenter_calc, TWOCENTER_XC
@@ -289,16 +290,7 @@ program create
 !         write (*,*) '  '
 !         write (*,*) ' Please insert your name and other messages. '
 !         write (*,*) '  '
-    if (.not. iammpi) then
-!          read (*,102) signature
-      signature = ' fireballpy '
-    else
-! You might want to edit this to put your own name in here
-      signature = ' MPI superhero '
-    endif
-    write (*,*) '  '
-    write (*,103) signature
-    write (*,*) '  '
+    signature = ' fireballpy '
   end if ! end master
 
 !  MPI Broadcast signature
@@ -341,11 +333,6 @@ program create
 
   if (iexc .eq. 4 .or. iexc .eq. 5 .or. iexc .eq. 6 &
   &      .or. iexc .eq. 10) then
-    if (iammaster) then
-      write (*,*) ' The exchange-correlation option that you chose '
-      write (*,*) ' has not been implemented into creator yet. '
-      write (*,*) ' Choose a different one, and restart. '
-    end if
     stop 1
   end if
   if (iexc .ne. 11 .and. (ispin .eq. 1 .or. isnuxc1c .eq. 1 .or. &
@@ -381,31 +368,6 @@ program create
       &                   lright, mright, index_max2c, index_max3c)
 
 ! Write out the results of mk_index
-      if (iammaster) then
-        write (*,*) '  '
-        write (*,*) '  '
-        write (*,*) ' species 1 = ', itype1, ' species 2 = ', itype2
-        write (*,100)
-        write (*,*) ' For two-center interactions: '
-        write (*,*) ' index_max2c = ', index_max2c(itype1,itype2)
-        write (*,500)
-        do index = 1, index_max2c(itype1,itype2)
-          write (*,501) index, &
-          &       nleft(itype1,itype2,index), lleft(itype1,itype2,index), &
-          &       mleft(itype1,itype2,index), nright(itype1,itype2,index), &
-          &       lright(itype1,itype2,index), mright(itype1,itype2,index)
-        end do
-        write (*,*) ' Additionally, for three-center interactions: '
-        write (*,*) ' index_max3c = ', index_max3c(itype1,itype2)
-        write (*,500)
-        do index = index_max2c(itype1,itype2) + 1, &
-        &                index_max3c(itype1,itype2)
-          write (*,501) index, &
-          &       nleft(itype1,itype2,index), lleft(itype1,itype2,index), &
-          &       mleft(itype1,itype2,index), nright(itype1,itype2,index), &
-          &       lright(itype1,itype2,index), mright(itype1,itype2,index)
-        end do
-      end if ! end master
       if (index_max3c(itype1,itype2) .gt. inter_max) then
         write (*,*) ' index_max3c(itype1,itype2) = ',  &
         &                   index_max3c(itype1,itype2)
@@ -426,36 +388,6 @@ program create
 ! Write out the info file.
 ! Only do this on the master
   if (iammaster) then
-    write (*,*) '  '
-    write (*,*) '  '
-    write (*,*) ' Now we are writing the following to the '
-    write (*,*) ' info.dat file. '
-    write (*,*) '  '
-
-! First write to the screen
-    do ispec = 1, nspec
-      write (*,100)
-      write (*,301) ispec
-      write (*,302) atom(ispec)
-      write (*,303) nzx(ispec)
-      write (*,304) xmass(ispec)
-      write (*,305) nssh(ispec)
-      write (*,306) (lssh(ispec,issh), issh = 1, nssh(ispec))
-      write (*,307) nsshPP(ispec)
-      write (*,308) (lsshPP(ispec,issh), issh = 1, nsshPP(ispec))
-!jel-PP
-      write (*,314) (rcPP(ispec))
-
-      write (*,309) (xnocc(issh,ispec), issh = 1, nssh(ispec))
-      write (*,310) (rcutoff(ispec,issh), issh = 1, nssh(ispec))
-      write (*,311) (wavefxn(ispec,issh), issh = 1, nssh(ispec))
-      write (*,312) (napot(ispec,issh), issh = 0, nssh(ispec))
-      write (*,313) etotatom(ispec)
-
-      write (*,100)
-    end do
-
-! Next write to the info.dat file.
     inquire (file = 'coutput/info.dat', exist = read_info)
     open (unit = 12, file = 'coutput/info.dat', status = 'unknown')
 
@@ -509,7 +441,6 @@ program create
     &                   ibcna, ibcxc, inuxc1c, inuxc2c, isnuxc1c, &
     &                   isnuxc2c
     close (unit = 12)
-    write (*,*) '  '
 
 ! Done with setup, now get to work
 ! ======================================================================
@@ -522,7 +453,6 @@ program create
 ! **********************************************************************
     if (V_intra_dip .eq. 1) then
       do itype = 1,nspec
-        write(*,*) 'itype= ', itype !Ankais
         call onecentervdip (nsh_max, nspec, nspec_max, itype, &
         &               nssh, lssh, drr_rho, rcutoffa_max, what, signature)
       end do !end do itype
@@ -574,7 +504,6 @@ program create
       end do
     end do
   end if ! end master
-    stop
 
 ! ======================================================================
 ! I. Perform three-center calculations
