@@ -11,10 +11,10 @@ subroutine assemble_xc_1c ()
   integer in1
   integer matom
   integer ixc
-  real dccexc_1c
-  real exc_1c
-  real muexc_1c
-  real, dimension (numorb_max,numorb_max) :: mu1xc
+  real(double) dccexc_1c
+  real(double) exc_1c
+  real(double) muexc_1c
+  real(double), dimension (numorb_max,numorb_max) :: mu1xc
   etotxc_1c = 0.0d0
   Uexc_1c = 0.0d0
   Umuxc_1c = 0.0d0
@@ -24,7 +24,7 @@ subroutine assemble_xc_1c ()
    matom = neigh_self(iatom)
    in1 = imass(iatom)
    ixc = 4
-   print*,'assemble_xc_1c iatom =', iatom
+   print*,'assemble_xc_1c iatom =', iatom, in1
    call unocentros (in1, iatom, dccexc_1c, mu1xc)
    etotxc_1c = etotxc_1c + dccexc_1c
    do imu = 1, num_orb(in1)

@@ -323,7 +323,7 @@ contains
       end if
       do issh = 1, nssh1
         io = 3710 + issh
-        write (fnamel1(issh), '(a,i2.2,a,i2.2,a,i2.2,a)') 'vxc_2c_ol.', issh,  &
+        write (fnamel1(issh), '(a,i2.2,a,i2.2,a,i2.2,a)') 'vxc_2c_ol_', issh,  &
         &     '.', nzx1_, '.', nzx2_, '.dat'
         write (stdout, '(a)') 'Computing '//trim(fnamel1(issh))//'...'
         open (unit=io, file='coutput/'//trim(fnamel1(issh)), status='new',     &
@@ -337,7 +337,7 @@ contains
         close(io)
         if (ispec1_ /= ispec2_) then
           io = 3720 + issh
-          write (fnamer2(issh), '(a,i2.2,a,i2.2,a,i2.2,a)') 'vxc_2c_or.',      &
+          write (fnamer2(issh), '(a,i2.2,a,i2.2,a,i2.2,a)') 'vxc_2c_or_',      &
           &     issh, '.', nzx2_, '.', nzx1_, '.dat'
           write (stdout, '(a)') 'Computing '//trim(fnamer2(issh))//'...'
           open (unit=io, file='coutput/'//trim(fnamer2(issh)), status='new',   &
@@ -353,7 +353,7 @@ contains
       end do
       do issh = 1, nssh2
         io = 3810 + issh
-        write (fnamer1(issh), '(a,i2.2,a,i2.2,a,i2.2,a)') 'vxc_2c_or.', issh,  &
+        write (fnamer1(issh), '(a,i2.2,a,i2.2,a,i2.2,a)') 'vxc_2c_or_', issh,  &
         &     '.', nzx1_, '.', nzx2_, '.dat'
         write (stdout, '(a)') 'Computing '//trim(fnamer1(issh))//'...'
         open (unit=io, file='coutput/'//trim(fnamer1(issh)), status='new',     &
@@ -367,7 +367,7 @@ contains
         close(io)
         if (ispec1_ /= ispec2_) then
           io = 3820 + issh
-          write (fnamel2(issh), '(a,i2.2,a,i2.2,a,i2.2,a)') 'vxc_2c_ol.',      &
+          write (fnamel2(issh), '(a,i2.2,a,i2.2,a,i2.2,a)') 'vxc_2c_ol_',      &
           &     issh, '.', nzx2_, '.', nzx1_, '.dat'
           write (stdout, '(a)') 'Computing '//trim(fnamel2(issh))//'...'
           open (unit=io, file='coutput/'//trim(fnamel2(issh)), status='new',   &
