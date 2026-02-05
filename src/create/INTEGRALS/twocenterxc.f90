@@ -44,7 +44,8 @@
 module twocenterxc
   use iso_fortran_env, only: stderr => error_unit, stdout => output_unit
   use precision, only: wp
-  use utils, only: utils_progress_bar, utils_clean_progress_bar
+  use utils, only: utils_progress_bar_prepare, utils_progress_bar_print,        &
+  &                utils_progress_bar_clear
   implicit none
   private
 
@@ -394,14 +395,14 @@ contains
       if (twocenter_calc /= 0) return
       call twocenter_charge_grid(dq1, dq2)
 
+      call utils_progress_bar_prepare(ndd_, 100)
       d = 0.0_wp
       do igrid = 1, ndd_
-        call utils_progress_bar(igrid, ndd_, 60, stdout)
+        call utils_progress_bar_print(igrid, stdout)
         d = d + dr
         ix = 1
         do ix1 = 1, npts1
           do ix2 = 1, npts2
-            call utils_progress_bar(ix, npts, 30, stdout)
             xmatt(1, ix) = 1.0_wp
             do issh = 1, nssh1
               ddq = dq1(issh, 1 + mod(ix1 - 1, ndq**issh)/ndq**(issh - 1))
@@ -430,7 +431,6 @@ contains
             ix = ix + 1
           end do ! ix2
         end do ! ix1
-        call utils_clean_progress_bar(30, stdout)
         ! End of the disaster
 
         ! Now we do the fit
@@ -508,8 +508,8 @@ contains
           end if
         end do
       end do ! grid
-      call utils_clean_progress_bar(60, stdout)
       deallocate(dq1, dq2, vvxc, xmatt, fnamel1, fnamel2, fnamer1, fnamer2)
+      call utils_progress_bar_clear(stdout)
     end if
 
     write (stdout, '(a)') 'Done'

@@ -1,43 +1,26 @@
 module utils
   implicit none
-  public
+  private
+  public :: utils_progress_bar_prepare, utils_progress_bar_print, utils_progress_bar_clear
 
-contains
+  interface
+    module subroutine utils_progress_bar_prepare(max_iterations, length)
+      implicit none
+      integer, intent(in) :: max_iterations, length
+    end subroutine utils_progress_bar_prepare
+  end interface
 
-  subroutine utils_progress_bar(iteration, max_iterations, length, unit)
-    integer, intent(in) :: iteration, max_iterations, length, unit
-    integer :: i, percentage, len_done
-    percentage = (100*iteration)/max_iterations
-    len_done = nint(length*percentage/100.0)
-    if (iteration > 1) then
-      do i = 1, length + 17
-        write (unit, '(a)', advance='no') achar(8)
-      end do
-    end if
-    write (unit, '(i3,a)', advance='no') percentage, '% |'
-    do i = 1, len_done
-      write (unit, '(a)', advance='no') '#'
-    end do
-    do i = len_done + 1, length
-      write (unit, '(a)', advance='no') ' '
-    end do
-    write (unit, '(a,i4,a,i4)', advance='no') '| ', iteration, '/', max_iterations
-    flush(unit)
-  end subroutine utils_progress_bar
+  interface
+    module subroutine utils_progress_bar_print(iteration, unit)
+      implicit none
+      integer, intent(in) :: iteration, unit
+    end subroutine utils_progress_bar_print
+  end interface
 
-  subroutine utils_clean_progress_bar(length, unit)
-    integer, intent(in) :: length, unit
-    integer :: i
-    do i = 1, length + 17
-      write (unit, '(a)', advance='no') achar(8)
-    end do
-    do i = 1, length + 17
-      write (unit, '(a)', advance='no') ' '
-    end do
-    do i = 1, length + 17
-      write (unit, '(a)', advance='no') achar(8)
-    end do
-    flush(unit)
-  end subroutine utils_clean_progress_bar
-
+  interface
+    module subroutine utils_progress_bar_clear(unit)
+      implicit none
+      integer, intent(in) :: unit
+    end subroutine utils_progress_bar_clear
+  end interface
 end module utils

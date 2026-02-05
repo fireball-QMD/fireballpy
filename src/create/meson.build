@@ -6,6 +6,7 @@ modules_create_srcs = [
   'quadrature.f90',
   'x_exact.f90',
   'utils.f90',
+  'utils' / 'utils_progress_bar.f90',
   'math.f90',
   'math' / 'math_lstsq_impl.f90',
   'math' / 'math_Ylm_impl.f90',
