@@ -12,16 +12,16 @@ subroutine stationary_charges()
   integer issh, jssh
   integer ineigh ,jatom         
   integer mbeta
-  real,dimension(nssh_tot,nssh_tot) :: A
-  real,dimension(nssh_tot) :: c, SQ ! carga
-  real :: Ep2
+  real(double),dimension(nssh_tot,nssh_tot) :: A
+  real(double),dimension(nssh_tot) :: c, SQ ! carga
+  real(double) :: Ep2
   integer issh1, mu_min, mu_max, l, inumorb
-  real aux
+  real(double) aux
   integer :: beta, alpha, alpha_iatom, ina, matom 
-  integer :: alpha_iatom2, alpha2, nssh_tot2
-  integer, dimension (:), allocatable :: mapindex
-  integer, dimension (:), allocatable :: B
-  integer, dimension (:,:), allocatable :: M
+  integer :: alpha_iatom2, alpha2, nssh_tot2, lwork, info
+  integer, dimension (:), allocatable :: mapindex, ipiv
+  real(double), dimension (:), allocatable :: B, work
+  real(double), dimension (:,:), allocatable :: M
  
   SQ = 0.0d0
   c = 0.0d0
@@ -94,9 +94,15 @@ subroutine stationary_charges()
       endif
     end do
     !LWMAX = 100
-    !call ssysv( 'U', nssh_tot, 1, M, nssh_tot, ipiv, B, nssh_tot, work, lwork, info )
-    !call sgesv(nssh_tot,1,M,nssh_tot,ipiv,B,nssh_tot,info )
-  stop    
+    allocate(work(1), ipiv(nssh_tot))
+    call dsysv( 'U', nssh_tot, 1, M, nssh_tot, ipiv, B, nssh_tot, work, -1, info )
+    lwork = int(work(1))
+    deallocate(work)
+    allocate(work(lwork))
+    call dsysv( 'U', nssh_tot, 1, M, nssh_tot, ipiv, B, nssh_tot, work, lwork, info )
+    deallocate(work)
+    call dgesv(nssh_tot,1,M,nssh_tot,ipiv,B,nssh_tot,info )
+    deallocate(ipiv)
   contains
 
     subroutine load_M() !Mx=B

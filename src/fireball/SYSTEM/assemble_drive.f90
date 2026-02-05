@@ -52,7 +52,7 @@ subroutine assemble_drive()
   end if ! end if of Kscf = 1
   
   print*,'average_rho...'
-  call average_rho() !AQUI
+  !call average_rho() !AQUI
   print*,'...average_rho'
 
   !call average_ca_rho ()
