@@ -47,7 +47,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--write', help="Save version to this file")
-    parser.add_argument( '--meson-dist', help='Output path is relative to MESON_DIST_ROOT', action='store_true')
+    parser.add_argument('--meson-dist', help='Output path is relative to MESON_DIST_ROOT', action='store_true')
     args = parser.parse_args()
 
     version, git_hash = git_version(init_version())
