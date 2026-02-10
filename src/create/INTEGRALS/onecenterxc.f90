@@ -390,7 +390,7 @@ subroutine onecenterxc (nspec, nspec_max, nsh_max, wfmax_points,      &
       deallocate(tmpmat, iszero, rho1c, rhop1c, rhopp1c)
       errmsg = 'INTEGRALS/onecenterxc.f90: call to `dgelst` failed with info = '
       write (error_unit, '(a)') errmsg
-      stop info
+      stop 1
     end if
 
     ! Prepare for output

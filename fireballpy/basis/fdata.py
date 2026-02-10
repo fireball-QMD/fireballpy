@@ -807,6 +807,9 @@ def plot(wavefunctions: Annotated[list[pathlib.Path],
     ax.legend(fontsize=14)
     plt.show()
 
- 
+
+def main():
+    app()
+
 if __name__ == '__main__':
     app()

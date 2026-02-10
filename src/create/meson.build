@@ -124,20 +124,25 @@ foreach src : readfiles_srcs
   create_srcs += 'READFILES' / src
 endforeach
 
-# Deal with MPI
-# if mpi_dep.found()
-#   create_srcs += 'MPI.f90'
-# else
-  create_srcs += 'noMPI.f90'
-# endif
-
 create_srcs += 'create.f90'
 
-# Build create executable
-create_exe = executable('create.x',
-  create_srcs,
-  # dependencies: [blas_dep, lapack_dep, mpi_dep],
-  dependencies: [blas_dep, lapack_dep],
-  install: true,
-  install_dir: py.get_install_dir() / 'fireballpy' / 'basis',
-)
+# Deal with MPI
+if get_option('mpi')
+  create_srcs += 'MPI.f90'
+  create_exe = executable(
+    'create.x',
+    create_srcs,
+    dependencies: [blas_dep, lapack_dep, mpi_dep],
+    install: true,
+    install_dir: py.get_install_dir() / 'fireballpy' / 'basis',
+  )
+else
+  create_srcs += 'noMPI.f90'
+  create_exe = executable(
+    'create.x',
+    create_srcs,
+    dependencies: [blas_dep, lapack_dep],
+    install: true,
+    install_dir: py.get_install_dir() / 'fireballpy' / 'basis',
+  )
+endif

@@ -4,8 +4,7 @@ requires = ['meson-python', 'numpy']
 
 [project]
 name = 'fireballpy'
-version = '0.7.1.dev0'
-license = { file = 'LICENSE' }
+dynamic = ['version', 'license', 'license-files']
 authors = [
   { name = 'José Ortega Mateo', email = 'jose.ortega@uam.es' },
   { name = 'Jesús Ignacio Mendieta Moreno', email = 'jesus.mendieta@uam.es' },
@@ -15,7 +14,7 @@ authors = [
 ]
 description = 'Python interfase to the Fireball DFT code'
 readme = 'README.md'
-requires-python = '>=3.9, <3.13'
+requires-python = '>=3.10, <3.13'
 classifiers = [
   'Intended Audience :: Science/Research',
   'Operating System :: POSIX :: Linux',
@@ -30,26 +29,31 @@ classifiers = [
   'Topic :: Scientific/Engineering :: Physics'
 ]
 dependencies = [
-  'numpy >= 2.0.0',
-  'scipy >= 1.7.0',
-  'ase >= 3.22.0',
-  'tqdm >= 4.40.0',
-  'requests >= 2.31.0',
-  'dftd3 >= 1.1.0',
-  'tomli >= 1.1.0 ; python_version < "3.11"',
-  'cyclopts >= 3.3.0',
-]
-
-[project.optional-dependencies]
-docs = [
-  'sphinx >= 8.0.0',
-  'sphinx-design >= 0.6.0',
-  'sphinx-copybutton >= 0.5.0',
-  'sphinx-favicon >= 1.0.0',
-  'sphinxcontrib-bibtex >= 2.6.0',
-  'numpydoc >= 1.8.0',
-  'pydata-sphinx-theme >= 0.15.0',
+    "ase>=3.22.0",
+    "cyclopts>=3.3.0",
+    "dftd3>=1.1.0",
+    "numpy>=2.0.0",
+    "requests>=2.31.0",
+    "scipy>=1.7.0",
+    "tomli>=1.1.0",
+    "tqdm>=4.40.0",
 ]
 
 [project.scripts]
-fdata = 'fireballpy.basis.fdata:app'
+fdata = 'fireballpy.basis.fdata:main'
+
+[dependency-groups]
+dev = [
+    "meson-python>=0.17.0",
+    "numpy>=2.0.0",
+    "ninja>=1.0.0",
+]
+docs = [
+    "numpydoc>=1.8.0",
+    "pydata-sphinx-theme>=0.15.0",
+    "sphinx>=8.0.0",
+    "sphinx-copybutton>=0.5.0",
+    "sphinx-design>=0.6.0",
+    "sphinx-favicon>=1.0.0",
+    "sphinxcontrib-bibtex>=2.6.0",
+]

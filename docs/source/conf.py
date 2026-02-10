@@ -49,7 +49,7 @@ source_suffix = '.rst'
 
 today_fmt = '%B %d, %Y'
 templates_path = ['_templates']
-exclude_patterns = []
+exclude_patterns: list[str] = []
 
 # HTML
 # html_theme = 'sphinx_rtd_theme'
@@ -98,7 +98,7 @@ html_theme_options = {
 html_title = f"{project} v{version} Manual"
 html_static_path = ['_static', os.path.join('..', '..', 'examples')]
 html_last_updated_fmt = '%b %d, %Y'
-html_additional_pages = {}
+# html_additional_pages = {}
 html_use_modindex = True
 html_domain_indices = False
 html_copy_source = False

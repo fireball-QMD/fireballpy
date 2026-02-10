@@ -1,4 +1,5 @@
 .ipynb_checkpoints
+.venv
 __pycache__
 bin
 build
@@ -8,8 +9,8 @@ dist
 *.so
 *.traj
 *.log
-fireballpy/version.py
 docs/build
 docs/source/reference/generated
 fbpyenv
 .mypy_cache
+.python-version
