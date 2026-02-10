@@ -7,7 +7,7 @@ from subprocess import Popen, PIPE
 
 # Reference: https://github.com/scipy/scipy/blob/main/tools/gitversion.py
 def init_version():
-    init = os.path.join(os.path.dirname(__file__), '../fireballpy/version.py')
+    init = os.path.join(os.path.dirname(__file__), '../pyproject.toml')
     with open(init) as fid:
         data = fid.readlines()
 
@@ -17,9 +17,6 @@ def init_version():
 
     version = version_line.strip().split(' = ')[1]
     version = version.replace('"', '').replace("'", '')
-    if 'dev' in version:
-        version = version.split('+')[0]
-
     return version
 
 

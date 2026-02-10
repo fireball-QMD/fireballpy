@@ -14,3 +14,4 @@ docs/source/reference/generated
 fbpyenv
 .mypy_cache
 .python-version
+fireballpy/version.py
