@@ -67,7 +67,8 @@ add_global_arguments(cflags, language: 'c')
 
 # Find mpifort
 if get_option('mpi')
-  mpi_dep = dependency('mpi', language: 'fortran')
+  mpi = dependency('mpi', language: 'fortran')
+  mpi_dep = declare_dependency(dependencies: mpi)
 endif
 
 # Link LAPACK and BLAS (strat from scipy)
@@ -89,43 +90,6 @@ else
   lapack = dependency(lapack_name)
 endif
 lapack_dep = declare_dependency(dependencies: lapack, compile_args: _args_blas_lapack)
-
-# Get included dirs
-if py.full_path().contains(meson.current_source_dir())
-  incdir_numpy = run_command(
-    py,
-    [
-      '-c', 'import numpy; import os; print(os.path.relpath(numpy.get_include()))',
-    ],
-    check: true,
-  ).stdout().strip()
-  incdir_f2py = run_command(
-    py,
-    [
-      '-c', 'import numpy.f2py; import os; print(os.path.relpath(numpy.f2py.get_include()))',
-    ],
-    check: true,
-  ).stdout().strip()
-else
-  incdir_numpy = run_command(py, ['-c', 'import numpy; print(numpy.get_include())'], check: true).stdout().strip()
-  incdir_f2py = run_command(
-    py,
-    ['-c', 'import numpy.f2py; print(numpy.f2py.get_include())'],
-    check: true,
-  ).stdout().strip()
-endif
-
-fortranobject_lib = static_library(
-  '_fortranobject',
-  incdir_f2py / 'fortranobject.c',
-  dependencies: [py_dep],
-  include_directories: [incdir_numpy, incdir_f2py],
-)
-
-fortranobject_dep = declare_dependency(
-  link_with: fortranobject_lib,
-  include_directories: [incdir_numpy, incdir_f2py],
-)
 
 # Build _fireball, _begin and create.x
 subdir('src')

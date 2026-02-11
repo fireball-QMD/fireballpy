@@ -1,6 +1,7 @@
 pure function sf(d)
   use, intrinsic :: iso_fortran_env, only: double => real64
   use M_system, only: qmmm_rc1, qmmm_rc2, qmmm_width
+  implicit none
   real(double), intent(in) :: d
   real(double) :: rc12, aux1, aux2, y, sf
   if (qmmm_rc1 < 0.0d0) then

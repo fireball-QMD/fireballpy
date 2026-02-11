@@ -34,7 +34,7 @@ rcatms_srcs = [
   'vshort.f90',
 ]
 
-vnn_srcs= [
+vnn_srcs = [
   'get_ewfmesh_size.f90',
   'get_wfmesh_size.f90',
   'psiofr.f90',
@@ -59,5 +59,10 @@ foreach src : vnn_srcs
 endforeach
 
 # Build begin library
-begin_lib = static_library('begin', begin_srcs)
+begin_lib = shared_library(
+  'begin',
+  begin_srcs,
+  install: true,
+  install_dir: py.get_install_dir() / 'fireballpy.libs',
+)
 begin_dep = declare_dependency(link_with: begin_lib, sources: begin_srcs)

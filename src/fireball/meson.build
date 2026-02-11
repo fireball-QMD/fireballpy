@@ -147,5 +147,15 @@ foreach src : system_srcs
 endforeach
 
 # Build fireball library
-fireball_lib = static_library('fireball', fireball_srcs, dependencies: [blas_dep, lapack_dep])
-fireball_dep = declare_dependency(link_with: fireball_lib, sources: fireball_srcs)
+fireball_lib = shared_library(
+  'fireball',
+  fireball_srcs,
+  dependencies: [blas_dep, lapack_dep],
+  install: true,
+  install_dir: py.get_install_dir() / 'fireballpy.libs',
+)
+fireball_dep = declare_dependency(
+  dependencies: [blas_dep, lapack_dep],
+  link_with: [fireball_lib],
+  sources: fireball_srcs,
+)

@@ -21,7 +21,6 @@ py.extension_module(
   ['begin.f90', begin_source],
   fortran_args: fflags,
   dependencies: [fortranobject_dep, begin_dep],
-  link_language: 'fortran',
   install: true,
   subdir: 'fireballpy/basis',
 )

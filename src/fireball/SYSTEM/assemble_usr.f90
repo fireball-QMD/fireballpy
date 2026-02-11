@@ -3,6 +3,7 @@ subroutine assemble_usr ()
   use M_constants, only: eq2
   use M_system, only: iforce, natoms, ratom, imass, neigh_max, uiiuee, ewald, fewald, neigh_b, neigh_j, neighn, Qin, dq, xl, dusr, dxcv
   use M_fdata, only: nsh_max, ME2c_max, nssh, Qneutral
+  implicit none
   integer iatom
   integer ideriv
   integer in1, in2
