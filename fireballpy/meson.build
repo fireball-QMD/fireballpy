@@ -22,6 +22,7 @@ py.extension_module(
   fortran_args: fflags,
   dependencies: [fortranobject_dep, fireball_dep],
   link_language: 'fortran',
+  link_with: [fireball_lib],
   install: true,
   subdir: 'fireballpy',
 )
