@@ -12,17 +12,18 @@ subroutine stationary_charges()
   integer issh, jssh
   integer ineigh ,jatom         
   integer mbeta
+  integer i,j
   real(double),dimension(nssh_tot,nssh_tot) :: A
   real(double),dimension(nssh_tot) :: c, SQ ! carga
   real(double) :: Ep2
   integer issh1, mu_min, mu_max, l, inumorb
   real(double) aux
-  integer :: beta, alpha, alpha_iatom, ina, matom 
-  integer :: alpha_iatom2, alpha2, nssh_tot2, lwork, info
+  integer :: beta, alpha, alpha_iatom, ina, matom, iatom 
+  integer :: alpha_iatom2, alpha2, nssh_tot2 
   integer, dimension (:), allocatable :: mapindex, ipiv
+  integer :: info, lwork 
   real(double), dimension (:), allocatable :: B, work
   real(double), dimension (:,:), allocatable :: M
- 
   SQ = 0.0d0
   c = 0.0d0
   alpha = 0
@@ -33,13 +34,19 @@ subroutine stationary_charges()
   !end do
   !lo usamos para H2O HsHsOsp
   !                   s s s p 
-  fix_shell_charge = [1,0,1,0]
+  !fix_shell_charge = [1,0,1,0]
+  !                   CCC
+  fix_shell_charge = [1,0,1,1,0,1,1,1,0]
+
   print*,'fix_shell_charge',fix_shell_charge
   nssh_tot2 = count(fix_shell_charge == 0)
   allocate(mapindex(nssh_tot2))
   allocate(M(nssh_tot2+1,nssh_tot2+1))
   allocate(B(nssh_tot2+1))
 
+  !SOLVE SYSTEM Mx = B.  x are the charges
+  M(nssh_tot2+1,nssh_tot2+1) = 0
+  B(nssh_tot2+1) = ztot
  
   alpha_iatom2 = 0 
   
@@ -81,28 +88,51 @@ subroutine stationary_charges()
      end if !fix_shell_charge(alpha) = 0
     end do !alpha
 
-    !SOLVE SYSTEM Mx = B.  x are the charges
-    M(nssh_tot2+1,nssh_tot2+1) = 0
-    B(nssh_tot2+1) = ztot
 
-    do alpha = 1,nssh_tot
-      if (fix_shell_charge(alpha) .eq. 0) then
-        M(nssh_tot2+1,mapindex(alpha)) = 1
-        M(mapindex(alpha),nssh_tot2+1) = 1
-      else
-        B(nssh_tot2+1) = B(nssh_tot2+1) - Qin(get_issh_ofshell(alpha),get_iatom_ofshell(alpha))
-      endif
+!    do alpha = 1,nssh_tot
+!      if (fix_shell_charge(alpha) .eq. 0) then
+!        M(nssh_tot2+1,mapindex(alpha)) = 1
+!        M(mapindex(alpha),nssh_tot2+1) = 1
+!      else
+!        B(nssh_tot2+1) = B(nssh_tot2+1) - Qin(get_issh_ofshell(alpha),get_iatom_ofshell(alpha))
+!      endif
+!    end do
+
+    print *, "===== MATRIZ M ====="
+    do i = 1, nssh_tot2
+        write(*,'(100(1x,ES14.6))') (M(i,j), j=1,nssh_tot2)
     end do
-    !LWMAX = 100
-    allocate(work(1), ipiv(nssh_tot))
-    call dsysv( 'U', nssh_tot, 1, M, nssh_tot, ipiv, B, nssh_tot, work, -1, info )
+
+    print *, "===== VECTOR B ====="
+    do i = 1, nssh_tot2
+        write(*,'(1x,ES14.6)') B(i)
+    end do
+
+
+    allocate(ipiv(nssh_tot))
+    allocate(work(1))
+    call dsysv('U', nssh_tot, 1, M, nssh_tot, ipiv, B, nssh_tot, work, -1, info)
     lwork = int(work(1))
     deallocate(work)
     allocate(work(lwork))
-    call dsysv( 'U', nssh_tot, 1, M, nssh_tot, ipiv, B, nssh_tot, work, lwork, info )
+    call dsysv('U', nssh_tot, 1, M, nssh_tot, ipiv, B, nssh_tot, work, lwork, info)
     deallocate(work)
-    call dgesv(nssh_tot,1,M,nssh_tot,ipiv,B,nssh_tot,info )
     deallocate(ipiv)
+    if (info /= 0) then
+       print *, "Error in dsysv, info =", info
+    end if
+   
+    do alpha = 1, nssh_tot
+       issh=get_issh_ofshell(alpha)
+       iatom=get_iatom_ofshell(alpha)
+       print*,'stationary_charges',issh,iatom,mapindex(alpha),fix_shell_charge(alpha)
+       if (fix_shell_charge(alpha) .eq. 0) then
+          Qout(issh,iatom) = B(mapindex(alpha))
+       else
+          Qout(issh,iatom) = Qin(issh,iatom)
+       end if
+    end do
+
   contains
 
     subroutine load_M() !Mx=B
