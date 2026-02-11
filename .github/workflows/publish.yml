@@ -10,20 +10,20 @@ on:
 
 jobs:
   build:
-    name: Build distribution
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Clean before build
         run: git clean -xdfq
+
       - name: Build wheels
         run: |
           docker pull quay.io/pypa/manylinux_2_28_x86_64
           docker run -v $(pwd):/fireballpy quay.io/pypa/manylinux_2_28_x86_64 /bin/bash -c "cd /fireballpy && \
           yum install -y openblas-devel openmpi-devel && \
-          pipx install build && \
-          pyproject-build -w && \
+          uv build && \
           mkdir wheels && \
           mv dist/*.whl wheels/ && \
           for whl in wheels/*.whl; do
