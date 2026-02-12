@@ -1,5 +1,6 @@
 import argparse
 import os
+import stat
 import sys
 import tempfile
 from subprocess import Popen, PIPE
@@ -102,8 +103,20 @@ def main():
         pyver = '.'.join(sys.version.split('.')[0:2])
         lib_folder = os.path.join(sys.prefix, sys.platlibdir)
         fpy_folder = os.path.join(lib_folder, 'python' + pyver, 'site-packages', 'fireballpy.libs')
-        os.symlink(os.path.join(fpy_folder, 'libfireball.so'), os.path.join(lib_folder, 'libfireball.so'))
-        os.symlink(os.path.join(fpy_folder, 'libbegin.so'), os.path.join(lib_folder, 'libbegin.so'))
+        for lib in ['libfireball.so', 'libbegin.so']:
+            if os.path.isfile(os.path.join(lib_folder, lib)):
+                os.remove(os.path.join(lib_folder, lib))
+            os.symlink(os.path.join(fpy_folder, lib), os.path.join(lib_folder, lib))
+
+        bin_folder = os.path.join(sys.prefix, 'bin')
+        if os.path.isfile(os.path.join(bin_folder, 'fdata')):
+            os.remove(os.path.join(bin_folder, 'fdata'))
+        with open(os.path.join(bin_folder, 'fdata'), 'x') as file:
+            file.write('#!' + sys.executable + '\n')
+            with open(os.path.join(lib_folder, 'python' + pyver, 'site-packages', 'fireballpy', 'basis', 'fdata.py'), 'r') as fp:
+                fdata = fp.read()
+            file.write(fdata)
+        os.chmod(os.path.join(bin_folder, 'fdata'), stat.S_IRWXU | stat.S_IRGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH)
 
 
 if __name__ == '__main__':
