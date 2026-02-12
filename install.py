@@ -2,7 +2,7 @@ import argparse
 import os
 import sys
 import tempfile
-from subprocess import Popen, PIPE, DEVNULL
+from subprocess import Popen, PIPE
 
 
 def setup(meson, folder, args, env):
@@ -54,18 +54,13 @@ def main():
                         help="Use ifort, icc and MKL")
     parser.add_argument("--fast", action="store_true",
                         help="Apply non-float-respecting optimizations")
+    parser.add_argument("--mpi", action="store_true",
+                        help="Compile with mpi")
     parser.add_argument("--warn", action="store_true",
                         help="Print compiling info")
+    parser.add_argument("--conda", action="store_true",
+                        help="Make links to work with conda envs")
     args = parser.parse_args()
-
-    # Check mpi
-    ismpi = False
-    try:
-        p = Popen(['mpirun', '--version'], stdout=DEVNULL, stderr=DEVNULL)
-        _ = p.communicate()
-        ismpi = True
-    except FileNotFoundError:
-        ismpi = 0
 
     env = os.environ.copy()
     meson = [sys.executable, '-m', 'mesonbuild.mesonmain']
@@ -73,28 +68,24 @@ def main():
     if args.intel:
         env['CC'] = 'icx'
         env['FC'] = 'ifx'
-        if ismpi:
-            env['MPICC'] = "mpiicx"
-            env['MPIFC'] = "mpiifx"
-            setup_args += ['-Dmpi=true']
+        env['MPICC'] = "mpiicx"
+        env['MPIFC'] = "mpiifx"
         setup_args += ['-Dblas=mkl-dynamic-ilp64-seq']
     elif args.intel_old:
         env['CC'] = 'icc'
         env['FC'] = 'ifort'
-        if ismpi:
-            env['MPICC'] = "mpicc"
-            env['MPIFC'] = "mpifort"
-            setup_args += ['-Dmpi=true']
+        env['MPICC'] = "mpicc"
+        env['MPIFC'] = "mpifort"
         setup_args += ['-Dblas=mkl-dynamic-ilp64-seq']
     else:
         env['CC'] = 'gcc'
         env['FC'] = 'gfortran'
-        if ismpi:
-            env['CC'] = 'mpicc'
-            env['FC'] = 'mpifort'
-            setup_args += ['-Dmpi=true']
+        env['CC'] = 'mpicc'
+        env['FC'] = 'mpifort'
     if args.fast:
         setup_args += ['-Doptimization=3', '-Dbuildtype=custom']
+    if args.mpi:
+        setup_args += ['-Dmpi=true']
 
     if args.build_dir is None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -106,6 +97,13 @@ def main():
         comp(meson, args.build_dir, args.warn)
         install(meson, args.build_dir)
     version()
+
+    if args.conda:
+        pyver = '.'.join(sys.version.split('.')[0:2])
+        lib_folder = os.path.join(sys.prefix, sys.platlibdir)
+        fpy_folder = os.path.join(lib_folder, 'python' + pyver, 'site-packages', 'fireballpy.libs')
+        os.symlink(os.path.join(fpy_folder, 'libfireball.so'), os.path.join(lib_folder, 'libfireball.so'))
+        os.symlink(os.path.join(fpy_folder, 'libbegin.so'), os.path.join(lib_folder, 'libbegin.so'))
 
 
 if __name__ == '__main__':

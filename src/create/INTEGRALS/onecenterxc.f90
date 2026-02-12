@@ -384,11 +384,11 @@ subroutine onecenterxc (nspec, nspec_max, nsh_max, wfmax_points,      &
     lwork = nssh1 + max(nssh1, nrhs*nnz)
     lwork = ibset(0, bit_size(lwork) - leadz(lwork))
     allocate(work(lwork))
-    call dgelst('T', nssh1, npts, nrhs*nnz, xmatt, nssh1, tmpmat, npts, work, lwork, info)
+    call dgels('T', nssh1, npts, nrhs*nnz, xmatt, nssh1, tmpmat, npts, work, lwork, info)
     deallocate(work, xmatt)
     if (info /= 0) then
       deallocate(tmpmat, iszero, rho1c, rhop1c, rhopp1c)
-      errmsg = 'INTEGRALS/onecenterxc.f90: call to `dgelst` failed with info = '
+      errmsg = 'INTEGRALS/onecenterxc.f90: call to `dgels` failed with info = '
       write (error_unit, '(a)') errmsg
       stop 1
     end if
