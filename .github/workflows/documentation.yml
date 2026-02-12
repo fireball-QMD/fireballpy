@@ -32,7 +32,7 @@ jobs:
         run: git clean -xdfq
 
       - name: Install dependencies
-        run: uv sync --group docs --group jupyterlite
+        run: uv sync --group dev --group docs --group jupyterlite
 
       - name: Build the JupyterLite site
         run: uv run jupyter lite build --contents examples --output-dir jupyter

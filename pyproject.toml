@@ -4,7 +4,7 @@ requires = ['meson-python>=0.16.0', 'numpy>=2.0.0', 'ninja>=1.0.0']
 
 [project]
 name = 'fireballpy'
-version = '0.8.6dev0'
+version = '0.8.7dev0'
 dynamic = ['license', 'license-files']
 authors = [
   { name = 'José Ortega Mateo', email = 'jose.ortega@uam.es' },

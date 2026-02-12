@@ -22,13 +22,13 @@ jobs:
         run: |
           docker pull quay.io/pypa/manylinux_2_28_x86_64
           docker run -v $(pwd):/fireballpy quay.io/pypa/manylinux_2_28_x86_64 /bin/bash -c "\
-          cd /fireballpy \
-          yum install -y git openblas-devel openmpi-devel \
+          cd /fireballpy
+          yum install -y git openblas-devel openmpi-devel
           for version in 3.10 3.11 3.12; do
-          uv build --clear -p \$version \
+          uv build --clear -p \$version
           done
-          mkdir wheels \
-          mv dist/*.whl wheels/ \
+          mkdir wheels
+          mv dist/*.whl wheels/
           for whl in wheels/*.whl; do
           auditwheel repair \$whl -w dist/
           done"
