@@ -69,20 +69,23 @@ def main():
     if args.intel:
         env['CC'] = 'icx'
         env['FC'] = 'ifx'
-        env['MPICC'] = "mpiicx"
-        env['MPIFC'] = "mpiifx"
+        if args.mpi:
+            env['MPICC'] = "mpiicx"
+            env['MPIFC'] = "mpiifx"
         setup_args += ['-Dblas=mkl-dynamic-ilp64-seq']
     elif args.intel_old:
         env['CC'] = 'icc'
         env['FC'] = 'ifort'
-        env['MPICC'] = "mpicc"
-        env['MPIFC'] = "mpifort"
+        if args.mpi:
+            env['MPICC'] = "mpicc"
+            env['MPIFC'] = "mpifort"
         setup_args += ['-Dblas=mkl-dynamic-ilp64-seq']
     else:
         env['CC'] = 'gcc'
         env['FC'] = 'gfortran'
-        env['CC'] = 'mpicc'
-        env['FC'] = 'mpifort'
+        if args.mpi:
+            env['CC'] = 'mpicc'
+            env['FC'] = 'mpifort'
     if args.fast:
         setup_args += ['-Doptimization=3', '-Dbuildtype=custom']
     if args.mpi:
