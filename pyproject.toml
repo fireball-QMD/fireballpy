@@ -65,3 +65,6 @@ jupyterlite = [
 
 [tool.uv]
 no-build-isolation = true
+
+[tool.uv.extra-build-dependencies]
+fireballpy = [{ requirement = "meson-python", match-runtime = true }]
