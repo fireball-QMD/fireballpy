@@ -36,16 +36,19 @@ subroutine stationary_charges()
   !                   s s s p 
   !fix_shell_charge = [1,0,1,0]
   !                   CCC
-  fix_shell_charge = [1,0,1,1,0,1,1,1,0]
+  fix_shell_charge = [0,0,0,0,0,0]
 
   print*,'fix_shell_charge',fix_shell_charge
   nssh_tot2 = count(fix_shell_charge == 0)
   allocate(mapindex(nssh_tot2))
   allocate(M(nssh_tot2+1,nssh_tot2+1))
   allocate(B(nssh_tot2+1))
-
+  M=0.0d0
+  B=0.0d0
   !SOLVE SYSTEM Mx = B.  x are the charges
-  M(nssh_tot2+1,nssh_tot2+1) = 0
+  M(:,nssh_tot2+1) = 1.0
+  M(nssh_tot2+1,:) = 1.0
+  M(nssh_tot2+1,nssh_tot2+1)= 0.0
   B(nssh_tot2+1) = ztot
  
   alpha_iatom2 = 0 
@@ -54,6 +57,22 @@ subroutine stationary_charges()
     if (fix_shell_charge(alpha) .eq. 0) alpha_iatom2=alpha_iatom2+1
     mapindex(alpha)=alpha_iatom2
   end do
+
+  print*, '-----g_h----'
+  do i = 1, nssh_tot
+      write(*,'(100(1x,ES14.6))') (g_h_shell(i,j), j=1,nssh_tot)
+  end do
+  print*, '-----g_xc----'
+  do i = 1, nssh_tot
+      write(*,'(100(1x,ES14.6))') (g_xc_shell(i,j), j=1,nssh_tot)
+  end do
+
+  print*, '-----f_xc----'
+  do i = 1, nssh_tot
+      write(*,'(100(1x,ES14.6))') (f_xc_shell(i,j), j=1,nssh_tot)
+  end do
+
+
 
   do alpha = 1, nssh_tot
     if (fix_shell_charge(alpha) .eq. 0) then
@@ -99,12 +118,12 @@ subroutine stationary_charges()
 !    end do
 
     print *, "===== MATRIZ M ====="
-    do i = 1, nssh_tot2
-        write(*,'(100(1x,ES14.6))') (M(i,j), j=1,nssh_tot2)
+    do i = 1, nssh_tot2+1
+        write(*,'(100(1x,ES14.6))') (M(i,j), j=1,nssh_tot2+1)
     end do
 
     print *, "===== VECTOR B ====="
-    do i = 1, nssh_tot2
+    do i = 1, nssh_tot2+1
         write(*,'(1x,ES14.6)') B(i)
     end do
 
@@ -158,6 +177,8 @@ subroutine stationary_charges()
       g_h_shell = 0.0
       g_xc_shell=0.0d0
       vxc_aa_shell = 0.0d0
+!      print*,'====== gxc_1c  ======='
+!      print*,gxc_1c
       do iatom = 1, natoms
         do imu=1,num_orb(imass(iatom))
           alpha = get_shell_ofatom_imu(iatom,imu) 
@@ -167,7 +188,10 @@ subroutine stationary_charges()
               beta = get_shell_ofatom_issh(katom,kssh)
               g_h_shell(alpha,beta) = g_h_shell(alpha,beta) +&
               & g_h(imu,imu, kssh, katom, matom, iatom) / (2*get_l_ofshell(alpha) + 1)
-              g_xc_shell(alpha,beta) = gxc_1c(imass(iatom),imu,issh,kssh) / (2*get_l_ofshell(alpha) + 1)
+              if(iatom .eq. katom) then
+                 g_xc_shell(alpha,beta) = g_xc_shell(alpha,beta) + &
+                & gxc_1c(imass(iatom),imu,imu,kssh) / (2*get_l_ofshell(alpha) + 1)
+              end if
             end do
           end do
           vxc_aa_shell(alpha) = vxc_aa_shell(alpha) + vxc_1c_0(imass(iatom),imu,imu) / (2*get_l_ofshell(alpha) + 1)

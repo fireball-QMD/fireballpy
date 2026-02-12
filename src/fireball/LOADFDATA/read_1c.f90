@@ -27,6 +27,7 @@ subroutine read_1c ()
     write (auxz,'(''.'',i2.2)') nzx(in1)
     ! leemos onecenter_xc.06.dat 
     root = trim(fdataLocation) // trim(onecfname(1)) // auxz // '.dat'
+!print*,'lee ', root
     open (unit = 36, file = root, status = 'old')
     read (36,*) numsh, numorb
     do imu = 1, numorb
@@ -36,6 +37,9 @@ subroutine read_1c ()
     do kssh= 1, numsh
       do imu = 1, numorb
         read (36,*) (gxc_1c(in1,imu,inu,kssh),inu=1,numorb)
+        !print*,in1,imu,kssh
+        !print*, (gxc_1c(in1,imu,inu,kssh),inu=1,numorb)
+        
       end do
       read (36,*)
     end do
