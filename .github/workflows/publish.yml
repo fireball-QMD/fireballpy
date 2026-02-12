@@ -24,7 +24,7 @@ jobs:
           docker run -v $(pwd):/fireballpy quay.io/pypa/manylinux_2_28_x86_64 /bin/bash -c "\
           cd /fireballpy
           yum install -y git openblas-devel openmpi-devel
-          git config --global safe.directory "*"
+          git config --global safe.directory \"*\"
           for version in 3.10 3.11 3.12; do
           uv pip install --system -p \$version -r requirements/build_requirements.txt
           uv build -p \$version
