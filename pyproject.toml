@@ -1,10 +1,10 @@
 [build-system]
 build-backend = 'mesonpy'
-requires = ['meson-python', 'numpy']
+requires = ['meson-python>=0.16.0', 'numpy>=2.0.0', 'ninja>=1.0.0']
 
 [project]
 name = 'fireballpy'
-version = '0.8.5dev0'
+version = '0.8.6dev0'
 dynamic = ['license', 'license-files']
 authors = [
   { name = 'José Ortega Mateo', email = 'jose.ortega@uam.es' },
@@ -45,7 +45,7 @@ fdata = 'fireballpy.basis.fdata:main'
 
 [dependency-groups]
 dev = [
-    "meson-python>=0.17.0",
+    "meson-python>=0.16.0",
     "numpy>=2.0.0",
     "ninja>=1.0.0",
 ]
@@ -58,3 +58,10 @@ docs = [
     "sphinx-favicon>=1.0.0",
     "sphinxcontrib-bibtex>=2.6.0",
 ]
+jupyterlite = [
+    "jupyterlite-pyodide-kernel>=0.2.0",
+    "notebook>=7.0.0",
+]
+
+[tool.uv]
+no-build-isolation = true

@@ -31,21 +31,14 @@ jobs:
       - name: Clean before build
         run: git clean -xdfq
 
-      - name: Install build dependencies
-        run: uv sync --no-editable --group docs
-
-      - name: Install JupyterLite
-        run: |
-          uv pip install jupyterlite-core==0.2.1 jupyterlab~=4.0.9 notebook~=7.0.6
-          uv pip install jupyterlite-pyodide-kernel==0.2.0
+      - name: Install dependencies
+        run: uv sync --group docs --group jupyterlite
 
       - name: Build the JupyterLite site
-        run: |
-          cp -r fireballpy examples
-          uv run --no-editable jupyter lite build --contents examples --output-dir jupyter
+        run: uv run jupyter lite build --contents examples --output-dir jupyter
 
       - name: Build the documentation with Sphinx
-        run: make html -C docs
+        run: uv run make html -C docs
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
