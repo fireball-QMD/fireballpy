@@ -32,7 +32,7 @@ jobs:
           mkdir wheels
           mv dist/*.whl wheels/
           for whl in wheels/*.whl; do
-          auditwheel repair \$whl -w dist/
+          auditwheel repair \$whl -w dist/ --plat manylinux_2_27_x86_64
           done"
       - name: Store the distribution packages
         uses: actions/upload-artifact@v4

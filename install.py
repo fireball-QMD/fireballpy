@@ -106,7 +106,7 @@ def main():
         pyver = '.'.join(sys.version.split('.')[0:2])
         lib_folder = os.path.join(sys.prefix, sys.platlibdir)
         fpy_folder = os.path.join(lib_folder, 'python' + pyver, 'site-packages', 'fireballpy.libs')
-        for lib in ['libfireball.so', 'libbegin.so']:
+        for lib in ['libfireball.a', 'libbegin.a']:
             if os.path.isfile(os.path.join(lib_folder, lib)):
                 os.remove(os.path.join(lib_folder, lib))
             os.symlink(os.path.join(fpy_folder, lib), os.path.join(lib_folder, lib))
