@@ -25,10 +25,10 @@ jobs:
           cd /fireballpy
           yum install -y git openblas-devel openmpi-devel
           for version in 3.10 3.11 3.12; do
-          uv venv -p \$version
+          uv venv -p \$version --clear
           uv pip install -p \$version -r requirements/build_requirements.txt
-          uv sync --group docs --group jupyterlite
-          uv build --clear -p \$version
+          uv sync --only-dev
+          uv build --wheel --clear -p \$version
           done
           mkdir wheels
           mv dist/*.whl wheels/
