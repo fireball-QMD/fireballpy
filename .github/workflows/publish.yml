@@ -24,11 +24,10 @@ jobs:
           docker run -v $(pwd):/fireballpy quay.io/pypa/manylinux_2_28_x86_64 /bin/bash -c "\
           cd /fireballpy
           yum install -y git openblas-devel openmpi-devel
+          git config --global safe.directory "*"
           for version in 3.10 3.11 3.12; do
-          uv venv -p \$version --clear
-          uv pip install -p \$version -r requirements/build_requirements.txt
-          uv sync --only-dev
-          uv build --wheel --clear -p \$version
+          uv pip install --system -p \$version -r requirements/build_requirements.txt
+          uv build -p \$version
           done
           mkdir wheels
           mv dist/*.whl wheels/

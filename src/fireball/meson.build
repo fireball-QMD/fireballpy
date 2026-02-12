@@ -147,7 +147,7 @@ foreach src : system_srcs
 endforeach
 
 # Build fireball library
-fireball_lib = shared_library(
+fireball_lib = library(
   'fireball',
   fireball_srcs,
   dependencies: [blas_dep, lapack_dep],

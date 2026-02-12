@@ -1,7 +1,7 @@
 subroutine scf_loop (verbose)
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: double => real64, stdout => output_unit
   use M_system, only: max_scf_iterations, scf_achieved, Kscf, etot, sigma, iqout, &
-    & ebs, eqmmm, uiiuee, uxcdcc_ols, etotxc_1c, sigmatol, iforce, errno, Kbest, sigmabest, isgeneig
+  & ebs, eqmmm, uiiuee, uxcdcc_ols, etotxc_1c, sigmatol, iforce, errno, Kbest, sigmabest, isgeneig
   implicit none
   logical, intent(in) :: verbose
   Kscf = 1
@@ -16,14 +16,18 @@ subroutine scf_loop (verbose)
     call build_rho ()
     if (errno .ne. 0) return
     if (scf_achieved .or. (Kscf .gt. max_scf_iterations)) exit
-    if (verbose) print '(a13,i4,a8,f12.6,a17,es10.3,a3,es10.3)', '-> Iteration ', Kscf, ': EBS = ', ebs, '; RMSD/nshells = ', sigma, ' > ', sigmatol
+    if (verbose) then
+      write (stdout, '(a13,i4,a8,f12.6,a17,es10.3,a3,es10.3)') '-> Iteration ', Kscf, ': EBS = ', ebs, '; RMSD/nshells = ', sigma, ' > ', sigmatol
+      flush(stdout)
+    end if
   end do
   if (verbose) then
     if (scf_achieved) then
-      print '(a13,i4,a8,f12.6,a17,es10.3,a3,es10.3)', '-> Iteration ', Kscf, ': EBS = ', ebs, '; RMSD/nshells = ', sigma, ' < ', sigmatol
+      write (stdout, '(a13,i4,a8,f12.6,a17,es10.3,a3,es10.3)') '-> Iteration ', Kscf, ': EBS = ', ebs, '; RMSD/nshells = ', sigma, ' < ', sigmatol
     else
-      print '(a15,i4,a8,f12.6,a17,es10.3)', 'Best iteration ', Kbest, ': EBS = ', ebs, '; RSMD/nshells = ', sigmabest
+      write (stdout, '(a15,i4,a8,f12.6,a17,es10.3)') 'Best iteration ', Kbest, ': EBS = ', ebs, '; RSMD/nshells = ', sigmabest
     end if
+    flush(stdout)
   end if
   call get_ewald (iforce)
   call assemble_usr ()

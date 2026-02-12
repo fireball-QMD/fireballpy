@@ -10,6 +10,7 @@ project(
     'buildtype=debugoptimized',
     'c_std=c11',
     'fortran_std=f2008',
+    'default_library=both',
     'blas=openblas',
     'lapack=openblas',
     'mpi=false',

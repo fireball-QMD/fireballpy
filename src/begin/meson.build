@@ -59,7 +59,7 @@ foreach src : vnn_srcs
 endforeach
 
 # Build begin library
-begin_lib = shared_library(
+begin_lib = library(
   'begin',
   begin_srcs,
   install: true,
