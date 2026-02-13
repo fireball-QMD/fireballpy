@@ -34,7 +34,7 @@ def parse_selection(sel: str) -> list[int]:
 
 class BaseScorer(ABC):
     @abstractmethod
-    def fdata_score(self, reference: str, fdata_path: str, charges_method: str, verbose: bool = False) -> float:
+    def fdata_score(self, reference: str, fdata_path: str, charges_method: str, verbose: bool = False, **kwargs) -> float:
         ...
 
     @abstractmethod
@@ -62,7 +62,7 @@ class InteractionEnergyScorer(BaseScorer):
         self.fdata_save = {}
         self.d3_save = {}
 
-    def fdata_score(self, reference: str, fdata_path: str, charges_method: str, verbose: bool = False) -> float:
+    def fdata_score(self, reference: str, fdata_path: str, charges_method: str, verbose: bool = False, **kwargs) -> float:
         score = 0.0
         save = {}
         for c, curve in tqdm(self.curves.items(), desc="Computing self-energies", unit='curves', disable=not verbose):
@@ -80,7 +80,7 @@ class InteractionEnergyScorer(BaseScorer):
                         xyz_b.calc = Fireball(fdata='custom', fdata_path=fdata_path,
                                               total_charge=block.get('charge', 0),
                                               charges_method=charges_method,
-                                              correction=False, lazy=False)
+                                              correction=False, lazy=False, **kwargs)
                         save[c][b] = float(xyz_b.get_potential_energy())
                         save[c]['block_total'] += save[c][b]
 
@@ -88,7 +88,7 @@ class InteractionEnergyScorer(BaseScorer):
                 xyz.calc = Fireball(fdata='custom', fdata_path=fdata_path,
                                     total_charge=curve.get('charge', 0),
                                     charges_method=charges_method,
-                                    correction=False, lazy=False)
+                                    correction=False, lazy=False, **kwargs)
                 save[c]['all'].append(float(xyz.get_potential_energy()))
                 save[c]['property'].append(save[c]['all'][-1] - save[c]['block_total'])
                 curvescore += (save[c]['property'][-1] - ref*self.units)**2

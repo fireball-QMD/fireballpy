@@ -22,13 +22,14 @@ class Optimizer(ABC):
             references = [references]
             weights = [1.0]
         elif isinstance(datasets, list):
-            if not len(datasets) == len(references):
-                raise ValueError("There must be the same elements of ``datasets`` as ``references``.")
-            if weights is not None:
-                if not len(weights) == len(datasets):
-                    raise ValueError("There must be the same elements of ``datasets`` as ``weights``.")
-            else:
+            if not weights:
                 weights = [1.0 for _ in range(len(datasets))]
+            if len(weights) != len(datasets):
+                raise ValueError("There must be the same elements of ``datasets`` as ``weights``.")
+            if len(references) != len(datasets):
+                raise ValueError("There must be the same elements of ``datasets`` as ``references``.")
+        else:
+            raise ValueError("``datasets`` must be either a ``str`` or a list of ``str``")
 
         self.datasets = datasets
         self.references = references
@@ -56,7 +57,7 @@ class D3Optimizer(Optimizer):
     def __init__(self, datasets: str | list[str], references: str | list[str],
                  charges_method: str, fdata_path: str,
                  damping: str, params: dict,
-                 weights: list[float] | None = None, verbose: bool = False) -> None:
+                 weights: list[float] | None = None, verbose: bool = False, **kwargs) -> None:
         super().__init__(datasets, references, charges_method, weights)
         self.fdata_path = fdata_path
         self.damping = damping
@@ -67,7 +68,7 @@ class D3Optimizer(Optimizer):
         # Compute the Fireball once
         for scorer, reference in zip(self.scorers, self.references):
             scorer.fdata_score(reference=reference, fdata_path=self.fdata_path,
-                               charges_method=self.charges_method, verbose=self.verbose)
+                               charges_method=self.charges_method, verbose=self.verbose, **kwargs)
 
     def __call__(self, trial: optuna.Trial) -> float:
         correction = {'damping': self.damping,
@@ -82,7 +83,8 @@ class D3Optimizer(Optimizer):
 def optimize_dftd3(*, datasets: str | list[str], references: str | list[str],
                    charges_method: str, fdata_path: str,
                    damping: str, params_tweaks: dict,
-                   weights: list[float] | None = None, **kwargs) -> tuple[D3Optimizer, optuna.study.Study]:
+                   weights: list[float] | None = None, opt_kwargs: dict | None = None,
+                   fb_kwargs: dict | None = None) -> tuple[D3Optimizer, optuna.study.Study]:
     """Optimize the DFT-D3 correction of a custom FData.
 
     Parameters
@@ -105,29 +107,35 @@ def optimize_dftd3(*, datasets: str | list[str], references: str | list[str],
         (see `Simple DFT-D3 documentation <https://dftd3.readthedocs.io>`_) and
         the values are dictionaries with the parameters that may be accepted by
         :method:`optuna.trial.Trial.suggest_float`.
-    **kwargs
+    opt_kwargs
         All parameters accepted by :method:`optuna.study.Study.optimize`
+    fb_kwargs
+        All parameters accepted by Fireball
     """
 
+    if not opt_kwargs:
+        opt_kwargs = {}
+    if not fb_kwargs:
+        fb_kwargs = {}
     opt = D3Optimizer(datasets=datasets, references=references, charges_method=charges_method,
                       fdata_path=fdata_path, damping=damping, params=params_tweaks,
                       weights=weights,
-                      verbose=kwargs.get('show_progress_bar', False))
+                      verbose=opt_kwargs.get('show_progress_bar', False), **fb_kwargs)
     study = optuna.create_study()
-    study.optimize(opt, **kwargs)
+    study.optimize(opt, **opt_kwargs)
     opt.best_params = study.best_params
     return opt, study
-
-
 
 
 if __name__ == '__main__':
     opt, std = optimize_dftd3(datasets='s66x8.json', references='reference_value',
                               charges_method='weighted_lowdin', fdata_path='/home/roldanc/.cache/fireball/fdatas/biology/',
-                              damping='d3bj', params_tweaks={'s8': {'low': 0.001, 'high': 100.0, 'step': 0.001},
-                                                             'a1': {'low': 0.001, 'high': 100.0, 'step': 0.001},
-                                                             'a2': {'low': 0.001, 'high': 100.0, 'step': 0.001}},
-                              n_trials=10000, n_jobs=20, show_progress_bar=True)
+                              damping='d3bj',
+                              params_tweaks={'s8': {'low': 0.1, 'high': 5.0, 'step': 0.0001},
+                                             'a1': {'low': 0.1, 'high': 5.0, 'step': 0.0001},
+                                             'a2': {'low': 0.1, 'high': 5.0, 'step': 0.0001}},
+                              opt_kwargs={'n_trials': 5000, 'n_jobs': -1, 'show_progress_bar': True},
+                              fb_kwargs={'mixer_kws': {'method': 'johnson', 'mix_order': 3, 'beta': 0.02}})
     print("Best parameters are:", opt.best_params)
     opt[0].plot(reference='reference_value')
     plt.show()
