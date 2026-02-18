@@ -152,6 +152,11 @@ subroutine stationary_charges()
        end if
     end do
 
+    print *, "===== VECTOR B out ====="
+    do i = 1, nssh_tot2+1
+        write(*,'(1x,ES14.6)') B(i)
+    end do
+
   contains
 
     subroutine load_M() !Mx=B
