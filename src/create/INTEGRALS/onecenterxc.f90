@@ -56,24 +56,23 @@ module onecenter
   public :: onecenter_calc
 
   integer :: iexc_, nsh_max_, nspec_, nspec_max_, wfmax_points_
-  integer, allocatable :: iderorb_(:), nsshxc_(:), nzx_(:), lsshxc_(:,:)
+  integer, allocatable :: nsshxc_(:), nzx_(:), lsshxc_(:,:)
   real(kind=wp) :: fraction_
-  real(kind=wp), allocatable :: dqorb_(:), drr_rho_(:), rcutoffa_max_(:),      &
+  real(kind=wp), allocatable :: drr_rho_(:), rcutoffa_max_(:),                 &
   & xnocc_(:,:)
 
 contains
 
   ! TODO: all these things should be read from a module
   integer function onecenter_init(nspec, nspec_max, nsh_max, wfmax_points,     &
-  & iexc, fraction, nsshxc, lsshxc, rcutoffa_max, xnocc, dqorb, iderorb,       &
-  & drr_rho, nzx)
+  & iexc, fraction, nsshxc, lsshxc, rcutoffa_max, xnocc, drr_rho, nzx)
     integer, intent (in) :: iexc, nsh_max, nspec, nspec_max, wfmax_points,     &
-    & iderorb(:), nsshxc(:), nzx(:), lsshxc(:,:)
-    real(kind=wp), intent (in) :: fraction, dqorb(:), drr_rho(:),              &
+    & nsshxc(:), nzx(:), lsshxc(:,:)
+    real(kind=wp), intent (in) :: fraction, drr_rho(:),                        &
     & rcutoffa_max(:), xnocc(:,:)
 
-    allocate(iderorb_(nspec_max), nsshxc_(nspec_max), nzx_(nspec_max),         &
-    & lsshxc_(nspec_max, nsh_max), dqorb_(nspec_max), drr_rho_(nspec_max),     &
+    allocate(nsshxc_(nspec_max), nzx_(nspec_max),                              &
+    & lsshxc_(nspec_max, nsh_max), drr_rho_(nspec_max),                        &
     & rcutoffa_max_(nspec_max), xnocc_(nsh_max, nspec_max), stat=onecenter_init)
     if (onecenter_init /= 0) then
       write(stderr, '(a)') '[ERROR] onecenterxc.f90: failed allocation'
@@ -86,11 +85,9 @@ contains
     nspec_max_ = nspec_max
     wfmax_points_ = wfmax_points
     fraction_ = fraction
-    iderorb_ = iderorb
     nsshxc_ = nsshxc
     nzx_ = nzx
     lsshxc_ = lsshxc
-    dqorb_ = dqorb
     drr_rho_ = drr_rho
     rcutoffa_max_ = rcutoffa_max
     xnocc_ = xnocc
@@ -116,16 +113,15 @@ contains
 
   integer function onecenter_spec_calc(ispec)
     integer, intent(in) :: ispec
-    logical :: first_orb(0:2)
-    integer :: irho, issh, jssh, kssh, ilssh, jlssh, iorb, jorb,               &
-    & nssh, nssh1, ix, ndq, nnz, npts, nnrho, nrhs, norbs, im, io
+    logical :: first_shell(0:2)
+    integer :: irho, issh, jssh, kssh, ilssh, jlssh,                           &
+    & nssh, nssh1, ix, ndq, nnz, npts, nnrho, nrhs, im, io
     real(kind=wp) :: dnuxc, dnuxcs, drho, exc, dexcc, factor, rcutoff, rho,    &
     & rhomax, rhomin, rh, rhp, rhpp, vxc, ddq, tmp, xnocc_in(nsh_max_),        &
     & rho1c(wfmax_points_), rhop1c(wfmax_points_), rhopp1c(wfmax_points_)
     character(len=2) :: auxz
     character(len=256) :: errmsg
     logical, allocatable :: iszero(:)
-    integer, allocatable :: orb2ssh(:), morbs(:)
     real(kind=wp), allocatable :: xmatt(:,:), eexc(:,:), vvxc(:,:),            &
     & tmpmat(:,:), dq(:,:), exc1crho(:,:,:), nuxc1crho(:,:,:)
     real(kind=wp), external :: psiofr
@@ -145,7 +141,7 @@ contains
 
     ! TODO: this should come from somewhere else
     ! Prepare the increments
-    first_orb = .true.
+    first_shell = .true.
     ndq = 3
     npts = ndq**nssh
     nnz = (nssh*(nssh + 1))/2
@@ -153,33 +149,33 @@ contains
     do issh = 1, nssh
       ilssh = lsshxc_(ispec, issh)
       if (ilssh == 0) then
-        if (first_orb(ilssh)) then
+        if (first_shell(ilssh)) then
           dq(issh, 1) = -0.10_wp
           dq(issh, 2) = 0.00_wp
           dq(issh, 3) = 0.10_wp
-          first_orb(ilssh) = .false.
+          first_shell(ilssh) = .false.
         else
           dq(issh, 1) = 0.00_wp
           dq(issh, 2) = 0.05_wp
           dq(issh, 3) = 0.10_wp
         end if
       else if (ilssh == 1) then
-        if (first_orb(ilssh)) then
+        if (first_shell(ilssh)) then
           dq(issh, 1) = -0.20_wp
           dq(issh, 2) = 0.00_wp
           dq(issh, 3) = 0.20_wp
-          first_orb(ilssh) = .false.
+          first_shell(ilssh) = .false.
         else
           dq(issh, 1) = 0.00_wp
           dq(issh, 2) = 0.10_wp
           dq(issh, 3) = 0.20_wp
         end if
       else
-        if (first_orb(ilssh)) then
+        if (first_shell(ilssh)) then
           dq(issh, 1) = -0.50_wp
           dq(issh, 2) = 0.00_wp
           dq(issh, 3) = 0.50_wp
-          first_orb(ilssh) = .false.
+          first_shell(ilssh) = .false.
         else
           dq(issh, 1) = 0.00_wp
           dq(issh, 2) = 0.25_wp
@@ -192,10 +188,8 @@ contains
     allocate(iszero(nnz))
     iszero = .false.
     kssh = 0
-    norbs = 0
     do issh = 1, nssh
       ilssh = lsshxc_(ispec, issh)
-      norbs = norbs + (2*ilssh + 1)
       do jssh = issh, nssh
         kssh = kssh + 1
         if (ilssh /= lsshxc_(ispec, jssh)) iszero(kssh) = .true.
@@ -289,19 +283,6 @@ contains
     end do
     deallocate(tmpmat, iszero)
 
-    ! Useful mapping
-    allocate(orb2ssh(norbs), morbs(norbs))
-    iorb = 0
-    do issh = 1, nssh
-      im = -lsshxc_(ispec, issh)
-      do ilssh = 1, (2*lsshxc_(ispec, issh) + 1)
-        iorb = iorb + 1
-        orb2ssh(iorb) = issh
-        morbs(iorb) = im
-        im = im + 1
-      end do
-    end do
-
     ! Write output
     io = 360
     open (unit=io, file='coutput/onecenter_xc.'//auxz//'.dat', status='new',   &
@@ -310,17 +291,10 @@ contains
       write (stderr, '(a)') '[ERROR] failed to open onecenter_xc.'//auxz//'.dat'
       return
     end if
-    write (io,'(2i4)') nssh, norbs
+    write (io,'(2i4)') nssh
     do ix = 0, nssh
-      do iorb = 1, norbs
-        do jorb = 1, norbs
-          if (morbs(iorb) == morbs(jorb)) then
-            write (io,'(ES15.7)', advance='no') nuxc1crho(ix, orb2ssh(iorb), orb2ssh(jorb))
-          else
-            write (io,'(ES15.7)', advance='no') 0.0_wp
-          end if
-        end do
-        write (io,'(a)') ''
+      do issh = 1, nssh
+        write (io,'(ES15.7)') (nuxc1crho(ix, issh, jssh), jssh = 1, nssh)
       end do
       write (io,'(a)') ''
     end do
@@ -329,7 +303,7 @@ contains
       write (io,'(a)') ''
     end do
     close(io)
-    deallocate(orb2ssh, morbs, exc1crho, nuxc1crho)
+    deallocate(exc1crho, nuxc1crho)
 
     write (stdout,'(a)') 'Done'
     onecenter_spec_calc = 0
@@ -337,6 +311,6 @@ contains
   end function onecenter_spec_calc
 
   subroutine onecenter_free()
-    deallocate(iderorb_, nsshxc_, nzx_, lsshxc_, dqorb_, drr_rho_, rcutoffa_max_, xnocc_)
+    deallocate(nsshxc_, nzx_, lsshxc_, drr_rho_, rcutoffa_max_, xnocc_)
   end subroutine onecenter_free
 end module onecenter

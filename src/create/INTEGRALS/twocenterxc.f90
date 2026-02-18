@@ -603,12 +603,12 @@ contains
     real(kind=wp) :: dens, dzraw, r, r1, r2, rho, rho2, z1, z2, z12, z22
     real(kind=wp), external :: psiofr
 
-    zmin = max(-rcutoff1_, d - rcutoff2_)
-    zmax = min(rcutoff1_, d + rcutoff2_)
+    zmin = min(-rcutoff1_, d - rcutoff2_)
+    zmax = max(rcutoff1_, d + rcutoff2_)
     rhomin = 0.0_wp
     rhomax = min(rcutoff1_, rcutoff2_)
     dzraw = min(drr_rho(ispec1_),drr_rho(ispec2_))
-    dz = dzraw*ixcgridfactor
+    dz = dzraw*ixcgridfacto
     if (dz > 0.05_wp) dz = 0.05_wp
     if (dz < 0.002_wp) dz = 0.002_wp
     nnz = int((zmax - zmin)/dz) + 1
