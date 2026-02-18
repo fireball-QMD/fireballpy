@@ -294,7 +294,7 @@ contains
     write (io,'(2i4)') nssh
     do ix = 0, nssh
       do issh = 1, nssh
-        write (io,'(ES15.7)') (nuxc1crho(ix, issh, jssh), jssh = 1, nssh)
+        write (io,'(100ES15.7)') (nuxc1crho(ix, issh, jssh), jssh = 1, nssh)
       end do
       write (io,'(a)') ''
     end do

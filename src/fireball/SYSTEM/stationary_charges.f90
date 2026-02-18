@@ -160,6 +160,9 @@ subroutine stationary_charges()
       use M_fdata, only: gxc_1c,fxc_1c,exc_1c_0,vxc_1c_0, nssh
       implicit none
       integer :: iatom,count ,issh,kssh,alpha,beta,imu, matom, katom 
+      g_h_shell = 0.0d0
+      g_xc_shell=0.0d0
+      vxc_aa_shell = 0.0d0
       f_xc_shell=0.0d0
       count=0
       do iatom=1,natoms
@@ -167,18 +170,15 @@ subroutine stationary_charges()
           alpha = count + issh          
           do kssh=1, nssh(imass(iatom))
             beta = count + kssh
-            f_xc_shell(alpha,beta) = fxc_1c(imass(iatom),issh,kssh)
+            f_xc_shell(alpha,beta) = fxc_1c(issh,kssh,imass(iatom))
+            g_xc_shell(alpha,beta) = gxc_1c(issh,issh,kssh,imass(iatom))
           end do
-          exc_aa_shell(alpha) = exc_1c_0(imass(iatom),issh)
+          exc_aa_shell(alpha) = exc_1c_0(issh,imass(iatom))
+          vxc_aa_shell(alpha) = vxc_1c_0(issh,issh,imass(iatom))
         end do
         count = count + nssh(imass(iatom))
       end do
 
-      g_h_shell = 0.0
-      g_xc_shell=0.0d0
-      vxc_aa_shell = 0.0d0
-!      print*,'====== gxc_1c  ======='
-!      print*,gxc_1c
       do iatom = 1, natoms
         do imu=1,num_orb(imass(iatom))
           alpha = get_shell_ofatom_imu(iatom,imu) 
@@ -188,13 +188,8 @@ subroutine stationary_charges()
               beta = get_shell_ofatom_issh(katom,kssh)
               g_h_shell(alpha,beta) = g_h_shell(alpha,beta) +&
               & g_h(imu,imu, kssh, katom, matom, iatom) / (2*get_l_ofshell(alpha) + 1)
-              if(iatom .eq. katom) then
-                 g_xc_shell(alpha,beta) = g_xc_shell(alpha,beta) + &
-                & gxc_1c(imass(iatom),imu,imu,kssh) / (2*get_l_ofshell(alpha) + 1)
-              end if
             end do
           end do
-          vxc_aa_shell(alpha) = vxc_aa_shell(alpha) + vxc_1c_0(imass(iatom),imu,imu) / (2*get_l_ofshell(alpha) + 1)
         end do
       end do
     end subroutine  load_M

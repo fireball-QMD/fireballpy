@@ -1,9 +1,9 @@
 subroutine read_1c ()
   use, intrinsic :: iso_fortran_env, only: double => real64
   use M_fdata, only: nspecies, nzx, fdataLocation, onecfname, exc_1c_0, vxc_1c_0, &
-    &  gxc_1c, fxc_1c, nsh_max, nssh ,numorb_max
+    &  gxc_1c, fxc_1c, nsh_max, nssh 
   implicit none
-  integer :: iline, in1, issh, itype, jssh, kssh, kkssh, numsh, numorb,imu,inu
+  integer :: iline, in1, issh, itype, jssh, kssh, numsh
   character (len=3) :: auxz
   character (len=1000) :: root
 
@@ -12,11 +12,11 @@ subroutine read_1c ()
   if (allocated(gxc_1c)) deallocate(gxc_1c)
   if (allocated(fxc_1c)) deallocate(fxc_1c)
 
-  allocate(exc_1c_0 (nspecies,nsh_max))
-  allocate(fxc_1c (nspecies,nsh_max,nsh_max))
+  allocate(exc_1c_0 (nsh_max,nspecies))
+  allocate(fxc_1c (nsh_max,nsh_max,nspecies))
 
-  allocate(gxc_1c (nspecies,numorb_max,numorb_max,nsh_max))
-  allocate(vxc_1c_0 (nspecies,numorb_max,numorb_max))
+  allocate(gxc_1c (nsh_max,nsh_max,nsh_max,nspecies))
+  allocate(vxc_1c_0 (nsh_max,nsh_max,nspecies))
 
   exc_1c_0 = 0.0d0
   vxc_1c_0 = 0.0d0
@@ -25,28 +25,23 @@ subroutine read_1c ()
 
   do in1 = 1, nspecies
     write (auxz,'(''.'',i2.2)') nzx(in1)
-    ! leemos onecenter_xc.06.dat 
     root = trim(fdataLocation) // trim(onecfname(1)) // auxz // '.dat'
-!print*,'lee ', root
     open (unit = 36, file = root, status = 'old')
-    read (36,*) numsh, numorb
-    do imu = 1, numorb
-      read (36,*) (vxc_1c_0(in1,imu,inu),inu=1,numorb)
+    read (36,*) numsh
+    do issh = 1, numsh
+      read (36,*) (vxc_1c_0(jssh,issh,in1),jssh=1,numsh)
     end do
     read (36,*)
     do kssh= 1, numsh
-      do imu = 1, numorb
-        read (36,*) (gxc_1c(in1,imu,inu,kssh),inu=1,numorb)
-        !print*,in1,imu,kssh
-        !print*, (gxc_1c(in1,imu,inu,kssh),inu=1,numorb)
-        
+      do issh = 1, numsh
+        read (36,*) (gxc_1c(jssh,issh,kssh,in1),jssh=1,numsh)
       end do
       read (36,*)
     end do
-    read (36,*) (exc_1c_0(in1,jssh), jssh = 1, numsh)
+    read (36,*) (exc_1c_0(jssh,in1), jssh = 1, numsh)
     read (36,*)
     do kssh = 1, numsh
-      read (36,*) (fxc_1c(in1,jssh,kssh),jssh=1,numsh)
+      read (36,*) (fxc_1c(jssh,kssh,in1),jssh=1,numsh)
       read (36,*)
     end do
     close (unit = 36)

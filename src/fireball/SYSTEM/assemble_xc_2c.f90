@@ -1,7 +1,7 @@
 subroutine assemble_xc_2c ()
   use, intrinsic :: iso_fortran_env, only: double => real64
   use M_system, only: numorb_max, natoms, neigh_self, ratom, imass, neighn, neigh_b, neigh_j, xl, vxc, rho_off, rhoij_off, s_mat, Kscf, g_xc, Qin
-  use M_fdata, only: num_orb, nssh
+  use M_fdata, only: num_orb, nssh, nsh_max, Qneutral
   implicit none
   integer iatom
   integer iatomstart
@@ -16,6 +16,7 @@ subroutine assemble_xc_2c ()
   integer matom
   integer mbeta
   integer natomsp
+  integer issh
   real(double)  y 
   real(double) dxn
   real(double), dimension (numorb_max, numorb_max) :: bcxcx
@@ -28,10 +29,19 @@ subroutine assemble_xc_2c ()
   real(double), dimension (3) :: r1, r2, r21
   real(double), dimension (3) :: sighat
   real(double), dimension (numorb_max, numorb_max) :: sx
+  real(double), dimension (nsh_max) :: dqi
+  real(double), dimension (nsh_max) :: dqj
+
+
   do iatom = 1, natoms
     matom = neigh_self(iatom)
     r1(:) = ratom(:,iatom)
     in1 = imass(iatom)
+    dqi = 0.0d0
+    do issh = 1, nssh(in1)
+      dqi(issh) = (Qin(issh,iatom) - Qneutral(issh,in1))
+    end do
+
     do ineigh = 1, neighn(iatom)
       mbeta = neigh_b(ineigh,iatom)
       jatom = neigh_j(ineigh,iatom)
@@ -46,6 +56,10 @@ subroutine assemble_xc_2c ()
       else
         sighat(:) = r21(:)/y
       end if
+      dqj = 0.0d0
+      do issh = 1, nssh(in2)
+        dqj(issh) = (Qin(issh,jatom) - Qneutral(issh,in2))
+      end do
       call epsilon (r2, sighat, eps)
       call deps2cent (r1, r2, eps, deps)
       if (iatom .ne. jatom .or. mbeta .ne. 0) then 
@@ -64,7 +78,7 @@ subroutine assemble_xc_2c ()
           call doscentros (interaction, isorp, kforce, in1, in2, in3, y, eps, deps, rhomx, rhompx)
           do inu = 1, num_orb(in3)
             do imu = 1, num_orb(in1)
-              vxc(imu,inu,ineigh,iatom) = vxc(imu,inu,ineigh,iatom) + rhomx(imu,inu)*Qin(isorp,iatom)
+              vxc(imu,inu,ineigh,iatom) = vxc(imu,inu,ineigh,iatom) + rhomx(imu,inu)*dqi(isorp)
               if (Kscf .eq. 1) then
                 g_xc(imu,inu,isorp,iatom,ineigh,iatom) = g_xc(imu,inu,isorp,iatom,ineigh,iatom) + rhomx(imu,inu)
               end if
@@ -77,7 +91,7 @@ subroutine assemble_xc_2c ()
           call doscentros (interaction, isorp, kforce, in1, in2, in3, y, eps, deps, rhomx, rhompx)
           do inu = 1, num_orb(in3)
             do imu = 1, num_orb(in1)
-              vxc(imu,inu,ineigh,iatom) = vxc(imu,inu,ineigh,iatom) + rhomx(imu,inu)*Qin(isorp,jatom)
+              vxc(imu,inu,ineigh,iatom) = vxc(imu,inu,ineigh,iatom) + rhomx(imu,inu)*dqj(isorp)
               if (Kscf .eq. 1) then
                 g_xc(imu,inu,isorp,jatom,ineigh,iatom) = g_xc(imu,inu,isorp,jatom,ineigh,iatom) + rhomx(imu,inu)
               end if

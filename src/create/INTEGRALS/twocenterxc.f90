@@ -608,7 +608,7 @@ contains
     rhomin = 0.0_wp
     rhomax = min(rcutoff1_, rcutoff2_)
     dzraw = min(drr_rho(ispec1_),drr_rho(ispec2_))
-    dz = dzraw*ixcgridfacto
+    dz = dzraw*ixcgridfactor
     if (dz > 0.05_wp) dz = 0.05_wp
     if (dz < 0.002_wp) dz = 0.002_wp
     nnz = int((zmax - zmin)/dz) + 1
