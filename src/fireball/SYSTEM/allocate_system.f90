@@ -195,26 +195,15 @@ subroutine allocate_system ()
     end do
    end do
 
-           
-  imu = 0
-  alpha = 0 
-
-  alpha = 0 
-  imu=1
-  print*,'alpha,imu,iatom,issh,lssh'
-  do iatom=1,natoms
-   do issh=1,nssh(imass(iatom))
-     alpha = alpha + 1
-     get_shell_ofatom_issh(iatom,issh)=alpha
-     print '(5I6)', alpha, imu, iatom, issh, lssh(issh, imass(iatom))      
-     get_orb_ofshell(alpha) = imu
-     get_iatom_ofshell(alpha) = iatom
-     get_issh_ofshell(alpha) = issh
-     get_l_ofshell(alpha) = lssh(issh,imass(iatom))
-     imu = imu + ( 2*lssh(issh,imass(iatom))+1 )
-   end do
+  do alpha=1,nssh_tot
+    print*,'alpha = ',alpha
+    print*,'get_orb_ofshell =',get_orb_ofshell(alpha)
+    print*,'get_iatom_ofshell =',get_iatom_ofshell(alpha)
+    print*,'get_issh_ofshell=',get_issh_ofshell(alpha)
+    print*,'get_l_ofshell=',get_l_ofshell(alpha)
   end do
-           
+ 
+
   imu = 0
   alpha = 0 
   do iatom=1,natoms
@@ -234,6 +223,7 @@ subroutine allocate_system ()
    end do
   end do
 
+  
  
   if (icluster .eq. 1) mbeta_max = 0
   neigh_max = -99

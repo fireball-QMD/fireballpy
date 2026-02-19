@@ -101,5 +101,6 @@ subroutine assemble_xc_2c ()
       end if
     end do
   end do
+  vxc = 0.0d0
   return
 end subroutine assemble_xc_2c

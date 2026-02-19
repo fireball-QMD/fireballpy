@@ -39,11 +39,13 @@ subroutine unocentros (in1, iatom, dccexc_1c, mu1xc)
       l2   = getlssh(degelec(iatom)+inu)
       jssh = getissh(degelec(iatom)+inu)
       if( m1 .eq. m2 .and. l1 .eq. l2 ) then
+         print*,imu+degelec(iatom),inu+degelec(iatom),'m1,l1,issh', m1,l1,issh
          mu1xc(inu,imu) = vxc_1c_0(jssh,issh,in1)  
+        print*,'jssh,issh,kssh,in1,gxc_1cv'
         do kssh = 1,nssh(in1)
+          print*,jssh,issh,kssh,in1,gxc_1c(jssh,issh,kssh,in1)
           mu1xc(inu,imu) = mu1xc(inu,imu) + dqi(kssh) * gxc_1c(jssh,issh,kssh,in1)
-          g_xc(inu,imu,kssh,iatom,neigh_self(iatom),iatom) = &
-          & g_xc(inu,imu,kssh,iatom,neigh_self(iatom),iatom) + gxc_1c(jssh,issh,kssh,in1)
+          g_xc(inu,imu,kssh,iatom,neigh_self(iatom),iatom) = gxc_1c(jssh,issh,kssh,in1)
         enddo 
       endif
     end do
@@ -55,7 +57,7 @@ subroutine unocentros (in1, iatom, dccexc_1c, mu1xc)
       V_aux(issh) = V_aux(issh) + dqi(kssh) * gxc_1c(issh,issh,kssh,in1)
     enddo
   enddo
-  e_aux = 0.d0  
+  E_aux = 0.d0  
   do issh = 1,nssh(in1)
     E_aux(issh) = exc_1c_0(issh,in1) 
     do kssh = 1,nssh(in1)
@@ -66,5 +68,6 @@ subroutine unocentros (in1, iatom, dccexc_1c, mu1xc)
   do issh = 1,nssh(in1)
     dccexc_1c = dccexc_1c + (E_aux(issh) - V_aux(issh))*Qin(issh,iatom)    
   enddo
+
   return
 end subroutine unocentros
