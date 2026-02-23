@@ -33,6 +33,7 @@ subroutine assemble_xc_2c ()
   real(double), dimension (nsh_max) :: dqj
 
 
+  kforce = 0
   do iatom = 1, natoms
     matom = neigh_self(iatom)
     r1(:) = ratom(:,iatom)
@@ -65,7 +66,7 @@ subroutine assemble_xc_2c ()
       if (iatom .ne. jatom .or. mbeta .ne. 0) then 
         isorp = 0
         interaction = 6
-        in3 = in2
+        in3 = in1
         call doscentros (interaction, isorp, kforce, in1, in2, in3, y, eps, deps, rhomx, rhompx)
         do inu = 1, num_orb(in3)
           do imu = 1, num_orb(in1)
@@ -75,7 +76,7 @@ subroutine assemble_xc_2c ()
         interaction = 7
         in3 = in2
         do isorp = 1, nssh(in1)
-          call doscentros (interaction, isorp, kforce, in1, in2, in3, y, eps, deps, rhomx, rhompx)
+          call doscentros (interaction, isorp, kforce, in1, in1, in3, y, eps, deps, rhomx, rhompx)
           do inu = 1, num_orb(in3)
             do imu = 1, num_orb(in1)
               vxc(imu,inu,ineigh,iatom) = vxc(imu,inu,ineigh,iatom) + rhomx(imu,inu)*dqi(isorp)
@@ -101,6 +102,6 @@ subroutine assemble_xc_2c ()
       end if
     end do
   end do
-  vxc = 0.0d0
+  ! vxc = 0.0d0
   return
 end subroutine assemble_xc_2c

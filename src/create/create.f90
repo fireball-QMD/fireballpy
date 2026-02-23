@@ -480,7 +480,7 @@ program create
     ! Two center
     do itype1 = 1, nspec
       do itype2 = itype1, nspec
-        index_max = index_max2c(itype1,itype1)
+        index_max = index_max2c(itype1,itype2)
         do index = 1, index_max
           n1(index) = nleft(itype1,itype2,index)
           l1(index) = lleft(itype1,itype2,index)

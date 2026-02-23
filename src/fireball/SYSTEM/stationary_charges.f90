@@ -127,13 +127,13 @@ subroutine stationary_charges()
     end do
 
 
-    allocate(ipiv(nssh_tot))
+    allocate(ipiv(nssh_tot + 1))
     allocate(work(1))
-    call dsysv('U', nssh_tot, 1, M, nssh_tot, ipiv, B, nssh_tot, work, -1, info)
+    call dsysv('U', nssh_tot + 1, 1, M, nssh_tot + 1, ipiv, B, nssh_tot + 1, work, -1, info)
     lwork = int(work(1))
     deallocate(work)
     allocate(work(lwork))
-    call dsysv('U', nssh_tot, 1, M, nssh_tot, ipiv, B, nssh_tot, work, lwork, info)
+    call dsysv('U', nssh_tot + 1, 1, M, nssh_tot + 1, ipiv, B, nssh_tot + 1, work, lwork, info)
     deallocate(work)
     deallocate(ipiv)
     if (info /= 0) then

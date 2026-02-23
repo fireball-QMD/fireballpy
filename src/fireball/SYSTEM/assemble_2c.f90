@@ -96,7 +96,7 @@ subroutine assemble_2c ()
       end do
 
       isorp = 0
-      kforce = 1           ! don't calculate forces here
+      kforce = 0           ! don't calculate forces here
       interaction = 4
       in3 = in1
       call doscentros (interaction, isorp, kforce, in1, in2, in3, y, eps, deps, bcnax, bcnapx)

@@ -28,9 +28,7 @@
 ! subdivsion { (b) (3) (ii) } of the Rights in Technical Data and
 ! Computer Software clause at 52.227-7013.
 
-
-! twocenterxc.f90
-! Program Description
+! twocenterxc.f90 Program Description
 ! ===========================================================================
 !      This code is a general two-center integration routine for matrix
 ! elements of the form <psi(1)|V(1)|psi(2)>.  Thus, V(1) is located at the
@@ -48,7 +46,6 @@ module twocenterxc
   &                utils_progress_bar_clear
   implicit none
   private
-
   public :: TWOCENTER_XC
   public :: twocenter_init
   public :: twocenter_calc
@@ -270,10 +267,9 @@ contains
     integer, intent(in) :: interactions
     include '../parameters.inc'
     include '../exchange.inc'
-    include '../pseudopotentials.inc'
     integer :: igrid, index, index_coulomb, issh, l1, l2, m1, m2, n1, n2,      &
     &          io, ix, ix1, ix2, ndq, npts, npts1, npts2, nssh1, nssh2
-    real(kind=wp) :: d, dmax, dr, ddq, xnocc_in(nsh_max, 2)
+    real(kind=wp) :: d, dmin, dmax, dr, ddq, xnocc_in(nsh_max, 2)
     character(len=40) :: fname1, fname2
     real(kind=wp), allocatable :: dq1(:,:), dq2(:,:), xmatt(:,:), vvxc(:,:)
     character(len=40), allocatable :: fnamel1(:), fnamer1(:), fnamel2(:),      &
@@ -287,8 +283,9 @@ contains
 
     nssh1 = nsshxc(ispec1_)
     nssh2 = nsshxc(ispec2_)
+    dmin = 0.0_wp
     dmax = rcutoff1_ + rcutoff2_
-    dr = dmax/real(ndd_ - 1, kind=wp)
+    dr = (dmax - dmin)/real(ndd_ - 1, kind=wp)
 
     if (twocenter_interactions(1)) then
       allocate(fnamel1(nssh1), fnamel2(nssh2), fnamer1(nssh2), fnamer2(nssh1), &
@@ -396,22 +393,21 @@ contains
       call twocenter_charge_grid(dq1, dq2)
 
       call utils_progress_bar_prepare(ndd_, 100)
-      d = 0.0_wp
       do igrid = 1, ndd_
         call utils_progress_bar_print(igrid, stdout)
-        d = d + dr
+        d = dmin + real(igrid - 1, kind=wp)*dr
         ix = 1
         do ix1 = 1, npts1
           do ix2 = 1, npts2
             xmatt(1, ix) = 1.0_wp
             do issh = 1, nssh1
               ddq = dq1(issh, 1 + mod(ix1 - 1, ndq**issh)/ndq**(issh - 1))
-              xnocc_in(issh, 1) = xnocc(issh, ispec1_) + ddq
+              xnocc_in(issh, 1) = xnocc(issh, ispec1_)! + ddq
               xmatt(issh+1, ix) = ddq
             end do
             do issh = 1, nssh2
               ddq = dq2(issh, 1 + mod(ix2 - 1, ndq**issh)/ndq**(issh - 1))
-              xnocc_in(issh, 2) = xnocc(issh, ispec2_) + ddq
+              xnocc_in(issh, 2) = xnocc(issh, ispec2_)! + ddq
               xmatt(issh+1+nssh1, ix) = ddq
             end do
             twocenter_calc = twocenter_rho2c(d, xnocc_in)
@@ -519,14 +515,14 @@ contains
 
   real(wp) function twocenter_integral_fit (n1, l1, m1, n2, l2, m2, d)
     use math, only: math_Ylm
-    include '../parameters.inc'
-    include '../exchange.inc'
-    include '../wavefunctions.inc'
     integer, intent(in) :: n1, l1, m1, n2, l2, m2
+    include '../parameters.inc'
+    include '../quadrature.inc'
     real(kind=wp), intent(in) :: d
-    integer :: irho, iz
+    integer :: irho, iz, nnz
     real(kind=wp) :: factor, factor2, factor4, phifactor, psi1, psi2,      &
-    &                r1, r2, rho, rho2, z1, z2, z12, z22
+    &                r1, r2, rho, rho2, z1, z2, z12, z22, vofr, dens,      &
+    &                zmin, zmax
     real(kind=wp), external :: vxc, psiofr, rescaled_psi
     real(kind=wp), allocatable :: rhomult(:), zmult(:)
 
@@ -534,16 +530,11 @@ contains
 
     zmin = max(-rcutoff1_, d - rcutoff2_)
     zmax = min(rcutoff1_, d + rcutoff2_)
-    dz = dz_
-    nnz = int((zmax - zmin)/dz)
+    nnz = int((zmax - zmin)/dz_)
     if (iand(nnz, 1) == 0) nnz = nnz + 1
-    rhomin = rhomin_
-    rhomax = rhomax_
-    drho = drho_
-    nnrho = nnrho_
 
     allocate(zmult(nnz))
-    factor = 0.33333333333333333333_wp*dz
+    factor = 0.33333333333333333333_wp*dz_
     factor2 = 2.0_wp*factor
     factor4 = 2.0_wp*factor2
     zmult(1) = factor
@@ -554,12 +545,12 @@ contains
     if (nnz > 1) zmult(nnz - 1) = factor2
     zmult(nnz) = factor
 
-    allocate(rhomult(nnrho))
-    factor = 0.33333333333333333333_wp*drho
+    allocate(rhomult(nnrho_))
+    factor = 0.33333333333333333333_wp*drho_
     factor2 = 2.0_wp*factor
     factor4 = 2.0_wp*factor2
     rhomult(1) = factor
-    do irho = 2, nnrho - 3, 2
+    do irho = 2, nnrho_ - 3, 2
       rhomult(irho) = factor4
       rhomult(irho+1) = factor2
     end do
@@ -567,23 +558,24 @@ contains
     rhomult(nnrho_) = factor
 
     do iz = 1, nnz
-      z1 = zmin + real(iz - 1, kind=wp)*dz
+      z1 = zmin + real(iz - 1, kind=wp)*dz_
       z2 = z1 - d
       z12 = z1*z1
       z22 = z2*z2
       do irho = 1, nnrho_
-        rho = rhomin_ + real(irho - 1, kind=wp)*drho
+        rho = rhomin_ + real(irho - 1, kind=wp)*drho_
         rho2 = rho*rho
         r1 = sqrt(z12 + rho2)
         if (r1 >= rcutoff1_) cycle
         r2 = sqrt(z22 + rho2)
+        if (r2 >= rcutoff2_) cycle
         factor = zmult(iz)*rhomult(irho)
         psi1 = psiofr(ispec1_, n1, r1)
-        psi1 = rescaled_psi(l1, m1, rho, r1, z1, psi1)
         psi2 = psiofr(ispec2_, n2, r2)
+        vofr = vxc(rho, z1, iexc_, fraction_)
+        psi1 = rescaled_psi(l1, m1, rho, r1, z1, psi1)
         psi2 = rescaled_psi(l2, m2, rho, r2, z2, psi2)
-        twocenter_integral_fit = twocenter_integral_fit +                      &
-        &                        vxc(rho, z1, iexc_, fraction_)*psi1*psi2*rho*factor
+        twocenter_integral_fit = twocenter_integral_fit + vofr*psi1*psi2*rho*factor
       end do
     end do
     phifactor = 0.5_wp*math_Ylm(l1, m1, 0.0_wp)*math_Ylm(l2, m2, 0.0_wp)
@@ -594,11 +586,11 @@ contains
 
   integer function twocenter_rho2c (d, xnocc_in)
     use constants, only: inv4pi
+    real(kind=wp), intent(in) :: d, xnocc_in(:,:)
     include '../parameters.inc'
     include '../exchange.inc'
     include '../quadrature.inc'
     include '../wavefunctions.inc'
-    real(kind=wp), intent(in) :: d, xnocc_in(:,:)
     integer :: irho, issh, iz
     real(kind=wp) :: dens, dzraw, r, r1, r2, rho, rho2, z1, z2, z12, z22
     real(kind=wp), external :: psiofr
@@ -606,7 +598,7 @@ contains
     zmin = min(-rcutoff1_, d - rcutoff2_)
     zmax = max(rcutoff1_, d + rcutoff2_)
     rhomin = 0.0_wp
-    rhomax = min(rcutoff1_, rcutoff2_)
+    rhomax = max(rcutoff1_, rcutoff2_)
     dzraw = min(drr_rho(ispec1_),drr_rho(ispec2_))
     dz = dzraw*ixcgridfactor
     if (dz > 0.05_wp) dz = 0.05_wp
@@ -662,20 +654,20 @@ contains
     end do
     do irho = 1, nnrho
       do iz = 2, nnz - 1
-        rhoz2c(irho,iz) = (rho2c(irho,iz+1) - rho2c(irho,iz-1))/(2.0d0*dz)
-        rhozz2c(irho,iz) = (rho2c(irho,iz+1) - 2.0d0*rho2c(irho,iz) + rho2c(irho,iz-1))/(dz**2)
+        rhoz2c(irho,iz) = (rho2c(irho,iz+1) - rho2c(irho,iz-1))/(2.0_wp*dz)
+        rhozz2c(irho,iz) = (rho2c(irho,iz+1) - 2.0_wp*rho2c(irho,iz) + rho2c(irho,iz-1))/(dz**2)
       end do
-      rhoz2c(irho,1) = 2.0d0*rhoz2c(irho,2) - rhoz2c(irho,3)
-      rhoz2c(irho,nnz) = 2.0d0*rhoz2c(irho,nnz-1) - rhoz2c(irho,nnz-2)
-      rhozz2c(irho,1) = 2.0d0*rhozz2c(irho,2) - rhozz2c(irho,3)
-      rhozz2c(irho,nnz) = 2.0d0*rhozz2c(irho,nnz-1) - rhozz2c(irho,nnz-2)
+      rhoz2c(irho,1) = 2.0_wp*rhoz2c(irho,2) - rhoz2c(irho,3)
+      rhoz2c(irho,nnz) = 2.0_wp*rhoz2c(irho,nnz-1) - rhoz2c(irho,nnz-2)
+      rhozz2c(irho,1) = 2.0_wp*rhozz2c(irho,2) - rhozz2c(irho,3)
+      rhozz2c(irho,nnz) = 2.0_wp*rhozz2c(irho,nnz-1) - rhozz2c(irho,nnz-2)
     end do
     do irho = 1, nnrho
       do iz = 2, nnz - 1
-        rhopz2c(irho,iz) = (rhop2c(irho,iz+1) - rhop2c(irho,iz-1))/(2.0d0*dz)
+        rhopz2c(irho,iz) = (rhop2c(irho,iz+1) - rhop2c(irho,iz-1))/(2.0_wp*dz)
       end do
-      rhopz2c(irho,1) = 2.0d0*rhopz2c(irho,2) - rhopz2c(irho,3)
-      rhopz2c(irho,nnz) = 2.0d0*rhopz2c(irho,nnz-1) - rhopz2c(irho,nnz-2)
+      rhopz2c(irho,1) = 2.0_wp*rhopz2c(irho,2) - rhopz2c(irho,3)
+      rhopz2c(irho,nnz) = 2.0_wp*rhopz2c(irho,nnz-1) - rhopz2c(irho,nnz-2)
     end do
 
     twocenter_rho2c = 0
