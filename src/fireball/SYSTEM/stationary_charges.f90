@@ -26,16 +26,16 @@ subroutine stationary_charges()
   c = 0.0d0
   alpha = 0
   call load_M()
-  !Borrar es solo para hacer test----------
-  !do issh=1,nsh_max
-  !  fix_shell_charge(issh)=fix_shell_charge_aux(issh)
-  !end do
+  !todos libres
+  do issh=1,nssh_tot
+    fix_shell_charge(issh)=0
+  end do
   !lo usamos para H2O HsHsOsp
   !                   s s s p 
   !fix_shell_charge = [1,0,1,0]
   !                   CC
-  fix_shell_charge = [1,0,1,1,0,0]
- 
+  !fix_shell_charge = [0,0,0,0,0,0]
+  
 
   ztot_aux=0.0d0
   do alpha=1, nssh_tot
@@ -191,9 +191,9 @@ end if
        else
           Qout(issh,iatom) = Qin(issh,iatom)
        end if
-       print '(A,I0,A,F6.3)', 'Qin(', alpha, ') = ', Qout(issh, iatom)
+       print '(A,I0,A,F8.3)', 'Qin(', alpha, ') = ', Qout(issh, iatom)
     end do
-   stop
+   !stop
   contains
 
     subroutine load_M() !Mx=B

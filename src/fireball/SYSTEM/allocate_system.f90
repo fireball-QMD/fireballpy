@@ -13,7 +13,7 @@ subroutine allocate_system ()
     & dxcdcc, ft, dusr, fotxc, fotxc_ca, faca, fotca, f3naa, f3nab, f3nac, f3nla, f3nlb, f3nlc, f3caa, f3cab, f3cac, flrew, f3xca_ca, &
     & f3xcb_ca, f3xcc_ca, f3xca, f3xcb, f3xcc, flrew_qmmm, fro, ftot, dxcv, norbitals_new, qstate, bbnkre, bbnkim, igamma, &
     & g_h, g_xc, f_xc, exc_aa, vxc_aa, get_orb_ofshell, get_l_ofshell, get_issh_ofshell, get_iatom_ofshell, get_shell_oforb, orb2shell, &
-    & g_h_shell, g_xc_shell, f_xc_shell, exc_aa_shell, vxc_aa_shell, get_shell_ofatom_imu, get_shell_ofatom_issh
+    & g_h_shell, g_xc_shell, f_xc_shell, exc_aa_shell, vxc_aa_shell, get_shell_ofatom_imu, get_shell_ofatom_issh, fix_shell_charge
   use M_fdata, only: nssh, rcutoff, rc_PP, nspecies, num_orb, Qneutral, lssh, nsshPP, lsshPP,  nsh_max, numXmax, numYmax
 !  use M_fdata, only: numy3c_xc3c, ideriv_max
   implicit none
@@ -178,7 +178,9 @@ subroutine allocate_system ()
   allocate (get_shell_ofatom_imu(natoms,numorb_max))
   if (allocated(get_shell_ofatom_issh)) deallocate(get_shell_ofatom_issh) 
   allocate (get_shell_ofatom_issh(natoms,nsh_max))
-
+  
+  if (allocated(fix_shell_charge)) deallocate(fix_shell_charge)
+  allocate (fix_shell_charge(nssh_tot))
   alpha = 0 
   imu=1
   print*,'alpha,imu,iatom,issh,lssh'
