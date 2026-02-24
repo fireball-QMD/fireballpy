@@ -120,13 +120,13 @@ subroutine allocate_system ()
 
 
   ! By default the input charges are initialized to the neutral atom charges
-!  Qin = 0.0d0
-!  do iatom = 1, natoms
-!    in1 = imass(iatom)
-!    do issh = 1, nssh(in1)
-!      Qin(issh,iatom) = Qneutral(issh,in1)
-!    end do
-!  end do
+  Qin = 0.0d0
+  do iatom = 1, natoms
+    in1 = imass(iatom)
+    do issh = 1, nssh(in1)
+      Qin(issh,iatom) = Qneutral(issh,in1)
+    end do
+  end do
 
 
   ztot = real(qstate, double)

@@ -15,7 +15,7 @@ subroutine stationary_charges()
   real(double),dimension(nssh_tot) :: c, SQ ! carga
   real(double) :: Ep2
   integer issh1, mu_min, mu_max, l, inumorb
-  real(double) aux
+  real(double) aux, ztot_aux
   integer :: beta, alpha, alpha_iatom, ina, matom, iatom 
   integer :: alpha_iatom2, alpha2, nssh_tot2 
   integer, dimension (:), allocatable :: mapindex, ipiv
@@ -34,8 +34,19 @@ subroutine stationary_charges()
   !                   s s s p 
   !fix_shell_charge = [1,0,1,0]
   !                   CC
-  fix_shell_charge = [1,0,0,1,0,0]
+  fix_shell_charge = [1,0,1,1,0,0]
+ 
 
+  ztot_aux=0.0d0
+  do alpha=1, nssh_tot
+    if (fix_shell_charge(alpha) .eq. 0) then
+      ztot_aux = ztot_aux + Qin(get_issh_ofshell(alpha),get_iatom_ofshell(alpha))
+      print*,'alpha = ',alpha,'con Qin =', Qin(get_issh_ofshell(alpha),get_iatom_ofshell(alpha)), 'is not fix'
+    else
+      print*,'alpha = ',alpha,'con Qin =', Qin(get_issh_ofshell(alpha),get_iatom_ofshell(alpha)), 'is fix'
+    end if 
+  end do
+  print*,'ztot_fix =',ztot-ztot_aux
   print*,'fix_shell_charge',fix_shell_charge
   nssh_tot2 = count(fix_shell_charge == 0)
   allocate(mapindex(nssh_tot2))
@@ -47,7 +58,7 @@ subroutine stationary_charges()
   M(:,nssh_tot2+1) = 1.0
   M(nssh_tot2+1,:) = 1.0
   M(nssh_tot2+1,nssh_tot2+1)= 0.0
-  B(nssh_tot2+1) = ztot
+  B(nssh_tot2+1) = ztot_aux
  
   alpha_iatom2 = 0 
   
@@ -118,7 +129,7 @@ subroutine stationary_charges()
 
     print *, "===== MATRIZ M ====="
     do i = 1, nssh_tot2+1
-        write(*,'(100(1x,ES14.6))') (M(i,j), j=1,nssh_tot2+1)
+        write(*,'(100(1x,ES14.4))') (M(i,j), j=1,nssh_tot2+1)
     end do
 
     print *, "===== VECTOR B ====="
@@ -129,41 +140,38 @@ subroutine stationary_charges()
     
     
     ! simetrizo M = (M + M^T)/2
-    do i = 1, nssh_tot2
-      do j = i+1, nssh_tot2
-        aux = (M(i,j) + M(j,i)) / 2.0d0
-        M(i,j) = aux
-        M(j,i) = aux
-      end do
-    end do
+!    do i = 1, nssh_tot2
+!.      do j = i+1, nssh_tot2
+!.        aux = (M(i,j) + M(j,i)) / 2.0d0
+!        M(i,j) = aux
+!        M(j,i) = aux
+!      end do
+!    end do
 
-! Ahora sí puedes usar dsysv
+allocate(ipiv(nssh_tot2+ 1))
 
+call dgesv(nssh_tot2+ 1, 1, M, nssh_tot2+ 1, &
+           ipiv, B, nssh_tot2+ 1, info)
 
-    allocate(ipiv(nssh_tot + 1))
-    allocate(work(1))
-    call dsysv('U', nssh_tot + 1, 1, M, nssh_tot + 1, ipiv, B, nssh_tot + 1, work, -1, info)
-    lwork = int(work(1))
-    deallocate(work)
-    allocate(work(lwork))
-    call dsysv('U', nssh_tot + 1, 1, M, nssh_tot + 1, ipiv, B, nssh_tot + 1, work, lwork, info)
-    deallocate(work)
-    deallocate(ipiv)
-    if (info /= 0) then
-       print *, "Error in dsysv, info =", info
-    end if
-   
-    do alpha = 1, nssh_tot
-       issh=get_issh_ofshell(alpha)
-       iatom=get_iatom_ofshell(alpha)
-       print*,'stationary_charges',issh,iatom,mapindex(alpha),fix_shell_charge(alpha)
-       if (fix_shell_charge(alpha) .eq. 0) then
-          Qout(issh,iatom) = B(mapindex(alpha))
-       else
-          Qout(issh,iatom) = Qin(issh,iatom)
-       end if
-    end do
+deallocate(ipiv)
 
+if (info /= 0) then
+   print *, "Error in dgesv, info =", info
+end if
+
+!    allocate(ipiv(nssh_tot + 1))
+!    allocate(work(1))
+!    call dsysv('U', nssh_tot + 1, 1, M, nssh_tot + 1, ipiv, B, nssh_tot + 1, work, -1, info)
+!    lwork = int(work(1))
+!    deallocate(work)
+!    allocate(work(lwork))
+!    call dsysv('U', nssh_tot + 1, 1, M, nssh_tot + 1, ipiv, B, nssh_tot + 1, work, lwork, info)
+!    deallocate(work)
+!    deallocate(ipiv)
+!    if (info /= 0) then
+!       print *, "Error in dsysv, info =", info
+!    end if
+!
     print *, "===== VECTOR B out ====="
     do i = 1, nssh_tot2+1
         write(*,'(1x,ES14.6)') B(i)
@@ -173,7 +181,19 @@ subroutine stationary_charges()
       aux = aux + B(i)
     end do
     print*,'sum B = ',aux
-    stop
+    
+    do alpha = 1, nssh_tot
+       issh=get_issh_ofshell(alpha)
+       iatom=get_iatom_ofshell(alpha)
+       !print*,'stationary_charges',issh,iatom,mapindex(alpha),fix_shell_charge(alpha)
+       if (fix_shell_charge(alpha) .eq. 0) then
+          Qout(issh,iatom) = B(mapindex(alpha))
+       else
+          Qout(issh,iatom) = Qin(issh,iatom)
+       end if
+       print '(A,I0,A,F6.3)', 'Qin(', alpha, ') = ', Qout(issh, iatom)
+    end do
+   stop
   contains
 
     subroutine load_M() !Mx=B
