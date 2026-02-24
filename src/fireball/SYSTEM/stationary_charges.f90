@@ -33,8 +33,8 @@ subroutine stationary_charges()
   !lo usamos para H2O HsHsOsp
   !                   s s s p 
   !fix_shell_charge = [1,0,1,0]
-  !                   CCC
-  fix_shell_charge = [0,0,0,0,0,0]
+  !                   CC
+  fix_shell_charge = [1,0,0,1,0,0]
 
   print*,'fix_shell_charge',fix_shell_charge
   nssh_tot2 = count(fix_shell_charge == 0)
@@ -126,6 +126,19 @@ subroutine stationary_charges()
         write(*,'(1x,ES14.6)') B(i)
     end do
 
+    
+    
+    ! simetrizo M = (M + M^T)/2
+    do i = 1, nssh_tot2
+      do j = i+1, nssh_tot2
+        aux = (M(i,j) + M(j,i)) / 2.0d0
+        M(i,j) = aux
+        M(j,i) = aux
+      end do
+    end do
+
+! Ahora sí puedes usar dsysv
+
 
     allocate(ipiv(nssh_tot + 1))
     allocate(work(1))
@@ -155,6 +168,11 @@ subroutine stationary_charges()
     do i = 1, nssh_tot2+1
         write(*,'(1x,ES14.6)') B(i)
     end do
+    aux = 0.0d0
+    do i = 1, nssh_tot2
+      aux = aux + B(i)
+    end do
+    print*,'sum B = ',aux
     stop
   contains
 
