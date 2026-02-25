@@ -67,22 +67,18 @@ subroutine stationary_charges()
     mapindex(alpha)=alpha_iatom2
   end do
 
-  print*, '-----Qin----'
-  print*, Qin
-
-  print*, '-----g_h----'
-  do i = 1, nssh_tot
-      write(*,'(100(1x,ES14.6))') (g_h_shell(i,j), j=1,nssh_tot)
-  end do
-  print*, '-----g_xc----'
-  do i = 1, nssh_tot
-      write(*,'(100(1x,ES14.6))') (g_xc_shell(i,j), j=1,nssh_tot)
-  end do
-
-  print*, '-----f_xc----'
-  do i = 1, nssh_tot
-      write(*,'(100(1x,ES14.6))') (f_xc_shell(i,j), j=1,nssh_tot)
-  end do
+  !print*, '-----g_h----'
+  !do i = 1, nssh_tot
+  !    write(*,'(100(1x,ES14.6))') (g_h_shell(i,j), j=1,nssh_tot)
+  !end do
+  !print*, '-----g_xc----'
+  !do i = 1, nssh_tot
+  !    write(*,'(100(1x,ES14.6))') (g_xc_shell(i,j), j=1,nssh_tot)
+  !end do
+  !print*, '-----f_xc----'
+  !do i = 1, nssh_tot
+  !    write(*,'(100(1x,ES14.6))') (f_xc_shell(i,j), j=1,nssh_tot)
+  !end do
 
 
 
@@ -191,7 +187,7 @@ end if
        else
           Qout(issh,iatom) = Qin(issh,iatom)
        end if
-       print '(A,I0,A,F8.3)', 'Qin(', alpha, ') = ', Qout(issh, iatom)
+!       print '(A,I0,A,F8.3)', 'Qin(', alpha, ') = ', Qout(issh, iatom)
     end do
    !stop
   contains
