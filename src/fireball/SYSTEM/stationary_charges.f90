@@ -3,7 +3,7 @@ subroutine stationary_charges()
   use M_system, only: natoms, imass, neigh_j, neighn, numorb_max, Qin, Qout, &
   & rho, nssh_tot, neigh_self,neigh_b, fix_shell_charge, get_l_ofshell, &
   & get_orb_ofshell, get_issh_ofshell, g_h, g_xc, get_iatom_ofshell, ztot, &
-  & g_h_shell, g_xc_shell,f_xc_shell,exc_aa_shell,vxc_aa_shell
+  & g_h_shell, g_xc_shell,f_xc_shell,exc_aa_shell,vxc_aa_shell, qstate
   use M_fdata, only: num_orb,nssh,lssh
   implicit none
   integer imu, inu          
@@ -34,10 +34,11 @@ subroutine stationary_charges()
   !                   s s s p 
   !fix_shell_charge = [1,0,1,0]
   !                   CC
-  !fix_shell_charge = [0,0,0,0,0,0]
-  
+  !fix_shell_charge = [1,0,1,1,0,1]
+  !fix_shell_charge = [0,1,1,0,1,1] 
 
   ztot_aux=0.0d0
+  !ztot_aux=qstate
   do alpha=1, nssh_tot
     if (fix_shell_charge(alpha) .eq. 0) then
       ztot_aux = ztot_aux + Qin(get_issh_ofshell(alpha),get_iatom_ofshell(alpha))
@@ -67,18 +68,18 @@ subroutine stationary_charges()
     mapindex(alpha)=alpha_iatom2
   end do
 
-  !print*, '-----g_h----'
-  !do i = 1, nssh_tot
-  !    write(*,'(100(1x,ES14.6))') (g_h_shell(i,j), j=1,nssh_tot)
-  !end do
-  !print*, '-----g_xc----'
-  !do i = 1, nssh_tot
-  !    write(*,'(100(1x,ES14.6))') (g_xc_shell(i,j), j=1,nssh_tot)
-  !end do
-  !print*, '-----f_xc----'
-  !do i = 1, nssh_tot
-  !    write(*,'(100(1x,ES14.6))') (f_xc_shell(i,j), j=1,nssh_tot)
-  !end do
+  print*, '-----g_h----'
+  do i = 1, nssh_tot
+      write(*,'(100(1x,ES14.6))') (g_h_shell(i,j), j=1,nssh_tot)
+  end do
+  print*, '-----g_xc----'
+  do i = 1, nssh_tot
+      write(*,'(100(1x,ES14.6))') (g_xc_shell(i,j), j=1,nssh_tot)
+  end do
+  print*, '-----f_xc----'
+  do i = 1, nssh_tot
+      write(*,'(100(1x,ES14.6))') (f_xc_shell(i,j), j=1,nssh_tot)
+  end do
 
 
 
@@ -104,7 +105,7 @@ subroutine stationary_charges()
         in2 = imass(jatom)
         do imu = 1, num_orb(in1)
           do inu = 1, num_orb(in2)
-            aux = 0.0d0*g_h(imu,inu,alpha_issh,alpha_iatom,ineigh,iatom) + g_xc(imu,inu,alpha_issh,alpha_iatom,ineigh,iatom)
+            aux = g_h(imu,inu,alpha_issh,alpha_iatom,ineigh,iatom) + g_xc(imu,inu,alpha_issh,alpha_iatom,ineigh,iatom)
             B(mapindex(alpha)) = B(mapindex(alpha)) +  rho(imu,inu,ineigh,iatom)*aux
           end do ! inu
         end do ! imu
@@ -136,13 +137,13 @@ subroutine stationary_charges()
     
     
     ! simetrizo M = (M + M^T)/2
-!    do i = 1, nssh_tot2
-!.      do j = i+1, nssh_tot2
-!.        aux = (M(i,j) + M(j,i)) / 2.0d0
-!        M(i,j) = aux
-!        M(j,i) = aux
-!      end do
-!    end do
+    do i = 1, nssh_tot2
+      do j = i+1, nssh_tot2
+        aux = (M(i,j) + M(j,i)) / 2.0d0
+        M(i,j) = aux
+        M(j,i) = aux
+      end do
+    end do
 
 allocate(ipiv(nssh_tot2+ 1))
 
@@ -189,7 +190,7 @@ end if
        end if
 !       print '(A,I0,A,F8.3)', 'Qin(', alpha, ') = ', Qout(issh, iatom)
     end do
-   !stop
+!   stop
   contains
 
     subroutine load_M() !Mx=B
@@ -218,7 +219,6 @@ end if
         end do
         count = count + nssh(imass(iatom))
       end do
-
       do iatom = 1, natoms
         do imu=1,num_orb(imass(iatom))
           alpha = get_shell_ofatom_imu(iatom,imu) 

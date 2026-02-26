@@ -131,7 +131,7 @@ subroutine assemble_ca_2c_dip ()
           vca(imu,inu,matom,iatom) = vca(imu,inu,matom,iatom) + (stn1*bcca(imu,inu) + stn2*emnpl(imu,inu))*eq2
         end do
       end do
- 
+
       !NOTE (true_dipoles, 2017):  We do not need to compute ewaldsr in the on-top case because we have excluded
       ! this case already in the new assemble_lr.f90 subroutine!!
       ! CALL DOSCENTROS AND GET VNA FOR ONTOP CASE
@@ -149,7 +149,7 @@ subroutine assemble_ca_2c_dip ()
             do imu = 1, num_orb(in1)
               bcca(imu,inu) = bcca(imu,inu) + dxn*bccax(imu,inu)
               if (Kscf .eq. 1 .and. iqout .eq. 6) then
-                g_h(imu,inu,isorp,jatom,matom,iatom)  =  g_h(imu,inu,isorp,jatom,matom,iatom) + bccax(imu,inu)*eq2
+                g_h(imu,inu,isorp,jatom,ineigh,iatom)  =  g_h(imu,inu,isorp,jatom,ineigh,iatom) + bccax(imu,inu)*eq2
               end if
             end do
           end do
@@ -163,7 +163,7 @@ subroutine assemble_ca_2c_dip ()
             do imu = 1, num_orb(in1)
               bcca(imu,inu) = bcca(imu,inu) + dxn*bccax(imu,inu)
               if (Kscf .eq. 1 .and. iqout .eq. 6) then
-                g_h(imu,inu,isorp,jatom,matom,iatom)  =  g_h(imu,inu,isorp,jatom,matom,iatom) + bccax(imu,inu)*eq2
+                g_h(imu,inu,isorp,jatom,ineigh,iatom)  =  g_h(imu,inu,isorp,jatom,ineigh,iatom) + bccax(imu,inu)*eq2
               end if
             end do
           end do

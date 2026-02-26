@@ -59,9 +59,10 @@ subroutine assemble_drive()
   !call assemble_olsxc_on ()
   !call assemble_olsxc_off ()
 
+  
+  print*,'idipole =',idipole
   if (idipole .eq. 0) call assemble_ca_2c ()
   if (idipole .eq. 1) call assemble_ca_2c_dip ()
-  
 
   !call assemble_zw_on_na() !AQUI vxc = 0.0d0
   !call assemble_zw_off_na() !AQUI
