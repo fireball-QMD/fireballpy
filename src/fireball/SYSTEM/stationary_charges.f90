@@ -3,7 +3,8 @@ subroutine stationary_charges()
   use M_system, only: natoms, imass, neigh_j, neighn, numorb_max, Qin, Qout, &
   & rho, nssh_tot, neigh_self,neigh_b, fix_shell_charge, get_l_ofshell, &
   & get_orb_ofshell, get_issh_ofshell, g_h, g_xc, get_iatom_ofshell, ztot, &
-  & g_h_shell, g_xc_shell,f_xc_shell,exc_aa_shell,vxc_aa_shell, qstate
+  & g_h_shell, g_xc_shell,f_xc_shell,exc_aa_shell,vxc_aa_shell, qstate, symbol, &
+  & get_shell_ofatom_issh, Kscf, ratom
   use M_fdata, only: num_orb,nssh,lssh
   implicit none
   integer imu, inu          
@@ -36,19 +37,36 @@ subroutine stationary_charges()
   !                   CC
   !fix_shell_charge = [1,0,1,1,0,1]
   !fix_shell_charge = [0,1,1,0,1,1] 
+  !fix_shell_charge = [1,0,1,1,0,1,0,1] 
 
   ztot_aux=0.0d0
   !ztot_aux=qstate
+
   do alpha=1, nssh_tot
-    if (fix_shell_charge(alpha) .eq. 0) then
-      ztot_aux = ztot_aux + Qin(get_issh_ofshell(alpha),get_iatom_ofshell(alpha))
-      print*,'alpha = ',alpha,'con Qin =', Qin(get_issh_ofshell(alpha),get_iatom_ofshell(alpha)), 'is not fix'
-    else
-      print*,'alpha = ',alpha,'con Qin =', Qin(get_issh_ofshell(alpha),get_iatom_ofshell(alpha)), 'is fix'
-    end if 
+    if (fix_shell_charge(alpha) .eq. 0) ztot_aux = ztot_aux + Qin(get_issh_ofshell(alpha),get_iatom_ofshell(alpha))
   end do
+
+  if (Kscf .eq. 1) then
+    print*, "========  positions ========",'Kscf = ',Kscf
+    do iatom = 1, natoms
+       in1 = imass(iatom)
+       write (*,'(2X,A2,3F12.6)') symbol(iatom), ratom(:,iatom)  - (/ 3.141593, 0.367879, 1.414214 /)
+     enddo
+   end if
+   print*, "======== Qin  CHARGES ======== Kscf = " ,Kscf
+   do iatom = 1, natoms
+     in1 = imass(iatom)
+     aux = sum(Qin(1:nssh(in1), iatom))
+     write(*,'(2X,A2,1X," | ",F12.6," |",100(1X,F12.6,1X,"(",I0,")"," |"))') &
+     symbol(iatom), aux, &
+     (Qin(issh,iatom), &
+     fix_shell_charge(get_shell_ofatom_issh(iatom,issh)), &
+     issh = 1, nssh(in1))
+   end do
+   print*, "=============================="
+
+
   print*,'ztot_fix =',ztot-ztot_aux
-  print*,'fix_shell_charge',fix_shell_charge
   nssh_tot2 = count(fix_shell_charge == 0)
   allocate(mapindex(nssh_tot2))
   allocate(M(nssh_tot2+1,nssh_tot2+1))
@@ -68,17 +86,17 @@ subroutine stationary_charges()
     mapindex(alpha)=alpha_iatom2
   end do
 
-  print*, '-----g_h----'
+  print*, '    -----g_h----'
   do i = 1, nssh_tot
-      write(*,'(100(1x,ES14.6))') (g_h_shell(i,j), j=1,nssh_tot)
+      write(*,'(100(1x,F14.6))') (g_h_shell(i,j), j=1,nssh_tot)
   end do
-  print*, '-----g_xc----'
+  print*, '    -----g_xc----'
   do i = 1, nssh_tot
-      write(*,'(100(1x,ES14.6))') (g_xc_shell(i,j), j=1,nssh_tot)
+      write(*,'(100(1x,F14.6))') (g_xc_shell(i,j), j=1,nssh_tot)
   end do
-  print*, '-----f_xc----'
+  print*, '    -----f_xc----'
   do i = 1, nssh_tot
-      write(*,'(100(1x,ES14.6))') (f_xc_shell(i,j), j=1,nssh_tot)
+      write(*,'(100(1x,F14.6))') (f_xc_shell(i,j), j=1,nssh_tot)
   end do
 
 
@@ -124,37 +142,32 @@ subroutine stationary_charges()
 !      endif
 !    end do
 
-    print *, "===== MATRIZ M ====="
+    print *, "    ===== MATRIZ M ====="
     do i = 1, nssh_tot2+1
-        write(*,'(100(1x,ES14.4))') (M(i,j), j=1,nssh_tot2+1)
+        write(*,'(100(1x,F14.6))') (M(i,j), j=1,nssh_tot2+1)
     end do
 
-    print *, "===== VECTOR B ====="
+    print *, "    ===== VECTOR B ====="
     do i = 1, nssh_tot2+1
-        write(*,'(1x,ES14.6)') B(i)
+        write(*,'(1x,F14.6)') B(i)
     end do
 
     
     
     ! simetrizo M = (M + M^T)/2
-    do i = 1, nssh_tot2
-      do j = i+1, nssh_tot2
-        aux = (M(i,j) + M(j,i)) / 2.0d0
-        M(i,j) = aux
-        M(j,i) = aux
-      end do
-    end do
+    !do i = 1, nssh_tot2
+    !  do j = i+1, nssh_tot2
+    !    aux = (M(i,j) + M(j,i)) / 2.0d0
+    !    M(i,j) = aux
+    !    M(j,i) = aux
+    !  end do
+    !end do
 
-allocate(ipiv(nssh_tot2+ 1))
+  allocate(ipiv(nssh_tot2+ 1))
+  call dgesv(nssh_tot2+ 1, 1, M, nssh_tot2+ 1, ipiv, B, nssh_tot2+ 1, info)
+  deallocate(ipiv)
 
-call dgesv(nssh_tot2+ 1, 1, M, nssh_tot2+ 1, &
-           ipiv, B, nssh_tot2+ 1, info)
-
-deallocate(ipiv)
-
-if (info /= 0) then
-   print *, "Error in dgesv, info =", info
-end if
+  if (info /= 0) print *, "Error in dgesv, info =", info
 
 !    allocate(ipiv(nssh_tot + 1))
 !    allocate(work(1))
@@ -171,7 +184,7 @@ end if
 !
     print *, "===== VECTOR B out ====="
     do i = 1, nssh_tot2+1
-        write(*,'(1x,ES14.6)') B(i)
+        write(*,'(1x,F14.6)') B(i)
     end do
     aux = 0.0d0
     do i = 1, nssh_tot2
@@ -182,14 +195,25 @@ end if
     do alpha = 1, nssh_tot
        issh=get_issh_ofshell(alpha)
        iatom=get_iatom_ofshell(alpha)
-       !print*,'stationary_charges',issh,iatom,mapindex(alpha),fix_shell_charge(alpha)
        if (fix_shell_charge(alpha) .eq. 0) then
           Qout(issh,iatom) = B(mapindex(alpha))
        else
           Qout(issh,iatom) = Qin(issh,iatom)
        end if
-!       print '(A,I0,A,F8.3)', 'Qin(', alpha, ') = ', Qout(issh, iatom)
     end do
+
+   print*, "======== Qout CHARGES ======== Kscf = " ,Kscf
+   do iatom = 1, natoms
+     in1 = imass(iatom)
+     aux = sum(Qout(1:nssh(in1), iatom))
+     write(*,'(2X,A2,1X," | ",F12.6," |",100(1X,F12.6,1X,"(",I0,")"," |"))') &
+     symbol(iatom), aux, &
+     (Qout(issh,iatom), &
+     fix_shell_charge(get_shell_ofatom_issh(iatom,issh)), &
+     issh = 1, nssh(in1))
+   end do
+   print*, " =============================="
+
 !   stop
   contains
 

@@ -195,15 +195,6 @@ subroutine allocate_system ()
     end do
    end do
 
-!  do alpha=1,nssh_tot
-!    print*,'alpha = ',alpha
-!    print*,'get_orb_ofshell =',get_orb_ofshell(alpha)
-!    print*,'get_iatom_ofshell =',get_iatom_ofshell(alpha)
-!    print*,'get_issh_ofshell=',get_issh_ofshell(alpha)
-!    print*,'get_l_ofshell=',get_l_ofshell(alpha)
-!  end do
- 
-
   imu = 0
   alpha = 0 
   do iatom=1,natoms
