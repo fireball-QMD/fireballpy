@@ -27,8 +27,7 @@ subroutine read_2c (interaction)
       if (interaction .eq. 17) isub2c = nssh(in1)
       if (interaction .eq. 18) isub2c = nssh(in2)
       if (interaction .eq. 19) isub2c = nssh(in2)
-      write(*,'("Read interaction ",I0," in read2c  isub2c=",I0, " twocf=",A)') &
-      & interaction, isub2c, trim(twocfname(interaction))
+      !write(*,'("Read interaction ",I0," in read2c  isub2c=",I0, " twocf=",A)') interaction, isub2c, trim(twocfname(interaction))
       do isorp = initype(interaction), isub2c
         root_isorp = root
         if (isub2c .ge. 1) then  

@@ -28,7 +28,6 @@ subroutine unocentros (in1, iatom, dccexc_1c, mu1xc)
     dqi(issh) = (Qin(issh,iatom) - Qneutral(issh,in1))
   end do
 
-  print*,'---- unocentros --',in1, iatom
 
   do imu = 1,num_orb(in1)
     m1   = getmssh(degelec(iatom)+imu)
@@ -39,11 +38,8 @@ subroutine unocentros (in1, iatom, dccexc_1c, mu1xc)
       l2   = getlssh(degelec(iatom)+inu)
       jssh = getissh(degelec(iatom)+inu)
       if( m1 .eq. m2 .and. l1 .eq. l2 ) then
-         print*,imu+degelec(iatom),inu+degelec(iatom),'m1,l1,issh', m1,l1,issh
          mu1xc(inu,imu) = vxc_1c_0(jssh,issh,in1)  
-        print*,'jssh,issh,kssh,in1,gxc_1cv'
         do kssh = 1,nssh(in1)
-          print*,jssh,issh,kssh,in1,gxc_1c(jssh,issh,kssh,in1)
           mu1xc(inu,imu) = mu1xc(inu,imu) + dqi(kssh) * gxc_1c(jssh,issh,kssh,in1)
           g_xc(inu,imu,kssh,iatom,neigh_self(iatom),iatom) = gxc_1c(jssh,issh,kssh,in1)
         enddo 
