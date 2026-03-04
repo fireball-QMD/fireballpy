@@ -402,12 +402,12 @@ contains
             xmatt(1, ix) = 1.0_wp
             do issh = 1, nssh1
               ddq = dq1(issh, 1 + mod(ix1 - 1, ndq**issh)/ndq**(issh - 1))
-              xnocc_in(issh, 1) = xnocc(issh, ispec1_)! + ddq
+              xnocc_in(issh, 1) = xnocc(issh, ispec1_) + ddq
               xmatt(issh+1, ix) = ddq
             end do
             do issh = 1, nssh2
               ddq = dq2(issh, 1 + mod(ix2 - 1, ndq**issh)/ndq**(issh - 1))
-              xnocc_in(issh, 2) = xnocc(issh, ispec2_)! + ddq
+              xnocc_in(issh, 2) = xnocc(issh, ispec2_) + ddq
               xmatt(issh+1+nssh1, ix) = ddq
             end do
             twocenter_calc = twocenter_rho2c(d, xnocc_in)

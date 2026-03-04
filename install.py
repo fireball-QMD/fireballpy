@@ -78,16 +78,16 @@ def main():
     setup_args = ['-Dpython.install_env=auto']
     if args.intel:
         if ismpi:
-            env['CC'] = f"mpiicx"
-            env['FC'] = f"mpiifx"
+            env['CC'] = "mpiicx"
+            env['FC'] = "mpiifx"
         else:
             env['CC'] = 'icx'
             env['FC'] = 'ifx'
-        setup_args += ['-Dblas=mkl-dynamic-lp64-iomp']
+        setup_args += ['-Dblas=mkl-dynamic-lp64-seq']
     else:
         if ismpi:
-            env['CC'] = f"mpicc"
-            env['FC'] = f"mpifort"
+            env['CC'] = "mpicc"
+            env['FC'] = "mpifort"
         else:
             env['CC'] = 'gcc'
             env['FC'] = 'gfortran'
