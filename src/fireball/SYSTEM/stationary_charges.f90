@@ -38,7 +38,7 @@ subroutine stationary_charges()
   !fix_shell_charge = [1,0,1,1,0,1]
   !fix_shell_charge = [0,1,1,0,1,1] 
   !fix_shell_charge = [1,0,1,1,0,1,0,1] 
-
+  !fix_shell_charge = [1,0,1,0]
   ztot_aux=0.0d0
   !ztot_aux=qstate
 
