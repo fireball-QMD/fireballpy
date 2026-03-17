@@ -142,17 +142,45 @@ subroutine stationary_charges()
 !      endif
 !    end do
 
-    print *, "    ===== MATRIZ M ====="
-    do i = 1, nssh_tot2+1
-        write(*,'(100(1x,F14.6))') (M(i,j), j=1,nssh_tot2+1)
-    end do
+!    print *, "    ===== MATRIZ M ====="
+!    do i = 1, nssh_tot2+1
+!        write(*,'(100(1x,F14.6))') (M(i,j), j=1,nssh_tot2+1)
+!    end do
+!
+!    print *, "    ===== VECTOR B ====="
+!    do i = 1, nssh_tot2+1
+!        write(*,'(1x,F14.6)') B(i)
+!    end do
 
-    print *, "    ===== VECTOR B ====="
-    do i = 1, nssh_tot2+1
-        write(*,'(1x,F14.6)') B(i)
+  
+print *, "M = np.array(["
+do i = 1, nssh_tot2
+    write(*,'(A)', advance='no') "    ["
+    do j = 1, nssh_tot2+1
+        if (j < nssh_tot2+1) then
+            write(*,'(F12.6,A)', advance='no') M(i,j), ", "
+        else
+            write(*,'(F12.6)', advance='no') M(i,j)
+        end if
     end do
+    if (i < nssh_tot2) then
+        print *, "],"
+    else
+        print *, "]"
+    end if
+end do
+print *, "])"
+  
 
-    
+print *, "B = np.array(["
+do i = 1, nssh_tot2
+    if (i < nssh_tot2+1) then
+        write(*,'(F12.6,A)') B(i), ","
+    else
+        write(*,'(F12.6)') B(i)
+    end if
+end do
+print *, "])"
     
     ! simetrizo M = (M + M^T)/2
     !do i = 1, nssh_tot2
