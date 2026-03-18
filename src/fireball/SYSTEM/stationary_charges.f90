@@ -86,20 +86,6 @@ subroutine stationary_charges()
     mapindex(alpha)=alpha_iatom2
   end do
 
-  print*, '    -----g_h----'
-  do i = 1, nssh_tot
-      write(*,'(100(1x,F14.6))') (g_h_shell(i,j), j=1,nssh_tot)
-  end do
-  print*, '    -----g_xc----'
-  do i = 1, nssh_tot
-      write(*,'(100(1x,F14.6))') (g_xc_shell(i,j), j=1,nssh_tot)
-  end do
-  print*, '    -----f_xc----'
-  do i = 1, nssh_tot
-      write(*,'(100(1x,F14.6))') (f_xc_shell(i,j), j=1,nssh_tot)
-  end do
-
-
 
   do alpha = 1, nssh_tot
     if (fix_shell_charge(alpha) /= 0) cycle
@@ -133,54 +119,8 @@ subroutine stationary_charges()
   end do !alpha
 
 
-!    do alpha = 1,nssh_tot
-!      if (fix_shell_charge(alpha) .eq. 0) then
-!        M(nssh_tot2+1,mapindex(alpha)) = 1
-!        M(mapindex(alpha),nssh_tot2+1) = 1
-!      else
-!        B(nssh_tot2+1) = B(nssh_tot2+1) - Qin(get_issh_ofshell(alpha),get_iatom_ofshell(alpha))
-!      endif
-!    end do
-
-!    print *, "    ===== MATRIZ M ====="
-!    do i = 1, nssh_tot2+1
-!        write(*,'(100(1x,F14.6))') (M(i,j), j=1,nssh_tot2+1)
-!    end do
-!
-!    print *, "    ===== VECTOR B ====="
-!    do i = 1, nssh_tot2+1
-!        write(*,'(1x,F14.6)') B(i)
-!    end do
-
-  
-print *, "M = np.array(["
-do i = 1, nssh_tot2
-    write(*,'(A)', advance='no') "    ["
-    do j = 1, nssh_tot2+1
-        if (j < nssh_tot2+1) then
-            write(*,'(F12.6,A)', advance='no') M(i,j), ", "
-        else
-            write(*,'(F12.6)', advance='no') M(i,j)
-        end if
-    end do
-    if (i < nssh_tot2) then
-        print *, "],"
-    else
-        print *, "]"
-    end if
-end do
-print *, "])"
-  
-
-print *, "B = np.array(["
-do i = 1, nssh_tot2
-    if (i < nssh_tot2+1) then
-        write(*,'(F12.6,A)') B(i), ","
-    else
-        write(*,'(F12.6)') B(i)
-    end if
-end do
-print *, "])"
+  call print_matrix_as_numpy("M", M, nssh_tot2, nssh_tot2)
+  call print_vector_as_numpy("B", B, nssh_tot2)
     
     ! simetrizo M = (M + M^T)/2
     !do i = 1, nssh_tot2
@@ -285,5 +225,50 @@ print *, "])"
         end do
       end do
     end subroutine  load_M
+  subroutine print_matrix_as_numpy(name, M, nrows, ncols)
+    implicit none
+    character(len=*), intent(in) :: name
+    integer, intent(in) :: nrows, ncols
+    real(8), intent(in) :: M(nrows, ncols)
+    integer :: i, j
 
+    print *, trim(name) // " = np.array(["
+    
+    do i = 1, nrows
+        write(*,'(A)', advance='no') "    ["
+        
+        do j = 1, ncols
+            if (j < ncols) then
+                write(*,'(F12.6,A)', advance='no') M(i,j), ", "
+            else
+                write(*,'(F12.6)', advance='no') M(i,j)
+            end if
+        end do
+        
+        if (i < nrows) then
+            print *, "],"
+        else
+            print *, "]"
+        end if
+    end do
+
+    print *, "])"
+    
+  end subroutine print_matrix_as_numpy
+  subroutine print_vector_as_numpy(name, v, n)
+    implicit none
+    character(len=*), intent(in) :: name
+    integer, intent(in) :: n
+    real(8), intent(in) :: v(n)
+    integer :: i
+    write(*,'(A)', advance='no') trim(name) // " = np.array(["
+    do i = 1, n
+        if (i < n) then
+            write(*,'(F12.6,A)', advance='no') v(i), ", "
+        else
+            write(*,'(F12.6)', advance='no') v(i)
+        end if
+    end do
+    print *, "])"
+  end subroutine print_vector_as_numpy
 end subroutine stationary_charges
