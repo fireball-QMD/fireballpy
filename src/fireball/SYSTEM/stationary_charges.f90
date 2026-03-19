@@ -229,10 +229,10 @@ subroutine stationary_charges()
     implicit none
     character(len=*), intent(in) :: name
     integer, intent(in) :: nrows, ncols
-    real(8), intent(in) :: M(nrows, ncols)
+    real(8), intent(in) :: M(nrows+1, ncols+1)
     integer :: i, j
 
-    print *, trim(name) // " = np.array(["
+    write(*,'(A)', advance='no') trim(name) // " = np.array(["
     
     do i = 1, nrows
         write(*,'(A)', advance='no') "    ["
@@ -259,7 +259,7 @@ subroutine stationary_charges()
     implicit none
     character(len=*), intent(in) :: name
     integer, intent(in) :: n
-    real(8), intent(in) :: v(n)
+    real(8), intent(in) :: v(n+1)
     integer :: i
     write(*,'(A)', advance='no') trim(name) // " = np.array(["
     do i = 1, n

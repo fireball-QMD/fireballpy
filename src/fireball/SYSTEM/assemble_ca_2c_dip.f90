@@ -149,7 +149,7 @@ subroutine assemble_ca_2c_dip ()
             do imu = 1, num_orb(in1)
               bcca(imu,inu) = bcca(imu,inu) + dxn*bccax(imu,inu)
               if (Kscf .eq. 1 .and. iqout .eq. 6) then
-                g_h(imu,inu,isorp,jatom,ineigh,iatom)  =  g_h(imu,inu,isorp,jatom,ineigh,iatom) + bccax(imu,inu)*eq2
+                g_h(imu,inu,isorp,iatom,ineigh,iatom)  =  g_h(imu,inu,isorp,iatom,ineigh,iatom) + bccax(imu,inu)*eq2
               end if
             end do
           end do
