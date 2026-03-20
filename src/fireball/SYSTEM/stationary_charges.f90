@@ -31,6 +31,7 @@ subroutine stationary_charges()
   do issh=1,nssh_tot
     fix_shell_charge(issh)=0
   end do
+  !fix_shell_charge(1)=1
   !lo usamos para H2O HsHsOsp
   !                   s s s p 
   !fix_shell_charge = [1,0,1,0]
