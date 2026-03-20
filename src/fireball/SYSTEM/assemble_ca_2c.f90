@@ -167,12 +167,12 @@ subroutine assemble_ca_2c ()
             ewaldsr(imu,inu,ineigh,iatom) = ewaldsr(imu,inu,ineigh,iatom) + (dq1*sterm_1 + dq1*dterm_1) + (dq2*sterm_2 - dq2*dterm_2)
             if (Kscf .eq. 1 .and. iqout .eq. 6) then
               do issh = 1, nssh(in2)
-                emnpl_noq(imu,inu) = sterm_1-dterm_1  ! on top right
+                emnpl_noq(imu,inu) = sterm_2-dterm_2  ! on top right
                 g_h(imu,inu,issh,jatom,ineigh,iatom)  =  g_h(imu,inu,issh,jatom,ineigh,iatom) - emnpl_noq(imu,inu)
               end do
               do issh = 1, nssh(in1)
                 emnpl_noq(imu,inu) = sterm_1+dterm_1  ! on top left
-                g_h(imu,inu,issh,jatom,ineigh,iatom)  =  g_h(imu,inu,issh,jatom,ineigh,iatom) - emnpl_noq(imu,inu)
+                g_h(imu,inu,issh,iatom,ineigh,iatom)  =  g_h(imu,inu,issh,iatom,ineigh,iatom) - emnpl_noq(imu,inu)
               end do
             end if
           end do
