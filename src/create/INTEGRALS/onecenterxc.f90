@@ -123,11 +123,13 @@ contains
     character(len=256) :: errmsg
     logical, allocatable :: iszero(:)
     real(kind=wp), allocatable :: xmatt(:,:), eexc(:,:), vvxc(:,:),            &
-    & tmpmat(:,:), dq(:,:), exc1crho(:,:,:), nuxc1crho(:,:,:)
+    & tmpmat(:,:), dq(:,:), exc1crho(:,:,:), nuxc1crho(:,:,:),                 &
+    & nuxc1crho_radial(:,:,:)
     real(kind=wp), external :: psiofr
 
     write (auxz,'(i2.2)') nzx_(ispec)
     write (stdout,'(a)') 'Computing onecenter_xc.'//auxz//'.dat...'
+    write (stdout,'(a)') 'Computing onecenter_xc_corr.'//auxz//'.dat...'
 
     nssh = nsshxc_(ispec)
     nssh1 = nssh + 1
@@ -239,7 +241,7 @@ contains
         do issh = 1, nssh
           do jssh = issh, nssh
             kssh = kssh + 1
-            if (iszero(kssh)) cycle
+            ! if (iszero(kssh)) cycle
             tmp = psiofr(ispec, issh, rho)*psiofr(ispec, jssh, rho)*factor*rho*rho
             eexc(ix, kssh) = eexc(ix, kssh) + tmp*exc
             vvxc(ix, kssh) = vvxc(ix, kssh) + tmp*vxc
@@ -265,7 +267,7 @@ contains
     end if
 
     ! Prepare for output
-    allocate(exc1crho(0:nssh,nssh,nssh), nuxc1crho(0:nssh,nssh,nssh))
+    allocate(exc1crho(0:nssh,nssh,nssh), nuxc1crho(0:nssh,nssh,nssh), nuxc1crho_radial(0:nssh,nssh,nssh))
     exc1crho = 0.0_wp
     nuxc1crho = 0.0_wp
     do ix = 0, nssh
@@ -273,6 +275,8 @@ contains
       do issh = 1, nssh
         do jssh = issh, nssh
           kssh = kssh + 1
+          nuxc1crho_radial(ix, issh, jssh) = tmpmat(ix+1, kssh + nnz)
+          nuxc1crho_radial(ix, jssh, issh) = tmpmat(ix+1, kssh + nnz)
           if (iszero(kssh)) cycle
           exc1crho(ix, issh, jssh) = tmpmat(ix+1, kssh)
           exc1crho(ix, jssh, issh) = tmpmat(ix+1, kssh)
@@ -303,7 +307,24 @@ contains
       write (io,'(a)') ''
     end do
     close(io)
-    deallocate(exc1crho, nuxc1crho)
+
+    io = 361
+    open (unit=io, file='coutput/onecenter_xc_corr.'//auxz//'.dat', status='new',   &
+    &     action='write', iostat=onecenter_spec_calc)
+    if (onecenter_spec_calc /= 0) then
+      write (stderr, '(a)') '[ERROR] failed to open onecenter_xc_corr.'//auxz//'.dat'
+      return
+    end if
+    write (io,'(2i4)') nssh
+    do ix = 1, nssh
+      do issh = 1, nssh
+        write (io,'(100ES15.7)') (nuxc1crho_radial(ix, issh, jssh), jssh = 1, nssh)
+      end do
+      write (io,'(a)') ''
+    end do
+    close(io)
+
+    deallocate(exc1crho, nuxc1crho, nuxc1crho_radial)
 
     write (stdout,'(a)') 'Done'
     onecenter_spec_calc = 0

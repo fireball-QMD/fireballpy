@@ -304,21 +304,6 @@ contains
       write (io, '(a)') ' Matrix elements for the xc potential'
       call twocenter_write_header(io, dmax, .false.)
       close(io)
-      if (ispec1_ /= ispec2_) then
-        io = 3620
-        write (fname2, '(a,i2.2,a,i2.2,a)') 'vxc_2c.', nzx2_, '.',             &
-        &     nzx1_, '.dat'
-        write (stdout, '(a)') 'Computing '//trim(fname2)//'...'
-        open (unit=io, file='coutput/'//trim(fname2), status='new',            &
-        &     action='write', iostat=twocenter_calc)
-        if (twocenter_calc /= 0) then
-          write (stderr, '(a)') '[ERROR] failed to open '//trim(fname2)
-          return
-        end if
-        write (io, '(a)') ' Matrix elements for the xc potential'
-        call twocenter_write_header(io, dmax, .true.)
-        close(io)
-      end if
       do issh = 1, nssh1
         io = 3710 + issh
         write (fnamel1(issh), '(a,i2.2,a,i2.2,a,i2.2,a)') 'vxc_2c_ol_', issh,  &
@@ -333,21 +318,6 @@ contains
         write (io, '(a)') ' Matrix elements for the xc potential derivatives (left atom)'
         call twocenter_write_header(io, dmax, .false.)
         close(io)
-        if (ispec1_ /= ispec2_) then
-          io = 3720 + issh
-          write (fnamer2(issh), '(a,i2.2,a,i2.2,a,i2.2,a)') 'vxc_2c_or_',      &
-          &     issh, '.', nzx2_, '.', nzx1_, '.dat'
-          write (stdout, '(a)') 'Computing '//trim(fnamer2(issh))//'...'
-          open (unit=io, file='coutput/'//trim(fnamer2(issh)), status='new',   &
-          &     action='write', iostat=twocenter_calc)
-          if (twocenter_calc /= 0) then
-            write (stderr, '(a)') '[ERROR] failed to open '//trim(fnamer2(issh))
-            return
-          end if
-          write (io, '(a)') ' Matrix elements for the xc potential derivatives (right atom)'
-          call twocenter_write_header(io, dmax, .true.)
-          close(io)
-        end if
       end do
       do issh = 1, nssh2
         io = 3810 + issh
@@ -363,21 +333,6 @@ contains
         write (io, '(a)') ' Matrix elements for the xc potential derivatives (right atom)'
         call twocenter_write_header(io, dmax, .false.)
         close(io)
-        if (ispec1_ /= ispec2_) then
-          io = 3820 + issh
-          write (fnamel2(issh), '(a,i2.2,a,i2.2,a,i2.2,a)') 'vxc_2c_ol_',      &
-          &     issh, '.', nzx2_, '.', nzx1_, '.dat'
-          write (stdout, '(a)') 'Computing '//trim(fnamel2(issh))//'...'
-          open (unit=io, file='coutput/'//trim(fnamel2(issh)), status='new',   &
-          &     action='write', iostat=twocenter_calc)
-          if (twocenter_calc /= 0) then
-            write (stderr, '(a)') '[ERROR] failed to open '//trim(fnamel2(issh))
-            return
-          end if
-          write (io, '(a)') ' Matrix elements for the xc potential derivatives (left atom)'
-          call twocenter_write_header(io, dmax, .true.)
-          close(io)
-        end if
       end do
 
       ! TODO: this is a disaster but for now is what we have
@@ -448,17 +403,6 @@ contains
         end if
         write (io, '(4ES18.8)') (vvxc(1, index), index = 1, index_max_)
         close (io)
-        if (ispec1_ /= ispec2_) then
-          io = 3620
-          open (unit=io, file='coutput/'//trim(fname2), status='old',           &
-          &     action='write', position='append', iostat=twocenter_calc)
-          if (twocenter_calc /= 0) then
-            write (stderr, '(a)') '[ERROR] failed to open '//trim(fname2)
-            return
-          end if
-          write (io, '(4ES18.8)') (vvxc(1, index), index = 1, index_max_)
-          close (io)
-        end if
         do issh = 1, nssh1
           io = 3710 + issh
           open (unit=io, file='coutput/'//trim(fnamel1(issh)), status='old',   &
@@ -469,17 +413,6 @@ contains
           end if
           write (io, '(4ES18.8)') (vvxc(issh + 1, index), index = 1, index_max_)
           close (io)
-          if (ispec1_ /= ispec2_) then
-            io = 3720 + issh
-            open (unit=io, file='coutput/'//trim(fnamer2(issh)), status='old', &
-            &     action='write', position='append', iostat=twocenter_calc)
-            if (twocenter_calc /= 0) then
-              write (stderr, '(a)') '[ERROR] failed to open '//trim(fnamer2(issh))
-              return
-            end if
-            write (io, '(4ES18.8)') (vvxc(issh + 1, index), index = 1, index_max_)
-            close (io)
-          end if
         end do
         do issh = 1, nssh2
           io = 3810 + issh
@@ -491,17 +424,6 @@ contains
           end if
           write (io, '(4ES18.8)') (vvxc(nssh1 + issh + 1, index), index = 1, index_max_)
           close (io)
-          if (ispec1_ /= ispec2_) then
-            io = 3820 + issh
-            open (unit=io, file='coutput/'//trim(fnamel2(issh)), status='old', &
-            &     action='write', position='append', iostat=twocenter_calc)
-            if (twocenter_calc /= 0) then
-              write (stderr, '(a)') '[ERROR] failed to open '//trim(fnamel2(issh))
-              return
-            end if
-            write (io, '(4ES18.8)') (vvxc(nssh1 + issh + 1, index), index = 1, index_max_)
-            close (io)
-          end if
         end do
       end do ! grid
       deallocate(dq1, dq2, vvxc, xmatt, fnamel1, fnamel2, fnamer1, fnamer2)
