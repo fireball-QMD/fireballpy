@@ -65,15 +65,16 @@ subroutine assemble_lr_dip ()
             do imu = 1, num_orb(in1)
               sterm = s_mat(imu,inu,ineigh,iatom)
               dterm = (dipc(1,imu,inu,ineigh,iatom)*rnabc(1) + dipc(2,imu,inu,ineigh,iatom)*rnabc(2)  + dipc(3,imu,inu,ineigh,iatom)*rnabc(3))
+              emnpl_noq(imu,inu) = sterm/x + dterm/(x*x*x)
               emnpl(imu,inu) = dq3*sterm/x + dq3*dterm/(x*x*x)
               ewaldlr(imu,inu,ineigh,iatom) = ewaldlr(imu,inu,ineigh,iatom)  + emnpl(imu,inu)*eq2
+              ewaldlr(inu,imu,jneigh,jatom)  = ewaldlr(imu,inu,ineigh,iatom)
               if (Kscf .eq. 1 .and. iqout .eq. 6) then
                 do issh = 1, nssh(inalp)
                   g_h(imu,inu,issh,ialp,ineigh,iatom) = g_h(imu,inu,issh,ialp,ineigh,iatom) + emnpl_noq(imu,inu)*eq2
                   g_h(inu,imu,issh,ialp,jneigh,jatom) = g_h(imu,inu,issh,ialp,ineigh,iatom)
                 end do 
               end if
-              ewaldlr(inu,imu,jneigh,jatom)  = ewaldlr(imu,inu,ineigh,iatom)
             end do !end do imu = 1, num_orb(in1)
           end do  ! end do inu = 1, num_orb(in2)
         end if    ! end if (x .lt. 1.0d-05)

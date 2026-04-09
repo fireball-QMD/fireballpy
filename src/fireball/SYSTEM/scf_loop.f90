@@ -15,19 +15,23 @@ subroutine scf_loop (verbose)
     if (errno .ne. 0) return
     call build_rho ()
     if (errno .ne. 0) return
-    if (scf_achieved .or. (Kscf .gt. max_scf_iterations)) exit
+    call assemble_usr (0)
+    if (Kscf .le. max_scf_iterations) call mixer ()
+    etot = ebs + uiiuee + uxcdcc_ols + etotxc_1c + eqmmm
+    print *, 'ebs        =', ebs
+    print *, 'uiiuee     =', uiiuee
+    print *, 'uxcdcc_ols =', uxcdcc_ols
+    print *, 'etotxc_1c  =', etotxc_1c
+    print *, 'eqmmm      =', eqmmm
     if (verbose) print '(a13,i4,a8,f12.6,a17,es10.3,a3,es10.3)', '-> Iteration ', Kscf, ': EBS = ', ebs, '; RMSD/nshells = ', sigma, ' > ', sigmatol
-!  end do
+    if (verbose) print '(" ETOT = ",F15.6,"  Kscf = ",I3)', etot, kscf 
+    if (scf_achieved .or. (Kscf .gt. max_scf_iterations)) exit
+  end do 
   if (verbose) then
-    if (scf_achieved) then
-      print '(a13,i4,a8,f12.6,a17,es10.3,a3,es10.3)', '-> Iteration ', Kscf, ': EBS = ', ebs, '; RMSD/nshells = ', sigma, ' < ', sigmatol
-    else
-      print '(a15,i4,a8,f12.6,a17,es10.3)', 'Best iteration ', Kbest, ': EBS = ', ebs, '; RSMD/nshells = ', sigmabest
-    end if
+   if (scf_achieved) then
+     print '(a13,i4,a8,f12.6,a17,es10.3,a3,es10.3)', '-> Iteration ', Kscf, ': EBS = ', ebs, '; RMSD/nshells = ', sigma, ' < ', sigmatol
+   else
+     print '(a15,i4,a8,f12.6,a17,es10.3)', 'Best iteration ', Kbest, ': EBS = ', ebs, '; RSMD/nshells = ', sigmabest
+   end if
   end if
-  call get_ewald (iforce)
-  call assemble_usr ()
-  etot = ebs + uiiuee + uxcdcc_ols + etotxc_1c + eqmmm
-  if (verbose) print '(" ETOT = ",F15.6,"  Kscf = ",I3)', etot, kscf 
-  end do ! ojo quitar esto es para ver ETOT en cada paso con fix_charge no pasa por static
 end subroutine scf_loop
