@@ -24,9 +24,7 @@
 
 !
 ! This program is free software: you can redistribute it and/or modify
-! by the Government is subject to restrictions as set forth in
-! subdivsion { (b) (3) (ii) } of the Rights in Technical Data and
-! Computer Software clause at 52.227-7013.
+! by the Government is subject to restrictions as set forth in subdivsion { (b) (3) (ii) } of the Rights in Technical Data and Computer Software clause at 52.227-7013.
 
 ! twocenterxc.f90 Program Description
 ! ===========================================================================
@@ -271,7 +269,9 @@ contains
     &          io, ix, ix1, ix2, ndq, npts, npts1, npts2, nssh1, nssh2
     real(kind=wp) :: d, dmin, dmax, dr, ddq, xnocc_in(nsh_max, 2)
     character(len=40) :: fname1, fname2
-    real(kind=wp), allocatable :: dq1(:,:), dq2(:,:), xmatt(:,:), vvxc(:,:)
+    integer :: index_map(index_max_)
+    real(kind=wp), allocatable :: dq1(:,:), dq2(:,:), xmatt(:,:), vvxc(:,:),   &
+    &                             temp_vxc(:)
     character(len=40), allocatable :: fnamel1(:), fnamer1(:), fnamel2(:),      &
     &                                 fnamer2(:)
 
@@ -304,6 +304,21 @@ contains
       write (io, '(a)') ' Matrix elements for the xc potential'
       call twocenter_write_header(io, dmax, .false.)
       close(io)
+      if (ispec1_ /= ispec2_) then
+        io = 3620
+        write (fname2, '(a,i2.2,a,i2.2,a)') 'vxc_2c.', nzx2_, '.',             &
+        &     nzx1_, '.dat'
+        write (stdout, '(a)') 'Computing '//trim(fname2)//'...'
+        open (unit=io, file='coutput/'//trim(fname2), status='new',            &
+        &     action='write', iostat=twocenter_calc)
+        if (twocenter_calc /= 0) then
+          write (stderr, '(a)') '[ERROR] failed to open '//trim(fname2)
+          return
+        end if
+        write (io, '(a)') ' Matrix elements for the xc potential'
+        call twocenter_write_header(io, dmax, .true.)
+        close(io)
+      end if
       do issh = 1, nssh1
         io = 3710 + issh
         write (fnamel1(issh), '(a,i2.2,a,i2.2,a,i2.2,a)') 'vxc_2c_ol_', issh,  &
@@ -318,6 +333,21 @@ contains
         write (io, '(a)') ' Matrix elements for the xc potential derivatives (left atom)'
         call twocenter_write_header(io, dmax, .false.)
         close(io)
+        if (ispec1_ /= ispec2_) then
+          io = 3720 + issh
+          write (fnamer2(issh), '(a,i2.2,a,i2.2,a,i2.2,a)') 'vxc_2c_or_',      &
+          &     issh, '.', nzx2_, '.', nzx1_, '.dat'
+          write (stdout, '(a)') 'Computing '//trim(fnamer2(issh))//'...'
+          open (unit=io, file='coutput/'//trim(fnamer2(issh)), status='new',   &
+          &     action='write', iostat=twocenter_calc)
+          if (twocenter_calc /= 0) then
+            write (stderr, '(a)') '[ERROR] failed to open '//trim(fnamer2(issh))
+            return
+          end if
+          write (io, '(a)') ' Matrix elements for the xc potential derivatives (right atom)'
+          call twocenter_write_header(io, dmax, .true.)
+          close(io)
+        end if
       end do
       do issh = 1, nssh2
         io = 3810 + issh
@@ -333,6 +363,21 @@ contains
         write (io, '(a)') ' Matrix elements for the xc potential derivatives (right atom)'
         call twocenter_write_header(io, dmax, .false.)
         close(io)
+        if (ispec1_ /= ispec2_) then
+          io = 3820 + issh
+          write (fnamel2(issh), '(a,i2.2,a,i2.2,a,i2.2,a)') 'vxc_2c_ol_',      &
+          &     issh, '.', nzx2_, '.', nzx1_, '.dat'
+          write (stdout, '(a)') 'Computing '//trim(fnamel2(issh))//'...'
+          open (unit=io, file='coutput/'//trim(fnamel2(issh)), status='new',   &
+          &     action='write', iostat=twocenter_calc)
+          if (twocenter_calc /= 0) then
+            write (stderr, '(a)') '[ERROR] failed to open '//trim(fnamel2(issh))
+            return
+          end if
+          write (io, '(a)') ' Matrix elements for the xc potential derivatives (left atom)'
+          call twocenter_write_header(io, dmax, .true.)
+          close(io)
+        end if
       end do
 
       ! TODO: this is a disaster but for now is what we have
@@ -344,7 +389,28 @@ contains
       npts = npts1*npts2
       allocate(dq1(nssh1, ndq), dq2(nssh2, ndq), xmatt(nssh1+nssh2+1, npts),   &
       &        vvxc(npts, index_max_), stat=twocenter_calc)
+      if (ispec1_ /= ispec2_) allocate(temp_vxc(index_max_), stat=twocenter_calc)
       if (twocenter_calc /= 0) return
+      if (ispec1_ /= ispec2_) then
+        ix = 0
+        do ix2 = 1, nssh2
+          l2 = lsshxc(ispec2_, ix2)
+          do ix1 = 1, nssh1
+            l1 = lsshxc(ispec1_, ix1)
+            do issh = -min(l1, l2), min(l1, l2)
+              ix = ix + 1
+              do index = 1, index_max_
+                if ((ix1 == nleft_(index)) .and. (ix2 == nright_(index)) .and. &
+                &   (l1 == lleft_(index)) .and. (l2 == lright_(index)) .and.   &
+                &   (issh == mleft_(index))) then
+                  index_map(ix) = index
+                  exit
+                end if
+              end do
+            end do
+          end do
+        end do
+      end if
       call twocenter_charge_grid(dq1, dq2)
 
       call utils_progress_bar_prepare(ndd_, 100)
@@ -403,6 +469,24 @@ contains
         end if
         write (io, '(4ES18.8)') (vvxc(1, index), index = 1, index_max_)
         close (io)
+        if (ispec1_ /= ispec2_) then
+          io = 3620
+          open (unit=io, file='coutput/'//trim(fname2), status='old',           &
+          &     action='write', position='append', iostat=twocenter_calc)
+          if (twocenter_calc /= 0) then
+            write (stderr, '(a)') '[ERROR] failed to open '//trim(fname2)
+            return
+          end if
+          do index = 1, index_max_
+            temp_vxc(index) = vvxc(1, index_map(index))
+            l1 = lleft_(index_map(index))
+            m1 = abs(mleft_(index_map(index)))
+            l2 = lright_(index_map(index))
+            if (iand(l1 + l2 + 2*m1, 1) == 1) temp_vxc(index) = -temp_vxc(index)
+          end do ! index
+          write (io, '(4ES18.8)') (temp_vxc(index), index = 1, index_max_)
+          close (io)
+        end if
         do issh = 1, nssh1
           io = 3710 + issh
           open (unit=io, file='coutput/'//trim(fnamel1(issh)), status='old',   &
@@ -413,6 +497,24 @@ contains
           end if
           write (io, '(4ES18.8)') (vvxc(issh + 1, index), index = 1, index_max_)
           close (io)
+          if (ispec1_ /= ispec2_) then
+            io = 3720 + issh
+            open (unit=io, file='coutput/'//trim(fnamer2(issh)), status='old', &
+            &     action='write', position='append', iostat=twocenter_calc)
+            if (twocenter_calc /= 0) then
+              write (stderr, '(a)') '[ERROR] failed to open '//trim(fnamer2(issh))
+              return
+            end if
+            do index = 1, index_max_
+              temp_vxc(index) = vvxc(issh + 1, index_map(index))
+              l1 = lleft_(index_map(index))
+              m1 = abs(mleft_(index_map(index)))
+              l2 = lright_(index_map(index))
+              if (iand(l1 + l2 + 2*m1, 1) == 1) temp_vxc(index) = -temp_vxc(index)
+            end do ! index
+            write (io, '(4ES18.8)') (temp_vxc(index), index = 1, index_max_)
+            close (io)
+          end if
         end do
         do issh = 1, nssh2
           io = 3810 + issh
@@ -424,6 +526,24 @@ contains
           end if
           write (io, '(4ES18.8)') (vvxc(nssh1 + issh + 1, index), index = 1, index_max_)
           close (io)
+          if (ispec1_ /= ispec2_) then
+            io = 3820 + issh
+            open (unit=io, file='coutput/'//trim(fnamel2(issh)), status='old', &
+            &     action='write', position='append', iostat=twocenter_calc)
+            if (twocenter_calc /= 0) then
+              write (stderr, '(a)') '[ERROR] failed to open '//trim(fnamel2(issh))
+              return
+            end if
+            do index = 1, index_max_
+              temp_vxc(index) = vvxc(nssh1 + issh + 1, index_map(index))
+              l1 = lleft_(index_map(index))
+              m1 = abs(mleft_(index_map(index)))
+              l2 = lright_(index_map(index))
+              if (iand(l1 + l2 + 2*m1, 1) == 1) temp_vxc(index) = -temp_vxc(index)
+            end do ! index
+            write (io, '(4ES18.8)') (temp_vxc(index), index = 1, index_max_)
+            close (io)
+          end if
         end do
       end do ! grid
       deallocate(dq1, dq2, vvxc, xmatt, fnamel1, fnamel2, fnamer1, fnamer2)
