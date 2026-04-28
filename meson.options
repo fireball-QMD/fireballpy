@@ -1,4 +1,13 @@
-option('blas', type: 'string', value: 'openblas',
-       description: 'option for BLAS library switching')
-option('lapack', type: 'string', value: 'openblas',
-       description: 'option for LAPACK library switching')
+option(
+  'blas',
+  type: 'string',
+  value: 'openblas',
+  description: 'option for BLAS library switching',
+)
+option(
+  'lapack',
+  type: 'string',
+  value: 'openblas',
+  description: 'option for LAPACK library switching',
+)
+option('mpi', type: 'boolean', value: true, description: 'option for MPI compiling')

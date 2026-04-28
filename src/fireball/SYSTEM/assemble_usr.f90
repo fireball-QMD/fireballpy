@@ -3,6 +3,7 @@ subroutine assemble_usr (iauxforce)
   use M_constants, only: eq2
   use M_system, only: natoms, ratom, imass, neigh_max, uiiuee, ewald, fewald, neigh_b, neigh_j, neighn, Qin, dq, xl, dusr, dxcv
   use M_fdata, only: nsh_max, ME2c_max, nssh, Qneutral
+  implicit none
   integer, intent (in) :: iauxforce
   integer iatom
   integer ideriv

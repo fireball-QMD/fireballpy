@@ -1,7 +1,8 @@
 subroutine common_neighbors ()
   use, intrinsic :: iso_fortran_env, only: double => real64
-  use M_system, only: natoms, ratom, imass, neigh_b, neigh_j, neighn, neigh_comb, neigh_comj, neigh_comm, neigh_comn, xl, errno
+  use M_system, only: natoms, ratom, imass, neigh_b, neigh_j, neighn, neigh_comb, neigh_comj, neigh_comm, neigh_comn, xl, errno, neigh_max
   use M_fdata, only: nssh, rcutoff
+  implicit none
   integer ialp
   integer iatom
   integer ibeta
@@ -22,6 +23,8 @@ subroutine common_neighbors ()
   real(double), dimension (3) :: vec, vec1, vec2
   do ialp = 1,natoms
     num_neigh = 0
+    do ineigh = 1, neighn(ialp)
+    end do
     do ineigh = 1, neighn(ialp)
       iatom = neigh_j(ineigh,ialp)
       ibeta = neigh_b(ineigh,ialp)

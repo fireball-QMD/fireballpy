@@ -1,7 +1,7 @@
 subroutine scf_loop (verbose)
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: double => real64, stdout => output_unit
   use M_system, only: max_scf_iterations, scf_achieved, Kscf, etot, sigma, iqout, &
-    & ebs, eqmmm, uiiuee, uxcdcc_ols, etotxc_1c, sigmatol, iforce, errno, Kbest, sigmabest, isgeneig
+  & ebs, eqmmm, uiiuee, uxcdcc_ols, etotxc_1c, sigmatol, iforce, errno, Kbest, sigmabest, isgeneig
   implicit none
   logical, intent(in) :: verbose
   Kscf = 1

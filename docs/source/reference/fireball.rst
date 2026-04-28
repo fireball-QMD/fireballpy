@@ -1,4 +1,4 @@
-.. currentmodule:: fireballpy
+.. currentmodule:: fireballpy.fireball
 
 .. _fireballpy-api-fireball:
 

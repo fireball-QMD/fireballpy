@@ -1,4 +1,4 @@
-.. currentmodule:: fireballpy
+.. currentmodule:: fireballpy.fireball
 
 .. _fireballpy-api-internal:
 
@@ -12,8 +12,6 @@ Internal classes
 .. autoclass:: FDataFiles
    :members: load_fdata, get_charges_method, get_correction
    :no-inherited-members:
-
-.. autofunction:: load_fdata
 
 .. autoclass:: KPoints
    :members: set_kpoints

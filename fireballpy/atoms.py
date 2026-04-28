@@ -4,7 +4,6 @@ from numpy.typing import ArrayLike, NDArray
 from scipy.linalg import norm, inv
 from scipy.spatial.distance import pdist
 
-from fireballpy._errors import type_check
 from fireballpy._fireball import set_coords, set_cell, update_coords
 
 TWOPI = 2.0*np.pi
@@ -75,13 +74,10 @@ class AtomSystem:
         # Deal with the cell vectors
         if a1 is None:
             a1 = [0.0, 0.0, 0.0]
-        type_check(a1, ArrayLike, 'a1', ' if provided')
         if a2 is None:
             a2 = [0.0, 0.0, 0.0]
-        type_check(a2, ArrayLike, 'a1', ' if provided')
         if a3 is None:
             a3 = [0.0, 0.0, 0.0]
-        type_check(a3, ArrayLike, 'a1', ' if provided')
         a1 = np.ascontiguousarray(a1, dtype=np.float64)
         a2 = np.ascontiguousarray(a2, dtype=np.float64)
         a3 = np.ascontiguousarray(a3, dtype=np.float64)

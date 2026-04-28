@@ -16,12 +16,19 @@ subroutine anderson ( x_try, x_old, nmsh )
   real(double), allocatable, dimension(:) :: work
 
   if(Kscf .eq. 1)then
+    if (allocated(Fv)) deallocate(Fv)
     allocate (Fv(nmsh,max_scf_iterations))
+    if (allocated(Xv)) deallocate(Xv)
     allocate (Xv(nmsh,max_scf_iterations))
+    if (allocated(delF)) deallocate(delF)
     allocate (delF(nmsh,max_scf_iterations))
+    if (allocated(delX)) deallocate(delX)
     allocate (delX(nmsh,max_scf_iterations))
+    if (allocated(r2_sav)) deallocate(r2_sav)
     allocate (r2_sav(max_scf_iterations))
+    if (allocated(x_best)) deallocate(x_best)
     allocate (x_best(nmsh))
+    if (allocated(wi)) deallocate(wi)
     allocate (wi(max_scf_iterations))
     wi = 1.0d0
 
