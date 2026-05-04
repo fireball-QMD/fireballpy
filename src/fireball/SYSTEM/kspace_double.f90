@@ -1,16 +1,16 @@
 subroutine kspace_double (ikpoint, sks)
   use, intrinsic :: iso_fortran_env, only: double => real64
   use M_system, only: iqout, natoms, degelec, imass, getlssh, getissh, Kscf, blowre, blowim, bbnkre, bbnkim, sm12_complex, eigen_k, norbitals, &
-    & norbitals_new, getiatom, neigh_b, neigh_j, neighn, neighPPn, neighPP_b, neighPP_j, vnl, s_mat, h_mat, errno, isgeneig, xl, ratom
+  & norbitals_new, getiatom, neigh_b, neigh_j, neighn, neighPPn, neighPP_b, neighPP_j, vnl, s_mat, h_mat, errno, isgeneig, xl, ratom
   use M_fdata, only: num_orb, Qneutral
   implicit none
   integer, intent(in) :: ikpoint
   real(double), dimension(3), intent(in) :: sks
   complex(double), parameter :: a0 = cmplx(0.0d0, 0.0d0, double)
   complex(double), parameter :: a1 = cmplx(1.0d0, 0.0d0, double)
-  real(double), parameter :: overtol = 1.0d-4
+  real(double), parameter :: overtol = 1.0d-5
   integer iatom, imu, inu, in1, in2, ineigh, &
-    & jatom, jmu, jnu, mbeta, mineig, lm
+  & jatom, jmu, jnu, mbeta, mineig, lm
   real(double) :: dot
   complex(double) :: phase
   real(double), dimension(3) :: vec
@@ -139,13 +139,18 @@ subroutine kspace_double (ikpoint, sks)
     end if
     mineig = 0
     do imu = 1, norbitals
-      if (eigen(imu) .lt. overtol) mineig = imu
+      if (eigen(imu) .lt. overtol) then
+        mineig = imu
+        exit
+      end if
     end do
     mineig = mineig + 1
     norbitals_new = norbitals + 1 - mineig
     if ((norbitals_new .ne. norbitals) .and. ((iqout .eq. 1) .or. (iqout .eq. 3))) then
-      errno = 13
-      return
+      ! errno = 13
+      ! return
+      eigen(norbitals_new:norbitals) = eigen(norbitals_new:norbitals) + overtol
+      norbitals_new = norbitals
     end if
     allocate(xxxx(norbitals, norbitals_new))
     if ((iqout .eq. 1) .or. (iqout .eq. 3)) then
