@@ -72,14 +72,14 @@ def main():
         if args.mpi:
             env['MPICC'] = "mpiicx"
             env['MPIFC'] = "mpiifx"
-        setup_args += ['-Dblas=mkl-dynamic-ilp64-seq']
+        setup_args += ['-Dblas=mkl-dynamic-lp64-iomp']
     elif args.intel_old:
         env['CC'] = 'icc'
         env['FC'] = 'ifort'
         if args.mpi:
             env['MPICC'] = "mpicc"
             env['MPIFC'] = "mpifort"
-        setup_args += ['-Dblas=mkl-dynamic-ilp64-seq']
+        setup_args += ['-Dblas=mkl-dynamic-lp64-iomp']
     else:
         env['CC'] = 'gcc'
         env['FC'] = 'gfortran'
