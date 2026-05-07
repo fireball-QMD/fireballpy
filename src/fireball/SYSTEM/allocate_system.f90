@@ -8,7 +8,7 @@ subroutine allocate_system ()
     & neigh_pair_a2, neigh_pair_n1, neigh_pair_n2, neighj_tot, neighb_tot, neighn_tot, numorb_max, neighPP_self, neighPPn, neighPP_b, &
     & neighPP_j, sVNL, spVNL, sp_mat, tp_mat, dipcm, dippcm, dippc, vnl, neighPP_comn, neighPP_comm, neighPP_comj, neighPP_comb, &
     & neighPP_max, Qin, Qinmixer, Qout, Qoutmixer, dq, Q_partial, QLowdin_TOT, QMulliken_TOT, dq_DP, vxc, vxc_ca, rho, rho_off, &
-    & rhoij_off, s_mat, sm_mat, spm_mat, rho_on, arho_on, rhoi_on, arhoi_on, arhop_on, rhop_on, arhoij_off, arho_off, arhopij_off, &
+    & rhoij_off, s_mat, rho_on, arho_on, rhoi_on, arhoi_on, arhop_on, rhop_on, arhoij_off, arho_off, arhopij_off, &
     & arhop_off, rhop_off, rhopij_off, vca, ewaldlr, h_mat, t_mat, vna, ewaldqmmm, dipc, xl, fotnl, fanl, fotna, fana, faxc, faxc_ca, &
     & dxcdcc, ft, dusr, fotxc, fotxc_ca, faca, fotca, f3naa, f3nab, f3nac, f3nla, f3nlb, f3nlc, f3caa, f3cab, f3cac, flrew, f3xca_ca, &
     & f3xcb_ca, f3xcc_ca, f3xca, f3xcb, f3xcc, flrew_qmmm, fro, ftot, dxcv, norbitals_new, qstate, bbnkre, bbnkim, igamma
@@ -378,8 +378,6 @@ subroutine allocate_system ()
   allocate (dippc (3, 3, numorb_max, numorb_max, neigh_max, natoms))
   if (allocated(dipp)) deallocate(dipp)
   allocate (dipp (3, numorb_max, numorb_max, neigh_max, natoms)) 
-  if (allocated(sm_mat)) deallocate(sm_mat)
-  allocate (sm_mat (nsh_max, nsh_max, neigh_max, natoms))
   if (allocated(ewaldqmmm)) deallocate(ewaldqmmm)
   allocate (ewaldqmmm (numorb_max, numorb_max, neigh_max,natoms))
   if (allocated(cape)) deallocate(cape)
@@ -420,8 +418,6 @@ subroutine allocate_system ()
   if (allocated(ewaldlr)) deallocate(ewaldlr)
   allocate (ewaldlr (numorb_max, numorb_max, neigh_max, natoms))
 
-  if (allocated(spm_mat)) deallocate(spm_mat)
-  allocate (spm_mat (3, nsh_max, nsh_max, neigh_max, natoms))
   if (allocated(arhop_off)) deallocate(arhop_off)
   allocate (arhop_off (3, nsh_max, nsh_max, neigh_max, natoms))
   if (allocated(arhopij_off)) deallocate(arhopij_off)

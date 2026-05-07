@@ -1,7 +1,7 @@
 subroutine Dassemble_ca_olsxc_3c ()
   use, intrinsic :: iso_fortran_env, only: double => real64
   use M_system, only: xc_overtol, natoms, ratom, imass, neigh_comb, neigh_comj, neigh_comm, neigh_comn, numorb_max, Qin, rho, rho_off, &
-    & s_mat, sm_mat, spm_mat, arho_off, xl, f3xca_ca, f3xcb_ca, f3xcc_ca, f3xca, f3xcb, f3xcc
+    & s_mat, arho_off, xl, f3xca_ca, f3xcb_ca, f3xcc_ca, f3xca, f3xcb, f3xcc
   use M_fdata, only: nssh,num_orb,lssh,nsh_max
   implicit none
   integer ialp
@@ -147,17 +147,8 @@ subroutine Dassemble_ca_olsxc_3c ()
         end do
         do issh = 1, nssh(in1)
           do jssh = 1, nssh(in2)
-            sm = sm_mat(issh,jssh,mneigh,iatom)
-            if (abs(sm) .lt. xc_overtol) then
-              if(sm .gt. 0.0d0) then
-                sm = xc_overtol
-              else
-                sm = -1.0d0*xc_overtol
-              endif
-            endif
-            spm(:) = spm_mat(:,issh,jssh,mneigh,iatom)
-            avrhop_b (:,issh,jssh) = avrhop_b (:,issh,jssh) + (sm*rhop_3cb(:,issh,jssh) - rho_3c(issh,jssh)*spm(:))/(sm*sm)
-            avrhop_c (:,issh,jssh) = avrhop_c (:,issh,jssh) + (sm*rhop_3cc(:,issh,jssh) + rho_3c(issh,jssh)*spm(:))/(sm*sm)
+            avrhop_b (:,issh,jssh) = avrhop_b (:,issh,jssh) + 0.50d0*(rhop_3cb(:,issh,issh) + rhop_3cb(:,jssh,jssh))
+            avrhop_c (:,issh,jssh) = avrhop_c (:,issh,jssh) + 0.50d0*(rhop_3cc(:,issh,jssh) + rhop_3cc(:,jssh,jssh))
           end do
         end do
         n1 = 0

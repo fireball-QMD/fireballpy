@@ -185,8 +185,6 @@ module M_system
   real(double), dimension (:, :, :, :), allocatable :: rho_off
   real(double), dimension (:, :, :, :), allocatable :: rhoij_off
   real(double), dimension (:, :, :, :), allocatable :: s_mat 
-  real(double), dimension (:, :, :, :), allocatable :: sm_mat
-  real(double), dimension (:, :, :, :, :), allocatable :: spm_mat
   real(double), dimension (:, :, :), allocatable :: rho_on
   real(double), dimension (:, :, :), allocatable :: arho_on
   real(double), dimension (:, :, :), allocatable :: rhoi_on
