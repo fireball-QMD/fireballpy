@@ -1,13 +1,13 @@
 ! Set int options
 subroutine set_options(dipole_method, charges_method, &
-    & ismolecule, isgamma, total_charge, mixer_method, &
-    & max_iter, mix_order, beta, w0, tol)
+& ismolecule, isgamma, total_charge, mixer_method, &
+& max_iter, mix_order, beta, w0, tol)
   use iso_c_binding
   use M_system, only: igamma, icluster, idipole, iqout, iqmmm, &
-    & qstate, ialgmix, max_scf_iterations, idmix, w02, bmix, sigmatol
+  & qstate, ialgmix, max_scf_iterations, idmix, w02, bmix, sigmatol
   implicit none
   integer, intent(in) :: dipole_method, charges_method, &
-    & ismolecule, isgamma, total_charge, mixer_method, max_iter, mix_order
+  & ismolecule, isgamma, total_charge, mixer_method, max_iter, mix_order
   real(c_double), intent(in) :: beta, w0, tol
   iqmmm = 0 ! ensure this is off by default
   idipole = dipole_method
@@ -97,7 +97,7 @@ subroutine update_coords(natoms, xyz)
   real(c_double), dimension(3, natoms), intent(in) :: xyz
   ratom = xyz
 end subroutine update_coords
- 
+
 ! Set kpoints as needed by Fireball
 subroutine set_kpoints(nkpts, kpts, weights)
   use iso_c_binding
@@ -158,7 +158,7 @@ subroutine loadfdata_from_path(fdata_path)
   fdatalocation = trim(fdata_path)
   call load_fdata()
 end subroutine loadfdata_from_path
- 
+
 ! Allocate all needed arrays. Python gc handles deallocate after work
 subroutine call_allocate_system()
   use iso_c_binding
@@ -188,11 +188,11 @@ end subroutine get_initial_charges
 
 ! Compute the SCF loop
 subroutine scf(natoms, nshell, nkpts, norbitals, &
-    & verbose, fix_charges, shell_charges, eigenvalues, eigenvectors, &
-    & nbands, converged, errno_out, energy, fermi_level, charges)
+& verbose, fix_charges, shell_charges, eigenvalues, eigenvectors, &
+& nbands, converged, errno_out, energy, fermi_level, charges)
   use iso_c_binding
   use M_system, only: errno, scf_achieved, etot, efermi, eigen_k, Qin, imass, ifixcharge, icluster, &
-    & igamma, bbnkre, bbnkim, norbitals_new
+  & igamma, bbnkre, bbnkim, norbitals_new
   use M_fdata, only: Qneutral, nssh
   implicit none
   integer, intent(in) :: natoms, nshell, nkpts, norbitals

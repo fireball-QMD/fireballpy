@@ -190,6 +190,7 @@ class BaseFireball:
         self.maxshells = max([self.fdatafiles.nshells[z] for z in self.fdatafiles.nshells])
         self.norbitals = sum([self.fdatafiles.norbitals[z] for z in self.atomsystem.numbers])
         self._alloc_arrays()
+        call_allocate_system()
 
         if initial_charges is not None:
             if not isinstance(initial_charges, (tuple, list, np.ndarray)):
@@ -222,8 +223,8 @@ class BaseFireball:
             In general it is useful to fix the charges when making postprocessing.
         """
         if not self.scf_computed:
-            set_initial_charges(self.shell_charges.T)
             call_allocate_system()
+            set_initial_charges(self.shell_charges.T)
             converged, nbands, fb_errno, energy, fermi_level, charges = scf(self.verbose,
                                                                             fix_charges,
                                                                             self.shell_charges.T,
