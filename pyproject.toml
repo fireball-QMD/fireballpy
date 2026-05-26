@@ -65,3 +65,8 @@ jupyterlite = [
 
 [tool.uv]
 no-build-isolation = true
+
+[tool.fortitude.check]
+extend-select = ["C021", "C022", "C032", "C043", "C132", "C171", "C183", "MOD001", "MOD002", "MOD031", "MOD201", "S103", "S104", "S201", "S211", "S212", "S242", "S251", "S262", "S263"]
+ignore = ["C003", "C092"]
+line-length = 132
