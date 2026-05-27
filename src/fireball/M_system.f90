@@ -193,8 +193,8 @@ module M_system
   real(double), dimension (:, :, :, :, :), allocatable :: rhop_on
   real(double), dimension (:, :, :, :), allocatable :: arhoij_off
   real(double), dimension (:, :, :, :), allocatable :: arho_off
+  real(double), dimension (:, :, :, :), allocatable :: rhomp_2c
   real(double), dimension (:, :, :, :, :), allocatable :: arhopij_off 
-  real(double), dimension (:, :, :, :, :), allocatable :: arhop_off
   real(double), dimension (:, :, :, :, :), allocatable :: rhop_off
   real(double), dimension (:, :, :, :, :), allocatable :: rhopij_off
   real(double), dimension (:, :, :, :), allocatable :: vca

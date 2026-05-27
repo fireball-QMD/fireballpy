@@ -3,27 +3,26 @@ subroutine average_ca_rho()
   use, intrinsic :: iso_fortran_env, only: dp => real64
   use M_fdata, only: nssh, num_orb, nsh_max
   use M_system, only: iforce, xc_overtol, natoms, ratom, imass, neigh_max, Kscf, &
-  &                   neigh_b, neigh_j, neighn, neigh_comb, neigh_comj, &
+  &                   neigh_b, neigh_j, neighn, neigh_comb, neigh_comj, neigh_self, &
   &                   neigh_comm, neigh_comn, neigh_back, numorb_max, Qin, rho_off, &
   &                   rhoij_off, rho_on, arho_on, rhoi_on, &
   &                   arhoi_on, arhop_on, rhop_on, arhoij_off, arho_off, arhopij_off, &
-  &                   arhop_off, rhop_off, rhopij_off, xl
+  &                   rhop_off, rhopij_off, xl, rhomp_2c, neigh_com_ng
   implicit none
   integer :: iatom, ibeta, imu, in1, in2, indna, ineigh, interaction, interaction0, &
-  &          inu, isorp, ialp, issh, jatom, jneigh, jbeta, jssh, mbeta, mneigh, interaction3c
+  &          inu, isorp, ialp, issh, jatom, jneigh, jbeta, jssh, mbeta, mneigh, interaction3c, &
+  &          iself, jself, iback, jback
   real(dp) :: cost, x, y
   real(dp) :: r1(3), r2(3), r21(3), rhat(3), rnabc(3), rna(3), sighat(3), eps(3, 3), &
   &           deps(3, 3, 3), rhomx(numorb_max, numorb_max), rhompx(3, numorb_max, numorb_max), &
   &           rhomm(nsh_max, nsh_max), rhompm(3, nsh_max, nsh_max), &
-  &           rhom_2c(nsh_max, nsh_max, neigh_max, natoms), rhomi_2c(nsh_max, nsh_max, natoms), &
-  &           rhomp_2c(3, nsh_max, nsh_max, neigh_max, natoms)
+  &           rhom_2c(nsh_max, neigh_max, natoms)
 
   !   -----  ON SITE PART  ------
   rho_on = 0.0_dp
   rhoi_on = 0.0_dp
   rhop_on = 0.0_dp
   rhom_2c = 0.0_dp
-  rhomi_2c = 0.0_dp
   rhomp_2c = 0.0_dp
   interaction = 17
   interaction0 = 22
@@ -59,14 +58,10 @@ subroutine average_ca_rho()
               &                               rhomx(imu, inu)*Qin(isorp, jatom)
             end do
           end do
-          do jssh = 1, nssh(in1)
-            do issh = 1, nssh(in1)
-              rhomi_2c(issh, jssh, iatom) = rhomi_2c(issh, jssh, iatom) + &
-              &                                    rhomm(issh, jssh)*Qin(isorp, jatom)
-              rhom_2c(issh, jssh, ineigh, iatom) = rhom_2c(issh, jssh, ineigh, iatom) + &
-              &                                    rhomm(issh, jssh)*Qin(isorp, jatom)
-            end do   ! issh
-          end do   ! jssh
+          do issh = 1, nssh(in1)
+            rhom_2c(issh, ineigh, iatom) = rhom_2c(issh, ineigh, iatom) + &
+            &                                    rhomm(issh, issh)*Qin(isorp, jatom)
+          end do   ! issh
         end do   ! isorp
       else
         do isorp = 1, nssh(in2)
@@ -80,14 +75,12 @@ subroutine average_ca_rho()
               &                               rhomx(imu, inu)*Qin(isorp, jatom)
             end do
           end do
-          do jssh = 1, nssh(in1)
-            do issh = 1, nssh(in1)
-              rhom_2c(issh, jssh, ineigh, iatom) = rhom_2c(issh, jssh, ineigh, iatom) + &
-              &                                    rhomm(issh, jssh)*Qin(isorp, jatom)
-              rhomp_2c(:, issh, jssh, ineigh, iatom) = rhomp_2c(:, issh, jssh, ineigh, iatom) + &
-              &                                        rhompm(:, issh, jssh)*Qin(isorp, jatom)
-            end do   ! issh
-          end do   ! jssh
+          do issh = 1, nssh(in1)
+            rhom_2c(issh, ineigh, iatom) = rhom_2c(issh, ineigh, iatom) + &
+            &                                    rhomm(issh, issh)*Qin(isorp, jatom)
+            rhomp_2c(:, issh, ineigh, iatom) = rhomp_2c(:, issh, ineigh, iatom) + &
+            &                                        rhompm(:, issh, issh)*Qin(isorp, jatom)
+          end do   ! issh
         end do   ! isorp
       end if
     end do   ! ineigh
@@ -100,45 +93,44 @@ subroutine average_ca_rho()
   arhoij_off = 0.0_dp
   arhopij_off = 0.0_dp
   arho_off = 0.0_dp
-  arhop_off = 0.0_dp
   do iatom = 1, natoms
     in1 = imass(iatom)
     do ineigh = 1, neighn(iatom)
       mbeta = neigh_b(ineigh, iatom)
       jatom = neigh_j(ineigh, iatom)
       in2 = imass(jatom)
+      iself = neigh_self(iatom)
+      jself = neigh_self(jatom)
       do jssh = 1, nssh(in1)
         do issh = 1, nssh(in1)
           arho_on(issh, jssh, iatom) = arho_on(issh, jssh, iatom) + &
-            &                          0.5_dp*(rhom_2c(issh, issh, ineigh, iatom) + rhom_2c(jssh, jssh, ineigh, iatom))
-          arhop_on(:, issh, jssh, ineigh, iatom) = 0.5_dp*(rhomp_2c(:, issh, issh, ineigh, iatom) + &
-            &                                              rhomp_2c(:, jssh, jssh, ineigh, iatom))
+          &                          0.5_dp*(rhom_2c(issh, ineigh, iatom) + rhom_2c(jssh, ineigh, iatom))
+          arhop_on(:, issh, jssh, ineigh, iatom) = 0.5_dp*(rhomp_2c(:, issh, ineigh, iatom) + &
+          &                                              rhomp_2c(:, jssh, ineigh, iatom))
         end do
       end do
       if (iatom == jatom .and. mbeta == 0) then
         do jssh = 1, nssh(in1)
           do issh = 1, nssh(in1)
-            arhoi_on(issh, jssh, iatom) = 0.5_dp*(rhomi_2c(issh, issh, iatom) + &
-              &                                   rhomi_2c(jssh, jssh, iatom))
+            arhoi_on(issh, jssh, iatom) = 0.5_dp*(rhom_2c(issh, iself, iatom) + &
+            &                                   rhom_2c(jssh, iself, iatom))
           end do
         end do
       else
         jneigh = neigh_back(iatom, ineigh)
         do jssh = 1, nssh(in2)
           do issh = 1, nssh(in1)
-            arhoij_off(issh, jssh, ineigh, iatom) = 0.5_dp*(rhomi_2c(issh, issh, iatom) + &
-              &                                             rhomi_2c(jssh, jssh, jatom) + &
-              &                                             rhom_2c(issh, issh, ineigh, iatom) + &
-              &                                             rhom_2c(jssh, jssh, jneigh, jatom))
-            arhopij_off(:, issh, jssh, ineigh, iatom) = 0.5_dp*(rhomp_2c(:, issh, issh, ineigh, iatom) + &
-              &                                                 rhomp_2c(:, jssh, jssh, jneigh, jatom))
+            arhoij_off(issh, jssh, ineigh, iatom) = 0.5_dp*(rhom_2c(issh, iself, iatom) + &
+            &                                             rhom_2c(jssh, jself, jatom) + &
+            &                                             rhom_2c(issh, ineigh, iatom) + &
+            &                                             rhom_2c(jssh, jneigh, jatom))
+            arhopij_off(:, issh, jssh, ineigh, iatom) = 0.5_dp*(rhomp_2c(:, issh, ineigh, iatom) - &
+            &                                                 rhomp_2c(:, jssh, jneigh, jatom))
           end do
         end do
       end if
     end do   ! do ineigh
   end do    ! do iatom
-  arho_off = arhoij_off
-  arhop_off = arhopij_off
 
   ! THREE CENTER PART
   rho_off = 0.0_dp
@@ -152,10 +144,12 @@ subroutine average_ca_rho()
       if (mneigh == 0) cycle
       iatom = neigh_comj(1, ineigh, ialp)
       ibeta = neigh_comb(1, ineigh, ialp)
+      iback = neigh_com_ng(1, ineigh, ialp)
       r1 = ratom(:, iatom) + xl(:, ibeta)
       in1 = imass(iatom)
       jatom = neigh_comj(2, ineigh, ialp)
       jbeta = neigh_comb(2, ineigh, ialp)
+      jback = neigh_com_ng(2, ineigh, ialp)
       r2 = ratom(:, jatom) + xl(:, jbeta)
       in2 = imass(jatom)
       jneigh = neigh_back(iatom, mneigh)
@@ -192,14 +186,14 @@ subroutine average_ca_rho()
       do jssh = 1, nssh(in2)
         do issh = 1, nssh(in1)
           arho_off(issh, jssh, mneigh, iatom) = arho_off(issh, jssh, mneigh, iatom) + &
-            &                                   0.5_dp*(rhom_2c(issh, issh, mneigh, iatom) + &
-            &                                           rhom_2c(jssh, jssh, jneigh, jatom))
-          arhop_off(:, issh, jssh, mneigh, iatom) = arhop_off(:, issh, jssh, mneigh, iatom) + &
-            &                                       0.5_dp*rhomp_2c(:, issh, issh, mneigh, iatom)
+          &                                   0.5_dp*(rhom_2c(issh, iback, iatom) + &
+          &                                           rhom_2c(jssh, jback, jatom))
+          arho_off(jssh, issh, jneigh, jatom) = arho_off(issh, jssh, mneigh, iatom)
         end do
       end do
     end do ! ineigh
   end do ! ialp
+  arho_off = arho_off + arhoij_off
 
   !   -----  OFF SITE PART  ------
   ! We assemble off-site density matrices
@@ -233,9 +227,9 @@ subroutine average_ca_rho()
         do inu = 1, num_orb(in2)
           do imu = 1, num_orb(in1)
             rhoij_off(imu, inu, ineigh, iatom) = rhoij_off(imu, inu, ineigh, iatom) + &
-              &                                  rhomx(imu, inu)*Qin(isorp, iatom)
+            &                                  rhomx(imu, inu)*Qin(isorp, iatom)
             rhopij_off(:, imu, inu, ineigh, iatom) = rhopij_off(:, imu, inu, ineigh, iatom) + &
-              &                                      rhompx(:, imu, inu)*Qin(isorp, iatom)
+            &                                      rhompx(:, imu, inu)*Qin(isorp, iatom)
           end do ! imu
         end do ! inu
       end do ! isorp
@@ -246,9 +240,9 @@ subroutine average_ca_rho()
         do inu = 1, num_orb(in2)
           do imu = 1, num_orb(in1)
             rhoij_off(imu, inu, ineigh, iatom) = rhoij_off(imu, inu, ineigh, iatom) + &
-              &                                  rhomx(imu, inu)*Qin(isorp, jatom)
+            &                                  rhomx(imu, inu)*Qin(isorp, jatom)
             rhopij_off(:, imu, inu, ineigh, iatom) = rhopij_off(:, imu, inu, ineigh, iatom) + &
-              &                                      rhompx(:, imu, inu)*Qin(isorp, jatom)
+            &                                      rhompx(:, imu, inu)*Qin(isorp, jatom)
           end do ! imu
         end do ! inu
       end do ! isorp

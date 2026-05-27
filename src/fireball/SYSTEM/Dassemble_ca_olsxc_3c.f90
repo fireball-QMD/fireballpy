@@ -1,12 +1,12 @@
 subroutine Dassemble_ca_olsxc_3c()
   use, intrinsic :: iso_fortran_env, only: dp => real64
   use M_system, only: xc_overtol, natoms, ratom, imass, neigh_comb, neigh_comj, neigh_comm, &
-    & neigh_comn, neigh_back, numorb_max, Qin, rho, rho_off, arhop_off, &
-    & s_mat, arho_off, xl, f3xca_ca, f3xcb_ca, f3xcc_ca, f3xca, f3xcb, f3xcc
+  & neigh_comn, neigh_back, numorb_max, Qin, rho, rho_off, rhomp_2c, neigh_com_ng, &
+  & s_mat, arho_off, xl, f3xca_ca, f3xcb_ca, f3xcc_ca, f3xca, f3xcb, f3xcc
   use M_fdata, only: nssh, num_orb, lssh, nsh_max
   implicit none
   integer :: ialp, iatom, ibeta, imu, inu, in1, in2, indna, index1, index2, ineigh, interaction, &
-    &        isorp, issh, jssh, jatom, jbeta, jneigh, l1, l2, mneigh, n1, n2
+  &        isorp, issh, jssh, jatom, jbeta, jneigh, l1, l2, mneigh, n1, n2, iback, jback
   real(dp) :: cost, x, y, muxc, dmuxc, d2muxc, exc, dexc, d2exc, sx, sm, rho_av
   real(dp), dimension(3, 3, 3) :: depsA
   real(dp), dimension(3, 3, 3) :: depsB
@@ -33,10 +33,12 @@ subroutine Dassemble_ca_olsxc_3c()
       if (mneigh /= 0) then
         iatom = neigh_comj(1, ineigh, ialp)
         ibeta = neigh_comb(1, ineigh, ialp)
+        iback = neigh_com_ng(1, ineigh, ialp)
         r1 = ratom(:, iatom) + xl(:, ibeta)
         in1 = imass(iatom)
         jatom = neigh_comj(2, ineigh, ialp)
         jbeta = neigh_comb(2, ineigh, ialp)
+        jback = neigh_com_ng(2, ineigh, ialp)
         jneigh = neigh_back(iatom, mneigh)
         r2 = ratom(:, jatom) + xl(:, jbeta)
         in2 = imass(jatom)
@@ -69,7 +71,7 @@ subroutine Dassemble_ca_olsxc_3c()
         avrhop_c = 0.0_dp
         do isorp = 1, nssh(indna)
           call Dtrescentros(interaction, isorp, in1, in2, indna, x, y, cost, eps, &
-            &               depsA, depsB, rhat, sighat, rhoin, rhoxpa, rhoxpb, rhoxpc)
+          &               depsA, depsB, rhat, sighat, rhoin, rhoxpa, rhoxpb, rhoxpc)
           call DtrescentrosS(isorp, in1, in2, indna, x, y, cost, rhat, sighat, rhomm, rhompa, rhompb, rhompc)
           rhoin = rho_off(:, :, mneigh, iatom)
           do inu = 1, num_orb(in2)
@@ -81,8 +83,9 @@ subroutine Dassemble_ca_olsxc_3c()
         end do
         do jssh = 1, nssh(in2)
           do issh = 1, nssh(in1)
-            avrhop_b(:, issh, jssh) = avrhop_b(:, issh, jssh) + arhop_off(:, issh, jssh, mneigh, iatom)
-            avrhop_c(:, issh, jssh) = avrhop_c(:, issh, jssh) + arhop_off(:, issh, jssh, jneigh, jatom)
+            ! Minus as iback is the neighbour of ialp corresponding to iatom
+            avrhop_b(:, issh, jssh) = avrhop_b(:, issh, jssh) - 0.5_dp*rhomp_2c(:, issh, iback, iatom)
+            avrhop_c(:, issh, jssh) = avrhop_c(:, issh, jssh) - 0.5_dp*rhomp_2c(:, jssh, jback, jatom)
           end do
         end do
         n1 = 0
