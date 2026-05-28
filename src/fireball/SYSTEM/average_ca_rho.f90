@@ -3,20 +3,20 @@ subroutine average_ca_rho()
   use, intrinsic :: iso_fortran_env, only: dp => real64
   use M_fdata, only: nssh, num_orb, nsh_max
   use M_system, only: iforce, xc_overtol, natoms, ratom, imass, neigh_max, Kscf, &
-  &                   neigh_b, neigh_j, neighn, neigh_comb, neigh_comj, neigh_self, &
-  &                   neigh_comm, neigh_comn, neigh_back, numorb_max, Qin, rho_off, &
-  &                   rhoij_off, rho_on, arho_on, rhoi_on, &
-  &                   arhoi_on, arhop_on, rhop_on, arhoij_off, arho_off, arhopij_off, &
-  &                   rhop_off, rhopij_off, xl, rhomp_2c, neigh_com_ng
+    &                 neigh_b, neigh_j, neighn, neigh_comb, neigh_comj, neigh_self, &
+    &                 neigh_comm, neigh_comn, neigh_back, numorb_max, Qin, rho_off, &
+    &                 rhoij_off, rho_on, arho_on, rhoi_on, &
+    &                 arhoi_on, arhop_on, rhop_on, arhoij_off, arho_off, arhopij_off, &
+    &                 rhop_off, rhopij_off, xl, rhomp_2c, neigh_com_ng
   implicit none
   integer :: iatom, ibeta, imu, in1, in2, indna, ineigh, interaction, interaction0, &
-  &          inu, isorp, ialp, issh, jatom, jneigh, jbeta, jssh, mbeta, mneigh, interaction3c, &
-  &          iself, jself, iback, jback
+    &        inu, isorp, ialp, issh, jatom, jneigh, jbeta, jssh, mbeta, mneigh, interaction3c, &
+    &        iself, jself, iback, jback
   real(dp) :: cost, x, y
   real(dp) :: r1(3), r2(3), r21(3), rhat(3), rnabc(3), rna(3), sighat(3), eps(3, 3), &
-  &           deps(3, 3, 3), rhomx(numorb_max, numorb_max), rhompx(3, numorb_max, numorb_max), &
-  &           rhomm(nsh_max, nsh_max), rhompm(3, nsh_max, nsh_max), &
-  &           rhom_2c(nsh_max, neigh_max, natoms)
+    &         deps(3, 3, 3), rhomx(numorb_max, numorb_max), rhompx(3, numorb_max, numorb_max), &
+    &         rhomm(nsh_max, nsh_max), rhompm(3, nsh_max, nsh_max), &
+    &         rhom_2c(nsh_max, neigh_max, natoms)
 
   !   -----  ON SITE PART  ------
   rho_on = 0.0_dp
@@ -35,51 +35,52 @@ subroutine average_ca_rho()
       in2 = imass(jatom)
       r2 = ratom(:, jatom) + xl(:, mbeta)
       r21 = r2 - r1
-      y = norm2(r21)
-      if (y < 1.0e-05_dp) then
+
+      if (iatom == jatom .and. mbeta == 0) then
+        y = 0.0_dp
         sighat(1) = 0.0_dp
         sighat(2) = 0.0_dp
         sighat(3) = 1.0_dp
-      else
-        sighat = r21/y
-      end if
-      call epsilon(r2, sighat, eps)
-      call deps2cent(r1, r2, eps, deps)
-
-      if (iatom == jatom .and. mbeta == 0) then
+        call epsilon(r2, sighat, eps)
+        call deps2cent(r1, r2, eps, deps)
         do isorp = 1, nssh(in2)
           call doscentros(interaction, isorp, iforce, in1, in2, in1, y, eps, deps, rhomx, rhompx)
           call doscentrosS(interaction0, isorp, iforce, in1, in2, in1, y, eps, rhomm, rhompm)
           do inu = 1, num_orb(in1)
             do imu = 1, num_orb(in1)
               rhoi_on(imu, inu, iatom) = rhoi_on(imu, inu, iatom) + &
-              &                                rhomx(imu, inu)*Qin(isorp, jatom)
+                &                        rhomx(imu, inu)*Qin(isorp, jatom)
               rho_on(imu, inu, iatom) = rho_on(imu, inu, iatom) + &
-              &                               rhomx(imu, inu)*Qin(isorp, jatom)
+                &                       rhomx(imu, inu)*Qin(isorp, jatom)
             end do
           end do
           do issh = 1, nssh(in1)
             rhom_2c(issh, ineigh, iatom) = rhom_2c(issh, ineigh, iatom) + &
-            &                                    rhomm(issh, issh)*Qin(isorp, jatom)
+              &                            rhomm(issh, issh)*Qin(isorp, jatom)
           end do   ! issh
         end do   ! isorp
       else
+        y = norm2(r21)
+        if (y < 1.0e-5_dp) print *, "ME CAGO EN DIOS"
+        sighat = r21/y
+        call epsilon(r2, sighat, eps)
+        call deps2cent(r1, r2, eps, deps)
         do isorp = 1, nssh(in2)
           call doscentros(interaction, isorp, iforce, in1, in2, in1, y, eps, deps, rhomx, rhompx)
           call doscentrosS(interaction0, isorp, iforce, in1, in2, in1, y, eps, rhomm, rhompm)
           do inu = 1, num_orb(in1)
             do imu = 1, num_orb(in1)
               rhop_on(:, imu, inu, ineigh, iatom) = rhop_on(:, imu, inu, ineigh, iatom) + &
-              &                                 rhompx(:, imu, inu)*Qin(isorp, jatom)
+                &                                   rhompx(:, imu, inu)*Qin(isorp, jatom)
               rho_on(imu, inu, iatom) = rho_on(imu, inu, iatom) + &
-              &                               rhomx(imu, inu)*Qin(isorp, jatom)
+                &                       rhomx(imu, inu)*Qin(isorp, jatom)
             end do
           end do
           do issh = 1, nssh(in1)
             rhom_2c(issh, ineigh, iatom) = rhom_2c(issh, ineigh, iatom) + &
-            &                                    rhomm(issh, issh)*Qin(isorp, jatom)
+              &                            rhomm(issh, issh)*Qin(isorp, jatom)
             rhomp_2c(:, issh, ineigh, iatom) = rhomp_2c(:, issh, ineigh, iatom) + &
-            &                                        rhompm(:, issh, issh)*Qin(isorp, jatom)
+              &                                rhompm(:, issh, issh)*Qin(isorp, jatom)
           end do   ! issh
         end do   ! isorp
       end if
@@ -95,42 +96,42 @@ subroutine average_ca_rho()
   arho_off = 0.0_dp
   do iatom = 1, natoms
     in1 = imass(iatom)
+    iself = neigh_self(iatom)
+    do jssh = 1, nssh(in1)
+      do issh = 1, nssh(in1)
+        arhoi_on(issh, jssh, iatom) = 0.5_dp*(rhom_2c(issh, iself, iatom) + &
+          &                                   rhom_2c(jssh, iself, iatom))
+      end do
+    end do
     do ineigh = 1, neighn(iatom)
       mbeta = neigh_b(ineigh, iatom)
       jatom = neigh_j(ineigh, iatom)
       in2 = imass(jatom)
-      iself = neigh_self(iatom)
       jself = neigh_self(jatom)
+      jneigh = neigh_back(iatom, ineigh)
       do jssh = 1, nssh(in1)
         do issh = 1, nssh(in1)
           arho_on(issh, jssh, iatom) = arho_on(issh, jssh, iatom) + &
-          &                          0.5_dp*(rhom_2c(issh, ineigh, iatom) + rhom_2c(jssh, ineigh, iatom))
+            &                          0.5_dp*(rhom_2c(issh, ineigh, iatom) + &
+            &                                  rhom_2c(jssh, ineigh, iatom))
           arhop_on(:, issh, jssh, ineigh, iatom) = 0.5_dp*(rhomp_2c(:, issh, ineigh, iatom) + &
-          &                                              rhomp_2c(:, jssh, ineigh, iatom))
+            &                                              rhomp_2c(:, jssh, ineigh, iatom))
         end do
       end do
-      if (iatom == jatom .and. mbeta == 0) then
-        do jssh = 1, nssh(in1)
-          do issh = 1, nssh(in1)
-            arhoi_on(issh, jssh, iatom) = 0.5_dp*(rhom_2c(issh, iself, iatom) + &
-            &                                   rhom_2c(jssh, iself, iatom))
-          end do
-        end do
-      else
-        jneigh = neigh_back(iatom, ineigh)
-        do jssh = 1, nssh(in2)
-          do issh = 1, nssh(in1)
-            arhoij_off(issh, jssh, ineigh, iatom) = 0.5_dp*(rhom_2c(issh, iself, iatom) + &
+      if (iatom == jatom .and. mbeta == 0) cycle
+      do jssh = 1, nssh(in2)
+        do issh = 1, nssh(in1)
+          arhoij_off(issh, jssh, ineigh, iatom) = 0.5_dp*(rhom_2c(issh, iself, iatom) + &
             &                                             rhom_2c(jssh, jself, jatom) + &
             &                                             rhom_2c(issh, ineigh, iatom) + &
             &                                             rhom_2c(jssh, jneigh, jatom))
-            arhopij_off(:, issh, jssh, ineigh, iatom) = 0.5_dp*(rhomp_2c(:, issh, ineigh, iatom) - &
+          arhopij_off(:, issh, jssh, ineigh, iatom) = 0.5_dp*(rhomp_2c(:, issh, ineigh, iatom) - &
             &                                                 rhomp_2c(:, jssh, jneigh, jatom))
-          end do
         end do
-      end if
+      end do
     end do   ! do ineigh
   end do    ! do iatom
+  arho_off = arhoij_off
 
   ! THREE CENTER PART
   rho_off = 0.0_dp
@@ -155,13 +156,7 @@ subroutine average_ca_rho()
       jneigh = neigh_back(iatom, mneigh)
       r21 = r2 - r1
       y = norm2(r21)
-      if (y < 1.0e-05_dp) then
-        sighat(1) = 0.0_dp
-        sighat(2) = 0.0_dp
-        sighat(3) = 1.0_dp
-      else
-        sighat(:) = r21(:)/y
-      end if
+      sighat = r21/y
       rnabc = rna - (r1 + 0.5_dp*r21)
       x = norm2(rnabc)
       if (x < 1.0e-05_dp) then
@@ -178,7 +173,7 @@ subroutine average_ca_rho()
         do inu = 1, num_orb(in2)
           do imu = 1, num_orb(in1)
             rho_off(imu, inu, mneigh, iatom) = rho_off(imu, inu, mneigh, iatom) + &
-            &                               rhomx(imu, inu)*Qin(isorp, ialp)
+               &                               rhomx(imu, inu)*Qin(isorp, ialp)
             rho_off(inu, imu, jneigh, jatom) = rho_off(imu, inu, mneigh, iatom)
           end do ! imu
         end do ! inu
@@ -186,14 +181,13 @@ subroutine average_ca_rho()
       do jssh = 1, nssh(in2)
         do issh = 1, nssh(in1)
           arho_off(issh, jssh, mneigh, iatom) = arho_off(issh, jssh, mneigh, iatom) + &
-          &                                   0.5_dp*(rhom_2c(issh, iback, iatom) + &
-          &                                           rhom_2c(jssh, jback, jatom))
+            &                                   0.5_dp*(rhom_2c(issh, iback, iatom) + &
+            &                                           rhom_2c(jssh, jback, jatom))
           arho_off(jssh, issh, jneigh, jatom) = arho_off(issh, jssh, mneigh, iatom)
         end do
       end do
     end do ! ineigh
   end do ! ialp
-  arho_off = arho_off + arhoij_off
 
   !   -----  OFF SITE PART  ------
   ! We assemble off-site density matrices
@@ -202,23 +196,17 @@ subroutine average_ca_rho()
   rhoij_off = 0.0_dp
   rhopij_off = 0.0_dp
   do iatom = 1, natoms
-    r1(:) = ratom(:, iatom)
+    r1 = ratom(:, iatom)
     in1 = imass(iatom)
     do ineigh = 1, neighn(iatom)
       mbeta = neigh_b(ineigh, iatom)
       jatom = neigh_j(ineigh, iatom)
-      r2(:) = ratom(:, jatom) + xl(:, mbeta)
+      r2 = ratom(:, jatom) + xl(:, mbeta)
       in2 = imass(jatom)
       if (iatom == jatom .and. mbeta == 0) cycle
-      r21(:) = r2(:) - r1(:)
+      r21 = r2 - r1
       y = norm2(r21)
-      if (y < 1.0e-05_dp) then
-        sighat(1) = 0.0_dp
-        sighat(2) = 0.0_dp
-        sighat(3) = 1.0_dp
-      else
-        sighat(:) = r21(:)/y
-      end if
+      sighat = r21/y
       call epsilon(r2, sighat, eps)
       call deps2cent(r1, r2, eps, deps)
       interaction = 15
@@ -227,9 +215,13 @@ subroutine average_ca_rho()
         do inu = 1, num_orb(in2)
           do imu = 1, num_orb(in1)
             rhoij_off(imu, inu, ineigh, iatom) = rhoij_off(imu, inu, ineigh, iatom) + &
-            &                                  rhomx(imu, inu)*Qin(isorp, iatom)
+              &                                  rhomx(imu, inu)*Qin(isorp, iatom)
             rhopij_off(:, imu, inu, ineigh, iatom) = rhopij_off(:, imu, inu, ineigh, iatom) + &
-            &                                      rhompx(:, imu, inu)*Qin(isorp, iatom)
+              &                                      rhompx(:, imu, inu)*Qin(isorp, iatom)
+            rho_off(imu, inu, ineigh, iatom) = rho_off(imu, inu, ineigh, iatom) + &
+              &                                rhomx(imu, inu)*Qin(isorp, iatom)
+            rhop_off(:, imu, inu, ineigh, iatom) = rhop_off(:, imu, inu, ineigh, iatom) + &
+              &                                    rhompx(:, imu, inu)*Qin(isorp, iatom)
           end do ! imu
         end do ! inu
       end do ! isorp
@@ -240,14 +232,16 @@ subroutine average_ca_rho()
         do inu = 1, num_orb(in2)
           do imu = 1, num_orb(in1)
             rhoij_off(imu, inu, ineigh, iatom) = rhoij_off(imu, inu, ineigh, iatom) + &
-            &                                  rhomx(imu, inu)*Qin(isorp, jatom)
+              &                                  rhomx(imu, inu)*Qin(isorp, jatom)
             rhopij_off(:, imu, inu, ineigh, iatom) = rhopij_off(:, imu, inu, ineigh, iatom) + &
-            &                                      rhompx(:, imu, inu)*Qin(isorp, jatom)
+              &                                      rhompx(:, imu, inu)*Qin(isorp, jatom)
+            rho_off(imu, inu, ineigh, iatom) = rho_off(imu, inu, ineigh, iatom) + &
+              &                                rhomx(imu, inu)*Qin(isorp, jatom)
+            rhop_off(:, imu, inu, ineigh, iatom) = rhop_off(:, imu, inu, ineigh, iatom) + &
+              &                                    rhompx(:, imu, inu)*Qin(isorp, jatom)
           end do ! imu
         end do ! inu
       end do ! isorp
     end do ! ineigh
   end do ! iatom
-  rho_off = rho_off + rhoij_off
-  rhop_off = rhop_off + rhopij_off
 end subroutine average_ca_rho
