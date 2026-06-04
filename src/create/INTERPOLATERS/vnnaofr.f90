@@ -55,9 +55,9 @@
 ! Program Declaration
 ! ===========================================================================
         function vnnaofr (ispec, issh, r)
-        use precision
+        use precision, only: wp
         implicit none
-        real(kind=long) vnnaofr
+        real(kind=wp) vnnaofr
 
         include '../parameters.inc'
         include '../vnonneutral.inc'
@@ -68,7 +68,7 @@
         integer ispec
         integer issh
 
-        real(kind=long) r
+        real(kind=wp) r
 
 ! Local Parameters and Data Declaration
 ! ===========================================================================
@@ -83,14 +83,14 @@
         integer ileft, imid
         integer max_points
 
-        real(kind=long) L(0:norder),mu(0:norder),Z(0:norder),alpha(0:norder)
-        real(kind=long) a(0:norder),b(0:norder),c(0:norder),d(0:norder)
-        real(kind=long) h
+        real(kind=wp) L(0:norder),mu(0:norder),Z(0:norder),alpha(0:norder)
+        real(kind=wp) a(0:norder),b(0:norder),c(0:norder),d(0:norder)
+        real(kind=wp) h
         integer iam
         integer i,j
-        real(kind=long) xmin
-        real(kind=long) xxp
-        real(kind=long) aaa,bbb,ccc,ddd
+        real(kind=wp) xmin
+        real(kind=wp) xxp
+        real(kind=wp) aaa,bbb,ccc,ddd
 
 ! Procedure
 ! ===========================================================================

@@ -1,12 +1,18 @@
-        module constants
-         use precision
-         
-         real(kind=long), parameter :: abohr = 0.529177249d0 
-         real(kind=long), parameter :: abohr15 = 0.3849477153d0
-         real(kind=long), parameter :: beta = 0.9d0
-         real(kind=long), parameter :: eq2 = 14.39975d0
-         real(kind=long), parameter :: Hartree = 14.39975d0/abohr 
-         real(kind=long), parameter :: pi = 3.141592653589793238462643d0
-         real(kind=long), parameter :: ryd = 13.6057981d0 
-         real(kind=long), parameter :: tolerance = 1.0d-5
-        end module
+module constants
+  use precision, only: wp
+  implicit none
+  public
+  real(kind=wp), parameter :: abohr = 0.5291772105638411_wp
+  real(kind=wp), parameter :: abohr15 = 0.38494767331059465_wp
+  real(kind=wp), parameter :: abohr3 = 0.14818471118724036_wp
+  real(kind=wp), parameter :: abohr4 = 0.07841597211427229_wp
+  real(kind=wp), parameter :: abohr5 = 0.04149594538708256_wp
+  real(kind=wp), parameter :: invabohr = 1.8897261258369282_wp
+  real(kind=wp), parameter :: beta = 0.9_wp
+  real(kind=wp), parameter :: eq2 = 14.399645351950548_wp
+  real(kind=wp), parameter :: hartree = 27.211386024367243_wp
+  real(kind=wp), parameter :: pi = 3.141592653589793_wp
+  real(kind=wp), parameter :: ryd = 13.605693012183622_wp
+  real(kind=wp), parameter :: tolerance = 1.0e-5_wp
+  real(kind=wp), parameter :: inv4pi = 0.07957747154594767_wp
+end module constants

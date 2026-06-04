@@ -3,13 +3,14 @@ subroutine load_fdata()
   use M_constants, only: abohr
   use M_fdata, only: fdataLocation, infofname, nsh_max, nshPP_max, nspecies, nzx, symbolA, &
     & etotatom, smass, rc_PP, rcutoff, cl_PP, nssh, lssh, nsshPP, lsshPP, Qneutral, wavefxn, &
-    & napot, ind2c, icon3c, splineint_2c, numz2c, z2cmax, interactions2c_max, &
-    & isorpmax, isorpmax_xc, ME2c_max, nfofx
+    & napot, ind2c, icon3c, splineint_2c, numz2c, z2cmax, &
+    & isorpmax, isorpmax_xc, ME2c_max, nfofx,initype
   implicit none
   integer :: in1, in2, in3, ispec, issh, aux, icount, isorp, &
-    & interaction, mintype, maxtype
+    & interaction  
   real(double), dimension (:,:), allocatable :: rcutoff_temp
-
+  integer :: maxtype(20) 
+  integer :: interactions2c_max
   ! Find nsh_max and nsh_max_PP
   nsh_max = 0
   nshPP_max = 0
@@ -108,7 +109,7 @@ subroutine load_fdata()
   ! Prepare and load two centres
   icount = 0
   ind2c = 0
-  interactions2c_max = 27 + 11*nsh_max
+  interactions2c_max = (nsh_max+1)*3+8*nsh_max+9
   if (allocated(numz2c)) deallocate(numz2c)
   if (allocated(z2cmax)) deallocate(z2cmax)
   if (allocated(splineint_2c)) deallocate(splineint_2c)
@@ -118,25 +119,21 @@ subroutine load_fdata()
   numz2c = 0
   z2cmax = 0.0d0
   splineint_2c = 0.0d0
-  do interaction = 1, 23
-    if ((interaction .ge. 2) .and. (interaction .le. 4)) then
-      mintype = 0
-      maxtype = nsh_max
-    else if ((interaction .ge. 15) .and. (interaction .le. 22)) then
-      mintype = 1
-      maxtype = nsh_max
-    else if ((interaction .ge. 6) .and. (interaction .le. 8)) then
-      mintype = 0
-      maxtype = 4
-    else
-      mintype = 0
-      maxtype = 0
-    end if
-    do isorp=mintype,maxtype
+  maxtype =  (/ &
+     0,                          &   !1
+     nsh_max, nsh_max, nsh_max,  &   !2-4
+     0, 0,                       &   !5-6
+     nsh_max, nsh_max,           &   !7-8
+     0, 0, 0, 0, 0,              &   ! 9-13
+     nsh_max, nsh_max, nsh_max,  &
+     nsh_max, nsh_max, nsh_max,  &   ! 14-19
+     0  /)                           ! 20
+
+  do interaction = 1, 20
+    do isorp=initype(interaction),maxtype(interaction)
       icount = icount + 1
       ind2c(interaction, isorp) = icount
     end do
-    if(interaction .eq. 14) cycle
     call read_2c (interaction)
   end do
 

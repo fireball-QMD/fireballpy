@@ -1,3 +1,4 @@
+from typing import Any
 import numpy as np
 from scipy.integrate import tplquad
 from ase.data import chemical_symbols
@@ -156,7 +157,7 @@ class Orbitals:
                     names.append(chemical_symbols[z] + orbname)
         return names
 
-    def munu_integral(self, mu: int, nu: int, iatom: int = -1, f=None):
+    def munu_integral(self, mu: int, nu: int, shell: bool = False, abs: bool = False, charge: bool = True, iatom: list[int] | None = None, f: Any | None = None):
         aslm = self.aslm
         scs = self.shell_charges
         rns = self.coords
@@ -189,51 +190,21 @@ class Orbitals:
             xmax = disth[0] + cutmin
             ymax = disth[1] + cutmin
             zmax = disth[2] + cutmin
+        if iatom is None:
+            iatom = [i for i in range(scs.shape[0])]
+        iatom = np.array(iatom, dtype=np.int32)
 
         if f is None:
-            if iatom > -1:
-                @njit
-                def ifun0(z, y, x, aiatom, ascs, aaslm, afcs, afxs, arns, mu, nu):
-                    i1 = aaslm[mu][0]
-                    j1 = aaslm[mu][1]
-                    l1 = aaslm[mu][2]
-                    m1 = aaslm[mu][3]
-                    i2 = aaslm[nu][0]
-                    j2 = aaslm[nu][1]
-                    l2 = aaslm[nu][2]
-                    m2 = aaslm[nu][3]
-                    xs1 = afxs[i1, j1, :]
-                    xs2 = afxs[i2, j2, :]
-                    cs1 = afcs[i1, j1, :, :]
-                    cs2 = afcs[i2, j2, :, :]
-                    rn1 = arns[i1]
-                    rn2 = arns[i2]
-                    n = 0.0
-                    rn3 = arns[aiatom]
-                    for j in range(ascs.shape[1]):
-                        q = ascs[aiatom, j]
-                        if np.abs(q) < 1e-10:
-                            continue
-                        xs3 = afxs[aiatom, j, :]
-                        cs3 = afcs[aiatom, j, :, :]
-                        n += q*orbital(x, y, z, cs3, xs3, rn3, 0, 0)**2
-                    o1 = orbital(x, y, z, cs1, xs1, rn1, l1, m1)
-                    o2 = orbital(x, y, z, cs2, xs2, rn2, l2, m2)
-                    res = o1*o2*n
-                    return res
-                return tplquad(ifun0, x0-xmax, x0+xmax, y0-ymax, y0+ymax, z0-zmax, z0+zmax, epsabs=1e-4, epsrel=1e-4,
-                               args=(iatom, scs, aslm, fcs, fxs, rns, mu, nu))[0]
-
             @njit
-            def ifun1(z, y, x, ascs, aaslm, afcs, afxs, arns, mu, nu):
-                i1 = aaslm[mu][0]
-                j1 = aaslm[mu][1]
-                l1 = aaslm[mu][2]
-                m1 = aaslm[mu][3]
-                i2 = aaslm[nu][0]
-                j2 = aaslm[nu][1]
-                l2 = aaslm[nu][2]
-                m2 = aaslm[nu][3]
+            def ifun0(z, y, x, aiatom, ascs, aaslm, afcs, afxs, arns, amu, anu, ashell, aq, aabs):
+                i1 = aaslm[amu][0]
+                j1 = aaslm[amu][1]
+                l1 = 0 if ashell else aaslm[amu][2]
+                m1 = 0 if ashell else aaslm[amu][3]
+                i2 = aaslm[anu][0]
+                j2 = aaslm[anu][1]
+                l2 = 0 if ashell else aaslm[anu][2]
+                m2 = 0 if ashell else aaslm[anu][3]
                 xs1 = afxs[i1, j1, :]
                 xs2 = afxs[i2, j2, :]
                 cs1 = afcs[i1, j1, :, :]
@@ -241,7 +212,7 @@ class Orbitals:
                 rn1 = arns[i1]
                 rn2 = arns[i2]
                 n = 0.0
-                for i in range(ascs.shape[0]):
+                for i in iatom:
                     rn3 = arns[i]
                     for j in range(ascs.shape[1]):
                         q = ascs[i, j]
@@ -249,82 +220,30 @@ class Orbitals:
                             continue
                         xs3 = afxs[i, j, :]
                         cs3 = afcs[i, j, :, :]
-                        n += q*orbital(x, y, z, cs3, xs3, rn3, 0, 0)**2
+                        if aq:
+                            n += q*orbital(x, y, z, cs3, xs3, rn3, 0, 0)**2
+                        else:
+                            n += orbital(x, y, z, cs3, xs3, rn3, 0, 0)**2
                 o1 = orbital(x, y, z, cs1, xs1, rn1, l1, m1)
                 o2 = orbital(x, y, z, cs2, xs2, rn2, l2, m2)
-                res = o1*o2*n
+                res = np.abs(o1*o2)*n if aabs else o1*o2*n
                 return res
-            return tplquad(ifun1, x0-xmax, x0+xmax, y0-ymax, y0+ymax, z0-zmax, z0+zmax, epsabs=1e-4, epsrel=1e-4,
-                           args=(scs, aslm, fcs, fxs, rns, mu, nu))[0]
+            return tplquad(ifun0, x0-xmax, x0+xmax, y0-ymax, y0+ymax, z0-zmax, z0+zmax, epsabs=1e-4, epsrel=1e-4,
+                           args=(iatom, scs, aslm, fcs, fxs, rns, mu, nu, shell, charge, abs))[0]
 
         if isinstance(f, int) or isinstance(f, float):
-            @njit
-            def ifunn(z, y, x, af, aaslm, afcs, afxs, arns, mu, nu):
-                i1 = aaslm[mu][0]
-                j1 = aaslm[mu][1]
-                l1 = aaslm[mu][2]
-                m1 = aaslm[mu][3]
-                i2 = aaslm[nu][0]
-                j2 = aaslm[nu][1]
-                l2 = aaslm[nu][2]
-                m2 = aaslm[nu][3]
-                xs1 = afxs[i1, j1, :]
-                xs2 = afxs[i2, j2, :]
-                cs1 = afcs[i1, j1, :, :]
-                cs2 = afcs[i2, j2, :, :]
-                rn1 = arns[i1]
-                rn2 = arns[i2]
-                o1 = orbital(x, y, z, cs1, xs1, rn1, l1, m1)
-                o2 = orbital(x, y, z, cs2, xs2, rn2, l2, m2)
-                res = o1*o2*af
-                return res
-            return tplquad(ifunn, x0-xmax, x0+xmax, y0-ymax, y0+ymax, z0-zmax, z0+zmax, epsabs=1e-4, epsrel=1e-4,
-                           args=(f, aslm, fcs, fxs, rns, mu, nu))[0]
-
-        if iatom > -1:
-            @njit
-            def ifun3(z, y, x, aiatom, ascs, aaslm, afcs, afxs, arns, mu, nu):
-                i1 = aaslm[mu][0]
-                j1 = aaslm[mu][1]
-                l1 = aaslm[mu][2]
-                m1 = aaslm[mu][3]
-                i2 = aaslm[nu][0]
-                j2 = aaslm[nu][1]
-                l2 = aaslm[nu][2]
-                m2 = aaslm[nu][3]
-                xs1 = afxs[i1, j1, :]
-                xs2 = afxs[i2, j2, :]
-                cs1 = afcs[i1, j1, :, :]
-                cs2 = afcs[i2, j2, :, :]
-                rn1 = arns[i1]
-                rn2 = arns[i2]
-                n = 0.0
-                rn3 = arns[aiatom]
-                for j in range(ascs.shape[1]):
-                    q = ascs[aiatom, j]
-                    if np.abs(q) < 1e-10:
-                        continue
-                    xs3 = afxs[aiatom, j, :]
-                    cs3 = afcs[aiatom, j, :, :]
-                    n += q*orbital(x, y, z, cs3, xs3, rn3, 0, 0)**2
-                o1 = orbital(x, y, z, cs1, xs1, rn1, l1, m1)
-                o2 = orbital(x, y, z, cs2, xs2, rn2, l2, m2)
-                fn = f(n)
-                res = o1*o2*fn
-                return res
-            return tplquad(ifun3, x0-xmax, x0+xmax, y0-ymax, y0+ymax, z0-zmax, z0+zmax, epsabs=1e-4, epsrel=1e-4,
-                           args=(iatom, scs, aslm, fcs, fxs, rns, mu, nu))[0]
+            pass
 
         @njit
-        def ifun4(z, y, x, ascs, aaslm, afcs, afxs, arns, mu, nu):
-            i1 = aaslm[mu][0]
-            j1 = aaslm[mu][1]
-            l1 = aaslm[mu][2]
-            m1 = aaslm[mu][3]
-            i2 = aaslm[nu][0]
-            j2 = aaslm[nu][1]
-            l2 = aaslm[nu][2]
-            m2 = aaslm[nu][3]
+        def ifun2(z, y, x, aiatom, ascs, aaslm, afcs, afxs, arns, amu, anu, ashell, aq, aabs):
+            i1 = aaslm[amu][0]
+            j1 = aaslm[amu][1]
+            l1 = 0 if ashell else aaslm[amu][2]
+            m1 = 0 if ashell else aaslm[amu][3]
+            i2 = aaslm[anu][0]
+            j2 = aaslm[anu][1]
+            l2 = 0 if ashell else aaslm[anu][2]
+            m2 = 0 if ashell else aaslm[anu][3]
             xs1 = afxs[i1, j1, :]
             xs2 = afxs[i2, j2, :]
             cs1 = afcs[i1, j1, :, :]
@@ -332,7 +251,7 @@ class Orbitals:
             rn1 = arns[i1]
             rn2 = arns[i2]
             n = 0.0
-            for i in range(ascs.shape[0]):
+            for i in aiatom:
                 rn3 = arns[i]
                 for j in range(ascs.shape[1]):
                     q = ascs[i, j]
@@ -340,188 +259,17 @@ class Orbitals:
                         continue
                     xs3 = afxs[i, j, :]
                     cs3 = afcs[i, j, :, :]
-                    n += q*orbital(x, y, z, cs3, xs3, rn3, 0, 0)**2
+                    if aq:
+                        n += q*orbital(x, y, z, cs3, xs3, rn3, 0, 0)**2
+                    else:
+                        n += orbital(x, y, z, cs3, xs3, rn3, 0, 0)**2
             o1 = orbital(x, y, z, cs1, xs1, rn1, l1, m1)
             o2 = orbital(x, y, z, cs2, xs2, rn2, l2, m2)
             fn = f(n)
-            res = o1*o2*fn
+            res = np.abs(o1*o2)*fn if aabs else o1*o2*fn
             return res
-        return tplquad(ifun4, x0-xmax, x0+xmax, y0-ymax, y0+ymax, z0-zmax, z0+zmax, epsabs=1e-4, epsrel=1e-4,
-                       args=(scs, aslm, fcs, fxs, rns, mu, nu))[0]
-
-    def munu_weight_integral(self, mu: int, nu: int, iatom: int = -1, f=None):
-        aslm = self.aslm
-        scs = self.shell_charges
-        rns = self.coords
-        fcs = self.cs
-        fxs = self.xs
-        i1 = aslm[mu][0]
-        j1 = aslm[mu][1]
-        i2 = aslm[nu][0]
-        j2 = aslm[nu][1]
-        rn1 = rns[i1]
-        rn2 = rns[i2]
-        rcut1 = self.xs[i1, j1, :].max()
-        rcut2 = self.xs[i2, j2, :].max()
-        if i1 == i2:
-            x0 = rn1[0]
-            y0 = rn1[1]
-            z0 = rn1[2]
-            xmax = rcut1
-            ymax = rcut1
-            zmax = rcut1
-        else:
-            center = 0.5*(rn1 + rn2)
-            disth = 0.5*np.abs(rn1 - rn2)
-            cutmin = np.minimum(rcut1, rcut2)
-            if 2.0*np.min(disth) > cutmin:
-                return np.float64(0.0)
-            x0 = center[0]
-            y0 = center[1]
-            z0 = center[2]
-            xmax = disth[0] + cutmin
-            ymax = disth[1] + cutmin
-            zmax = disth[2] + cutmin
-
-        if f is None:
-            if iatom > -1:
-                @njit
-                def ifun0(z, y, x, aiatom, ascs, aaslm, afcs, afxs, arns, mu, nu):
-                    i1 = aaslm[mu][0]
-                    j1 = aaslm[mu][1]
-                    i2 = aaslm[nu][0]
-                    j2 = aaslm[nu][1]
-                    xs1 = afxs[i1, j1, :]
-                    xs2 = afxs[i2, j2, :]
-                    cs1 = afcs[i1, j1, :, :]
-                    cs2 = afcs[i2, j2, :, :]
-                    rn1 = arns[i1]
-                    rn2 = arns[i2]
-                    n = 0.0
-                    rn3 = arns[aiatom]
-                    for j in range(ascs.shape[1]):
-                        q = ascs[aiatom, j]
-                        if np.abs(q) < 1e-10:
-                            continue
-                        xs3 = afxs[aiatom, j, :]
-                        cs3 = afcs[aiatom, j, :, :]
-                        n += q*orbital(x, y, z, cs3, xs3, rn3, 0, 0)**2
-                    o1 = orbital(x, y, z, cs1, xs1, rn1, 0, 0)
-                    o2 = orbital(x, y, z, cs2, xs2, rn2, 0, 0)
-                    res = np.abs(o1*o2)*n
-                    return res
-                return tplquad(ifun0, x0-xmax, x0+xmax, y0-ymax, y0+ymax, z0-zmax, z0+zmax, epsabs=1e-4, epsrel=1e-4,
-                               args=(iatom, scs, aslm, fcs, fxs, rns, mu, nu))[0]
-
-            @njit
-            def ifun1(z, y, x, ascs, aaslm, afcs, afxs, arns, mu, nu):
-                i1 = aaslm[mu][0]
-                j1 = aaslm[mu][1]
-                i2 = aaslm[nu][0]
-                j2 = aaslm[nu][1]
-                xs1 = afxs[i1, j1, :]
-                xs2 = afxs[i2, j2, :]
-                cs1 = afcs[i1, j1, :, :]
-                cs2 = afcs[i2, j2, :, :]
-                rn1 = arns[i1]
-                rn2 = arns[i2]
-                n = 0.0
-                for i in range(ascs.shape[0]):
-                    rn3 = arns[i]
-                    for j in range(ascs.shape[1]):
-                        q = ascs[i, j]
-                        if np.abs(q) < 1e-10:
-                            continue
-                        xs3 = afxs[i, j, :]
-                        cs3 = afcs[i, j, :, :]
-                        n += q*orbital(x, y, z, cs3, xs3, rn3, 0, 0)**2
-                o1 = orbital(x, y, z, cs1, xs1, rn1, 0, 0)
-                o2 = orbital(x, y, z, cs2, xs2, rn2, 0, 0)
-                res = np.abs(o1*o2)*n
-                return res
-            return tplquad(ifun1, x0-xmax, x0+xmax, y0-ymax, y0+ymax, z0-zmax, z0+zmax, epsabs=1e-4, epsrel=1e-4,
-                           args=(scs, aslm, fcs, fxs, rns, mu, nu))[0]
-
-        if isinstance(f, int) or isinstance(f, float):
-            @njit
-            def ifunn(z, y, x, af, aaslm, afcs, afxs, arns, mu, nu):
-                i1 = aaslm[mu][0]
-                j1 = aaslm[mu][1]
-                i2 = aaslm[nu][0]
-                j2 = aaslm[nu][1]
-                xs1 = afxs[i1, j1, :]
-                xs2 = afxs[i2, j2, :]
-                cs1 = afcs[i1, j1, :, :]
-                cs2 = afcs[i2, j2, :, :]
-                rn1 = arns[i1]
-                rn2 = arns[i2]
-                o1 = orbital(x, y, z, cs1, xs1, rn1, 0, 0)
-                o2 = orbital(x, y, z, cs2, xs2, rn2, 0, 0)
-                res = np.abs(o1*o2)*af
-                return res
-            return tplquad(ifunn, x0-xmax, x0+xmax, y0-ymax, y0+ymax, z0-zmax, z0+zmax, epsabs=1e-4, epsrel=1e-4,
-                           args=(f, aslm, fcs, fxs, rns, mu, nu))[0]
-
-        if iatom > -1:
-            @njit
-            def ifun3(z, y, x, aiatom, ascs, aaslm, afcs, afxs, arns, mu, nu):
-                i1 = aaslm[mu][0]
-                j1 = aaslm[mu][1]
-                i2 = aaslm[nu][0]
-                j2 = aaslm[nu][1]
-                xs1 = afxs[i1, j1, :]
-                xs2 = afxs[i2, j2, :]
-                cs1 = afcs[i1, j1, :, :]
-                cs2 = afcs[i2, j2, :, :]
-                rn1 = arns[i1]
-                rn2 = arns[i2]
-                n = 0.0
-                rn3 = arns[aiatom]
-                for j in range(ascs.shape[1]):
-                    q = ascs[aiatom, j]
-                    if np.abs(q) < 1e-10:
-                        continue
-                    xs3 = afxs[aiatom, j, :]
-                    cs3 = afcs[aiatom, j, :, :]
-                    n += q*orbital(x, y, z, cs3, xs3, rn3, 0, 0)**2
-                o1 = orbital(x, y, z, cs1, xs1, rn1, 0, 0)
-                o2 = orbital(x, y, z, cs2, xs2, rn2, 0, 0)
-                fn = f(n)
-                res = np.abs(o1*o2)*fn
-                return res
-            return tplquad(ifun3, x0-xmax, x0+xmax, y0-ymax, y0+ymax, z0-zmax, z0+zmax, epsabs=1e-4, epsrel=1e-4,
-                           args=(iatom, scs, aslm, fcs, fxs, rns, mu, nu))[0]
-
-        @njit
-        def ifun4(z, y, x, ascs, aaslm, afcs, afxs, arns, mu, nu):
-            i1 = aaslm[mu][0]
-            j1 = aaslm[mu][1]
-            i2 = aaslm[nu][0]
-            j2 = aaslm[nu][1]
-            xs1 = afxs[i1, j1, :]
-            xs2 = afxs[i2, j2, :]
-            cs1 = afcs[i1, j1, :, :]
-            cs2 = afcs[i2, j2, :, :]
-            rn1 = arns[i1]
-            rn2 = arns[i2]
-            n = 0.0
-            for i in range(ascs.shape[0]):
-                rn3 = arns[i]
-                for j in range(ascs.shape[1]):
-                    q = ascs[i, j]
-                    if np.abs(q) < 1e-10:
-                        continue
-                    xs3 = afxs[i, j, :]
-                    cs3 = afcs[i, j, :, :]
-                    n += q*orbital(x, y, z, cs3, xs3, rn3, 0, 0)**2
-            o1 = orbital(x, y, z, cs1, xs1, rn1, 0, 0)
-            o2 = orbital(x, y, z, cs2, xs2, rn2, 0, 0)
-            fn = f(n)
-            res = np.abs(o1*o2)*fn
-            return res
-        return tplquad(ifun4, x0-xmax, x0+xmax, y0-ymax, y0+ymax, z0-zmax, z0+zmax, epsabs=1e-4, epsrel=1e-4,
-                       args=(scs, aslm, fcs, fxs, rns, mu, nu))[0]
-
+        return tplquad(ifun2, x0-xmax, x0+xmax, y0-ymax, y0+ymax, z0-zmax, z0+zmax, epsabs=1e-4, epsrel=1e-4,
+                       args=(iatom, scs, aslm, fcs, fxs, rns, mu, nu, shell, charge, abs))[0]
 
 
 class Fireball_Orbitals:
@@ -631,7 +379,6 @@ class Fireball_Orbitals:
         }
 
     def phi2D(self, A: np.ndarray, B: np.ndarray,  C: np.ndarray, D: np.ndarray,  num_puntos: int = 100):
-        from mpl_toolkits.mplot3d import Axes3D  # Necesario para 3D
         x = np.linspace(0, 1, num_puntos)  # 50 puntos entre -5 y 5
         y = np.linspace(0, 1, num_puntos)  # 50 puntos entre -5 y 5
         X, Y = np.meshgrid(x, y)

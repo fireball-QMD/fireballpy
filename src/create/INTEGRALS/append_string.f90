@@ -54,7 +54,7 @@
 ! Program Declaration
 ! ===========================================================================
         function append_string (filename, extension)
-        use precision
+        use precision, only: wp
         implicit none
         character (len = 200) append_string
  

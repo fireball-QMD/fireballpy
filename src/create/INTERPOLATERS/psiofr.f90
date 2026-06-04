@@ -59,9 +59,9 @@
 ! Program Declaration
 ! ===========================================================================
         function psiofr (ispec, issh, r)
-        use precision
+        use precision, only: wp
         implicit none
-        real(kind=long) psiofr
+        real(kind=wp) psiofr
 
         include '../parameters.inc'
         include '../wavefunctions.inc'
@@ -71,7 +71,7 @@
         integer ispec
         integer issh
 
-        real(kind=long) r
+        real(kind=wp) r
 
 ! Local Parameters and Data Declaration
 ! ===========================================================================
@@ -86,14 +86,14 @@
         integer ileft, imid
         integer max_points
 
-        real(kind=long) L(0:norder),mu(0:norder),Z(0:norder),alpha(0:norder)
-        real(kind=long) a(0:norder),b(0:norder),c(0:norder),d(0:norder)
-        real(kind=long) h
+        real(kind=wp) L(0:norder),mu(0:norder),Z(0:norder),alpha(0:norder)
+        real(kind=wp) a(0:norder),b(0:norder),c(0:norder),d(0:norder)
+        real(kind=wp) h
         integer iam
         integer i,j
-        real(kind=long) xmin
-        real(kind=long) xxp
-        real(kind=long) aaa,bbb,ccc,ddd
+        real(kind=wp) xmin
+        real(kind=wp) xxp
+        real(kind=wp) aaa,bbb,ccc,ddd
 
 ! Procedure
 ! ===========================================================================
@@ -168,14 +168,11 @@
 !
  1234   continue 
         if (imid .gt. max_points) imid=max_points ! If we have gone off of the end
-        aaa=psi_spline(1,imid,issh,ispec)
-        bbb=psi_spline(2,imid,issh,ispec)
-        ccc=psi_spline(3,imid,issh,ispec)
-        ddd=psi_spline(4,imid,issh,ispec)
- 
         xxp=r-(imid-1)*h
- 
-        psiofr=aaa+bbb*xxp+ccc*xxp**2+ddd*xxp**3
+        psiofr = psi_spline(4,imid,issh,ispec)
+        do j = 3, 1, -1
+          psiofr = xxp*psiofr + psi_spline(j,imid,issh,ispec)
+        end do
 
 ! Format Statements
 ! ===========================================================================

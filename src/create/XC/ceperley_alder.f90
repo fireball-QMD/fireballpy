@@ -58,21 +58,21 @@
         subroutine ceperley_alder (rho_in, epsx, potx, epsxc, potxc, drvexc, &
      &                             dpotxc)
         use constants
-        use precision
+        use precision, only: wp
         implicit none
 
 ! Argument Declaration and Description
 ! ===========================================================================
 ! Input
-        real(kind=long), intent (in) :: rho_in
+        real(kind=wp), intent (in) :: rho_in
 
 ! Output
-        real(kind=long), intent (out) :: dpotxc
-        real(kind=long), intent (out) :: drvexc
-        real(kind=long), intent (out) :: epsx
-        real(kind=long), intent (out) :: epsxc
-        real(kind=long), intent (out) :: potx
-        real(kind=long), intent (out) :: potxc
+        real(kind=wp), intent (out) :: dpotxc
+        real(kind=wp), intent (out) :: drvexc
+        real(kind=wp), intent (out) :: epsx
+        real(kind=wp), intent (out) :: epsxc
+        real(kind=wp), intent (out) :: potx
+        real(kind=wp), intent (out) :: potxc
 
 ! Local Parameters and Data Declaration
 ! ===========================================================================
@@ -80,18 +80,18 @@
 
 ! Local Variable Declaration and Description
 ! ===========================================================================
-        real(kind=long) density
-        real(kind=long) densityp
-        real(kind=long) densitypp
-        real(kind=long) dpotc
-        real(kind=long) dpotx
-        real(kind=long) depsc
-        real(kind=long) ddepsc
-        real(kind=long) potc
-        real(kind=long) rho
-        real(kind=long) rs
-        real(kind=long) rsl
-        real(kind=long) sqrs
+        real(kind=wp) density
+        real(kind=wp) densityp
+        real(kind=wp) densitypp
+        real(kind=wp) dpotc
+        real(kind=wp) dpotx
+        real(kind=wp) depsc
+        real(kind=wp) ddepsc
+        real(kind=wp) potc
+        real(kind=wp) rho
+        real(kind=wp) rs
+        real(kind=wp) rsl
+        real(kind=wp) sqrs
 
 ! Allocate Arrays
 ! ===========================================================================

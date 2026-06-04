@@ -62,15 +62,15 @@
 !
 ! Program Declaration
 ! ===========================================================================
-        real(kind=long) function jl2 (l,x)
-        use precision
+        real(kind=wp) function jl2 (l,x)
+        use precision, only: wp
         implicit none
  
 ! Argument Declaration and Description
 ! ===========================================================================
         integer l
  
-        real(kind=long) x
+        real(kind=wp) x
  
 ! Local Parameters and Data Declaration
 ! ===========================================================================

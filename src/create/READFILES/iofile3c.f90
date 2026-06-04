@@ -59,7 +59,7 @@
 ! ===========================================================================
         subroutine iofile3c (root, suffix, ith, isorp, index1, index2,       &
      &                       index3, iunit, filename, skip)
-        use precision
+        use precision, only: wp
         implicit none
  
 ! Argument Declaration and Description

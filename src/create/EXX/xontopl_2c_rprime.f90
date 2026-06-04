@@ -61,7 +61,7 @@
 ! ===========================================================================
         subroutine xontopl_2c_rprime (nspec_max, nssh, nalpha, itype,      &
     &                                 rcutoff, nrho, lmax)
-        use precision
+        use precision, only: wp
         use x_exact
         implicit none
  
@@ -76,7 +76,7 @@
  
         integer, intent (in) :: nssh (nspec_max)
  
-        real(kind=long), intent (in) :: rcutoff
+        real(kind=wp), intent (in) :: rcutoff
  
 ! Local Parameters and Data Declaration
 ! ===========================================================================
@@ -88,17 +88,17 @@
         integer issh
         integer lqn
  
-        real(kind=long) psi3
-        real(kind=long) psi4
-        real(kind=long) r
-        real(kind=long) rhomax
-        real(kind=long) rhomin
-        real(kind=long) rp
-        real(kind=long) sumrp
+        real(kind=wp) psi3
+        real(kind=wp) psi4
+        real(kind=wp) r
+        real(kind=wp) rhomax
+        real(kind=wp) rhomin
+        real(kind=wp) rp
+        real(kind=wp) sumrp
  
-        real(kind=long), dimension (:), allocatable :: rhopmult
+        real(kind=wp), dimension (:), allocatable :: rhopmult
  
-        real(kind=long), external :: psiofr
+        real(kind=wp), external :: psiofr
  
 ! Allocate Arrays
 ! ===========================================================================

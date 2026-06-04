@@ -50,6 +50,6 @@
 
 ! Superspline anyone?
         logical superspline
-        parameter (superspline = .false.)
+        parameter (superspline = .true.)
 
 

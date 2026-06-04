@@ -23,11 +23,11 @@
 !
       subroutine exch(d,s,u,v,ex,vx)
 !
-      use precision
+      use precision, only: wp
       implicit none
-      real(kind=long) d,s,u,v,ex,vx,a1,a2,a3,a4,ax,a,b1,thrd,thrd4
-      real(kind=long) f,fac,fs,fss,p0,p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11
-      real(kind=long) s2,s3,s4
+      real(kind=wp) d,s,u,v,ex,vx,a1,a2,a3,a4,ax,a,b1,thrd,thrd4
+      real(kind=wp) f,fac,fs,fss,p0,p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11
+      real(kind=wp) s2,s3,s4
 
       data a1,a2,a3,a4/0.19645d0,0.27430d0,0.15084d0,100.d0/
       data ax,a,b1/-0.7385588d0,7.7956d0,0.004d0/
@@ -70,11 +70,11 @@
 !  output: correlation energy per electron (ec), up- and down-spin
 !  potentials (vcup,vcdn), derivatives of ec wrt rs (ecrs) & zet (eczet)
 !  output: correlation contribution (alfc) to the spin stiffness
-      use precision
+      use precision, only: wp
       implicit none
-      real(kind=long) rs,zet,ec,vcup,vcdn,ecrs,eczet,alfc
-      real(kind=long) gam,fzz,thrd,thrd4
-      real(kind=long) ALFM,ALFRSM,COMM,EP,EPRS,EU,EURS,F,FZ,Z4
+      real(kind=wp) rs,zet,ec,vcup,vcdn,ecrs,eczet,alfc
+      real(kind=wp) gam,fzz,thrd,thrd4
+      real(kind=wp) ALFM,ALFRSM,COMM,EP,EPRS,EU,EURS,F,FZ,Z4
       data gam,fzz/0.5198421d0,1.709921d0/
       data thrd,thrd4/0.333333333333d0,1.333333333333d0/
       f = ((1.d0+zet)**thrd4+(1.d0-zet)**thrd4-2.d0)/gam
@@ -103,10 +103,10 @@
 
       subroutine gcor(a,a1,b1,b2,b3,b4,p,rs,gg,ggrs)
 !
-      use precision
+      use precision, only: wp
       implicit none
-      real(kind=long) a,a1,b1,b2,b3,b4,p,rs,gg,ggrs,p1,q0,rs12,rs32,rsp
-      real(kind=long) q1,q2,q3
+      real(kind=wp) a,a1,b1,b2,b3,b4,p,rs,gg,ggrs,p1,q0,rs12,rs32,rsp
+      real(kind=wp) q1,q2,q3
       p1 = p + 1.d0
       q0 = -2.d0*a*(1.d0+a1*rs)
       rs12 = sqrt(rs)
@@ -136,17 +136,17 @@
       subroutine corgga(rs,zet,t,uu,vv,ww,h,dvcup,dvcdn, &
      &                  fk,sk,g,ec,ecrs,eczet)
 !
-      use precision
+      use precision, only: wp
       implicit none
-      real(kind=long) rs,zet,t,uu,vv,ww,h,dvcup,dvcdn
-      real(kind=long) xnu,cc0,cx,alf,c1,c2,c3,c4,c5,c6,a4,thrdm,thrd2,bet,delt
-      real(kind=long) g3,g4,B,B2,BEC,BG,CC,CCRS,COEFF,COMM
-      real(kind=long) FAC,FACT0,FACT1,FACT2,FACT3,FACT4,FACT5
-      real(kind=long) GZ,H0,H0B,H0BT,H0RS,H0RST,H0T,H0TT,H0Z,H0ZT,H1,H1RS
-      real(kind=long) H1RST,H1T,H1TT,H1Z,H1ZT,HRS,HRST,HT,HTT,HZ,HZT
-      real(kind=long) PON,PREF,Q4,Q5,Q6,Q7,Q8,Q9,R0,R1,R2,R3,R4
-      real(kind=long) RS2,RS3,RSTHRD,T2,T4,T6
-      real(kind=long) fk,sk,g,ec,ecrs,eczet
+      real(kind=wp) rs,zet,t,uu,vv,ww,h,dvcup,dvcdn
+      real(kind=wp) xnu,cc0,cx,alf,c1,c2,c3,c4,c5,c6,a4,thrdm,thrd2,bet,delt
+      real(kind=wp) g3,g4,B,B2,BEC,BG,CC,CCRS,COEFF,COMM
+      real(kind=wp) FAC,FACT0,FACT1,FACT2,FACT3,FACT4,FACT5
+      real(kind=wp) GZ,H0,H0B,H0BT,H0RS,H0RST,H0T,H0TT,H0Z,H0ZT,H1,H1RS
+      real(kind=wp) H1RST,H1T,H1TT,H1Z,H1ZT,HRS,HRST,HT,HTT,HZ,HZT
+      real(kind=wp) PON,PREF,Q4,Q5,Q6,Q7,Q8,Q9,R0,R1,R2,R3,R4
+      real(kind=wp) RS2,RS3,RSTHRD,T2,T4,T6
+      real(kind=wp) fk,sk,g,ec,ecrs,eczet
 
       data xnu,cc0,cx,alf/15.75592d0,0.004235d0,-0.001667212d0,0.09d0/
       data c1,c2,c3,c4/0.002568d0,0.023266d0,7.389d-6,8.723d0/

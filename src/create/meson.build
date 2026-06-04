@@ -5,6 +5,11 @@ modules_create_srcs = [
   'precision.f90',
   'quadrature.f90',
   'x_exact.f90',
+  'utils.f90',
+  'utils' / 'utils_progress_bar.f90',
+  'math.f90',
+  'math' / 'math_lstsq_impl.f90',
+  'math' / 'math_Ylm_impl.f90',
 ]
 
 exx_srcs = [
@@ -41,6 +46,7 @@ integrals_srcs = [
   'threecenter_integral.f90',
   'twocenter.f90',
   'twocenter_integral.f90',
+  'twocenterxc.f90',
 ]
 
 interpolaters_srcs = [

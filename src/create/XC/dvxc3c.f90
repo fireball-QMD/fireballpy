@@ -83,8 +83,8 @@
 !
 ! Program Declaration
 ! ===========================================================================
-        real(kind=long) function dvxc3c (iexc, r1, r2, r3, in1, in2, in3, IX)
-        use precision
+        real(kind=wp) function dvxc3c (iexc, r1, r2, r3, in1, in2, in3, IX)
+        use precision, only: wp
         implicit none
 
         include '../parameters.inc'
@@ -99,40 +99,40 @@
         integer in3
         integer ix
 
-        real(kind=long) r1
-        real(kind=long) r2
-        real(kind=long) r3
+        real(kind=wp) r1
+        real(kind=wp) r2
+        real(kind=wp) r3
 
 ! Local Parameters and Data Declaration
 ! ===========================================================================
-        real(kind=long) abohr
+        real(kind=wp) abohr
         parameter (abohr = 0.529177249d0)
 
 ! Local Variable Declaration and Description
 ! ===========================================================================
 
-        real(kind=long) dens
-        real(kind=long) dens1
-        real(kind=long) dens2
-        real(kind=long) dens3
-        real(kind=long) densp
-        real(kind=long) densp1
-        real(kind=long) densp2
-        real(kind=long) densp3
-        real(kind=long) denspp
-        real(kind=long) denspp1
-        real(kind=long) denspp2
-        real(kind=long) denspp3
-        real(kind=long) dnuxc
-        real(kind=long) dnuxcs
-        real(kind=long) exc2c
-        real(kind=long) exc3c
-        real(kind=long) fraction
-        real(kind=long) hartree
-        real(kind=long) rin
-        real(kind=long) vxc2c
-        real(kind=long) vxc3c
-        real(kind=long) dexc
+        real(kind=wp) dens
+        real(kind=wp) dens1
+        real(kind=wp) dens2
+        real(kind=wp) dens3
+        real(kind=wp) densp
+        real(kind=wp) densp1
+        real(kind=wp) densp2
+        real(kind=wp) densp3
+        real(kind=wp) denspp
+        real(kind=wp) denspp1
+        real(kind=wp) denspp2
+        real(kind=wp) denspp3
+        real(kind=wp) dnuxc
+        real(kind=wp) dnuxcs
+        real(kind=wp) exc2c
+        real(kind=wp) exc3c
+        real(kind=wp) fraction
+        real(kind=wp) hartree
+        real(kind=wp) rin
+        real(kind=wp) vxc2c
+        real(kind=wp) vxc3c
+        real(kind=wp) dexc
 
 ! Procedure
 ! ===========================================================================

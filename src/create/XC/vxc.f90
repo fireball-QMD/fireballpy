@@ -94,8 +94,9 @@
 !
 ! Program Declaration
 ! ======================================================================
-        real(kind=long) function vxc (r, z, iexc, fraction)
-        use precision
+        real(kind=wp) function vxc (r, z, iexc, fraction)
+        use precision, only: wp
+        use constants, only: invabohr, abohr3, abohr4, abohr5, hartree
         implicit none
 
         include '../parameters.inc'
@@ -106,29 +107,23 @@
 ! Input
         integer iexc
 
-        real(kind=long) fraction
-        real(kind=long) r
-        real(kind=long) z
-
-! Local Parameters and Data Declaration
-! ======================================================================
-        real(kind=long) abohr
-        parameter (abohr = 0.529177249d0)
+        real(kind=wp) fraction
+        real(kind=wp) r
+        real(kind=wp) z
 
 ! Local Variable Declaration and Description
 ! ======================================================================
-        real(kind=long) dens
-        real(kind=long) densp
-        real(kind=long) denspp
-        real(kind=long) densz
-        real(kind=long) denszz
-        real(kind=long) denspz
-        real(kind=long) dnuxc2c
-        real(kind=long) dnuxcs2c
-        real(kind=long) exc2c
-        real(kind=long) hartree
-        real(kind=long) rin
-        real(kind=long) vxc2c
+        real(kind=wp) dens
+        real(kind=wp) densp
+        real(kind=wp) denspp
+        real(kind=wp) densz
+        real(kind=wp) denszz
+        real(kind=wp) denspz
+        real(kind=wp) dnuxc2c
+        real(kind=wp) dnuxcs2c
+        real(kind=wp) exc2c
+        real(kind=wp) rin
+        real(kind=wp) vxc2c
 
 ! Procedure
 ! ======================================================================
@@ -159,13 +154,13 @@
         end if
 
 ! Convert to atomic units
-        rin = r/abohr
-        dens = dens*abohr**3
-        densp = densp*abohr**4
-        densz = densz*abohr**4
-        denspp = denspp*abohr**5
-        denszz = denszz*abohr**5
-        denspz = denspz*abohr**5
+        rin = r*invabohr
+        dens = dens*abohr3
+        densp = densp*abohr4
+        densz = densz*abohr4
+        denspp = denspp*abohr5
+        denszz = denszz*abohr5
+        denspz = denspz*abohr5
 
 ! Here energy and potential due to exchange and correlation are calculated.
         call get_potxc2c (iexc, fraction, rin, dens, densp, denspp, &
@@ -173,7 +168,6 @@
      &                    dnuxcs2c)
 
 ! Answers are in Hartrees convert to eV.
-        hartree = 14.39975d0/abohr
         vxc = hartree*vxc2c
 
 ! Format Statements

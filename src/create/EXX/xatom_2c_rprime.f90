@@ -62,7 +62,7 @@
         subroutine xatom_2c_rprime (n2, l2, m2, nalpha, lalpha, malpha,     &
     &                               itype1, itype2, rcutoff1, rcutoff2, d,  &
     &                               nrho, nz, lmax)
-        use precision
+        use precision, only: wp
         use x_exact
         implicit none
  
@@ -81,9 +81,9 @@
         integer, intent (in) :: nrho
         integer, intent (in) :: nz
  
-        real(kind=long), intent (in) :: d
-        real(kind=long), intent (in) :: rcutoff1
-        real(kind=long), intent (in) :: rcutoff2
+        real(kind=wp), intent (in) :: d
+        real(kind=wp), intent (in) :: rcutoff1
+        real(kind=wp), intent (in) :: rcutoff2
  
 ! Local Parameters and Data Declaration
 ! ===========================================================================
@@ -97,27 +97,27 @@
         integer mqn
         integer nnz
  
-        real(kind=long) dzp
-        real(kind=long) psi3
-        real(kind=long) psi4
-        real(kind=long) r
-        real(kind=long) rho
-        real(kind=long) rhomax
-        real(kind=long) rhomin
-        real(kind=long) rp1
-        real(kind=long) rp2
-        real(kind=long) sumrp
-        real(kind=long) vofr
-        real(kind=long) zmax
-        real(kind=long) zmin
-        real(kind=long) zp1
-        real(kind=long) zp2
+        real(kind=wp) dzp
+        real(kind=wp) psi3
+        real(kind=wp) psi4
+        real(kind=wp) r
+        real(kind=wp) rho
+        real(kind=wp) rhomax
+        real(kind=wp) rhomin
+        real(kind=wp) rp1
+        real(kind=wp) rp2
+        real(kind=wp) sumrp
+        real(kind=wp) vofr
+        real(kind=wp) zmax
+        real(kind=wp) zmin
+        real(kind=wp) zp1
+        real(kind=wp) zp2
  
-        real(kind=long), dimension (:), allocatable :: rhopmult
-        real(kind=long), dimension (:), allocatable :: zpmult
+        real(kind=wp), dimension (:), allocatable :: rhopmult
+        real(kind=wp), dimension (:), allocatable :: zpmult
  
-        real(kind=long), external :: psiofr
-        real(kind=long), external :: rescaled_psi
+        real(kind=wp), external :: psiofr
+        real(kind=wp), external :: rescaled_psi
  
 ! Allocate Arrays
 ! ===========================================================================

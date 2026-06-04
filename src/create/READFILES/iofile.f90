@@ -30,7 +30,7 @@
 ! Computer Software clause at 52.227-7013.
  
       subroutine iofile(root,suffix,index,iunit)
-      use precision
+      use precision, only: wp
       implicit none
  
       integer index

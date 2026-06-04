@@ -147,6 +147,8 @@ subroutine denmat ()
 
     if (iqout .eq. 4) call MULLIKEN_DIPOLE_CHARGES()
 
+    if (iqout .eq. 6) call STATIONARY_CHARGES()     
+
     if (iqout .eq. 7) then
       call MULLIKEN_DIPOLE_CHARGES()
       call Dipole_proyection()
@@ -180,5 +182,8 @@ subroutine denmat ()
     errno = 1
     return
   end if
+
+
+
 
 end subroutine denmat

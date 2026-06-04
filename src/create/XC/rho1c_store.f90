@@ -67,7 +67,7 @@
         subroutine rho1c_store (in1, nsh_max, nssh, dq, jssh, drho, &
      &                          rcutoff, xnocc, ix, wfmax_points, &
      &                          rho1c, rhop1c, rhopp1c)
-        use precision
+        use precision, only: wp
         implicit none
 
 ! Input Declaration and Description
@@ -80,16 +80,16 @@
         integer, intent(in) :: nssh
         integer, intent(in) :: wfmax_points
 
-        real(kind=long), intent(in) :: dq
-        real(kind=long), intent(in) :: drho
-        real(kind=long), intent(in) :: rcutoff
+        real(kind=wp), intent(in) :: dq
+        real(kind=wp), intent(in) :: drho
+        real(kind=wp), intent(in) :: rcutoff
 
-        real(kind=long), dimension(nsh_max), intent(in) :: xnocc
+        real(kind=wp), dimension(nsh_max), intent(in) :: xnocc
 
 ! Output
-        real(kind=long), dimension(wfmax_points), intent(out) :: rho1c
-        real(kind=long), dimension(wfmax_points), intent(out) :: rhop1c
-        real(kind=long), dimension(wfmax_points), intent(out) :: rhopp1c
+        real(kind=wp), dimension(wfmax_points), intent(out) :: rho1c
+        real(kind=wp), dimension(wfmax_points), intent(out) :: rhop1c
+        real(kind=wp), dimension(wfmax_points), intent(out) :: rhopp1c
 
 ! Local Parameters and Data Declaration
 ! ====================================================================
@@ -102,12 +102,12 @@
         integer issh
         integer nnrho
 
-        real(kind=long) dens
-        real(kind=long) psiofr
-        real(kind=long) rho
-        real(kind=long) rhomax
-        real(kind=long) rhomin
-        real(kind=long) xinv4pi
+        real(kind=wp) dens
+        real(kind=wp) psiofr
+        real(kind=wp) rho
+        real(kind=wp) rhomax
+        real(kind=wp) rhomin
+        real(kind=wp) xinv4pi
 
         external psiofr
 
@@ -134,7 +134,7 @@
 ! Here we loop over rho computing the sum of the densities for species
 ! in1 at each value of rho.
         do irho = 1, nnrho
-         rho = rhomin + real(irho - 1, kind=long)*drho
+         rho = rhomin + real(irho - 1, kind=wp)*drho
 
          dens = 0.0d0
          do issh = 1, nssh
@@ -150,7 +150,7 @@
 
 ! Now calculate the derivatives - rhop1c and rhopp1c
         do irho = 2, nnrho - 1
-         rho = rhomin + real(irho - 1, kind=long)*drho
+         rho = rhomin + real(irho - 1, kind=wp)*drho
 
 ! First derivatives:
          rhop1c(irho) = (rho1c(irho+1) - rho1c(irho-1))/(2.0d0*drho)

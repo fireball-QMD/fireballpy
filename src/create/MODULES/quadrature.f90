@@ -1,11 +1,11 @@
         module quadrature
-         use precision
+         use precision, only: wp
 
 ! quadratures for kinetic energy
          integer, parameter :: nqke = 400
          integer, parameter :: nrke = 240
          integer, parameter :: nddke = 107
-         real(kind=long), parameter :: ecutke = 40.0d3
+         real(kind=wp), parameter :: ecutke = 40.0d3
 
 ! Three-center interactions
 ! ****************************************************************************

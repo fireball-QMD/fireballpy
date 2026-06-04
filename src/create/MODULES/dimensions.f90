@@ -1,5 +1,5 @@
          module dimensions
-         use precision
+         use precision, only: wp
  
 ! Maximum number of non-zero three-center matrix elements 
 !        integer, parameter :: inter2c_max = 24

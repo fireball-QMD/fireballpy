@@ -58,7 +58,7 @@
 ! ===========================================================================
         subroutine iofile2c (root, suffix, index1, index2, iunit, filename,  &
      &                       skip)
-        use precision
+        use precision, only: wp
         implicit none
  
 ! Argument Declaration and Description

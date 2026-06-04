@@ -1,9 +1,10 @@
-subroutine assemble_usr ()
+subroutine assemble_usr (iauxforce)
   use, intrinsic :: iso_fortran_env, only: double => real64
   use M_constants, only: eq2
-  use M_system, only: iforce, natoms, ratom, imass, neigh_max, uiiuee, ewald, fewald, neigh_b, neigh_j, neighn, Qin, dq, xl, dusr, dxcv
+  use M_system, only: natoms, ratom, imass, neigh_max, uiiuee, ewald, fewald, neigh_b, neigh_j, neighn, Qin, dq, xl, dusr, dxcv
   use M_fdata, only: nsh_max, ME2c_max, nssh, Qneutral
   implicit none
+  integer, intent (in) :: iauxforce
   integer iatom
   integer ideriv
   integer in1, in2
@@ -71,7 +72,7 @@ subroutine assemble_usr ()
       interaction = 12
       ideriv = 0
       do index = 1, index_coulomb
-        call interpolate_1d (interaction, ideriv, in1, in2, index, iforce, distance, slist(index), dslist(index))
+        call interpolate_1d (interaction, ideriv, in1, in2, index, iauxforce, distance, slist(index), dslist(index))
       end do
       n1 = nssh(in1)
       n2 = nssh(in2)
@@ -97,7 +98,7 @@ subroutine assemble_usr ()
         end do
         u0(iatom,ineigh)=(eq2/2.0d0)*(Zi*Zj/distance-u0(iatom,ineigh))
         corksr(iatom,ineigh) = - (eq2/2.0d0)*QQ/distance
-        if (iforce .eq. 1) then
+        if (iauxforce .eq. 1) then
           eta(:) = (r2(:) - r1(:))/distance
           xforce = 0.0d0
           do issh = 1, nssh(in1)

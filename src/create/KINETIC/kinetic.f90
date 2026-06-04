@@ -73,7 +73,7 @@
      &                      mright, signature, iammaster)
         use dimensions
         use quadrature
-        use precision
+        use precision, only: wp
         implicit none
  
 ! Argument Declaration and Description
@@ -139,39 +139,39 @@
  
         integer inj (2)
  
-        real(kind=long) ang_integral
-        real(kind=long) d
-        real(kind=long) dmax
-        real(kind=long) dq
-        real(kind=long) dr
-        real(kind=long) eV
-        real(kind=long) factor
-        real(kind=long), external :: jl2
-        real(kind=long) pi
-        real(kind=long), external :: psiofr
-        real(kind=long) q
-        real(kind=long) qmax
-        real(kind=long) r
-        real(kind=long) rcutoff1
-        real(kind=long) rcutoff2
-        real(kind=long) rrmax
-        real(kind=long) rmin
-        real(kind=long) xnqtop
-        real(kind=long) xtra
+        real(kind=wp) ang_integral
+        real(kind=wp) d
+        real(kind=wp) dmax
+        real(kind=wp) dq
+        real(kind=wp) dr
+        real(kind=wp) eV
+        real(kind=wp) factor
+        real(kind=wp), external :: jl2
+        real(kind=wp) pi
+        real(kind=wp), external :: psiofr
+        real(kind=wp) q
+        real(kind=wp) qmax
+        real(kind=wp) r
+        real(kind=wp) rcutoff1
+        real(kind=wp) rcutoff2
+        real(kind=wp) rrmax
+        real(kind=wp) rmin
+        real(kind=wp) xnqtop
+        real(kind=wp) xtra
  
-        real(kind=long) angular (0:kmax, inter_max)
-        real(kind=long) answer (0:kmax)
+        real(kind=wp) angular (0:kmax, inter_max)
+        real(kind=wp) answer (0:kmax)
  
 ! The 5 in the esplit is to split q into 5 ranges for comparison purposes.
 ! This is similarly done for xnormq and qsplit below.
-        real(kind=long) esplit (5)
-        real(kind=long) qsplit (5)
+        real(kind=wp) esplit (5)
+        real(kind=wp) qsplit (5)
  
-        real(kind=long) rmax (2)
-        real(kind=long) rjj (nsh_max, 2, 2*nqke + 1)
-        real(kind=long) sumj (nsh_max, 2)
-        real(kind=long) tkinetic (inter_max, nddke)
-        real(kind=long) xnormq (2, 0:nsh_max, 5)
+        real(kind=wp) rmax (2)
+        real(kind=wp) rjj (nsh_max, 2, 2*nqke + 1)
+        real(kind=wp) sumj (nsh_max, 2)
+        real(kind=wp) tkinetic (inter_max, nddke)
+        real(kind=wp) xnormq (2, 0:nsh_max, 5)
  
         character (len = 1) ang
         character (len = 40) filename

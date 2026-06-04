@@ -80,7 +80,7 @@
 ! Program Declaration
 ! ===========================================================================
         subroutine Pintegral (l, m, lp, mp, kmax, Pint)
-        use precision
+        use precision, only: wp
         implicit none
  
 ! Argument Declaration and Description
@@ -93,7 +93,7 @@
         integer kmax
  
 ! Output
-        real(kind=long) Pint (0:kmax)
+        real(kind=wp) Pint (0:kmax)
  
 ! Local Parameters and Data Declaration
 ! ===========================================================================
@@ -104,12 +104,12 @@
 ! ===========================================================================
         integer i, j
  
-        real(kind=long) arg
+        real(kind=wp) arg
  
-        real(kind=long) pn (0:imax,0:jmax)
-        real(kind=long) theta (0:nmax)
+        real(kind=wp) pn (0:imax,0:jmax)
+        real(kind=wp) theta (0:nmax)
  
-        complex(kind=long) sum
+        complex(kind=wp) sum
  
 ! Procedure
 ! ===========================================================================
@@ -119,7 +119,7 @@
 !----------------------------------------------------------------------
         do i = 0, kmax
          call Tintegral (l, m, lp, mp, i, sum)
-         theta(i) = real(sum, kind=long)
+         theta(i) = real(sum, kind=wp)
         end do
  
  
@@ -137,7 +137,7 @@
  
         do i = 2, kmax
          do j = 0,i
-          arg = real(i, kind=long)
+          arg = real(i, kind=wp)
           pn(i,j+1) = pn(i,j+1) + (2.0d0*arg - 1.0d0)*pn(i-1,j)/arg
           pn(i,j) = pn(i,j) - (arg - 1.0d0)*pn(i-2,j)/arg
          end do

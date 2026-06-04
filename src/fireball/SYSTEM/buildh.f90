@@ -6,6 +6,7 @@ subroutine buildh ()
   integer :: iatom, jatom, imu, inu, ineigh, in1, in2
 
   h_mat = 0.0d0
+  vxc_ca = 0.0d0
   do iatom = 1, natoms
     in1 = imass(iatom)
     do ineigh = 1, neighn(iatom)

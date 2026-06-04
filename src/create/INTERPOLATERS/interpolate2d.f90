@@ -56,7 +56,7 @@
         subroutine interpolate2d (rhoin, rhomin, rhomax, drho, zin, &
      &                            zmin, zmax, dz, nnrho, nrho_points, &
      &                            nnz, nz_points, frho, answer)
-        use precision
+        use precision, only: wp
         implicit none
 
 ! Argument Declaration and Description
@@ -67,20 +67,20 @@
         integer nrho_points
         integer nz_points
 
-        real(kind=long) drho
-        real(kind=long) dz
-        real(kind=long) rhoin
-        real(kind=long) rhomax
-        real(kind=long) rhomin
-        real(kind=long) zin
-        real(kind=long) zmax
-        real(kind=long) zmin
+        real(kind=wp) drho
+        real(kind=wp) dz
+        real(kind=wp) rhoin
+        real(kind=wp) rhomax
+        real(kind=wp) rhomin
+        real(kind=wp) zin
+        real(kind=wp) zmax
+        real(kind=wp) zmin
 
 ! This is the function being interpolated
-        real(kind=long) frho (nrho_points, nz_points)
+        real(kind=wp) frho (nrho_points, nz_points)
 
 ! Output
-        real(kind=long) answer
+        real(kind=wp) answer
 
 ! Local Parameters and Data Declaration
 ! ===========================================================================
@@ -93,26 +93,26 @@
         integer jj
         integer k
 
-        real(kind=long) e36t
-        real(kind=long) f0p3
-        real(kind=long) f0p6
-        real(kind=long) f1m2
-        real(kind=long) f1m3
-        real(kind=long) f1p3
-        real(kind=long) f1p6
-        real(kind=long) ftp
-        real(kind=long) gradrho
-        real(kind=long) gradtest
-        real(kind=long) gradz
-        real(kind=long) prho
-        real(kind=long) prod
-        real(kind=long) pz
-        real(kind=long) tp
+        real(kind=wp) e36t
+        real(kind=wp) f0p3
+        real(kind=wp) f0p6
+        real(kind=wp) f1m2
+        real(kind=wp) f1m3
+        real(kind=wp) f1p3
+        real(kind=wp) f1p6
+        real(kind=wp) ftp
+        real(kind=wp) gradrho
+        real(kind=wp) gradtest
+        real(kind=wp) gradz
+        real(kind=wp) prho
+        real(kind=wp) prod
+        real(kind=wp) pz
+        real(kind=wp) tp
 
-        real(kind=long) b (0:5)
-        real(kind=long) bb (0:5, -2:3)
-        real(kind=long) g (-2:3)
-        real(kind=long) fun (-1:2, -1:2)
+        real(kind=wp) b (0:5)
+        real(kind=wp) bb (0:5, -2:3)
+        real(kind=wp) g (-2:3)
+        real(kind=wp) fun (-1:2, -1:2)
 
 ! Procedure
 ! ===========================================================================
@@ -147,8 +147,8 @@
         if (imidz .lt. 2) imidz = 2
         if (imidz .gt. nnz) imidz = nnz
 
-        prho = (rhoin - rhomin)/drho - real(imidrho - 1, kind=long)
-        pz = (zin - zmin)/dz - real(imidz - 1, kind=long)
+        prho = (rhoin - rhomin)/drho - real(imidrho - 1, kind=wp)
+        pz = (zin - zmin)/dz - real(imidz - 1, kind=wp)
 
         fun(-1,-1) = frho(imidrho - 1,imidz - 1)
         fun(-1, 0) = frho(imidrho - 1,imidz)

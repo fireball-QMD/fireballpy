@@ -14,5 +14,5 @@ subroutine build_rho ()
   end if
 
   if (errno .ne. 0) return
-  if (Kscf .le. max_scf_iterations) call mixer ()
+!  if (Kscf .le. max_scf_iterations) call mixer ()
 end subroutine build_rho

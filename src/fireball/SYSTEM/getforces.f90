@@ -2,6 +2,8 @@ subroutine getforces ()
   use, intrinsic :: iso_fortran_env, only: double => real64
   use M_system, only: idipole, iqmmm, flrew_qmmm
   implicit none
+  call get_ewald (1) ! iforce=1
+  call assemble_usr (1) ! iforce=1
   call Dassemble_2c ()
   call Dassemble_2c_PP ()
   call Dassemble_ca_olsxc_on ()

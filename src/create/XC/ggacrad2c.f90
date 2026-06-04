@@ -30,14 +30,14 @@
       subroutine ggacrad2c (mode, r, rh, rhp, rhpp, rhz, rhzz, &
      &                      cpot, cen)
 !
-      use precision
+      use precision, only: wp
       implicit none
 
-      real(kind=long) r, rh, rhp, rhpp, rhz, rhzz, cpot, cen
-      real(kind=long) thrd,pi,pisq3,thrd2,crs,eps
-      real(kind=long) alfc,d,dp,dp11,dp12,dp22,dpp,dvcdn,dvcup,gks2
-      real(kind=long) gks2sq,h,rs,t,uu,vcdn,vcup,vv,ww,zet,ztp
-      real(kind=long) fk,sk,g,ec,ecrs,eczet
+      real(kind=wp) r, rh, rhp, rhpp, rhz, rhzz, cpot, cen
+      real(kind=wp) thrd,pi,pisq3,thrd2,crs,eps
+      real(kind=wp) alfc,d,dp,dp11,dp12,dp22,dpp,dvcdn,dvcup,gks2
+      real(kind=wp) gks2sq,h,rs,t,uu,vcdn,vcup,vv,ww,zet,ztp
+      real(kind=wp) fk,sk,g,ec,ecrs,eczet
 
       integer mode
 

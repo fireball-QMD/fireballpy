@@ -71,7 +71,7 @@
 ! ===========================================================================
         subroutine ggaxrad2c (mode, rin, rho, rhop, rhopp, rhoz, rhozz,     &
      &                        rhopz, xpot, xen)
-        use precision
+        use precision, only: wp
         implicit none
 
 ! Argument Declaration and Description
@@ -79,42 +79,42 @@
 ! Input
         integer, intent (in) :: mode
 
-        real(kind=long), intent (in) :: rin
+        real(kind=wp), intent (in) :: rin
 
-        real(kind=long), intent (in), dimension (2) :: rho
-        real(kind=long), intent (in), dimension (2) :: rhop
-        real(kind=long), intent (in), dimension (2) :: rhopp
-        real(kind=long), intent (in), dimension (2) :: rhopz
-        real(kind=long), intent (in), dimension (2) :: rhoz
-        real(kind=long), intent (in), dimension (2) :: rhozz
+        real(kind=wp), intent (in), dimension (2) :: rho
+        real(kind=wp), intent (in), dimension (2) :: rhop
+        real(kind=wp), intent (in), dimension (2) :: rhopp
+        real(kind=wp), intent (in), dimension (2) :: rhopz
+        real(kind=wp), intent (in), dimension (2) :: rhoz
+        real(kind=wp), intent (in), dimension (2) :: rhozz
 
 ! Output
-        real(kind=long), intent (out) :: xen
+        real(kind=wp), intent (out) :: xen
 
-        real(kind=long), intent (out), dimension (2) :: xpot
+        real(kind=wp), intent (out), dimension (2) :: xpot
 
 ! Local Parameters and Data Declaration
 ! ===========================================================================
-        real(kind=long), parameter :: eps = 1.0d-15
+        real(kind=wp), parameter :: eps = 1.0d-15
 
 ! Local Variable Declaration and Description
 ! ===========================================================================
         integer ispin
 
-        real(kind=long) density
-        real(kind=long) densityp
-        real(kind=long) densitypp
-        real(kind=long) densitypz
-        real(kind=long) densityz
-        real(kind=long) densityzz
-        real(kind=long) ex
-        real(kind=long) fermik
-        real(kind=long) pi
-        real(kind=long) r
-        real(kind=long) s
-        real(kind=long) u
-        real(kind=long) v
-        real(kind=long) vx
+        real(kind=wp) density
+        real(kind=wp) densityp
+        real(kind=wp) densitypp
+        real(kind=wp) densitypz
+        real(kind=wp) densityz
+        real(kind=wp) densityzz
+        real(kind=wp) ex
+        real(kind=wp) fermik
+        real(kind=wp) pi
+        real(kind=wp) r
+        real(kind=wp) s
+        real(kind=wp) u
+        real(kind=wp) v
+        real(kind=wp) vx
 
 ! Allocate Arrays
 ! ===========================================================================

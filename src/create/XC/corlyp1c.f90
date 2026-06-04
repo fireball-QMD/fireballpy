@@ -58,62 +58,62 @@
 ! Program Declaration
 ! ===========================================================================
         subroutine corlyp1c (tpot, dp, dm, dp1, dm1, dp2, dm2, ec, vcp0, vcm0)
-        use precision
+        use precision, only: wp
         implicit none
 
 ! Argument Declaration and Description
 ! ===========================================================================
 ! Input
-        real(kind=long), intent (in) :: dm, dm1, dm2
-        real(kind=long), intent (in) :: dp, dp1, dp2
+        real(kind=wp), intent (in) :: dm, dm1, dm2
+        real(kind=wp), intent (in) :: dp, dp1, dp2
 
         logical, intent (in) :: tpot
 
 ! Output
-        real(kind=long), intent (out) :: ec
-        real(kind=long), intent (out) :: vcm0
-        real(kind=long), intent (out) :: vcp0
+        real(kind=wp), intent (out) :: ec
+        real(kind=wp), intent (out) :: vcm0
+        real(kind=wp), intent (out) :: vcp0
 
 ! Local Parameters and Data Declaration
 ! ===========================================================================
-        real(kind=long), parameter :: aa = 0.04918d0
-        real(kind=long), parameter :: bb = 0.132d0
-        real(kind=long), parameter :: cc = 0.2533d0
-        real(kind=long), parameter :: dd = 0.349d0
-        real(kind=long), parameter :: c5 = 4.55779986d0
-        real(kind=long), parameter :: c6 = 1.0d0/72.0d0
-        real(kind=long), parameter :: c7 = 1.0d0/18.0d0
-        real(kind=long), parameter :: c8 = 0.125d0
-        real(kind=long), parameter :: t13 = 1.0d0/3.0d0
-        real(kind=long), parameter :: t89 = 8.0d0/9.0d0
+        real(kind=wp), parameter :: aa = 0.04918d0
+        real(kind=wp), parameter :: bb = 0.132d0
+        real(kind=wp), parameter :: cc = 0.2533d0
+        real(kind=wp), parameter :: dd = 0.349d0
+        real(kind=wp), parameter :: c5 = 4.55779986d0
+        real(kind=wp), parameter :: c6 = 1.0d0/72.0d0
+        real(kind=wp), parameter :: c7 = 1.0d0/18.0d0
+        real(kind=wp), parameter :: c8 = 0.125d0
+        real(kind=wp), parameter :: t13 = 1.0d0/3.0d0
+        real(kind=wp), parameter :: t89 = 8.0d0/9.0d0
 
 ! Local Variable Declaration and Description
 ! ===========================================================================
-        real(kind=long) c1, c2, c3, c4, c9
-        real(kind=long) chf
-        real(kind=long) d0xt13, d0xt53
-        real(kind=long) d0, d1, d2
-        real(kind=long) dmt53, dpt53
-        real(kind=long) dxsq
-        real(kind=long) ga
-        real(kind=long) gafm, gafp
-        real(kind=long) gb
-        real(kind=long) h
-        real(kind=long) h2
-        real(kind=long) hf
-        real(kind=long) hff
-        real(kind=long) sc
-        real(kind=long) sc2
-        real(kind=long) scf
-        real(kind=long) t43, t53, t83
-        real(kind=long) yafm, yafp
-        real(kind=long) yb, yb1, yb2
-        real(kind=long) ybfm, ybfp
-        real(kind=long) yy1
-        real(kind=long) yz, yz1, yz2
-        real(kind=long) z1, z2
-        real(kind=long) zfm, zfp
-        real(kind=long) zeta
+        real(kind=wp) c1, c2, c3, c4, c9
+        real(kind=wp) chf
+        real(kind=wp) d0xt13, d0xt53
+        real(kind=wp) d0, d1, d2
+        real(kind=wp) dmt53, dpt53
+        real(kind=wp) dxsq
+        real(kind=wp) ga
+        real(kind=wp) gafm, gafp
+        real(kind=wp) gb
+        real(kind=wp) h
+        real(kind=wp) h2
+        real(kind=wp) hf
+        real(kind=wp) hff
+        real(kind=wp) sc
+        real(kind=wp) sc2
+        real(kind=wp) scf
+        real(kind=wp) t43, t53, t83
+        real(kind=wp) yafm, yafp
+        real(kind=wp) yb, yb1, yb2
+        real(kind=wp) ybfm, ybfp
+        real(kind=wp) yy1
+        real(kind=wp) yz, yz1, yz2
+        real(kind=wp) z1, z2
+        real(kind=wp) zfm, zfp
+        real(kind=wp) zeta
 
 ! Allocate Arrays
 ! ===========================================================================

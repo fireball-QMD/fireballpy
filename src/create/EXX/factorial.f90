@@ -48,9 +48,9 @@
 ! Program Declaration
 ! ===========================================================================
         function factorial (ifac)
-        use precision
+        use precision, only: wp
         implicit none
-        real(kind=long) factorial
+        real(kind=wp) factorial
  
 ! Argument Declaration and Description
 ! ===========================================================================

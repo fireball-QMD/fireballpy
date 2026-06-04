@@ -63,7 +63,7 @@
      &                       nrho, ndd, index_max, inter_max, nalpha,      &
      &                       lalpha, malpha, nleft, lleft, mleft, nright,  &
      &                       lright, mright, signature, iammaster)
-        use precision 
+        use precision, only: wp
         use x_exact
         implicit none
  
@@ -94,9 +94,9 @@
         integer, intent (in) :: nzx1
         integer, intent (in) :: nzx2
  
-        real(kind=long), intent (in) :: fraction
-        real(kind=long), intent (in) :: rcutoff1
-        real(kind=long), intent (in) :: rcutoff2
+        real(kind=wp), intent (in) :: fraction
+        real(kind=wp), intent (in) :: rcutoff1
+        real(kind=wp), intent (in) :: rcutoff2
  
         character (len=2), intent (in) :: atom1
         character (len=2), intent (in) :: atom2
@@ -120,12 +120,12 @@
         integer m1, m2
         integer n1, n2
  
-        real(kind=long) d
-        real(kind=long) dmax
-        real(kind=long) dr
-        real(kind=long) sum
+        real(kind=wp) d
+        real(kind=wp) dmax
+        real(kind=wp) dr
+        real(kind=wp) sum
  
-        real(kind=long), dimension (inter_max) :: hold
+        real(kind=wp), dimension (inter_max) :: hold
  
         character (len=40) fname
  

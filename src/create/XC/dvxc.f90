@@ -96,8 +96,8 @@
 !
 ! Program Declaration
 ! ===========================================================================
-        real(kind=long) function dvxc (in1, in2, r, z, r1, iexc, fraction, ix)
-        use precision
+        real(kind=wp) function dvxc (in1, in2, r, z, r1, iexc, fraction, ix)
+        use precision, only: wp
         implicit none
 
         include '../parameters.inc'
@@ -110,37 +110,37 @@
         integer in1, in2
         integer ix
 
-        real(kind=long) fraction
-        real(kind=long) r
-        real(kind=long) r1
-        real(kind=long) z
+        real(kind=wp) fraction
+        real(kind=wp) r
+        real(kind=wp) r1
+        real(kind=wp) z
 
 ! Local Parameters and Data Declaration
 ! ===========================================================================
-        real(kind=long) abohr
+        real(kind=wp) abohr
         parameter (abohr = 0.529177249d0)
 
 ! Local Variable Declaration and Description
 ! ===========================================================================
         integer in3
 
-        real(kind=long) dens
-        real(kind=long) densp
-        real(kind=long) denspp
-        real(kind=long) densz
-        real(kind=long) denszz
-        real(kind=long) denspz
-        real(kind=long) dexc1c
-        real(kind=long) dexc2c
-        real(kind=long) dnuxc
-        real(kind=long) dnuxcs
-        real(kind=long) dnuxc2c
-        real(kind=long) dnuxcs2c
-        real(kind=long) dvxc1c
-        real(kind=long) dvxc2c
-        real(kind=long) hartree
-        real(kind=long) rin
-        real(kind=long) dexc
+        real(kind=wp) dens
+        real(kind=wp) densp
+        real(kind=wp) denspp
+        real(kind=wp) densz
+        real(kind=wp) denszz
+        real(kind=wp) denspz
+        real(kind=wp) dexc1c
+        real(kind=wp) dexc2c
+        real(kind=wp) dnuxc
+        real(kind=wp) dnuxcs
+        real(kind=wp) dnuxc2c
+        real(kind=wp) dnuxcs2c
+        real(kind=wp) dvxc1c
+        real(kind=wp) dvxc2c
+        real(kind=wp) hartree
+        real(kind=wp) rin
+        real(kind=wp) dexc
 
 ! Procedure
 ! ===========================================================================

@@ -31,8 +31,8 @@
 
 ! Program Declaration
 ! ===========================================================================
-        real(kind=long) function radial_integral(itype, lqn, il1, il2, il3, il4, nspec_max, drr_rho, rcutoffa_max)
-        use precision
+        real(kind=wp) function radial_integral(itype, lqn, il1, il2, il3, il4, nspec_max, drr_rho, rcutoffa_max)
+        use precision, only: wp
         implicit none
 
 ! Argument Declaration and Description
@@ -44,22 +44,22 @@
         integer, intent (in) :: lqn
         integer, intent (in) :: itype
         integer, intent (in) :: nspec_max
-        real(kind=long), intent (in), dimension (nspec_max) :: drr_rho
-        real(kind=long), intent (in), dimension (nspec_max) :: rcutoffa_max
+        real(kind=wp), intent (in), dimension (nspec_max) :: drr_rho
+        real(kind=wp), intent (in), dimension (nspec_max) :: rcutoffa_max
 
         integer :: irho, irhop
         integer nnrho
-        real(kind=long) drho
-        real(kind=long) rhomax
-        real(kind=long) rhomin
+        real(kind=wp) drho
+        real(kind=wp) rhomax
+        real(kind=wp) rhomin
 
-        real(kind=long) :: sumr, r, sumrp, rp, psi1, psi2, psi3, psi4
+        real(kind=wp) :: sumr, r, sumrp, rp, psi1, psi2, psi3, psi4
 
 
-        real(kind=long), dimension (:), allocatable :: factor
-        real(kind=long), dimension (:), allocatable :: rpoint
+        real(kind=wp), dimension (:), allocatable :: factor
+        real(kind=wp), dimension (:), allocatable :: rpoint
 
-        real(kind=long), external :: psiofr
+        real(kind=wp), external :: psiofr
 !-------------------------------------------------------------------------------------
 
               rhomin = 0.0d0

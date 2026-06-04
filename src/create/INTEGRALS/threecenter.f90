@@ -117,7 +117,7 @@
      &                          ispmax, ispnum, iammaster, ispherical)
         use dimensions
         use quadrature
-        use precision
+        use precision, only: wp
         implicit none
  
 ! Argument Declaration and Description
@@ -142,14 +142,14 @@
         integer, intent (in), dimension (inter_max) :: m1  ! m-value in shell
         integer, intent (in), dimension (inter_max) :: m2
 
-        real(kind=long), intent (in) :: dbc  ! maximum bond distance: rc1 + rc2
-        real(kind=long), intent (in) :: dna  ! maximum neutral atom distance: 2*rc3
-        real(kind=long), intent (in) :: rcutoff1  ! largest radius of i-th atom (in Ang.)
-        real(kind=long), intent (in) :: rcutoff2  ! 1, 2, 3 = left, right, neutral atom
-        real(kind=long), intent (in) :: rcutoff3
+        real(kind=wp), intent (in) :: dbc  ! maximum bond distance: rc1 + rc2
+        real(kind=wp), intent (in) :: dna  ! maximum neutral atom distance: 2*rc3
+        real(kind=wp), intent (in) :: rcutoff1  ! largest radius of i-th atom (in Ang.)
+        real(kind=wp), intent (in) :: rcutoff2  ! 1, 2, 3 = left, right, neutral atom
+        real(kind=wp), intent (in) :: rcutoff3
 
-        real(kind=long), intent (in), dimension (ntheta_max) :: ctheta
-        real(kind=long), intent (in), dimension (ntheta_max) :: ctheta_weights
+        real(kind=wp), intent (in), dimension (ntheta_max) :: ctheta
+        real(kind=wp), intent (in), dimension (ntheta_max) :: ctheta_weights
 
         character (len = 2), intent (in) :: atom1
         character (len = 2), intent (in) :: atom2
@@ -184,23 +184,23 @@
 
         integer, dimension (inter_max) :: nabs
 
-        real(kind=long) dbcx
-        real(kind=long) dnax
-        real(kind=long) distance_bc
-        real(kind=long) cost
-        real(kind=long) pl
-        real(kind=long) plm
-        real(kind=long) plmm
-        real(kind=long) sint
-        real(kind=long) temp
+        real(kind=wp) dbcx
+        real(kind=wp) dnax
+        real(kind=wp) distance_bc
+        real(kind=wp) cost
+        real(kind=wp) pl
+        real(kind=wp) plm
+        real(kind=wp) plmm
+        real(kind=wp) sint
+        real(kind=wp) temp
 
-        real(kind=long), dimension (ntheta_max) :: answer
+        real(kind=wp), dimension (ntheta_max) :: answer
 ! Final results after sin(theta) or cos(theta) factor.
-        real(kind=long), dimension (0:10, inter_max, ntheta_max) :: ggstore
+        real(kind=wp), dimension (0:10, inter_max, ntheta_max) :: ggstore
 ! Results from the integrator
-        real(kind=long), dimension (0:10, inter_max) :: gmat
-        real(kind=long), dimension (ntheta_max, inter_max, 0:10) :: qpl
-        real(kind=long), dimension (3) :: rna
+        real(kind=wp), dimension (0:10, inter_max) :: gmat
+        real(kind=wp), dimension (ntheta_max, inter_max, 0:10) :: qpl
+        real(kind=wp), dimension (3) :: rna
 
         character (len = 40) fname
         character (len = 12) ftype
@@ -309,7 +309,7 @@
 ! ----------------------------------------------------------------------------
 ! Loop over all bondcharge distances.
         do ibcba = 1, nbcba
-         dbcx = real(ibcba - 1, kind=long)*dbc/real(nbcba - 1, kind=long)
+         dbcx = real(ibcba - 1, kind=wp)*dbc/real(nbcba - 1, kind=wp)
  
 ! for all bondcharges-- we set b=dbcx/2.
          distance_bc = dbcx/2.d0
@@ -317,7 +317,7 @@
 ! Loop over all neutral atom distances.
 ! The distance is measured from the bondcharge center (b=dbcx/2)
          do inaba = 1, nnaba
-          dnax = real(inaba - 1, kind=long)*dna/real(nnaba - 1, kind=long)
+          dnax = real(inaba - 1, kind=wp)*dna/real(nnaba - 1, kind=wp)
  
 ! ----------------------------------------------------------------------------
 ! 3. Since threecenter_integral internaly loops over ispmin to ispmax.

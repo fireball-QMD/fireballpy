@@ -49,6 +49,7 @@ system_srcs = [
   'dipole_proyection.f90',
   'mulliken_charges.f90',
   'mulliken_dipole_charges.f90',
+  'stationary_charges.f90',
   'lowdin_charges.f90',
   'neighbors.f90',
   'initboxes.f90',
@@ -71,9 +72,6 @@ system_srcs = [
   'assemble_mcweda.f90',
   'assemble_olsxc_1c.f90',
   'unocentros.f90',
-  'assemble_olsxc_on.f90',
-  'assemble_olsxc_off.f90',
-  'average_ca_rho.f90',
   'assemble_ca_2c.f90',
   'assemble_ca_3c.f90',
   'assemble_lr.f90',
@@ -100,7 +98,6 @@ system_srcs = [
   'doscentros.f90',
   'doscentrosS.f90',
   'build_olsxc_off.f90',
-  'average_ca_rho.f90',
   'trescentros.f90',
   'trescentrosS.f90',
   'smoother.f90',
@@ -133,6 +130,12 @@ system_srcs = [
   'doscentrosDipY.f90',
   'cepal.f90',
   'geth.f90',
+  'average_ca_rho.f90',
+  'assemble_xc_2c.f90',
+  'assemble_drive.f90',
+  'assemble_xc_1c.f90',
+  'average_rho.f90',
+  'Dassemble_xc_2c.f90',
 ]
 
 fireball_srcs = []

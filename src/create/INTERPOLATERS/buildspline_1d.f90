@@ -60,15 +60,15 @@
 ! Program Declaration
 ! ===========================================================================
         subroutine buildspline_1d (xintegral, splineint, numz, xmax)
-        use precision
+        use precision, only: wp
         implicit none
 
 ! Argument Declaration and Description
 ! ===========================================================================
         integer, intent(in) :: numz
-        real(kind=long), intent(in) :: xmax
-        real(kind=long), intent(in) :: xintegral(numz)
-        real(kind=long), intent(out):: splineint(4,numz)
+        real(kind=wp), intent(in) :: xmax
+        real(kind=wp), intent(in) :: xintegral(numz)
+        real(kind=wp), intent(out):: splineint(4,numz)
 
 ! Local Variable Declaration and Description
 ! ===========================================================================
@@ -77,23 +77,23 @@
         integer norder
         integer numz_used
 
-        real(kind=long) fn
-        real(kind=long) fnm1
-        real(kind=long) fo
-        real(kind=long) fop1
-        real(kind=long) fpo
-        real(kind=long) fpn
-        real(kind=long) h
-        real(kind=long) xmin
+        real(kind=wp) fn
+        real(kind=wp) fnm1
+        real(kind=wp) fo
+        real(kind=wp) fop1
+        real(kind=wp) fpo
+        real(kind=wp) fpn
+        real(kind=wp) h
+        real(kind=wp) xmin
 
-        real(kind=long), dimension (0: numz-1) :: a
-        real(kind=long), dimension (0: numz-1) :: b
-        real(kind=long), dimension (0: numz-1) :: c
-        real(kind=long), dimension (0: numz-1) :: d
-        real(kind=long), dimension (0: numz-1) :: alpha
-        real(kind=long), dimension (0: numz-1) :: L
-        real(kind=long), dimension (0: numz-1) :: mu
-        real(kind=long), dimension (0: numz-1) :: Z
+        real(kind=wp), dimension (0: numz-1) :: a
+        real(kind=wp), dimension (0: numz-1) :: b
+        real(kind=wp), dimension (0: numz-1) :: c
+        real(kind=wp), dimension (0: numz-1) :: d
+        real(kind=wp), dimension (0: numz-1) :: alpha
+        real(kind=wp), dimension (0: numz-1) :: L
+        real(kind=wp), dimension (0: numz-1) :: mu
+        real(kind=wp), dimension (0: numz-1) :: Z
 
 ! Procedure
 ! ===========================================================================

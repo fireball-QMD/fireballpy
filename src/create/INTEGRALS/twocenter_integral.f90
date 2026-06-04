@@ -60,7 +60,7 @@
      &                                 fraction, n1, l1, m1, n2, l2, m2, &
      &                                 nz, nrho, d, itype1, itype2, &
      &                                 rcutoff1, rcutoff2, sum, ispher)
-        use precision
+        use precision, only: wp
         implicit none
         include '../parameters.inc'
         include '../exchange.inc'
@@ -97,12 +97,12 @@
         integer nz              ! number of z-points on grid
         logical ispher          ! spherical approx.
  
-        real(kind=long) d
-        real(kind=long) fraction
-        real(kind=long) rcutoff1, rcutoff2
+        real(kind=wp) d
+        real(kind=wp) fraction
+        real(kind=wp) rcutoff1, rcutoff2
  
 ! Output
-        real(kind=long) sum
+        real(kind=wp) sum
  
 ! Local Parameters and Data Declaration
 ! ===========================================================================
@@ -125,40 +125,40 @@
         integer nnz
  
 ! These are the factors which come from the coefficient in the Ylm
-        real(kind=long) clm (0:lmax, -lmax:lmax)
+        real(kind=wp) clm (0:lmax, -lmax:lmax)
  
-        real(kind=long) density1
-        real(kind=long) density2
-        real(kind=long) density3
-        real(kind=long) dexc
-        real(kind=long) dpotxc12
-        real(kind=long) dpotxc12s
-        real(kind=long) drho
-        real(kind=long) dvxc
-        real(kind=long) dz
-        real(kind=long) factor
-        real(kind=long) phifactor
-        real(kind=long) pi
-        real(kind=long) psi1
-        real(kind=long) psi2
-        real(kind=long) psi3
-        real(kind=long) psiofr
-        real(kind=long) r1, r2
-        real(kind=long) rescaled_psi
-        real(kind=long) rho
-        real(kind=long) rhomax
-        real(kind=long) rhomin
-        real(kind=long) vofr
-        real(kind=long) vnnaofr
-        real(kind=long) vppofr
-        real(kind=long) vxc
-        real(kind=long) z1
-        real(kind=long) z2
-        real(kind=long) zmax
-        real(kind=long) zmin
+        real(kind=wp) density1
+        real(kind=wp) density2
+        real(kind=wp) density3
+        real(kind=wp) dexc
+        real(kind=wp) dpotxc12
+        real(kind=wp) dpotxc12s
+        real(kind=wp) drho
+        real(kind=wp) dvxc
+        real(kind=wp) dz
+        real(kind=wp) factor
+        real(kind=wp) phifactor
+        real(kind=wp) pi
+        real(kind=wp) psi1
+        real(kind=wp) psi2
+        real(kind=wp) psi3
+        real(kind=wp) psiofr
+        real(kind=wp) r1, r2
+        real(kind=wp) rescaled_psi
+        real(kind=wp) rho
+        real(kind=wp) rhomax
+        real(kind=wp) rhomin
+        real(kind=wp) vofr
+        real(kind=wp) vnnaofr
+        real(kind=wp) vppofr
+        real(kind=wp) vxc
+        real(kind=wp) z1
+        real(kind=wp) z2
+        real(kind=wp) zmax
+        real(kind=wp) zmin
  
-        real(kind=long) rhomult (max_points)
-        real(kind=long) zmult (max_points)
+        real(kind=wp) rhomult (max_points)
+        real(kind=wp) zmult (max_points)
  
         external dexc
         external dpotxc12
@@ -174,10 +174,9 @@
 ! ===========================================================================
 ! The variable iwftype defines where the potential is located, and the type
 ! of integral we are doing; iwftype 0 => ontop, iwftype 1 => atom
-        if (interaction .ne. 0 .and. interaction .ne. 3 .and.  &
-     &      interaction .ne. 4 .and. interaction .ne. 6) then
+        if (interaction .ne. 0 .and. interaction .ne. 3 .and. interaction .ne. 4) then
          iwftype = 0
-        else if (interaction .eq. 3 .or. interaction .eq. 6) then
+        else if (interaction .eq. 3) then
          iwftype = 1
         else if (interaction .eq. 4) then
          iwftype = 2
@@ -185,11 +184,6 @@
         else if ((interaction .eq. 0) .and. (ideriv.eq.0)) then 
            iwftype = 1
         else if ((interaction .eq. 0) .and. (ideriv.ne.0)) then 
-           iwftype = 0
-! Mc-Weda: ontop_right and ontop_left 2c density charge transfer correction
-        else if ((interaction .eq. 14) .and. (ideriv.eq.0)) then 
-           iwftype = 1
-        else if ((interaction .eq. 14) .and. (ideriv.ne.0)) then 
            iwftype = 0
         end if
 
@@ -271,11 +265,11 @@
 ! the number of points equivalent for all cases. Change the number of points
 ! to be integrated to be dependent upon the distance between the centers and
 ! this defined density.
-        dz = (rcutoff1 + rcutoff2)/(real(nz, kind=long)*2.0d0)
+        dz = (rcutoff1 + rcutoff2)/(real(nz, kind=wp)*2.0d0)
         nnz = int((zmax - zmin)/dz)
         if (mod(nnz,2) .eq. 0) nnz = nnz + 1
  
-        drho = max(rcutoff1,rcutoff2)/real(nrho, kind=long)
+        drho = max(rcutoff1,rcutoff2)/real(nrho, kind=wp)
         nnrho = int((rhomax - rhomin)/drho)
         if (mod(nnrho,2) .eq. 0) nnrho = nnrho + 1
  
@@ -303,8 +297,7 @@
 ! and after the factor of pi is multiplied out after the phi integration.
 ! For the coulomb case, we need spherically symmetric charge densities,
 ! so add up all m's squared
-        if (interaction .eq. 7 .or. interaction .eq. 11 &
-     &        .or. interaction .eq. 12 .or. interaction .eq. 13) then
+        if (interaction .eq. 11 .or. interaction .eq. 12 .or. interaction .eq. 13) then
          phifactor = 2.0d0*pi
         else
          phifactor = clm(l1,m1)*clm(l2,m2)/2.0d0
@@ -313,10 +306,10 @@
 ! Integration is over z (z-axis points from atom 1 to atom 2) and rho (rho is
 ! radial distance from z-axis).
         do iz = 1, nnz
-         z1 = zmin + real(iz-1, kind=long)*dz
+         z1 = zmin + real(iz-1, kind=wp)*dz
          z2 = z1 - d
          do irho = 1, nnrho
-          rho = rhomin + real(irho-1, kind=long)*drho
+          rho = rhomin + real(irho-1, kind=wp)*drho
           r1 = sqrt(z1**2 + rho**2)
           r2 = sqrt(z2**2 + rho**2)
  
@@ -411,14 +404,8 @@
             if (ideriv .eq. 2) vofr = vnnaofr (itype2, isorp, r2)
            else if (interaction .eq. 3) then
             vofr = vnnaofr (itype2, isorp, r2)
-           else if (interaction .eq. 5) then
-            vofr = vxc (rho, z1, iexc, fraction)
-           else if (interaction .eq. 6) then
-            vofr = dvxc (itype1, itype2, rho, z1, r1, iexc, fraction, &
-     &                   ix)
-           else if (interaction .eq. 7) then
-            vofr = dexc (itype1, itype2, rho, z1, r1, r2, iexc, &
-     &                   fraction, ix)
+           ! else if (interaction .eq. 5) then
+           !  vofr = vxc (rho, z1, iexc, fraction)
            else if (interaction .eq. 8) then
             vofr = z1 - 0.5d0*d
            else if (interaction .eq. 9) then
@@ -432,23 +419,11 @@
             vofr = dpotxc12 (rho, z1, iexc, fraction)
            else if (interaction .eq. 13) then
             vofr = dpotxc12s (rho, z1, iexc, fraction) 
-! McWeda charge transfer correction
-           else if (interaction .eq. 14 .and. ideriv .eq. 1) then
-	     vofr = dpotxc12 (rho, z1, iexc, fraction)
-             psi3 = psiofr (itype1, isorp, r1)
-             ! density psi**2/const
-             vofr = psi3**2/(4.0d0*pi)*vofr
-           else if (interaction .eq. 14 .and. ideriv .eq. 2) then
-	     vofr = dpotxc12 (rho, z1, iexc, fraction)
-             psi3 = psiofr (itype2, isorp, r2)
-             ! density psi**2/const
-             vofr = psi3**2/(4.0d0*pi)*vofr
            end if
  
 ! Let's skip over all this stuff if we are NOT using wavefunctions.
 ! There may be other cases where we can skip all this stuff also.
-           if (interaction .ne. 7 .and. interaction .ne. 11 .and. &
-     &         interaction .ne. 12 .and. interaction .ne. 13) then
+           if (interaction .ne. 11 .and. interaction .ne. 12 .and. interaction .ne. 13) then
  
 ! *************************************************************************
 ! Add magic factors based on what type of orbital is involved in the integration
@@ -467,9 +442,6 @@
 ! set the wavefunctions to 1.0d0. This term is not a matrix element, but
 ! rather a correction to the over counting which occured in the matrix
 ! elements evaluation.
-           else if (interaction .eq. 7) then
-            psi1 = 1.0d0
-            psi2 = 1.0d0
            else if (interaction .eq. 11) then
             psi1 = density1
             psi2 = 1.0d0

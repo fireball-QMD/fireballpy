@@ -61,7 +61,7 @@
 ! ===========================================================================
       	subroutine setup_clm
         use coefficients
-       use precision
+       use precision, only: wp
       	implicit none
 
 ! Argument Declaration and Description

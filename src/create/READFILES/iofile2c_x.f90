@@ -60,7 +60,7 @@
 ! ===========================================================================
         subroutine iofile2c_x (root, suffix, isorp, index1, index2, &
      &                         filename)
-        use precision
+        use precision, only: wp
         implicit none
  
 ! Argument Declaration and Description

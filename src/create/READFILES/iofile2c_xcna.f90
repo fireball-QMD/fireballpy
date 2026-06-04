@@ -59,7 +59,7 @@
 ! ===========================================================================
         subroutine iofile2c_xcna (root, suffix, isorp, index1, index2, iunit,&
      &                            filename, skip)
-        use precision
+        use precision, only: wp
         implicit none
  
 ! Argument Declaration and Description

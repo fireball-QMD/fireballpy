@@ -57,8 +57,8 @@
 !
 ! Program Declaration
 ! ===========================================================================
-        real(kind=long) function gauntReal (l,l1,l2,l3,l4,m1,m2,m3,m4)
-        use precision
+        real(kind=wp) function gauntReal (l,l1,l2,l3,l4,m1,m2,m3,m4)
+        use precision, only: wp
         implicit none
  
 ! Argument Declaration and Description
@@ -77,8 +77,8 @@
 ! Local Parameters and Data Declaration
 ! ===========================================================================
         integer :: m
-        complex(kind=long) :: YXX
-        complex(kind=long) :: gauntComplex
+        complex(kind=wp) :: YXX
+        complex(kind=wp) :: gauntComplex
  
 ! Procedure
 ! ===========================================================================
@@ -96,8 +96,8 @@
 
 ! Program Declaration
 ! ===========================================================================
-        complex(kind=long) function YXX (l,l3,l4,m,m3,m4)
-        use precision
+        complex(kind=wp) function YXX (l,l3,l4,m,m3,m4)
+        use precision, only: wp
         implicit none
  
 ! Argument Declaration and Description
@@ -109,8 +109,8 @@
         integer, intent (in) :: m
         integer, intent (in) :: m3
         integer, intent (in) :: m4
-        real(kind=long) :: aux
-        real(kind=long) :: gaunt
+        real(kind=wp) :: aux
+        real(kind=wp) :: gaunt
 ! Procedure
 ! ===========================================================================
         YXX=(0,0)
