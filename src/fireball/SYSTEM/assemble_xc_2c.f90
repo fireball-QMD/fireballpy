@@ -99,6 +99,23 @@ subroutine assemble_xc_2c ()
             end do
           end do
         end do
+
+        do inu = 1, num_orb(in3)
+          do imu = 1, num_orb(in1)
+            denmx(imu,inu) = rho_off(imu,inu,ineigh,iatom)
+            den1x(imu,inu) = rhoij_off(imu,inu,ineigh,iatom)
+            sx(imu,inu) = s_mat(imu,inu,ineigh,iatom)
+          end do
+        end do
+
+        ! Calculate <i| V_xc(n) |j> and <i|V_xc(n_i+n_j)|j>        
+        call build_olsxc_off (in1, in2, den1x, denmx, sx, ineigh, iatom, bcxcx)
+        do inu = 1, num_orb(in2)
+          do imu = 1, num_orb(in1)
+            vxc(imu,inu,ineigh,iatom) = vxc(imu,inu,ineigh,iatom) + bcxcx(imu,inu)
+          end do
+        end do
+
       end if
     end do
   end do

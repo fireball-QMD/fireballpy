@@ -87,7 +87,7 @@ subroutine average_ca_rho ()
     y = 0.0d0
     in2 = in1
     isorp = 0
-    interaction0 = 23
+    interaction0 = 20
     in3 = in2
     sighat = 0.0d0
     eps = 0.0d0
@@ -119,8 +119,8 @@ subroutine average_ca_rho ()
 
       ! CALL DOSCENTROS AND GET VXC FOR ATM CASE - AVERAGE DENSITY APPROXIMATION
       if (iatom .eq. jatom .and. mbeta .eq. 0) then
-        interaction = 17
-        interaction0 = 22
+        interaction = 16
+        interaction0 = 19
         in3 = in1
         do isorp = 1, nssh(in2)
           call doscentros (interaction, isorp, iforce, in1, in2, in3, y, eps, deps, rhomx, rhompx)
@@ -143,8 +143,8 @@ subroutine average_ca_rho ()
           end do   ! enddo inu
         end do   ! endo do isorp
       else
-        interaction = 17
-        interaction0 = 22
+        interaction = 16
+        interaction0 = 19
         in3 = in1
         do isorp = 1, nssh(in2)
           call doscentros (interaction, isorp, iforce, in1, in2, in3, y, eps, deps, rhomx, rhompx)
@@ -292,8 +292,8 @@ subroutine average_ca_rho ()
         end if
         call epsilon (r2, sighat, eps)
         call deps2cent (r1, r2, eps, deps)
-        interaction = 15
-        interaction0 = 20
+        interaction = 14
+        interaction0 = 17
         in3 = in1
         rhom_2c = 0.0d0
         rhomp_2c = 0.0d0
@@ -316,8 +316,8 @@ subroutine average_ca_rho ()
           end do
         end do
 
-        interaction = 16
-        interaction0 = 21
+        interaction = 15
+        interaction0 = 18
         in3 = in2
         do isorp = 1, nssh(in3)
           call doscentros (interaction, isorp, iforce, in1, in3, in2, y, eps, deps, rhomx, rhompx)
@@ -339,7 +339,7 @@ subroutine average_ca_rho ()
         end do
         if (Kscf .eq. 1) then
           isorp = 0
-          interaction0 = 23
+          interaction0 = 20
           in3 = in2
           call doscentrosS (interaction0, isorp, iforce, in1, in2, in3, y, eps, sm, spm)
           do inu = 1, nssh(in2)

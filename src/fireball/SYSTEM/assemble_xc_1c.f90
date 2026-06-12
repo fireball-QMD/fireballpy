@@ -10,7 +10,6 @@ subroutine assemble_xc_1c ()
   integer imu,inu
   integer in1
   integer matom
-  integer ixc
   real(double) dccexc_1c
   real(double) exc_1c
   real(double) muexc_1c
@@ -23,7 +22,6 @@ subroutine assemble_xc_1c ()
   do iatom = 1, natoms
    matom = neigh_self(iatom)
    in1 = imass(iatom)
-   ixc = 4
    call unocentros (in1, iatom, dccexc_1c, mu1xc)
    etotxc_1c = etotxc_1c + dccexc_1c
    do imu = 1, num_orb(in1)
