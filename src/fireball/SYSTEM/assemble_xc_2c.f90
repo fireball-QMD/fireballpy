@@ -1,6 +1,6 @@
 subroutine assemble_xc_2c ()
   use, intrinsic :: iso_fortran_env, only: double => real64
-  use M_system, only: numorb_max, natoms, neigh_self, ratom, imass, neighn, neigh_b, neigh_j, xl, vxc, rho_off, rhoij_off, s_mat, Kscf, g_xc, Qin
+  use M_system, only: numorb_max, natoms, neigh_self, ratom, imass, neighn, neigh_b, neigh_j, xl, vxc, rho_off, rhoij_off, s_mat, Kscf, g_xc, Qin, iqout
   use M_fdata, only: num_orb, nssh, nsh_max, Qneutral
   implicit none
   integer iatom
@@ -66,13 +66,14 @@ subroutine assemble_xc_2c ()
       if (iatom .ne. jatom .or. mbeta .ne. 0) then 
         isorp = 0
         interaction = 6
-        in3 = in1
+        in3 = in2
         call doscentros (interaction, isorp, kforce, in1, in2, in3, y, eps, deps, rhomx, rhompx)
         do inu = 1, num_orb(in3)
           do imu = 1, num_orb(in1)
             vxc(imu,inu,ineigh,iatom) = vxc(imu,inu,ineigh,iatom) + rhomx(imu,inu)
           end do
         end do
+        if (iqout .eq. 6) then
         interaction = 7
         in3 = in2
         do isorp = 1, nssh(in1)
@@ -99,6 +100,8 @@ subroutine assemble_xc_2c ()
             end do
           end do
         end do
+        end if ! iqout .eq. 6
+        in3 = in2
 
         do inu = 1, num_orb(in3)
           do imu = 1, num_orb(in1)
