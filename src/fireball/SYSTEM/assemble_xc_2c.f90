@@ -1,7 +1,7 @@
 subroutine assemble_xc_2c ()
   use, intrinsic :: iso_fortran_env, only: double => real64
   use M_system, only: numorb_max, natoms, neigh_self, ratom, imass, neighn, neigh_b, neigh_j, xl, vxc, rho_off, rhoij_off, s_mat, Kscf, g_xc, Qin, iqout
-  use M_fdata, only: num_orb, nssh, nsh_max, Qneutral
+  use M_fdata, only: num_orb, nssh, nsh_max, Qneutral, TWOCENTER_VXC_A, TWOCENTER_VXC_L, TWOCENTER_VXC_R
   implicit none
   integer iatom
   integer iatomstart
@@ -65,7 +65,7 @@ subroutine assemble_xc_2c ()
       call deps2cent (r1, r2, eps, deps)
       if (iatom .ne. jatom .or. mbeta .ne. 0) then 
         isorp = 0
-        interaction = 6
+        interaction = TWOCENTER_VXC_A
         in3 = in1
         call doscentros (interaction, isorp, kforce, in1, in2, in3, y, eps, deps, rhomx, rhompx)
         do inu = 1, num_orb(in3)
@@ -73,34 +73,32 @@ subroutine assemble_xc_2c ()
             vxc(imu,inu,ineigh,iatom) = vxc(imu,inu,ineigh,iatom) + rhomx(imu,inu)
           end do
         end do
-        ! if (iqout .eq. 6) then
-        interaction = 7
+        interaction = TWOCENTER_VXC_L
         in3 = in2
         do isorp = 1, nssh(in1)
           call doscentros (interaction, isorp, kforce, in1, in1, in3, y, eps, deps, rhomx, rhompx)
           do inu = 1, num_orb(in3)
             do imu = 1, num_orb(in1)
               vxc(imu,inu,ineigh,iatom) = vxc(imu,inu,ineigh,iatom) + rhomx(imu,inu)*dqi(isorp)
-              if (Kscf .eq. 1) then
+              if (Kscf .eq. 1 .and. iqout .eq. 6) then
                 g_xc(imu,inu,isorp,iatom,ineigh,iatom) = g_xc(imu,inu,isorp,iatom,ineigh,iatom) + rhomx(imu,inu)
               end if
             end do
           end do
         end do
-        interaction = 8
+        interaction = TWOCENTER_VXC_R
         in3 = in2
         do isorp = 1, nssh(in2)
           call doscentros (interaction, isorp, kforce, in1, in2, in3, y, eps, deps, rhomx, rhompx)
           do inu = 1, num_orb(in3)
             do imu = 1, num_orb(in1)
               vxc(imu,inu,ineigh,iatom) = vxc(imu,inu,ineigh,iatom) + rhomx(imu,inu)*dqj(isorp)
-              if (Kscf .eq. 1) then
+              if (Kscf .eq. 1 .and. iqout .eq. 6) then
                 g_xc(imu,inu,isorp,jatom,ineigh,iatom) = g_xc(imu,inu,isorp,jatom,ineigh,iatom) + rhomx(imu,inu)
               end if
             end do
           end do
         end do
-        ! end if ! iqout .eq. 6
         in3 = in2
 
         do inu = 1, num_orb(in3)

@@ -1,7 +1,7 @@
 subroutine assemble_F ()
   use, intrinsic :: iso_fortran_env, only: double => real64
   use M_system, only: natoms, neigh_j, neighn, nPP_j, nPPn, nPPx_j, nPPxn, fotnl, fanl, fotna, fana, faxc, faxc_ca, dxcdcc, ft, dusr, &
-    & fotxc, fotxc_ca, faca, fotca, f3naa, f3nab, f3nac, f3nla, f3nlb, f3nlc, f3caa, f3cab, f3cac, flrew, f3xca_ca, f3xcb_ca, f3xcc_ca, &
+    & fotxc_ca, faca, fotca, f3naa, f3nab, f3nac, f3nla, f3nlb, f3nlc, f3caa, f3cab, f3cac, flrew, f3xca_ca, f3xcb_ca, f3xcc_ca, &
     & f3xca, f3xcb, f3xcc, flrew_qmmm, fro, ftot, dxcv
   implicit none
   integer iatom
@@ -26,11 +26,9 @@ subroutine assemble_F ()
   real(double), dimension (3, natoms) :: fnl  ! total non-local force
   real(double), dimension (3, natoms) :: fnlatm     ! non-local/atom force
   real(double), dimension (3, natoms) :: fnlot      ! non-local/ontop force
-  real(double), dimension (3, natoms) :: fxc  ! total xc force
   real(double), dimension (3, natoms) :: fxc_ca     ! total xc force - charges
   real(double), dimension (3, natoms) :: fxcatm     ! xc atm/atm force
   real(double), dimension (3, natoms) :: fxcatm_ca  ! xc atm/atm force - charges
-  real(double), dimension (3, natoms) :: fxcot      ! xc ontop force
   real(double), dimension (3, natoms) :: fxcot_ca   ! xc ontop force - charges
   do iatom = 1, natoms
     f3nl(:,iatom) = f3nla(:,iatom) + f3nlb(:,iatom) + f3nlc(:,iatom)
@@ -45,7 +43,6 @@ subroutine assemble_F ()
   fnaot = 0.0d0
   fxcatm = 0.0d0
   fxcatm_ca = 0.0d0
-  fxcot = 0.0d0
   fxcot_ca = 0.0d0
   fnlatm = 0.0d0
   fnlot = 0.0d0
@@ -65,8 +62,6 @@ subroutine assemble_F ()
       fnaot(:,jatom) = fnaot(:,jatom) - 2.0d0*fotna(:,ineigh,iatom)
       fcaot(:,iatom) = fcaot(:,iatom) + 2.0d0*fotca(:,ineigh,iatom)
       fcaot(:,jatom) = fcaot(:,jatom) - 2.0d0*fotca(:,ineigh,iatom)
-      fxcot(:,iatom) = fxcot(:,iatom) + fotxc(:,ineigh,iatom)
-      fxcot(:,jatom) = fxcot(:,jatom) - fotxc(:,ineigh,iatom)
       fxcot_ca(:,iatom) = fxcot_ca(:,iatom) + fotxc_ca(:,ineigh,iatom)
       fxcot_ca(:,jatom) = fxcot_ca(:,jatom) - fotxc_ca(:,ineigh,iatom)
       dxcv(:,iatom) = dxcv(:,iatom) + dxcdcc(:,ineigh,iatom)
@@ -91,13 +86,12 @@ subroutine assemble_F ()
     fca(:,iatom) = f3ca(:,iatom) + fcaatm(:,iatom) + fcaot(:,iatom)
     fna(:,iatom) = f3na(:,iatom) + fnaatm(:,iatom) + fnaot(:,iatom)
     fnl(:,iatom) = f3nl(:,iatom) + fnlatm(:,iatom) + fnlot(:,iatom)
-    fxc(:,iatom) = f3xc(:,iatom) + fxcatm(:,iatom) + fxcot(:,iatom)
     fxc_ca(:,iatom) = fxcatm_ca(:,iatom) + fxcot_ca(:,iatom)  + f3xc_ca(:,iatom)
   end do
   
   
   do iatom = 1, natoms
-    fbs(:,iatom) = ft(:,iatom) + fna(:,iatom) + fnl(:,iatom) + fxc(:,iatom) + &
+    fbs(:,iatom) = ft(:,iatom) + fna(:,iatom) + fnl(:,iatom) + &
       & fca(:,iatom) + fxc_ca(:,iatom) + flrew(:,iatom) + flrew_qmmm(:,iatom)
   end do
   do iatom = 1, natoms

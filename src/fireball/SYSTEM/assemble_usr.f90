@@ -2,7 +2,7 @@ subroutine assemble_usr (iauxforce)
   use, intrinsic :: iso_fortran_env, only: double => real64
   use M_constants, only: eq2
   use M_system, only: natoms, ratom, imass, neigh_max, uiiuee, ewald, fewald, neigh_b, neigh_j, neighn, Qin, dq, xl, dusr, dxcv
-  use M_fdata, only: nsh_max, ME2c_max, nssh, Qneutral
+  use M_fdata, only: nsh_max, ME2c_max, nssh, Qneutral, TWOCENTER_COULOMB
   implicit none
   integer, intent (in) :: iauxforce
   integer iatom
@@ -69,7 +69,7 @@ subroutine assemble_usr (iauxforce)
       QQ = Zi*Zj - qi*qj
       distance = sqrt((r2(1) - r1(1))**2 + (r2(2) - r1(2))**2 + (r2(3) - r1(3))**2)
       index_coulomb = nssh(in1)*nssh(in2)
-      interaction = 12
+      interaction = TWOCENTER_COULOMB
       ideriv = 0
       do index = 1, index_coulomb
         call interpolate_1d (interaction, ideriv, in1, in2, index, iauxforce, distance, slist(index), dslist(index))

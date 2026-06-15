@@ -4,7 +4,8 @@ subroutine average_ca_rho ()
   use M_system, only: iforce, xc_overtol, natoms, ratom, imass, neigh_max, Kscf, neigh_b, neigh_j, neighn, neigh_comb, neigh_comj, &
     & neigh_comm, neigh_comn, neigh_back, numorb_max, Qin, rho_off, rhoij_off, sm_mat, spm_mat, rho_on, arho_on, rhoi_on, &
     & arhoi_on, arhop_on, rhop_on, arhoij_off, arho_off, arhopij_off, arhop_off, rhop_off, rhopij_off, xl
-  use M_fdata, only: nssh, num_orb, nsh_max
+  use M_fdata, only: nssh, num_orb, nsh_max, TWOCENTER_OVERLAPS, TWOCENTER_DEN_L, TWOCENTER_DEN_R, TWOCENTER_DEN_A, &
+    & TWOCENTER_DENS_L, TWOCENTER_DENS_R, TWOCENTER_DENS_A
   implicit none
   integer iatom
   integer ibeta
@@ -87,7 +88,7 @@ subroutine average_ca_rho ()
     y = 0.0d0
     in2 = in1
     isorp = 0
-    interaction0 = 20
+    interaction0 = TWOCENTER_OVERLAPS
     in3 = in2
     sighat = 0.0d0
     eps = 0.0d0
@@ -118,9 +119,9 @@ subroutine average_ca_rho ()
       call deps2cent (r1, r2, eps, deps)
 
       ! CALL DOSCENTROS AND GET VXC FOR ATM CASE - AVERAGE DENSITY APPROXIMATION
+      interaction = TWOCENTER_DEN_A
+      interaction0 = TWOCENTER_DENS_A
       if (iatom .eq. jatom .and. mbeta .eq. 0) then
-        interaction = 16
-        interaction0 = 19
         in3 = in1
         do isorp = 1, nssh(in2)
           call doscentros (interaction, isorp, iforce, in1, in2, in3, y, eps, deps, rhomx, rhompx)
@@ -143,8 +144,6 @@ subroutine average_ca_rho ()
           end do   ! enddo inu
         end do   ! endo do isorp
       else
-        interaction = 16
-        interaction0 = 19
         in3 = in1
         do isorp = 1, nssh(in2)
           call doscentros (interaction, isorp, iforce, in1, in2, in3, y, eps, deps, rhomx, rhompx)
@@ -292,8 +291,8 @@ subroutine average_ca_rho ()
         end if
         call epsilon (r2, sighat, eps)
         call deps2cent (r1, r2, eps, deps)
-        interaction = 14
-        interaction0 = 17
+        interaction = TWOCENTER_DEN_L
+        interaction0 = TWOCENTER_DENS_L
         in3 = in1
         rhom_2c = 0.0d0
         rhomp_2c = 0.0d0
@@ -316,8 +315,8 @@ subroutine average_ca_rho ()
           end do
         end do
 
-        interaction = 15
-        interaction0 = 18
+        interaction = TWOCENTER_DEN_R
+        interaction0 = TWOCENTER_DENS_R
         in3 = in2
         do isorp = 1, nssh(in3)
           call doscentros (interaction, isorp, iforce, in1, in3, in2, y, eps, deps, rhomx, rhompx)

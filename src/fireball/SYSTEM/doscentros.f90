@@ -9,7 +9,7 @@
 subroutine doscentros (interaction, isub, iforceaux, in1, in2, in3, distance, eps, deps, sx, spx)
   use, intrinsic :: iso_fortran_env, only: double => real64
   use M_system, only: numorb_max
-  use M_fdata, only: index_max2c,num_orb,ME2c_max
+  use M_fdata, only: index_max2c,num_orb,ME2c_max, TWOCENTER_VNA_L, TWOCENTER_VXC_L, TWOCENTER_DEN_L
   implicit none
   integer, intent (in) :: interaction
   integer, intent (in) :: isub
@@ -39,9 +39,9 @@ subroutine doscentros (interaction, isub, iforceaux, in1, in2, in3, distance, ep
   if (iforceaux .eq. 1) spmx = 0.0d0
   if (iforceaux .eq. 1) spx = 0.0d0
   switch = .true.
-  if(interaction .eq. 2) switch = .false.
-  if(interaction .eq. 15) switch = .false.
-  if(interaction .eq. 18) switch = .false.
+  if(interaction .eq. TWOCENTER_VNA_L) switch = .false.
+  if(interaction .eq. TWOCENTER_VXC_L) switch = .false.
+  if(interaction .eq. TWOCENTER_DEN_L) switch = .false.
   do index = 1, index_max2c(in1,in3)
    if ( switch ) then
     call interpolate_1d (interaction, isub, in1, in2, index, iforceaux, distance, slist(index), dslist(index))

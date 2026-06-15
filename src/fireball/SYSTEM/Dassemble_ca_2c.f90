@@ -3,7 +3,7 @@ subroutine Dassemble_ca_2c ()
   use M_constants, only: eq2
   use M_system, only: smt_elect, natoms, ratom, imass, dip, dipp, neigh_b, neigh_j, neighn, neigh_self, &
     & numorb_max, sp_mat, Qin, rho, s_mat, xl, faca, fotca
- use M_fdata, only: nssh, Qneutral, rcutoff, lssh, num_orb
+ use M_fdata, only: nssh, Qneutral, rcutoff, lssh, num_orb, TWOCENTER_VNA_L, TWOCENTER_VNA_A
  implicit none
  integer iatom
  integer icount
@@ -138,7 +138,7 @@ subroutine Dassemble_ca_2c ()
    bcca = 0.0d0
    bccap = 0.0d0
    kforce = 1
-   interaction = 4
+   interaction = TWOCENTER_VNA_A
    in3 = in1
    do isorp = 1, nssh(in2)
     call doscentros (interaction, isorp, kforce, in1, in2, in3, y,  eps, deps, bccax, bccapx)
@@ -178,7 +178,7 @@ subroutine Dassemble_ca_2c ()
      end do
     end do
     bccap = 0.0d0
-    interaction = 2
+    interaction = TWOCENTER_VNA_L
     in3 = in2
     do isorp = 1, nssh(in1)
      call doscentros (interaction, isorp, kforce, in1, in1, in3, y,eps, deps, bccax, bccapx)

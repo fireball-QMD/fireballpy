@@ -4,12 +4,11 @@ subroutine load_fdata()
   use M_fdata, only: fdataLocation, infofname, nsh_max, nshPP_max, nspecies, nzx, symbolA, &
     & etotatom, smass, rc_PP, rcutoff, cl_PP, nssh, lssh, nsshPP, lsshPP, Qneutral, wavefxn, &
     & napot, ind2c, icon3c, splineint_2c, numz2c, z2cmax, &
-    & isorpmax, isorpmax_xc, ME2c_max, nfofx,initype
+    & isorpmax, isorpmax_xc, ME2c_max, nfofx,initype, maxtype_2c
   implicit none
   integer :: in1, in2, in3, ispec, issh, aux, icount, isorp, &
     & interaction  
   real(double), dimension (:,:), allocatable :: rcutoff_temp
-  integer :: maxtype(20) 
   integer :: interactions2c_max
   ! Find nsh_max and nsh_max_PP
   nsh_max = 0
@@ -119,18 +118,9 @@ subroutine load_fdata()
   numz2c = 0
   z2cmax = 0.0d0
   splineint_2c = 0.0d0
-  maxtype =  (/ &
-     0,                          &   !1
-     nsh_max, nsh_max, nsh_max,  &   !2-4
-     0, 0,                       &   !5-6
-     nsh_max, nsh_max,           &   !7-8
-     0, 0, 0, 0, 0,              &   ! 9-13
-     nsh_max, nsh_max, nsh_max,  &
-     nsh_max, nsh_max, nsh_max,  &   ! 14-19
-     0  /)                           ! 20
 
   do interaction = 1, 20
-    do isorp=initype(interaction),maxtype(interaction)
+    do isorp=initype(interaction),nsh_max*maxtype_2c(interaction)
       icount = icount + 1
       ind2c(interaction, isorp) = icount
     end do

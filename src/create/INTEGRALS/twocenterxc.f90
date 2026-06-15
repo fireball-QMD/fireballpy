@@ -237,6 +237,7 @@ contains
     integer, intent(in) :: iounit
     real(kind=wp), intent(in) :: dmax
     logical, intent(in) :: rev
+    write (iounit, '(a)') repeat('=', 70)
     write (iounit, '(a)') ' created by: '
     write (iounit, '(2x,a)') signature_
     if (rev) then

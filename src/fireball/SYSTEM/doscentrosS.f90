@@ -1,6 +1,6 @@
 subroutine doscentrosS (interaction, isub, iauxforce, in1, in2, in3, distance, eps, sx, spx)
   use, intrinsic :: iso_fortran_env, only: double => real64
-  use M_fdata, only: index_maxS,nsh_max,MES_max,nssh
+  use M_fdata, only: index_maxS,nsh_max,MES_max,nssh, TWOCENTER_DENS_L
   implicit none
   integer, intent (in) :: iauxforce
   integer, intent (in) :: interaction
@@ -24,7 +24,7 @@ subroutine doscentrosS (interaction, isub, iauxforce, in1, in2, in3, distance, e
   if (iauxforce .eq. 1) spm = 0.0d0
   if (iauxforce .eq. 1) spx = 0.0d0
   do index = 1, index_maxS(in1,in3)
-    if (interaction .ne. 20) then
+    if (interaction .ne. TWOCENTER_DENS_L) then
       call interpolate_1d (interaction, isub, in1, in2, index, iauxforce, distance, slist(index), dslist(index))
     else
       call interpolate_1d (interaction, isub, in1, in3, index, iauxforce,  distance, slist(index), dslist(index))

@@ -69,7 +69,6 @@ system_srcs = [
   #'assemble_qmmm_dip.f90',
   'assemble_qmmm_new.f90',
   'assemble_qmmm_dip_new.f90',
-  'assemble_mcweda.f90',
   'assemble_olsxc_1c.f90',
   'unocentros.f90',
   'assemble_ca_2c.f90',
@@ -92,7 +91,6 @@ system_srcs = [
   'common_neighborsPP.f90',
   'assemble_olsxc_on.f90',
   'build_ca_olsxc_on.f90',
-  'assemble_olsxc_off.f90',
   'epsilon.f90',
   'deps2cent.f90',
   'doscentros.f90',
@@ -134,7 +132,6 @@ system_srcs = [
   'assemble_xc_2c.f90',
   'assemble_drive.f90',
   'assemble_xc_1c.f90',
-  'average_rho.f90',
   'Dassemble_xc_2c.f90',
 ]
 

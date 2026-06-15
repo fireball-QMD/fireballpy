@@ -1,6 +1,6 @@
 subroutine buildspline_1d (integral, numz, itype, in1, in2, zmax, interaction, xintegral_2c)
   use, intrinsic :: iso_fortran_env, only: double => real64
-  use M_fdata, only: ind2c, ME2c_max, nfofx, splineint_2c
+  use M_fdata, only: ind2c, ME2c_max, nfofx, splineint_2c, TWOCENTER_VNA_A
   implicit none
   integer, intent(in) :: integral, numz, itype, in1, in2, interaction
   real(double), intent(in) :: zmax
@@ -30,7 +30,7 @@ subroutine buildspline_1d (integral, numz, itype, in1, in2, zmax, interaction, x
   w = 1.0d0/b(numz_used-1)
   b(numz_used) = 2.0d0 - w
   ! Slight correction for 1/r derivative JOM-ENRIQUE
-  if(((interaction .eq. 12) .or. (interaction .eq. 4)) .and. (itype .ne. ind2c(4,0))) then
+  if(((interaction .eq. TWOCENTER_VNA_A)) .and. (itype .ne. ind2c(4,0))) then
     d(numz_used) = -3.0d0*h*(xintegral_2c(integral,numz_used) - xintegral_2c(integral,numz_used-1))/zmax - w*d(numz_used-1)
   else
     d(numz_used) = -w*d(numz_used-1)

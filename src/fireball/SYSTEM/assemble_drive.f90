@@ -44,10 +44,8 @@ subroutine assemble_drive()
     call assemble_2c_PP ()
   end if
   
-  !call average_rho() 
   call average_ca_rho ()
   call assemble_olsxc_on ()
-  !call assemble_olsxc_off () esta dentro de assemble_xc_2c
 
   
   if (idipole .eq. 0) call assemble_ca_2c ()

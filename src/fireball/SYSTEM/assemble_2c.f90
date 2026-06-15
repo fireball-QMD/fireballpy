@@ -4,7 +4,8 @@ subroutine assemble_2c ()
   use M_constants, only: eq2
   use M_system, only: iforce, iqout, idipole, natoms, ratom, imass, dip, dipp, neigh_b, neigh_j, neighn, neigh_self, numorb_max, sp_mat, &
     & tp_mat, dipcm, dippcm, dippc, s_mat, t_mat, vna, dipc, xl
-  use M_fdata, only: num_orb
+  use M_fdata, only: num_orb, TWOCENTER_OVERLAP, TWOCENTER_VNA_L, TWOCENTER_VNA_R, TWOCENTER_VNA_A, TWOCENTER_DIP_Z, &
+    & TWOCENTER_DIP_X, TWOCENTER_DIP_Y, TWOCENTER_KINETIC
   implicit none
   integer iatom
   integer imu
@@ -75,12 +76,12 @@ subroutine assemble_2c ()
       ! CALL DOSCENTROS AND GET S AND T
       ! ****************************************************************************
       isorp = 0
-      interaction = 1
+      interaction = TWOCENTER_OVERLAP
       in3 = in2
       call doscentros (interaction, isorp, iforce, in1, in2, in3, y, eps, deps, sx, spx)
  
       isorp = 0
-      interaction = 13
+      interaction = TWOCENTER_KINETIC
       in3 = in2
       call doscentros (interaction, isorp, iforce, in1, in2, in3, y, eps, deps, tx, tpx)
  
@@ -98,7 +99,7 @@ subroutine assemble_2c ()
 
       isorp = 0
       kforce = 0           ! don't calculate forces here
-      interaction = 4
+      interaction = TWOCENTER_VNA_A
       in3 = in1
       call doscentros (interaction, isorp, kforce, in1, in2, in3, y, eps, deps, bcnax, bcnapx)
       do inu = 1, num_orb(in3)
@@ -112,7 +113,7 @@ subroutine assemble_2c ()
         ! Do nothing here - special case. Interaction already calculated in atm case.
       else
         isorp = 0
-        interaction = 2
+        interaction = TWOCENTER_VNA_L
         in3 = in2
         call doscentros (interaction, isorp, kforce, in1, in1, in3, y, eps, deps, bcnax, bcnapx)
         do inu = 1, num_orb(in3)
@@ -122,7 +123,7 @@ subroutine assemble_2c ()
         end do
         ! For the vna_ontopr case, the potential is in the second atom (jatom): Neutral atom piece
         isorp = 0
-        interaction = 3
+        interaction = TWOCENTER_VNA_R
         in3 = in2
         call doscentros (interaction, isorp, kforce, in1, in2, in3, y, eps, deps, bcnax, bcnapx)
         do inu = 1, num_orb(in3)
@@ -142,7 +143,7 @@ subroutine assemble_2c ()
       ! JIMM: we read here the Z,Y,X dipole matrix elements and derivatives for the dipole long-range theory
       ! CALL DOSCENTROS AND GET DIP Z
       isorp = 0
-      interaction = 9
+      interaction = TWOCENTER_DIP_Z
       in3 = in2
       call doscentros (interaction, isorp, iforce, in1, in2, in3, y, eps, deps, dipx, dippx)
       do inu = 1, num_orb(in2)
@@ -160,7 +161,7 @@ subroutine assemble_2c ()
 
       ! CALL DOSCENTROS AND GET DIP Y
         isorp = 0
-        interaction = 10
+        interaction = TWOCENTER_DIP_Y
         in3 = in2
         call doscentrosDipY (interaction, isorp, in1, in2, in3, y, eps, deps, dipx, dippx)
         do inu = 1, num_orb(in2)
@@ -172,7 +173,7 @@ subroutine assemble_2c ()
 
         ! CALL DOSCENTROS AND GET DIP X
         isorp = 0
-        interaction = 11
+        interaction = TWOCENTER_DIP_X
         in3 = in2
         call doscentrosDipX (interaction, isorp, in1, in2, in3, y, eps, deps, dipx, dippx)
         do inu = 1, num_orb(in2)

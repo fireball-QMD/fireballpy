@@ -4,7 +4,7 @@ subroutine assemble_ca_2c ()
   use M_constants, only: eq2
   use M_system, only: smt_elect, natoms, ratom, imass, ewaldsr, dip, neigh_b, neigh_j, neighn, neigh_self, &
     & numorb_max, Qin, s_mat, vca, xl, g_h, kscf, iqout
-  use M_fdata, only: nssh, num_orb, rcutoff, Qneutral, lssh
+  use M_fdata, only: nssh, num_orb, rcutoff, Qneutral, lssh, TWOCENTER_VNA_L, TWOCENTER_VNA_R, TWOCENTER_VNA_A
   implicit none
   integer iatom
   integer icount
@@ -137,7 +137,7 @@ subroutine assemble_ca_2c ()
       ! CALL DOSCENTROS AND GET VNA FOR ATOM CASE
       bcca = 0.0d0
       kforce = 0
-      interaction = 4
+      interaction = TWOCENTER_VNA_A
       in3 = in1
       do isorp = 1, nssh(in2)
         call doscentros (interaction, isorp, kforce, in1, in2, in3, y, eps, deps, bccax, bccapx)
@@ -184,7 +184,7 @@ subroutine assemble_ca_2c ()
         ! Do nothing here - special case. Interaction already calculated in atm case.
       else
         bcca = 0.0d0
-        interaction = 2
+        interaction = TWOCENTER_VNA_L
         in3 = in2
         do isorp = 1, nssh(in1)
           call doscentros (interaction, isorp, kforce, in1, in1, in3, y, eps, deps, bccax, bccapx)
@@ -198,7 +198,7 @@ subroutine assemble_ca_2c ()
             end do
           end do
         end do
-        interaction = 3
+        interaction = TWOCENTER_VNA_R
         in3 = in2
         do isorp = 1, nssh(in2)
           call doscentros (interaction, isorp, kforce, in1, in2, in3, y, eps, deps, bccax, bccapx)

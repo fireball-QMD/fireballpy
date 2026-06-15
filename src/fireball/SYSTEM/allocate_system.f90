@@ -10,7 +10,7 @@ subroutine allocate_system ()
     & neighPP_max, Qin, Qinmixer, Qout, Qoutmixer, dq, Q_partial, QLowdin_TOT, QMulliken_TOT, dq_DP, vxc, vxc_ca, rho, rho_off, &
     & rhoij_off, s_mat, sm_mat, spm_mat, rho_on, arho_on, rhoi_on, arhoi_on, arhop_on, rhop_on, arhoij_off, arho_off, arhopij_off, &
     & arhop_off, rhop_off, rhopij_off, vca, ewaldlr, h_mat, t_mat, vna, ewaldqmmm, dipc, xl, fotnl, fanl, fotna, fana, faxc, faxc_ca, &
-    & dxcdcc, ft, dusr, fotxc, fotxc_ca, faca, fotca, f3naa, f3nab, f3nac, f3nla, f3nlb, f3nlc, f3caa, f3cab, f3cac, flrew, f3xca_ca, &
+    & dxcdcc, ft, dusr, fotxc_ca, faca, fotca, f3naa, f3nab, f3nac, f3nla, f3nlb, f3nlc, f3caa, f3cab, f3cac, flrew, f3xca_ca, &
     & f3xcb_ca, f3xcc_ca, f3xca, f3xcb, f3xcc, flrew_qmmm, fro, ftot, dxcv, norbitals_new, qstate, bbnkre, bbnkim, igamma, &
     & g_h, g_xc, f_xc, exc_aa, vxc_aa, get_orb_ofshell, get_l_ofshell, get_issh_ofshell, get_iatom_ofshell, get_shell_oforb, orb2shell, &
     & g_h_shell, g_xc_shell, f_xc_shell, exc_aa_shell, vxc_aa_shell, get_shell_ofatom_imu, get_shell_ofatom_issh, fix_shell_charge
@@ -516,8 +516,6 @@ subroutine allocate_system ()
   allocate (faxc (3, neigh_max, natoms))
   if (allocated(fotxc_ca)) deallocate(fotxc_ca)
   allocate (fotxc_ca (3, neigh_max, natoms))
-  if (allocated(fotxc)) deallocate(fotxc)
-  allocate (fotxc (3, neigh_max, natoms))
   if (allocated(faca)) deallocate(faca)
   allocate (faca (3, neigh_max, natoms))  
   if (allocated(fotca)) deallocate(fotca)

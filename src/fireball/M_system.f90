@@ -251,7 +251,6 @@ module M_system
   real(double), dimension (:, :, :), allocatable :: dxcdcc_zw
   real(double), dimension (:, :), allocatable :: ft
   real(double), dimension (:, :), allocatable :: dusr
-  real(double), dimension (:, :, :), allocatable :: fotxc 
   real(double), dimension (:, :, :), allocatable :: fotxc_ca
   real(double), dimension (:, :, :), allocatable :: faca 
   real(double), dimension (:, :, :), allocatable :: fotca
