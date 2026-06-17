@@ -1,7 +1,7 @@
 subroutine assemble_xc_2c ()
   use, intrinsic :: iso_fortran_env, only: double => real64
   use M_system, only: numorb_max, natoms, neigh_self, ratom, imass, neighn, neigh_b, neigh_j, xl, vxc, rho_off, rhoij_off, s_mat, Kscf, g_xc, Qin, iqout
-  use M_fdata, only: num_orb, nssh, nsh_max, Qneutral, TWOCENTER_VXC_A, TWOCENTER_VXC_L, TWOCENTER_VXC_R
+  use M_fdata, only: num_orb, nssh, nsh_max, Qneutral, TWOCENTER_VXC_0, TWOCENTER_VXC_L, TWOCENTER_VXC_R
   implicit none
   integer iatom
   integer iatomstart
@@ -65,8 +65,8 @@ subroutine assemble_xc_2c ()
       call deps2cent (r1, r2, eps, deps)
       if (iatom .ne. jatom .or. mbeta .ne. 0) then 
         isorp = 0
-        interaction = TWOCENTER_VXC_A
-        in3 = in1
+        interaction = TWOCENTER_VXC_0
+        in3 = in2
         call doscentros (interaction, isorp, kforce, in1, in2, in3, y, eps, deps, rhomx, rhompx)
         do inu = 1, num_orb(in3)
           do imu = 1, num_orb(in1)

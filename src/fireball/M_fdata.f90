@@ -81,7 +81,7 @@ module M_fdata
   integer, parameter :: TWOCENTER_VNA_R = 3
   integer, parameter :: TWOCENTER_VNA_A = 4
   integer, parameter :: TWOCENTER_VNL = 5
-  integer, parameter :: TWOCENTER_VXC_A = 6
+  integer, parameter :: TWOCENTER_VXC_0 = 6
   integer, parameter :: TWOCENTER_VXC_L = 7
   integer, parameter :: TWOCENTER_VXC_R = 8
   integer, parameter :: TWOCENTER_DIP_Z = 9

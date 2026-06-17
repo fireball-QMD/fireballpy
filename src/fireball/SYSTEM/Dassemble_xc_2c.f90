@@ -2,7 +2,7 @@ subroutine Dassemble_xc_2c ()
   use, intrinsic :: iso_fortran_env, only: double => real64
   use M_system, only: natoms, ratom, imass, neigh_b, neigh_j, neighn, neigh_self, numorb_max, sp_mat, Qin, rho, rho_off, rhoij_off, &
     & s_mat, arhoij_off, arho_off, arhopij_off, arhop_off, rhop_off, rhopij_off, xl, fotxc_ca
-  use M_fdata, only: num_orb, nssh, lssh, Qneutral, nsh_max, TWOCENTER_VXC_A, TWOCENTER_VXC_L, TWOCENTER_VXC_R
+  use M_fdata, only: num_orb, nssh, lssh, Qneutral, nsh_max, TWOCENTER_VXC_0, TWOCENTER_VXC_L, TWOCENTER_VXC_R
   implicit none
   integer iatom
   integer inu
@@ -84,7 +84,7 @@ subroutine Dassemble_xc_2c ()
      call deps2cent (r1, r2, eps, deps)
      kforce = 1
      isorp = 0
-     interaction = TWOCENTER_VXC_A
+     interaction = TWOCENTER_VXC_0
      in3 = in2
      call doscentros (interaction, isorp, kforce, in1, in2, in3, y, eps, deps, bcxcx, bcxcpx)
      do inu = 1, num_orb(in3)
