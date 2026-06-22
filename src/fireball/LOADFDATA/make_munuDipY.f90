@@ -97,6 +97,7 @@ subroutine make_munuDipY ()
             index = index + 1
             muDipY(index,in1,in2) = n1
             nuDipY(index,in1,in2) = n2 - 1
+            index = index + 1
             muDipY(index,in1,in2) = n1 + 2
             nuDipY(index,in1,in2) = n2 - 1
           end if
