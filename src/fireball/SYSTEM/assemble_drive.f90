@@ -48,8 +48,11 @@ subroutine assemble_drive()
   call assemble_olsxc_on ()
 
   
-  if (idipole .eq. 0) call assemble_ca_2c ()
-  if (idipole .eq. 1) call assemble_ca_2c_dip ()
+  ! Coulomb/Ewald (vca, ewaldsr) solo en Kscf=1: en Kscf>1 buildh usa g_h.dQ congelado
+  if (Kscf .eq. 1) then
+    if (idipole .eq. 0) call assemble_ca_2c ()
+    if (idipole .eq. 1) call assemble_ca_2c_dip ()
+  end if
 
   !call assemble_zw_on_na() !AQUI vxc = 0.0d0
   !call assemble_zw_off_na() !AQUI
@@ -67,10 +70,13 @@ subroutine assemble_drive()
       ewaldqmmm = 0.0d0
     end if
   end if
-  if (idipole .eq. 0) call assemble_ca_3c ()
-  if (idipole .eq. 1) call assemble_ca_3c_dip ()
-  if (idipole .eq. 0) call assemble_lr ()
-  if (idipole .eq. 1) call assemble_lr_dip ()
+  ! Coulomb 3c / Ewald LR (vca 3c, ewaldlr) solo en Kscf=1; en Kscf>1 via g_h.dQ congelado
+  if (Kscf .eq. 1) then
+    if (idipole .eq. 0) call assemble_ca_3c ()
+    if (idipole .eq. 1) call assemble_ca_3c_dip ()
+    if (idipole .eq. 0) call assemble_lr ()
+    if (idipole .eq. 1) call assemble_lr_dip ()
+  end if
 
   !call assemble_zw_3c_ct() !AQUI
 
