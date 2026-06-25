@@ -46,7 +46,7 @@ subroutine assemble_ca_2c_dip ()
 
   vca = 0.0d0
   ewaldsr = 0.0d0
-  if (Kscf .eq. 1 .and. iqout .eq. 6) then
+  if (Kscf .eq. 1) then
     g_h  = 0.0d0
   end if
   do iatom = 1,natoms
@@ -100,7 +100,7 @@ subroutine assemble_ca_2c_dip ()
             emnpl(imu,inu) =  dq2*(s_mat(imu,inu,matom,iatom)/y) + dq2*(dterm/(y*y*y))
             emnpl_noq(imu,inu) =  (s_mat(imu,inu,matom,iatom)/y) + (dterm/(y*y*y))
             ewaldsr(imu,inu,matom,iatom) =  ewaldsr(imu,inu,matom,iatom) + emnpl(imu,inu)*eq2
-            if (Kscf .eq. 1 .and. iqout .eq. 6) then
+            if (Kscf .eq. 1) then
               do issh = 1, nssh(in2)
                 g_h(get_shell_ofatom_issh(jatom,issh),imu,inu,matom,iatom)  =  g_h(get_shell_ofatom_issh(jatom,issh),imu,inu,matom,iatom) - emnpl_noq(imu,inu)*eq2
               end do 
@@ -120,7 +120,7 @@ subroutine assemble_ca_2c_dip ()
         do inu = 1, num_orb(in3)
           do imu = 1, num_orb(in1)
             bcca(imu,inu) = bcca(imu,inu) + bccax(imu,inu)*dxn
-            if (Kscf .eq. 1 .and. iqout .eq. 6) then
+            if (Kscf .eq. 1) then
               g_h(get_shell_ofatom_issh(jatom,isorp),imu,inu,matom,iatom)  =  g_h(get_shell_ofatom_issh(jatom,isorp),imu,inu,matom,iatom) + (stn1*bccax(imu,inu) + stn2*emnpl_noq(imu,inu))*eq2
             end if
           end do
@@ -148,7 +148,7 @@ subroutine assemble_ca_2c_dip ()
           do inu = 1, num_orb(in3)
             do imu = 1, num_orb(in1)
               bcca(imu,inu) = bcca(imu,inu) + dxn*bccax(imu,inu)
-              if (Kscf .eq. 1 .and. iqout .eq. 6) then
+              if (Kscf .eq. 1) then
                 g_h(get_shell_ofatom_issh(iatom,isorp),imu,inu,ineigh,iatom)  =  g_h(get_shell_ofatom_issh(iatom,isorp),imu,inu,ineigh,iatom) + bccax(imu,inu)*eq2
               end if
             end do
@@ -162,7 +162,7 @@ subroutine assemble_ca_2c_dip ()
           do inu = 1, num_orb(in3)
             do imu = 1, num_orb(in1)
               bcca(imu,inu) = bcca(imu,inu) + dxn*bccax(imu,inu)
-              if (Kscf .eq. 1 .and. iqout .eq. 6) then
+              if (Kscf .eq. 1) then
                 g_h(get_shell_ofatom_issh(jatom,isorp),imu,inu,ineigh,iatom)  =  g_h(get_shell_ofatom_issh(jatom,isorp),imu,inu,ineigh,iatom) + bccax(imu,inu)*eq2
               end if
             end do

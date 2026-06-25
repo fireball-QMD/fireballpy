@@ -162,7 +162,7 @@ subroutine assemble_ca_3c_dip ()
               emnpl(imu,inu) = dq3*sterm/x + dq3*dterm/(x*x*x)           
               emnpl_noq(imu,inu) = sterm/x + dterm/(x*x*x)           
               ewaldsr(imu,inu,mneigh,iatom) = ewaldsr(imu,inu,mneigh,iatom) + emnpl(imu,inu)*eq2
-              if (Kscf .eq. 1 .and. iqout .eq. 6) then
+              if (Kscf .eq. 1) then
                 do issh = 1, nssh(indna)
                   g_h(get_shell_ofatom_issh(ialp,issh),imu,inu,mneigh,iatom)  =  g_h(get_shell_ofatom_issh(ialp,issh),imu,inu,mneigh,iatom) - emnpl_noq(imu,inu)*eq2
                   g_h(get_shell_ofatom_issh(ialp,issh),inu,imu,jneigh,jatom)  =  g_h(get_shell_ofatom_issh(ialp,issh),imu,inu,mneigh,iatom)
@@ -180,7 +180,7 @@ subroutine assemble_ca_3c_dip ()
           do inu = 1, num_orb(in2)
             do imu = 1, num_orb(in1)
               bcca(imu,inu) = bcca(imu,inu) + bccax(imu,inu)*dxn
-              if (Kscf .eq. 1 .and. iqout .eq. 6) then
+              if (Kscf .eq. 1) then
                 g_h(get_shell_ofatom_issh(ialp,isorp),imu,inu,mneigh,iatom)  =  g_h(get_shell_ofatom_issh(ialp,isorp),imu,inu,mneigh,iatom) + (stn1*bccax(imu,inu) + stn2*emnpl_noq(imu,inu))*eq2
                 g_h(get_shell_ofatom_issh(ialp,isorp),inu,imu,jneigh,jatom)  =  g_h(get_shell_ofatom_issh(ialp,isorp),imu,inu,mneigh,iatom)
               end if

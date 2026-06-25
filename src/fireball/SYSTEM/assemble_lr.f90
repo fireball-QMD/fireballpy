@@ -53,7 +53,7 @@ subroutine assemble_lr ()
             dterm = 0.0d0
           endif
           ewaldlr(imu,inu,ineigh,iatom) = ewaldlr(imu,inu,ineigh,iatom)  + (sterm - dterm)*sub_ewald(iatom)*eq2  + (sterm + dterm)*sub_ewald(jatom)*eq2
-          if (Kscf .eq. 1 .and. iqout .eq. 6) then
+          if (Kscf .eq. 1) then
             do katom = 1,natoms
               in3 = imass(katom)
               do issh = 1, nssh(in3)

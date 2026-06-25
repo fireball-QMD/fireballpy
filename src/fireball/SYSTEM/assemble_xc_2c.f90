@@ -80,7 +80,7 @@ subroutine assemble_xc_2c ()
           do inu = 1, num_orb(in3)
             do imu = 1, num_orb(in1)
               vxc(imu,inu,ineigh,iatom) = vxc(imu,inu,ineigh,iatom) + rhomx(imu,inu)*dqi(isorp)
-              if (Kscf .eq. 1 .and. iqout .eq. 6) then
+              if (Kscf .eq. 1) then
                 g_xc(get_shell_ofatom_issh(iatom,isorp),imu,inu,ineigh,iatom) = g_xc(get_shell_ofatom_issh(iatom,isorp),imu,inu,ineigh,iatom) + rhomx(imu,inu)
               end if
             end do
@@ -93,7 +93,7 @@ subroutine assemble_xc_2c ()
           do inu = 1, num_orb(in3)
             do imu = 1, num_orb(in1)
               vxc(imu,inu,ineigh,iatom) = vxc(imu,inu,ineigh,iatom) + rhomx(imu,inu)*dqj(isorp)
-              if (Kscf .eq. 1 .and. iqout .eq. 6) then
+              if (Kscf .eq. 1) then
                 g_xc(get_shell_ofatom_issh(jatom,isorp),imu,inu,ineigh,iatom) = g_xc(get_shell_ofatom_issh(jatom,isorp),imu,inu,ineigh,iatom) + rhomx(imu,inu)
               end if
             end do

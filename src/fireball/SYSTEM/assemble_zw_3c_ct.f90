@@ -141,7 +141,7 @@ subroutine assemble_zw_3c_ct ()
               A=0.5*s_mat(imu,inu,mneigh,iatom)-dip(imu,inu,mneigh,iatom)/y
               B=0.5*s_mat(imu,inu,mneigh,iatom)+dip(imu,inu,mneigh,iatom)/y  
               bccax(imu,inu) = bccax(imu,inu)+ (A*g2nu(isorp,issh1,ineigh1,ialp)+B*g2nu(isorp,issh2,ineigh2,ialp))*dxn
-              if (Kscf .eq. 1 .and. iqout .eq. 6) then 
+              if (Kscf .eq. 1) then 
                 g_h(get_shell_ofatom_issh(ialp,isorp),imu,inu,mneigh,iatom) = g_h(get_shell_ofatom_issh(ialp,isorp),imu,inu,mneigh,iatom) + A*g2nu(isorp,issh1,ineigh1,ialp)+B*g2nu(isorp,issh2,ineigh2,ialp)
                 g_h(get_shell_ofatom_issh(ialp,isorp),inu,imu,jneigh,jatom) = g_h(get_shell_ofatom_issh(ialp,isorp),imu,inu,mneigh,iatom)
             end if 

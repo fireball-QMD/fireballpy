@@ -69,7 +69,7 @@ subroutine assemble_lr_dip ()
               emnpl(imu,inu) = dq3*sterm/x + dq3*dterm/(x*x*x)
               ewaldlr(imu,inu,ineigh,iatom) = ewaldlr(imu,inu,ineigh,iatom)  + emnpl(imu,inu)*eq2
               ewaldlr(inu,imu,jneigh,jatom)  = ewaldlr(imu,inu,ineigh,iatom)
-              if (Kscf .eq. 1 .and. iqout .eq. 6) then
+              if (Kscf .eq. 1) then
                 do issh = 1, nssh(inalp)
                   g_h(get_shell_ofatom_issh(ialp,issh),imu,inu,ineigh,iatom) = g_h(get_shell_ofatom_issh(ialp,issh),imu,inu,ineigh,iatom) + emnpl_noq(imu,inu)*eq2
                   g_h(get_shell_ofatom_issh(ialp,issh),inu,imu,jneigh,jatom) = g_h(get_shell_ofatom_issh(ialp,issh),imu,inu,ineigh,iatom)
@@ -114,7 +114,7 @@ subroutine assemble_lr_dip ()
               emnpl(imu,inu) = dq3*sterm/x + dq3*dterm/(x*x*x)
               emnpl_noq(imu,inu) = sterm/x + dterm/(x*x*x)
               ewaldlr(imu,inu,ineigh,iatom) = ewaldlr(imu,inu,ineigh,iatom)  + emnpl(imu,inu)*eq2
-              if (Kscf .eq. 1 .and. iqout .eq. 6) then
+              if (Kscf .eq. 1) then
                 do issh = 1, nssh(inalp)
                   g_h(get_shell_ofatom_issh(ialp,issh),imu,inu,ineigh,iatom) =  g_h(get_shell_ofatom_issh(ialp,issh),imu,inu,ineigh,iatom) + emnpl_noq(imu,inu)*eq2
                   ! symmetrize AQUI esta comentado ¿?

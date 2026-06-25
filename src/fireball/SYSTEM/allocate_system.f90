@@ -9,7 +9,7 @@ subroutine allocate_system ()
     & neighPP_j, sVNL, spVNL, sp_mat, tp_mat, dipcm, dippcm, dippc, vnl, neighPP_comn, neighPP_comm, neighPP_comj, neighPP_comb, &
     & neighPP_max, Qin, Qinmixer, Qout, Qoutmixer, dq, Q_partial, QLowdin_TOT, QMulliken_TOT, dq_DP, vxc, vxc_ca, rho, rho_off, &
     & rhoij_off, s_mat, sm_mat, spm_mat, rho_on, arho_on, rhoi_on, arhoi_on, arhop_on, rhop_on, arhoij_off, arho_off, arhopij_off, &
-    & arhop_off, rhop_off, rhopij_off, vca, ewaldlr, h_mat, t_mat, vna, ewaldqmmm, dipc, xl, fotnl, fanl, fotna, fana, faxc, faxc_ca, &
+    & arhop_off, rhop_off, rhopij_off, vca, ewaldlr, h_mat, h_mat0, t_mat, vna, ewaldqmmm, dipc, xl, fotnl, fanl, fotna, fana, faxc, faxc_ca, &
     & dxcdcc, ft, dusr, fotxc_ca, faca, fotca, f3naa, f3nab, f3nac, f3nla, f3nlb, f3nlc, f3caa, f3cab, f3cac, flrew, f3xca_ca, &
     & f3xcb_ca, f3xcc_ca, f3xca, f3xcb, f3xcc, flrew_qmmm, fro, ftot, dxcv, norbitals_new, qstate, bbnkre, bbnkim, igamma, &
     & g_h, g_xc, f_xc, exc_aa, vxc_aa, get_orb_ofshell, get_l_ofshell, get_issh_ofshell, get_iatom_ofshell, get_shell_oforb, orb2shell, &
@@ -401,6 +401,8 @@ subroutine allocate_system ()
   allocate (t_mat (numorb_max, numorb_max, neigh_max, natoms))
   if (allocated(h_mat)) deallocate(h_mat)
   allocate (h_mat (numorb_max, numorb_max, neigh_max, natoms))
+  if (allocated(h_mat0)) deallocate(h_mat0)
+  allocate (h_mat0 (numorb_max, numorb_max, neigh_max, natoms))
   if (allocated(sp_mat)) deallocate(sp_mat)
   allocate (sp_mat (3, numorb_max, numorb_max, neigh_max, natoms))
   if (allocated(tp_mat)) deallocate(tp_mat)

@@ -211,6 +211,7 @@ module M_system
   real(double), dimension (:, :, :, :), allocatable :: vca
   real(double), dimension (:, :, :, :), allocatable :: ewaldlr
   real(double), dimension (:, :, :, :), allocatable :: h_mat
+  real(double), dimension (:, :, :, :), allocatable :: h_mat0   ! h^0_{mu nu}: H a cargas neutras (Kscf=1, dQ=0)
   real(double), dimension (:, :, :, :), allocatable :: t_mat
   real(double), dimension (:, :, :, :), allocatable :: vna
   real(double), dimension (:, :, :, :), allocatable :: ewaldqmmm
