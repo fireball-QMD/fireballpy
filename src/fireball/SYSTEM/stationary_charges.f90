@@ -9,7 +9,7 @@ subroutine stationary_charges()
   implicit none
   integer imu, inu          
   integer in1, in2          
-  integer issh, jssh, alpha_issh, beta_iatom
+  integer issh, jssh, beta_iatom
   integer ineigh ,jatom         
   integer i,j
   real(double),dimension(nssh_tot,nssh_tot) :: A
@@ -17,7 +17,7 @@ subroutine stationary_charges()
   real(double) :: Ep2
   integer issh1, mu_min, mu_max, l, inumorb
   real(double) aux, ztot_aux
-  integer :: beta, alpha, alpha_iatom, ina, matom, iatom 
+  integer :: beta, alpha, ina, matom, iatom
   integer :: alpha_iatom2, alpha2, nssh_tot2 
   integer, dimension (:), allocatable :: mapindex, ipiv
   integer :: info, lwork 
@@ -101,8 +101,6 @@ subroutine stationary_charges()
         & - f_xc_shell(beta , alpha ) - f_xc_shell(alpha, beta  ))!&
       endif !fix_shell_charge(beta) = 1
     end do !beta
-    alpha_iatom = get_iatom_ofshell(alpha)
-    alpha_issh = get_issh_ofshell(alpha)
     do iatom = 1, natoms
       in1 = imass(iatom) 
       do ineigh = 1, neighn(iatom)
@@ -110,7 +108,7 @@ subroutine stationary_charges()
         in2 = imass(jatom)
         do imu = 1, num_orb(in1)
           do inu = 1, num_orb(in2)
-            aux = g_h(imu,inu,alpha_issh,alpha_iatom,ineigh,iatom) + g_xc(imu,inu,alpha_issh,alpha_iatom,ineigh,iatom)
+            aux = g_h(alpha,imu,inu,ineigh,iatom) + g_xc(alpha,imu,inu,ineigh,iatom)
             B(mapindex(alpha)) = B(mapindex(alpha)) +  rho(imu,inu,ineigh,iatom)*aux
           end do ! inu
         end do ! imu
@@ -220,7 +218,7 @@ subroutine stationary_charges()
             do kssh = 1, nssh(imass(katom))
               beta = get_shell_ofatom_issh(katom,kssh)
               g_h_shell(alpha,beta) = g_h_shell(alpha,beta) +&
-              & g_h(imu,imu, kssh, katom, matom, iatom) / (2*get_l_ofshell(alpha) + 1)
+              & g_h(beta,imu,imu, matom, iatom) / (2*get_l_ofshell(alpha) + 1)
             end do
           end do
         end do

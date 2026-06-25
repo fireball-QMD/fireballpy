@@ -1,6 +1,6 @@
 subroutine assemble_zw_3c_ct ()
   use, intrinsic :: iso_fortran_env, only: double => real64
-  use M_system, only: numorb_max, natoms, neigh_comn, neigh_comm, neigh_comj, neigh_comb, neigh_com_ng, neigh_back, imass, ratom, xl, Qin, orb2shell, s_mat, dip, vxc_ca, g_h, iqout, Kscf, neigh_max
+  use M_system, only: numorb_max, natoms, neigh_comn, neigh_comm, neigh_comj, neigh_comb, neigh_com_ng, neigh_back, imass, ratom, xl, Qin, orb2shell, s_mat, dip, vxc_ca, g_h, get_shell_ofatom_issh, iqout, Kscf, neigh_max
   use M_fdata, only: nssh, Qneutral, num_orb, nsh_max
   implicit none
   integer ialp
@@ -142,8 +142,8 @@ subroutine assemble_zw_3c_ct ()
               B=0.5*s_mat(imu,inu,mneigh,iatom)+dip(imu,inu,mneigh,iatom)/y  
               bccax(imu,inu) = bccax(imu,inu)+ (A*g2nu(isorp,issh1,ineigh1,ialp)+B*g2nu(isorp,issh2,ineigh2,ialp))*dxn
               if (Kscf .eq. 1 .and. iqout .eq. 6) then 
-                g_h(imu,inu,isorp,ialp,mneigh,iatom) = g_h(imu,inu,isorp,ialp,mneigh,iatom) + A*g2nu(isorp,issh1,ineigh1,ialp)+B*g2nu(isorp,issh2,ineigh2,ialp)
-                g_h(inu,imu,isorp,ialp,jneigh,jatom) = g_h(imu,inu,isorp,ialp,mneigh,iatom)
+                g_h(get_shell_ofatom_issh(ialp,isorp),imu,inu,mneigh,iatom) = g_h(get_shell_ofatom_issh(ialp,isorp),imu,inu,mneigh,iatom) + A*g2nu(isorp,issh1,ineigh1,ialp)+B*g2nu(isorp,issh2,ineigh2,ialp)
+                g_h(get_shell_ofatom_issh(ialp,isorp),inu,imu,jneigh,jatom) = g_h(get_shell_ofatom_issh(ialp,isorp),imu,inu,mneigh,iatom)
             end if 
             end do 
           end do 

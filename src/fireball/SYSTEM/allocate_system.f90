@@ -571,9 +571,9 @@ subroutine allocate_system ()
   end if
 
   if (allocated(g_h)) deallocate(g_h)
-  allocate (g_h(numorb_max,numorb_max,nsh_max,natoms,neigh_max,natoms))
+  allocate (g_h(nssh_tot,numorb_max,numorb_max,neigh_max,natoms))
   if (allocated(g_xc)) deallocate(g_xc)
-  allocate (g_xc(numorb_max,numorb_max,nsh_max,natoms,neigh_max,natoms))
+  allocate (g_xc(nssh_tot,numorb_max,numorb_max,neigh_max,natoms))
   if (allocated(f_xc)) deallocate(f_xc)
   allocate (f_xc(numorb_max,nsh_max,natoms,neigh_max,natoms))
   if (allocated(exc_aa)) deallocate(exc_aa)

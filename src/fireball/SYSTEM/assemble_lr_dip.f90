@@ -2,7 +2,7 @@ subroutine assemble_lr_dip ()
   use, intrinsic :: iso_fortran_env, only: double => real64
   use M_constants, only: eq2
   use M_system, only: natoms, ratom, imass, neigh_self, neigh_pair_a1, neigh_pair_a2, neigh_pair_n1, neigh_pair_n2, &
-    & numorb_max, tot_pairs, Qin, s_mat, ewaldlr, dipc, g_h, iqout, kscf
+    & numorb_max, tot_pairs, Qin, s_mat, ewaldlr, dipc, g_h, get_shell_ofatom_issh, iqout, kscf
   use M_fdata, only: nssh, Qneutral, num_orb
   implicit none
   integer iatom
@@ -71,8 +71,8 @@ subroutine assemble_lr_dip ()
               ewaldlr(inu,imu,jneigh,jatom)  = ewaldlr(imu,inu,ineigh,iatom)
               if (Kscf .eq. 1 .and. iqout .eq. 6) then
                 do issh = 1, nssh(inalp)
-                  g_h(imu,inu,issh,ialp,ineigh,iatom) = g_h(imu,inu,issh,ialp,ineigh,iatom) + emnpl_noq(imu,inu)*eq2
-                  g_h(inu,imu,issh,ialp,jneigh,jatom) = g_h(imu,inu,issh,ialp,ineigh,iatom)
+                  g_h(get_shell_ofatom_issh(ialp,issh),imu,inu,ineigh,iatom) = g_h(get_shell_ofatom_issh(ialp,issh),imu,inu,ineigh,iatom) + emnpl_noq(imu,inu)*eq2
+                  g_h(get_shell_ofatom_issh(ialp,issh),inu,imu,jneigh,jatom) = g_h(get_shell_ofatom_issh(ialp,issh),imu,inu,ineigh,iatom)
                 end do 
               end if
             end do !end do imu = 1, num_orb(in1)
@@ -116,7 +116,7 @@ subroutine assemble_lr_dip ()
               ewaldlr(imu,inu,ineigh,iatom) = ewaldlr(imu,inu,ineigh,iatom)  + emnpl(imu,inu)*eq2
               if (Kscf .eq. 1 .and. iqout .eq. 6) then
                 do issh = 1, nssh(inalp)
-                  g_h(imu,inu,issh,ialp,ineigh,iatom) =  g_h(imu,inu,issh,ialp,ineigh,iatom) + emnpl_noq(imu,inu)*eq2
+                  g_h(get_shell_ofatom_issh(ialp,issh),imu,inu,ineigh,iatom) =  g_h(get_shell_ofatom_issh(ialp,issh),imu,inu,ineigh,iatom) + emnpl_noq(imu,inu)*eq2
                   ! symmetrize AQUI esta comentado ¿?
                   !gvhxc(inu,imu,issh,ialp,jneigh,jatom) = gvhxc(imu,inu,issh,ialp,ineigh,iatom)  
                  end do 

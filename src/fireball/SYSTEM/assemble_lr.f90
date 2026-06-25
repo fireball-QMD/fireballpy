@@ -2,7 +2,7 @@ subroutine assemble_lr ()
   use, intrinsic :: iso_fortran_env, only: double => real64
   use M_constants, only: eq2
   use M_system, only: natoms, ratom, imass, ewald, dip, neigh_b, neigh_j, neighn, Qin, s_mat, ewaldlr, xl, &
-                    & g_h, iqout, kscf
+                    & g_h, get_shell_ofatom_issh, iqout, kscf
   use M_fdata, only: nssh,Qneutral,num_orb
   implicit none
   integer iatom
@@ -57,7 +57,7 @@ subroutine assemble_lr ()
             do katom = 1,natoms
               in3 = imass(katom)
               do issh = 1, nssh(in3)
-                g_h(imu,inu,issh,katom,ineigh,iatom) = g_h(imu,inu,issh,katom,ineigh,iatom) + (sterm - dterm)*ewald(iatom,katom)*eq2 + (sterm + dterm)*ewald(jatom,katom)*eq2 
+                g_h(get_shell_ofatom_issh(katom,issh),imu,inu,ineigh,iatom) = g_h(get_shell_ofatom_issh(katom,issh),imu,inu,ineigh,iatom) + (sterm - dterm)*ewald(iatom,katom)*eq2 + (sterm + dterm)*ewald(jatom,katom)*eq2
               end do
             end do
           endif

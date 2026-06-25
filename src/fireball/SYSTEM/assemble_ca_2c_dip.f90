@@ -3,7 +3,7 @@ subroutine assemble_ca_2c_dip ()
   use, intrinsic :: iso_fortran_env, only: double => real64
   use M_constants, only: eq2
   use M_system, only: smt_elect, natoms, ratom, imass, ewaldsr, neigh_b, neigh_j, neighn, neigh_self, numorb_max, Qin, &
-    & s_mat, vca, dipc, xl,  g_h, Kscf, iqout
+    & s_mat, vca, dipc, xl,  g_h, get_shell_ofatom_issh, Kscf, iqout
   use M_fdata, only: nssh,rcutoff,Qneutral,num_orb, TWOCENTER_VNA_A, TWOCENTER_VNA_L, TWOCENTER_VNA_R
   implicit none
   integer iatom
@@ -102,7 +102,7 @@ subroutine assemble_ca_2c_dip ()
             ewaldsr(imu,inu,matom,iatom) =  ewaldsr(imu,inu,matom,iatom) + emnpl(imu,inu)*eq2
             if (Kscf .eq. 1 .and. iqout .eq. 6) then
               do issh = 1, nssh(in2)
-                g_h(imu,inu,issh,jatom,matom,iatom)  =  g_h(imu,inu,issh,jatom,matom,iatom) - emnpl_noq(imu,inu)*eq2
+                g_h(get_shell_ofatom_issh(jatom,issh),imu,inu,matom,iatom)  =  g_h(get_shell_ofatom_issh(jatom,issh),imu,inu,matom,iatom) - emnpl_noq(imu,inu)*eq2
               end do 
             end if  
           end do
@@ -121,7 +121,7 @@ subroutine assemble_ca_2c_dip ()
           do imu = 1, num_orb(in1)
             bcca(imu,inu) = bcca(imu,inu) + bccax(imu,inu)*dxn
             if (Kscf .eq. 1 .and. iqout .eq. 6) then
-              g_h(imu,inu,isorp,jatom,matom,iatom)  =  g_h(imu,inu,isorp,jatom,matom,iatom) + (stn1*bccax(imu,inu) + stn2*emnpl_noq(imu,inu))*eq2
+              g_h(get_shell_ofatom_issh(jatom,isorp),imu,inu,matom,iatom)  =  g_h(get_shell_ofatom_issh(jatom,isorp),imu,inu,matom,iatom) + (stn1*bccax(imu,inu) + stn2*emnpl_noq(imu,inu))*eq2
             end if
           end do
         end do
@@ -149,7 +149,7 @@ subroutine assemble_ca_2c_dip ()
             do imu = 1, num_orb(in1)
               bcca(imu,inu) = bcca(imu,inu) + dxn*bccax(imu,inu)
               if (Kscf .eq. 1 .and. iqout .eq. 6) then
-                g_h(imu,inu,isorp,iatom,ineigh,iatom)  =  g_h(imu,inu,isorp,iatom,ineigh,iatom) + bccax(imu,inu)*eq2
+                g_h(get_shell_ofatom_issh(iatom,isorp),imu,inu,ineigh,iatom)  =  g_h(get_shell_ofatom_issh(iatom,isorp),imu,inu,ineigh,iatom) + bccax(imu,inu)*eq2
               end if
             end do
           end do
@@ -163,7 +163,7 @@ subroutine assemble_ca_2c_dip ()
             do imu = 1, num_orb(in1)
               bcca(imu,inu) = bcca(imu,inu) + dxn*bccax(imu,inu)
               if (Kscf .eq. 1 .and. iqout .eq. 6) then
-                g_h(imu,inu,isorp,jatom,ineigh,iatom)  =  g_h(imu,inu,isorp,jatom,ineigh,iatom) + bccax(imu,inu)*eq2
+                g_h(get_shell_ofatom_issh(jatom,isorp),imu,inu,ineigh,iatom)  =  g_h(get_shell_ofatom_issh(jatom,isorp),imu,inu,ineigh,iatom) + bccax(imu,inu)*eq2
               end if
             end do
           end do

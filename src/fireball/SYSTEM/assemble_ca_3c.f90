@@ -2,7 +2,7 @@ subroutine assemble_ca_3c ()
   use, intrinsic :: iso_fortran_env, only: double => real64
   use M_constants, only: eq2
   use M_system, only: smt_elect, natoms, ratom, imass, neigh_max, ewaldsr, dip, neigh_b, neigh_j, neighn, neigh_comb, neigh_comj, &
-    & neigh_comm, neigh_comn, neigh_back, neigh_self, numorb_max, Qin, s_mat, vca, xl,  g_h, kscf, iqout
+    & neigh_comm, neigh_comn, neigh_back, neigh_self, numorb_max, Qin, s_mat, vca, xl,  g_h, get_shell_ofatom_issh, kscf, iqout
   use M_fdata, only: nssh, Qneutral, rcutoff, lssh, num_orb
   implicit none
   integer ialp
@@ -187,8 +187,8 @@ subroutine assemble_ca_3c ()
             ewaldsr(imu,inu,mneigh,iatom) =  ewaldsr(imu,inu,mneigh,iatom) + emnpl(imu,inu)*eq2
               if (Kscf .eq. 1 .and. iqout .eq. 6) then
                 do issh = 1, nssh(indna)
-                  g_h(imu,inu,issh,ialp,mneigh,iatom)  =  g_h(imu,inu,issh,ialp,mneigh,iatom) - emnpl_noq(imu,inu)*eq2
-                  g_h(inu,imu,issh,ialp,jneigh,jatom)  =  g_h(imu,inu,issh,ialp,mneigh,iatom)
+                  g_h(get_shell_ofatom_issh(ialp,issh),imu,inu,mneigh,iatom)  =  g_h(get_shell_ofatom_issh(ialp,issh),imu,inu,mneigh,iatom) - emnpl_noq(imu,inu)*eq2
+                  g_h(get_shell_ofatom_issh(ialp,issh),inu,imu,jneigh,jatom)  =  g_h(get_shell_ofatom_issh(ialp,issh),imu,inu,mneigh,iatom)
                 end do
               end if
             ewaldsr(inu,imu,jneigh,jatom)=ewaldsr(imu,inu,mneigh,iatom)
@@ -204,8 +204,8 @@ subroutine assemble_ca_3c ()
             do imu = 1, num_orb(in1)
               bcca(imu,inu) = bcca(imu,inu) + bccax(imu,inu)*dxn
               if (Kscf .eq. 1 .and. iqout .eq. 6) then
-                g_h(imu,inu,isorp,ialp,mneigh,iatom)  =  g_h(imu,inu,isorp,ialp,mneigh,iatom) + (stn1(imu,inu)*bccax(imu,inu) + stn2(imu,inu)*emnpl_noq(imu,inu))*eq2
-                g_h(inu,imu,isorp,ialp,jneigh,jatom)  =  g_h(imu,inu,isorp,ialp,mneigh,iatom)
+                g_h(get_shell_ofatom_issh(ialp,isorp),imu,inu,mneigh,iatom)  =  g_h(get_shell_ofatom_issh(ialp,isorp),imu,inu,mneigh,iatom) + (stn1(imu,inu)*bccax(imu,inu) + stn2(imu,inu)*emnpl_noq(imu,inu))*eq2
+                g_h(get_shell_ofatom_issh(ialp,isorp),inu,imu,jneigh,jatom)  =  g_h(get_shell_ofatom_issh(ialp,isorp),imu,inu,mneigh,iatom)
               end if
             end do
           end do

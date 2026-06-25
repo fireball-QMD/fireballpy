@@ -277,8 +277,8 @@ module M_system
 
   real(double), dimension(3, 3, 5) :: amat
   
-  real(double), dimension (:,:,:,:,:,:), allocatable :: g_h
-  real(double), dimension (:,:,:,:,:,:), allocatable :: g_xc  
+  real(double), dimension (:,:,:,:,:), allocatable :: g_h
+  real(double), dimension (:,:,:,:,:), allocatable :: g_xc
   real(double), dimension (:,:,:,:,:), allocatable :: f_xc
   real(double), dimension (:,:,:,:), allocatable :: exc_aa
   real(double), dimension (:,:,:,:), allocatable :: vxc_aa

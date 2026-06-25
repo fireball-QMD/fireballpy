@@ -1,6 +1,6 @@
 subroutine assemble_xc_2c ()
   use, intrinsic :: iso_fortran_env, only: double => real64
-  use M_system, only: numorb_max, natoms, neigh_self, ratom, imass, neighn, neigh_b, neigh_j, xl, vxc, rho_off, rhoij_off, s_mat, Kscf, g_xc, Qin, iqout
+  use M_system, only: numorb_max, natoms, neigh_self, ratom, imass, neighn, neigh_b, neigh_j, xl, vxc, rho_off, rhoij_off, s_mat, Kscf, g_xc, get_shell_ofatom_issh, Qin, iqout
   use M_fdata, only: num_orb, nssh, nsh_max, Qneutral, TWOCENTER_VXC_0, TWOCENTER_VXC_L, TWOCENTER_VXC_R
   implicit none
   integer iatom
@@ -81,7 +81,7 @@ subroutine assemble_xc_2c ()
             do imu = 1, num_orb(in1)
               vxc(imu,inu,ineigh,iatom) = vxc(imu,inu,ineigh,iatom) + rhomx(imu,inu)*dqi(isorp)
               if (Kscf .eq. 1 .and. iqout .eq. 6) then
-                g_xc(imu,inu,isorp,iatom,ineigh,iatom) = g_xc(imu,inu,isorp,iatom,ineigh,iatom) + rhomx(imu,inu)
+                g_xc(get_shell_ofatom_issh(iatom,isorp),imu,inu,ineigh,iatom) = g_xc(get_shell_ofatom_issh(iatom,isorp),imu,inu,ineigh,iatom) + rhomx(imu,inu)
               end if
             end do
           end do
@@ -94,7 +94,7 @@ subroutine assemble_xc_2c ()
             do imu = 1, num_orb(in1)
               vxc(imu,inu,ineigh,iatom) = vxc(imu,inu,ineigh,iatom) + rhomx(imu,inu)*dqj(isorp)
               if (Kscf .eq. 1 .and. iqout .eq. 6) then
-                g_xc(imu,inu,isorp,jatom,ineigh,iatom) = g_xc(imu,inu,isorp,jatom,ineigh,iatom) + rhomx(imu,inu)
+                g_xc(get_shell_ofatom_issh(jatom,isorp),imu,inu,ineigh,iatom) = g_xc(get_shell_ofatom_issh(jatom,isorp),imu,inu,ineigh,iatom) + rhomx(imu,inu)
               end if
             end do
           end do
