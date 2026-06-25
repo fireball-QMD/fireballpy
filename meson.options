@@ -10,4 +10,4 @@ option(
   value: 'openblas',
   description: 'option for LAPACK library switching',
 )
-option('mpi', type: 'boolean', value: true, description: 'option for MPI compiling')
+option('mpi', type: 'boolean', value: false, description: 'option for MPI compiling')

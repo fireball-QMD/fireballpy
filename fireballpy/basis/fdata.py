@@ -319,19 +319,32 @@ class Element:
                 raise_err(ValueError(f'{err} Must be <= 1.'))
         self._cmix = np.ascontiguousarray(value, dtype=np.float64)
 
-    def pp_filenames(self, output: pathlib.Path) -> None:
+    def pp_filenames(self, output: pathlib.Path, pp_path: list[str] | None) -> None:
         symchar = str(self._nznuc).rjust(3, '0')
 
-        # Download if needed
-        self.ppfile = f'{symchar}.pp'
-        ppfolder = get_data_from_url(PPURL, 'ppfiles', 'Pseudopotential')
-        ppfile = os.path.join(ppfolder, self.symbol, str(self.ioption), self.ppfile)
+        if pp_path is None:
+            # Download if needed
+            self.ppfile = f'{symchar}.pp'
+            ppfolder = get_data_from_url(PPURL, 'ppfiles', 'Pseudopotential')
+            ppfile = os.path.join(ppfolder, self.symbol, str(self.ioption), self.ppfile)
 
-        # Use normal file if there is no ion
-        self.ppionfile = f'{symchar}++.pp'
-        ppionfile = os.path.join(ppfolder, self.symbol, str(self.ioption), self.ppionfile)
-        if not os.path.isfile(ppionfile):
-            ppionfile = ppfile
+            # Use normal file if there is no ion
+            self.ppionfile = f'{symchar}++.pp'
+            ppionfile = os.path.join(ppfolder, self.symbol, str(self.ioption), self.ppionfile)
+            if not os.path.isfile(ppionfile):
+                ppionfile = ppfile
+        else:
+            if len(pp_path) == 0 or len(pp_path) > 2:
+                raise_err(ValueError('At most two ppfiles are allowed (neutral and excited).'))
+            ppfile = pp_path[0]
+            self.ppfile = os.path.basename(ppfile)
+            if len(pp_path) == 1:
+                ext = os.path.splitext(ppfile)
+                ppionfile = ppfile
+                self.ppionfile = os.path.basename(ext[0] + '++' + ext[1])
+            else:
+                ppionfile = pp_path[1]
+                self.ppionfile = os.path.basename(ppionfile)
 
         # Copy them
         shutil.copy2(ppfile, output / self.ppfile)
@@ -395,7 +408,8 @@ def wavefunctions(element: Annotated[str, Parameter(group=args_grp)],
                   radius: Annotated[list[float], Parameter(group=parms_grp, name=['-r', '--radius'])],
                   nelectrons_neutral: Annotated[Optional[list[float]], Parameter(group=parms_grp, name=['-n0', '--nelectrons-neutral'])]=None,
                   valence_pp: Annotated[Optional[float], Parameter(group=parms_grp, name=['-zpp', '--valence-pp'])]=None,
-                  exchange_correlation: Annotated[ECEnum, Parameter(group=args_grp, name=['-ec', '--exchange-correlation'])]=ECEnum.BLYP,
+                  pp_path: Annotated[Optional[list[str]], Parameter(group=parms_grp, consume_multiple=True)]=None,
+                  exchange_correlation: Annotated[ECEnum, Parameter(group=args_grp, name=['-exc', '--exchange-correlation'])]=ECEnum.BLYP,
                   output: Annotated[pathlib.Path, Parameter(validator=Path(exists=False, file_okay=False, dir_okay=True), group=args_grp,
                                                             name=['-o', '--output'])]=pathlib.Path('cinput'),
                   save: Annotated[str | None, Parameter(group=args_grp, name=['-s', '--save'])]=None,
@@ -423,6 +437,8 @@ def wavefunctions(element: Annotated[str, Parameter(group=args_grp)],
     nval_pp: float | None
         Number of electrons considered for the pseudopotential. Increasing will lead to more constrained orbitals.
         [default: atomic number]
+    pp_path: list[str] | None
+        Path for the pseudopotentials. [default: downloaded from the server]
     exchange_correlation: ECEnum
         Exchange-correlation (EC) functional that will be used.
     output: pathlib.Path
@@ -475,7 +491,7 @@ def wavefunctions(element: Annotated[str, Parameter(group=args_grp)],
                 raise_err(ValueError('Exchange-correlation functional must be consistent in same element computations.'))
         else:
             meta[ele.symbol] = {}
-    ele.pp_filenames(output)
+    ele.pp_filenames(output, pp_path)
     ele.wf_filenames()
 
     save_orbs = ''

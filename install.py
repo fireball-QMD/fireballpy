@@ -105,11 +105,12 @@ def main():
     if args.conda:
         pyver = '.'.join(sys.version.split('.')[0:2])
         lib_folder = os.path.join(sys.prefix, sys.platlibdir)
-        fpy_folder = os.path.join(lib_folder, 'python' + pyver, 'site-packages', 'fireballpy.libs')
+        fpy_folder = os.path.join(lib_folder, 'python' + pyver, 'site-packages', 'fireballpy')
+        fpylib_folder = os.path.join(lib_folder, 'python' + pyver, 'site-packages', 'fireballpy.libs')
         for lib in ['libfireball.a', 'libbegin.a']:
             if os.path.isfile(os.path.join(lib_folder, lib)):
                 os.remove(os.path.join(lib_folder, lib))
-            os.symlink(os.path.join(fpy_folder, lib), os.path.join(lib_folder, lib))
+            os.symlink(os.path.join(fpylib_folder, lib), os.path.join(lib_folder, lib))
 
         bin_folder = os.path.join(sys.prefix, 'bin')
         if os.path.isfile(os.path.join(bin_folder, 'fdata')):
@@ -121,6 +122,10 @@ def main():
             file.write(fdata)
         os.chmod(os.path.join(bin_folder, 'fdata'), stat.S_IRWXU | stat.S_IRGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH)
 
+        exepath = os.path.join(os.path.split(__file__)[0], 'fireballpy', 'basis', 'create.x')
+        if os.path.isfile(exepath):
+            os.remove(exepath)
+        os.symlink(os.path.join(fpy_folder, 'basis', 'create.x'), exepath)
 
 if __name__ == '__main__':
     main()
