@@ -237,14 +237,14 @@
 ! what you get looks like this: bcna_01_01.14.06.14.dat
 !                           or  xc3c_05_07.06.06.14.dat
         if (interaction .eq. 1) then
-         ftype = 'coutput/bcna'
+         ftype = 'bcna'
         else if (interaction .eq. 2)  then
-         ftype = 'coutput/xc3c'
+         ftype = 'xc3c'
         else if (interaction .eq. 3) then
          if (ispherical) then
-          ftype = 'coutput/deS3'
+          ftype = 'deS3'
          else
-          ftype = 'coutput/den3'
+          ftype = 'den3'
          end if
         end if
  

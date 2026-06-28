@@ -15,4 +15,3 @@ fbpyenv
 .mypy_cache
 .python-version
 fireballpy/version.py
-create.x

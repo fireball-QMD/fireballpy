@@ -22,7 +22,7 @@ from ase.data import atomic_numbers, atomic_names, atomic_masses, chemical_symbo
 
 from fireballpy import __version__ as __fb_version__
 from fireballpy.utils import get_data_from_url, read_wf, read_wf_info, ANGULAR_MOMENTUM, ANGULAR_MOMENTUM_REV
-from fireballpy.basis import __file__ as __basis_file__
+from fireballpy.basis import __path__ as __basis_path__
 from fireballpy.basis._begin import generate_wavefunctions, generate_vnn
 
 PPURL = 'https://fireball.ftmc.uam.es/fireballpy/ppfiles.tar.xz'
@@ -92,24 +92,24 @@ class Element:
         ec: dict[int, dict[str, float]] = {}
         zrem = self.nznuc
         maxn = 0
-        l = ''
+        angmom = ''
         for orb in ELECTRONIC_CONFIG:
             n = int(orb[0])
-            l = orb[1]
-            s = min(zrem, ELECTRONS_PER_ORB[l])
+            angmom = orb[1]
+            s = min(zrem, ELECTRONS_PER_ORB[angmom])
             if n not in ec:
                 maxn = n
                 ec[n] = {}
-            ec[n][l] = ec[n].get(l, 0.0) + float(s)
+            ec[n][angmom] = ec[n].get(angmom, 0.0) + float(s)
             zrem -= s
             if zrem == 0:
                 break
 
         self._valence = [ec[maxn].get('s', 0.0), ec[maxn].get('p', 0.0), 0.0, 0.0]
-        if l == 's' or l == 'p':
+        if angmom == 's' or angmom == 'p':
             return
         self._valence[2] = ec[maxn-1]['d']
-        if l == 'd':
+        if angmom == 'd':
             if self.nznuc in [29, 47, 79, 111]:
                 self._valence = [1.0, 0.0, 10.0, 0.0]
             return
@@ -186,7 +186,7 @@ class Element:
     def xocc(self, value: list[float]) -> None:
         if len(value) != len(self._orbitals):
             err = f'Invalid value "{value}" for "-n" / "--nelectrons".'
-            raise_err(ValueError('Must provide one value per orbital.'))
+            raise_err(ValueError(f'{err} Must provide one value per orbital.'))
         for v in value:
             err = f'Invalid value "{v}" for "-n" / "--nelectrons".'
             if v < 0.0:
@@ -215,7 +215,7 @@ class Element:
     def rcutoff(self, value: list[float]) -> None:
         if len(value) != len(self._orbitals):
             err = f'Invalid value "{value}" for "-r" / "--radius".'
-            raise_err(ValueError('Must provide one value per orbital.'))
+            raise_err(ValueError(f'{err} Must provide one value per orbital.'))
         for v in value:
             err = f'Invalid value "{v}" for "-r" / "--radius".'
             if v < 0.0:
@@ -235,9 +235,9 @@ class Element:
     @xocc0.setter
     def xocc0(self, value: list[float] | None) -> None:
         valence: list[float] = []
-        for l in ANGULAR_MOMENTUM:
-            if l in self._orbitals:
-                valence.append(self._valence[ANGULAR_MOMENTUM[l]])
+        for angmom in ANGULAR_MOMENTUM:
+            if angmom in self._orbitals:
+                valence.append(self._valence[ANGULAR_MOMENTUM[angmom]])
         if value is None:
             value = valence
         err = f'Invalid value "{value}" for "-n0" / "--nelectrons-neutral".'
@@ -630,33 +630,33 @@ def write_lines(ele: Element) -> str:
     lines = [ele.symbol,
              ele.nznuc,
              ele.mass,
-             ele.ppfile,
-             ele.filename_na[0],
+             'basis/' + ele.ppfile,
+             'basis/' + ele.filename_na[0],
              (1 + int(ele.nexcite in [1, 2]))*len(ele.orbitals)]
     for o, n0, r, fw, fn in zip(ele.orbitals, ele.xocc0, ele.rcutoff, ele.filename_wf, ele.filename_na[1:]):
         lines.append(ANGULAR_MOMENTUM[o])
         lines.append(n0)
         lines.append(r)
-        lines.append(fw)
-        lines.append(fn)
+        lines.append('basis/' + fw)
+        lines.append('basis/' + fn)
     if ele.nexcite in [1, 2]:
         for o, r, fw, fn in zip(ele.orbitals, ele.rcutoff, ele.filename_ewf, ele.filename_ena):
             lines.append(ANGULAR_MOMENTUM[o])
-            lines.append('0')
+            lines.append(0)
             lines.append(r)
-            lines.append(fw)
-            lines.append(fn)
+            lines.append('basis/' + fw)
+            lines.append('basis/' + fn)
     lines += ['1', '0.5', '0.25 0.25 0.25 0.25 0.25 0.25']
 
-    with open(f'{ele.symbol}.input', 'w') as fp:
+    with open(os.path.join('basis', f'{ele.symbol}.input'), 'w') as fp:
         fp.write(os.linesep.join(map(lambda x: str(x), lines)))
         fp.write(os.linesep)
-    return f'{ele.symbol}.input'
+    return 'basis/' + f'{ele.symbol}.input'
 
 @app.command
 def basis(folder: Annotated[pathlib.Path, Parameter(validator=Path(exists=True, file_okay=False,
                                                                    dir_okay=True))]=pathlib.Path('cinput'), *,
-          output: Annotated[pathlib.Path, Parameter(validator=Path(exists=False, file_okay=False, dir_okay=False))]=pathlib.Path('coutput'),
+          output: Annotated[pathlib.Path, Parameter(validator=Path(file_okay=False, dir_okay=True))]=pathlib.Path('coutput'),
           elements: Annotated[Optional[list[str]], Parameter(show_default=False, negative=False, consume_multiple=True)]=None,
           verbose: Annotated[bool, Parameter(negative=False)]=False,
           njobs: Annotated[int, Parameter()]=1):
@@ -678,11 +678,11 @@ def basis(folder: Annotated[pathlib.Path, Parameter(validator=Path(exists=True, 
     if njobs < 0 and njobs != -1:
         raise_err(ValueError('Invalid value for "--njobs". Must be positive or -1.'))
 
-    folder = folder.absolute()
-    metafile = os.path.join(folder, 'meta.json')
-    if not os.path.isfile(metafile):
+    folder = folder.resolve()
+    metafile = folder/'meta.json'
+    if not metafile.is_file():
         raise_err(ValueError(f'Invalid value "{folder}" for "FOLDER" / "--folder". There is no "meta.json" file.'))
-    with open(metafile, 'r') as fp:
+    with metafile.open('r') as fp:
         meta = json.load(fp)
 
     if elements is None:
@@ -709,45 +709,40 @@ def basis(folder: Annotated[pathlib.Path, Parameter(validator=Path(exists=True, 
         el.nexcite = meta[el.symbol]['nexcite']
         el.filename_wf = [meta[el.symbol][o]['filename_wf'] for o in el.orbitals]
         el.filename_na = [meta[el.symbol]['filename_na0']] + [meta[el.symbol][o]['filename_na'] for o in el.orbitals]
-        if el.nexcite in [1, 2]:
-            el.filename_ewf = [meta[el.symbol][o]['filename_ewf'] for o in el.orbitals]
-            el.filename_ena = [meta[el.symbol][o]['filename_ena'] for o in el.orbitals]
+        el.filename_ewf = [meta[el.symbol][o]['filename_ewf'] for o in el.orbitals] if el.nexcite in [1, 2] else []
+        el.filename_ena = [meta[el.symbol][o]['filename_ena'] for o in el.orbitals] if el.nexcite in [1, 2] else []
         el.ppfile = meta[el.symbol]['ppfile']
         el.ppionfile = meta[el.symbol]['ppionfile']
         els.append(el)
 
-    output = output.absolute()
-    os.makedirs(output, exist_ok=False)
+    output = output.resolve()
+    output.mkdir(exist_ok=True)
+    basisf = output/'basis'
+    basisf.mkdir(exist_ok=True)
 
     nowfolder = os.getcwd()
     os.chdir(output)
-    with open('create.input', 'w') as fp:
+    with (basisf/'create.input').open('w') as fp:
         fp.write(f'{len(els)}{os.linesep}')
         for el in els:
-            shutil.copy2(folder/el.ppfile, el.ppfile)
-            shutil.copy2(folder/el.ppionfile, el.ppionfile)
-            for f in el.filename_wf + el.filename_na:
-                if os.path.isfile(folder/f):
-                    shutil.copy2(folder/f, f)
-            if el.nexcite in [1, 2]:
-                for f in el.filename_ewf + el.filename_ena:
-                    if os.path.isfile(folder/f):
-                        shutil.copy2(folder/f, f)
+            shutil.copy2(folder/el.ppfile, basisf/el.ppfile)
+            shutil.copy2(folder/el.ppionfile, basisf/el.ppionfile)
+            for f in el.filename_wf + el.filename_na + el.filename_ewf + el.filename_ena:
+                shutil.copy2(folder/f, basisf/f)
             fp.write(write_lines(el))
             fp.write(os.linesep)
-
-    os.makedirs('coutput', exist_ok=False)
+    with (basisf/'meta.json').open('w') as fp:
+        json.dump({k: meta[k] for k in meta}, fp)
 
     if njobs == -1:
         njobs = cpu_count()
     stdout = sys.stdout if verbose else subprocess.DEVNULL
     try:
-        exepath = os.path.join(os.path.split(__basis_file__)[0], 'create.x')
+        exepath = (pathlib.Path(__basis_path__[0])/'create.x').resolve()
         if njobs == 1:
-            p = subprocess.Popen(exepath, stdout=stdout, stderr=sys.stderr)
+            p = subprocess.Popen(str(exepath), stdout=stdout, stderr=sys.stderr)
         else:
-            p = subprocess.Popen(['mpirun', '-np', str(njobs), exepath],
-                                    stdout=stdout, stderr=sys.stderr)
+            p = subprocess.Popen(['mpirun', '-np', str(njobs), str(exepath)], stdout=stdout, stderr=sys.stderr)
         p.communicate()
         if p.returncode != 0:
             os.chdir(nowfolder)
@@ -757,27 +752,73 @@ def basis(folder: Annotated[pathlib.Path, Parameter(validator=Path(exists=True, 
         os.chdir(nowfolder)
         shutil.rmtree(output)
         raise e
-
-    os.makedirs('basis')
-    shutil.copy2(folder/'meta.json', os.path.join('basis', 'meta.json'))
-    shutil.move('create.input', os.path.join('basis', 'create.input'))
-    for el in els:
-        shutil.move(el.ppfile, os.path.join('basis', el.ppfile))
-        shutil.move(el.ppionfile, os.path.join('basis', el.ppionfile))
-        shutil.move(f'{el.symbol}.input', os.path.join('basis', f'{el.symbol}.input'))
-        for f in el.filename_wf + el.filename_na:
-            if os.path.isfile(f):
-                shutil.move(f, os.path.join('basis', f))
-        if el.nexcite in [1, 2]:
-            for f in el.filename_ewf + el.filename_ena:
-                if os.path.isfile(f):
-                    shutil.move(f, os.path.join('basis', f))
-
-    for f in filter(lambda x: x.endswith('.dat'), os.listdir('coutput')):
-        shutil.move(os.path.join('coutput', f), f)
-    os.removedirs('coutput')
     os.chdir(nowfolder)
 
+@app['basis'].command
+def delete(elements: Annotated[list[str], Parameter(group=args_grp, consume_multiple=True)],
+           output: Annotated[pathlib.Path, Parameter(validator=Path(exists=True, file_okay=False, dir_okay=True), group=args_grp,
+                                                     name=['-o', '--output'])]=pathlib.Path('coutput')):
+    """Delete the generated basis files for ELEMENTS.
+
+    Parameters
+    ----------
+    elements: list[str | int]
+        Name or atomic number of the desired element.
+    output: pathlib.Path
+        Folder where generated basis files are located.
+    """
+    output = output.resolve()
+    basisf = output/'basis'
+    infofile = output/'info.dat'
+    metafile = basisf/'meta.json'
+    createfile = basisf/'create.input'
+    if not infofile.is_file():
+        raise_err(ValueError(f'Invalid value "{output}" for "--output". There is no "info.dat" file.'))
+    with infofile.open('r') as fp:
+        info = fp.read().splitlines()
+    if not metafile.is_file():
+        raise_err(ValueError(f'Invalid value "{output}" for "--output". There is no "basis/meta.json" file.'))
+    with metafile.open('r') as fp:
+        meta = json.load(fp)
+    if not createfile.is_file():
+        raise_err(ValueError(f'Invalid value "{output}" for "--output". There is no "basis/create.input" file.'))
+    with createfile.open('r') as fp:
+        create = fp.read().splitlines()
+
+    if len(elements) != len(set(elements)):
+        raise_err(ValueError(f'Invalid value "{elements}" for "ELEMENTS" / "--elements". Contains repeated values.'))
+    for e in elements:
+        nz = atomic_numbers[e]
+        for f in basisf.iterdir():
+            if f.name.startswith(str(nz).rjust(3, '0')):
+                f.unlink()
+        (basisf/f'{e}.input').unlink()
+        for f in output.iterdir():
+            if '.' + str(nz).rjust(2, '0') + '.' in str(f):
+                f.unlink()
+    with metafile.open('w') as fp:
+        json.dump({k: meta[k] for k in meta if k not in elements}, fp)
+    with createfile.open('w') as fp:
+        for line in create:
+            if '/' in line and line.split('/')[1].split('.')[0] in elements:
+                continue
+            fp.write(line + os.linesep)
+    with infofile.open('w') as fp:
+        nspec = int(info[1].split('-')[0])
+        newspec = nspec - len(elements)
+        fp.write(info[0] + os.linesep)
+        fp.write(info[1].replace(str(nspec), str(newspec)) + os.linesep)
+        ispec = 1
+        for i in range(nspec):
+            if info[16*i + 4].split('-')[0].strip() in elements:
+                continue
+            fp.write(info[16*i + 2] + os.linesep)
+            fp.write(info[16*i + 3].replace(str(i + 1), str(ispec)) + os.linesep)
+            for j in range(4, 18):
+                fp.write(info[16*i + j] + os.linesep)
+            ispec += 1
+        for i in range(16*nspec + 2, len(info)):
+            fp.write(info[i] + os.linesep)
 
 @app.command
 def plot(wavefunctions: Annotated[list[pathlib.Path],
@@ -807,10 +848,10 @@ def plot(wavefunctions: Annotated[list[pathlib.Path],
     my_colors = colors * (len(wavefunctions) // len(colors)) + colors[:len(wavefunctions) % len(colors)]
     _, ax = plt.subplots(figsize=(6.9, 4.3), layout='constrained')
     for i, path in enumerate(wavefunctions):
-        z, l, rcutoff = read_wf_info(path)
+        z, angmom, rcutoff = read_wf_info(path)
         x, y = read_wf(path)
         symbol = chemical_symbols[z]
-        orbital = ANGULAR_MOMENTUM_REV[l]
+        orbital = ANGULAR_MOMENTUM_REV[angmom]
 
         sub = f'{orbital}{"*" if excited[i] else ""}'
         label = r'$\phi_{' + sub + r'}(' + symbol + r')\ \ R_c=' + str(rcutoff) + r'$'

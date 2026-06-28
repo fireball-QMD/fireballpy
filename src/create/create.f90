@@ -275,14 +275,6 @@ program create
     write (*,*) '  '
     write (*,*) '               Fireballs-2005 '
     write (*,*) '      A fast local orbital QMD Package '
-    write (*,*) '  '
-    write (*,*) '          Latest version Jan 10, 2005 '
-    write (*,*) '          See Copyright information: '
-    write (*,*) '            !!!Proprietory Code!!! '
-    write (*,*) '       Usable only with permission from '
-    write (*,*) '      the Fireball executive committee. '
-    write (*,*) '  This program is NOT, under any circumstances '
-    write (*,*) '    to be transfered to an unauthorized user. '
     write (*,100)
     write (*,*) '  '
 
@@ -388,51 +380,61 @@ program create
 ! Write out the info file.
 ! Only do this on the master
   if (iammaster) then
-    inquire (file = 'coutput/info.dat', exist = read_info)
-    open (unit = 12, file = 'coutput/info.dat', status = 'unknown')
+    write (*,*) '  '
+    write (*,*) '  '
+    write (*,*) ' Now we are writing the following to the '
+    write (*,*) ' info.dat file. '
+    write (*,*) '  '
 
-    time_message = ' No time available! '
-    open (unit = 45, file = 'timecreate', status = 'unknown')
-    do itmp = 1, 10000
-      read (45, 106, err = 445, end = 445) time_message
-    end do
-445 continue
-    close (unit = 45)
-
-    if (.not. read_info) then
-      write (12,104) signature
-      write (12,*) nspec, ' - Number of species '
-
-      do ispec = 1, nspec
-        write (12,100)
-        write (12,301) ispec
-        write (12,302) atom(ispec)
-        write (12,303) nzx(ispec)
-        write (12,304) xmass(ispec)
-        write (12,305) nssh(ispec)
-        write (12,306) (lssh(ispec,issh), issh = 1, nssh(ispec))
-        write (12,307) nsshPP(ispec)
-        write (12,308) (lsshPP(ispec,issh), issh = 1, nsshPP(ispec))
+! First write to the screen
+    do ispec = 1, nspec
+      write (*,100)
+      write (*,301) ispec
+      write (*,302) atom(ispec)
+      write (*,303) nzx(ispec)
+      write (*,304) xmass(ispec)
+      write (*,305) nssh(ispec)
+      write (*,306) (lssh(ispec,issh), issh = 1, nssh(ispec))
+      write (*,307) nsshPP(ispec)
+      write (*,308) (lsshPP(ispec,issh), issh = 1, nsshPP(ispec))
 !jel-PP
-        write (12,314) rcPP(ispec)
-        write (12,309) (xnocc(issh,ispec), issh = 1, nssh(ispec))
-        write (12,310) (rcutoff(ispec,issh), issh = 1, nssh(ispec))
-        write (12,311) (wavefxn(ispec,issh), issh = 1, nssh(ispec))
-        write (12,312) (napot(ispec,issh), issh = 0, nssh(ispec))
-        write (12,313) etotatom(ispec)
-        write (12,100)
-      end do
+      write (*,314) (rcPP(ispec))
 
-! If the file already exists then just write out the time
-    else
-      do itmp = 1, 10000
-        read (12, *, err = 446, end = 446)
-      end do
-446   continue
-      backspace 12
-    end if
+      write (*,309) (xnocc(issh,ispec), issh = 1, nssh(ispec))
+      write (*,310) (rcutoff(ispec,issh), issh = 1, nssh(ispec))
+      write (*,311) (wavefxn(ispec,issh), issh = 1, nssh(ispec))
+      write (*,312) (napot(ispec,issh), issh = 0, nssh(ispec))
+      write (*,313) etotatom(ispec)
 
-    write (12, 106) time_message
+      write (*,100)
+    end do
+
+! Next write to the info.dat file.
+    open (unit = 12, file = 'info.dat', status = 'unknown')
+    write (12,104) signature
+    write (12,*) nspec, ' - Number of species '
+
+    do ispec = 1, nspec
+      write (12,100)
+      write (12,301) ispec
+      write (12,302) atom(ispec)
+      write (12,303) nzx(ispec)
+      write (12,304) xmass(ispec)
+      write (12,305) nssh(ispec)
+      write (12,306) (lssh(ispec,issh), issh = 1, nssh(ispec))
+      write (12,307) nsshPP(ispec)
+      write (12,308) (lsshPP(ispec,issh), issh = 1, nsshPP(ispec))
+!jel-PP
+      write (12,314) rcPP(ispec)
+      write (12,309) (xnocc(issh,ispec), issh = 1, nssh(ispec))
+      write (12,310) (rcutoff(ispec,issh), issh = 1, nssh(ispec))
+      write (12,311) (wavefxn(ispec,issh), issh = 1, nssh(ispec))
+      write (12,312) (napot(ispec,issh), issh = 0, nssh(ispec))
+      write (12,313) etotatom(ispec)
+      write (12,100)
+    end do
+
+    write (12, 106) '  '
     write (12, 107) itest, iharris, idogs, ihubbard, ispin, &
     &                   ioomethod, ixc_opt
     write (12, 108) igauss, ngauss

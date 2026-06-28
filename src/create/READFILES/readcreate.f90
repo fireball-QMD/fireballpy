@@ -127,7 +127,7 @@
          ! write (*,*) '  '
         end if ! end master
  
-        open (unit = 44, file = 'create.input', status = 'old')
+        open (unit = 44, file = 'basis/create.input', status = 'old')
         read (44,*) nspec
         if (nspec .gt. nspec_max) then
          ! write (*,*) '  '

@@ -91,7 +91,6 @@ contains
     drr_rho_ = drr_rho
     rcutoffa_max_ = rcutoffa_max
     xnocc_ = xnocc
-
     onecenter_init = 0
     return
   end function onecenter_init
@@ -287,16 +286,43 @@ contains
     end do
     deallocate(tmpmat, iszero)
 
+    ! Write log
+    write (auxz,'(i2.2)') nzx(in1)
+    write (*,*) ' '
+    write (*,*) 'Writing output to: xc1c_dqi.'//auxz//'.dat'
+    write (*,*) 'Writing output to: exc1crho.'//auxz//'.dat'
+    write (*,*) 'Writing output to: nuxc1crho.'//auxz//'.dat'
+    if (inux == 1) write (*,*) 'Writing output to: nuxc_onecenter.'//auxz//'.dat'
+    if (inuxs == 1) write (*,*) 'Writing output to: nuxcs_onecenter.'//auxz//'.dat'
+    write (*,*) ' '
+
     ! Write output
-    io = 360
-    open (unit=io, file='coutput/onecenter_xc.'//auxz//'.dat', status='new',   &
-    &     action='write', iostat=onecenter_spec_calc)
-    if (onecenter_spec_calc /= 0) then
-      write (stderr, '(a)') '[ERROR] failed to open onecenter_xc.'//auxz//'.dat'
-      return
-    end if
-    write (io,'(2i4)') nssh
-    do ix = 0, nssh
+    open (unit=36, file='xc1c_dqi.dat', position='append', status='old')
+    open (unit=360, file='xc1c_dqi.'//auxz//'.dat', position='append', status='old')
+    write (36,400) in1, nssh
+    write (360,400) in1, nssh
+    do issh = 1, nssh
+      write (36,501) (exc1crho(0,issh,jssh), jssh = 1, nssh)
+      write (360,501) (exc1crho(0,issh,jssh), jssh = 1, nssh)
+    end do
+    write (36,*)
+    write (360,*)
+    do issh = 1, nssh
+      write (36,501) (nuxc1crho(0,issh,jssh), jssh = 1, nssh)
+      write (360,501) (nuxc1crho(0,issh,jssh), jssh = 1, nssh)
+    end do
+    close(36)
+    close(360)
+
+    open (unit=37, file='exc1crho.dat', position='append', status='old')
+    open (unit=38, file='nuxc1crho.dat', position='append', status='old')
+    open (unit=370, file='exc1crho.'//auxz//'.dat', position='append', status='old')
+    open (unit=380, file='nuxc1crho.'//auxz//'.dat', position='append', status='old')
+    do kssh = 1, nssh
+      write (37,410) in1, nssh, kssh
+      write (370,410) in1, nssh, kssh
+      write (38,410) in1, nssh, kssh
+      write (380,410) in1, nssh, kssh
       do issh = 1, nssh
         write (io,'(100ES15.7)') (nuxc1crho(ix, issh, jssh), jssh = 1, nssh)
       end do
@@ -308,27 +334,41 @@ contains
     end do
     close(io)
 
-    io = 361
-    open (unit=io, file='coutput/onecenter_xc_corr.'//auxz//'.dat', status='new',   &
-    &     action='write', iostat=onecenter_spec_calc)
-    if (onecenter_spec_calc /= 0) then
-      write (stderr, '(a)') '[ERROR] failed to open onecenter_xc_corr.'//auxz//'.dat'
-      return
+    if (inux == 1) then
+      open (unit=39, file='nuxc_onecenter.dat', position='append', status='old')
+      open (unit=390, file='nuxc_onecenter.'//auxz//'.dat', position='append', status='old')
+      do kssh = 1, nssh
+        write (39,410) in1, nssh, kssh
+        write (390,410) in1, nssh, kssh
+        do issh = 1, nssh
+          write (39,501) (nuxc_onecenter(kssh,issh,jssh), jssh = 1, nssh)
+          write (390,501) (nuxc_onecenter(kssh,issh,jssh), jssh = 1, nssh)
+        end do
+      end do
+      close(39)
+      close(390)
+      deallocate(nuxc_onecenter)
     end if
-    write (io,'(2i4)') nssh
-    do ix = 1, nssh
-      do issh = 1, nssh
-        write (io,'(100ES15.7)') (nuxc1crho_radial(ix, issh, jssh), jssh = 1, nssh)
+    if (inuxs == 1) then
+      open (unit=40, file='nuxcs_onecenter.dat', position='append', status='old')
+      open (unit=400, file='nuxcs_onecenter.'//auxz//'.dat', &
+      &  position='append', status='old')
+      do kssh = 1, nssh
+        write (40,410) in1, nssh, kssh
+        write (400,410) in1, nssh, kssh
+        do issh = 1, nssh
+          write (40,501) (nuxcs_onecenter(kssh,issh,jssh), jssh = 1, nssh)
+          write (400,501) (nuxcs_onecenter(kssh,issh,jssh), jssh = 1, nssh)
+        end do
       end do
       write (io,'(a)') ''
-    end do
+    end if
     close(io)
 
     deallocate(exc1crho, nuxc1crho, nuxc1crho_radial)
 
     write (stdout,'(a)') 'Done'
     onecenter_spec_calc = 0
-    return
   end function onecenter_spec_calc
 
   subroutine onecenter_free()

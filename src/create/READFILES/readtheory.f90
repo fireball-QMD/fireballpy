@@ -134,7 +134,7 @@
         isnuxc2c = 0
  
 ! Now we read in a theory.input file.
-!        open (unit = 45, file = 'theory.input', status = 'old')
+!        open (unit = 45, file = 'basis/theory.input', status = 'old')
 !        read (45,*) itest
 !        read (45,*) iharris
 !        read (45,*) idogs 
@@ -263,7 +263,7 @@
           ! write (*,*) '  '
           ! write (*,*) ' Switches read in from switch.input '
          end if ! end master
-         !open (unit = 45, file = 'switch.input', status = 'old')
+         !open (unit = 45, file = 'basis/switch.input', status = 'old')
          !read (45,*) iswitch(0)
          !read (45,*) imuxc1c
          !read (45,*) ikinetic
