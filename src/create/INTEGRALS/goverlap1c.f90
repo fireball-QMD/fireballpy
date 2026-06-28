@@ -137,7 +137,7 @@
 ! ===========================================================================
 ! Create file name for F1
 
-        fname = 'coutput/goverlapf1.dat'
+        fname = 'goverlapf1.dat'
 
 ! Open the file to store the onecenter data.
         write (*,*) ' open file ',fname
@@ -156,7 +156,7 @@
 !
 ! Create file name for F2
 
-        fname = 'coutput/goverlapf2.dat'
+        fname = 'goverlapf2.dat'
 
 ! Open the file to store the onecenter data.
         write (*,*) ' open file ',fname
@@ -213,8 +213,6 @@
            if (irho .eq. 1 .or. irho .eq. nnrho) factor = drho/3.0d0
  
  
-! JOM-test
-            write(*,*)'dpsiofr', rho , psiofr(1,2,rho), dpsiofr(1,2,rho)
            do issh = 1, nssh
             l1 = lsshxc(in1,issh)
             do jssh = 1, nssh
@@ -237,8 +235,8 @@
         write (36,*) '  '
         write (37,*) '  '
         write (*,*) '  '
-        write (*,*) ' Writing output to:  coutput/goverlapf1.dat '
-        write (*,*) ' Writing output to:  coutput/goverlapf2.dat '
+        write (*,*) ' Writing output to:  goverlapf1.dat '
+        write (*,*) ' Writing output to:  goverlapf2.dat '
         write (*,*) '  '
  
         close (unit = 36)

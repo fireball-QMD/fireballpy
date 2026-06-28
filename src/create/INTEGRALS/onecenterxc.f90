@@ -109,9 +109,9 @@ subroutine onecenterxc (nspec, nspec_max, nsh_max, wfmax_points,      &
   end if
 
   ! Set up the header for the output file.
-  open (unit=36, file='coutput/xc1c_dqi.dat', status='unknown')
-  open (unit=37, file='coutput/exc1crho.dat', status='unknown')
-  open (unit=38, file='coutput/nuxc1crho.dat', status='unknown')
+  open (unit=36, file='xc1c_dqi.dat', status='unknown')
+  open (unit=37, file='exc1crho.dat', status='unknown')
+  open (unit=38, file='nuxc1crho.dat', status='unknown')
   write (36,100)
   write (36,*) 'All one center matrix elements'
   write (36,*) 'created by:'
@@ -125,14 +125,14 @@ subroutine onecenterxc (nspec, nspec_max, nsh_max, wfmax_points,      &
   write (38,*) 'created by:'
   write (38,200) signature
   if (inux == 1) then
-    open (unit=39, file='coutput/nuxc_onecenter.dat', status='unknown')
+    open (unit=39, file='nuxc_onecenter.dat', status='unknown')
     write (39,100)
     write (39,*) 'All one center matrix elements'
     write (39,*) 'created by:'
     write (39,200) signature
   end if
   if (inuxs == 1) then
-    open (unit=40, file='coutput/nuxcs_onecenter.dat', status='unknown')
+    open (unit=40, file='nuxcs_onecenter.dat', status='unknown')
     write (40,100)
     write (40,*) 'All one center matrix elements (spin)'
     write (40,*) 'created by:'
@@ -143,9 +143,9 @@ subroutine onecenterxc (nspec, nspec_max, nsh_max, wfmax_points,      &
     write (37,300) what(in1)
     write (38,300) what(in1)
     write (auxz,'(i2.2)') nzx(in1)
-    open (unit=360, file='coutput/xc1c_dqi.'//auxz//'.dat', status='unknown')
-    open (unit=370, file='coutput/exc1crho.'//auxz//'.dat', status='unknown')
-    open (unit=380, file='coutput/nuxc1crho.'//auxz//'.dat', status='unknown')
+    open (unit=360, file='xc1c_dqi.'//auxz//'.dat', status='unknown')
+    open (unit=370, file='exc1crho.'//auxz//'.dat', status='unknown')
+    open (unit=380, file='nuxc1crho.'//auxz//'.dat', status='unknown')
     write (360,100)
     write (360,*) 'Z = ', nzx(in1), ' one center matrix elements'
     write (360,*) 'created by:'
@@ -168,7 +168,7 @@ subroutine onecenterxc (nspec, nspec_max, nsh_max, wfmax_points,      &
     write (380,100)
     close (380)
     if (inux == 1) then
-      open (unit=390, file='coutput/nuxc_onecenter.'//auxz//'.dat', status='unknown')
+      open (unit=390, file='nuxc_onecenter.'//auxz//'.dat', status='unknown')
       write (390,*) 'Z = ', nzx(in1), ' one center matrix elements'
       write (390,*) 'created by:'
       write (390,200) signature
@@ -177,7 +177,7 @@ subroutine onecenterxc (nspec, nspec_max, nsh_max, wfmax_points,      &
       close (390)
     end if
     if (inuxs == 1) then
-      open (unit=400, file='coutput/nuxcs_onecenter.'//auxz//'.dat', status='unknown')
+      open (unit=400, file='nuxcs_onecenter.'//auxz//'.dat', status='unknown')
       write (400,*) 'Z = ', nzx(in1), ' one center matrix elements (spin)'
       write (400,*) 'created by:'
       write (400,200) signature
@@ -445,16 +445,16 @@ subroutine onecenterxc (nspec, nspec_max, nsh_max, wfmax_points,      &
     ! Write log
     write (auxz,'(i2.2)') nzx(in1)
     write (*,*) ' '
-    write (*,*) 'Writing output to: coutput/xc1c_dqi.'//auxz//'.dat'
-    write (*,*) 'Writing output to: coutput/exc1crho.'//auxz//'.dat'
-    write (*,*) 'Writing output to: coutput/nuxc1crho.'//auxz//'.dat'
-    if (inux == 1) write (*,*) 'Writing output to: coutput/nuxc_onecenter.'//auxz//'.dat'
-    if (inuxs == 1) write (*,*) 'Writing output to: coutput/nuxcs_onecenter.'//auxz//'.dat'
+    write (*,*) 'Writing output to: xc1c_dqi.'//auxz//'.dat'
+    write (*,*) 'Writing output to: exc1crho.'//auxz//'.dat'
+    write (*,*) 'Writing output to: nuxc1crho.'//auxz//'.dat'
+    if (inux == 1) write (*,*) 'Writing output to: nuxc_onecenter.'//auxz//'.dat'
+    if (inuxs == 1) write (*,*) 'Writing output to: nuxcs_onecenter.'//auxz//'.dat'
     write (*,*) ' '
 
     ! Write output
-    open (unit=36, file='coutput/xc1c_dqi.dat', position='append', status='old')
-    open (unit=360, file='coutput/xc1c_dqi.'//auxz//'.dat', position='append', status='old')
+    open (unit=36, file='xc1c_dqi.dat', position='append', status='old')
+    open (unit=360, file='xc1c_dqi.'//auxz//'.dat', position='append', status='old')
     write (36,400) in1, nssh
     write (360,400) in1, nssh
     do issh = 1, nssh
@@ -470,10 +470,10 @@ subroutine onecenterxc (nspec, nspec_max, nsh_max, wfmax_points,      &
     close(36)
     close(360)
 
-    open (unit=37, file='coutput/exc1crho.dat', position='append', status='old')
-    open (unit=38, file='coutput/nuxc1crho.dat', position='append', status='old')
-    open (unit=370, file='coutput/exc1crho.'//auxz//'.dat', position='append', status='old')
-    open (unit=380, file='coutput/nuxc1crho.'//auxz//'.dat', position='append', status='old')
+    open (unit=37, file='exc1crho.dat', position='append', status='old')
+    open (unit=38, file='nuxc1crho.dat', position='append', status='old')
+    open (unit=370, file='exc1crho.'//auxz//'.dat', position='append', status='old')
+    open (unit=380, file='nuxc1crho.'//auxz//'.dat', position='append', status='old')
     do kssh = 1, nssh
       write (37,410) in1, nssh, kssh
       write (370,410) in1, nssh, kssh
@@ -493,8 +493,8 @@ subroutine onecenterxc (nspec, nspec_max, nsh_max, wfmax_points,      &
     deallocate(exc1crho, nuxc1crho)
 
     if (inux == 1) then
-      open (unit=39, file='coutput/nuxc_onecenter.dat', position='append', status='old')
-      open (unit=390, file='coutput/nuxc_onecenter.'//auxz//'.dat', position='append', status='old')
+      open (unit=39, file='nuxc_onecenter.dat', position='append', status='old')
+      open (unit=390, file='nuxc_onecenter.'//auxz//'.dat', position='append', status='old')
       do kssh = 1, nssh
         write (39,410) in1, nssh, kssh
         write (390,410) in1, nssh, kssh
@@ -508,8 +508,8 @@ subroutine onecenterxc (nspec, nspec_max, nsh_max, wfmax_points,      &
       deallocate(nuxc_onecenter)
     end if
     if (inuxs == 1) then
-      open (unit=40, file='coutput/nuxcs_onecenter.dat', position='append', status='old')
-      open (unit=400, file='coutput/nuxcs_onecenter.'//auxz//'.dat', &
+      open (unit=40, file='nuxcs_onecenter.dat', position='append', status='old')
+      open (unit=400, file='nuxcs_onecenter.'//auxz//'.dat', &
       &  position='append', status='old')
       do kssh = 1, nssh
         write (40,410) in1, nssh, kssh

@@ -189,7 +189,7 @@
  
 ! Open necessary file
         iounit = ((itype2 - 1)*nspec_max + itype1 - 1) + 36
-        root = 'coutput/kinetic'
+        root = 'kinetic'
         call iofile2c (root, 'dat', nzx1, nzx2, iounit, filename, skip)
         if (skip) return
  

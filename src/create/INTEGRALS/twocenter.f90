@@ -199,10 +199,10 @@
         if (ideriv .eq. 0) then
           ! spherical approx. 
           if(ispher) then 
-             root = 'coutput/denS_atom'
+             root = 'denS_atom'
           else
           ! NOT spherical approx. 
-             root = 'coutput/den_atom'
+             root = 'den_atom'
           endif
           call iofile2c_xcna (root, 'dat', isorp, nzx1, nzx2, iounit,  &
      &                       fname, skip)
@@ -210,10 +210,10 @@
          if (ideriv .eq. 1) then
           ! spherical approx. 
           if(ispher) then 
-             root = 'coutput/denS_ontopl'
+             root = 'denS_ontopl'
           else
           ! NOT spherical approx. 
-             root = 'coutput/den_ontopl'          
+             root = 'den_ontopl'          
           endif
           call iofile2c_xcna (root, 'dat', isorp, nzx1, nzx2, iounit,  &
      &                        fname, skip)
@@ -221,10 +221,10 @@
          if (ideriv .eq. 2) then
           ! spherical approx. 
           if(ispher) then 
-             root = 'coutput/denS_ontopr'
+             root = 'denS_ontopr'
           else
           ! NOT spherical approx. 
-             root = 'coutput/den_ontopr'
+             root = 'den_ontopr'
           endif
           call iofile2c_xcna (root, 'dat', isorp, nzx1, nzx2, iounit, &
      &                        fname, skip)
@@ -237,10 +237,10 @@
          end if ! end master
           ! spherical approx. 
           if(ispher) then 
-             root = 'coutput/overlapS'
+             root = 'overlapS'
           else
           ! NOT spherical approx. 
-             root = 'coutput/overlap'
+             root = 'overlap'
           endif
          call iofile2c (root, 'dat', nzx1, nzx2, iounit, fname, skip)
         else if (interaction .eq. 2) then
@@ -255,12 +255,12 @@
           write (*,100)
          end if ! end master
          if (ideriv .eq. 1) then
-          root = 'coutput/vna_ontopl'
+          root = 'vna_ontopl'
           call iofile2c_xcna (root, 'dat', isorp, nzx1, nzx2, iounit,  &
      &                        fname, skip)
          end if
          if (ideriv .eq. 2) then
-          root = 'coutput/vna_ontopr'
+          root = 'vna_ontopr'
           call iofile2c_xcna (root, 'dat', isorp, nzx1, nzx2, iounit, &
      &                        fname, skip)
          end if
@@ -275,7 +275,7 @@
            write (*,*) ' Doing non-neutral potential, shell = ', isorp
           end if
          end if ! end master
-         root = 'coutput/vna_atom' 
+         root = 'vna_atom' 
          call iofile2c_xcna (root, 'dat', isorp, nzx1, nzx2, iounit, &
      &                       fname, skip)
         else if (interaction .eq. 4) then
@@ -284,7 +284,7 @@
           write (*,*) ' are now being calculated. '
           write (*,100)
          end if ! end master
-         root = 'coutput/vnl' 
+         root = 'vnl' 
          call iofile2c (root, 'dat', nzx1, nzx2, iounit, fname, skip)
         else if (interaction .eq. 5) then
          if (iammaster) then
@@ -292,7 +292,7 @@
           write (*,*) ' elements (ontop) are now being calculated. '
           write (*,100)
          end if ! end master
-         root = 'coutput/xc_ontop'
+         root = 'xc_ontop'
          call iofile2c_xcna (root, 'dat', ideriv, nzx1, nzx2, iounit,  &
      &                       fname, skip)
         else if (interaction .eq. 6) then
@@ -301,7 +301,7 @@
           write (*,*) ' elements (atom-atom) are now being calculated. '
           write (*,100)
          end if ! end master
-         root = 'coutput/xc_atom'
+         root = 'xc_atom'
          call iofile2c_xcna (root, 'dat', ideriv, nzx1, nzx2, iounit, &
      &                       fname, skip)
         else if (interaction .eq. 7) then
@@ -310,7 +310,7 @@
           write (*,*) ' double counting is now being calculated. '
           write (*,100)
          end if ! end master
-         root = 'coutput/xc_corr'
+         root = 'xc_corr'
          call iofile2c_xcna (root, 'dat', ideriv, nzx1, nzx2, iounit, &
      &                       fname, skip)
         else if (interaction .eq. 8) then
@@ -319,7 +319,7 @@
           write (*,*) ' calculated.'
           write (*,100)
          end if ! end master
-         root = 'coutput/dipole_z'
+         root = 'dipole_z'
          call iofile2c (root, 'dat', nzx1, nzx2, iounit, fname, skip)
         else if (interaction .eq. 9) then
          if (iammaster) then
@@ -327,7 +327,7 @@
           write (*,*) ' calculated.'
           write (*,100)
          end if ! end master
-         root = 'coutput/dipole_y'
+         root = 'dipole_y'
          call iofile2c (root, 'dat', nzx1, nzx2, iounit, fname, skip)
         else if (interaction .eq. 10) then
          if (iammaster) then
@@ -335,7 +335,7 @@
           write (*,*) ' calculated.'
           write (*,100)
          end if ! end master
-         root = 'coutput/dipole_x'
+         root = 'dipole_x'
          call iofile2c (root, 'dat', nzx1, nzx2, iounit, fname, skip)
         else if (interaction .eq. 11) then
          if (iammaster) then
@@ -343,7 +343,7 @@
           write (*,*) ' calculated.'
           write (*,100)
          end if ! end master
-         root = 'coutput/coulomb'
+         root = 'coulomb'
          call iofile2c (root, 'dat', nzx1, nzx2, iounit, fname, skip)
         else if (interaction .eq. 12) then
          if (iammaster) then
@@ -351,7 +351,7 @@
           write (*,*) ' calculated.'
           write (*,100)
          end if ! end master
-         root = 'coutput/nuxc' 
+         root = 'nuxc' 
          call iofile2c (root, 'dat', nzx1, nzx2, iounit, fname, skip)
         else if (interaction .eq. 13) then
          if (iammaster) then 
@@ -359,7 +359,7 @@
           write (*,*) ' now being calculated.'
           write (*,100)
          end if ! end master
-         root = 'coutput/nuxcs'
+         root = 'nuxcs'
          call iofile2c (root, 'dat', nzx1, nzx2, iounit, fname, skip)
 ! jel-X
         else if (interaction .eq. 14) then
@@ -369,12 +369,12 @@
           write (*,100)
          end if ! end master
          if (ideriv .eq. 1) then 
-          root = 'coutput/dnuxc_ol' 
+          root = 'dnuxc_ol' 
           call iofile2c_xcna (root, 'dat', isorp, nzx1, nzx2, iounit, &
      &                        fname, skip)
          endif
          if (ideriv .eq. 2) then 
-          root = 'coutput/dnuxc_or' 
+          root = 'dnuxc_or' 
           call iofile2c_xcna (root, 'dat', isorp, nzx1, nzx2, iounit,  &
      &                        fname, skip)
          endif
