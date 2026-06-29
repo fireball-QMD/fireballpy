@@ -44,7 +44,6 @@
      &         NSSH, nsshPP, LSSH, LsshPP, NLEFT, LLEFT, MLEFT, &
      &                        NRIGHT, LRIGHT, MRIGHT, &
      &                        index_max2cPP)
-       use precision, only: wp
        IMPLICIT NONE
  
        INTEGER in1,in2,inm, nshmax, nspecmax, inter3max

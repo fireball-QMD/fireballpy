@@ -73,7 +73,8 @@
      &                      mright, signature, iammaster)
         use dimensions
         use quadrature
-        use precision, only: wp
+        use iso_fortran_env, only: dp => real64
+        use :: wavefunctions, only: wf_atoms
         implicit none
  
 ! Argument Declaration and Description
@@ -139,39 +140,38 @@
  
         integer inj (2)
  
-        real(kind=wp) ang_integral
-        real(kind=wp) d
-        real(kind=wp) dmax
-        real(kind=wp) dq
-        real(kind=wp) dr
-        real(kind=wp) eV
-        real(kind=wp) factor
-        real(kind=wp), external :: jl2
-        real(kind=wp) pi
-        real(kind=wp), external :: psiofr
-        real(kind=wp) q
-        real(kind=wp) qmax
-        real(kind=wp) r
-        real(kind=wp) rcutoff1
-        real(kind=wp) rcutoff2
-        real(kind=wp) rrmax
-        real(kind=wp) rmin
-        real(kind=wp) xnqtop
-        real(kind=wp) xtra
+        real(kind=dp) ang_integral
+        real(kind=dp) d
+        real(kind=dp) dmax
+        real(kind=dp) dq
+        real(kind=dp) dr
+        real(kind=dp) eV
+        real(kind=dp) factor
+        real(kind=dp), external :: jl2
+        real(kind=dp) pi
+        real(kind=dp) q
+        real(kind=dp) qmax
+        real(kind=dp) r
+        real(kind=dp) rcutoff1
+        real(kind=dp) rcutoff2
+        real(kind=dp) rrmax
+        real(kind=dp) rmin
+        real(kind=dp) xnqtop
+        real(kind=dp) xtra
  
-        real(kind=wp) angular (0:kmax, inter_max)
-        real(kind=wp) answer (0:kmax)
+        real(kind=dp) angular (0:kmax, inter_max)
+        real(kind=dp) answer (0:kmax)
  
 ! The 5 in the esplit is to split q into 5 ranges for comparison purposes.
 ! This is similarly done for xnormq and qsplit below.
-        real(kind=wp) esplit (5)
-        real(kind=wp) qsplit (5)
+        real(kind=dp) esplit (5)
+        real(kind=dp) qsplit (5)
  
-        real(kind=wp) rmax (2)
-        real(kind=wp) rjj (nsh_max, 2, 2*nqke + 1)
-        real(kind=wp) sumj (nsh_max, 2)
-        real(kind=wp) tkinetic (inter_max, nddke)
-        real(kind=wp) xnormq (2, 0:nsh_max, 5)
+        real(kind=dp) rmax (2)
+        real(kind=dp) rjj (nsh_max, 2, 2*nqke + 1)
+        real(kind=dp) sumj (nsh_max, 2)
+        real(kind=dp) tkinetic (inter_max, nddke)
+        real(kind=dp) xnormq (2, 0:nsh_max, 5)
  
         character (len = 1) ang
         character (len = 40) filename
@@ -193,7 +193,7 @@
         call iofile2c (root, 'dat', nzx1, nzx2, iounit, filename, skip)
         if (skip) return
  
-        factor = 7.62d0/2.0d0
+        factor = 7.62_dp/2.0_dp
         qmax = sqrt(ecutke/factor)
  
         if (iammaster) then
@@ -250,7 +250,7 @@
 !               psi_nlm (q) = 4 pi (-i)^l Y_lm(Omega_q) R_nl(q)
  
         q = - dq
-        rmin = 0.0d0
+        rmin = 0.0_dp
         inj(1) = itype1
         inj(2) = itype2
  
@@ -280,7 +280,7 @@
          call Pintegral (l1, m1, l2, m2, kmax, answer)
  
          angular(0,index) = answer(0)
-         angular(1:kmax,index) = 0.0d0
+         angular(1:kmax,index) = 0.0_dp
          do imu = 1, kmax
           if (mod(l1-l2-imu,2) .eq. 0) then
            angular(imu,index) = answer(imu)*(2*imu+1)*((-1)**((l1-l2-imu)/2))
@@ -292,7 +292,7 @@
 !
 ! F O U R I E R   T R A N S F O R M   O F   R A D I A L   C O M P O N E N T
 ! ***************************************************************************
-        rjj = 0.0d0
+        rjj = 0.0_dp
         do iq = 1, nqq
          q = q + dq
  
@@ -304,13 +304,13 @@
           r = - dr
           do ir = 1, nrr
            r = r + dr
-           factor = 4.0d0/3.0d0
-           if (mod(ir,2) .eq. 1) factor = 2.0d0/3.0d0
-           if (ir .eq. 1 .or. ir .eq. nrr) factor = 1.0d0/3.0d0
+           factor = 4.0_dp/3.0_dp
+           if (mod(ir,2) .eq. 1) factor = 2.0_dp/3.0_dp
+           if (ir .eq. 1 .or. ir .eq. nrr) factor = 1.0_dp/3.0_dp
            do issh = 1, nssh(inj(iatom))
             rjj(issh,iatom,iq) = rjj(issh,iatom,iq)                          &
      &       + factor*jl2(lssh(inj(iatom),issh),q*r)                         &
-     &               *psiofr(inj(iatom),issh,r)*r*r*dr
+     &               *wf_atoms(inj(iatom))%get_psi(issh,r)*r*r*dr
            end do
           end do
          end do
@@ -320,18 +320,18 @@
 !    - we first normalize in q space.
 !    - in q space we get a factor (4*pi)/((2pi)**3)=2/pi
 !    - we then normalize in r space
-        xtra = 2.0d0/pi
+        xtra = 2.0_dp/pi
         nsplit = 5
         do isplit = 1, nsplit
          xnqtop = real(nqq)*sqrt(real(isplit)/real(nsplit))
          nqtop = int(xnqtop)
-         sumj = 0.0d0
+         sumj = 0.0_dp
          q = - dq
          do iq = 1, nqtop
           q = q + dq
-          factor = (4.0d0/3.0d0)
-          if (mod(iq,2) .eq. 1) factor = (2.0d0/3.0d0)
-          if (iq .eq. 1 .or. iq .eq. nqq) factor = (1.0d0/3.0d0)
+          factor = (4.0_dp/3.0_dp)
+          if (mod(iq,2) .eq. 1) factor = (2.0_dp/3.0_dp)
+          if (iq .eq. 1 .or. iq .eq. nqq) factor = (1.0_dp/3.0_dp)
           do iatom = 1, 2
            do issh = 1, nssh(inj(iatom))
             sumj(issh,iatom) = sumj(issh,iatom)                              &
@@ -406,7 +406,7 @@
         end if  !end master
  
 ! eV= ((h/2pi)**2)/m/pi (in eV times angstroms squared)
-        eV = 2.4255d0
+        eV = 2.4255_dp
  
 ! Now calculate the kinetic energy for all distances.
 ! ***************************************************************************
@@ -414,7 +414,7 @@
          d = d + dr
  
 ! Initialize
-         tkinetic(1:index_max,id) = 0.0d0
+         tkinetic(1:index_max,id) = 0.0_dp
  
 ! Now the integral over q loop.
          q = - dq
@@ -422,9 +422,9 @@
           q = q + dq
  
 ! Simpson rule for integration.
-          factor = (4.0d0/3.0d0)*eV
-          if (mod(iq,2) .eq. 1) factor = (2.0d0/3.0d0)*eV
-          if (iq .eq. 1 .or. iq .eq. nqq) factor = (1.0d0/3.0d0)*eV
+          factor = (4.0_dp/3.0_dp)*eV
+          if (mod(iq,2) .eq. 1) factor = (2.0_dp/3.0_dp)*eV
+          if (iq .eq. 1 .or. iq .eq. nqq) factor = (1.0_dp/3.0_dp)*eV
  
           do index = 1, index_max
            n1 = nleft(index)
@@ -434,7 +434,7 @@
 ! The selection rules are such that |l1-k|<=l2<=l1+k.  Therefore, if we
 ! are only doing up to f-orbitals here, l1 = 0, 1, 2, 3 and l2 = 0, 1, 2, 3.
 ! The maximum value of k is 6!
-           ang_integral = 0.0d0
+           ang_integral = 0.0_dp
            do ktype = 0, 6
             ang_integral = ang_integral + angular(ktype,index)*jl2(ktype,q*d)
            end do

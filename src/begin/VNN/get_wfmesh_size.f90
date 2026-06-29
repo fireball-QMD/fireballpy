@@ -46,7 +46,7 @@
 ! ===========================================================================
         subroutine get_wfmesh_size (nssh, filein, mesh)
         use begin_input, only: outpath
-        use precision
+        use, intrinsic :: iso_fortran_env, only: dp => real64
         implicit none
 
 ! Argument Declaration and Description

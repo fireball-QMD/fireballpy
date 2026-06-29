@@ -58,7 +58,7 @@
 ! ===========================================================================
         subroutine readvpp (ispec, filein, nsshPP, lsshPP, iexc, &
      &                      fraction, iammaster)
-        use precision, only: wp
+        use iso_fortran_env, only: dp => real64
         implicit none
  
         include '../parameters.inc'
@@ -79,7 +79,7 @@
         integer nsshPP (nspec_max)
         integer lsshPP (nspec_max, nsh_max)
  
-        real(kind=wp) fraction
+        real(kind=dp) fraction
  
 ! Local Parameters and Data Declaration
 ! ===========================================================================
@@ -91,13 +91,13 @@
         integer issh
         integer mesh
  
-        real(kind=wp) alpha
-        real(kind=wp) rshort
-        real(kind=wp) vshort
+        real(kind=dp) alpha
+        real(kind=dp) rshort
+        real(kind=dp) vshort
 
-        real(kind=wp) Z_val
+        real(kind=dp) Z_val
 
-        real(kind=wp) rcutoff
+        real(kind=dp) rcutoff
  
 ! Procedure
 ! ===========================================================================
@@ -121,7 +121,7 @@
  
 ! Read in which exchange-correlation approximation we are using.
         read (88,*) iexc
-        fraction = 0.0d0
+        fraction = 0.0_dp
         if (iexc .eq. 12) then
          rewind(88)
          do iline = 1, 14
@@ -208,12 +208,6 @@
         end do
  
         close (unit = 88)
-
-        do issh = 1, nsshPP(ispec)
-         rcutoff = (mesh-1) * drr_pp(issh,ispec)
-         if (superspline) call buildspline_1d (vpp(1,issh,ispec),    &
-     &                        vpp_spline(1,1,issh,ispec), mesh, rcutoff)
-        end do
 
  
       if (iammaster) then

@@ -41,7 +41,7 @@ subroutine read_2c (interaction)
         write (extension,'(''.dat'')')
         filename = trim(filename) // trim(extension) !append_string (filename, extension)
         open(iounit, file=filename, status='old')
-        call readheader_2c (interaction, iounit, nsh_max, numz, rc1, rc2, zmin, zmax, npseudo, cl_pseudo)
+        call readheader_2c (interaction, iounit, in1, in2, nsh_max, numz, rc1, rc2, zmin, zmax, npseudo, cl_pseudo)
         if (interaction .eq. 5) then
           do issh = 1, nsshPP(in2) 
             cl_PP(issh,in2) = cl_pseudo(issh)
@@ -61,7 +61,7 @@ subroutine read_2c (interaction)
         if (interaction .eq. 17 .or. interaction .eq. 18) num_nonzero = index_maxS(in1,in2)
         if (interaction .eq. 20) num_nonzero = index_maxS(in1,in2)
 
-        call readdata_2c (interaction, iounit, num_nonzero, numz, zmax, itype, in1, in2)
+        if (num_nonzero > 0) call readdata_2c (interaction, iounit, num_nonzero, numz, zmax, itype, in1, in2)
         close(iounit)
       end do
     end do

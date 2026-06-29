@@ -1,11 +1,11 @@
         module quadrature
-         use precision, only: wp
+         use iso_fortran_env, only: dp => real64
 
 ! quadratures for kinetic energy
          integer, parameter :: nqke = 400
          integer, parameter :: nrke = 240
          integer, parameter :: nddke = 107
-         real(kind=wp), parameter :: ecutke = 40.0d3
+         real(kind=dp), parameter :: ecutke = 40.0e3_dp
 
 ! Three-center interactions
 ! ****************************************************************************

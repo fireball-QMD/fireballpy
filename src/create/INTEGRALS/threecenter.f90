@@ -117,7 +117,7 @@
      &                          ispmax, ispnum, iammaster, ispherical)
         use dimensions
         use quadrature
-        use precision, only: wp
+        use iso_fortran_env, only: dp => real64
         implicit none
  
 ! Argument Declaration and Description
@@ -142,14 +142,14 @@
         integer, intent (in), dimension (inter_max) :: m1  ! m-value in shell
         integer, intent (in), dimension (inter_max) :: m2
 
-        real(kind=wp), intent (in) :: dbc  ! maximum bond distance: rc1 + rc2
-        real(kind=wp), intent (in) :: dna  ! maximum neutral atom distance: 2*rc3
-        real(kind=wp), intent (in) :: rcutoff1  ! largest radius of i-th atom (in Ang.)
-        real(kind=wp), intent (in) :: rcutoff2  ! 1, 2, 3 = left, right, neutral atom
-        real(kind=wp), intent (in) :: rcutoff3
+        real(kind=dp), intent (in) :: dbc  ! maximum bond distance: rc1 + rc2
+        real(kind=dp), intent (in) :: dna  ! maximum neutral atom distance: 2*rc3
+        real(kind=dp), intent (in) :: rcutoff1  ! largest radius of i-th atom (in Ang.)
+        real(kind=dp), intent (in) :: rcutoff2  ! 1, 2, 3 = left, right, neutral atom
+        real(kind=dp), intent (in) :: rcutoff3
 
-        real(kind=wp), intent (in), dimension (ntheta_max) :: ctheta
-        real(kind=wp), intent (in), dimension (ntheta_max) :: ctheta_weights
+        real(kind=dp), intent (in), dimension (ntheta_max) :: ctheta
+        real(kind=dp), intent (in), dimension (ntheta_max) :: ctheta_weights
 
         character (len = 2), intent (in) :: atom1
         character (len = 2), intent (in) :: atom2
@@ -184,23 +184,23 @@
 
         integer, dimension (inter_max) :: nabs
 
-        real(kind=wp) dbcx
-        real(kind=wp) dnax
-        real(kind=wp) distance_bc
-        real(kind=wp) cost
-        real(kind=wp) pl
-        real(kind=wp) plm
-        real(kind=wp) plmm
-        real(kind=wp) sint
-        real(kind=wp) temp
+        real(kind=dp) dbcx
+        real(kind=dp) dnax
+        real(kind=dp) distance_bc
+        real(kind=dp) cost
+        real(kind=dp) pl
+        real(kind=dp) plm
+        real(kind=dp) plmm
+        real(kind=dp) sint
+        real(kind=dp) temp
 
-        real(kind=wp), dimension (ntheta_max) :: answer
+        real(kind=dp), dimension (ntheta_max) :: answer
 ! Final results after sin(theta) or cos(theta) factor.
-        real(kind=wp), dimension (0:10, inter_max, ntheta_max) :: ggstore
+        real(kind=dp), dimension (0:10, inter_max, ntheta_max) :: ggstore
 ! Results from the integrator
-        real(kind=wp), dimension (0:10, inter_max) :: gmat
-        real(kind=wp), dimension (ntheta_max, inter_max, 0:10) :: qpl
-        real(kind=wp), dimension (3) :: rna
+        real(kind=dp), dimension (0:10, inter_max) :: gmat
+        real(kind=dp), dimension (ntheta_max, inter_max, 0:10) :: qpl
+        real(kind=dp), dimension (3) :: rna
 
         character (len = 40) fname
         character (len = 12) ftype
@@ -309,15 +309,15 @@
 ! ----------------------------------------------------------------------------
 ! Loop over all bondcharge distances.
         do ibcba = 1, nbcba
-         dbcx = real(ibcba - 1, kind=wp)*dbc/real(nbcba - 1, kind=wp)
+         dbcx = real(ibcba - 1, kind=dp)*dbc/real(nbcba - 1, kind=dp)
  
 ! for all bondcharges-- we set b=dbcx/2.
-         distance_bc = dbcx/2.d0
+         distance_bc = dbcx/2._dp
 
 ! Loop over all neutral atom distances.
 ! The distance is measured from the bondcharge center (b=dbcx/2)
          do inaba = 1, nnaba
-          dnax = real(inaba - 1, kind=wp)*dna/real(nnaba - 1, kind=wp)
+          dnax = real(inaba - 1, kind=dp)*dna/real(nnaba - 1, kind=dp)
  
 ! ----------------------------------------------------------------------------
 ! 3. Since threecenter_integral internaly loops over ispmin to ispmax.
@@ -327,7 +327,7 @@
            cost = ctheta(itheta)
            sint = sqrt(1 - cost*cost)
            rna(1) = sint*dnax
-           rna(2) = 0.0d0
+           rna(2) = 0.0_dp
 ! -------------------------------------------------------
 !           rna(3)=cost*dnax + distance_bc  ! old staff
 ! -------------------------------------------------------
@@ -352,7 +352,7 @@
             if (nabs(index) .eq. 1)then
              do isorp = ispmin, ispmax
 !             type B: V=sin(theta)*Sum(l)* P*Q (nabs=1)
-              if (sint .lt. 0.001d0) stop 'sin theta is zero!!!'
+              if (sint .lt. 0.001_dp) stop 'sin theta is zero!!!'
               ggstore(isorp,index,itheta) = gmat(isorp,index)/sint
              end do
             else
@@ -380,18 +380,18 @@
 ! ----------------------------------------------------------------------------
            do index = 1, index_max
 ! Looping over the thetas, which are the roots of a Pl
-            answer = 0.0d0
+            answer = 0.0_dp
             do itheta = 1, ntheta_max 
-             plmm = 1.0d0
+             plmm = 1.0_dp
              plm = ctheta(itheta)
              temp = ctheta_weights(itheta)*ggstore(isorp,index,itheta)
-             if (abs(temp) .lt. 1.0d-10) temp = 0.0d0
+             if (abs(temp) .lt. 1.0e-10_dp) temp = 0.0_dp
              answer(1) = answer(1) + plmm*temp
              answer(2) = answer(2) + plm*temp
              do jtheta = 3, ntheta_max
               pl = (plm*ctheta(itheta)                                  &
-     &                 *(2.0d0*jtheta - 3.0d0) - (jtheta - 2.0d0)*plmm) &
-     &             /(jtheta - 1.0d0)
+     &                 *(2.0_dp*jtheta - 3.0_dp) - (jtheta - 2.0_dp)*plmm) &
+     &             /(jtheta - 1.0_dp)
               answer(jtheta) = answer(jtheta) + pl*temp
               plmm = plm
               plm = pl
@@ -400,7 +400,7 @@
 
 ! Normalize the coefficient, and write them out to qpl's.
             do itheta = 1, ntheta_max
-             qpl(itheta,index,isorp) = answer(itheta)*(2.d0*itheta - 1.d0)*0.5d0
+             qpl(itheta,index,isorp) = answer(itheta)*(2._dp*itheta - 1._dp)*0.5_dp
             end do
            end do !  end of the GL loop
           end do !  end of the isorp loop

@@ -80,7 +80,7 @@
 ! Program Declaration
 ! ===========================================================================
         subroutine Pintegral (l, m, lp, mp, kmax, Pint)
-        use precision, only: wp
+        use iso_fortran_env, only: dp => real64
         implicit none
  
 ! Argument Declaration and Description
@@ -93,7 +93,7 @@
         integer kmax
  
 ! Output
-        real(kind=wp) Pint (0:kmax)
+        real(kind=dp) Pint (0:kmax)
  
 ! Local Parameters and Data Declaration
 ! ===========================================================================
@@ -104,12 +104,12 @@
 ! ===========================================================================
         integer i, j
  
-        real(kind=wp) arg
+        real(kind=dp) arg
  
-        real(kind=wp) pn (0:imax,0:jmax)
-        real(kind=wp) theta (0:nmax)
+        real(kind=dp) pn (0:imax,0:jmax)
+        real(kind=dp) theta (0:nmax)
  
-        complex(kind=wp) sum
+        complex(kind=dp) sum
  
 ! Procedure
 ! ===========================================================================
@@ -119,7 +119,7 @@
 !----------------------------------------------------------------------
         do i = 0, kmax
          call Tintegral (l, m, lp, mp, i, sum)
-         theta(i) = real(sum, kind=wp)
+         theta(i) = real(sum, kind=dp)
         end do
  
  
@@ -128,18 +128,18 @@
 !----------------------------------------------------------------------
         do i = 0, imax
          do j = 0, jmax
-          pn(i,j) = 0.0d0
+          pn(i,j) = 0.0_dp
          end do
         end do
  
-        pn(0,0) = 1.0d0
-        pn(1,1) = 1.0d0
+        pn(0,0) = 1.0_dp
+        pn(1,1) = 1.0_dp
  
         do i = 2, kmax
          do j = 0,i
-          arg = real(i, kind=wp)
-          pn(i,j+1) = pn(i,j+1) + (2.0d0*arg - 1.0d0)*pn(i-1,j)/arg
-          pn(i,j) = pn(i,j) - (arg - 1.0d0)*pn(i-2,j)/arg
+          arg = real(i, kind=dp)
+          pn(i,j+1) = pn(i,j+1) + (2.0_dp*arg - 1.0_dp)*pn(i-1,j)/arg
+          pn(i,j) = pn(i,j) - (arg - 1.0_dp)*pn(i-2,j)/arg
          end do
         end do
  
@@ -149,7 +149,7 @@
 ! harmonics.
 !---------------------------------------------------------------------
         do i = 0, kmax
-         Pint(i) = 0.0d0
+         Pint(i) = 0.0_dp
          do j = 0, i
           Pint(i) = Pint(i) + pn(i,j)*theta(j)
          end do

@@ -153,12 +153,12 @@ endforeach
 fireball_lib = library(
   'fireball',
   fireball_srcs,
-  dependencies: [blas_dep, lapack_dep],
+  dependencies: [blas_dep, lapack_dep, common_dep],
   install: true,
   install_dir: py.get_install_dir() / 'fireballpy.libs',
 )
 fireball_dep = declare_dependency(
-  dependencies: [blas_dep, lapack_dep],
+  dependencies: [blas_dep, lapack_dep, common_dep],
   link_with: [fireball_lib],
   sources: fireball_srcs,
 )

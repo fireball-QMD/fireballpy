@@ -48,7 +48,8 @@
 ! ===========================================================================
         subroutine onecentervdip (nsh_max, nspec, nspec_max, itype, nsshxc,    &
      &                   lsshxc, drr_rho, rcutoffa_max, what, signature)
-        use precision, only: wp
+        use iso_fortran_env, only: dp => real64
+        use :: wavefunctions, only: wf_atoms
         implicit none
 
 ! Argument Declaration and Description
@@ -62,8 +63,8 @@
         integer, intent (in), dimension (nspec_max, nsh_max) :: lsshxc
         integer, intent (in), dimension (nspec_max) :: nsshxc
 
-        real(kind=wp), intent (in), dimension (nspec_max) :: drr_rho
-        real(kind=wp), intent (in), dimension (nspec_max) :: rcutoffa_max
+        real(kind=dp), intent (in), dimension (nspec_max) :: drr_rho
+        real(kind=dp), intent (in), dimension (nspec_max) :: rcutoffa_max
 
 
         character (len=70), intent (in), dimension (nspec_max) :: what
@@ -75,7 +76,7 @@
  
 ! Local Parameters and Data Declaration
 ! ===========================================================================
-        real(kind=wp), parameter :: eq2 = 14.39975d0
+        real(kind=dp), parameter :: eq2 = 14.39975_dp
  
 ! Local Variable Declaration and Description
 ! ===========================================================================
@@ -97,45 +98,43 @@
         integer Max_Nlines
         integer iline
 
-        real(kind=wp) coefficient
-        real(kind=wp) cg1
-        real(kind=wp) cg2
-        real(kind=wp) cg3
-        real(kind=wp) cg4
-        real(kind=wp) drho
-        real(kind=wp) psi1
-        real(kind=wp) psi2
-        real(kind=wp) psi3
-        real(kind=wp) psi4
-        real(kind=wp) r
-        real(kind=wp) rp
-        real(kind=wp) rhomax
-        real(kind=wp) rhomin
-        real(kind=wp) sumr
-        real(kind=wp) sumrp
-        real(kind=wp) aux
-        real(kind=wp) Rint
-        real(kind=wp) radial_integral
+        real(kind=dp) coefficient
+        real(kind=dp) cg1
+        real(kind=dp) cg2
+        real(kind=dp) cg3
+        real(kind=dp) cg4
+        real(kind=dp) drho
+        real(kind=dp) psi1
+        real(kind=dp) psi2
+        real(kind=dp) psi3
+        real(kind=dp) psi4
+        real(kind=dp) r
+        real(kind=dp) rp
+        real(kind=dp) rhomax
+        real(kind=dp) rhomin
+        real(kind=dp) sumr
+        real(kind=dp) sumrp
+        real(kind=dp) aux
+        real(kind=dp) Rint
+        real(kind=dp) radial_integral
 
-        real(kind=wp), dimension (:), allocatable :: factor
-        real(kind=wp), dimension (:), allocatable :: rpoint
+        real(kind=dp), dimension (:), allocatable :: factor
+        real(kind=dp), dimension (:), allocatable :: rpoint
 
-        real(kind=wp), external :: psiofr
 
         integer :: ialpha, ibeta, imu, inu, issh1, issh2, issh3, issh4
         integer :: l,l1,l2,l3,l4,m,m1,m2,m3,m4
         integer :: il1,il2,il3,il4
-        real(kind=wp) :: gauntReal, I
+        real(kind=dp) :: gauntReal, I
 
         integer, dimension(:,:), allocatable :: orb2lm
         integer, dimension(:), allocatable :: orb2shell
         integer , dimension(:,:), allocatable :: Orbitals
-        real(kind=wp), dimension(:), allocatable :: Total
+        real(kind=dp), dimension(:), allocatable :: Total
 
         character (len = 200) extension
         character (len = 200) filename
         character (len = 200) root
-        character (len = 200) append_string
 
 
 
@@ -147,7 +146,7 @@
          root = 'coutput/vdip_onecenter' 
          write (extension,'(''_'',i2.2)') itype
          !filename = trim(root)//trim(extension)
-         filename = append_string (root,extension)
+         filename = trim(root)//trim(extension)
 
          open (unit = 36, file = filename, status = 'unknown')
 
@@ -211,7 +210,7 @@
  
 ! Initialize the limits of integration for the radial integral.
 ! Set up the grid points for the rho integration.
-!         rhomin = 0.0d0
+!         rhomin = 0.0_dp
 !         rhomax = rcutoffa_max(itype)
 !         drho = drr_rho(itype)
 !         nnrho = int((rhomax - rhomin)/drho) + 1
@@ -225,8 +224,8 @@
 !         write(36,*)'itype =',itype,'l =',l1 
 !         do irho = 1, nnrho
 !           r = rpoint(irho)
-!           if (r .lt. 1.0d-04) r = 1.0d-04
-!           psi1 = psiofr(itype,il1,r)
+!           if (r .lt. 1.0e-4_dp) r = 1.0e-4_dp
+!           psi1 = wf_atoms(itype)%get_psi(il1,r)
 !           write(36,*)irho,r,psi1
 !         end do
 !         end do
@@ -237,9 +236,9 @@
 !         do irho = 1, nnrho
 !          rpoint(irho) = float(irho - 1)*drho
 ! Set up the Simpson rule factors:
-!          factor(irho) = 2.0d0*drho/3.0d0
-!          if (mod(irho,2) .eq. 0) factor(irho) = 4.0d0*drho/3.0d0
-!          if (irho .eq. 1 .or. irho .eq. nnrho) factor(irho) = drho/3.0d0
+!          factor(irho) = 2.0_dp*drho/3.0_dp
+!          if (mod(irho,2) .eq. 0) factor(irho) = 4.0_dp*drho/3.0_dp
+!          if (irho .eq. 1 .or. irho .eq. nnrho) factor(irho) = drho/3.0_dp
 !         end do !irho
 
               !new
@@ -247,7 +246,7 @@
                allocate(Orbitals(Max_Nlines,4))
                Orbitals = 0
                allocate(Total(Max_Nlines))
-               Total = 0.0d0
+               Total = 0.0_dp
                Nlines = 0
                write(*,*) 'Hi, nice to see you!' !Ankais
                do imu = 1, num_orb  !(itype)
@@ -269,7 +268,7 @@
                             issh3 = orb2shell(ialpha)
                             issh4 = orb2shell(ibeta)
                           if (abs(l3-l4) .eq. 1) then !Dipolar approx.
-                          I = 0.0d0
+                          I = 0.0_dp
                           do l = 0,4    !This l comes from the Laplace expansion of 1/|r-r'|
                               !Compute the radial integral...
                               !R

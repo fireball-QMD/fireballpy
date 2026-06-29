@@ -49,7 +49,8 @@
      &                          psi_gs)
         use begin_input
         use constants
-        use precision
+        use, intrinsic :: iso_fortran_env, only: dp => real64
+        use :: xc, only: xc_init, xc_end, xc_calc, xc_isgga
         implicit none
 
 ! Argument Declaration and Description
@@ -59,11 +60,11 @@
 
         integer, intent (in), dimension (nssh) :: mesh_psirc
 
-        real(kind=long), intent (in) :: rc_max
+        real(kind=dp), intent (in) :: rc_max
 
-        real(kind=long), intent (in), dimension (mesh) :: r
-        real(kind=long), intent (in), dimension (nssh) :: rcutoff_psirc
-        real(kind=long), intent (in), dimension (nssh, mesh) :: psi_gs
+        real(kind=dp), intent (in), dimension (mesh) :: r
+        real(kind=dp), intent (in), dimension (nssh) :: rcutoff_psirc
+        real(kind=dp), intent (in), dimension (nssh, mesh) :: psi_gs
 
 ! Local Parameters and Data Declaration
 ! ===========================================================================
@@ -83,53 +84,53 @@
         integer l, l1, l2
         integer mesh_new
 
-        real(kind=long) difference
-        real(kind=long) dr
-        real(kind=long) ebs
-        real(kind=long) eee
-        real(kind=long) ekin
-        real(kind=long) enew
-        real(kind=long) eold
-        real(kind=long) eout
-        real(kind=long) etot
-        real(kind=long) exc
-        real(kind=long) exmix
-        real(kind=long) integral
-        real(kind=long) total
-        real(kind=long) slope
-        real(kind=long) xnz
-        real(kind=long) xnorm
-        real(kind=long) zero
+        real(kind=dp) difference
+        real(kind=dp) dr
+        real(kind=dp) ebs
+        real(kind=dp) eee
+        real(kind=dp) ekin
+        real(kind=dp) enew
+        real(kind=dp) eold
+        real(kind=dp) eout
+        real(kind=dp) etot
+        real(kind=dp) exc
+        real(kind=dp) exmix
+        real(kind=dp) integral
+        real(kind=dp) total
+        real(kind=dp) slope
+        real(kind=dp) xnz
+        real(kind=dp) xnorm
+        real(kind=dp) zero
 
-        real(kind=long), dimension (0:3,0:3,0:6) :: cgcoeff
-        real(kind=long), dimension (:), allocatable :: eigenvalue
-        real(kind=long), dimension (:, :), allocatable :: psi
-        real(kind=long), dimension (:, :), allocatable :: psi_new
-        real(kind=long), dimension (mesh) :: psi0
-        real(kind=long), dimension (nssh, mesh) :: Rall
-        real(kind=long), dimension (mesh) :: rho
-        real(kind=long), dimension (mesh) :: rhop
-        real(kind=long), dimension (mesh) :: rhopp
-        real(kind=long), dimension (mesh) :: rmult
-        real(kind=long), dimension (mesh) :: sigma
-        real(kind=long), dimension (mesh) :: sigma_old
-        real(kind=long), dimension (4) :: terms
-        real(kind=long), dimension (mesh) :: uxc
-        real(kind=long), dimension (:), allocatable :: uxc_local
-        real(kind=long), dimension (mesh) :: v
-        real(kind=long), dimension (mesh) :: vc
-        real(kind=long), dimension (mesh) :: vee
-        real(kind=long), dimension (nssh, mesh) :: vexx
-        real(kind=long), dimension (:), allocatable :: vkin_local
-        real(kind=long), dimension (:, :), allocatable :: vl
-        real(kind=long), dimension (:), allocatable :: v_local
-        real(kind=long), dimension (:), allocatable :: vna_local
-        real(kind=long), dimension (:), allocatable :: xx
-        real(kind=long), dimension (:), allocatable :: yy
+        real(kind=dp), dimension (0:3,0:3,0:6) :: cgcoeff
+        real(kind=dp), dimension (:), allocatable :: eigenvalue
+        real(kind=dp), dimension (:, :), allocatable :: psi
+        real(kind=dp), dimension (:, :), allocatable :: psi_new
+        real(kind=dp), dimension (mesh) :: psi0
+        real(kind=dp), dimension (nssh, mesh) :: Rall
+        real(kind=dp), dimension (mesh) :: rho
+        real(kind=dp), dimension (mesh,1) :: rhop
+        real(kind=dp), dimension (mesh,1,1) :: rhopp
+        real(kind=dp), dimension (mesh) :: rmult
+        real(kind=dp), dimension (mesh) :: sigma
+        real(kind=dp), dimension (mesh) :: sigma_old
+        real(kind=dp), dimension (4) :: terms
+        real(kind=dp), dimension (mesh) :: uxc, eexc, dexcrho, dexcsigma, duxcrho, duxcsigma
+        real(kind=dp), dimension (:), allocatable :: uxc_local
+        real(kind=dp), dimension (mesh) :: v
+        real(kind=dp), dimension (mesh) :: vc
+        real(kind=dp), dimension (mesh) :: vee
+        real(kind=dp), dimension (nssh, mesh) :: vexx
+        real(kind=dp), dimension (:), allocatable :: vkin_local
+        real(kind=dp), dimension (:, :), allocatable :: vl
+        real(kind=dp), dimension (:), allocatable :: v_local
+        real(kind=dp), dimension (:), allocatable :: vna_local
+        real(kind=dp), dimension (:), allocatable :: xx
+        real(kind=dp), dimension (:), allocatable :: yy
 
-        real(kind=long), external :: clebsch_gordon
+        real(kind=dp), external :: clebsch_gordon
 ! optimized w.f.
-        real(kind=long), dimension (:,:), allocatable :: vXe
+        real(kind=dp), dimension (:,:), allocatable :: vXe
 
 ! Allocate Arrays
 ! ===========================================================================
@@ -154,9 +155,9 @@
         !write (*,*) ' mesh = ', mesh
 
 ! Initialize the wavefunctions and the exact exchange potential.
-        psi = 0.0d0
-        psi_new = 0.0d0
-        vexx = 0.0d0
+        psi = 0.0_dp
+        psi_new = 0.0_dp
+        vexx = 0.0_dp
 
 ! Get the Clebsch Gordan Coefficients.
         do l1 = 0, 3
@@ -172,7 +173,7 @@
         !write (*,*) '  '
         !write (*,*) ' Number of points in mesh = ', mesh
         !write (*,*) ' r(mesh) = ', r(mesh), ' must = rc_max = ', rc_max
-        if (abs(r(mesh) - rc_max) .gt. 1.0d-6) stop ' bad agreement between r(mesh) and rc '
+        if (abs(r(mesh) - rc_max) .gt. 1.0e-6_dp) stop ' bad agreement between r(mesh) and rc '
 
         !write (*,*) '  '
         !write (*,*) ' We average the output and input charge densities at each '
@@ -185,12 +186,12 @@
         !write (*,*) ' Tolerance checks closeness to self-consistentcy. It is '
         !write (*,*) ' the average difference between the old and new Etot and '
         !write (*,*) ' sum of eigenvalues, divided by the new average. '
-        !write (*,*) ' The standard tolerance is 1.0d-5. '
+        !write (*,*) ' The standard tolerance is 1.0e-5_dp. '
         !write (*,*) ' You have a tolerance of ', tolerance
         !write (*,*) '  '
 
 ! Determine the non-local pseudopotential.
-        xnz = real(nzval_ion, kind=long)
+        xnz = real(nzval_ion, kind=dp)
 !        call pp(ppionfile, nssh, mesh, xnz, r, vc, vl, ioptionpp, exmix)
         call pp(1, mesh, r, vc, vl, ioptionpp, exmix)
 
@@ -221,20 +222,20 @@
 
 ! create additional X-potential for excited orbitals to optimize 
 ! pseudoatomic w.f.
-        vXe = 0.0d0
+        vXe = 0.0_dp
         if (ioptim .eq. 1) then 
            do issh = 1,nssh
               jssh = issh + nssh
               do ipoint = 1, mesh
 ! (r/r0)**6.0
-!                  vXe(issh,ipoint) = (r(ipoint)/r0(issh))**2.0d0
+!                  vXe(issh,ipoint) = (r(ipoint)/r0(issh))**2.0_dp
                  if (r(ipoint) .gt. r0(jssh)) then 
 ! siesta formulae, PRB 64, 235111 (2001)
                     vXe(issh,ipoint) =                                      &
-     &                 v0(jssh)*exp( -1.0d0*(rcutoff(issh) - r0(jssh))      &
+     &                 v0(jssh)*exp( -1.0_dp*(rcutoff(issh) - r0(jssh))      &
      &                 / (r(ipoint)-r0(jssh)) ) /(rcutoff(issh)+0.01-r(ipoint))
                  else
-                    vXe(issh,ipoint) = 0.0d0
+                    vXe(issh,ipoint) = 0.0_dp
                  endif
               end do ! enddo ipoint
            enddo ! enddo  issh
@@ -247,17 +248,17 @@
 
 ! Construct approximate starting potential. We do this by forming hydrogenic
 ! wavefunctions using an effective bohr radius a0(m).
-        sigma = 0.0d0
+        sigma = 0.0_dp
         do issh = 1, nssh
          l = lam(issh)
          do ipoint = 1, mesh - 1
           if (r(ipoint) .lt. rcutoff_psirc(issh)) then
            psi0(ipoint) = r(ipoint)**(l+1)*exp(-r(ipoint)/a0(issh))
           else
-           psi0(ipoint) = 0.0d0
+           psi0(ipoint) = 0.0_dp
           end if
          end do
-         psi0(mesh) = 0.0d0
+         psi0(mesh) = 0.0_dp
 
 ! Grossly enforce the boundary condition at rc.
 ! Normalize and add to total charge density.
@@ -267,7 +268,7 @@
         end do
 
 ! Check that int[0,rc] sig(r) dr = z
-        difference = abs(dr*sum(sigma) - real(nzval_ion, kind=long))
+        difference = abs(dr*sum(sigma) - real(nzval_ion, kind=dp))
 !dani.        if (nznuc .ne. 1 .and. difference .gt. tolerance)                    &
 !dani.     &   stop ' Check: Sum of charge density - not equal to nzval_ion '
 
@@ -278,23 +279,42 @@
         rho(2:mesh-1) = sigma(2:mesh-1)/r(2:mesh-1)**2
 
 ! endpoints
-        rho(1) = 2.0d0*rho(2) - rho(3)
-        rho(mesh) = 2.0d0*rho(mesh-1) - rho(mesh-2)
+        rho(1) = 2.0_dp*rho(2) - rho(3)
+        rho(mesh) = 2.0_dp*rho(mesh-1) - rho(mesh-2)
 
 ! derivatives
-        rhop(2:mesh-1) = (rho(3:mesh) - rho(1:mesh-2))/(2.0d0*dr)
-        rhopp(3:mesh-1) = (rho(4:mesh) - 2.0d0*rho(3:mesh-1)                 &
+        rhop(2:mesh-1,1) = (rho(3:mesh) - rho(1:mesh-2))/(2.0_dp*dr)
+        rhopp(3:mesh-1,1,1) = (rho(4:mesh) - 2.0_dp*rho(3:mesh-1)                 &
      &                                 + rho(2:mesh-2))/(dr**2)
 
 ! endpoints
-        rhop(1) = 2.0d0*rhop(2) - rhop(3)
-        rhopp(1) = 2.0d0*rhopp(2) - rhopp(3)
-        rhop(mesh) = 2.0d0*rhop(mesh-1) - rhop(mesh-2)
-        rhopp(mesh) = 2.0d0*rhopp(mesh-1) - rhopp(mesh-2)
+        rhop(1,1) = 2.0_dp*rhop(2,1) - rhop(3,1)
+        rhopp(1,1,1) = 2.0_dp*rhopp(2,1,1) - rhopp(3,1,1)
+        rhop(mesh,1) = 2.0_dp*rhop(mesh-1,1) - rhop(mesh-2,1)
+        rhopp(mesh,1,1) = 2.0_dp*rhopp(mesh-1,1,1) - rhopp(mesh-2,1,1)
 
         ienergy = 0     ! do not calculate energies
-        call get_uxc (ioption, mesh, r, dr, rho, rhop, rhopp, uxc, exc,      &
-     &                ienergy, exmix)
+        if (xc_isgga()) then
+          call xc_calc(rho/abohr3, rhop/abohr4, rhopp/abohr5, eexc, uxc, dexcrho, dexcsigma, duxcrho, duxcsigma)
+          eexc = eexc/ryd
+          uxc = uxc/ryd
+          dexcrho = dexcrho/ryd/abohr3
+          dexcsigma = dexcrho/ryd/abohr3
+          duxcrho = dexcrho/ryd/abohr3
+          duxcsigma = dexcrho/ryd/abohr3
+        else
+          call xc_calc(rho/abohr3, eexc, uxc, dexcrho, duxcrho)
+          eexc = eexc/ryd
+          uxc = uxc/ryd
+          dexcrho = dexcrho/ryd/abohr3
+          duxcrho = dexcrho/ryd/abohr3
+        end if
+        if (ienergy == 1) then
+          exc = 0.0_dp
+          do ipoint = 1, mesh
+            exc = exc + dr*r(ipoint)**2*rho(ipoint)*eexc(ipoint)
+          end do
+        end if
         call get_vee (mesh, dr, sigma, vee)
 
 ! We do not have wave functions at this point. So do the first iteration with
@@ -320,10 +340,10 @@
         !write (*,200)
         !write (*,201)
 
-        eold = 0.0d0
+        eold = 0.0_dp
         do iteration = 1, max_iterations  ! ::::::: SCF LOOP ::::::::
          sigma_old = sigma
-         sigma = 0.0d0
+         sigma = 0.0_dp
 
          do issh = 1, nssh  ! -------- LOOP OVER ALL SHELLS ---------
           l = lam(issh)
@@ -331,11 +351,11 @@
 ! put potential in v
 ! Note that the factor of 2 is conversion from Hartree units to Rydberg units.
           if (ioptionpp .ne. 12) then
-!            v = 2.0d0*(vc + vl(issh,:)) + vee + uxc
-            v = 2.0d0*(vc + vl(issh,:)) + vee + uxc + vXe(issh,:)
+!            v = 2.0_dp*(vc + vl(issh,:)) + vee + uxc
+            v = 2.0_dp*(vc + vl(issh,:)) + vee + uxc + vXe(issh,:)
           else
-!           v = 2.0d0*(vc + vl(issh,:)) + vee + uxc + exmix*vexx(issh,:)
-           v = 2.0d0*(vc + vl(issh,:)) + vee + uxc + exmix*vexx(issh,:)     &
+!           v = 2.0_dp*(vc + vl(issh,:)) + vee + uxc + exmix*vexx(issh,:)
+           v = 2.0_dp*(vc + vl(issh,:)) + vee + uxc + exmix*vexx(issh,:)     &
       &         + vXe(issh,:)
           end if
 
@@ -350,13 +370,13 @@
           sigma = sigma + xocc_ion(issh)*psi(issh,:)**2
 
           do ipoint = 1, mesh_psirc(issh)
-           Rall(issh,ipoint) = 0.0d0
-           if (r(ipoint) .gt. 1.0d-4) Rall(issh,ipoint) = psi0(ipoint)/r(ipoint)
+           Rall(issh,ipoint) = 0.0_dp
+           if (r(ipoint) .gt. 1.0e-4_dp) Rall(issh,ipoint) = psi0(ipoint)/r(ipoint)
           end do
          end do  ! ---------------- END LOOP OVER SHELLS -----------------
 
 ! Mix in old and new sigma's
-         sigma = (1.0d0 - beta)*sigma + beta*sigma_old
+         sigma = (1.0_dp - beta)*sigma + beta*sigma_old
 
 ! Finished with all states of angular momentum l.
 ! Calculate exchange correlation and Hartree potential for new sigma
@@ -364,37 +384,56 @@
 ! The subroutine get_uxc depends on the actual density rho, calculate rho
 ! from sigma - rho = sigma/r**2. Also, since we are doing GGA's for some
 ! options, calculate the first and second derivatives of rho.
-         rho(2:mesh-1) = sigma(2:mesh-1)/(4.0d0*pi*r(2:mesh-1)**2)
+         rho(2:mesh-1) = sigma(2:mesh-1)/(4.0_dp*pi*r(2:mesh-1)**2)
 
 ! endpoints
-         rho(1) = 2.0d0*rho(2) - rho(3)
-         rho(mesh) = 2.0d0*rho(mesh-1) - rho(mesh-2)
+         rho(1) = 2.0_dp*rho(2) - rho(3)
+         rho(mesh) = 2.0_dp*rho(mesh-1) - rho(mesh-2)
 
 ! derivatives
-         rhop(2:mesh-1) = (rho(3:mesh) - rho(1:mesh-2))/(2.0d0*dr)
-         rhopp(3:mesh-1) = (rho(4:mesh) - 2.0d0*rho(3:mesh-1)                &
+         rhop(2:mesh-1,1) = (rho(3:mesh) - rho(1:mesh-2))/(2.0_dp*dr)
+         rhopp(3:mesh-1,1,1) = (rho(4:mesh) - 2.0_dp*rho(3:mesh-1)                &
      &                                  + rho(2:mesh-2))/(dr**2)
 
 ! endpoints
-         rhop(1) = 2.0d0*rhop(2) - rhop(3)
-         rhopp(1) = 2.0d0*rhopp(2) - rhopp(3)
-         rhop(mesh) = 2.0d0*rhop(mesh-1) - rhop(mesh-2)
-         rhopp(mesh) = 2.0d0*rhopp(mesh-1) - rhopp(mesh-2)
+         rhop(1,1) = 2.0_dp*rhop(2,1) - rhop(3,1)
+         rhopp(1,1,1) = 2.0_dp*rhopp(2,1,1) - rhopp(3,1,1)
+         rhop(mesh,1) = 2.0_dp*rhop(mesh-1,1) - rhop(mesh-2,1)
+         rhopp(mesh,1,1) = 2.0_dp*rhopp(mesh-1,1,1) - rhopp(mesh-2,1,1)
 
          ienergy = 1     ! calculate energies
-         call get_uxc (ioption, mesh, r, dr, rho, rhop, rhopp, uxc, exc,     &
-     &                 ienergy, exmix)
+         if (xc_isgga()) then
+           call xc_calc(rho/abohr3, rhop/abohr4, rhopp/abohr5, eexc, uxc, dexcrho, dexcsigma, duxcrho, duxcsigma)
+           eexc = eexc/ryd
+           uxc = uxc/ryd
+           dexcrho = dexcrho/ryd/abohr3
+           dexcsigma = dexcrho/ryd/abohr3
+           duxcrho = dexcrho/ryd/abohr3
+           duxcsigma = dexcrho/ryd/abohr3
+         else
+           call xc_calc(rho/abohr3, eexc, uxc, dexcrho, duxcrho)
+           eexc = eexc/ryd
+           uxc = uxc/ryd
+           dexcrho = dexcrho/ryd/abohr3
+           duxcrho = dexcrho/ryd/abohr3
+         end if
+         if (ienergy == 1) then
+           exc = 0.0_dp
+           do ipoint = 1, mesh
+             exc = exc + dr*r(ipoint)**2*rho(ipoint)*eexc(ipoint)
+           end do
+         end if
          call get_vee (mesh, dr, sigma, vee)
 
 ! The xc energy is in units of 4*pi, convert back.
-         exc = 4.0d0*pi*exc
+         exc = 4.0_dp*pi*exc
 
-         if (ioptionpp .eq. 12) then
-          do issh = 1, nssh
-           call ExxPot (mesh, nssh, mesh_psirc(issh), dr, r, Rall, lam,      &
-     &                  issh, 1, nssh, xocc_ion, cgcoeff, vexx)
-          end do
-         end if
+     !     if (ioptionpp .eq. 12) then
+     !      do issh = 1, nssh
+     !       call ExxPot (mesh, nssh, mesh_psirc(issh), dr, r, Rall, lam,      &
+     ! &                  issh, 1, nssh, xocc_ion, cgcoeff, vexx)
+     !      end do
+     !     end if
 
 ! Calculate the total energy:  Etot=sum(eigenval)-1/2*Vee-1/4*Vxc
 ! (Minus sign to convert binding energies into real energies)
@@ -404,23 +443,23 @@
 ! Evaluate the double counted electron-electron repulsion and the exchange-
 ! correlation energy.
 ! Do the integral using a trapezoidal rule.
-         eee = 0.0d0
+         eee = 0.0_dp
 
 ! eee = vee/2.
 ! exc = integral dr*sigma*(vxc-uxc)
 ! Contribution from origin is zero. Find terms in the sum of eigenvalues
-         v_local = 0.0d0
-         uxc_local = 0.0d0
-         vna_local = 0.0d0
-         vkin_local = 0.0d0
+         v_local = 0.0_dp
+         uxc_local = 0.0_dp
+         vna_local = 0.0_dp
+         vkin_local = 0.0_dp
          do ipoint = 2, mesh - 1
-          eee = eee + 0.5d0*dr*sigma(ipoint)*vee(ipoint)
+          eee = eee + 0.5_dp*dr*sigma(ipoint)*vee(ipoint)
 
 ! Remember that vc and vl are in hartrees so to get rydbergs multiply by 2.0
-          v_local = v_local + 2.0d0*dr*psi(:,ipoint)**2*vl(:,ipoint)
+          v_local = v_local + 2.0_dp*dr*psi(:,ipoint)**2*vl(:,ipoint)
           uxc_local = uxc_local + dr*psi(:,ipoint)**2*uxc(ipoint)
           vna_local = vna_local + dr*psi(:,ipoint)**2                        &
-     &                              *(2.0d0*vc(ipoint) + vee(ipoint))
+     &                              *(2.0_dp*vc(ipoint) + vee(ipoint))
 
 ! Kinetic energy
 ! The kinetic energy is given by integral(PSI Delta PSI d^3r) with
@@ -448,11 +487,11 @@
 ! We use a four-point interpolation formula to get the second derivative (this
 ! can be done by function d2u by setting norder = 3)
 !
-! Note: In our units (Rydbergs) hbar**2/(2*mass) = 1.d0
+! Note: In our units (Rydbergs) hbar**2/(2*mass) = 1._dp
 ! It is faster to not use function d2u to get the second derivative of u(r)
 ! if you only want to use the 4-point formula.
           do issh = 1, nssh
-           ekin = (psi(issh,ipoint-1) - 2.0d0*psi(issh,ipoint)                 &
+           ekin = (psi(issh,ipoint-1) - 2.0_dp*psi(issh,ipoint)                 &
      &                                + psi(issh,ipoint+1))/dr**2
            ekin = ekin - issh*(issh-1)*psi(issh,ipoint)/r(ipoint)**2
            vkin_local(issh) = vkin_local(issh) - dr*psi(issh,ipoint)*ekin
@@ -465,7 +504,7 @@
 ! term 2 = uxc
 ! term 3 = vna = vcore + vhartree
 ! term 4 = kinetic
-         terms = 0.0d0
+         terms = 0.0_dp
          do issh = 1, nssh
           terms(1) = terms(1) + xocc_ion(issh)*v_local(issh)
           terms(2) = terms(2) + xocc_ion(issh)*uxc_local(issh)
@@ -532,16 +571,16 @@
          mesh_new = mesh_psirc(issh)
 
 ! Set up integration factors.
-         rmult(1) = dr/3.0d0
-         rmult(mesh_new) = dr/3.0d0
+         rmult(1) = dr/3.0_dp
+         rmult(mesh_new) = dr/3.0_dp
          do ipoint = 2, mesh_new - 1, 2
-          rmult(ipoint) = 4.0d0*dr/3.0d0
+          rmult(ipoint) = 4.0_dp*dr/3.0_dp
          end do
          do ipoint = 3, mesh_new - 2, 2
-          rmult(ipoint) = 2.0d0*dr/3.0d0
+          rmult(ipoint) = 2.0_dp*dr/3.0_dp
          end do
 
-         integral = 0.0d0
+         integral = 0.0_dp
          do ipoint = 1, mesh_new
           integral =                                                         &
            integral + rmult(ipoint)*psi_gs(issh,ipoint)*psi(issh,ipoint)
@@ -553,7 +592,7 @@
          end do
 
 ! Check normalization
-         integral = 0.0d0
+         integral = 0.0_dp
          !write (*,*) '  '
          do ipoint = 1, mesh_new
           integral =                                                         &
@@ -561,7 +600,7 @@
          end do
          psi_new(issh,1:mesh_new) = psi_new(issh,1:mesh_new)/sqrt(integral)
 
-         integral = 0.0d0
+         integral = 0.0_dp
          !write (*,*) '  '
          do ipoint = 1, mesh_new
           integral =                                                         &
@@ -571,7 +610,7 @@
          !write (*,*) ' integral = ', integral
 
 ! Check orthoganalization
-         integral = 0.0d0
+         integral = 0.0_dp
          !write (*,*) '  '
          do ipoint = 1, mesh_new
           integral =                                                         &
@@ -600,7 +639,7 @@
          if(sav(issh)) write(14,101) filename_ewf(issh)
          if(sav(issh)) write(14,102) nznuc, atomname
          if(sav(issh)) write(14,103) mesh_new
-         zero = 0.0d0
+         zero = 0.0_dp
          if(sav(issh)) write(14,104) rcutoff_psirc(issh), rc_max, zero
          if(sav(issh)) write(14,105) lam(issh)
 
@@ -608,20 +647,20 @@
          xx(2) = r(2)*abohr
          xx(3) = r(3)*abohr
 
-         yy(2) = psi_new(issh,2)/(abohr15*r(2))
-         yy(3) = psi_new(issh,3)/(abohr15*r(3))
+         yy(2) = psi_new(issh,2)/(abohr1_5*r(2))
+         yy(3) = psi_new(issh,3)/(abohr1_5*r(3))
 
          slope = (yy(3) - yy(2))/(xx(3) - xx(2))
-         xx(1) = 0.0d0
+         xx(1) = 0.0_dp
          yy(1) = - slope*xx(2) + yy(2)
 
          xx(4:mesh_new-1) = r(4:mesh_new-1)*abohr
-         yy(4:mesh_new-1) = psi_new(issh,4:mesh_new-1)/(abohr15*r(4:mesh_new-1))
+         yy(4:mesh_new-1) = psi_new(issh,4:mesh_new-1)/(abohr1_5*r(4:mesh_new-1))
 
          xx(mesh_new) = r(mesh_new)*abohr
-         yy(mesh_new) = 0.0d0
+         yy(mesh_new) = 0.0_dp
 
-         inum = idint(real(mesh_new)/4.0d0)
+         inum = idint(real(mesh_new)/4.0_dp)
          iremainder = mesh_new - (inum*4)
 
          do jpoint = 1, mesh_new - iremainder,4

@@ -59,7 +59,8 @@
 ! ===========================================================================
         subroutine x_1c (nsh_max, nspec, nspec_max, fraction, nsshxc,       &
      &                   lsshxc, drr_rho, rcutoffa_max, what, signature)
-        use precision, only: wp
+        use iso_fortran_env, only: dp => real64
+        use :: wavefunctions, only: wf_atoms
         implicit none
  
 ! Argument Declaration and Description
@@ -72,10 +73,10 @@
         integer, intent (in), dimension (nspec_max, nsh_max) :: lsshxc
         integer, intent (in), dimension (nspec_max) :: nsshxc
  
-        real(kind=wp), intent (in) :: fraction
+        real(kind=dp), intent (in) :: fraction
  
-        real(kind=wp), intent (in), dimension (nspec_max) :: drr_rho
-        real(kind=wp), intent (in), dimension (nspec_max) :: rcutoffa_max
+        real(kind=dp), intent (in), dimension (nspec_max) :: drr_rho
+        real(kind=dp), intent (in), dimension (nspec_max) :: rcutoffa_max
  
         character (len=70), intent (in) :: signature
  
@@ -85,7 +86,7 @@
 ! ===========================================================================
         integer, parameter :: lmax = 3
  
-        real(kind=wp), parameter :: eq2 = 14.39975d0
+        real(kind=dp), parameter :: eq2 = 14.39975_dp
  
 ! Local Variable Declaration and Description
 ! ===========================================================================
@@ -102,29 +103,28 @@
         integer mqn
         integer nnrho
  
-        real(kind=wp) coefficient
-        real(kind=wp) cg1
-        real(kind=wp) cg2
-        real(kind=wp) cg3
-        real(kind=wp) cg4
-        real(kind=wp) drho
-        real(kind=wp) psi1
-        real(kind=wp) psi2
-        real(kind=wp) psi3
-        real(kind=wp) psi4
-        real(kind=wp) r
-        real(kind=wp) rp
-        real(kind=wp) rhomax
-        real(kind=wp) rhomin
-        real(kind=wp) sumr
-        real(kind=wp) sumrp
+        real(kind=dp) coefficient
+        real(kind=dp) cg1
+        real(kind=dp) cg2
+        real(kind=dp) cg3
+        real(kind=dp) cg4
+        real(kind=dp) drho
+        real(kind=dp) psi1
+        real(kind=dp) psi2
+        real(kind=dp) psi3
+        real(kind=dp) psi4
+        real(kind=dp) r
+        real(kind=dp) rp
+        real(kind=dp) rhomax
+        real(kind=dp) rhomin
+        real(kind=dp) sumr
+        real(kind=dp) sumrp
  
-        real(kind=wp), dimension (-lmax:lmax) :: answer
-        real(kind=wp), dimension (:), allocatable :: factor
-        real(kind=wp), dimension (:), allocatable :: rpoint
+        real(kind=dp), dimension (-lmax:lmax) :: answer
+        real(kind=dp), dimension (:), allocatable :: factor
+        real(kind=dp), dimension (:), allocatable :: rpoint
  
-        real(kind=wp), external :: clebsch_gordon
-        real(kind=wp), external :: psiofr
+        real(kind=dp), external :: clebsch_gordon
  
 ! Procedure
 ! ===========================================================================
@@ -149,7 +149,7 @@
  
 ! Initialize the limits of integration for the radial integral.
 ! Set up the grid points for the rho integration.
-         rhomin = 0.0d0
+         rhomin = 0.0_dp
          rhomax = rcutoffa_max(itype)
          drho = drr_rho(itype)
          nnrho = int((rhomax - rhomin)/drho) + 1
@@ -160,9 +160,9 @@
           rpoint(irho) = float(irho - 1)*drho
  
 ! Set up the Simpson rule factors:
-          factor(irho) = 2.0d0*drho/3.0d0
-          if (mod(irho,2) .eq. 0) factor(irho) = 4.0d0*drho/3.0d0
-          if (irho .eq. 1 .or. irho .eq. nnrho) factor(irho) = drho/3.0d0
+          factor(irho) = 2.0_dp*drho/3.0_dp
+          if (mod(irho,2) .eq. 0) factor(irho) = 4.0_dp*drho/3.0_dp
+          if (irho .eq. 1 .or. irho .eq. nnrho) factor(irho) = drho/3.0_dp
          end do
  
 ! Loop over the orbitals. Only the mu = nu matrix elements survive in the
@@ -179,7 +179,7 @@
            do jssh = 1, nsshxc(itype)
             lalpha = lsshxc(itype,jssh)
             do malpha = -lalpha, lalpha
-             answer(malpha) = 0.0d0
+             answer(malpha) = 0.0_dp
  
 ! Next perform a sum over all quantum numbers l (up to lmax) and all
 ! corresponding quantum numbers m.
@@ -193,31 +193,31 @@
                cg2 = clebsch_gordon (lalpha, malpha, lqn, mqn, lmu, mmu)
                cg3 = clebsch_gordon (lqn, 0, lalpha, 0, lmu, 0)
                cg4 = clebsch_gordon (lqn, mqn, lalpha, malpha, lmu, mmu)
-               coefficient = cg1*cg2*cg3*cg4*(2.0d0*real(lalpha) + 1)       &
-     &                                      /(2.0d0*real(lmu) + 1)
+               coefficient = cg1*cg2*cg3*cg4*(2.0_dp*real(lalpha) + 1)       &
+     &                                      /(2.0_dp*real(lmu) + 1)
  
 ! ****************************************************************************
 ! Perform the radial integration. Only do this integral if the coefficient is
 ! non-zero.
-               if (coefficient .gt. 1.0d-4) then
+               if (coefficient .gt. 1.0e-4_dp) then
  
 ! First integrate the even pieces and then the odd pieces
-                sumr = 0.0d0
+                sumr = 0.0_dp
                 do irho = 1, nnrho
                  r = rpoint(irho)
-                 if (r .lt. 1.0d-04) r = 1.0d-04
-                 psi1 = psiofr(itype,issh,r)
-                 psi2 = psiofr(itype,jssh,r)
+                 if (r .lt. 1.0e-4_dp) r = 1.0e-4_dp
+                 psi1 = wf_atoms(itype)%get_psi(issh,r)
+                 psi2 = wf_atoms(itype)%get_psi(jssh,r)
  
 ! ****************************************************************************
 ! Perform the radial integration over r'.
 ! Limits from 0 to r.
-                 sumrp = 0.0d0
+                 sumrp = 0.0_dp
                  do irhop = 1, nnrho
                   rp = rpoint(irhop)
-                  if (rp .lt. 1.0d-04) rp = 1.0d-04
-                  psi3 = psiofr(itype,jssh,rp)
-                  psi4 = psiofr(itype,issh,rp)
+                  if (rp .lt. 1.0e-4_dp) rp = 1.0e-4_dp
+                  psi3 = wf_atoms(itype)%get_psi(jssh,rp)
+                  psi4 = wf_atoms(itype)%get_psi(issh,rp)
                   if (rp .le. r) then
                    sumrp =                                                  &
      &              sumrp + factor(irhop)*psi3*psi4*rp**(lqn + 2)/r**(lqn + 1)
@@ -237,7 +237,7 @@
 ! End loop over lqn and mqn
               end do
              end do
-             answer(malpha) = answer(malpha) + (eq2/2.0d0)*fraction*sumr
+             answer(malpha) = answer(malpha) + (eq2/2.0_dp)*fraction*sumr
  
 ! End the loop over malpha
             end do

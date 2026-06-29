@@ -62,7 +62,8 @@
         subroutine xatom_2c_rprime (n2, l2, m2, nalpha, lalpha, malpha,     &
     &                               itype1, itype2, rcutoff1, rcutoff2, d,  &
     &                               nrho, nz, lmax)
-        use precision, only: wp
+        use iso_fortran_env, only: dp => real64
+        use :: wavefunctions, only: wf_atoms
         use x_exact
         implicit none
  
@@ -81,9 +82,9 @@
         integer, intent (in) :: nrho
         integer, intent (in) :: nz
  
-        real(kind=wp), intent (in) :: d
-        real(kind=wp), intent (in) :: rcutoff1
-        real(kind=wp), intent (in) :: rcutoff2
+        real(kind=dp), intent (in) :: d
+        real(kind=dp), intent (in) :: rcutoff1
+        real(kind=dp), intent (in) :: rcutoff2
  
 ! Local Parameters and Data Declaration
 ! ===========================================================================
@@ -97,27 +98,26 @@
         integer mqn
         integer nnz
  
-        real(kind=wp) dzp
-        real(kind=wp) psi3
-        real(kind=wp) psi4
-        real(kind=wp) r
-        real(kind=wp) rho
-        real(kind=wp) rhomax
-        real(kind=wp) rhomin
-        real(kind=wp) rp1
-        real(kind=wp) rp2
-        real(kind=wp) sumrp
-        real(kind=wp) vofr
-        real(kind=wp) zmax
-        real(kind=wp) zmin
-        real(kind=wp) zp1
-        real(kind=wp) zp2
+        real(kind=dp) dzp
+        real(kind=dp) psi3
+        real(kind=dp) psi4
+        real(kind=dp) r
+        real(kind=dp) rho
+        real(kind=dp) rhomax
+        real(kind=dp) rhomin
+        real(kind=dp) rp1
+        real(kind=dp) rp2
+        real(kind=dp) sumrp
+        real(kind=dp) vofr
+        real(kind=dp) zmax
+        real(kind=dp) zmin
+        real(kind=dp) zp1
+        real(kind=dp) zp2
  
-        real(kind=wp), dimension (:), allocatable :: rhopmult
-        real(kind=wp), dimension (:), allocatable :: zpmult
+        real(kind=dp), dimension (:), allocatable :: rhopmult
+        real(kind=dp), dimension (:), allocatable :: zpmult
  
-        real(kind=wp), external :: psiofr
-        real(kind=wp), external :: rescaled_psi
+        real(kind=dp), external :: rescaled_psi
  
 ! Allocate Arrays
 ! ===========================================================================
@@ -128,7 +128,7 @@
         zmin = max(-rcutoff1, d - rcutoff2)
         zmax = min(rcutoff1, d + rcutoff2)
 
-        rhomin = 0.0d0
+        rhomin = 0.0_dp
         rhomax = min(rcutoff1,rcutoff2)
 
 ! Strictly define what the density of the mesh should be. Make the density of
@@ -149,25 +149,25 @@
         allocate (rhopmult(nnrhop))
         rpoint(1) = rhomin
         rpoint(nnrhop) = rhomax
-        rhopmult(1) = drhop/3.0d0
-        rhopmult(nnrhop) = drhop/3.0d0
+        rhopmult(1) = drhop/3.0_dp
+        rhopmult(nnrhop) = drhop/3.0_dp
         do irho = 2, nnrhop - 1, 2
          rpoint(irho) = rhomin + real(irho - 1)*drhop
-         rhopmult(irho) = 4.0d0*drhop/3.0d0
+         rhopmult(irho) = 4.0_dp*drhop/3.0_dp
         end do
         do irho = 3, nnrhop - 2, 2
          rpoint(irho) = rhomin + real(irho - 1)*drhop
-         rhopmult(irho) = 2.0d0*drhop/3.0d0
+         rhopmult(irho) = 2.0_dp*drhop/3.0_dp
         end do
  
         allocate (zpmult(nnz))
-        zpmult(1) = dzp/3.0d0
-        zpmult(nnz) = dzp/3.0d0
+        zpmult(1) = dzp/3.0_dp
+        zpmult(nnz) = dzp/3.0_dp
         do izp = 2, nnz - 1, 2
-         zpmult(izp) = 4.0d0*dzp/3.0d0
+         zpmult(izp) = 4.0_dp*dzp/3.0_dp
         end do
         do izp = 3, nnz - 2, 2
-         zpmult(izp) = 2.0d0*dzp/3.0d0
+         zpmult(izp) = 2.0_dp*dzp/3.0_dp
         end do
 
 ! Loop over all the possible quantum numbers.
@@ -178,13 +178,13 @@
 ! Perform the radial integration over r' for each given r.
           do irho = 1, nnrhop
            r = rpoint(irho)
-           if (r .lt. 1.0d-4) r = 1.0d-4
+           if (r .lt. 1.0e-4_dp) r = 1.0e-4_dp
 
 ! Integration is over z (z-axis points from atom 1 to atom 2) and rho (rho is
 ! radial distance from z-axis). We are integrating in cylindrical coordinates
 ! here so the phi integration only goes from 0 - pi, rather than 0 - 2*pi;
 ! therefore, we divide the rho by a factor of two here.  
-           sumrp = 0.0d0
+           sumrp = 0.0_dp
            do izp = 1, nnz 
             zp1 = zmin + real(izp - 1)*dzp
             zp2 = zp1 - d
@@ -194,16 +194,16 @@
              rp2 = sqrt(zp2**2 + rho**2)
 
 ! Precaution against divide by zero
-             if (rp1 .lt. 1.0d-4) rp1 = 1.0d-4
-             if (rp2 .lt. 1.0d-4) rp2 = 1.0d-4
+             if (rp1 .lt. 1.0e-4_dp) rp1 = 1.0e-4_dp
+             if (rp2 .lt. 1.0e-4_dp) rp2 = 1.0e-4_dp
 
              if (rp1 .lt. rcutoff1 .and. rp2 .lt. rcutoff2) then
-              psi3 = psiofr (itype2, nalpha, rp2)
-              psi4 = psiofr (itype1, n2, rp1)
+              psi3 = wf_atoms(itype2)%get_psi( nalpha, rp2)
+              psi4 = wf_atoms(itype1)%get_psi( n2, rp1)
  
 ! Add magic factors based on what type of orbital is involved in the integration
 ! For the short-range coulomb interactions make spherically symmetric
-              vofr = rescaled_psi (lqn, mqn, rho, rp1, zp1, 1.0d0)
+              vofr = rescaled_psi (lqn, mqn, rho, rp1, zp1, 1.0_dp)
               psi3 = rescaled_psi (lalpha, malpha, rho, rp2, zp2, psi3)
               psi4 = rescaled_psi (l2, m2, rho, rp1, zp1, psi4)
 

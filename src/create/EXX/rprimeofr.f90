@@ -16,7 +16,7 @@
 ! University of Utah - James P. Lewis
 !                      Kurt R. Glaesemann
 !
-! Universidad Autonoma de Madrid - Jose Ortega
+! Universidad de Madrid - Jose Ortega
 !
 !                  made possible by support from Motorola
 !                         fireball@fermi.la.asu.edu
@@ -30,43 +30,42 @@
 ! Computer Software clause at 52.227-7013.
 
 
-! dpsiofr.f
+! rprimeofr.f
 ! Program Description
 ! ===========================================================================
-!       This function returns the values of the derivative d/dr psiofr(r) 
-! for the corresponding
-! shell of the atomtype ispec.  The radial functions are normalized as:
-
-!  int ( psiofr**2  r**2  dr ) = 1.0
-
-! The wavefunctions for each atom must be read in by calling readpsi
-! separately for each atom type.
-
-! The value of r input to this function must be in angstrom units.
+!       This function returns the values rprime(r) which is the r' integral
+! within the exact exchange calculation. The value of r input to this
+! function must be in angstrom units.
 !
 ! ===========================================================================
-! Code written from psiofr.f by
-! Jose Ortega Mateo
-! Dept. Fisica Teorica de la Materia Condensada
-! Universidad Autonoma de Madrid
+! Code written by:
+! James P. Lewis
+! Henry Eyring Center for Theoretical Chemistry
+! Department of Chemistry
+! University of Utah
+! 315 S. 1400 E.
+! Salt Lake City, UT 84112-0850
+! (801) 585-1078 (office)      email: lewis@hec.utah.edu
+! (801) 581-4353 (fax)         Web Site: http://
+
 ! ===========================================================================
 !
 ! Program Declaration
 ! ===========================================================================
-        function dpsiofr (ispec, issh, r)
-        use precision, only: wp
+        function rprimeofr(r, lqn, mqnorn, rcutoff)
+        use x_exact
+        use iso_fortran_env, only: dp => real64
         implicit none
-        real(kind=wp) dpsiofr
-
-        include '../parameters.inc'
-        include '../wavefunctions.inc'
+        real(kind=dp) rprimeofr
 
 ! Argument Declaration and Description
 ! ===========================================================================
-        integer ispec
-        integer issh
+! Input
+        integer lqn
+        integer mqnorn
 
-        real(kind=wp) r
+        real(kind=dp) r
+        real(kind=dp) rcutoff
 
 ! Local Parameters and Data Declaration
 ! ===========================================================================
@@ -81,37 +80,28 @@
         integer ileft, imid
         integer max_points
 
-        real(kind=wp) L(0:norder),mu(0:norder),Z(0:norder),alpha(0:norder)
-        real(kind=wp) a(0:norder),b(0:norder),c(0:norder),d(0:norder)
-        real(kind=wp) h
+        real(kind=dp) L(0:norder),mu(0:norder),Z(0:norder),alpha(0:norder)
+        real(kind=dp) a(0:norder),b(0:norder),c(0:norder),d(0:norder)
+        real(kind=dp) h
         integer iam
         integer i,j
-        real(kind=wp) xmin
-        real(kind=wp) xxp
-        real(kind=wp) aaa,bbb,ccc,ddd
-        real(kind=wp) dp
+        real(kind=dp) xmin
+        real(kind=dp) xxp
 
 ! Procedure
 ! ===========================================================================
-! note : the points are equally spaced
-        h=drr(issh,ispec)
-
-        imid = int(r/h) + 1
-        max_points = npoints(issh,ispec)
-
-! Special cases
-        if (r .ge. rrc(issh,ispec)) then
-          dp = psi(max_points,issh,ispec) -psi(max_points-1,issh,ispec) 
-          dpsiofr = dp/h
+        if (r .ge. rcutoff) then
+          rprimeofr = 0.0_dp
           return
-         else if (r .le. 0.0d0) then
-          dp = psi(2,issh,ispec) -psi(1,issh,ispec) 
-          dpsiofr = dp/h
-          return
+        else if (r .le. 0.0_dp) then
+         rprimeofr = rprime(1,lqn,mqnorn)
+         return
         end if
 
-
-        if (superspline) goto 1234
+! note : the points are equally spaced
+        h=drhop
+        imid = int(r/h) + 1
+        max_points = nnrhop
 
 ! Find starting point for the interpolation
         ileft = imid - norder2
@@ -122,13 +112,12 @@
         end if
 
 ! Now interpolate with "natural" splines with f''(x)=0 at end points
-
         do i=0,norder
-          a(i)=psi(i+ileft,issh,ispec)
+          a(i)=rprime(i+ileft,lqn,mqnorn)
         end do
 
         do i=1,norder-1
-          alpha(i)=3.0d0*(a(i+1)-2*a(i)+a(i-1))/h
+          alpha(i)=3.0_dp*(a(i+1)-2*a(i)+a(i-1))/h
         end do
 
         L(0)=1
@@ -136,7 +125,7 @@
         Z(0)=0
         c(0)=0
         do i=1,norder-1
-          L(i)=(4.0d0-mu(i-1))*h
+          L(i)=(4.0_dp-mu(i-1))*h
           mu(i)=h/L(i)
           Z(i)=(alpha(i)-h*Z(i-1))/L(i)
         end do
@@ -151,32 +140,14 @@
 !       Don't need 0 to iam-1
         do j=norder-1,iam,-1
           c(j)=z(j)-mu(j)*c(j+1)
-          b(j)=(a(j+1)-a(j))/h-h*(c(j+1)+2.0d0*c(j))/3.0d0
-          d(j)=(c(j+1)-c(j))/(3.0d0*h)
+          b(j)=(a(j+1)-a(j))/h-h*(c(j+1)+2.0_dp*c(j))/3.0_dp
+          d(j)=(c(j+1)-c(j))/(3.0_dp*h)
         end do
 
-        xmin = 0.0d0
+        xmin = 0.0_dp
         xxp=(r-(xmin+(imid-1)*h))
 
-!       psiofr=a(iam)+b(iam)*xxp+c(iam)*xxp**2+d(iam)*xxp**3
-        dpsiofr=b(iam)+2.0d0*c(iam)*xxp+3.0d0*d(iam)*xxp**2
-
-        return
- 
-!
-! Cubic splines:  One big "super spline"
-!
- 1234   continue 
-        if (imid .gt. max_points) imid=max_points ! If we have gone off of the end
-        aaa=psi_spline(1,imid,issh,ispec)
-        bbb=psi_spline(2,imid,issh,ispec)
-        ccc=psi_spline(3,imid,issh,ispec)
-        ddd=psi_spline(4,imid,issh,ispec)
- 
-        xxp=r-(imid-1)*h
- 
-!        psiofr=aaa+bbb*xxp+ccc*xxp**2+ddd*xxp**3
-        dpsiofr=bbb+2.0d0*ccc*xxp+3.0d0*ddd*xxp**2
+        rprimeofr=a(iam)+b(iam)*xxp+c(iam)*xxp**2+d(iam)*xxp**3
 
 ! Format Statements
 ! ===========================================================================

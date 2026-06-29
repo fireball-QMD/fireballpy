@@ -59,9 +59,10 @@
 ! Program Declaration
 ! ===========================================================================
         function rescaled_psi (l, m, rho, r, z, psi)
-        use precision, only: wp
+        use, intrinsic :: iso_fortran_env, only: dp => real64
+        use :: constants, only: tolerance
         implicit none
-        real(kind=wp) rescaled_psi
+        real(kind=dp) rescaled_psi
  
 ! Argument Declaration and Description
 ! ===========================================================================
@@ -69,10 +70,10 @@
         integer, intent (in) :: l
         integer, intent (in) :: m
  
-        real(kind=wp), intent (in) :: r
-        real(kind=wp), intent (in) :: rho
-        real(kind=wp), intent (in) :: z
-        real(kind=wp), intent (in) :: psi
+        real(kind=dp), intent (in) :: r
+        real(kind=dp), intent (in) :: rho
+        real(kind=dp), intent (in) :: z
+        real(kind=dp), intent (in) :: psi
  
 ! Local Parameters and Data Declaration
 ! ===========================================================================
@@ -111,60 +112,59 @@
 ! Add magic factors based on what type of orbital is involved in the integration
 ! For the short-range coulomb interactions make spherically symmetric
 ! s-states:
-        if (l .eq. 0) then
+        if (l == 0) then
          rescaled_psi = psi
          return
         end if
 
 ! Quick returns
-        if (psi .eq. 0.0d0) then
+        if (psi == 0.0_dp) then
          rescaled_psi = 0
          return
         end if
-        if (r .le. 1.0d-5)then
+        if (r <= tolerance)then
           rescaled_psi = 0 
           return
         end if
  
 ! p-states:
-        if (l .eq. 1) then
-         if (abs(m) .eq. 1) rescaled_psi = psi*rho/r
-         if (m .eq. 0) rescaled_psi = psi*z/r
+        if (l == 1) then
+         if (abs(m) == 1) rescaled_psi = psi*rho/r
+         if (m == 0) rescaled_psi = psi*z/r
          return
         end if
  
 ! d-states:
-        if (l .eq. 2) then
-         if (abs(m) .eq. 2) rescaled_psi = psi*rho**2/r**2
-         if (abs(m) .eq. 1) rescaled_psi = psi*rho*z/r**2
-         if (m .eq. 0) rescaled_psi = psi*(2.0d0*z**2 - rho**2)/r**2
+        if (l == 2) then
+         if (abs(m) == 2) rescaled_psi = psi*rho**2/r**2
+         if (abs(m) == 1) rescaled_psi = psi*rho*z/r**2
+         if (m == 0) rescaled_psi = psi*(2.0_dp*z**2 - rho**2)/r**2
          return
         end if
  
 ! f states:
-        if (l .eq. 3) then
-         if (abs(m) .eq. 3) rescaled_psi = psi*rho**3/r**3
-         if (abs(m) .eq. 2) rescaled_psi = psi*rho**2*z/r**3
-         if (abs(m) .eq. 1) rescaled_psi = psi*rho*(4.0d0*z**2 - rho**2)/r**3
-         if (m .eq. 0) rescaled_psi = psi*z*(2.0d0*z**2 - 3.0d0*rho**2)/r**3
+        if (l == 3) then
+         if (abs(m) == 3) rescaled_psi = psi*rho**3/r**3
+         if (abs(m) == 2) rescaled_psi = psi*rho**2*z/r**3
+         if (abs(m) == 1) rescaled_psi = psi*rho*(4.0_dp*z**2 - rho**2)/r**3
+         if (m == 0) rescaled_psi = psi*z*(2.0_dp*z**2 - 3.0_dp*rho**2)/r**3
          return
         end if
  
 ! These terms for l > 4 are only used in the case of exact exchange.
-        if (l .eq. 4) then
-         if (abs(m) .eq. 4) rescaled_psi = psi*rho**4/r**4
-         if (abs(m) .eq. 3) rescaled_psi = psi*z*rho**3/r**4
-         if (abs(m) .eq. 2) rescaled_psi = psi*(6.0d0*z**2 - rho**2)*rho**2/r**4
-         if (abs(m) .eq. 1)                                                   &
-     &    rescaled_psi = psi*z*(4.0d0*z**2 - 3.0d0*rho**2)*rho/r**4
-         if (m .eq. 0)                                                        &
-     &    rescaled_psi = psi*(35.0d0*z**4/r**4                                &
-     &                        + (3.0d0*rho**2 - 27.0d0*z**2)/r**2)
+        if (l == 4) then
+         if (abs(m) == 4) rescaled_psi = psi*rho**4/r**4
+         if (abs(m) == 3) rescaled_psi = psi*z*rho**3/r**4
+         if (abs(m) == 2) rescaled_psi = psi*(6.0_dp*z**2 - rho**2)*rho**2/r**4
+         if (abs(m) == 1)                                                   &
+     &    rescaled_psi = psi*z*(4.0_dp*z**2 - 3.0_dp*rho**2)*rho/r**4
+         if (m == 0)                                                        &
+     &    rescaled_psi = psi*(35.0_dp*z**4/r**4                                &
+     &                        + (3.0_dp*rho**2 - 27.0_dp*z**2)/r**2)
          return
         end if
  
 ! Format Statements
 ! ===========================================================================
  
-        return
         end

@@ -82,7 +82,7 @@
 ! Program Declaration
 ! ===========================================================================
         subroutine Tintegral (l1, m1, l2, m2, k, sum)
-        use precision, only: wp
+        use iso_fortran_env, only: dp => real64
         implicit none
  
 ! Argument Declaration and Description
@@ -95,7 +95,7 @@
         integer k
  
 ! Output:
-        complex(kind=wp) sum             ! value of the integral
+        complex(kind=dp) sum             ! value of the integral
  
 ! Local Parameters and Data Declaration
 ! ===========================================================================
@@ -113,9 +113,9 @@
  
         integer iyl (0:maxnode)
  
-        real(kind=wp) delk
+        real(kind=dp) delk
  
-        complex(kind=wp) cl (0:maxnode)
+        complex(kind=dp) cl (0:maxnode)
  
         external delk
  
@@ -154,16 +154,16 @@
 ! Kronecker delta for l or m
 ! ===========================================================================
         function delk(i,j)
-        use precision, only: wp
+        use iso_fortran_env, only: dp => real64
         implicit none
  
         integer i, j
-        real(kind=wp) delk
+        real(kind=dp) delk
  
         if (i .eq. j) then
-         delk = 1.0d0
+         delk = 1.0_dp
         else
-         delk = 0.0d0
+         delk = 0.0_dp
         end if
  
         return

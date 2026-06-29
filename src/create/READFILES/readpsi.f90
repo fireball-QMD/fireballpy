@@ -57,7 +57,7 @@
 ! ===========================================================================
         subroutine readpsi (ispec, issh, lqn, rcutoff, xnoccin, nzx, &
      &                      filein, iammaster)
-        use precision, only: wp
+        use iso_fortran_env, only: dp => real64
         implicit none
  
         include '../parameters.inc'
@@ -71,8 +71,8 @@
         integer lqn
         integer nzx
  
-        real(kind=wp) rcutoff
-        real(kind=wp) xnoccin
+        real(kind=dp) rcutoff
+        real(kind=dp) xnoccin
  
         character(len=25) filein
  
@@ -80,8 +80,8 @@
  
 ! Local Parameters and Data Declaration
 ! ===========================================================================
-        real(kind=wp) abohr
-        parameter (abohr = 0.529177249d0)
+        real(kind=dp) abohr
+        parameter (abohr = 0.529177249_dp)
  
 ! Local Variable Declaration and Description
 ! ===========================================================================
@@ -92,14 +92,14 @@
         integer mesh
         integer nzxwf
  
-        real(kind=wp) r
-        real(kind=wp) rc
-        real(kind=wp) rc_max
-        real(kind=wp) rcutoffwf
-        real(kind=wp) sum
-        real(kind=wp) xnoccwf
+        real(kind=dp) r
+        real(kind=dp) rc
+        real(kind=dp) rc_max
+        real(kind=dp) rcutoffwf
+        real(kind=dp) sum
+        real(kind=dp) xnoccwf
  
-        real(kind=wp) psitemp(wfmax_points)
+        real(kind=dp) psitemp(wfmax_points)
  
         character(len=25) fileinwf
  
@@ -134,8 +134,8 @@
          stop 'error in readpsi'
         end if
  
-        if (rcutoffwf .le. (rcutoff - 1.0d-2) .or. &
-     &      rcutoffwf .ge. (rcutoff + 1.0d-2)) then
+        if (rcutoffwf .le. (rcutoff - 1.0e-2_dp) .or. &
+     &      rcutoffwf .ge. (rcutoff + 1.0e-2_dp)) then
          ! write (*,*) ' rcutoffwf = ', rcutoffwf, ' rcutoff = ', rcutoff
          ! write (*,*) ' The cutoff radius in the wavefunction file, for '
          ! write (*,*) ' this shell, does not match the cutoff radius '
@@ -179,26 +179,26 @@
         end if ! end master
         npoints(issh,ispec) = mesh
         rrc(issh,ispec) = rc
-        if (issh .eq. 1) rrc_rho(ispec) = -1.0d0
+        if (issh .eq. 1) rrc_rho(ispec) = -1.0_dp
         rrc_rho(ispec) = max(rrc_rho(ispec),rc)
  
-        drr(issh,ispec) = rc/real(mesh - 1, kind=wp)
-        if (issh .eq. 1) drr_rho(ispec) = 99.0d0
+        drr(issh,ispec) = rc/real(mesh - 1, kind=dp)
+        if (issh .eq. 1) drr_rho(ispec) = 99.0_dp
         drr_rho(ispec) = min(drr_rho(ispec),drr(issh,ispec))
  
         npoints_rho(ispec) = int(rrc_rho(ispec)/drr_rho(ispec)) + 1
-        rrc_rho(ispec) = real(npoints_rho(ispec) - 1, kind=wp)*drr_rho(ispec)
+        rrc_rho(ispec) = real(npoints_rho(ispec) - 1, kind=dp)*drr_rho(ispec)
  
 ! Shift the rrc_rho value just a little or else the exchange-correlation
-! interactions for gradients go haywire at the endpoints where rho = 0.0d0
-        rrc_rho(ispec) = rrc_rho(ispec) - 1.0d-4
+! interactions for gradients go haywire at the endpoints where rho = 0.0_dp
+        rrc_rho(ispec) = rrc_rho(ispec) - 1.0e-4_dp
  
         do ipoint = 1, npoints_rho(ispec)
-         rr_rho(ipoint,ispec) = real(ipoint - 1, kind=wp)*drr_rho(ispec)
+         rr_rho(ipoint,ispec) = real(ipoint - 1, kind=dp)*drr_rho(ispec)
         end do
  
 ! Read in the points
-        inum = idint(real(mesh, kind=wp)/4)
+        inum = idint(real(mesh, kind=dp)/4)
         iremainder = mesh - (inum*4)
         do ipoint = 1, mesh - iremainder, 4
          read (88,100) psitemp(ipoint), psitemp(ipoint+1), &
@@ -233,19 +233,17 @@
          rr(ipoint,issh,ispec) = r
         end do
  
-        sum = 0.0d0
+        sum = 0.0_dp
         do ipoint = 1, mesh
          if (ipoint .ne. 1 .or. ipoint .ne. mesh) then
           sum = sum + drr(issh,ispec)*rr(ipoint,issh,ispec)**2 &
      &                               *psi(ipoint,issh,ispec)**2
          else
-          sum = sum + 0.5d0*drr(issh,ispec)*rr(ipoint,issh,ispec)**2 &
+          sum = sum + 0.5_dp*drr(issh,ispec)*rr(ipoint,issh,ispec)**2 &
      &                                     *psi(ipoint,issh,ispec)**2
          end if
         end do
 
-        if (superspline) call buildspline_1d (psi(1,issh,ispec),  &
-     &                       psi_spline(1,1,issh,ispec), mesh, rcutoff)
  
         if (iammaster) then
          ! write (*,300) issh, sum
@@ -255,7 +253,7 @@
         end if ! end master
  
 ! Code to just make ftnchek happy, because rc_max is not ever used
-        if (rc_max .eq. 0.0d0) return
+        if (rc_max .eq. 0.0_dp) return
  
 ! Format Statements
 ! ===========================================================================

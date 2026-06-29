@@ -44,14 +44,14 @@
 ! Program Declaration
 ! ===========================================================================
         function vshort (r)
-        use precision
+        use, intrinsic :: iso_fortran_env, only: dp => real64
         use pp_storage
         implicit none
-        real(kind=long) vshort
+        real(kind=dp) vshort
 
 ! Argument Declaration and Description
 ! ===========================================================================
-        real(kind=long) r
+        real(kind=dp) r
 
 ! Local Parameters and Data Declaration
 ! ===========================================================================
@@ -63,21 +63,21 @@
         integer iprod
         integer isum
 
-        real(kind=long) prod
+        real(kind=dp) prod
 
 ! Procedure
 ! ===========================================================================
 ! Initialize vshort to zero
-        vshort = 0.0d0
+        vshort = 0.0_dp
 
 ! Now the shortranged local potential
 ! If r is slightly negative return the value at r = 0
-        if (r .lt. 0.0d0) then
+        if (r .lt. 0.0_dp) then
          vshort = v_short(1)
          return
         end if
 
-! The short stuff is zero at long range.
+! The short stuff is zero at dp range.
         if (r .gt. rrc_short) return
 
         imid = int(r/drr_short) + 1
@@ -101,7 +101,7 @@
 
 ! Now interpolate
         do isum = ileft, iright
-         prod = 1.0d0
+         prod = 1.0_dp
          do iprod = ileft, iright
           if (iprod .ne. isum) then
            prod = prod*(r - r_short(iprod))/(r_short(isum) - r_short(iprod))

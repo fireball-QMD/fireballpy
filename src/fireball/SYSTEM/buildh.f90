@@ -5,6 +5,7 @@ subroutine buildh ()
   implicit none
   integer :: iatom, jatom, imu, inu, ineigh, in1, in2
 
+  print *, vxc
   h_mat = 0.0d0
   vxc_ca = 0.0d0
   do iatom = 1, natoms

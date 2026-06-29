@@ -49,7 +49,7 @@
 ! Program Declaration
 ! ===========================================================================
         subroutine psirc (mesh, nexcite, l, rcutoff, v, eout, psi)
-        use precision
+        use, intrinsic :: iso_fortran_env, only: dp => real64
         implicit none
 
 ! Argument Declaration and Description
@@ -59,18 +59,18 @@
         integer, intent (in) :: mesh
         integer, intent (in) :: nexcite
 
-        real(kind=long), intent (in) :: rcutoff
+        real(kind=dp), intent (in) :: rcutoff
 
-        real(kind=long), intent (in), dimension (mesh) :: v
+        real(kind=dp), intent (in), dimension (mesh) :: v
 
 ! Output
-        real(kind=long), intent (out) :: eout
+        real(kind=dp), intent (out) :: eout
 
-        real(kind=long), intent (out), dimension (mesh) :: psi
+        real(kind=dp), intent (out), dimension (mesh) :: psi
 
 ! Local Parameters and Data Declaration
 ! ===========================================================================
-        real(kind=long), parameter :: small = 1.0d-14
+        real(kind=dp), parameter :: small = 1.0e-14_dp
 
 ! Local Variable Declaration and Description
 ! ===========================================================================
@@ -78,10 +78,10 @@
         integer node
         integer node_lower, node_upper
 
-        real(kind=long) alnd, alnd1, alnd2
-        real(kind=long) alnd_lower, alnd_upper
-        real(kind=long) ebind, ebind1, ebind2
-        real(kind=long) ebind_lower, ebind_upper
+        real(kind=dp) alnd, alnd1, alnd2
+        real(kind=dp) alnd_lower, alnd_upper
+        real(kind=dp) ebind, ebind1, ebind2
+        real(kind=dp) ebind_lower, ebind_upper
 
         logical test
 
@@ -93,9 +93,9 @@
 ! Assume all energies are not orders of magnitude away from atomic units --
 ! otherwise you might want to put a guessed energy here to start.
 ! Find upper bound to binding energy
-        ebind_upper = 1.0d0
+        ebind_upper = 1.0_dp
         do iteration = 1, 100
-         ebind = 2.0d0*ebind_upper
+         ebind = 2.0_dp*ebind_upper
          call integrate_hpsi (mesh, l, rcutoff, ebind, v, node, alnd)
          if (test(node,nexcite,alnd)) exit
          ebind_upper = ebind
@@ -107,9 +107,9 @@
         ebind_upper = ebind
 
 ! Find lower bound to binding energy
-        ebind_lower = -1.0d0
+        ebind_lower = -1.0_dp
         do iteration = 1, 100
-         ebind = 2.0d0*ebind_lower
+         ebind = 2.0_dp*ebind_lower
          call integrate_hpsi (mesh, l, rcutoff, ebind, v, node, alnd)
          if (.not. test(node,nexcite,alnd)) exit
          ebind_lower = ebind
@@ -122,7 +122,7 @@
 ! Do binary chop to get close
         do iteration = 1, 100
          if (node_lower .eq. node_upper) exit
-         ebind = 0.5d0*(ebind_upper + ebind_lower)
+         ebind = 0.5_dp*(ebind_upper + ebind_lower)
          call integrate_hpsi (mesh, l, rcutoff, ebind, v, node, alnd)
          if (test(node,nexcite,alnd)) then
           ebind_upper = ebind
@@ -150,7 +150,7 @@
          if (abs(alnd1-alnd2) .lt. small) exit
          ebind = ebind1 - (ebind2 - ebind1)*alnd1/(alnd2 - alnd1)
          if (ebind .gt. ebind_upper .or. ebind .lt. ebind_lower)          &
-     &    ebind = 0.5d0*(ebind_upper + ebind_lower)
+     &    ebind = 0.5_dp*(ebind_upper + ebind_lower)
          call integrate_hpsi (mesh, l, rcutoff, ebind, v, node, alnd)
          if (test(node,nexcite,alnd)) then
           ebind_upper = ebind
@@ -180,17 +180,17 @@
 
 
         function test (node, nexcite, alnd)
-        use precision
+        use, intrinsic :: iso_fortran_env, only: dp => real64
         implicit none
         logical test
 
         integer, intent (in) :: node
         integer, intent (in) :: nexcite
 
-        real(kind=long), intent (in) :: alnd
+        real(kind=dp), intent (in) :: alnd
 
         test = (node .lt. nexcite) .or.                                    &
-     &         (node .eq. nexcite .and. alnd .gt. 0.0d0)
+     &         (node .eq. nexcite .and. alnd .gt. 0.0_dp)
 
         return
         end

@@ -23,7 +23,7 @@ from ase.data import atomic_numbers, atomic_names, atomic_masses, chemical_symbo
 from fireballpy import __version__ as __fb_version__
 from fireballpy.utils import get_data_from_url, read_wf, read_wf_info, ANGULAR_MOMENTUM, ANGULAR_MOMENTUM_REV
 from fireballpy.basis import __file__ as __basis_file__
-from fireballpy.basis._begin import generate_wavefunctions, generate_vnn
+from fireballpy.basis._wfs import generate_wavefunctions, generate_vnn
 
 PPURL = 'https://fireball.ftmc.uam.es/fireballpy/ppfiles.tar.xz'
 A0 = {'s': 2.0, 'p': 1.0, 'd': 0.8, 'f': 0.7}

@@ -46,7 +46,7 @@
 ! ===========================================================================
         subroutine get_nlmesh_size (ion, mesh)
         use begin_input, only: ppfile, ppionfile, outpath
-        use precision
+        use, intrinsic :: iso_fortran_env, only: dp => real64
         implicit none
 
 ! Argument Declaration and Description
@@ -70,14 +70,14 @@
 
         integer, dimension (:), allocatable :: lssh
 
-        real(kind=long) alpha
-        real(kind=long) r_nl
-        real(kind=long) r_short
-        real(kind=long) v_nl
-        real(kind=long) v_short
+        real(kind=dp) alpha
+        real(kind=dp) r_nl
+        real(kind=dp) r_short
+        real(kind=dp) v_nl
+        real(kind=dp) v_short
 ! jel-PP
-        real(kind=long) Z_val
-        real(kind=long) rc_PP
+        real(kind=dp) Z_val
+        real(kind=dp) rc_PP
 
 ! Procedure
 ! ===========================================================================

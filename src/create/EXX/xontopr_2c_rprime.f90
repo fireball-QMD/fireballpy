@@ -61,7 +61,8 @@
 ! ===========================================================================
         subroutine xontopr_2c_rprime (nspec_max, nssh, nalpha, itype,       &
     &                                 rcutoff, d, nrho, nz, lmax)
-        use precision, only: wp
+        use iso_fortran_env, only: dp => real64
+        use :: wavefunctions, only: wf_atoms
         use x_exact
         implicit none
  
@@ -77,8 +78,8 @@
  
         integer, intent (in) :: nssh (nspec_max)
  
-        real(kind=wp), intent (in) :: d
-        real(kind=wp), intent (in) :: rcutoff
+        real(kind=dp), intent (in) :: d
+        real(kind=dp), intent (in) :: rcutoff
  
 ! Local Parameters and Data Declaration
 ! ===========================================================================
@@ -92,25 +93,24 @@
         integer lqn
         integer nnz
  
-        real(kind=wp) dzp
-        real(kind=wp) psi3
-        real(kind=wp) psi4
-        real(kind=wp) r
-        real(kind=wp) rho
-        real(kind=wp) rhomax
-        real(kind=wp) rhomin
-        real(kind=wp) rp1
-        real(kind=wp) rp2
-        real(kind=wp) sumrp
-        real(kind=wp) zmax
-        real(kind=wp) zmin
-        real(kind=wp) zp1
-        real(kind=wp) zp2
+        real(kind=dp) dzp
+        real(kind=dp) psi3
+        real(kind=dp) psi4
+        real(kind=dp) r
+        real(kind=dp) rho
+        real(kind=dp) rhomax
+        real(kind=dp) rhomin
+        real(kind=dp) rp1
+        real(kind=dp) rp2
+        real(kind=dp) sumrp
+        real(kind=dp) zmax
+        real(kind=dp) zmin
+        real(kind=dp) zp1
+        real(kind=dp) zp2
  
-        real(kind=wp), dimension (:), allocatable :: rhopmult
-        real(kind=wp), dimension (:), allocatable :: zpmult
+        real(kind=dp), dimension (:), allocatable :: rhopmult
+        real(kind=dp), dimension (:), allocatable :: zpmult
  
-        real(kind=wp), external :: psiofr
  
 ! Allocate Arrays
 ! ===========================================================================
@@ -121,7 +121,7 @@
         zmin = max(-rcutoff, d - rcutoff)
         zmax = min(rcutoff, d + rcutoff)
  
-        rhomin = 0.0d0
+        rhomin = 0.0_dp
         rhomax = rcutoff
  
 ! Strictly define what the density of the mesh should be. Make the density of
@@ -142,25 +142,25 @@
         allocate (rhopmult(nnrhop))
         rpoint(1) = rhomin
         rpoint(nnrhop) = rhomax
-        rhopmult(1) = drhop/3.0d0
-        rhopmult(nnrhop) = drhop/3.0d0
+        rhopmult(1) = drhop/3.0_dp
+        rhopmult(nnrhop) = drhop/3.0_dp
         do irho = 2, nnrhop - 1, 2
          rpoint(irho) = rhomin + real(irho - 1)*drhop
-         rhopmult(irho) = 4.0d0*drhop/3.0d0
+         rhopmult(irho) = 4.0_dp*drhop/3.0_dp
         end do
         do irho = 3, nnrhop - 2, 2
          rpoint(irho) = rhomin + real(irho - 1)*drhop
-         rhopmult(irho) = 2.0d0*drhop/3.0d0
+         rhopmult(irho) = 2.0_dp*drhop/3.0_dp
         end do
  
         allocate (zpmult(nnz))
-        zpmult(1) = dzp/3.0d0
-        zpmult(nnz) = dzp/3.0d0
+        zpmult(1) = dzp/3.0_dp
+        zpmult(nnz) = dzp/3.0_dp
         do izp = 2, nnz - 1, 2
-         zpmult(izp) = 4.0d0*dzp/3.0d0
+         zpmult(izp) = 4.0_dp*dzp/3.0_dp
         end do
         do izp = 3, nnz - 2, 2
-         zpmult(izp) = 2.0d0*dzp/3.0d0
+         zpmult(izp) = 2.0_dp*dzp/3.0_dp
         end do
  
 ! Loop over all of the shells of itype.
@@ -173,11 +173,11 @@
 ! Perform the radial integration over r' for each given r.
           do irho = 1, nnrhop
            r = rpoint(irho)
-           if (r .lt. 1.0d-4) r = 1.0d-4
+           if (r .lt. 1.0e-4_dp) r = 1.0e-4_dp
  
 ! Integration is over z (z-axis points from atom 1 to atom 2) and rho (rho is
 ! radial distance from z-axis). 
-           sumrp = 0.0d0
+           sumrp = 0.0_dp
            do izp = 1, nnz
             zp1 = zmin + real(izp - 1)*dzp
             zp2 = zp1 - d
@@ -187,12 +187,12 @@
              rp2 = sqrt(zp2**2 + rho**2)
 
 ! Precaution against divide by zero
-             if (rp1 .lt. 1.0d-4) rp1 = 1.0d-4
-             if (rp2 .lt. 1.0d-4) rp2 = 1.0d-4
+             if (rp1 .lt. 1.0e-4_dp) rp1 = 1.0e-4_dp
+             if (rp2 .lt. 1.0e-4_dp) rp2 = 1.0e-4_dp
  
              if (rp2 .lt. rcutoff) then
-              psi3 = psiofr (itype, nalpha, rp2)
-              psi4 = psiofr (itype, issh, rp2)
+              psi3 = wf_atoms(itype)%get_psi( nalpha, rp2)
+              psi4 = wf_atoms(itype)%get_psi( issh, rp2)
  
 ! Limits from 0 to r.
               if (rp1 .le. r) then

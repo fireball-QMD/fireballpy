@@ -47,7 +47,7 @@
 ! ===========================================================================
         subroutine vnn_excite
         use begin_input
-        use precision
+        use, intrinsic :: iso_fortran_env, only: dp => real64
         implicit none
 
 ! Argument Declaration and Description
@@ -71,27 +71,27 @@
 
         integer, dimension (:), allocatable :: npoints
 
-        real(kind=long), external :: derf0
-        real(kind=long) dr
-        real(kind=long) drp1, drp2
-        real(kind=long) fact
-        real(kind=long), external :: psiofr
-        real(kind=long) r
-        real(kind=long) r21
-        real(kind=long) r22
-        real(kind=long) rc_max
-        real(kind=long) rp1, rp2
+        real(kind=dp), external :: derf0
+        real(kind=dp) dr
+        real(kind=dp) drp1, drp2
+        real(kind=dp) fact
+        real(kind=dp), external :: psiofr
+        real(kind=dp) r
+        real(kind=dp) r21
+        real(kind=dp) r22
+        real(kind=dp) rc_max
+        real(kind=dp) rp1, rp2
 
-        real(kind=long), dimension (:), allocatable :: drr
-        real(kind=long), dimension (:,:), allocatable :: psi
-        real(kind=long), dimension (:,:), allocatable :: rr
-        real(kind=long), dimension (:), allocatable :: rrc
-        real(kind=long), dimension (:), allocatable :: term1
-        real(kind=long), dimension (:), allocatable :: term2
-        real(kind=long), dimension (nssh) :: vrho
-        real(kind=long), dimension (:,:), allocatable :: vvrho
-        real(kind=long), dimension (:), allocatable :: xnocc
-        real(kind=long), dimension (nrr) :: xrr
+        real(kind=dp), dimension (:), allocatable :: drr
+        real(kind=dp), dimension (:,:), allocatable :: psi
+        real(kind=dp), dimension (:,:), allocatable :: rr
+        real(kind=dp), dimension (:), allocatable :: rrc
+        real(kind=dp), dimension (:), allocatable :: term1
+        real(kind=dp), dimension (:), allocatable :: term2
+        real(kind=dp), dimension (nssh) :: vrho
+        real(kind=dp), dimension (:,:), allocatable :: vvrho
+        real(kind=dp), dimension (:), allocatable :: xnocc
+        real(kind=dp), dimension (nrr) :: xrr
 
 ! Allocate Arrays
 ! ===========================================================================
@@ -130,11 +130,11 @@
         call readpsi_excite (nssh, filename_ewf, mesh, npoints, rrc, drr,    &
      &                       xnocc, rr, psi)
 
-        rc_max = -1.0d0
+        rc_max = -1.0_dp
         do issh = 1, nssh
          rc_max = max(rc_max,rrc(issh))
         end do
-        rc_max = rc_max*0.529177249d0
+        rc_max = rc_max*0.529177249_dp
 
 
 ! *****************************************************************************
@@ -150,19 +150,19 @@
 ! integration over r
         do ir = 1, nrr
          r = r + dr
-         term1 = 0.0d0
-         term2 = 0.0d0
+         term1 = 0.0_dp
+         term2 = 0.0_dp
 
          drp1 = r/real(nrrp - 1)
          drp2 = (rc_max - r)/real(nrrp - 1)
-         rp1 = 0.0d0
+         rp1 = 0.0_dp
          rp2 = r
 
 ! integration over r'
          do irp = 1, nrrp
-          fact = 4.0d0
-          if (mod(irp,2) .ne. 0) fact = 2.0d0
-          if (irp .eq. 1 .or. irp .eq. nrrp) fact = 1.0d0
+          fact = 4.0_dp
+          if (mod(irp,2) .ne. 0) fact = 2.0_dp
+          if (irp .eq. 1 .or. irp .eq. nrrp) fact = 1.0_dp
 
           do issh = 1, nssh
            r21 = psiofr(issh, rp1, nssh, mesh, npoints, drr, rrc, rr, psi)**2
@@ -176,17 +176,17 @@
          end do
 
          do issh = 1, nssh
-          term1(issh) = (drp1/3.0d0)*term1(issh)
-          term2(issh) = (drp2/3.0d0)*term2(issh)
+          term1(issh) = (drp1/3.0_dp)*term1(issh)
+          term2(issh) = (drp2/3.0_dp)*term2(issh)
           vrho(issh) = term2(issh)
-          if (r .gt. 1.0d-5) vrho(issh) = vrho(issh) + term1(issh)/r
+          if (r .gt. 1.0e-5_dp) vrho(issh) = vrho(issh) + term1(issh)/r
          end do
 
          vvrho(:,ir) = vrho
          xrr(ir) = r
 
 ! Write out 10 values
-         itenth = int(float(nrr)/10.0d0)
+         itenth = int(float(nrr)/10.0_dp)
          if (mod(ir,itenth) .eq. 1) then
           !write (*,*) '  '
           !write (*,200) ir, xrr(ir)

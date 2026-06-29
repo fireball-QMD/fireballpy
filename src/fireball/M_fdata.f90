@@ -9,26 +9,6 @@ module M_fdata
   logical :: debug = .True.
   character(len=100) :: infofname = 'info.py.dat'
   !===================================
-  !  1 = overlap 
-  !  2 = vna_ontopl
-  !  3 = vna_ontopr
-  !  4 = vna_atom
-  !  5 = vnl
-  !  6 = vxc_2c       **Carlos
-  !  7 = vxc_2c_ol    **
-  !  8 = vxc_2c_or    **
-  !  9 = dipole_z
-  ! 10 = dipole_y
-  ! 11 = dipole_x
-  ! 12 = coulomb
-  ! 13 = kinetic
-  ! 14 = den_ontopl
-  ! 15 = den_ontopr
-  ! 16 = den_atom
-  ! 17 = denS_ontopl
-  ! 18 = denS_ontopr
-  ! 19 = denS_atom
-  ! 20 = overlapS  
   ! info.dat variables
   integer :: nsh_max, nshPP_max, isorpmax, isorpmax_xc, nspecies
   character (len=1000) fdataLocation
@@ -36,7 +16,7 @@ module M_fdata
   real(double), dimension (:), allocatable :: etotatom, smass, rc_PP
   character (len=2), dimension (:), allocatable :: symbolA
   integer, dimension (:,:), allocatable :: lssh, lsshPP
-  real(double), dimension (:,:), allocatable :: rcutoff, cl_PP, Qneutral
+  real(double), dimension (:,:), allocatable :: rcutoff, cl_PP, Qneutral, Qref
   character (len=25), dimension (:,:), allocatable :: wavefxn, napot
 
   ! Maximum number of two-center matrix elements: (calculated in make_munu.f90)
@@ -75,7 +55,7 @@ module M_fdata
 
   ! One center integrals
   !character (len=9), dimension (3), parameter :: onecfname = (/'xc1c_dqi ','nuxc1crho','exc1crho '/)
-  character (len=12), dimension (1), parameter :: onecfname = (/'onecenter_xc'/)
+  character (len=2), dimension (1), parameter :: onecfname = (/'xc'/)
   real(double), dimension (:,:), allocatable :: exc_1c_0
   real(double), dimension (:,:,:), allocatable :: vxc_1c_0, fxc_1c
   real(double), dimension (:,:,:,:), allocatable :: gxc_1c
@@ -94,7 +74,7 @@ module M_fdata
 
   character (len=11), dimension (20), parameter :: twocfname = (/ &
     'overlap    ','vna_ontopl ','vna_ontopr ','vna_atom   ','vnl        ', &
-    'vxc_2c     ','vxc_2c_ol  ','vxc_2c_or  ','dipole_z   ','dipole_y   ', &
+    'vxc_neutral','vxc_ontopl ','vxc_ontopr ','dipole_z   ','dipole_y   ', &
     'dipole_x   ','coulomb    ','kinetic    ','den_ontopl ','den_ontopr ', &
     'den_atom   ','denS_ontopl','denS_ontopr','denS_atom  ','overlapS   ' /)
 

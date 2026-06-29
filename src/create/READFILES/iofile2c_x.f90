@@ -60,7 +60,7 @@
 ! ===========================================================================
         subroutine iofile2c_x (root, suffix, isorp, index1, index2, &
      &                         filename)
-        use precision, only: wp
+        use iso_fortran_env, only: dp => real64
         implicit none
  
 ! Argument Declaration and Description

@@ -44,23 +44,23 @@
 ! Program Declaration
 ! ===========================================================================
         function derf0 (x)
-        use precision
+        use, intrinsic :: iso_fortran_env, only: dp => real64
         implicit none
-        real(kind=long) derf0
+        real(kind=dp) derf0
 
 ! Argument Declaration and Description
 ! ===========================================================================
-        real(kind=long) x
+        real(kind=dp) x
 
 ! Local Parameters and Data Declaration
 ! ===========================================================================
 
 ! Local Variable Declaration and Description
 ! ===========================================================================
-        real(kind=long) a1, a2, a3, a4, a5
-        real(kind=long) p
-        real(kind=long) t
-        real(kind=long) y, z
+        real(kind=dp) a1, a2, a3, a4, a5
+        real(kind=dp) p
+        real(kind=dp) t
+        real(kind=dp) y, z
 
 ! Allocate Arrays
 ! ===========================================================================
@@ -68,18 +68,18 @@
 ! Procedure
 ! ===========================================================================
         y = x
-        if (y .lt. 0.0d0) y = -y
-        if (y .gt. 1.0d-7) then
-         p = 0.3275911d0
-         t = 1.0d0/(1.0d0 + p*y)
-         a1 = 0.254829592d0
-         a2 = -0.284496736d0
-         a3 = 1.421413741d0
-         a4 = -1.453152027d0
-         a5 = 1.061405429d0
-         z = 1.0d0 - exp(-y*y)*(a1*t + a2*t*t + a3*(t**3) + a4*(t**4)       &
+        if (y .lt. 0.0_dp) y = -y
+        if (y .gt. 1.0e-7_dp) then
+         p = 0.3275911_dp
+         t = 1.0_dp/(1.0_dp + p*y)
+         a1 = 0.254829592_dp
+         a2 = -0.284496736_dp
+         a3 = 1.421413741_dp
+         a4 = -1.453152027_dp
+         a5 = 1.061405429_dp
+         z = 1.0_dp - exp(-y*y)*(a1*t + a2*t*t + a3*(t**3) + a4*(t**4)       &
      &                                                    + a5*(t**5))
-         if (x .lt. 0.0d0) z = -z
+         if (x .lt. 0.0_dp) z = -z
         else
          z = 0.0
         end if

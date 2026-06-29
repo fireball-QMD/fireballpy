@@ -62,7 +62,7 @@
      &                         nrho, ndd, index_max, inter_max, nalpha,     &
      &                         lalpha, malpha, nleft, lleft, mleft, nright, &
      &                         lright, mright, signature, iammaster)
-        use precision, only: wp
+        use iso_fortran_env, only: dp => real64
         use x_exact
         implicit none
  
@@ -95,9 +95,9 @@
  
         integer, intent (in), dimension (nspec_max) :: nsshxc
  
-        real(kind=wp), intent (in) :: fraction
-        real(kind=wp), intent (in) :: rcutoff1
-        real(kind=wp), intent (in) :: rcutoff2
+        real(kind=dp), intent (in) :: fraction
+        real(kind=dp), intent (in) :: rcutoff1
+        real(kind=dp), intent (in) :: rcutoff2
  
         character (len=2), intent (in) :: atom1
         character (len=2), intent (in) :: atom2
@@ -121,12 +121,12 @@
         integer m1, m2
         integer n1, n2
  
-        real(kind=wp) d
-        real(kind=wp) dmax
-        real(kind=wp) dr
-        real(kind=wp) sum
+        real(kind=dp) d
+        real(kind=dp) dmax
+        real(kind=dp) dr
+        real(kind=dp) sum
  
-        real(kind=wp), dimension (inter_max) :: hold
+        real(kind=dp), dimension (inter_max) :: hold
  
         character (len=40) fname
  

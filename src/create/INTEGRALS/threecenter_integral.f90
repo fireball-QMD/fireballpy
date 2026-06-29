@@ -47,7 +47,9 @@
 !
 !     ------------------------------------------------------------
 !
-      use precision, only: wp
+      use iso_fortran_env, only: dp => real64
+      use :: potentials, only: pot_atoms
+      use :: wavefunctions, only: wf_atoms
       implicit none
 !
       include '../parameters.inc'
@@ -85,25 +87,25 @@
       integer m1 (inter_max)   ! m-value in that shell
       integer m2 (inter_max)   !
 !
-      real(kind=wp) rc1           ! i=1,2,3  for left,right, neutral atm
-      real(kind=wp) rc2
+      real(kind=dp) rc1           ! i=1,2,3  for left,right, neutral atm
+      real(kind=dp) rc2
 !
-      real(kind=wp) h
-      real(kind=wp) HR,HT,HP
+      real(kind=dp) h
+      real(kind=dp) HR,HT,HP
       integer tempR, tempT, tempP
  
-      real(kind=wp) dbcx          ! bond charge distance  (A)
-      real(kind=wp) rna(3)        ! neutral atom location (A)
+      real(kind=dp) dbcx          ! bond charge distance  (A)
+      real(kind=dp) rna(3)        ! neutral atom location (A)
 !
       integer tmpImid,imid
-      real(kind=wp) xmin
-      real(kind=wp) xxp
-      real(kind=wp) psipsi
+      real(kind=dp) xmin
+      real(kind=dp) xxp
+      real(kind=dp) psipsi
 !
-      real(kind=wp) gmat(0:10,inter_max)   ! result from the integrator
+      real(kind=dp) gmat(0:10,inter_max)   ! result from the integrator
 !
-      real(kind=wp) psiofr,vpot,vnnaofr,dvxc3c
-      external dvxc3c, vnnaofr,psiofr
+!      real(kind=dp) dvxc3c
+!      external dvxc3c
 !
 !     ............................................................
 !
@@ -126,43 +128,44 @@
 !     Internal variables:
 !
 !
-      real(kind=wp) thetamat(0:10,inter_max)
+      real(kind=dp) thetamat(0:10,inter_max)
 !
-      real(kind=wp) znormMU(inter_max),znormNU(inter_max), &
+      real(kind=dp) znormMU(inter_max),znormNU(inter_max), &
      &       psiAmat(inter_max),psiBmat(inter_max)
 !
 !
-      real(kind=wp) thfactMU(0:3,-3:3), &
+      real(kind=dp) thfactMU(0:3,-3:3), &
      &       thfactNU(0:3,-3:3), &
      &       phifactor(-3:3)
 !
-      real(kind=wp) avgVmat(0:10,inter_max), fsimp(5000)
+      real(kind=dp) avgVmat(0:10,inter_max), fsimp(5000)
 !
-      real(kind=wp) inthpR(numInthpR*2+1), inthpTheta(numInthpT*2+1),  &
+      real(kind=dp) inthpR(numInthpR*2+1), inthpTheta(numInthpT*2+1),  &
      & inthpPhi(numInthpP*2+1)
-      real(kind=wp) wR(numInthpR*2+1),wTheta(numInthpT*2+1), &
+      real(kind=dp) wR(numInthpR*2+1),wTheta(numInthpT*2+1), &
      & wPhi(numInthpP*2+1)
 !
       integer   numbphi
       integer irMax, itMax,iPhiMax
       parameter (numbphi=5000)
-      real(kind=wp)  paramR, paramT, paramP
-      real(kind=wp)    phiy(numbphi), &
+      real(kind=dp)  paramR, paramT, paramP
+      real(kind=dp)    phiy(numbphi), &
      &          cphiy(numbphi),sphiy(numbphi)
 
-      real(kind=wp) w1, w2
+      real(kind=dp) w1, w2
 !
       integer nn1,nl1,nm1,nn2,nl2,nm2,i,ir,ix,ix1,it,ip,inm, &
      &        nmax,isorpX, NinthpR, NinthpT, NinthpP
 !
 ! JOM r1
-      real(kind=wp)  r1
-      real(kind=wp)  sq3,sq15,pi,dr,dtheta,dphi,r,theta,phi, &
+      real(kind=dp)  r1
+      real(kind=dp)  sq3,sq15,pi,dr,dtheta,dphi,r,theta,phi, &
      &        rmin,rmax,dc1,ds1,dc,ds,zr,r2,dc2,ds2,xr,yr,r3, &
      &        cphi,sphi,simp,simp2,simpson, &
      &        averagephi,averagetheta, &
      &        prod,prod2,dsth,stuffmunu,thrd,nrrinv,ntinv,nphiinv
-      real(kind=wp) sq12,sq4,hunderedfortieth
+      real(kind=dp) sq12,sq4,hunderedfortieth
+      real(kind=dp) vpot
 !
 ! =====================================================================
 !     The size of the matrix is determined by Nsh(in1) and Nsh(in2)
@@ -171,21 +174,21 @@
 !
 !     Normalization factors
       
-      sq3=1.73205080756887729352744634150587d0
-      sq15=3.87298334620741688517926539978240d0
-      sq12=3.46410161513775458705489268301174d0
-      sq4 = 2.0d0
-      pi= 3.14159265358979323846264338327950d0
-      thrd=0.333333333333333333333333333333333d0
+      sq3=1.73205080756887729352744634150587_dp
+      sq15=3.87298334620741688517926539978240_dp
+      sq12=3.46410161513775458705489268301174_dp
+      sq4 = 2.0_dp
+      pi= 3.14159265358979323846264338327950_dp
+      thrd=0.333333333333333333333333333333333_dp
 
-      rmin=0.0d0
+      rmin=0.0_dp
 
       ! added my murat manguoglu
-      hunderedfortieth=0.007142857142857142857142857142857143d0 ! 1/140
+      hunderedfortieth=0.007142857142857142857142857142857143_dp ! 1/140
 
 ! JOM
 !      rmax = dmax1(rc1,rc2)
-      rmax = 0.5d0*(rc1+rc2)
+      rmax = 0.5_dp*(rc1+rc2)
 
       NinthpR = numInthpR
       NinthpT = numInthpT
@@ -201,9 +204,9 @@
       paramT = 2.0D0
       paramP = 1.0D0
   
-      nrrinv=1.0d0/real(irMax-1, kind=wp)
-      ntinv=1.0d0/real(itMax-1, kind=wp)
-      nphiinv=1.0d0/real(iphiMax-1, kind=wp)
+      nrrinv=1.0_dp/real(irMax-1, kind=dp)
+      ntinv=1.0_dp/real(itMax-1, kind=dp)
+      nphiinv=1.0_dp/real(iphiMax-1, kind=dp)
 
       HR = (rmax-rmin)*nrrinv
       HT = PI*ntinv
@@ -275,8 +278,8 @@
       do 313 inm=1,index_max
         nl1=l1(inm)
         nl2=l2(inm)
-        if(nl1.eq.0)znormMU(inm)=1.0d0
-        if(nl2.eq.0)znormNU(inm)=1.0d0
+        if(nl1.eq.0)znormMU(inm)=1.0_dp
+        if(nl2.eq.0)znormNU(inm)=1.0_dp
         if(nl1.eq.1)znormMU(inm)=sq3
         if(nl2.eq.1)znormNU(inm)=sq3
         if(nl1.eq.2)znormMU(inm)=sq15
@@ -321,7 +324,7 @@
 !
 !      dr=(rmax-rmin)*nrrinv
 !      dtheta=pi*ntinv
-!      dphi=2.d0*pi*nphiinv
+!      dphi=2._dp*pi*nphiinv
 !
 ! end JOM
 
@@ -339,7 +342,7 @@
  
       do 1451 inm=1,index_max
         do 1451 isorpX=ispmin,ispmax
-          gmat(isorpX,inm)=0.0d0
+          gmat(isorpX,inm)=0.0_dp
  1451 continue
      
 !
@@ -358,7 +361,7 @@
 !
          do inm=1,index_max
            do ix=ispmin,ispmax
-             thetamat(ix,inm)=0.0d0
+             thetamat(ix,inm)=0.0_dp
            end do
          end do
 !
@@ -368,9 +371,9 @@
 ! JOM we have to define psiAmat latter
 !         do inm=1,index_max
 !           nn1=n1(inm)
-!           psiAmat(inm)=psiofr(in1,nn1,r)
+!           psiAmat(inm)=wf_atoms(in1)%get_psi(nn1,r)
 !! jel-spher
-!           if(ispher) psiAmat(inm) = sqrt(psiAmat(inm)**2.0d0)
+!           if(ispher) psiAmat(inm) = sqrt(psiAmat(inm)**2.0_dp)
 !         end do
 ! end JOM
 
@@ -395,18 +398,18 @@
            dc=cos(theta)
            ds=sin(theta)
 !
-	   r1 = r**2 + 0.25d0*(dbcx**2) + r*dbcx*dc
-           if (r1 .le. 0.0d0) then
-            r1 = 0.0d0
+	   r1 = r**2 + 0.25_dp*(dbcx**2) + r*dbcx*dc
+           if (r1 .le. 0.0_dp) then
+            r1 = 0.0_dp
            else
             r1 = sqrt(r1)
            end if
            if(r1.gt.rc1)go to 208       ! outside integration range
 
 !           r2 = r**2 + dbcx**2 - 2*r*dbcx*dc
-	   r2 = r**2 + 0.25d0*(dbcx**2) - r*dbcx*dc
-           if (r2 .le. 0.0d0) then
-            r2 = 0.0d0
+	   r2 = r**2 + 0.25_dp*(dbcx**2) - r*dbcx*dc
+           if (r2 .le. 0.0_dp) then
+            r2 = 0.0_dp
            else
             r2 = sqrt(r2)
            end if
@@ -417,12 +420,12 @@
            do inm=1,index_max
              nn1 = n1(inm)
              nn2 = n2(inm)
-             psiAmat(inm)=psiofr(in1,nn1,r1)
-             psiBmat(inm)=psiofr(in2,nn2,r2)
+             psiAmat(inm)=wf_atoms(in1)%get_psi(nn1,r1)
+             psiBmat(inm)=wf_atoms(in2)%get_psi(nn2,r2)
 ! jel-spher
              if(ispher) then
-              psiAmat(inm) = sqrt(psiAmat(inm)**2.0d0)
-              psiBmat(inm) = sqrt(psiBmat(inm)**2.0d0)
+              psiAmat(inm) = sqrt(psiAmat(inm)**2.0_dp)
+              psiBmat(inm) = sqrt(psiBmat(inm)**2.0_dp)
               end if
            enddo
 !
@@ -431,22 +434,22 @@
 !          Be careful for r1 very small.
 !          Find cos(theta1), sin(theta1).
            if(r1.gt.0.00001)then
-             dc1=(zr+0.5d0*dbcx)/r1
+             dc1=(zr+0.5_dp*dbcx)/r1
              ds1=ds*r/r1
            else
-             dc1=1.0d0
-             ds1=0.0d0
+             dc1=1.0_dp
+             ds1=0.0_dp
            end if
 !
 !          Theta stuff for atom 2.
 !          Be careful for r2 very small.
 !          Find cos(theta2), sin(theta2).
            if(r2.gt.0.00001)then
-             dc2=(zr-0.5d0*dbcx)/r2
+             dc2=(zr-0.5_dp*dbcx)/r2
              ds2=ds*r/r2
            else
-             dc2=1.0d0
-             ds2=0.0d0
+             dc2=1.0_dp
+             ds2=0.0_dp
            end if
 !=========================================================
 ! end JOM JOM
@@ -462,7 +465,7 @@
 !          ATOM A .........................................
 !
 !          S
-           thfactMU(0,0)=1.0d0
+           thfactMU(0,0)=1.0_dp
 !
 !          P
 !          Note: We order the orbitals here x,y,z (or pi,pi',sig)
@@ -478,7 +481,7 @@
 !
 !          D Order of d-orbitals is 3z^2-1, x^2-y^2, xz, xy, yz
 !
-           thfactMU(2,0)=3.0d0*dc1*dc1-1.0d0
+           thfactMU(2,0)=3.0_dp*dc1*dc1-1.0_dp
            thfactMU(2,2)=ds1*ds1
            thfactMU(2,1)=ds1*dc1
            thfactMU(2,-2)=ds1*ds1
@@ -487,7 +490,7 @@
 !          ATOM B .............................................
 !
 !          S
-           thfactNU(0,0)=1.0d0
+           thfactNU(0,0)=1.0_dp
 !
 !          P
 !
@@ -497,7 +500,7 @@
 !
 !          D Order of d-orbitals is 3z^2-1, x^2-y^2, xz, xy, yz
 !
-           thfactNU(2,0)=3.0d0*dc2*dc2-1.0d0
+           thfactNU(2,0)=3.0_dp*dc2*dc2-1.0_dp
            thfactNU(2,2)=ds2*ds2
            thfactNU(2,1)=ds2*dc2
            thfactNU(2,-2)=ds2*ds2
@@ -509,7 +512,7 @@
  
            do inm=1,index_max
              do ix=ispmin,ispmax
-               avgVmat(ix,inm)=0.0d0
+               avgVmat(ix,inm)=0.0_dp
              end do
            end do
 !
@@ -520,13 +523,13 @@
 !          average over phi (divide by 2*pi)
 ! JOM : I add this normalization factor at the end, out
 !       of the loops
-!           averagephi=0.5d0/pi
-! HAO : It should be averagephi = 1.d0/pi, since interal of phi is now
+!           averagephi=0.5_dp/pi
+! HAO : It should be averagephi = 1._dp/pi, since interal of phi is now
 !       done in (0, pi).
  
 !          The phi factors depend only on m.
  
-           phifactor(0)=1.0d0
+           phifactor(0)=1.0_dp
  
            do 244 ip=1, iphiMax
 !
@@ -556,16 +559,16 @@
 !
              do  iX=ispmin,ispmax
 !
-               IF(interaction .EQ. 1) vpot=vnnaofr(in3,iX,r3)
+               IF(interaction .EQ. 1) vpot=pot_atoms(in3)%get_vnn(iX,r3)
 !
-               IF(interaction .EQ. 2) then
-                IX1=IX+1
-                vpot = dvxc3c (iexc, r1, r2, r3, in1, in2, in3, IX1)
-               END IF
+!               IF(interaction .EQ. 2) then
+!                IX1=IX+1
+!                vpot = dvxc3c (iexc, r1, r2, r3, in1, in2, in3, IX1)
+!               END IF
 ! xc3c_SN
                IF(interaction .EQ. 3) then
-                  psipsi = psiofr(in3,ix,r3)
-                  vpot=(psipsi**2)/(4.0d0*pi)
+                  psipsi = wf_atoms(in3)%get_psi(ix,r3)
+                  vpot=(psipsi**2)/(4.0_dp*pi)
                ENDIF
 !
 !              note: dc,ds defined at the beginning of the theta loop
@@ -592,7 +595,7 @@
 !           dsth=ds1
            dsth=ds
 ! JOM I add this norm. factor outside loops
-!           averagetheta=0.5d0
+!           averagetheta=0.5_dp
 !           prod=wTheta(it)*averagetheta*dsth
            prod=wTheta(it)*dsth
  
@@ -650,7 +653,7 @@
       do inm=1,index_max
 !        prod=znormMU(inm)*znormNU(inm)
 !JOM
-        prod=znormMU(inm)*znormNU(inm)*0.5d0/pi
+        prod=znormMU(inm)*znormNU(inm)*0.5_dp/pi
         do ix=ispmin,ispmax
            gmat(ix,inm)=gmat(ix,inm)*prod
         end do

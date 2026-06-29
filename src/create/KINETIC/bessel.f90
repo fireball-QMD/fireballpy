@@ -62,15 +62,15 @@
 !
 ! Program Declaration
 ! ===========================================================================
-        real(kind=wp) function jl2 (l,x)
-        use precision, only: wp
+        real(kind=dp) function jl2 (l,x)
+        use iso_fortran_env, only: dp => real64
         implicit none
  
 ! Argument Declaration and Description
 ! ===========================================================================
         integer l
  
-        real(kind=wp) x
+        real(kind=dp) x
  
 ! Local Parameters and Data Declaration
 ! ===========================================================================
@@ -90,81 +90,81 @@
 ! L = 0
 ! j0 = sinx/x
         if (l .eq. 0) then
-         if (x .gt. 1.0d-4) then
+         if (x .gt. 1.0e-4_dp) then
           jl2 = dsin(x)/x
          else
-          jl2 = (1.0d0 - x**2/6.0d0 + x**4/120.0d0)
+          jl2 = (1.0_dp - x**2/6.0_dp + x**4/120.0_dp)
          end if
         end if
  
 ! L = 1
 ! j1 = sinx/x**2 - cosx/x
         if (l .eq. 1) then
-         if (x .gt. 1.0d-1) then
+         if (x .gt. 1.0e-1_dp) then
           jl2 = dsin(x)/(x**2) - cos(x)/x
          else
-          jl2 = 1.0d0 - x**2/10.0d0 + x**4/280.0d0 - x**6/15120.0d0 &
-     &                + x**8/1330560.0d0
-          jl2 = (x/3.0d0)*jl2
+          jl2 = 1.0_dp - x**2/10.0_dp + x**4/280.0_dp - x**6/15120.0_dp &
+     &                + x**8/1330560.0_dp
+          jl2 = (x/3.0_dp)*jl2
          end if
         end if
  
 ! L = 2
 ! j2 = (3/x**3 - 1/x)*sinx - 3*cosx/x**2
         if (l .eq. 2) then
-         if (x .gt. 5.0d-1) then
-          jl2 = (3.0d0/x**3 - 1.0d0/x)*dsin(x) - (3.0d0/x**2)*dcos(x)
+         if (x .gt. 5.0e-1_dp) then
+          jl2 = (3.0_dp/x**3 - 1.0_dp/x)*dsin(x) - (3.0_dp/x**2)*dcos(x)
          else
-          jl2 = 1.0d0 - x**2/14.0d0 + x**4/504.0d0 - x**6/33264.0d0 &
-     &                + x**8/3459456.0d0
-          jl2 = (x**2/15.0d0)*jl2
+          jl2 = 1.0_dp - x**2/14.0_dp + x**4/504.0_dp - x**6/33264.0_dp &
+     &                + x**8/3459456.0_dp
+          jl2 = (x**2/15.0_dp)*jl2
          end if
         end if
  
 ! L = 3
         if (l .eq. 3) then
-         if (x .gt. 5.0d-1) then
-           jl2 = (15.0d0/x**4 - 6.0d0/x**2)*dsin(x) &
-     &         - (15.0d0/x**3 - 1.0d0/x)*dcos(x)
+         if (x .gt. 5.0e-1_dp) then
+           jl2 = (15.0_dp/x**4 - 6.0_dp/x**2)*dsin(x) &
+     &         - (15.0_dp/x**3 - 1.0_dp/x)*dcos(x)
          else
-           jl2 = 1.0d0 - x**2/18.0d0 + x**4/792.0d0 - x**6/61776.0d0 &
-     &                + x**8/7413120.0d0
-           jl2 = (x**3/105.0d0)*jl2
+           jl2 = 1.0_dp - x**2/18.0_dp + x**4/792.0_dp - x**6/61776.0_dp &
+     &                + x**8/7413120.0_dp
+           jl2 = (x**3/105.0_dp)*jl2
          end if
         end if
  
 ! L = 4
         if (l .eq. 4) then
-         if (x .gt. 5.0d-1) then
-           jl2 = (105.0d0/x**5 - 45.0d0/x**3 + 1.0d0/x)*dsin(x) &
-     &         - (105.0d0/x**4 - 10.0d0/x**2)*dcos(x)
+         if (x .gt. 5.0e-1_dp) then
+           jl2 = (105.0_dp/x**5 - 45.0_dp/x**3 + 1.0_dp/x)*dsin(x) &
+     &         - (105.0_dp/x**4 - 10.0_dp/x**2)*dcos(x)
          else
-           jl2 = 1.0d0 - x**2/22.0d0 + x**4/1144.0d0 - x**6/102960.0d0 &
-     &                + x**8/14002560.0d0
-           jl2 = (x**4/945.0d0)*jl2
+           jl2 = 1.0_dp - x**2/22.0_dp + x**4/1144.0_dp - x**6/102960.0_dp &
+     &                + x**8/14002560.0_dp
+           jl2 = (x**4/945.0_dp)*jl2
          end if
         end if
  
 ! L = 5
         if (l .eq. 5) then
-         if (x .gt. 5.0d-1) then
-          jl2 = (945.0d0/x**6 - 420.0d0/x**4 + 15.0d0/x**2)*dsin(x) &
-     &         - (945.0d0/x**5 - 105.0d0/x**3 + 1.0d0/x)*dcos(x)
+         if (x .gt. 5.0e-1_dp) then
+          jl2 = (945.0_dp/x**6 - 420.0_dp/x**4 + 15.0_dp/x**2)*dsin(x) &
+     &         - (945.0_dp/x**5 - 105.0_dp/x**3 + 1.0_dp/x)*dcos(x)
          else
-          jl2 = 1.0d0 - x**2/26.0d0 + x**4/1560.0d0 - x**6/159120.0d0
-          jl2 = (x**5/10395.0d0)*jl2
+          jl2 = 1.0_dp - x**2/26.0_dp + x**4/1560.0_dp - x**6/159120.0_dp
+          jl2 = (x**5/10395.0_dp)*jl2
          end if
         end if
  
 ! L = 6
         if (l .eq. 6) then
-         if (x .gt. 5.0d-1) then
-          jl2 = (10395.0d0/x**7 - 4725.0d0/x**5 + 210.0d0/x**3 &
-     &                                          - 1.0d0/x)*dsin(x) &
-     &         - (10395.0d0/x**6 - 1260.0d0/x**4 + 21.0d0/x**2)*dcos(x)
+         if (x .gt. 5.0e-1_dp) then
+          jl2 = (10395.0_dp/x**7 - 4725.0_dp/x**5 + 210.0_dp/x**3 &
+     &                                          - 1.0_dp/x)*dsin(x) &
+     &         - (10395.0_dp/x**6 - 1260.0_dp/x**4 + 21.0_dp/x**2)*dcos(x)
          else
-          jl2 = 1.0d0 - x**2/30.0d0 + x**4/2040.0d0 - x**6/232560.0d0
-          jl2 = (x**6/135135.0d0)*jl2
+          jl2 = 1.0_dp - x**2/30.0_dp + x**4/2040.0_dp - x**6/232560.0_dp
+          jl2 = (x**6/135135.0_dp)*jl2
          end if
         end if
  

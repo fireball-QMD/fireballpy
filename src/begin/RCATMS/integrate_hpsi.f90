@@ -46,7 +46,7 @@
 ! Program Declaration
 ! ===========================================================================
         subroutine integrate_hpsi (mesh, l, rcutoff, ebind, v, node, alnd)
-        use precision
+        use, intrinsic :: iso_fortran_env, only: dp => real64
         implicit none
 
 ! Argument Declaration and Description
@@ -55,15 +55,15 @@
         integer, intent (in) :: l
         integer, intent (in) :: mesh
 
-        real(kind=long), intent (in) :: ebind
-        real(kind=long), intent (in) :: rcutoff
+        real(kind=dp), intent (in) :: ebind
+        real(kind=dp), intent (in) :: rcutoff
 
-        real(kind=long), intent (in), dimension (mesh) :: v
+        real(kind=dp), intent (in), dimension (mesh) :: v
 
 ! Output
         integer, intent (out) :: node
 
-        real(kind=long), intent (out) :: alnd
+        real(kind=dp), intent (out) :: alnd
 
 ! Local Parameters and Data Declaration
 ! ===========================================================================
@@ -74,13 +74,13 @@
         integer ipoint
         integer istart
 
-        real(kind=long) dr
-        real(kind=long) h12
-        real(kind=long) u1, u2, u3
-        real(kind=long) v1, v2, v3
+        real(kind=dp) dr
+        real(kind=dp) h12
+        real(kind=dp) u1, u2, u3
+        real(kind=dp) v1, v2, v3
 
-        real(kind=long), dimension (:), allocatable :: r
-        real(kind=long), dimension (:), allocatable :: v_ang
+        real(kind=dp), dimension (:), allocatable :: r
+        real(kind=dp), dimension (:), allocatable :: v_ang
 
 
 ! Allocate Arrays
@@ -91,62 +91,62 @@
 ! Procedure
 ! ===========================================================================
         dr = rcutoff/(mesh - 1)
-        h12 = dr**2/12.0d0
+        h12 = dr**2/12.0_dp
         do ipoint = 2, mesh
          r(ipoint) = (ipoint - 1)*dr
         end do
-        v_ang(1) = 0.0d0
-        v_ang(2:mesh) = l*(l + 1.0d0)/r(2:mesh)**2
+        v_ang(1) = 0.0_dp
+        v_ang(2:mesh) = l*(l + 1.0_dp)/r(2:mesh)**2
 
 ! imatch = matching point for the integration
 ! Why is it multiplied by such an odd number such as 0.53 - is this supposed
 ! to be abohr?
         istart = 1
-        imatch = mesh*0.53d0
+        imatch = mesh*0.53_dp
 
 ! Initialize node counter
         node = 0
 
 ! Integrate out from origin
-        u1 = 0.0d0
+        u1 = 0.0_dp
         u2 = dr
-        v1 = 0.0d0
+        v1 = 0.0_dp
         v2 = v(istart+1) + v_ang(istart+1) + ebind
         do ipoint = istart + 2, imatch
          v3 = v(ipoint) + v_ang(ipoint) + ebind
-         u3 = (u2*(2.0d0 + 10.0d0*h12*v2) - u1*(1.0d0 - h12*v1))             &
-     &       /(1.0d0 - h12*v3)
-         if (sign(1.0d0,u3) .ne. sign(1.0d0,u2)) node = node + 1
+         u3 = (u2*(2.0_dp + 10.0_dp*h12*v2) - u1*(1.0_dp - h12*v1))             &
+     &       /(1.0_dp - h12*v3)
+         if (sign(1.0_dp,u3) .ne. sign(1.0_dp,u2)) node = node + 1
          u1 = u2
          u2 = u3
          v1 = v2
          v2 = v3
         end do
         v3 = v(imatch+1) + v_ang(imatch+1) + ebind
-        u3 = (u2*(2.0d0 + 10.0d0*h12*v2) - u1*(1.0d0 - h12*v1))/(1.0d0 - h12*v3)
-        alnd = (u3 - u1)/(2.0d0*dr*u2)
+        u3 = (u2*(2.0_dp + 10.0_dp*h12*v2) - u1*(1.0_dp - h12*v1))/(1.0_dp - h12*v3)
+        alnd = (u3 - u1)/(2.0_dp*dr*u2)
 
 ! Now integrate in from rmax
-        u1 = 0.0d0
+        u1 = 0.0_dp
         u2 = dr
         v1 = v(mesh) + v_ang(mesh) + ebind
         v2 = v(mesh-1) + v_ang(mesh-1) + ebind
         do ipoint = mesh-2, imatch, -1
          v3 = v(ipoint) + v_ang(ipoint) + ebind
-         u3 = (u2*(2.0d0 + 10.0d0*h12*v2) - u1*(1.0d0 - h12*v1))             &
-     &       /(1.0d0 - h12*v3)
-         if (sign(1.0d0,u3) .ne. sign(1.0d0,u2)) node = node + 1
+         u3 = (u2*(2.0_dp + 10.0_dp*h12*v2) - u1*(1.0_dp - h12*v1))             &
+     &       /(1.0_dp - h12*v3)
+         if (sign(1.0_dp,u3) .ne. sign(1.0_dp,u2)) node = node + 1
          u1 = u2
          u2 = u3
          v1 = v2
          v2 = v3
         end do
         v3 = v(mesh-imatch-1) + v_ang(mesh-imatch-1) + ebind
-        u3 = (u2*(2.0d0 + 10.0d0*h12*v2) - u1*(1.0d0 - h12*v1))/(1.0d0 - h12*v3)
+        u3 = (u2*(2.0_dp + 10.0_dp*h12*v2) - u1*(1.0_dp - h12*v1))/(1.0_dp - h12*v3)
 
 ! Calculate discontinuity in log derivative - it may look like this is lower
 ! order, but matching these actually matches the solution exactly
-        alnd = alnd + (u3 - u1)/(2.0d0*dr*u2)
+        alnd = alnd + (u3 - u1)/(2.0_dp*dr*u2)
 
 ! Deallocate Arrays
 ! ===========================================================================

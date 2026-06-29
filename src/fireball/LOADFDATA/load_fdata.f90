@@ -4,7 +4,7 @@ subroutine load_fdata()
   use M_fdata, only: fdataLocation, infofname, nsh_max, nshPP_max, nspecies, nzx, symbolA, &
     & etotatom, smass, rc_PP, rcutoff, cl_PP, nssh, lssh, nsshPP, lsshPP, Qneutral, wavefxn, &
     & napot, ind2c, icon3c, splineint_2c, numz2c, z2cmax, &
-    & isorpmax, isorpmax_xc, ME2c_max, nfofx,initype
+    & isorpmax, isorpmax_xc, ME2c_max, nfofx,initype, Qref
   implicit none
   integer :: in1, in2, in3, ispec, issh, aux, icount, isorp, &
     & interaction  
@@ -45,6 +45,7 @@ subroutine load_fdata()
   if (allocated(nsshPP)) deallocate(nsshPP)
   if (allocated(lsshPP)) deallocate(lsshPP)
   if (allocated(Qneutral)) deallocate(Qneutral)
+  if (allocated(Qref)) deallocate(Qref)
   if (allocated(wavefxn)) deallocate(wavefxn)
   if (allocated(napot)) deallocate(napot)
   allocate (nzx (nspecies))
@@ -60,9 +61,11 @@ subroutine load_fdata()
   allocate (nsshPP (nspecies))
   allocate (lsshPP (nsh_max, nspecies))
   allocate (Qneutral (nsh_max, nspecies))
+  allocate (Qref (nsh_max, nspecies))
   allocate (wavefxn (nsh_max, nspecies))
   allocate (napot (0:nsh_max, nspecies))
   Qneutral = 0.0d0
+  Qref = 0.0d0
   rcutoff = 0.0d0
 
   ! Load info.dat

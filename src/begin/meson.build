@@ -1,21 +1,6 @@
-modules_begin_srcs = [
+modules_wfs_srcs = [
   'begin_input.f90',
-  'constants.f90',
   'pp_storage.f90',
-  'precision.f90',
-]
-
-xcb_srcs = [
-  'bpgcxc.f90',
-  'corlyp.f90',
-  'Exx.f90',
-  'get_uxc.f90',
-  'gga91_sr.f90',
-  'ggacrad.f90',
-  'ggaxrad.f90',
-  'ldaxc.f90',
-  'lsdavwn.f90',
-  'pbe.f90',
 ]
 
 rcatms_srcs = [
@@ -44,25 +29,23 @@ vnn_srcs = [
   'vnn_excite.f90',
 ]
 
-begin_srcs = []
-foreach src : modules_begin_srcs
-  begin_srcs += 'MODULES' / src
-endforeach
-foreach src : xcb_srcs
-  begin_srcs += 'XC' / src
+wfs_srcs = []
+foreach src : modules_wfs_srcs
+  wfs_srcs += 'MODULES' / src
 endforeach
 foreach src : rcatms_srcs
-  begin_srcs += 'RCATMS' / src
+  wfs_srcs += 'RCATMS' / src
 endforeach
 foreach src : vnn_srcs
-  begin_srcs += 'VNN' / src
+  wfs_srcs += 'VNN' / src
 endforeach
 
-# Build begin library
-begin_lib = library(
-  'begin',
-  begin_srcs,
+# Build wfs library
+wfs_lib = library(
+  'fpy_wfs',
+  wfs_srcs,
+  dependencies: [libxc_dep, common_dep],
   install: true,
   install_dir: py.get_install_dir() / 'fireballpy.libs',
 )
-begin_dep = declare_dependency(link_with: begin_lib, sources: begin_srcs)
+wfs_dep = declare_dependency(link_with: wfs_lib, sources: wfs_srcs)

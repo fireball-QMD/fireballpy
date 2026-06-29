@@ -59,8 +59,8 @@
 !
 ! Program Declaration
 ! ===========================================================================
-        real(kind=wp) function clebsch_gordon (l1, m1, l2, m2, l, m)
-        use precision, only: wp
+        real(kind=dp) function clebsch_gordon (l1, m1, l2, m2, l, m)
+        use iso_fortran_env, only: dp => real64
         implicit none
  
 ! Argument Declaration and Description
@@ -82,16 +82,16 @@
 ! ===========================================================================
         integer iz
  
-        real(kind=wp) piece1
-        real(kind=wp) piece2
-        real(kind=wp) piece3
+        real(kind=dp) piece1
+        real(kind=dp) piece2
+        real(kind=dp) piece3
  
-        real(kind=wp), external :: factorial
+        real(kind=dp), external :: factorial
  
 ! Procedure
 ! ===========================================================================
 ! Initialize the coefficient to zero.
-        clebsch_gordon = 0.0d0
+        clebsch_gordon = 0.0_dp
  
 ! First determine that the values of the l1, l2, and l satisfiy the
 ! triangle equation - |l1-l2| =< l >= l1 + l2.
@@ -105,7 +105,7 @@
  
 ! The clebsch_gordon coefficient will be written as a product of three
 ! pieces. So clebsch_gordon = piece1*piece2*piece3
-        piece1 = sqrt(((2.0d0*l + 1)*factorial(l1 + l2 - l)                  &
+        piece1 = sqrt(((2.0_dp*l + 1)*factorial(l1 + l2 - l)                  &
      &                 *factorial(l1 - l2 + l)*factorial(-l1 + l2 + l))      &
      &                /factorial(l1 + l2 + l + 1))
  
@@ -113,7 +113,7 @@
      &                *factorial(l2 + m2)*factorial(l2 - m2)                 &
      &                *factorial(l + m)*factorial(l - m))
  
-        piece3 = 0.0d0
+        piece3 = 0.0_dp
         do iz = 0, izmax
          if (((l1 + l2 - l - iz) .ge. 0) .and. ((l1 - m1 - iz) .ge. 0)       &
      &       .and. ((l2 + m2 - iz) .ge. 0) .and. ((l - l2 + m1 + iz) .ge. 0) &

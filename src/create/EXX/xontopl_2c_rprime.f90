@@ -61,7 +61,8 @@
 ! ===========================================================================
         subroutine xontopl_2c_rprime (nspec_max, nssh, nalpha, itype,      &
     &                                 rcutoff, nrho, lmax)
-        use precision, only: wp
+        use iso_fortran_env, only: dp => real64
+        use :: wavefunctions, only: wf_atoms
         use x_exact
         implicit none
  
@@ -76,7 +77,7 @@
  
         integer, intent (in) :: nssh (nspec_max)
  
-        real(kind=wp), intent (in) :: rcutoff
+        real(kind=dp), intent (in) :: rcutoff
  
 ! Local Parameters and Data Declaration
 ! ===========================================================================
@@ -88,17 +89,16 @@
         integer issh
         integer lqn
  
-        real(kind=wp) psi3
-        real(kind=wp) psi4
-        real(kind=wp) r
-        real(kind=wp) rhomax
-        real(kind=wp) rhomin
-        real(kind=wp) rp
-        real(kind=wp) sumrp
+        real(kind=dp) psi3
+        real(kind=dp) psi4
+        real(kind=dp) r
+        real(kind=dp) rhomax
+        real(kind=dp) rhomin
+        real(kind=dp) rp
+        real(kind=dp) sumrp
  
-        real(kind=wp), dimension (:), allocatable :: rhopmult
+        real(kind=dp), dimension (:), allocatable :: rhopmult
  
-        real(kind=wp), external :: psiofr
  
 ! Allocate Arrays
 ! ===========================================================================
@@ -106,7 +106,7 @@
 ! Procedure
 ! ===========================================================================
 ! Set integration limits
-        rhomin = 0.0d0
+        rhomin = 0.0_dp
         rhomax = rcutoff
  
 ! Strictly define what the density of the mesh should be. 
@@ -119,15 +119,15 @@
         allocate (rhopmult(nnrhop))
         rpoint(1) = rhomin
         rpoint(nnrhop) = rhomax
-        rhopmult(1) = drhop/3.0d0
-        rhopmult(nnrhop) = drhop/3.0d0
+        rhopmult(1) = drhop/3.0_dp
+        rhopmult(nnrhop) = drhop/3.0_dp
         do irho = 2, nnrhop - 1, 2
          rpoint(irho) = rhomin + real(irho - 1)*drhop
-         rhopmult(irho) = 4.0d0*drhop/3.0d0
+         rhopmult(irho) = 4.0_dp*drhop/3.0_dp
         end do
         do irho = 3, nnrhop - 2, 2
          rpoint(irho) = rhomin + real(irho - 1)*drhop
-         rhopmult(irho) = 2.0d0*drhop/3.0d0
+         rhopmult(irho) = 2.0_dp*drhop/3.0_dp
         end do
  
 ! Loop over all of the shells of itype.
@@ -140,16 +140,16 @@
 ! Perform the radial integration over r' for each given r.
           do irho = 1, 2*nrho - 1
            r = rpoint(irho)
-           if (r .lt. 1.0d-4) r = 1.0d-4
+           if (r .lt. 1.0e-4_dp) r = 1.0e-4_dp
  
-           sumrp = 0.0d0
+           sumrp = 0.0_dp
            do irhop = 1, 2*nrho - 1
             rp = rpoint(irhop)
-            if (rp .lt. 1.0d-4) rp = 1.0d-4
+            if (rp .lt. 1.0e-4_dp) rp = 1.0e-4_dp
 
             if (rp .lt. rcutoff) then
-             psi3 = psiofr (itype, nalpha, rp)
-             psi4 = psiofr (itype, issh, rp)
+             psi3 = wf_atoms(itype)%get_psi( nalpha, rp)
+             psi4 = wf_atoms(itype)%get_psi( issh, rp)
  
 ! Limits from 0 to r.
              if (rp .le. r) then

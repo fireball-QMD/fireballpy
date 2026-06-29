@@ -57,8 +57,8 @@
 !
 ! Program Declaration
 ! ===========================================================================
-        real(kind=wp) function gauntReal (l,l1,l2,l3,l4,m1,m2,m3,m4)
-        use precision, only: wp
+        real(kind=dp) function gauntReal (l,l1,l2,l3,l4,m1,m2,m3,m4)
+        use iso_fortran_env, only: dp => real64
         implicit none
  
 ! Argument Declaration and Description
@@ -77,8 +77,8 @@
 ! Local Parameters and Data Declaration
 ! ===========================================================================
         integer :: m
-        complex(kind=wp) :: YXX
-        complex(kind=wp) :: gauntComplex
+        complex(kind=dp) :: YXX
+        complex(kind=dp) :: gauntComplex
  
 ! Procedure
 ! ===========================================================================
@@ -86,7 +86,7 @@
         do m=-l,l
           gauntComplex = gauntComplex + ((-1)**m)*YXX(l,l1,l2,-m,m1,m2)*YXX(l,l3,l4,m,m3,m4)
         end do
-        if (abs(aimag(gauntComplex)) .gt. 1.0d-04 ) then 
+        if (abs(aimag(gauntComplex)) .gt. 1.0e-4_dp ) then 
          write (*,*) 'sum_m {YXX*YXX}, l1,l2,m1,m2,l3,l4,m3,m4 =',l1,l2,m1,m2,l3,l4,m3,m4 
          write (*,*) 'Warning function gauntReal it is not real',gauntComplex
         end if
@@ -96,8 +96,8 @@
 
 ! Program Declaration
 ! ===========================================================================
-        complex(kind=wp) function YXX (l,l3,l4,m,m3,m4)
-        use precision, only: wp
+        complex(kind=dp) function YXX (l,l3,l4,m,m3,m4)
+        use iso_fortran_env, only: dp => real64
         implicit none
  
 ! Argument Declaration and Description
@@ -109,50 +109,50 @@
         integer, intent (in) :: m
         integer, intent (in) :: m3
         integer, intent (in) :: m4
-        real(kind=wp) :: aux
-        real(kind=wp) :: gaunt
+        real(kind=dp) :: aux
+        real(kind=dp) :: gaunt
 ! Procedure
 ! ===========================================================================
         YXX=(0,0)
         if (m3 < 0 .and. m4 < 0) then 
-          aux=-0.50d0*(gaunt(l,l3,l4,m,m3,m4)-((-1)**m4)*gaunt(l,l3,l4,m,m3,-m4) &
+          aux=-0.50_dp*(gaunt(l,l3,l4,m,m3,m4)-((-1)**m4)*gaunt(l,l3,l4,m,m3,-m4) &
           &   -((-1)**m3)*gaunt(l,l3,l4,m,-m3,m4)+((-1)**(m3+m4))*gaunt(l,l3,l4,m,-m3,-m4))
-          YXX = cmplx(aux,0.0d0)
+          YXX = cmplx(aux,0.0_dp)
         endif 
         if (m3 < 0 .and. m4 == 0) then
-          aux=(sqrt(0.5d0))*(gaunt(l,l3,l4,m,m3,m4)-((-1)**m3)*gaunt(l,l3,l4,m,-m3,m4))
-          YXX = cmplx(0.0d0,aux)
+          aux=(sqrt(0.5_dp))*(gaunt(l,l3,l4,m,m3,m4)-((-1)**m3)*gaunt(l,l3,l4,m,-m3,m4))
+          YXX = cmplx(0.0_dp,aux)
         endif 
         if (m3 < 0 .and. m4 > 0) then
           aux = 0.5*(gaunt(l,l3,l4,m,m3,-m4)+((-1)**m4)*gaunt(l,l3,l4,m,m3,m4)     &
           &   -((-1)**m3)*gaunt(l,l3,l4,m,-m3,-m4)-((-1)**(m3+m4))*gaunt(l,l3,l4,m,-m3,m4))
-          YXX = cmplx(0.0d0,aux)
+          YXX = cmplx(0.0_dp,aux)
         endif 
         if (m3 == 0 .and. m4 < 0) then
-          aux = (sqrt(0.5d0))*(gaunt(l,l3,l4,m,m3,m4)-((-1)**m4)*gaunt(l,l3,l4,m,m3,-m4))
-          YXX = cmplx(0.0d0,aux)
+          aux = (sqrt(0.5_dp))*(gaunt(l,l3,l4,m,m3,m4)-((-1)**m4)*gaunt(l,l3,l4,m,m3,-m4))
+          YXX = cmplx(0.0_dp,aux)
         endif 
         if (m3 == 0 .and. m4 == 0) then
           aux = gaunt(l,l3,l4,m,m3,m4)
-          YXX = cmplx(aux,0.0d0)
+          YXX = cmplx(aux,0.0_dp)
         endif 
          if (m3 == 0 .and. m4 > 0) then
-          aux = (sqrt(0.5d0))*(gaunt(l,l3,l4,m,m3,-m4)+((-1)**m4)*gaunt(l,l3,l4,m,m3,m4))
-          YXX = cmplx(aux,0.0d0)
+          aux = (sqrt(0.5_dp))*(gaunt(l,l3,l4,m,m3,-m4)+((-1)**m4)*gaunt(l,l3,l4,m,m3,m4))
+          YXX = cmplx(aux,0.0_dp)
          endif 
          if (m3 > 0 .and. m4 < 0) then
            aux = 0.5*(gaunt(l,l3,l4,m,-m3,m4)-((-1)**m4)*gaunt(l,l3,l4,m,-m3,-m4)     &
            &   +((-1)**m3)*gaunt(l,l3,l4,m,m3,m4)-((-1)**(m3+m4))*gaunt(l,l3,l4,m,m3,-m4))
-           YXX = cmplx(0.0d0,aux)
+           YXX = cmplx(0.0_dp,aux)
          endif 
          if (m3 > 0 .and. m4 == 0) then
-           aux = (sqrt(0.5d0))*(gaunt(l,l3,l4,m,-m3,m4)+(-1*m3)*gaunt(l,l3,l4,m,m3,m4))
-           YXX = cmplx(aux,0.0d0)
+           aux = (sqrt(0.5_dp))*(gaunt(l,l3,l4,m,-m3,m4)+(-1*m3)*gaunt(l,l3,l4,m,m3,m4))
+           YXX = cmplx(aux,0.0_dp)
          endif 
          if (m3 > 0 .and. m4 > 0) then
            aux = 0.5*(gaunt(l,l3,l4,m,-m3,-m4)+((-1)**m4)*gaunt(l,l3,l4,m,-m3,m4)      &
            & +((-1)**m3)*gaunt(l,l3,l4,m,m3,-m4)+((-1)**(m3+m4))*gaunt(l,l3,l4,m,m3,m4))
-           YXX = cmplx(aux,0.0d0)
+           YXX = cmplx(aux,0.0_dp)
          endif 
          return 
       end function YXX

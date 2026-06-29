@@ -53,7 +53,8 @@
 ! Office telephone 801-585-1078
 ! ===========================================================================
         subroutine gleg (ctheta, ctheta_weights, ntheta_max)
-        use precision, only: wp
+        use, intrinsic :: iso_fortran_env, only: dp => real64
+        use :: constants, only: tolerance
         implicit none
  
 ! Argument Declaration and Description
@@ -62,8 +63,8 @@
         integer, intent (in) :: ntheta_max
 
 ! Output
-        real(kind=wp), intent (out), dimension (ntheta_max) :: ctheta 
-        real(kind=wp), intent (out), dimension (ntheta_max) :: ctheta_weights 
+        real(kind=dp), intent (out), dimension (ntheta_max) :: ctheta 
+        real(kind=dp), intent (out), dimension (ntheta_max) :: ctheta_weights 
 
 ! ===========================================================================
 
@@ -76,12 +77,12 @@
         integer ndown, nup
         integer node
 
-        real(kind=wp) pl1
-        real(kind=wp) pl2
-        real(kind=wp) pl3
-        real(kind=wp) plp
-        real(kind=wp) pdown, pup
-        real(kind=wp) xx
+        real(kind=dp) pl1
+        real(kind=dp) pl2
+        real(kind=dp) pl3
+        real(kind=dp) plp
+        real(kind=dp) pdown, pup
+        real(kind=dp) xx
 
 ! Procedure
 ! ===========================================================================
@@ -91,10 +92,10 @@
 !
 ! Use symmetry -- only need 1/2 the points
 ! Find the nodes of P sub n.
-        xx = 1.0d0
+        xx = 1.0_dp
         nw = (ntheta_max + 1)/2
-        pl2 = 2.0d0
-        plp = 1.0d0
+        pl2 = 2.0_dp
+        plp = 1.0_dp
 
         ndown = nw
         nup = 0
@@ -102,7 +103,7 @@
  
 ! The variables pup and pdown are upper and lower bounds for the nodes.
          pup = xx
-         pdown = 0.0d0
+         pdown = 0.0_dp
          do jterm = 1, 50
  
 ! Use either binary chop or Newton-Raphson to get to node. Use the property 
@@ -110,26 +111,26 @@
 ! nodes are located between xx and 1.
           if (nup .eq. iterm - 1 .and. ndown .eq. iterm) then
            xx = xx - pl2/plp
-           if (xx .lt. pdown .or. xx .gt. pup) xx = 0.5d0*(pup + pdown)
+           if (xx .lt. pdown .or. xx .gt. pup) xx = 0.5_dp*(pup + pdown)
           else
-           xx = 0.5d0*(pup + pdown)
+           xx = 0.5_dp*(pup + pdown)
           end if
  
 ! Calculate Legendre polynomial from recursion relation and record the number
 ! of sign changes.
-          pl1 = 1.0d0
+          pl1 = 1.0_dp
           pl2 = xx
           node = 0
           do itheta = 2, ntheta_max
-           pl3 = (2.0d0*real(itheta) - 1.0d0)*xx*pl2                         &
-     &          - (real(itheta) - 1.0d0)*pl1
-           if (sign(1.0d0,pl3) .ne. sign(1.0d0,pl2)) node = node + 1
+           pl3 = (2.0_dp*real(itheta) - 1.0_dp)*xx*pl2                         &
+     &          - (real(itheta) - 1.0_dp)*pl1
+           if (sign(1.0_dp,pl3) .ne. sign(1.0_dp,pl2)) node = node + 1
            pl1 = pl2
            pl2 = pl3/real(itheta)
           end do
 
 ! Calculate the derivative
-          plp = ntheta_max*(pl1 - xx*pl2)/(1.0d0 - xx*xx)
+          plp = ntheta_max*(pl1 - xx*pl2)/(1.0_dp - xx*xx)
           if (node .ge. iterm) then
            pdown = xx
            ndown = node
@@ -137,15 +138,15 @@
            pup = xx
            nup = node
           end if
-          if (abs(pl2) .lt. 1.0d-10) exit 
+          if (abs(pl2) .lt. tolerance**2) exit 
          end do
-         if (abs(pl2) .gt. 1.0d-10)                                          &
+         if (abs(pl2) .gt. tolerance**2)                                          &
      &    write (*,*) ' Warning no convergence in gleg after', jterm,        &
      &                ' iterations'
          ctheta(iterm) = xx
 
 ! Gauss-Legendre weights
-         ctheta_weights(iterm) = 2.0d0/((1.0d0 - xx*xx)*plp*plp)
+         ctheta_weights(iterm) = 2.0_dp/((1.0_dp - xx*xx)*plp*plp)
         end do
  
 ! Fill in other half of points and weights from symmetry
@@ -154,10 +155,9 @@
          ctheta(iterm) = - ctheta(iterm)
          ctheta_weights(ntheta_max - iterm + 1) = ctheta_weights(iterm)
         end do
-        if (int(nw/2)*2 .ne. nw) ctheta(nw) = 0.0d0 ! Symmetry
+        if (int(nw/2)*2 .ne. nw) ctheta(nw) = 0.0_dp ! Symmetry
 
 ! Format Statements
 ! ===========================================================================
-        return
         end
  

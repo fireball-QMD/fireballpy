@@ -56,7 +56,7 @@
 ! Program Declaration
 ! ===========================================================================
         subroutine get_vee (mesh, dr, sigma, vee)
-        use precision
+        use, intrinsic :: iso_fortran_env, only: dp => real64
         implicit none
 
 ! Argument Declaration and Description
@@ -64,11 +64,11 @@
 ! Input
         integer, intent (in) :: mesh
 
-        real(kind=long), intent (in) :: dr
-        real(kind=long), intent (in), dimension (mesh) :: sigma
+        real(kind=dp), intent (in) :: dr
+        real(kind=dp), intent (in), dimension (mesh) :: sigma
 
 ! Output
-        real(kind=long), intent (out), dimension (mesh) :: vee
+        real(kind=dp), intent (out), dimension (mesh) :: vee
 
 ! Local Parameters and Data Declaration
 ! ===========================================================================
@@ -77,9 +77,9 @@
 ! ===========================================================================
         integer ipoint
 
-        real(kind=long) a1, a2
-        real(kind=long) b1, b2
-        real(kind=long) r
+        real(kind=dp) a1, a2
+        real(kind=dp) b1, b2
+        real(kind=dp) r
 
 ! Allocate Arrays
 ! ===========================================================================
@@ -87,26 +87,26 @@
 ! Procedure
 ! ===========================================================================
 ! Find x1(r)
-        a1 = 0.0d0
-        vee = 0.0d0
+        a1 = 0.0_dp
+        vee = 0.0_dp
         do ipoint = 2, mesh
          r = (ipoint - 1)*dr
-         a2 = 0.5d0*sigma(ipoint)
+         a2 = 0.5_dp*sigma(ipoint)
          a1 = a1 + a2
-         vee(ipoint) = 2.0d0*a1*dr/r
+         vee(ipoint) = 2.0_dp*a1*dr/r
          a1 = a1 + a2
         end do
 
 ! Next get x2(r) - also trapezoidal rule
-        b1 = 0.0d0
+        b1 = 0.0_dp
         do ipoint = mesh, 2, -1
          r = (ipoint - 1)*dr
-         b2 = 0.5d0*sigma(ipoint)/r
+         b2 = 0.5_dp*sigma(ipoint)/r
          b1 = b1 + b2
-         vee(ipoint) = vee(ipoint) + 2.0d0*b1*dr
+         vee(ipoint) = vee(ipoint) + 2.0_dp*b1*dr
          b1 = b1 + b2
         end do
-        vee(1) = vee(1) + 2.0d0*b1*dr
+        vee(1) = vee(1) + 2.0_dp*b1*dr
 
 ! Deallocate Arrays
 ! ===========================================================================

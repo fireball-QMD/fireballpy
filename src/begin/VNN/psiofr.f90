@@ -52,9 +52,9 @@
 ! Program Declaration
 ! ===========================================================================
         function psiofr (issh, r, nssh, mesh, npoints, drr, rrc, rr, psi)
-        use precision
+        use, intrinsic :: iso_fortran_env, only: dp => real64
         implicit none
-        real(kind=long) psiofr
+        real(kind=dp) psiofr
 
 ! Argument Declaration and Description
 ! ===========================================================================
@@ -65,12 +65,12 @@
 
         integer, intent(in), dimension (nssh) :: npoints
 
-        real(kind=long), intent (in) :: r
+        real(kind=dp), intent (in) :: r
 
-        real(kind=long), intent(in), dimension (nssh) :: drr
-        real(kind=long), intent(in), dimension (nssh, mesh) :: psi
-        real(kind=long), intent(in), dimension (nssh, mesh) :: rr
-        real(kind=long), intent(in), dimension (nssh) :: rrc
+        real(kind=dp), intent(in), dimension (nssh) :: drr
+        real(kind=dp), intent(in), dimension (nssh, mesh) :: psi
+        real(kind=dp), intent(in), dimension (nssh, mesh) :: rr
+        real(kind=dp), intent(in), dimension (nssh) :: rrc
 
 ! Local Parameters and Data Declaration
 ! ===========================================================================
@@ -82,17 +82,17 @@
         integer iprod
         integer isum
 
-        real(kind=long) prod
-        real(kind=long) sum
+        real(kind=dp) prod
+        real(kind=dp) sum
 
 ! Procedure
 ! ===========================================================================
 ! Initialize to zero
-        psiofr = 0.0d0
-        if (r .gt. rrc(issh)*0.529177249d0) return
+        psiofr = 0.0_dp
+        if (r .gt. rrc(issh)*0.529177249_dp) return
 
 ! If r is slightly negative return the value at r = 0
-        if (r .lt. 0.0d0) then
+        if (r .lt. 0.0_dp) then
          psiofr = psi(issh,1)
          return
         end if
@@ -117,9 +117,9 @@
         end if
 
 ! Now interpolate
-        sum = 0.0d0
+        sum = 0.0_dp
         do isum = ileft, iright
-         prod = 1.0d0
+         prod = 1.0_dp
          do iprod = ileft, iright
           if (iprod .ne. isum) then
            prod = prod*(r - rr(issh,iprod))/(rr(issh,isum) - rr(issh,iprod))

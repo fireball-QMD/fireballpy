@@ -48,9 +48,9 @@
 ! Program Declaration
 ! ===========================================================================
         function factorial (ifac)
-        use precision, only: wp
+        use iso_fortran_env, only: dp => real64
         implicit none
-        real(kind=wp) factorial
+        real(kind=dp) factorial
  
 ! Argument Declaration and Description
 ! ===========================================================================

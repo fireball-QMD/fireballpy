@@ -5,10 +5,10 @@
         integer nsshxc (nspec_max)            ! number of shells
         integer lsshxc (nspec_max, nsh_max)   ! number of shells
  
-        real(kind=wp) xnocc (nsh_max, nspec_max)
-        real(kind=wp) dqorb (nspec_max)              ! dq used in changed shell
+        real(kind=dp) xnocc (nsh_max, nspec_max)
+        real(kind=dp) dqorb (nspec_max)              ! dq used in changed shell
  
         common /xorbocc/ xnocc, dqorb, iderorb, nsshxc, lsshxc
 ! jel-dq
-        real(kind=wp) dqint (nsh_max, nspec_max)      ! intraatomic charge transfer
+        real(kind=dp) dqint (nsh_max, nspec_max)      ! intraatomic charge transfer
 	common /dq/ dqint

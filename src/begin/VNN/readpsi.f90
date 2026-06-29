@@ -50,7 +50,7 @@
         subroutine readpsi (nssh, filein, mesh_max, npoints, rrc, drr,      &
      &                      xnocc, rr, psi)
         use constants
-        use precision
+        use, intrinsic :: iso_fortran_env, only: dp => real64
         use begin_input, only: outpath
         implicit none
 
@@ -65,11 +65,11 @@
 ! Output
         integer, intent(out), dimension (nssh) :: npoints
 
-        real(kind=long), intent(out), dimension (nssh) :: drr
-        real(kind=long), intent(out), dimension (nssh, mesh_max) :: psi
-        real(kind=long), intent(out), dimension (nssh, mesh_max) :: rr
-        real(kind=long), intent(out), dimension (nssh) :: rrc
-        real(kind=long), intent(out), dimension (nssh) :: xnocc
+        real(kind=dp), intent(out), dimension (nssh) :: drr
+        real(kind=dp), intent(out), dimension (nssh, mesh_max) :: psi
+        real(kind=dp), intent(out), dimension (nssh, mesh_max) :: rr
+        real(kind=dp), intent(out), dimension (nssh) :: rrc
+        real(kind=dp), intent(out), dimension (nssh) :: xnocc
 
 ! Local Parameters and Data Declaration
 ! ===========================================================================
@@ -83,12 +83,12 @@
         integer mesh
         integer nzx
 
-        real(kind=long) r
-        real(kind=long) rc
-        real(kind=long) rc_max
-        real(kind=long) sum
+        real(kind=dp) r
+        real(kind=dp) rc
+        real(kind=dp) rc_max
+        real(kind=dp) sum
 
-        real(kind=long), dimension (:), allocatable :: psitemp
+        real(kind=dp), dimension (:), allocatable :: psitemp
 
         character(len=15) fileinwf
 
@@ -125,9 +125,9 @@
          drr(issh) = rc/real(mesh - 1)
 
 ! Read in the points
-         inum = int(real(mesh)/4.0d0)
+         inum = int(real(mesh)/4.0_dp)
          iremainder = mesh - (inum*4)
-         psitemp = 0.0d0
+         psitemp = 0.0_dp
          do ipoint = 1, mesh - iremainder, 4
           read (21,100) psitemp(ipoint), psitemp(ipoint+1),                 &
      &                  psitemp(ipoint+2), psitemp(ipoint+3)
@@ -145,7 +145,7 @@
 
 ! Write psitemp to psi - the real wavefunction for all orbitals
          psi(issh,1:mesh) = psitemp(1:mesh)
-         psi(issh,mesh+1:mesh_max) = 0.0d0
+         psi(issh,mesh+1:mesh_max) = 0.0_dp
 
 ! Check normalization
          !write (*,*) '  '
@@ -158,12 +158,12 @@
           rr(issh,ipoint) = r
          end do
 
-         sum = 0.0d0
+         sum = 0.0_dp
          do ipoint = 1, mesh
           if (ipoint .ne. 1 .or. ipoint .ne. mesh) then
            sum = sum + drr(issh)*rr(issh,ipoint)**2*psitemp(ipoint)**2
           else
-           sum = sum + 0.5d0*drr(issh)*rr(issh,ipoint)**2*psitemp(ipoint)**2
+           sum = sum + 0.5_dp*drr(issh)*rr(issh,ipoint)**2*psitemp(ipoint)**2
           end if
          end do
 

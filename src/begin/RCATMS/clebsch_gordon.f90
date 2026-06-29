@@ -45,9 +45,9 @@
 ! Program Declaration
 ! ===========================================================================
         function clebsch_gordon (l1, m1, l2, m2, l, m)
-        use precision
+        use, intrinsic :: iso_fortran_env, only: dp => real64
         implicit none
-        real(kind=long) clebsch_gordon
+        real(kind=dp) clebsch_gordon
 
 ! Argument Declaration and Description
 ! ===========================================================================
@@ -65,18 +65,18 @@
 ! ===========================================================================
         integer iz
 
-        real(kind=long) factorial
-        real(kind=long) piece1
-        real(kind=long) piece2
-        real(kind=long) piece3
-        real(kind=long) part3
+        real(kind=dp) factorial
+        real(kind=dp) piece1
+        real(kind=dp) piece2
+        real(kind=dp) piece3
+        real(kind=dp) part3
 
         external factorial
 
 ! Procedure
 ! ===========================================================================
 ! Initialize the coefficient to zero.
-        clebsch_gordon = 0.0d0
+        clebsch_gordon = 0.0_dp
 
 ! First determine that the values of the l1, l2, and l satisfiy the
 ! triangle equation - |l1-l2| =< l >= l1 + l2.
@@ -88,7 +88,7 @@
 
 ! The clebsch_gordon coefficient will be written as a product of three
 ! pieces. So clebsch_gordon = piece1*piece2*piece3
-        piece1 = sqrt(((2.0d0*l + 1)*factorial(l1 + l2 - l)                 &
+        piece1 = sqrt(((2.0_dp*l + 1)*factorial(l1 + l2 - l)                 &
      &                *factorial(l1 - l2 + l)*factorial(-l1 + l2 + l))      &
      &                /factorial(l1 + l2 + l + 1))
 
@@ -96,7 +96,7 @@
      &                *factorial(l2 + m2)*factorial(l2 - m2)                &
      &                *factorial(l + m)*factorial(l - m))
 
-        piece3 = 0.0d0
+        piece3 = 0.0_dp
         do iz = 0, izmax
          if (((l1+l2-l-iz) .ge. -0.1) .and. ((l1-m1-iz) .ge. -0.1)          &
      &       .and. ((l2 + m2 - iz) .ge. -0.1)                               &
@@ -120,12 +120,12 @@
 
 
         function factorial (ix)
-        use precision
-        real(kind=long) factorial
+        use, intrinsic :: iso_fortran_env, only: dp => real64
+        real(kind=dp) factorial
 
         integer ix
         integer k
-        real(kind=long) fprod
+        real(kind=dp) fprod
 
         if (ix .lt. 0) then
          write(6,*) 'Stop !!!!   Factorial for negative x'

@@ -66,7 +66,8 @@
      &                                  n1, l1, m1, n2, l2, m2, nz, nrho,   &
      &                                  d, itype1, itype2, rcutoff1,        &
      &                                  rcutoff2, lmax, sum)
-        use precision, only: wp
+        use iso_fortran_env, only: dp => real64
+        use :: wavefunctions, only: wf_atoms
         use coefficients
         implicit none
  
@@ -86,17 +87,17 @@
         integer, intent (in) :: nrho        ! number of rho-points on grid
         integer, intent (in) :: nz          ! number of z-points on grid
  
-        real(kind=wp), intent (in) :: d
-        real(kind=wp), intent (in) :: fraction
-        real(kind=wp), intent (in) :: rcutoff1
-        real(kind=wp), intent (in) :: rcutoff2
+        real(kind=dp), intent (in) :: d
+        real(kind=dp), intent (in) :: fraction
+        real(kind=dp), intent (in) :: rcutoff1
+        real(kind=dp), intent (in) :: rcutoff2
  
 ! Output
-        real(kind=wp), intent (out) :: sum
+        real(kind=dp), intent (out) :: sum
  
 ! Local Parameters and Data Declaration
 ! ===========================================================================
-        real(kind=wp), parameter :: eq2 = 14.39975d0
+        real(kind=dp), parameter :: eq2 = 14.39975_dp
  
 ! Local Variable Declaration and Description
 ! ===========================================================================
@@ -107,32 +108,31 @@
         integer nnrho
         integer nnz
  
-        real(kind=wp) cg1
-        real(kind=wp) cg2
-        real(kind=wp) drho
-        real(kind=wp) dz
-        real(kind=wp) factor
-        real(kind=wp) phifactor
-        real(kind=wp) psi1
-        real(kind=wp) psi2
-        real(kind=wp) r1, r2
-        real(kind=wp) rho
-        real(kind=wp) rhomax
-        real(kind=wp) rhomin
-        real(kind=wp) sumrp
-        real(kind=wp) vofr
-        real(kind=wp) z1, z2
-        real(kind=wp) zmax
-        real(kind=wp) zmin
+        real(kind=dp) cg1
+        real(kind=dp) cg2
+        real(kind=dp) drho
+        real(kind=dp) dz
+        real(kind=dp) factor
+        real(kind=dp) phifactor
+        real(kind=dp) psi1
+        real(kind=dp) psi2
+        real(kind=dp) r1, r2
+        real(kind=dp) rho
+        real(kind=dp) rhomax
+        real(kind=dp) rhomin
+        real(kind=dp) sumrp
+        real(kind=dp) vofr
+        real(kind=dp) z1, z2
+        real(kind=dp) zmax
+        real(kind=dp) zmin
  
-        real(kind=wp), dimension (:), allocatable :: rhomult
-        real(kind=wp), dimension (:), allocatable :: zmult
+        real(kind=dp), dimension (:), allocatable :: rhomult
+        real(kind=dp), dimension (:), allocatable :: zmult
  
-        real(kind=wp), external :: clebsch_gordon
-        real(kind=wp), external :: delk
-        real(kind=wp), external :: psiofr
-        real(kind=wp), external :: rescaled_psi
-        real(kind=wp), external :: rprimeofr
+        real(kind=dp), external :: clebsch_gordon
+        real(kind=dp), external :: delk
+        real(kind=dp), external :: rescaled_psi
+        real(kind=dp), external :: rprimeofr
  
 ! Allocate Arrays
 ! ===========================================================================
@@ -143,14 +143,14 @@
         zmin = max(-rcutoff1, d - rcutoff2)
         zmax = min(rcutoff1, d + rcutoff2)
  
-        rhomin = 0.0d0
+        rhomin = 0.0_dp
         rhomax = min(rcutoff1, rcutoff2)
  
 ! Strictly define what the density of the mesh should be. Make the density of
 ! the number of points equivalent for all cases. Change the number of points
 ! to be integrated to be dependent upon the distance between the centers and
 ! this defined density.
-        dz = (rcutoff1 + rcutoff2)/(real(nz)*2.0d0)
+        dz = (rcutoff1 + rcutoff2)/(real(nz)*2.0_dp)
         nnz = (zmax - zmin)/dz
         if (mod(nnz,2) .eq. 0) nnz = nnz + 1
  
@@ -161,27 +161,27 @@
 ! Set up Simpson's rule factors. First for the z integration and then for
 ! the rho integration.
         allocate (zmult(nnz))
-        zmult(1) = dz/3.0d0
-        zmult(nnz) = dz/3.0d0
+        zmult(1) = dz/3.0_dp
+        zmult(nnz) = dz/3.0_dp
         do iz = 2, nnz - 1, 2
-         zmult(iz) = 4.0d0*dz/3.0d0
+         zmult(iz) = 4.0_dp*dz/3.0_dp
         end do
         do iz = 3, nnz - 2, 2
-         zmult(iz) = 2.0d0*dz/3.0d0
+         zmult(iz) = 2.0_dp*dz/3.0_dp
         end do
  
         allocate (rhomult(nnrho))
-        rhomult(1) = drho/3.0d0
-        rhomult(nnrho) = drho/3.0d0
+        rhomult(1) = drho/3.0_dp
+        rhomult(nnrho) = drho/3.0_dp
         do irho = 2, nnrho - 1, 2
-         rhomult(irho) = 4.0d0*drho/3.0d0
+         rhomult(irho) = 4.0_dp*drho/3.0_dp
         end do
         do irho = 3, nnrho - 2, 2
-         rhomult(irho) = 2.0d0*drho/3.0d0
+         rhomult(irho) = 2.0_dp*drho/3.0_dp
         end do
  
 ! Initialize the sum to zero
-        sum = 0.0d0
+        sum = 0.0_dp
  
 ! ***************************************************************************
 ! The two-center integral calculated here is for a given matrix element, so
@@ -203,11 +203,11 @@
           cg1 = clebsch_gordon (lalpha, 0, lqn, 0, l1, 0)
           cg2 = clebsch_gordon (lalpha, malpha, lqn, mqn, l1, m1)
           phifactor = cg1*cg2*clm(l2,m2)*clm(lalpha,malpha)*clm(lqn,mqn)     &
-     &                   *delk(m2,mqn+malpha)*sqrt(2.0d0*real(lalpha)+1.0d0) &
-     &                   /(sqrt((2.0d0*real(lqn) + 1.0d0)                    &
-     &                         *(2.0d0*real(l1) + 1.0d0))*2.0d0)
+     &                   *delk(m2,mqn+malpha)*sqrt(2.0_dp*real(lalpha)+1.0_dp) &
+     &                   /(sqrt((2.0_dp*real(lqn) + 1.0_dp)                    &
+     &                         *(2.0_dp*real(l1) + 1.0_dp))*2.0_dp)
  
-          if (phifactor .gt. 1.0d-4) then
+          if (phifactor .gt. 1.0e-4_dp) then
  
 ! Integration is over z (z-axis points from atom 1 to atom 2) and rho (rho is
 ! radial distance from z-axis).
@@ -220,8 +220,8 @@
              r2 = sqrt(z2**2 + rho**2)
  
 ! Precaution against divide by zero
-             if (r1 .lt. 1.0d-4) r1 = 1.0d-4
-             if (r2 .lt. 1.0d-4) r2 = 1.0d-4
+             if (r1 .lt. 1.0e-4_dp) r1 = 1.0e-4_dp
+             if (r2 .lt. 1.0e-4_dp) r2 = 1.0e-4_dp
  
 ! Total integration factor
              factor = zmult(iz)*rhomult(irho)*phifactor
@@ -230,8 +230,8 @@
 ! means s, p, d, and f-state. The variables m1, m2 (= 0-3) implies sigma,
 ! pi, delta, or phi.
              if ((r1 .lt. rcutoff1) .and. (r2 .lt. rcutoff2)) then
-              psi1 = psiofr (itype1, nalpha, r1)
-              psi2 = psiofr (itype2, n2, r2)
+              psi1 = wf_atoms(itype1)%get_psi( nalpha, r1)
+              psi2 = wf_atoms(itype2)%get_psi( n2, r2)
  
 ! Perform the radial integration over r'.
 ! This integral was actually performed previous to calling this routine, since
@@ -241,12 +241,12 @@
  
 ! Add magic factors based on what type of orbital is involved in the integration
 ! For the short-range coulomb interactions make spherically symmetric
-              vofr = rescaled_psi (lqn, mqn, rho, r1, z1, 1.0d0)
+              vofr = rescaled_psi (lqn, mqn, rho, r1, z1, 1.0_dp)
               psi1 = rescaled_psi (lalpha, malpha, rho, r1, z1, psi1)
               psi2 = rescaled_psi (l2, m2, rho, r2, z2, psi2)
  
 ! This is the actual integral
-              sum = sum + fraction*(eq2/2.0d0)*factor*psi1*vofr*psi2*sumrp*rho
+              sum = sum + fraction*(eq2/2.0_dp)*factor*psi1*vofr*psi2*sumrp*rho
              end if
  
 ! End loop for integration of z and rho.

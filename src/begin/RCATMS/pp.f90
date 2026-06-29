@@ -56,7 +56,7 @@
         use begin_input
         use constants
         use pp_storage
-        use precision
+        use, intrinsic :: iso_fortran_env, only: dp => real64
         implicit none
 
 ! Argument Declaration and Description
@@ -66,17 +66,17 @@
         integer, intent (in) :: mesh
 !       integer, intent (in) :: nssh
 
-!       real(kind=long), intent (in) :: xnz
+!       real(kind=dp), intent (in) :: xnz
 
-        real(kind=long), intent (in), dimension (mesh) :: r
+        real(kind=dp), intent (in), dimension (mesh) :: r
 
 ! Output
         integer, intent (out) :: ioptionpp
 
-        real(kind=long), intent (out) :: exmix
+        real(kind=dp), intent (out) :: exmix
 
-        real(kind=long), intent (out), dimension (mesh) :: vc
-        real(kind=long), intent (out), dimension (nssh, mesh) :: vl
+        real(kind=dp), intent (out), dimension (mesh) :: vc
+        real(kind=dp), intent (out), dimension (nssh, mesh) :: vl
 
 ! Local Parameters and Data Declaration
 ! ===========================================================================
@@ -100,12 +100,12 @@
         integer, dimension (:), allocatable :: lsshPP
         integer, dimension (:), allocatable :: mapPP
 
-        real(kind=long), external :: derf0
-        real(kind=long) prod
-        real(kind=long) rc_PP
-        real(kind=long) rpoint
-        real(kind=long) vcore
-        real(kind=long), external :: vshort
+        real(kind=dp), external :: derf0
+        real(kind=dp) prod
+        real(kind=dp) rc_PP
+        real(kind=dp) rpoint
+        real(kind=dp) vcore
+        real(kind=dp), external :: vshort
 
 
 ! Allocate Arrays
@@ -162,9 +162,9 @@
 
 ! Read Zval
         read (88,*) Zval
-        if (nzval_pp .gt. 0.0d0) Zval = nzval_pp
+        if (nzval_pp .gt. 0.0_dp) Zval = nzval_pp
 
-! Read in alpha for longranged local part => -Z*e**2*erf(alpha*r)/r
+! Read in alpha for dpranged local part => -Z*e**2*erf(alpha*r)/r
         read (88,*) alpha
         !write (*,*) ' alpha read in: ', alpha
 
@@ -222,19 +222,19 @@
         do ipoint = 1, mesh
          rpoint = r(ipoint)
 
-! First the erf-piece local potential. This is the long-range piece.
-         if (rpoint .gt. 1.0d-4) then
+! First the erf-piece local potential. This is the dp-range piece.
+         if (rpoint .gt. 1.0e-4_dp) then
           vcore = - (Zval/rpoint)*derf0(alpha*abohr*rpoint)
 
          else
-          vcore = - Zval*2.0d0*alpha*abohr/sqrt(pi)
+          vcore = - Zval*2.0_dp*alpha*abohr/sqrt(pi)
          end if
          rpoint = rpoint*abohr
          vc(ipoint) = vcore + vshort(rpoint)/hartree
         end do
 
 ! reset non-local part 
-        vl = 0.0d0
+        vl = 0.0_dp
 ! Now the non-local angular momentum dependent potential.
         do issh = 1, nssh
         mapPP(issh)=0
@@ -257,9 +257,9 @@
 
           do ipoint = 1, mesh
            rpoint = r(ipoint)*abohr
-           vl(issh,ipoint) = 0.0d0
+           vl(issh,ipoint) = 0.0_dp
 
-! The short stuff is zero at long range.
+! The short stuff is zero at dp range.
            if (rpoint .lt. rrc_nl(imu)) then
             imid = int(rpoint/drr_nl(imu)) + 1
 
@@ -282,7 +282,7 @@
 
 ! Now interpolate
             do isum = ileft, iright
-             prod = 1.0d0
+             prod = 1.0_dp
              do iprod = ileft, iright
               if (iprod .ne. isum) then
                prod = prod*(rpoint - r_nl(imu,iprod))/                  &

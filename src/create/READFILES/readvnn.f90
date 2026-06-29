@@ -59,7 +59,7 @@
 ! ===========================================================================
         subroutine readvnn (ispec, issh, rcutoff, nzx, filein, etotatom, &
      &                      iammaster)
-        use precision, only: wp
+        use iso_fortran_env, only: dp => real64
         implicit none
  
         include '../parameters.inc'
@@ -71,8 +71,8 @@
         integer issh
         integer nzx
  
-        real(kind=wp) etotatom
-        real(kind=wp) rcutoff
+        real(kind=dp) etotatom
+        real(kind=dp) rcutoff
  
         character(len=25) filein
  
@@ -87,7 +87,7 @@
         integer mesh
         integer nzxvnn
  
-        real(kind=wp) rcutoffvnn
+        real(kind=dp) rcutoffvnn
  
         character(len=25) fileinvnn
  
@@ -138,7 +138,7 @@
          stop 'error in readvnn'
         end if
  
-        if (abs(rcutoffvnn - rcutoff) .gt. 1.0d-5) then
+        if (abs(rcutoffvnn - rcutoff) .gt. 1.0e-5_dp) then
          ! write (*,*) ' rcutoffvnn = ', rcutoffvnn, &
      ! &               ' rcutoff = ', rcutoff
          ! write (*,*) ' The cutoff radius in the wavefunction file, for '
@@ -155,8 +155,6 @@
         end do
         drr_na(issh,ispec) = rr_na(2,issh,ispec) - rr_na(1,issh,ispec)
 
-        if (superspline) call buildspline_1d (vnna(1,issh,ispec),    &
-     &                     vnna_spline(1,1,issh,ispec), mesh, rcutoff) 
  
         close (unit = 88)
  

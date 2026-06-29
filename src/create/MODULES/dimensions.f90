@@ -1,5 +1,5 @@
          module dimensions
-         use precision, only: wp
+         use iso_fortran_env, only: dp => real64
  
 ! Maximum number of non-zero three-center matrix elements 
 !        integer, parameter :: inter2c_max = 24

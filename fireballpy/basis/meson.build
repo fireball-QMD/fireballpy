@@ -1,15 +1,15 @@
-# Build _begin
+# Build _wfs
 # --quiet flag to supress stupid non-sense warnings
 # one might have to take it out if it does not work to debug
-begin_source = custom_target(
-  'begin_module',
-  input: 'begin.f90', # No module hence no .f90 wrappers
-  output: ['_beginmodule.c', '_begin-f2pywrappers.f'],
+wfs_source = custom_target(
+  'wfs_module',
+  input: 'wfs.f90', # No module hence no .f90 wrappers
+  output: ['_wfsmodule.c', '_wfs-f2pywrappers.f'],
   command: [
     py,
     '-m', 'numpy.f2py',
     '@INPUT@',
-    '-m', '_begin',
+    '-m', '_wfs',
     '--lower',
     '--build-dir', '@OUTDIR@',
     '--quiet',
@@ -17,10 +17,10 @@ begin_source = custom_target(
 )
 
 py.extension_module(
-  '_begin',
-  ['begin.f90', begin_source],
+  '_wfs',
+  ['wfs.f90', wfs_source],
   fortran_args: fflags,
-  dependencies: [fortranobject_dep, begin_dep],
+  dependencies: [fortranobject_dep, wfs_dep],
   install: true,
   subdir: 'fireballpy/basis',
 )
@@ -29,7 +29,7 @@ py.install_sources(
   [
     '__init__.py',
     '__main__.py',
-    '_begin.pyi',
+    '_wfs.pyi',
     'fdata.py',
   ],
   subdir: 'fireballpy/basis',

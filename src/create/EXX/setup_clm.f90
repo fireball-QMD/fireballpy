@@ -61,7 +61,7 @@
 ! ===========================================================================
       	subroutine setup_clm
         use coefficients
-       use precision, only: wp
+       use iso_fortran_env, only: dp => real64
       	implicit none
 
 ! Argument Declaration and Description
@@ -81,61 +81,61 @@
 ! Procedure
 ! ===========================================================================
 ! The Ylm coefficients
-        clm(0,0)  = 1.0d0
+        clm(0,0)  = 1.0_dp
 
-        clm(1,-1) = sqrt(3.0d0/2.0d0)
-        clm(1,0)  = sqrt(3.0d0)
-        clm(1,1)  = - sqrt(3.0d0/2.0d0)
+        clm(1,-1) = sqrt(3.0_dp/2.0_dp)
+        clm(1,0)  = sqrt(3.0_dp)
+        clm(1,1)  = - sqrt(3.0_dp/2.0_dp)
 
-        clm(2,-2) = sqrt(15.0d0/8.0d0)
-        clm(2,-1) = sqrt(15.0d0/2.0d0)
-        clm(2,0)  = sqrt(5.0d0/4.0d0)
-        clm(2,1)  = - sqrt(15.0d0/2.0d0)
-        clm(2,2)  = sqrt(15.0d0/8.0d0)
+        clm(2,-2) = sqrt(15.0_dp/8.0_dp)
+        clm(2,-1) = sqrt(15.0_dp/2.0_dp)
+        clm(2,0)  = sqrt(5.0_dp/4.0_dp)
+        clm(2,1)  = - sqrt(15.0_dp/2.0_dp)
+        clm(2,2)  = sqrt(15.0_dp/8.0_dp)
 
-        clm(3,-3) = sqrt(35.0d0/16.0d0)
-        clm(3,-2) = sqrt(105.0d0/8.0d0)
-        clm(3,-1) = sqrt(21.0d0/16.0d0)
-        clm(3,0)  = sqrt(7.0d0/4.0d0)
-        clm(3,1)  = - sqrt(21.0d0/16.0d0)
-        clm(3,2)  = sqrt(105.0d0/8.0d0)
-        clm(3,3)  = - sqrt(35.0d0/16.0d0)
+        clm(3,-3) = sqrt(35.0_dp/16.0_dp)
+        clm(3,-2) = sqrt(105.0_dp/8.0_dp)
+        clm(3,-1) = sqrt(21.0_dp/16.0_dp)
+        clm(3,0)  = sqrt(7.0_dp/4.0_dp)
+        clm(3,1)  = - sqrt(21.0_dp/16.0_dp)
+        clm(3,2)  = sqrt(105.0_dp/8.0_dp)
+        clm(3,3)  = - sqrt(35.0_dp/16.0_dp)
 
-        clm(4,-4) = sqrt(315.0d0/128.0d0)
-        clm(4,-3) = sqrt(315.0d0/16.0d0)
-        clm(4,-2) = sqrt(45.0d0/32.0d0)
-        clm(4,-1) = sqrt(45.0d0/16.0d0)
-        clm(4,0) = sqrt(9.0d0/64.0d0)
-        clm(4,1) = - sqrt(45.0d0/16.0d0)
-        clm(4,2) = sqrt(45.0d0/32.0d0)
-        clm(4,3) = - sqrt(315.0d0/16.0d0)
-        clm(4,4) = sqrt(315.0d0/128.0d0)
+        clm(4,-4) = sqrt(315.0_dp/128.0_dp)
+        clm(4,-3) = sqrt(315.0_dp/16.0_dp)
+        clm(4,-2) = sqrt(45.0_dp/32.0_dp)
+        clm(4,-1) = sqrt(45.0_dp/16.0_dp)
+        clm(4,0) = sqrt(9.0_dp/64.0_dp)
+        clm(4,1) = - sqrt(45.0_dp/16.0_dp)
+        clm(4,2) = sqrt(45.0_dp/32.0_dp)
+        clm(4,3) = - sqrt(315.0_dp/16.0_dp)
+        clm(4,4) = sqrt(315.0_dp/128.0_dp)
 
-        clm(5,-5) = 0.0d0
-        clm(5,-4) = 0.0d0
-        clm(5,-3) = 0.0d0
-        clm(5,-2) = 0.0d0
-        clm(5,-1) = 0.0d0
-        clm(5,0) = 0.0d0
-        clm(5,1) = 0.0d0
-        clm(5,2) = 0.0d0
-        clm(5,3) = 0.0d0
-        clm(5,4) = 0.0d0
-        clm(5,5) = 0.0d0
+        clm(5,-5) = 0.0_dp
+        clm(5,-4) = 0.0_dp
+        clm(5,-3) = 0.0_dp
+        clm(5,-2) = 0.0_dp
+        clm(5,-1) = 0.0_dp
+        clm(5,0) = 0.0_dp
+        clm(5,1) = 0.0_dp
+        clm(5,2) = 0.0_dp
+        clm(5,3) = 0.0_dp
+        clm(5,4) = 0.0_dp
+        clm(5,5) = 0.0_dp
 
-        clm(6,-6) = 0.0d0
-        clm(6,-5) = 0.0d0
-        clm(6,-4) = 0.0d0
-        clm(6,-3) = 0.0d0
-        clm(6,-2) = 0.0d0
-        clm(6,-1) = 0.0d0
-        clm(6,0) = 0.0d0
-        clm(6,1) = 0.0d0
-        clm(6,2) = 0.0d0
-        clm(6,3) = 0.0d0
-        clm(6,4) = 0.0d0
-        clm(6,5) = 0.0d0
-        clm(6,6) = 0.0d0
+        clm(6,-6) = 0.0_dp
+        clm(6,-5) = 0.0_dp
+        clm(6,-4) = 0.0_dp
+        clm(6,-3) = 0.0_dp
+        clm(6,-2) = 0.0_dp
+        clm(6,-1) = 0.0_dp
+        clm(6,0) = 0.0_dp
+        clm(6,1) = 0.0_dp
+        clm(6,2) = 0.0_dp
+        clm(6,3) = 0.0_dp
+        clm(6,4) = 0.0_dp
+        clm(6,5) = 0.0_dp
+        clm(6,6) = 0.0_dp
 
 ! Deallocate Arrays
 ! ===========================================================================

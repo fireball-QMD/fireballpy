@@ -51,7 +51,7 @@
      &                         nssh, lssh, nzx, rcutoff, rcutoffa, &
      &                         rcutoffa_max, xmass, ppfile, napot, &
      &                         wavefxn)
-        use precision, only: wp
+        use iso_fortran_env, only: dp => real64
         implicit none
  
         include '../parameters.inc'
@@ -70,10 +70,10 @@
         integer nssh (nspec_max)               ! number of shells
         integer nzx (nspec_max)
  
-        real(kind=wp) rcutoff (nspec_max, nsh_max) ! cutoff radius in bohr
-        real(kind=wp) rcutoffa (nspec_max, nsh_max)! cutoff radius in angstroms
-        real(kind=wp) rcutoffa_max (nspec_max)     ! cutoff radius in angstroms
-        real(kind=wp) xmass (nspec_max)
+        real(kind=dp) rcutoff (nspec_max, nsh_max) ! cutoff radius in bohr
+        real(kind=dp) rcutoffa (nspec_max, nsh_max)! cutoff radius in angstroms
+        real(kind=dp) rcutoffa_max (nspec_max)     ! cutoff radius in angstroms
+        real(kind=dp) xmass (nspec_max)
  
         character(len=2) atom (nspec_max)
         character(len=25) napot (nspec_max, 0:nsh_max)
@@ -98,8 +98,8 @@
      &       'Ac', 'Th', 'Pa', 'U ', 'Np', 'Pu', 'Am', 'Cm', 'Bk', 'Cf', &
      &       'Es', 'Fm', 'Md', 'No', 'Lw' /
  
-        real(kind=wp) abohr
-        parameter (abohr = 0.529177249d0)
+        real(kind=dp) abohr
+        parameter (abohr = 0.529177249_dp)
  
 ! Local Variable Declaration and Description
 ! ===========================================================================
@@ -107,7 +107,7 @@
         integer issh
         integer ispec
  
-        real(kind=wp) add
+        real(kind=dp) add
  
         character(len=2) atomcheck
  
@@ -202,7 +202,7 @@
          end do
  
 ! Check that xns + xnp .lt. nzx
-         add = 0.0d0
+         add = 0.0_dp
          do issh = 1, nssh(ispec)
           add = add + xnocc(issh,ispec)
          end do
@@ -226,8 +226,8 @@
 !         read (45,*) (dqint(issh,ispec),issh = 1, nssh(ispec))
 ! end jel-dq
           iderorb(ispec) = nssh(ispec)
-            dqorb(ispec) = 0.5d0
-            if (nssh(ispec) .eq. 1) dqorb(ispec) = 0.25d0
+            dqorb(ispec) = 0.5_dp
+            if (nssh(ispec) .eq. 1) dqorb(ispec) = 0.25_dp
             do issh = 1, nssh(ispec)
               dqint(issh,ispec) = dqorb(ispec)/nssh(ispec)
             end do             
@@ -263,7 +263,7 @@
  
 ! First find the largest rc.
         do ispec = 1, nspec
-         rcutoffa_max(ispec) = -1.0d0
+         rcutoffa_max(ispec) = -1.0_dp
          do issh = 1, nssh(ispec)
           rcutoffa_max(ispec) = &
      &     max(rcutoffa_max(ispec),rcutoffa(ispec,issh))

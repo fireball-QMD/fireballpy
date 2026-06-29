@@ -31,8 +31,9 @@
 
 ! Program Declaration
 ! ===========================================================================
-        real(kind=wp) function radial_integral(itype, lqn, il1, il2, il3, il4, nspec_max, drr_rho, rcutoffa_max)
-        use precision, only: wp
+        real(kind=dp) function radial_integral(itype, lqn, il1, il2, il3, il4, nspec_max, drr_rho, rcutoffa_max)
+        use iso_fortran_env, only: dp => real64
+        use :: wavefunctions, only: wf_atoms
         implicit none
 
 ! Argument Declaration and Description
@@ -44,25 +45,24 @@
         integer, intent (in) :: lqn
         integer, intent (in) :: itype
         integer, intent (in) :: nspec_max
-        real(kind=wp), intent (in), dimension (nspec_max) :: drr_rho
-        real(kind=wp), intent (in), dimension (nspec_max) :: rcutoffa_max
+        real(kind=dp), intent (in), dimension (nspec_max) :: drr_rho
+        real(kind=dp), intent (in), dimension (nspec_max) :: rcutoffa_max
 
         integer :: irho, irhop
         integer nnrho
-        real(kind=wp) drho
-        real(kind=wp) rhomax
-        real(kind=wp) rhomin
+        real(kind=dp) drho
+        real(kind=dp) rhomax
+        real(kind=dp) rhomin
 
-        real(kind=wp) :: sumr, r, sumrp, rp, psi1, psi2, psi3, psi4
+        real(kind=dp) :: sumr, r, sumrp, rp, psi1, psi2, psi3, psi4
 
 
-        real(kind=wp), dimension (:), allocatable :: factor
-        real(kind=wp), dimension (:), allocatable :: rpoint
+        real(kind=dp), dimension (:), allocatable :: factor
+        real(kind=dp), dimension (:), allocatable :: rpoint
 
-        real(kind=wp), external :: psiofr
 !-------------------------------------------------------------------------------------
 
-              rhomin = 0.0d0
+              rhomin = 0.0_dp
          rhomax = rcutoffa_max(itype)
          drho = drr_rho(itype)
          nnrho = int((rhomax - rhomin)/drho) + 1
@@ -74,36 +74,36 @@
          do irho = 1, nnrho
           rpoint(irho) = float(irho - 1)*drho
 ! Set up the Simpson rule factors:
-          factor(irho) = 2.0d0*drho/3.0d0
-          if (mod(irho,2) .eq. 0) factor(irho) = 4.0d0*drho/3.0d0
-          if (irho .eq. 1 .or. irho .eq. nnrho) factor(irho) = drho/3.0d0
+          factor(irho) = 2.0_dp*drho/3.0_dp
+          if (mod(irho,2) .eq. 0) factor(irho) = 4.0_dp*drho/3.0_dp
+          if (irho .eq. 1 .or. irho .eq. nnrho) factor(irho) = drho/3.0_dp
          end do !irho
 !-------------------------------------------------------------------------------------
        !START RADIAL INTEGRAL
        !-----------------------------------------------------------
 ! First integrate the even pieces and then the odd pieces
-              sumr = 0.0d0
+              sumr = 0.0_dp
               do irho = 1, nnrho
                r = rpoint(irho)
-               if (r .lt. 1.0d-04) r = 1.0d-04
-                psi1 = psiofr(itype,il1,r)
-                psi2 = psiofr(itype,il2,r)
+               if (r .lt. 1.0e-4_dp) r = 1.0e-4_dp
+                psi1 = wf_atoms(itype)%get_psi(il1,r)
+                psi2 = wf_atoms(itype)%get_psi(il2,r)
  
 ! ****************************************************************************
 ! Perform the radial integration over r'.
 ! Limits from 0 to r.
-                sumrp = 0.0d0
+                sumrp = 0.0_dp
                 do irhop = 1, nnrho
                  rp = rpoint(irhop)
-                 if (rp .lt. 1.0d-04) rp = 1.0d-04
-                 psi3 = psiofr(itype,il3,rp)
-                 psi4 = psiofr(itype,il4,rp)
+                 if (rp .lt. 1.0e-4_dp) rp = 1.0e-4_dp
+                 psi3 = wf_atoms(itype)%get_psi(il3,rp)
+                 psi4 = wf_atoms(itype)%get_psi(il4,rp)
                  if (rp .le. r) then
                   sumrp = sumrp + factor(irhop)*psi3*psi4*rp**(lqn + 2)/r**(lqn + 1)   ! Limits from 0 to rcutoff.
                  else
                   sumrp = sumrp + factor(irhop)*psi3*psi4*r**lqn/rp**(lqn - 1)
                  end if
-!                if (sumr .gt. 1.0d-04 ) then
+!                if (sumr .gt. 1.0e-4_dp ) then
 !                    write(36,'(10F14.10)')  sumr, psi1,psi2,r,sumrp,psi3,psi3,rp
 !                end if
                 end do !rhop

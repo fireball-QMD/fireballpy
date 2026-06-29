@@ -96,7 +96,7 @@
 ! Program Declaration
 ! ===========================================================================
         subroutine tree (l, m, n, cl, iyl)
-        use precision, only: wp
+        use iso_fortran_env, only: dp => real64
         implicit none
  
 ! Argument Declaration and Description
@@ -109,7 +109,7 @@
 ! Output:
         integer iyl (0:n)       !array of l-values
  
-        complex(kind=wp) cl(0:n)      !array of coefficients
+        complex(kind=dp) cl(0:n)      !array of coefficients
  
 ! Local Parameters and Data Declaration
 ! ===========================================================================
@@ -122,8 +122,8 @@
         integer iright          !right child
         integer lnow
  
-        complex(kind=wp) c1           !function for c1
-        complex(kind=wp) c2           !function for c2
+        complex(kind=dp) c1           !function for c1
+        complex(kind=dp) c2           !function for c2
  
         external c1, c2
  
@@ -149,38 +149,38 @@
  
 ! Functions for calculating coefficients in angular integrals.
 ! ===========================================================================
-        complex(kind=wp) function c1(l, m)
-        use precision, only: wp
+        complex(kind=dp) function c1(l, m)
+        use iso_fortran_env, only: dp => real64
         implicit none
  
 ! Input
         integer l, m
  
         integer i, j
-        complex(kind=wp) arg
+        complex(kind=dp) arg
  
         i = (l - m + 1)*(l + m + 1)
         j = (2*l + 1)*(2*l + 3)
-        arg = cmplx(real(i, kind=wp)/real(j, kind=wp), kind=wp)
+        arg = cmplx(real(i, kind=dp)/real(j, kind=dp), kind=dp)
         c1 = sqrt(arg)
  
         return
         end
  
 ! ===========================================================================
-        complex(kind=wp) function c2(l,m)
-        use precision, only: wp
+        complex(kind=dp) function c2(l,m)
+        use iso_fortran_env, only: dp => real64
         implicit none
  
 ! Input
         integer l, m
  
         integer i, j
-        complex(kind=wp) arg
+        complex(kind=dp) arg
  
         i = (l - m)*(l + m)
         j = (2*l - 1)*(2*l + 1)
-        arg = cmplx(real(i, kind=wp)/real(j, kind=wp), kind=wp)
+        arg = cmplx(real(i, kind=dp)/real(j, kind=dp), kind=dp)
         c2 = sqrt(arg)
  
         return

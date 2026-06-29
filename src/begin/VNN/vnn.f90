@@ -49,12 +49,12 @@
         use begin_input
         use constants
         use pp_storage
-        use precision
+        use, intrinsic :: iso_fortran_env, only: dp => real64
         implicit none
 
 ! Argument Declaration and Description
 ! ===========================================================================
-        real(kind=long), parameter :: etotatom = 0.0d0
+        real(kind=dp), parameter :: etotatom = 0.0_dp
 
 ! Local Parameters and Data Declaration
 ! ===========================================================================
@@ -74,38 +74,38 @@
 
         integer, dimension (:), allocatable :: npoints_vnn
 
-        real(kind=long), external :: derf0
-        real(kind=long) dr
-        real(kind=long) drp1, drp2
-        real(kind=long) fact
-        real(kind=long), external :: psiofr
-        real(kind=long) r_vnn
-        real(kind=long) r21
-        real(kind=long) r22
-        real(kind=long) rc_max_vnn
-        real(kind=long) rp1, rp2
-        real(kind=long) vcore
-        real(kind=long), external :: vshort
+        real(kind=dp), external :: derf0
+        real(kind=dp) dr
+        real(kind=dp) drp1, drp2
+        real(kind=dp) fact
+        real(kind=dp), external :: psiofr
+        real(kind=dp) r_vnn
+        real(kind=dp) r21
+        real(kind=dp) r22
+        real(kind=dp) rc_max_vnn
+        real(kind=dp) rp1, rp2
+        real(kind=dp) vcore
+        real(kind=dp), external :: vshort
 !dani.JOM
-       real(kind=long), dimension (mesh_rcatms) :: r
-       real(kind=long), dimension (mesh_rcatms) :: vc
-       real(kind=long), dimension (:,:), allocatable :: vl
+       real(kind=dp), dimension (mesh_rcatms) :: r
+       real(kind=dp), dimension (mesh_rcatms) :: vc
+       real(kind=dp), dimension (:,:), allocatable :: vl
        integer ioptionpp
-       real(kind=long) exmix
+       real(kind=dp) exmix
       
-!        real(kind=long) xnz
+!        real(kind=dp) xnz
 
-        real(kind=long), dimension (:), allocatable :: drr
-        real(kind=long), dimension (:,:), allocatable :: psi_vnn
-        real(kind=long), dimension (:,:), allocatable :: rr
-        real(kind=long), dimension (:), allocatable :: rrc
-        real(kind=long), dimension (:), allocatable :: term1
-        real(kind=long), dimension (:), allocatable :: term2
-        real(kind=long), dimension (nrr) :: vneut
-        real(kind=long), dimension (nssh) :: vrho
-        real(kind=long), dimension (:,:), allocatable :: vvrho
-        real(kind=long), dimension (:), allocatable :: xnocc
-        real(kind=long), dimension (nrr) :: xrr
+        real(kind=dp), dimension (:), allocatable :: drr
+        real(kind=dp), dimension (:,:), allocatable :: psi_vnn
+        real(kind=dp), dimension (:,:), allocatable :: rr
+        real(kind=dp), dimension (:), allocatable :: rrc
+        real(kind=dp), dimension (:), allocatable :: term1
+        real(kind=dp), dimension (:), allocatable :: term2
+        real(kind=dp), dimension (nrr) :: vneut
+        real(kind=dp), dimension (nssh) :: vrho
+        real(kind=dp), dimension (:,:), allocatable :: vvrho
+        real(kind=dp), dimension (:), allocatable :: xnocc
+        real(kind=dp), dimension (nrr) :: xrr
 
 ! Allocate Arrays
 ! ===========================================================================
@@ -160,7 +160,7 @@
         !write (*,*) ' Its name should according to our convention - '
         !write (*,*) ' 1. Begin with the chemical number (Z) (e.g. 14 for Si)'
         !write (*,*) ' which should be followed by the value for rc.'
-        !write (*,*) ' 2. Signify to which shell the potential belongs. '
+        !write (*,*) ' 2. Signify to which shell the potential bedps. '
         !write (*,*) ' 3. The extension should be _s.na, _p.na, _d.na, or _f.na '
         !write (*,*) '  '
         !write (*,*) ' An example is 014_500_s.na which is the s-shell '
@@ -181,13 +181,13 @@
         call readpsi (nssh, filename_wf, mesh, npoints_vnn, rrc,        &
      &                drr, xnocc, rr, psi_vnn)
 
-        rc_max_vnn = -1.0d0
+        rc_max_vnn = -1.0_dp
         do issh = 1, nssh
          rc_max_vnn = max(rc_max_vnn,rrc(issh))
         end do
-        rc_max_vnn = rc_max_vnn*0.529177249d0
+        rc_max_vnn = rc_max_vnn*0.529177249_dp
 
-!        xnz = 0.0d0
+!        xnz = 0.0_dp
 !        do issh = 1, nssh
 !         xnz = xnz + xnocc(issh)
 !        end do
@@ -206,19 +206,19 @@
 ! integration over r
         do ir = 1, nrr
          r_vnn = r_vnn + dr
-         term1 = 0.0d0
-         term2 = 0.0d0
+         term1 = 0.0_dp
+         term2 = 0.0_dp
 
          drp1 = r_vnn/real(nrrp - 1)
          drp2 = (rc_max_vnn - r_vnn)/real(nrrp - 1)
-         rp1 = 0.0d0
+         rp1 = 0.0_dp
          rp2 = r_vnn
 
 ! integration over r'
          do irp = 1, nrrp
-          fact = 4.0d0
-          if (mod(irp,2) .ne. 0) fact = 2.0d0
-          if (irp .eq. 1 .or. irp .eq. nrrp) fact = 1.0d0
+          fact = 4.0_dp
+          if (mod(irp,2) .ne. 0) fact = 2.0_dp
+          if (irp .eq. 1 .or. irp .eq. nrrp) fact = 1.0_dp
 
           do issh = 1, nssh
            r21 = psiofr(issh, rp1, nssh, mesh, npoints_vnn, drr,        &
@@ -234,20 +234,20 @@
          end do
 
          do issh = 1, nssh
-          term1(issh) = (drp1/3.0d0)*term1(issh)
-          term2(issh) = (drp2/3.0d0)*term2(issh)
+          term1(issh) = (drp1/3.0_dp)*term1(issh)
+          term2(issh) = (drp2/3.0_dp)*term2(issh)
           vrho(issh) = term2(issh)
-          if (r_vnn .gt. 1.0d-5) vrho(issh) = vrho(issh) + term1(issh)/r_vnn
+          if (r_vnn .gt. 1.0e-5_dp) vrho(issh) = vrho(issh) + term1(issh)/r_vnn
          end do
 
 ! Evaluate the core potential
-! First the erf-piece local potential. This is the long-range piece.
-         if (r_vnn .ne. 0.0d0) then
+! First the erf-piece local potential. This is the dp-range piece.
+         if (r_vnn .ne. 0.0_dp) then
 !          vcore = - (xnz/r_vnn)*derf0(alpha*r_vnn)
           vcore = - (Zval/r_vnn)*derf0(alpha*r_vnn)
          else
-!          vcore = - xnz*2.0d0*alpha/sqrt(pi)
-          vcore = - Zval*2.0d0*alpha/sqrt(pi)
+!          vcore = - xnz*2.0_dp*alpha/sqrt(pi)
+          vcore = - Zval*2.0_dp*alpha/sqrt(pi)
          end if
          vneut(ir) = vcore + vshort(r_vnn)/eq2
 
@@ -260,7 +260,7 @@
          xrr(ir) = r_vnn
 
 ! Write out 10 values
-         itenth = int(float(nrr)/10.0d0)
+         itenth = int(float(nrr)/10.0_dp)
          if (mod(ir,itenth) .eq. 1) then
           !write (*,*) '  '
           !write (*,200) ir, xrr(ir), vneut(ir)
@@ -281,7 +281,7 @@
          write (66,101) filename_na(issh)
          write (66,*) nznuc
 
-         if (issh .eq. 0) write (66,*) rc_max_vnn/0.529177249d0
+         if (issh .eq. 0) write (66,*) rc_max_vnn/0.529177249_dp
          if (issh .ne. 0) write (66,*) rcutoff(issh)
          write (66,*) nrr
          if (issh .eq. 0) write (66,*) etotatom
