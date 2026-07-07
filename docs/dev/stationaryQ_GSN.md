@@ -116,6 +116,28 @@ Cargas convergidas (base doble, en el mínimo): H2O O = −0.298 / H = +0.149; d
 O = −0.31/−0.28; H2O2 O = −0.120 / H = +0.120. Físicas y con las excitadas a 0 por
 construcción.
 
+### Validación en dinámica: NVE del dímero de agua
+
+NVE con Verlet (ASE), 300 K inicial, dt = 0.5 fs, 0.5 ps, misma semilla de velocidades en
+todos los métodos. Drift lineal de E_tot / fluctuación RMS respecto a la recta:
+
+| método | base doble: drift / rms | base simple: drift / rms |
+|---|---|---|
+| **stationary_charges (igsn=4)** | **+2.2 meV/ps / 0.8 meV** | **+20 meV/ps / 4.4 meV** |
+| lowdin | +139 / 35 | −55 / 30 |
+| weighted_lowdin | +1640 / 118 | −45 / 30 |
+| mulliken | +736 / 36 | +488 / 142 |
+| mulliken_dipole | +3536 / 657 | −27 / 23 |
+| mulliken_dipole_preserving | +3525 / 621 | +159 / 32 |
+
+stationary_charges es el mejor en ambas bases y el único utilizable en base doble: los
+métodos con dipolo bombean ~3.5 eV/ps (el término no variacional ∂E/∂Q·∂Q/∂R que sus fuerzas
+omiten) y el sistema se autocalienta de 255 K a >500-900 K en 0.5 ps. El drift residual de
+stationary_charges no escala con dt (control con dt = 0.25 fs: +3.4 meV/ps) → no es error del
+integrador sino la pequeña inconsistencia de fuerzas restante (~0.001-0.004 eV/Å de los
+scans). El ranking NVE reproduce el de los gaps E↔F estáticos. Script, datos crudos y figura
+E_tot(t): `18_claude/md_nve.py`, `18_claude/nve_data/`, `18_claude/doc/nve_etot_dimer.png`.
+
 ## 4. Hallazgos colaterales y pendientes
 
 - Solape esférico on-site tabulado S_αα = 1.0024–1.0028 en vez de 1 (artefacto de tabla en
