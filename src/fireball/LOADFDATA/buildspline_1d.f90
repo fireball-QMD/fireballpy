@@ -41,11 +41,17 @@ subroutine buildspline_1d (integral, numz, itype, in1, in2, zmax, interaction, x
     z(iorder) = (d(iorder) - z(iorder+1))/b(iorder)
   end do
 
-  do iorder=1,numz_used
+  do iorder=1,numz_used-1
     splineint_2c(1,integral,iorder,itype,in1,in2) = xintegral_2c(integral,iorder)
     splineint_2c(2,integral,iorder,itype,in1,in2) = xintegral_2c(integral,iorder+1) - xintegral_2c(integral,iorder) &
       & - 0.333333333333333d0*(z(iorder+1) + 2.0*z(iorder))
     splineint_2c(3,integral,iorder,itype,in1,in2) = z(iorder)
     splineint_2c(4,integral,iorder,itype,in1,in2) = 0.333333333333333d0*(z(iorder+1) - z(iorder))
   end do
+  ! ultimo punto: no hay intervalo numz_used (interpolate_1d usa i <= nnum-1);
+  ! antes se leia z(numz_used+1) fuera de rango
+  splineint_2c(1,integral,numz_used,itype,in1,in2) = xintegral_2c(integral,numz_used)
+  splineint_2c(2,integral,numz_used,itype,in1,in2) = 0.0d0
+  splineint_2c(3,integral,numz_used,itype,in1,in2) = z(numz_used)
+  splineint_2c(4,integral,numz_used,itype,in1,in2) = 0.0d0
 end subroutine buildspline_1d

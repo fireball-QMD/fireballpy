@@ -280,6 +280,10 @@ module M_system
   
   real(double), dimension (:,:,:,:,:), allocatable :: g_h
   real(double), dimension (:,:,:,:,:), allocatable :: g_xc
+  ! N^gamma_munu = <phi_mu|(phi^S_gamma)^2|phi_nu>, gamma: global shell index
+  real(double), dimension (:,:,:,:,:), allocatable :: den_or
+  ! M^gamma_alphabeta = <phi^S_alpha|(phi^S_gamma)^2|phi^S_beta>, gamma: global shell index
+  real(double), dimension (:,:,:,:,:), allocatable :: den_sh
   real(double), dimension (:,:,:,:,:), allocatable :: f_xc
   real(double), dimension (:,:,:,:), allocatable :: exc_aa
   real(double), dimension (:,:,:,:), allocatable :: vxc_aa
