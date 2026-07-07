@@ -97,7 +97,8 @@ subroutine stationary_charges()
 
   print*,'ztot_fix =',ztot-ztot_aux
   nssh_tot2 = count(fix_shell_charge == 0)
-  allocate(mapindex(nssh_tot2))
+  ! mapindex mapea shell global (1..nssh_tot) -> indice comprimido de shells libres
+  allocate(mapindex(nssh_tot))
   allocate(M(nssh_tot2+1,nssh_tot2+1))
   allocate(B(nssh_tot2+1))
   M=0.0d0
