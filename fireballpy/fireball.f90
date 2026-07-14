@@ -236,12 +236,16 @@ end subroutine scf
 ! Get the forces in each atom
 subroutine calc_forces(natoms, forces, errno_out)
   use iso_c_binding
-  use M_system, only : ftot, errno
+  use M_system, only : ftot, errno, iscf_fast
   implicit none
   integer, intent(in) :: natoms
   real(c_double), dimension(3, natoms), intent(inout) :: forces
   integer, intent(out) :: errno_out
   errno = 0
+  ! Speed up SCF loop: la reconstruccion rapida de Kscf>1 no actualiza los arrays de
+  ! derivadas (rhop_*, arhop_*); un ensamblado completo con las cargas convergidas
+  ! los deja consistentes antes de ensamblar las fuerzas.
+  if (iscf_fast .eq. 1) call average_ca_rho (1)
   call getforces()
   errno_out = errno
   forces = ftot

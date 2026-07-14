@@ -44,7 +44,7 @@ subroutine assemble_drive()
     call assemble_2c_PP ()
   end if
   
-  call average_ca_rho ()
+  call average_ca_rho (0)
   call assemble_olsxc_on ()
 
   

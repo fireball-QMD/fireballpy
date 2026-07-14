@@ -1,6 +1,7 @@
 subroutine assemble_xc_2c ()
   use, intrinsic :: iso_fortran_env, only: double => real64
-  use M_system, only: numorb_max, natoms, neigh_self, ratom, imass, neighn, neigh_b, neigh_j, xl, vxc, rho_off, rhoij_off, s_mat, Kscf, g_xc, get_shell_ofatom_issh, Qin, iqout
+  use M_system, only: numorb_max, natoms, neigh_self, ratom, imass, neighn, neigh_b, neigh_j, xl, vxc, rho_off, rhoij_off, s_mat, Kscf, g_xc, get_shell_ofatom_issh, Qin, iqout, &
+    & vxc_ca0, iscf_fast, nssh_tot, get_issh_ofshell, get_iatom_ofshell
   use M_fdata, only: num_orb, nssh, nsh_max, Qneutral, TWOCENTER_VXC_0, TWOCENTER_VXC_L, TWOCENTER_VXC_R
   implicit none
   integer iatom
@@ -31,7 +32,20 @@ subroutine assemble_xc_2c ()
   real(double), dimension (numorb_max, numorb_max) :: sx
   real(double), dimension (nsh_max) :: dqi
   real(double), dimension (nsh_max) :: dqj
+  ! Speed up SCF loop: en Kscf>1 el termino de cargas estaticas se reconstruye como
+  ! vxc_ca0 + g_xc.dQ (exactamente lineal en dQ), sin llamadas a doscentros.
+  logical :: fast
+  integer :: alpha
+  real(double), dimension (nssh_tot) :: dQg
 
+  fast = (Kscf .gt. 1) .and. (iscf_fast .eq. 1)
+  if (fast) then
+    do alpha = 1, nssh_tot
+      dQg(alpha) = Qin(get_issh_ofshell(alpha), get_iatom_ofshell(alpha)) &
+        & - Qneutral(get_issh_ofshell(alpha), imass(get_iatom_ofshell(alpha)))
+    end do
+  end if
+  if (Kscf .eq. 1) vxc_ca0 = 0.0d0
 
   kforce = 0
   do iatom = 1, natoms
@@ -61,9 +75,21 @@ subroutine assemble_xc_2c ()
       do issh = 1, nssh(in2)
         dqj(issh) = (Qin(issh,jatom) - Qneutral(issh,in2))
       end do
-      call epsilon (r2, sighat, eps)
-      call deps2cent (r1, r2, eps, deps)
-      if (iatom .ne. jatom .or. mbeta .ne. 0) then 
+      if (.not. fast) then
+        call epsilon (r2, sighat, eps)
+        call deps2cent (r1, r2, eps, deps)
+      end if
+      if (iatom .ne. jatom .or. mbeta .ne. 0) then
+        if (fast) then
+          ! termino de cargas estaticas congelado: VXC_0 (vxc_ca0) + suma_alpha g_xc.dQ
+          in3 = in2
+          do inu = 1, num_orb(in3)
+            do imu = 1, num_orb(in1)
+              vxc(imu,inu,ineigh,iatom) = vxc(imu,inu,ineigh,iatom) + vxc_ca0(imu,inu,ineigh,iatom) &
+                & + dot_product(g_xc(:,imu,inu,ineigh,iatom), dQg)
+            end do
+          end do
+        else
         isorp = 0
         interaction = TWOCENTER_VXC_0
         in3 = in2
@@ -71,6 +97,7 @@ subroutine assemble_xc_2c ()
         do inu = 1, num_orb(in3)
           do imu = 1, num_orb(in1)
             vxc(imu,inu,ineigh,iatom) = vxc(imu,inu,ineigh,iatom) + rhomx(imu,inu)
+            if (Kscf .eq. 1) vxc_ca0(imu,inu,ineigh,iatom) = rhomx(imu,inu)
           end do
         end do
         interaction = TWOCENTER_VXC_L
@@ -99,6 +126,7 @@ subroutine assemble_xc_2c ()
             end do
           end do
         end do
+        end if   ! end if (fast)
         in3 = in2
 
         do inu = 1, num_orb(in3)

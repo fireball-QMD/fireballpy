@@ -1,7 +1,8 @@
 subroutine assemble_usr (iauxforce)
   use, intrinsic :: iso_fortran_env, only: double => real64
   use M_constants, only: eq2
-  use M_system, only: natoms, ratom, imass, neigh_max, uiiuee, ewald, fewald, neigh_b, neigh_j, neighn, Qin, dq, xl, dusr, dxcv
+  use M_system, only: natoms, ratom, imass, neigh_max, uiiuee, ewald, fewald, neigh_b, neigh_j, neighn, Qin, dq, xl, dusr, dxcv, &
+    & Kscf, coulomb_mat, iscf_fast
   use M_fdata, only: nsh_max, ME2c_max, nssh, Qneutral, TWOCENTER_COULOMB
   implicit none
   integer, intent (in) :: iauxforce
@@ -68,16 +69,22 @@ subroutine assemble_usr (iauxforce)
       Zj = Q0(jatom)
       QQ = Zi*Zj - qi*qj
       distance = sqrt((r2(1) - r1(1))**2 + (r2(2) - r1(2))**2 + (r2(3) - r1(3))**2)
-      index_coulomb = nssh(in1)*nssh(in2)
-      interaction = TWOCENTER_COULOMB
-      ideriv = 0
-      do index = 1, index_coulomb
-        call interpolate_1d (interaction, ideriv, in1, in2, index, iauxforce, distance, slist(index), dslist(index))
-      end do
       n1 = nssh(in1)
       n2 = nssh(in2)
-
-      call recoverC (n1, n2, slist, dslist, coulomb, coulombD)
+      ! Speed up SCF loop: las integrales de Coulomb son Q-independientes; en Kscf>1
+      ! (sin fuerzas) se reutiliza la tabla congelada en Kscf=1 en vez de reinterpolar.
+      if (Kscf .gt. 1 .and. iauxforce .eq. 0 .and. iscf_fast .eq. 1) then
+        coulomb(1:n1,1:n2) = coulomb_mat(1:n1,1:n2,ineigh,iatom)
+      else
+        index_coulomb = nssh(in1)*nssh(in2)
+        interaction = TWOCENTER_COULOMB
+        ideriv = 0
+        do index = 1, index_coulomb
+          call interpolate_1d (interaction, ideriv, in1, in2, index, iauxforce, distance, slist(index), dslist(index))
+        end do
+        call recoverC (n1, n2, slist, dslist, coulomb, coulombD)
+        if (Kscf .eq. 1) coulomb_mat(1:n1,1:n2,ineigh,iatom) = coulomb(1:n1,1:n2)
+      end if
 
       if (iatom .eq. jatom .and. mbeta .eq. 0) then
         uee00(iatom) = 0.0d0
