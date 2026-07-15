@@ -306,6 +306,11 @@ module M_system
   real(double), dimension (:,:), allocatable :: f_xc_shell
   real(double), dimension (:), allocatable :: exc_aa_shell
   real(double), dimension (:), allocatable :: vxc_aa_shell
-  integer, dimension (:), allocatable :: fix_shell_charge 
+  integer, dimension (:), allocatable :: fix_shell_charge
+  ! Seleccion de shells fijadas a carga neutra en stationary_charges (se fija desde Python
+  ! con set_fix_shells): 0 = ninguna, 1 = solo shells d, 2 = shells con Qneutral=0 (default),
+  ! 3 = mascara de usuario en fix_shell_user (indice de shell global: atomo1-shells, atomo2-...)
+  integer :: ifix_shells = 2
+  integer, dimension (:), allocatable :: fix_shell_user
   integer, dimension(:,:), allocatable :: orb2shell
 end module M_system

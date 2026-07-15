@@ -4,7 +4,7 @@ subroutine stationary_charges()
   & rho, nssh_tot, neigh_self,neigh_b, fix_shell_charge, get_l_ofshell, &
   & get_orb_ofshell, get_issh_ofshell, g_h, g_xc, get_iatom_ofshell, ztot, &
   & g_h_shell, g_xc_shell,f_xc_shell,exc_aa_shell,vxc_aa_shell, qstate, symbol, &
-  & get_shell_ofatom_issh, Kscf, ratom
+  & get_shell_ofatom_issh, Kscf, ratom, ifix_shells, fix_shell_user
   use M_fdata, only: num_orb,nssh,lssh,Qneutral
   implicit none
   integer imu, inu          
@@ -32,7 +32,6 @@ subroutine stationary_charges()
   integer, parameter :: isolver = 0
   real(double), parameter :: rcond_sc = 1.0d-3   ! umbral relativo isolver=1
   real(double), parameter :: ridge_sc = 3.0d-2   ! lambda de Tikhonov isolver=2 (unidades de M ~ eV/e)
-  integer, parameter :: ifix_dshell = 2          ! 1 = shells d fijas a carga neutra (ver abajo)
   integer :: rank_sc
   integer, dimension (:), allocatable :: iwork_lsd
   real(double), dimension (:), allocatable :: Q0v, sing, bp, xv
@@ -45,19 +44,32 @@ subroutine stationary_charges()
   do issh=1,nssh_tot
     fix_shell_charge(issh)=0
   end do
-  ! ifix_dshell=1: fijar las shells d (polarizacion vacia, Q0=0) a su carga neutra.
-  ! ifix_dshell=2: fijar TODAS las shells con Qneutral=0 (d y excitadas s*/p* de base doble).
+  ! ifix_shells=1: fijar las shells d (polarizacion vacia, Q0=0) a su carga neutra.
+  ! ifix_shells=2: fijar TODAS las shells con Qneutral=0 (d y excitadas s*/p* de base doble).
   ! Motivo: las shells vacias libres crean direcciones casi nulas del sistema estacionario
   ! (dimero de agua: Q_d=-1.0, gap 10 mA / 0.55 eV/A; base doble: SCF no converge, Q basura);
   ! fijandolas el sistema es variacional (dimero 0.03 mA / 0.004 eV/A).
-  if (ifix_dshell .eq. 1) then
+  ! ifix_shells=3: mascara de usuario (fix_shell_user, via set_fix_shells desde Python).
+  if (ifix_shells .eq. 1) then
     do issh=1,nssh_tot
       if (get_l_ofshell(issh) .eq. 2) fix_shell_charge(issh)=1
     end do
-  else if (ifix_dshell .eq. 2) then
+  else if (ifix_shells .eq. 2) then
     do issh=1,nssh_tot
       if (Qneutral(get_issh_ofshell(issh), imass(get_iatom_ofshell(issh))) .lt. 1.0d-10) fix_shell_charge(issh)=1
     end do
+  else if (ifix_shells .eq. 3) then
+    if ((.not. allocated(fix_shell_user)) .or. (size(fix_shell_user) .ne. nssh_tot)) then
+      print*, 'stationary_charges: fix_shell_user no alocada o de tamano incorrecto', &
+        & size(fix_shell_user), nssh_tot, '-- se usa el criterio Qneutral=0 (ifix_shells=2)'
+      do issh=1,nssh_tot
+        if (Qneutral(get_issh_ofshell(issh), imass(get_iatom_ofshell(issh))) .lt. 1.0d-10) fix_shell_charge(issh)=1
+      end do
+    else
+      do issh=1,nssh_tot
+        fix_shell_charge(issh)=fix_shell_user(issh)
+      end do
+    end if
   end if
   !fix_shell_charge(1)=1
   !lo usamos para H2O HsHsOsp

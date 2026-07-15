@@ -57,7 +57,7 @@ el SCF resuelve la estacionariedad exacta de la energía viva. La matriz queda a
 Con fdata **sin** superspline el gap de H2O baja a **0.00 mÅ / 0.0017 eV/Å** (variacional
 exacto): el residuo de 0.22 mÅ es artefacto de la interpolación superspline, no del método.
 
-### 2.3 Shells de polarización y bases con L repetido (`ifix_dshell`, `isolver`)
+### 2.3 Shells de polarización y bases con L repetido (`ifix_shells`, `isolver`)
 
 El dímero de agua descubrió que las shells **d** (polarización vacía, Q⁰=0) crean direcciones
 casi nulas del sistema estacionario (cond(M) ≈ 3.4·10³): la solución se desliza hasta
@@ -65,8 +65,15 @@ casi nulas del sistema estacionario (cond(M) ≈ 3.4·10³): la solución se des
 15 pasos). En base doble pasa lo mismo con las shells excitadas s*/p* libres (SCF no
 converge, Q_p(O) = −3.6).
 
-- **`ifix_dshell=2` (DEFAULT)**: fija a carga neutra **todas** las shells con Qneutral=0
-  (d y excitadas), vía `fix_shell_charge`. (`ifix_dshell=1` fija solo las d.)
+- **`ifix_shells=2` / `fix_shells='auto'` (DEFAULT)**: fija a carga neutra **todas** las
+  shells con Qneutral=0 (d y excitadas), vía `fix_shell_charge`. (`=1`/`'d'` fija solo las d;
+  `=0`/`'none'` ninguna; `=3` máscara de usuario.) Desde 2026-07-15 es variable de
+  `M_system.f90` controlable desde Python: `Fireball(..., fix_shells='auto'|'d'|'none'|máscara)`,
+  donde la máscara es 0/1 por shell global (orden átomo1-shells, átomo2-shells…). **Ojo**:
+  `'auto'` no fija nada en fdatas sin shells vacías (todo s,p ocupadas) — ahí considerar
+  máscara manual o `isolver=2`. A/B de patrones de fijado en el cuaderno
+  (`IMPLEMENTACION_eq117_simplified.md` §5e): cualquier fijado consistente mantiene el gap
+  E↔F ~0.1 mÅ, pero solo el criterio Qneutral=0 completo da una PES física.
 - **`isolver`**: 0 = `dgesv` directo (DEFAULT); 1 = `dgelsd`/truncamiento SVD (malo para
   scans: saltos de rango → PES discontinua); 2 = Tikhonov suave en dQ = Q − Q⁰ con ligadura
   exacta y µ sin penalizar (ridge ~0.03). Tikhonov acota las cargas pero no sustituye a
@@ -158,8 +165,9 @@ python ../scan_generic.py <fdata_path> stationary_charges h2o
 
 `scan_generic.py`: malla gruesa ±0.30 Å (paso 0.05) para acotar el mínimo + malla fina
 ±0.05 (paso 0.005); E_min por parábola local, F=0 por interpolación lineal. Los flags
-(`igsn`, `ifix_dshell`, `isolver`, `ridge_sc`) son `parameter` en
-`src/fireball/SYSTEM/stationary_charges.f90`.
+(`igsn`, `isolver`, `ridge_sc`) son `parameter` en
+`src/fireball/SYSTEM/stationary_charges.f90`; `ifix_shells` es variable de `M_system.f90`
+y se controla desde Python con el parámetro `fix_shells` de la calculadora (§2.3).
 
 **OJO**: si se cambia `makemunu` hay que regenerar la fdata (los ficheros de interacción
 cambian de tamaño; una fdata vieja da `forrtl: severe (59)` al leer `vxc_2c`).

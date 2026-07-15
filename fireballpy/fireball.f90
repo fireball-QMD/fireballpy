@@ -73,19 +73,22 @@ subroutine set_initial_charges(natoms, nsh_max, qinput)
   Qin = qinput
 end subroutine set_initial_charges
 
-subroutine set_fix_shell_charge(nsh_max, fix_shell_charge_aux)
+! Seleccion de shells fijadas a carga neutra en stationary_charges.
+! mode: 0 = ninguna, 1 = solo shells d, 2 = shells con Qneutral=0 (default),
+! 3 = mascara de usuario (mask, 0/1 por shell global: atomo1-shells, atomo2-shells, ...)
+subroutine set_fix_shells(mode, nsh, mask)
   use iso_c_binding
-  use M_system, only : fix_shell_charge
+  use M_system, only : ifix_shells, fix_shell_user
   implicit none
-  integer, intent(in) :: nsh_max
-  real(c_double), dimension(nsh_max), intent(in) :: fix_shell_charge_aux
-  integer :: iatom, issh
-  if (allocated(fix_shell_charge)) deallocate(fix_shell_charge)
-  allocate (fix_shell_charge(nsh_max))
-  do issh=1,nsh_max
-    fix_shell_charge(issh)=fix_shell_charge_aux(issh)
-  end do  
-end subroutine set_fix_shell_charge
+  integer, intent(in) :: mode, nsh
+  integer, dimension(nsh), intent(in) :: mask
+  ifix_shells = mode
+  if (allocated(fix_shell_user)) deallocate(fix_shell_user)
+  if (mode .eq. 3) then
+    allocate (fix_shell_user(nsh))
+    fix_shell_user = mask
+  end if
+end subroutine set_fix_shells
 
 
 ! Faster set coordinates for simulations

@@ -94,6 +94,12 @@ class Fireball(Calculator, BaseFireball):
         | ``mixer_kws``       | ``dict``             | Dictionary with the charges mixer options. For reference                 |
         |                     |                      | see :ref:`here <mixer>`.                                                 |
         +---------------------+----------------------+--------------------------------------------------------------------------+
+        | ``fix_shells``      | ``str``,             | Shells fixed to their neutral charge by                                  |
+        |                     | ``ArrayLike[int]``   | ``charges_method='stationary_charges'``. ``'auto'``/``None`` (default):  |
+        |                     | or ``None``          | shells with zero neutral charge; ``'d'``: only l=2 shells; ``'none'``:   |
+        |                     |                      | all free; or a 0/1 mask per shell in global shell order                  |
+        |                     |                      | (shells of atom 1, then atom 2, ...).                                    |
+        +---------------------+----------------------+--------------------------------------------------------------------------+
 
     Methods
     -------
@@ -132,7 +138,8 @@ class Fireball(Calculator, BaseFireball):
     """
     _valid_kwargs = {'fdata_path': None, 'gamma': None, 'charges_method': None,
                      'dipole_method': 'improved', 'total_charge': 0, 'fix_charges': False,
-                     'correction': None, 'initial_charges': None, 'mixer_kws': None}
+                     'correction': None, 'initial_charges': None, 'mixer_kws': None,
+                     'fix_shells': None}
 
     implemented_properties = ['energy', 'free_energy', 'forces', 'charges']
 
