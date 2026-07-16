@@ -80,11 +80,17 @@ subroutine stationary_charges()
   !fix_shell_charge = [0,1,1,0,1,1] 
   !fix_shell_charge = [1,0,1,1,0,1,0,1] 
   !fix_shell_charge = [1,0,1,0]
-  ztot_aux=0.0d0
-  !ztot_aux=qstate
-
+  ! Restriccion de carga del sistema estacionario: las shells LIBRES deben cargar el total
+  ! REAL de electrones (ztot = qstate + sum(Qneutral), incluye la carga extra en sistemas
+  ! cargados) MENOS lo que se lleva a neutro en las shells fijas. Antes se sumaba Qin de las
+  ! libres, que no impone ztot cuando qstate/=0: el sistema dejaba electrones sin colocar y el
+  ! mixer los renormalizaba sobre TODAS las shells (incl. las fijas), rompiendo el fijado
+  ! (p.ej. d de O/P "fija" salia a 0.2 en PO4^3-). Con esto, en sistemas neutros es identico
+  ! (ztot_aux = sum(Qneutral libres) = sum(Qin libres) al no haber deriva).
+  ztot_aux = ztot
   do alpha=1, nssh_tot
-    if (fix_shell_charge(alpha) .eq. 0) ztot_aux = ztot_aux + Qin(get_issh_ofshell(alpha),get_iatom_ofshell(alpha))
+    if (fix_shell_charge(alpha) .ne. 0) &
+      & ztot_aux = ztot_aux - Qneutral(get_issh_ofshell(alpha), imass(get_iatom_ofshell(alpha)))
   end do
 
   if (Kscf .eq. 1) then
@@ -270,7 +276,9 @@ subroutine stationary_charges()
        if (fix_shell_charge(alpha) .eq. 0) then
           Qout(issh,iatom) = B(mapindex(alpha))
        else
-          Qout(issh,iatom) = Qin(issh,iatom)
+          ! shell fija -> su carga neutra (no Qin, que el mixer puede haber desviado en
+          ! sistemas cargados). En neutros Qin ya = Qneutral, asi que es identico.
+          Qout(issh,iatom) = Qneutral(issh, imass(iatom))
        end if
     end do
 
