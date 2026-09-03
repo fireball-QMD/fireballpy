@@ -12,15 +12,21 @@ module indices
 
 contains
 
-  pure subroutine indices_onecenter_set(ls, index_max, s1, s2)
+  pure subroutine indices_onecenter_set(ls, index_max, s1, s2, l12, names)
     integer, intent(in) :: ls(:)
     integer, intent(out) :: index_max
-    integer, allocatable, intent(out) :: s1(:), s2(:)
+    integer, allocatable, intent(out) :: s1(:), s2(:), l12(:)
+    character(64), allocatable, intent(out), optional :: names(:)
     integer :: nssh, issh, jssh, ix, l1tmp, l2tmp
-    integer :: buffer(2, 1024)
+    integer :: buffer(3, 1024)
+    character(64) :: auxname
 
     if (allocated(s1)) deallocate (s1)
     if (allocated(s2)) deallocate (s2)
+    if (allocated(l12)) deallocate (l12)
+    if (present(names)) then
+      if (allocated(names)) deallocate (names)
+    end if
     nssh = size(ls)
 
     index_max = 0
@@ -32,14 +38,23 @@ contains
         index_max = index_max + 1
         buffer(1, index_max) = issh
         buffer(2, index_max) = jssh
+        buffer(3, index_max) = l1tmp
       end do
     end do
     if (index_max == 0) return
-    allocate (s1(index_max), s2(index_max))
+    allocate (s1(index_max), s2(index_max), l12(index_max))
     do ix = 1, index_max
       s1(ix) = buffer(1, ix)
       s2(ix) = buffer(2, ix)
+      l12(ix) = buffer(3, ix)
     end do
+    if (present(names)) then
+      allocate (names(index_max))
+      do ix = 1, index_max
+        auxname = indices_get_name(l12(ix), 0, omit_suffix=.true.)
+        names(ix) = trim(auxname)
+      end do
+    end if
   end subroutine indices_onecenter_set
 
   pure subroutine indices_twocenter_set(index_type, ls1, ls2, index_max, s1, s2, l1, l2, m1, m2, names)

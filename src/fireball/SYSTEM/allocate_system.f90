@@ -9,10 +9,11 @@ subroutine allocate_system ()
     & neighPP_j, sVNL, spVNL, sp_mat, tp_mat, dipcm, dippcm, dippc, vnl, neighPP_comn, neighPP_comm, neighPP_comj, neighPP_comb, &
     & neighPP_max, Qin, Qinmixer, Qout, Qoutmixer, dq, Q_partial, QLowdin_TOT, QMulliken_TOT, dq_DP, vxc, vxc_ca, rho, rho_off, &
     & rhoij_off, s_mat, sm_mat, spm_mat, rho_on, arho_on, rhoi_on, arhoi_on, arhop_on, rhop_on, arhoij_off, arho_off, arhopij_off, &
-    & arhop_off, rhop_off, rhopij_off, vca, ewaldlr, h_mat, t_mat, vna, ewaldqmmm, dipc, xl, fotnl, fanl, fotna, fana, faxc, faxc_ca, &
-    & dxcdcc, ft, dusr, fotxc, fotxc_ca, faca, fotca, f3naa, f3nab, f3nac, f3nla, f3nlb, f3nlc, f3caa, f3cab, f3cac, flrew, f3xca_ca, &
+    & arhop_off, rhop_off, rhopij_off, vca, ewaldlr, h_mat, h_mat0, t_mat, vna, ewaldqmmm, dipc, xl, fotnl, fanl, fotna, fana, faxc, faxc_ca, &
+    & dxcdcc, ft, dusr, fotxc_ca, faca, fotca, f3naa, f3nab, f3nac, f3nla, f3nlb, f3nlc, f3caa, f3cab, f3cac, flrew, f3xca_ca, &
     & f3xcb_ca, f3xcc_ca, f3xca, f3xcb, f3xcc, flrew_qmmm, fro, ftot, dxcv, norbitals_new, qstate, bbnkre, bbnkim, igamma, &
-    & g_h, g_xc, f_xc, exc_aa, vxc_aa, get_orb_ofshell, get_l_ofshell, get_issh_ofshell, get_iatom_ofshell, get_shell_oforb, orb2shell, &
+    & g_h, g_xc, f_xc, exc_aa, vxc_aa, den_or, den_sh, denij_or, denij_sh, deni_or, deni_sh, vxc_ca0, coulomb_mat, &
+    & get_orb_ofshell, get_l_ofshell, get_issh_ofshell, get_iatom_ofshell, get_shell_oforb, orb2shell, &
     & g_h_shell, g_xc_shell, f_xc_shell, exc_aa_shell, vxc_aa_shell, get_shell_ofatom_imu, get_shell_ofatom_issh, fix_shell_charge
   use M_fdata, only: nssh, rcutoff, rc_PP, nspecies, num_orb, Qneutral, lssh, nsshPP, lsshPP,  nsh_max, numXmax, numYmax
 !  use M_fdata, only: numy3c_xc3c, ideriv_max
@@ -401,6 +402,8 @@ subroutine allocate_system ()
   allocate (t_mat (numorb_max, numorb_max, neigh_max, natoms))
   if (allocated(h_mat)) deallocate(h_mat)
   allocate (h_mat (numorb_max, numorb_max, neigh_max, natoms))
+  if (allocated(h_mat0)) deallocate(h_mat0)
+  allocate (h_mat0 (numorb_max, numorb_max, neigh_max, natoms))
   if (allocated(sp_mat)) deallocate(sp_mat)
   allocate (sp_mat (3, numorb_max, numorb_max, neigh_max, natoms))
   if (allocated(tp_mat)) deallocate(tp_mat)
@@ -516,8 +519,6 @@ subroutine allocate_system ()
   allocate (faxc (3, neigh_max, natoms))
   if (allocated(fotxc_ca)) deallocate(fotxc_ca)
   allocate (fotxc_ca (3, neigh_max, natoms))
-  if (allocated(fotxc)) deallocate(fotxc)
-  allocate (fotxc (3, neigh_max, natoms))
   if (allocated(faca)) deallocate(faca)
   allocate (faca (3, neigh_max, natoms))  
   if (allocated(fotca)) deallocate(fotca)
@@ -573,9 +574,33 @@ subroutine allocate_system ()
   end if
 
   if (allocated(g_h)) deallocate(g_h)
-  allocate (g_h(numorb_max,numorb_max,nsh_max,natoms,neigh_max,natoms))
+  allocate (g_h(nssh_tot,numorb_max,numorb_max,neigh_max,natoms))
   if (allocated(g_xc)) deallocate(g_xc)
-  allocate (g_xc(numorb_max,numorb_max,nsh_max,natoms,neigh_max,natoms))
+  allocate (g_xc(nssh_tot,numorb_max,numorb_max,neigh_max,natoms))
+  if (allocated(den_or)) deallocate(den_or)
+  allocate (den_or(nssh_tot,numorb_max,numorb_max,neigh_max,natoms))
+  if (allocated(den_sh)) deallocate(den_sh)
+  allocate (den_sh(nssh_tot,nsh_max,nsh_max,neigh_max,natoms))
+  den_or = 0.0d0
+  den_sh = 0.0d0
+  if (allocated(denij_or)) deallocate(denij_or)
+  allocate (denij_or(nssh_tot,numorb_max,numorb_max,neigh_max,natoms))
+  if (allocated(denij_sh)) deallocate(denij_sh)
+  allocate (denij_sh(nssh_tot,nsh_max,nsh_max,neigh_max,natoms))
+  if (allocated(deni_or)) deallocate(deni_or)
+  allocate (deni_or(nsh_max,numorb_max,numorb_max,natoms))
+  if (allocated(deni_sh)) deallocate(deni_sh)
+  allocate (deni_sh(nsh_max,nsh_max,nsh_max,natoms))
+  if (allocated(vxc_ca0)) deallocate(vxc_ca0)
+  allocate (vxc_ca0(numorb_max,numorb_max,neigh_max,natoms))
+  if (allocated(coulomb_mat)) deallocate(coulomb_mat)
+  allocate (coulomb_mat(nsh_max,nsh_max,neigh_max,natoms))
+  denij_or = 0.0d0
+  denij_sh = 0.0d0
+  deni_or = 0.0d0
+  deni_sh = 0.0d0
+  vxc_ca0 = 0.0d0
+  coulomb_mat = 0.0d0
   if (allocated(f_xc)) deallocate(f_xc)
   allocate (f_xc(numorb_max,nsh_max,natoms,neigh_max,natoms))
   if (allocated(exc_aa)) deallocate(exc_aa)

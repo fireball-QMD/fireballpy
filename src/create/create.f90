@@ -453,7 +453,6 @@ program create
     call pot_init()
     call pp_init()
 
-
     write (stdout, "(a)") "  ==== ONE CENTER INTEGRALS ===="
     write (stdout, "(a)") repeat("=", 30)
     ! TODO: mpi
@@ -497,398 +496,398 @@ program create
 
   end if ! end master
 
-!! ======================================================================
-!! I. Perform three-center calculations
-!! ======================================================================
-!! Note igauss controls whether or not we ACTUALLY compute the gaussian
-!! integrals EVEN WHEN REQUESTED BY igauss3C. The point is that switch
-!! allows you to NOT compute things EVEN IF YOU NEED THEM!
-!!        if (igauss .eq. 1) call gausscreate (ngauss)
+! ======================================================================
+! I. Perform three-center calculations
+! ======================================================================
+! Note igauss controls whether or not we ACTUALLY compute the gaussian
+! integrals EVEN WHEN REQUESTED BY igauss3C. The point is that switch
+! allows you to NOT compute things EVEN IF YOU NEED THEM!
+!        if (igauss .eq. 1) call gausscreate (ngauss)
+
+! We have calculated BOTH 3XC and 3NA gaussian fits. So we need not
+! bother with the 3XC or the 3NA parts below.
+! We are not doing gaussian fits of anything.
+
+! **********************************************************************
 !
-!! We have calculated BOTH 3XC and 3NA gaussian fits. So we need not
-!! bother with the 3XC or the 3NA parts below.
-!! We are not doing gaussian fits of anything.
+!  =====>         1b. Three center exchange-correlation matrix element
+!                                   (three-center SNXC)
 !
-!! **********************************************************************
-!!
-!!  =====>         1b. Three center exchange-correlation matrix element
-!!                                   (three-center SNXC)
-!!
-!! **********************************************************************
-!
-!  ideriv = 0
-!
-!  if (ibcxc .eq. 1 .and. ixc_opt .eq. 1 ) then
-!    if (iammaster) then
-!      write (*,*) ' Calculating three-center exchange-correlation '
-!      write (*,*) ' interactions (SNXC). '
-!    end if
-!    nstyles = ideriv
-!    call gleg (ctheta, ctheta_weights, ntheta_max)
-!    do looper3a = 1, nspec*nspec*nspec
-!      if (mod(looper3a + nspec*nspec*nspec*nstyles, nproc) &
-!      &        .eq. my_proc) then
-!        itmp   = looper3a
-!        itype3 = 1 + int((itmp - 1)/(nspec*nspec))
-!        itmp   = itmp - (itype3 - 1)*(nspec*nspec)
-!        itype2 = 1 + int((itmp - 1)/nspec)
-!        itmp   = itmp - (itype2 - 1)*nspec
-!        itype1 = itmp
-!
-!        rcutoff1 = rcutoffa_max(itype1)
-!        rcutoff2 = rcutoffa_max(itype2)
-!        rcutoff3 = rcutoffa_max(itype3)
-!
-!        atom1 = atom(itype1)
-!        atom2 = atom(itype2)
-!        atom3 = atom(itype3)
-!
-!        what1 = what(itype1)
-!        what2 = what(itype2)
-!        what3 = what(itype3)
-!
-!        dbc = rcutoff1 + rcutoff2
-!        dna = rcutoff3 + max(rcutoff1,rcutoff2)
-!
-!        index_max = index_max3c(itype1,itype2)
-!        do index = 1, index_max
-!          n1(index) = nleft(itype1,itype2,index)
-!          l1(index) = lleft(itype1,itype2,index)
-!          m1(index) = mleft(itype1,itype2,index)
-!          n2(index) = nright(itype1,itype2,index)
-!          l2(index) = lright(itype1,itype2,index)
-!          m2(index) = mright(itype1,itype2,index)
-!        end do
-!
-!! If the cutoffs for the atoms are too drastically different, then the grid
-!! size should be increased. Otherwise, the number of non-zero points may
-!! be too few.
-!        max_diff = max(abs(rcutoff1 - rcutoff2), &
-!        &                    abs(rcutoff2 - rcutoff3), &
-!        &                    abs(rcutoff3 - rcutoff1))
-!        if (max_diff .gt. 2.0_dp) then
-!          write (*,*) ' ************ WARNING ************* '
-!          write (*,*) ' You have at least two species which have '
-!          write (*,*) ' rcutoff''s which differ by more than 2.0 '
-!          write (*,*) ' Angstroms. It is highly advisable that you '
-!          write (*,*) ' increase the number of mesh points, so as to '
-!          write (*,*) ' avoid a case where you may end up with many '
-!          write (*,*) ' zeros, and too few non-zero elements in your '
-!          write (*,*) ' grid. '
-!        end if
-!! xc3c_SN now we call threecenter() with new option 'interaction=3'
-!        interaction = 3
-!        ispher = .false.
-!
-!! Even in case of harris option we need all interactions
-!        isorpmin = 1
-!        isorpmax = nssh(itype3)
-!
-!! Do not parallelize over ispnum, because it involves little work
-!        ispnum = isorpmax - isorpmin + 1
-!        call threecenter (itype1, itype2, itype3, index_max, iexc, &
-!        &                       interaction, nzx, nssh, n1, l1, m1, &
-!        &                       n2, l2, m2, rcutoff1, rcutoff2, rcutoff3, &
-!        &                       atom1, atom2, atom3, what1, what2, what3, &
-!        &                       dbc, dna, signature, ctheta,  &
-!        &                       ctheta_weights, isorpmin, &
-!        &                       isorpmax, ispnum, iammaster, ispher)
-!
-!      end if ! end MPI which node
-!    end do
-!  end if
-!! xc3c_SN: end of the added part
-!
-!
-!! **********************************************************************
-!!
-!!  =====>         2. Three center neutral atom matrix element
-!!
-!! **********************************************************************
-!  if (ibcna .eq. 1) then
-!    if (iammaster) then
-!      write (*,*) ' Calculating three-center neutral atom and '
-!      write (*,*) ' charged atom interactions. '
-!    end if
-!    call gleg (ctheta, ctheta_weights, ntheta_max)
-!    do looper3a = 1, nspec*nspec*nspec
-!      if (mod(looper3a + nspec*nspec*nspec*nstyles, nproc) &
-!      &        .eq. my_proc) then
-!        itmp   = looper3a
-!        itype3 = 1 + int((itmp - 1)/(nspec*nspec))
-!        itmp   = itmp - (itype3 - 1)*(nspec*nspec)
-!        itype2 = 1 + int((itmp - 1)/nspec)
-!        itmp   = itmp - (itype2 - 1)*nspec
-!        itype1 = itmp
-!
-!        rcutoff1 = rcutoffa_max(itype1)
-!        rcutoff2 = rcutoffa_max(itype2)
-!        rcutoff3 = rcutoffa_max(itype3)
-!
-!        atom1 = atom(itype1)
-!        atom2 = atom(itype2)
-!        atom3 = atom(itype3)
-!
-!        what1 = what(itype1)
-!        what2 = what(itype2)
-!        what3 = what(itype3)
-!
-!        dbc = rcutoff1 + rcutoff2
-!        dna = rcutoff3 + max(rcutoff1,rcutoff2)
-!
-!        index_max = index_max3c(itype1,itype2)
-!        do index = 1, index_max
-!          n1(index) = nleft(itype1,itype2,index)
-!          l1(index) = lleft(itype1,itype2,index)
-!          m1(index) = mleft(itype1,itype2,index)
-!          n2(index) = nright(itype1,itype2,index)
-!          l2(index) = lright(itype1,itype2,index)
-!          m2(index) = mright(itype1,itype2,index)
-!        end do
-!
-!! If the cutoffs for the atoms are too drastically different, then the grid
-!! size should be increased. Otherwise, the number of non-zero points may
-!! be too few.
-!        max_diff = max(abs(rcutoff1 - rcutoff2), &
-!        &                    abs(rcutoff2 - rcutoff3), &
-!        &                    abs(rcutoff3 - rcutoff1))
-!        if (max_diff .gt. 2.0_dp) then
-!          write (*,*) ' ************ WARNING ************* '
-!          write (*,*) ' You have at least two species which have '
-!          write (*,*) ' rcutoff''s which differ by more than 2.0 '
-!          write (*,*) ' Angstroms. It is highly advisable that you '
-!          write (*,*) ' increase the number of mesh points, so as to '
-!          write (*,*) ' avoid a case where you may end up with many '
-!          write (*,*) ' zeros, and too few non-zero elements in your '
-!          write (*,*) ' grid. '
-!        end if
-!
-!        interaction = 1
-!        ispher = .false.
-!        if (idogs .eq. 1) then
-!          isorpmin = 1
-!          isorpmax = nssh(itype3)
-!        else
-!          isorpmin = 0
-!          isorpmax = 0
-!        end if
-!        if (iharris .eq. 1) isorpmin = 0
-!
-!! Do not parallelize over ispnum, because it involves little work
-!        ispnum = isorpmax - isorpmin + 1
-!        call threecenter (itype1, itype2, itype3, index_max, iexc, &
-!        &                       interaction, nzx, nssh, n1, l1, m1, &
-!        &                       n2, l2, m2, rcutoff1, rcutoff2, rcutoff3, &
-!        &                       atom1, atom2, atom3, what1, what2, what3, &
-!        &                       dbc, dna, signature, &
-!        &                       ctheta, ctheta_weights, isorpmin, &
-!        &                       isorpmax, ispnum, iammaster, ispher)
-!      end if ! end MPI which node
-!    end do
-!  end if
-!
-!! ======================================================================
-!! II. Compute purely two center cases (overlap, dipole, coulomb
-!! integrals, and kinetic energy).
-!! ======================================================================
-!  do looper2 = 1, nspec*nspec
-!    if (mod(looper2,nproc) .eq. my_proc) then
-!      itmp   = looper2
-!      itype2 = 1 + int((itmp - 1)/nspec)
-!      itmp   = itmp - (itype2 - 1)*nspec
-!      itype1 = itmp
-!
-!      nzx1 = nzx(itype1)
-!      nzx2 = nzx(itype2)
-!
-!      rcutoff1 = rcutoffa_max(itype1)
-!      rcutoff2 = rcutoffa_max(itype2)
-!
-!      nssh2 = nssh(itype2)
-!
-!      atom1 = atom(itype1)
-!      atom2 = atom(itype2)
-!
-!      what1 = what(itype1)
-!      what2 = what(itype2)
-!
-!      index_max = index_max2c(itype1,itype2)
-!      do index = 1, index_max
-!        n1(index) = nleft(itype1,itype2,index)
-!        l1(index) = lleft(itype1,itype2,index)
-!        m1(index) = mleft(itype1,itype2,index)
-!        n2(index) = nright(itype1,itype2,index)
-!        l2(index) = lright(itype1,itype2,index)
-!        m2(index) = mright(itype1,itype2,index)
-!      end do
-!
-!! **********************************************************************
-!!
-!!  =====>         1. Kinetic
-!!
-!! **********************************************************************
-!      if (ikinetic .eq. 1) then
-!        call kinetic (itype1, itype2, atom1, atom2, what1, what2, &
-!        &                   nzx1, nzx2, rcutoff1, rcutoff2, nssh, lssh, &
-!        &                   index_max, n1, l1, m1, n2, l2, m2, signature, &
-!        &                   iammaster)
-!      end if
-!    end if
-!  end do
-!
-!
-!!
-!! SPHERIC APPROXIMATION (only OLSXC Method)
-!!
-!!++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-!!  set lssh = lsshxc = 0 ... only s-like orbitals
-!  lssh = 0
-!  lsshxc = 0
-!
-!! **********************************************************************
-!! Call the following subroutines to determine the needed matrix elements
-!! for each itype1, itype2 pair.
-!  do itype1 = 1, nspec
-!    do itype2 = 1, nspec
-!      call mk_index (itype1, itype2, nspec_max, nsh_max, inter_max, &
-!      &                   nssh, lssh, nleft, lleft, mleft, nright, &
-!      &                   lright, mright, index_max2c, index_max3c)
-!
-!! Write out the results of mk_index
-!      if (iammaster) then
-!        write (*,*) '  '
-!        write (*,*) '  '
-!        write (*,*) ' species 1 = ', itype1, ' species 2 = ', itype2
-!        write (*,100)
-!        write (*,*) ' For two-center interactions: '
-!        write (*,*) ' index_max2c = ', index_max2c(itype1,itype2)
-!        write (*,500)
-!        do index = 1, index_max2c(itype1,itype2)
-!          write (*,501) index, &
-!          &       nleft(itype1,itype2,index), lleft(itype1,itype2,index), &
-!          &       mleft(itype1,itype2,index), nright(itype1,itype2,index), &
-!          &       lright(itype1,itype2,index), mright(itype1,itype2,index)
-!        end do
-!        write (*,*) ' Additionally, for three-center interactions: '
-!        write (*,*) ' index_max3c = ', index_max3c(itype1,itype2)
-!        write (*,500)
-!        do index = index_max2c(itype1,itype2) + 1, &
-!        &                index_max3c(itype1,itype2)
-!          write (*,501) index, &
-!          &       nleft(itype1,itype2,index), lleft(itype1,itype2,index), &
-!          &       mleft(itype1,itype2,index), nright(itype1,itype2,index), &
-!          &       lright(itype1,itype2,index), mright(itype1,itype2,index)
-!        end do
-!      end if ! end master
-!      if (index_max3c(itype1,itype2) .gt. inter_max) then
-!        write (*,*) ' index_max3c(itype1,itype2) = ',  &
-!        &                   index_max3c(itype1,itype2)
-!        write (*,*) ' inter_max = ', inter_max
-!        write (*,*) ' Redimension index_max in parameters.inc! '
-!        stop 1
-!      end if
-!
-!    end do
-!  end do
-!
-!! **********************************************************************
-!!
-!!  =====>         1b. Three center exchange-correlation matrix element
-!!                                   (three-center OLSXC)
-!!                                  SPHERICAL APPROXIMATION
-!! **********************************************************************
-!
-!  ideriv = 0
-!
-!  if (ibcxc .eq. 1 .and. ixc_opt .eq. 1 ) then
-!    if (iammaster) then
-!      write (*,*) ' Calculating three-center exchange-correlation '
-!      write (*,*) ' interactions (OLSXC). '
-!    end if
-!    nstyles = ideriv
-!    call gleg (ctheta, ctheta_weights, ntheta_max)
-!    do looper3a = 1, nspec*nspec*nspec
-!      if (mod(looper3a + nspec*nspec*nspec*nstyles, nproc) &
-!      &        .eq. my_proc) then
-!        itmp   = looper3a
-!        itype3 = 1 + int((itmp - 1)/(nspec*nspec))
-!        itmp   = itmp - (itype3 - 1)*(nspec*nspec)
-!        itype2 = 1 + int((itmp - 1)/nspec)
-!        itmp   = itmp - (itype2 - 1)*nspec
-!        itype1 = itmp
-!
-!        rcutoff1 = rcutoffa_max(itype1)
-!        rcutoff2 = rcutoffa_max(itype2)
-!        rcutoff3 = rcutoffa_max(itype3)
-!
-!        atom1 = atom(itype1)
-!        atom2 = atom(itype2)
-!        atom3 = atom(itype3)
-!
-!        what1 = what(itype1)
-!        what2 = what(itype2)
-!        what3 = what(itype3)
-!
-!        dbc = rcutoff1 + rcutoff2
-!        dna = rcutoff3 + max(rcutoff1,rcutoff2)
-!
-!        index_max = index_max3c(itype1,itype2)
-!        do index = 1, index_max
-!          n1(index) = nleft(itype1,itype2,index)
-!          l1(index) = lleft(itype1,itype2,index)
-!          m1(index) = mleft(itype1,itype2,index)
-!          n2(index) = nright(itype1,itype2,index)
-!          l2(index) = lright(itype1,itype2,index)
-!          m2(index) = mright(itype1,itype2,index)
-!        end do
-!
-!! If the cutoffs for the atoms are too drastically different, then the grid
-!! size should be increased. Otherwise, the number of non-zero points may
-!! be too few.
-!        max_diff = max(abs(rcutoff1 - rcutoff2), &
-!        &                    abs(rcutoff2 - rcutoff3), &
-!        &                    abs(rcutoff3 - rcutoff1))
-!        if (max_diff .gt. 2.0_dp) then
-!          write (*,*) ' ************ WARNING ************* '
-!          write (*,*) ' You have at least two species which have '
-!          write (*,*) ' rcutoff''s which differ by more than 2.0 '
-!          write (*,*) ' Angstroms. It is highly advisable that you '
-!          write (*,*) ' increase the number of mesh points, so as to '
-!          write (*,*) ' avoid a case where you may end up with many '
-!          write (*,*) ' zeros, and too few non-zero elements in your '
-!          write (*,*) ' grid. '
-!        end if
-!! xc3c_SN now we call threecenter() with new option 'interaction=3'
-!        interaction = 3
-!        ispher = .true.
-!
-!! Even in case of harris option we need all interactions
-!        isorpmin = 1
-!        isorpmax = nssh(itype3)
-!
-!! Do not parallelize over ispnum, because it involves little work
-!        ispnum = isorpmax - isorpmin + 1
-!        call threecenter (itype1, itype2, itype3, index_max, iexc, &
-!        &                       interaction, nzx, nssh, n1, l1, m1, &
-!        &                       n2, l2, m2, rcutoff1, rcutoff2, rcutoff3, &
-!        &                       atom1, atom2, atom3, what1, what2, what3, &
-!        &                       dbc, dna, signature, ctheta,  &
-!        &                       ctheta_weights, isorpmin,  &
-!        &                       isorpmax, ispnum, iammaster, ispher)
-!
-!      end if ! end MPI which node
-!    end do
-!  end if
+! **********************************************************************
+
+  ideriv = 0
+
+  if (ibcxc .eq. 1 .and. ixc_opt .eq. 1 ) then
+    if (iammaster) then
+      write (*,*) ' Calculating three-center exchange-correlation '
+      write (*,*) ' interactions (SNXC). '
+    end if
+    nstyles = ideriv
+    call gleg (ctheta, ctheta_weights, ntheta_max)
+    do looper3a = 1, nspec*nspec*nspec
+      if (mod(looper3a + nspec*nspec*nspec*nstyles, nproc) &
+      &        .eq. my_proc) then
+        itmp   = looper3a
+        itype3 = 1 + int((itmp - 1)/(nspec*nspec))
+        itmp   = itmp - (itype3 - 1)*(nspec*nspec)
+        itype2 = 1 + int((itmp - 1)/nspec)
+        itmp   = itmp - (itype2 - 1)*nspec
+        itype1 = itmp
+
+        rcutoff1 = rcutoffa_max(itype1)
+        rcutoff2 = rcutoffa_max(itype2)
+        rcutoff3 = rcutoffa_max(itype3)
+
+        atom1 = atom(itype1)
+        atom2 = atom(itype2)
+        atom3 = atom(itype3)
+
+        what1 = what(itype1)
+        what2 = what(itype2)
+        what3 = what(itype3)
+
+        dbc = rcutoff1 + rcutoff2
+        dna = rcutoff3 + max(rcutoff1,rcutoff2)
+
+        index_max = index_max3c(itype1,itype2)
+        do index = 1, index_max
+          n1(index) = nleft(itype1,itype2,index)
+          l1(index) = lleft(itype1,itype2,index)
+          m1(index) = mleft(itype1,itype2,index)
+          n2(index) = nright(itype1,itype2,index)
+          l2(index) = lright(itype1,itype2,index)
+          m2(index) = mright(itype1,itype2,index)
+        end do
+
+! If the cutoffs for the atoms are too drastically different, then the grid
+! size should be increased. Otherwise, the number of non-zero points may
+! be too few.
+        max_diff = max(abs(rcutoff1 - rcutoff2), &
+        &                    abs(rcutoff2 - rcutoff3), &
+        &                    abs(rcutoff3 - rcutoff1))
+        if (max_diff .gt. 2.0_dp) then
+          write (*,*) ' ************ WARNING ************* '
+          write (*,*) ' You have at least two species which have '
+          write (*,*) ' rcutoff''s which differ by more than 2.0 '
+          write (*,*) ' Angstroms. It is highly advisable that you '
+          write (*,*) ' increase the number of mesh points, so as to '
+          write (*,*) ' avoid a case where you may end up with many '
+          write (*,*) ' zeros, and too few non-zero elements in your '
+          write (*,*) ' grid. '
+        end if
+! xc3c_SN now we call threecenter() with new option 'interaction=3'
+        interaction = 3
+        ispher = .false.
+
+! Even in case of harris option we need all interactions
+        isorpmin = 1
+        isorpmax = nssh(itype3)
+
+! Do not parallelize over ispnum, because it involves little work
+        ispnum = isorpmax - isorpmin + 1
+        call threecenter (itype1, itype2, itype3, index_max, iexc, &
+        &                       interaction, nzx, nssh, n1, l1, m1, &
+        &                       n2, l2, m2, rcutoff1, rcutoff2, rcutoff3, &
+        &                       atom1, atom2, atom3, what1, what2, what3, &
+        &                       dbc, dna, signature, ctheta,  &
+        &                       ctheta_weights, isorpmin, &
+        &                       isorpmax, ispnum, iammaster, ispher)
+
+      end if ! end MPI which node
+    end do
+  end if
 ! xc3c_SN: end of the added part
 
 
-! MPI CLEAN UP
+! **********************************************************************
+!
+!  =====>         2. Three center neutral atom matrix element
+!
+! **********************************************************************
+  if (ibcna .eq. 1) then
+    if (iammaster) then
+      write (*,*) ' Calculating three-center neutral atom and '
+      write (*,*) ' charged atom interactions. '
+    end if
+    call gleg (ctheta, ctheta_weights, ntheta_max)
+    do looper3a = 1, nspec*nspec*nspec
+      if (mod(looper3a + nspec*nspec*nspec*nstyles, nproc) &
+      &        .eq. my_proc) then
+        itmp   = looper3a
+        itype3 = 1 + int((itmp - 1)/(nspec*nspec))
+        itmp   = itmp - (itype3 - 1)*(nspec*nspec)
+        itype2 = 1 + int((itmp - 1)/nspec)
+        itmp   = itmp - (itype2 - 1)*nspec
+        itype1 = itmp
+
+        rcutoff1 = rcutoffa_max(itype1)
+        rcutoff2 = rcutoffa_max(itype2)
+        rcutoff3 = rcutoffa_max(itype3)
+
+        atom1 = atom(itype1)
+        atom2 = atom(itype2)
+        atom3 = atom(itype3)
+
+        what1 = what(itype1)
+        what2 = what(itype2)
+        what3 = what(itype3)
+
+        dbc = rcutoff1 + rcutoff2
+        dna = rcutoff3 + max(rcutoff1,rcutoff2)
+
+        index_max = index_max3c(itype1,itype2)
+        do index = 1, index_max
+          n1(index) = nleft(itype1,itype2,index)
+          l1(index) = lleft(itype1,itype2,index)
+          m1(index) = mleft(itype1,itype2,index)
+          n2(index) = nright(itype1,itype2,index)
+          l2(index) = lright(itype1,itype2,index)
+          m2(index) = mright(itype1,itype2,index)
+        end do
+
+! If the cutoffs for the atoms are too drastically different, then the grid
+! size should be increased. Otherwise, the number of non-zero points may
+! be too few.
+        max_diff = max(abs(rcutoff1 - rcutoff2), &
+        &                    abs(rcutoff2 - rcutoff3), &
+        &                    abs(rcutoff3 - rcutoff1))
+        if (max_diff .gt. 2.0_dp) then
+          write (*,*) ' ************ WARNING ************* '
+          write (*,*) ' You have at least two species which have '
+          write (*,*) ' rcutoff''s which differ by more than 2.0 '
+          write (*,*) ' Angstroms. It is highly advisable that you '
+          write (*,*) ' increase the number of mesh points, so as to '
+          write (*,*) ' avoid a case where you may end up with many '
+          write (*,*) ' zeros, and too few non-zero elements in your '
+          write (*,*) ' grid. '
+        end if
+
+        interaction = 1
+        ispher = .false.
+        if (idogs .eq. 1) then
+          isorpmin = 1
+          isorpmax = nssh(itype3)
+        else
+          isorpmin = 0
+          isorpmax = 0
+        end if
+        if (iharris .eq. 1) isorpmin = 0
+
+! Do not parallelize over ispnum, because it involves little work
+        ispnum = isorpmax - isorpmin + 1
+        call threecenter (itype1, itype2, itype3, index_max, iexc, &
+        &                       interaction, nzx, nssh, n1, l1, m1, &
+        &                       n2, l2, m2, rcutoff1, rcutoff2, rcutoff3, &
+        &                       atom1, atom2, atom3, what1, what2, what3, &
+        &                       dbc, dna, signature, &
+        &                       ctheta, ctheta_weights, isorpmin, &
+        &                       isorpmax, ispnum, iammaster, ispher)
+      end if ! end MPI which node
+    end do
+  end if
+
+! ======================================================================
+! II. Compute purely two center cases (overlap, dipole, coulomb
+! integrals, and kinetic energy).
+! ======================================================================
+  do looper2 = 1, nspec*nspec
+    if (mod(looper2,nproc) .eq. my_proc) then
+      itmp   = looper2
+      itype2 = 1 + int((itmp - 1)/nspec)
+      itmp   = itmp - (itype2 - 1)*nspec
+      itype1 = itmp
+
+      nzx1 = nzx(itype1)
+      nzx2 = nzx(itype2)
+
+      rcutoff1 = rcutoffa_max(itype1)
+      rcutoff2 = rcutoffa_max(itype2)
+
+      nssh2 = nssh(itype2)
+
+      atom1 = atom(itype1)
+      atom2 = atom(itype2)
+
+      what1 = what(itype1)
+      what2 = what(itype2)
+
+      index_max = index_max2c(itype1,itype2)
+      do index = 1, index_max
+        n1(index) = nleft(itype1,itype2,index)
+        l1(index) = lleft(itype1,itype2,index)
+        m1(index) = mleft(itype1,itype2,index)
+        n2(index) = nright(itype1,itype2,index)
+        l2(index) = lright(itype1,itype2,index)
+        m2(index) = mright(itype1,itype2,index)
+      end do
+
+! **********************************************************************
+!
+!  =====>         1. Kinetic
+!
+! **********************************************************************
+      if (ikinetic .eq. 1) then
+        call kinetic (itype1, itype2, atom1, atom2, what1, what2, &
+        &                   nzx1, nzx2, rcutoff1, rcutoff2, nssh, lssh, &
+        &                   index_max, n1, l1, m1, n2, l2, m2, signature, &
+        &                   iammaster)
+      end if
+    end if
+  end do
+
+
+!
+! SPHERIC APPROXIMATION (only OLSXC Method)
+!
+!++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+!  set lssh = lsshxc = 0 ... only s-like orbitals
+  lssh = 0
+  lsshxc = 0
+
+! **********************************************************************
+! Call the following subroutines to determine the needed matrix elements
+! for each itype1, itype2 pair.
+  do itype1 = 1, nspec
+    do itype2 = 1, nspec
+      call mk_index (itype1, itype2, nspec_max, nsh_max, inter_max, &
+      &                   nssh, lssh, nleft, lleft, mleft, nright, &
+      &                   lright, mright, index_max2c, index_max3c)
+
+! Write out the results of mk_index
+      if (iammaster) then
+        write (*,*) '  '
+        write (*,*) '  '
+        write (*,*) ' species 1 = ', itype1, ' species 2 = ', itype2
+        write (*,100)
+        write (*,*) ' For two-center interactions: '
+        write (*,*) ' index_max2c = ', index_max2c(itype1,itype2)
+        write (*,500)
+        do index = 1, index_max2c(itype1,itype2)
+          write (*,501) index, &
+          &       nleft(itype1,itype2,index), lleft(itype1,itype2,index), &
+          &       mleft(itype1,itype2,index), nright(itype1,itype2,index), &
+          &       lright(itype1,itype2,index), mright(itype1,itype2,index)
+        end do
+        write (*,*) ' Additionally, for three-center interactions: '
+        write (*,*) ' index_max3c = ', index_max3c(itype1,itype2)
+        write (*,500)
+        do index = index_max2c(itype1,itype2) + 1, &
+        &                index_max3c(itype1,itype2)
+          write (*,501) index, &
+          &       nleft(itype1,itype2,index), lleft(itype1,itype2,index), &
+          &       mleft(itype1,itype2,index), nright(itype1,itype2,index), &
+          &       lright(itype1,itype2,index), mright(itype1,itype2,index)
+        end do
+      end if ! end master
+      if (index_max3c(itype1,itype2) .gt. inter_max) then
+        write (*,*) ' index_max3c(itype1,itype2) = ',  &
+        &                   index_max3c(itype1,itype2)
+        write (*,*) ' inter_max = ', inter_max
+        write (*,*) ' Redimension index_max in parameters.inc! '
+        stop 1
+      end if
+
+    end do
+  end do
+
+! **********************************************************************
+!
+!  =====>         1b. Three center exchange-correlation matrix element
+!                                   (three-center OLSXC)
+!                                  SPHERICAL APPROXIMATION
+! **********************************************************************
+
+  ideriv = 0
+
+  if (ibcxc .eq. 1 .and. ixc_opt .eq. 1 ) then
+    if (iammaster) then
+      write (*,*) ' Calculating three-center exchange-correlation '
+      write (*,*) ' interactions (OLSXC). '
+    end if
+    nstyles = ideriv
+    call gleg (ctheta, ctheta_weights, ntheta_max)
+    do looper3a = 1, nspec*nspec*nspec
+      if (mod(looper3a + nspec*nspec*nspec*nstyles, nproc) &
+      &        .eq. my_proc) then
+        itmp   = looper3a
+        itype3 = 1 + int((itmp - 1)/(nspec*nspec))
+        itmp   = itmp - (itype3 - 1)*(nspec*nspec)
+        itype2 = 1 + int((itmp - 1)/nspec)
+        itmp   = itmp - (itype2 - 1)*nspec
+        itype1 = itmp
+
+        rcutoff1 = rcutoffa_max(itype1)
+        rcutoff2 = rcutoffa_max(itype2)
+        rcutoff3 = rcutoffa_max(itype3)
+
+        atom1 = atom(itype1)
+        atom2 = atom(itype2)
+        atom3 = atom(itype3)
+
+        what1 = what(itype1)
+        what2 = what(itype2)
+        what3 = what(itype3)
+
+        dbc = rcutoff1 + rcutoff2
+        dna = rcutoff3 + max(rcutoff1,rcutoff2)
+
+        index_max = index_max3c(itype1,itype2)
+        do index = 1, index_max
+          n1(index) = nleft(itype1,itype2,index)
+          l1(index) = lleft(itype1,itype2,index)
+          m1(index) = mleft(itype1,itype2,index)
+          n2(index) = nright(itype1,itype2,index)
+          l2(index) = lright(itype1,itype2,index)
+          m2(index) = mright(itype1,itype2,index)
+        end do
+
+! If the cutoffs for the atoms are too drastically different, then the grid
+! size should be increased. Otherwise, the number of non-zero points may
+! be too few.
+        max_diff = max(abs(rcutoff1 - rcutoff2), &
+        &                    abs(rcutoff2 - rcutoff3), &
+        &                    abs(rcutoff3 - rcutoff1))
+        if (max_diff .gt. 2.0_dp) then
+          write (*,*) ' ************ WARNING ************* '
+          write (*,*) ' You have at least two species which have '
+          write (*,*) ' rcutoff''s which differ by more than 2.0 '
+          write (*,*) ' Angstroms. It is highly advisable that you '
+          write (*,*) ' increase the number of mesh points, so as to '
+          write (*,*) ' avoid a case where you may end up with many '
+          write (*,*) ' zeros, and too few non-zero elements in your '
+          write (*,*) ' grid. '
+        end if
+! xc3c_SN now we call threecenter() with new option 'interaction=3'
+        interaction = 3
+        ispher = .true.
+
+! Even in case of harris option we need all interactions
+        isorpmin = 1
+        isorpmax = nssh(itype3)
+
+! Do not parallelize over ispnum, because it involves little work
+        ispnum = isorpmax - isorpmin + 1
+        call threecenter (itype1, itype2, itype3, index_max, iexc, &
+        &                       interaction, nzx, nssh, n1, l1, m1, &
+        &                       n2, l2, m2, rcutoff1, rcutoff2, rcutoff3, &
+        &                       atom1, atom2, atom3, what1, what2, what3, &
+        &                       dbc, dna, signature, ctheta,  &
+        &                       ctheta_weights, isorpmin,  &
+        &                       isorpmax, ispnum, iammaster, ispher)
+
+      end if ! end MPI which node
+    end do
+  end if
+! xc3c_SN: end of the added part
+
+
   if (iammaster) then
     call pp_end()
     call pot_end()
     call wf_end()
     call xc_end()
   end if
+! MPI CLEAN UP
   call Finalize_MPI
 
 ! Format Statements

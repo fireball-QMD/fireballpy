@@ -211,6 +211,7 @@ module M_system
   real(double), dimension (:, :, :, :), allocatable :: vca
   real(double), dimension (:, :, :, :), allocatable :: ewaldlr
   real(double), dimension (:, :, :, :), allocatable :: h_mat
+  real(double), dimension (:, :, :, :), allocatable :: h_mat0   ! h^0_{mu nu}: H a cargas neutras (Kscf=1, dQ=0)
   real(double), dimension (:, :, :, :), allocatable :: t_mat
   real(double), dimension (:, :, :, :), allocatable :: vna
   real(double), dimension (:, :, :, :), allocatable :: ewaldqmmm
@@ -251,7 +252,6 @@ module M_system
   real(double), dimension (:, :, :), allocatable :: dxcdcc_zw
   real(double), dimension (:, :), allocatable :: ft
   real(double), dimension (:, :), allocatable :: dusr
-  real(double), dimension (:, :, :), allocatable :: fotxc 
   real(double), dimension (:, :, :), allocatable :: fotxc_ca
   real(double), dimension (:, :, :), allocatable :: faca 
   real(double), dimension (:, :, :), allocatable :: fotca
@@ -278,8 +278,26 @@ module M_system
 
   real(double), dimension(3, 3, 5) :: amat
   
-  real(double), dimension (:,:,:,:,:,:), allocatable :: g_h
-  real(double), dimension (:,:,:,:,:,:), allocatable :: g_xc  
+  real(double), dimension (:,:,:,:,:), allocatable :: g_h
+  real(double), dimension (:,:,:,:,:), allocatable :: g_xc
+  ! N^gamma_munu = <phi_mu|(phi^S_gamma)^2|phi_nu>, gamma: global shell index
+  real(double), dimension (:,:,:,:,:), allocatable :: den_or
+  ! M^gamma_alphabeta = <phi^S_alpha|(phi^S_gamma)^2|phi^S_beta>, gamma: global shell index
+  real(double), dimension (:,:,:,:,:), allocatable :: den_sh
+  ! Speed up SCF loop (seccion 4 de doc/XC_basic_claude_fable.tex): tablas Q-independientes
+  ! adicionales rellenadas en Kscf=1 para reconstruir densidades/vxc sin interpolar en Kscf>1.
+  ! iscf_fast=0 recupera el camino clasico (reensamblado con interpolaciones en cada paso).
+  integer :: iscf_fast = 1
+  ! pieza 2c (L+R) de den_or/den_sh: reconstruye rhoij_off/arhoij_off (gamma: indice global)
+  real(double), dimension (:,:,:,:,:), allocatable :: denij_or
+  real(double), dimension (:,:,:,:,:), allocatable :: denij_sh
+  ! pieza self (atomo i sobre si mismo, indice de shell local): reconstruye rhoi_on/arhoi_on
+  real(double), dimension (:,:,:,:), allocatable :: deni_or
+  real(double), dimension (:,:,:,:), allocatable :: deni_sh
+  ! termino constante VXC_0 (isorp=0) off-site de assemble_xc_2c, congelado en Kscf=1
+  real(double), dimension (:,:,:,:), allocatable :: vxc_ca0
+  ! integrales de Coulomb 2c por par de vecinos (assemble_usr), congeladas en Kscf=1
+  real(double), dimension (:,:,:,:), allocatable :: coulomb_mat
   real(double), dimension (:,:,:,:,:), allocatable :: f_xc
   real(double), dimension (:,:,:,:), allocatable :: exc_aa
   real(double), dimension (:,:,:,:), allocatable :: vxc_aa
@@ -288,6 +306,11 @@ module M_system
   real(double), dimension (:,:), allocatable :: f_xc_shell
   real(double), dimension (:), allocatable :: exc_aa_shell
   real(double), dimension (:), allocatable :: vxc_aa_shell
-  integer, dimension (:), allocatable :: fix_shell_charge 
+  integer, dimension (:), allocatable :: fix_shell_charge
+  ! Seleccion de shells fijadas a carga neutra en stationary_charges (se fija desde Python
+  ! con set_fix_shells): 0 = ninguna, 1 = solo shells d, 2 = shells con Qneutral=0 (default),
+  ! 3 = mascara de usuario en fix_shell_user (indice de shell global: atomo1-shells, atomo2-...)
+  integer :: ifix_shells = 2
+  integer, dimension (:), allocatable :: fix_shell_user
   integer, dimension(:,:), allocatable :: orb2shell
 end module M_system

@@ -1,11 +1,21 @@
 ! This routine calculates the average densities with charge transfer.
-subroutine average_ca_rho ()
+! imode = 0: normal. En Kscf=1 ensamblado completo + tabulacion de den_or/den_sh/denij/deni;
+!            en Kscf>1 (si iscf_fast=1) reconstruccion por contraccion de las tablas con Qin,
+!            sin llamadas a doscentros/trescentros (Speed up SCF loop, seccion 4 del tex).
+!            La reconstruccion NO actualiza los arrays de derivadas (rhop_*, arhop_*), que solo
+!            consumen las rutinas de fuerzas tras converger el SCF.
+! imode = 1: fuerza el ensamblado completo (refresh de derivadas antes de getforces).
+subroutine average_ca_rho (imode)
   use, intrinsic :: iso_fortran_env, only: double => real64
   use M_system, only: iforce, xc_overtol, natoms, ratom, imass, neigh_max, Kscf, neigh_b, neigh_j, neighn, neigh_comb, neigh_comj, &
     & neigh_comm, neigh_comn, neigh_back, numorb_max, Qin, rho_off, rhoij_off, sm_mat, spm_mat, rho_on, arho_on, rhoi_on, &
-    & arhoi_on, arhop_on, rhop_on, arhoij_off, arho_off, arhopij_off, arhop_off, rhop_off, rhopij_off, xl
-  use M_fdata, only: nssh, num_orb, nsh_max
+    & arhoi_on, arhop_on, rhop_on, arhoij_off, arho_off, arhopij_off, arhop_off, rhop_off, rhopij_off, xl, &
+    & den_or, den_sh, denij_or, denij_sh, deni_or, deni_sh, iscf_fast, &
+    & neigh_self, get_shell_ofatom_issh, nssh_tot, get_issh_ofshell, get_iatom_ofshell
+  use M_fdata, only: nssh, num_orb, nsh_max, TWOCENTER_OVERLAPS, TWOCENTER_DEN_L, TWOCENTER_DEN_R, TWOCENTER_DEN_A, &
+    & TWOCENTER_DENS_L, TWOCENTER_DENS_R, TWOCENTER_DENS_A
   implicit none
+  integer, intent(in) :: imode
   integer iatom
   integer ibeta
   integer imu
@@ -25,6 +35,12 @@ subroutine average_ca_rho ()
   integer jssh
   integer mbeta
   integer mneigh
+  integer gsh
+  integer matom
+  ! den_or/den_sh verification
+  logical, parameter :: debug_den = .false.
+  integer kalpha
+  real(double) qk, val, err_on, err_off, err_sh
   real(double) cost
   real(double) x
   real(double) y
@@ -54,6 +70,13 @@ subroutine average_ca_rho ()
   !
   real(double) rho_modified
 
+  ! Fast path: en Kscf>1 todas las integrales ya estan tabuladas (Kscf=1); las densidades
+  ! son lineales en Q, asi que basta contraer las tablas con las cargas actuales.
+  if (imode .eq. 0 .and. Kscf .gt. 1 .and. iscf_fast .eq. 1) then
+    call rebuild_rho_from_tables ()
+    return
+  end if
+
   rhomx=0.0d0
   rhompx=0.0d0
 
@@ -61,6 +84,15 @@ subroutine average_ca_rho ()
 
   if (Kscf .eq. 1) sm_mat = 0.0d0
   if (Kscf .eq. 1 .and. iforce .eq. 1) spm_mat = 0.0d0
+  ! N^gamma_munu and M^gamma_alphabeta are charge-independent: fill only at Kscf=1
+  if (Kscf .eq. 1) then
+    den_or = 0.0d0
+    den_sh = 0.0d0
+    denij_or = 0.0d0
+    denij_sh = 0.0d0
+    deni_or = 0.0d0
+    deni_sh = 0.0d0
+  end if
   
   !   -----  ON SITE PART  ------
   ! We assemble on-site density matrices
@@ -87,7 +119,7 @@ subroutine average_ca_rho ()
     y = 0.0d0
     in2 = in1
     isorp = 0
-    interaction0 = 23
+    interaction0 = TWOCENTER_OVERLAPS
     in3 = in2
     sighat = 0.0d0
     eps = 0.0d0
@@ -96,8 +128,18 @@ subroutine average_ca_rho ()
       eps(issh,issh) = 1.0d0
     enddo
     call doscentrosS (interaction0, isorp, iforce, in1, in2, in3, y, eps, sm, spm)
+    ! store the raw on-site spherical overlap in the self-neighbor slot of sm_mat
+    ! (used by stationary_charges to build dn_bar/dQ on-site)
+    if (Kscf .eq. 1) then
+      matom = neigh_self(iatom)
+      do jssh = 1, nssh(in1)
+        do issh = 1, nssh(in1)
+          sm_mat(issh,jssh,matom,iatom) = sm(issh,jssh)
+        end do
+      end do
+    end if
 
-    do ineigh = 1, neighn(iatom) 
+    do ineigh = 1, neighn(iatom)
       rhomp_2c  = 0.0d0
       mbeta = neigh_b(ineigh,iatom)
       jatom = neigh_j(ineigh,iatom)
@@ -118,9 +160,9 @@ subroutine average_ca_rho ()
       call deps2cent (r1, r2, eps, deps)
 
       ! CALL DOSCENTROS AND GET VXC FOR ATM CASE - AVERAGE DENSITY APPROXIMATION
+      interaction = TWOCENTER_DEN_A
+      interaction0 = TWOCENTER_DENS_A
       if (iatom .eq. jatom .and. mbeta .eq. 0) then
-        interaction = 17
-        interaction0 = 22
         in3 = in1
         do isorp = 1, nssh(in2)
           call doscentros (interaction, isorp, iforce, in1, in2, in3, y, eps, deps, rhomx, rhompx)
@@ -141,10 +183,25 @@ subroutine average_ca_rho ()
               rhomi_2c(imu,inu) = rhomi_2c(imu,inu) + rhomm(imu,inu)*Qin(isorp,jatom)
             end do   ! endo imu
           end do   ! enddo inu
+          if (Kscf .eq. 1) then
+            gsh = get_shell_ofatom_issh(jatom,isorp)
+            matom = neigh_self(iatom)
+            do inu = 1, num_orb(in1)
+              do imu = 1, num_orb(in3)
+                den_or(gsh,imu,inu,matom,iatom) = den_or(gsh,imu,inu,matom,iatom) + rhomx(imu,inu)
+                ! pieza self (jatom=iatom): indice de shell local isorp
+                deni_or(isorp,imu,inu,iatom) = deni_or(isorp,imu,inu,iatom) + rhomx(imu,inu)
+              end do
+            end do
+            do inu = 1, nssh(in1)
+              do imu = 1, nssh(in3)
+                den_sh(gsh,imu,inu,matom,iatom) = den_sh(gsh,imu,inu,matom,iatom) + rhomm(imu,inu)
+                deni_sh(isorp,imu,inu,iatom) = deni_sh(isorp,imu,inu,iatom) + rhomm(imu,inu)
+              end do
+            end do
+          end if
         end do   ! endo do isorp
       else
-        interaction = 17
-        interaction0 = 22
         in3 = in1
         do isorp = 1, nssh(in2)
           call doscentros (interaction, isorp, iforce, in1, in2, in3, y, eps, deps, rhomx, rhompx)
@@ -161,8 +218,22 @@ subroutine average_ca_rho ()
             do imu = 1, nssh(in3)
               rhom_2c(imu,inu) = rhom_2c(imu,inu) + rhomm(imu,inu)*Qin(isorp,jatom)
               rhomp_2c(:,imu,inu) = rhomp_2c(:,imu,inu) +  rhompm(:,imu,inu)*Qin(isorp,jatom)
-            end do   
-          end do   
+            end do
+          end do
+          if (Kscf .eq. 1) then
+            gsh = get_shell_ofatom_issh(jatom,isorp)
+            matom = neigh_self(iatom)
+            do inu = 1, num_orb(in1)
+              do imu = 1, num_orb(in3)
+                den_or(gsh,imu,inu,matom,iatom) = den_or(gsh,imu,inu,matom,iatom) + rhomx(imu,inu)
+              end do
+            end do
+            do inu = 1, nssh(in1)
+              do imu = 1, nssh(in3)
+                den_sh(gsh,imu,inu,matom,iatom) = den_sh(gsh,imu,inu,matom,iatom) + rhomm(imu,inu)
+              end do
+            end do
+          end if
         end do   !isorp
       end if   ! end if (iatom.eq.jatom)
       ! Now assemble the derivative average density using the density pieces from above.
@@ -261,9 +332,24 @@ subroutine average_ca_rho ()
           do inu = 1, nssh(in2)
             do imu = 1, nssh(in1)
               rhom_3c(imu,inu,mneigh,iatom) = rhom_3c(imu,inu,mneigh,iatom) + rhomm(imu,inu)*Qin(isorp,ialp)
-              rhom_3c(inu,imu,jneigh,jatom) = rhom_3c(imu,inu,mneigh,iatom) 
+              rhom_3c(inu,imu,jneigh,jatom) = rhom_3c(imu,inu,mneigh,iatom)
             end do
           end do
+          if (Kscf .eq. 1) then
+            gsh = get_shell_ofatom_issh(ialp,isorp)
+            do inu = 1, num_orb(in2)
+              do imu = 1, num_orb(in1)
+                den_or(gsh,imu,inu,mneigh,iatom) = den_or(gsh,imu,inu,mneigh,iatom) + rhomx(imu,inu)
+                den_or(gsh,inu,imu,jneigh,jatom) = den_or(gsh,imu,inu,mneigh,iatom)
+              end do
+            end do
+            do inu = 1, nssh(in2)
+              do imu = 1, nssh(in1)
+                den_sh(gsh,imu,inu,mneigh,iatom) = den_sh(gsh,imu,inu,mneigh,iatom) + rhomm(imu,inu)
+                den_sh(gsh,inu,imu,jneigh,jatom) = den_sh(gsh,imu,inu,mneigh,iatom)
+              end do
+            end do
+          end if
         end do   ! do isorp
       end if
     end do   ! end do neigh_comn(ialp)
@@ -292,8 +378,8 @@ subroutine average_ca_rho ()
         end if
         call epsilon (r2, sighat, eps)
         call deps2cent (r1, r2, eps, deps)
-        interaction = 15
-        interaction0 = 20
+        interaction = TWOCENTER_DEN_L
+        interaction0 = TWOCENTER_DENS_L
         in3 = in1
         rhom_2c = 0.0d0
         rhomp_2c = 0.0d0
@@ -314,10 +400,25 @@ subroutine average_ca_rho ()
               rhomp_2c(:,imu,inu) = rhomp_2c(:,imu,inu) + rhompm(:,imu,inu)*Qin(isorp,iatom)
             end do
           end do
+          if (Kscf .eq. 1) then
+            gsh = get_shell_ofatom_issh(iatom,isorp)
+            do inu = 1, num_orb(in2)
+              do imu = 1, num_orb(in1)
+                den_or(gsh,imu,inu,ineigh,iatom) = den_or(gsh,imu,inu,ineigh,iatom) + rhomx(imu,inu)
+                denij_or(gsh,imu,inu,ineigh,iatom) = denij_or(gsh,imu,inu,ineigh,iatom) + rhomx(imu,inu)
+              end do
+            end do
+            do inu = 1, nssh(in2)
+              do imu = 1, nssh(in1)
+                den_sh(gsh,imu,inu,ineigh,iatom) = den_sh(gsh,imu,inu,ineigh,iatom) + rhomm(imu,inu)
+                denij_sh(gsh,imu,inu,ineigh,iatom) = denij_sh(gsh,imu,inu,ineigh,iatom) + rhomm(imu,inu)
+              end do
+            end do
+          end if
         end do
 
-        interaction = 16
-        interaction0 = 21
+        interaction = TWOCENTER_DEN_R
+        interaction0 = TWOCENTER_DENS_R
         in3 = in2
         do isorp = 1, nssh(in3)
           call doscentros (interaction, isorp, iforce, in1, in3, in2, y, eps, deps, rhomx, rhompx)
@@ -336,10 +437,25 @@ subroutine average_ca_rho ()
               rhomp_2c(:,imu,inu) =  rhomp_2c(:,imu,inu) + rhompm(:,imu,inu)*Qin(isorp,jatom)
             end do
           end do
+          if (Kscf .eq. 1) then
+            gsh = get_shell_ofatom_issh(jatom,isorp)
+            do inu = 1, num_orb(in2)
+              do imu = 1, num_orb(in1)
+                den_or(gsh,imu,inu,ineigh,iatom) = den_or(gsh,imu,inu,ineigh,iatom) + rhomx(imu,inu)
+                denij_or(gsh,imu,inu,ineigh,iatom) = denij_or(gsh,imu,inu,ineigh,iatom) + rhomx(imu,inu)
+              end do
+            end do
+            do inu = 1, nssh(in2)
+              do imu = 1, nssh(in1)
+                den_sh(gsh,imu,inu,ineigh,iatom) = den_sh(gsh,imu,inu,ineigh,iatom) + rhomm(imu,inu)
+                denij_sh(gsh,imu,inu,ineigh,iatom) = denij_sh(gsh,imu,inu,ineigh,iatom) + rhomm(imu,inu)
+              end do
+            end do
+          end if
         end do
         if (Kscf .eq. 1) then
           isorp = 0
-          interaction0 = 23
+          interaction0 = 20
           in3 = in2
           call doscentrosS (interaction0, isorp, iforce, in1, in2, in3, y, eps, sm, spm)
           do inu = 1, nssh(in2)
@@ -378,5 +494,140 @@ subroutine average_ca_rho ()
     end do   ! do ineigh
   end do    ! do iatom
 
+  ! Verification: contract den_or/den_sh with current Qin and compare with the
+  ! densities assembled above. At Kscf>1 this also validates that the Kscf=1
+  ! cached integrals are charge-independent.
+  if (debug_den) then
+    err_on = 0.0d0
+    err_off = 0.0d0
+    err_sh = 0.0d0
+    do iatom = 1, natoms
+      in1 = imass(iatom)
+      matom = neigh_self(iatom)
+      do ineigh = 1, neighn(iatom)
+        jatom = neigh_j(ineigh,iatom)
+        mbeta = neigh_b(ineigh,iatom)
+        in2 = imass(jatom)
+        if (iatom .eq. jatom .and. mbeta .eq. 0) then
+          do inu = 1, num_orb(in1)
+            do imu = 1, num_orb(in1)
+              val = 0.0d0
+              do kalpha = 1, nssh_tot
+                qk = Qin(get_issh_ofshell(kalpha), get_iatom_ofshell(kalpha))
+                val = val + qk*den_or(kalpha,imu,inu,matom,iatom)
+              end do
+              err_on = max(err_on, abs(val - rho_on(imu,inu,iatom)))
+            end do
+          end do
+        else
+          do inu = 1, num_orb(in2)
+            do imu = 1, num_orb(in1)
+              val = 0.0d0
+              do kalpha = 1, nssh_tot
+                qk = Qin(get_issh_ofshell(kalpha), get_iatom_ofshell(kalpha))
+                val = val + qk*den_or(kalpha,imu,inu,ineigh,iatom)
+              end do
+              err_off = max(err_off, abs(val - rho_off(imu,inu,ineigh,iatom)))
+            end do
+          end do
+          do jssh = 1, nssh(in2)
+            do issh = 1, nssh(in1)
+              val = 0.0d0
+              do kalpha = 1, nssh_tot
+                qk = Qin(get_issh_ofshell(kalpha), get_iatom_ofshell(kalpha))
+                val = val + qk*den_sh(kalpha,issh,jssh,ineigh,iatom)
+              end do
+              err_sh = max(err_sh, abs(val - arho_off(issh,jssh,ineigh,iatom)*sm_mat(issh,jssh,ineigh,iatom)))
+            end do
+          end do
+        end if
+      end do
+    end do
+    write (*,'(A,I3,3(A,ES12.4))') ' DEN_CHECK Kscf=', Kscf, '  max|N.Q-rho_on|=', err_on, &
+      & '  max|N.Q-rho_off|=', err_off, '  max|M.Q-n_sh_off|=', err_sh
+  end if
+
   deallocate (rhom_3c)
+  return
+
+contains
+
+  ! Reconstruye todas las densidades de valor contrayendo las tablas Kscf=1 con Qin.
+  ! Reproduce exactamente (salvo redondeo por orden de suma) el ensamblado completo:
+  !   rho_on    = den_or(:, :, :, matom) . Qg          rhoi_on   = deni_or . Qin(:,iatom)
+  !   arho_on   = (den_sh(matom) . Qg)/sm              arhoi_on  = (deni_sh . Qin)/sm
+  !   rho_off   = den_or . Qg   (2c L+R + 3c)          rhoij_off = denij_or . Qg  (solo 2c)
+  !   arho_off  = (den_sh . Qg)/sm                     arhoij_off= (denij_sh . Qg)/sm
+  ! con el mismo clamp de sm por xc_overtol que el camino completo. Los arrays de
+  ! derivadas (rhop_*, arhop_*) NO se tocan: se refrescan con imode=1 antes de las fuerzas.
+  subroutine rebuild_rho_from_tables ()
+    integer kiatom, kineigh, kjatom, kmbeta, kin1, kin2, kimu, kinu, kissh, kjssh, kmatom, kgsh
+    real(double), dimension (nssh_tot) :: Qg
+    real(double) smval
+
+    do kgsh = 1, nssh_tot
+      Qg(kgsh) = Qin(get_issh_ofshell(kgsh), get_iatom_ofshell(kgsh))
+    end do
+
+    rho_on = 0.0d0
+    rhoi_on = 0.0d0
+    arho_on = 0.0d0
+    arhoi_on = 0.0d0
+    rho_off = 0.0d0
+    rhoij_off = 0.0d0
+    arho_off = 0.0d0
+    arhoij_off = 0.0d0
+
+    do kiatom = 1, natoms
+      kin1 = imass(kiatom)
+      kmatom = neigh_self(kiatom)
+      do kinu = 1, num_orb(kin1)
+        do kimu = 1, num_orb(kin1)
+          rho_on(kimu,kinu,kiatom) = dot_product(den_or(:,kimu,kinu,kmatom,kiatom), Qg)
+          rhoi_on(kimu,kinu,kiatom) = dot_product(deni_or(1:nssh(kin1),kimu,kinu,kiatom), Qin(1:nssh(kin1),kiatom))
+        end do
+      end do
+      do kjssh = 1, nssh(kin1)
+        do kissh = 1, nssh(kin1)
+          smval = sm_mat(kissh,kjssh,kmatom,kiatom)
+          if (abs(smval) .lt. xc_overtol) then
+            if (smval .gt. 0.0d0) then
+              smval = xc_overtol
+            else
+              smval = -xc_overtol
+            end if
+          end if
+          arho_on(kissh,kjssh,kiatom) = dot_product(den_sh(:,kissh,kjssh,kmatom,kiatom), Qg)/smval
+          arhoi_on(kissh,kjssh,kiatom) = dot_product(deni_sh(1:nssh(kin1),kissh,kjssh,kiatom), Qin(1:nssh(kin1),kiatom))/smval
+        end do
+      end do
+      do kineigh = 1, neighn(kiatom)
+        kmbeta = neigh_b(kineigh,kiatom)
+        kjatom = neigh_j(kineigh,kiatom)
+        if (kiatom .eq. kjatom .and. kmbeta .eq. 0) cycle
+        kin2 = imass(kjatom)
+        do kinu = 1, num_orb(kin2)
+          do kimu = 1, num_orb(kin1)
+            rho_off(kimu,kinu,kineigh,kiatom) = dot_product(den_or(:,kimu,kinu,kineigh,kiatom), Qg)
+            rhoij_off(kimu,kinu,kineigh,kiatom) = dot_product(denij_or(:,kimu,kinu,kineigh,kiatom), Qg)
+          end do
+        end do
+        do kjssh = 1, nssh(kin2)
+          do kissh = 1, nssh(kin1)
+            smval = sm_mat(kissh,kjssh,kineigh,kiatom)
+            if (abs(smval) .lt. xc_overtol) then
+            if (smval .gt. 0.0d0) then
+              smval = xc_overtol
+            else
+              smval = -xc_overtol
+            end if
+          end if
+            arho_off(kissh,kjssh,kineigh,kiatom) = dot_product(den_sh(:,kissh,kjssh,kineigh,kiatom), Qg)/smval
+            arhoij_off(kissh,kjssh,kineigh,kiatom) = dot_product(denij_sh(:,kissh,kjssh,kineigh,kiatom), Qg)/smval
+          end do
+        end do
+      end do
+    end do
+  end subroutine rebuild_rho_from_tables
+
 end subroutine average_ca_rho

@@ -17,10 +17,13 @@ from ase import Atoms
 
 from fireballpy._fireball import (set_options,
                                   set_initial_charges,
+                                  set_fix_shells,
                                   call_allocate_system,
                                   scf,
                                   get_initial_charges,
                                   calc_forces)
+
+_ifix_shells_table = {'none': 0, 'd': 1, 'auto': 2}
 
 DEFAULT_MIXER = {'method': 'johnson',
                  'max_iter': 200,
@@ -73,6 +76,14 @@ class BaseFireball:
     mixer_kws : dict, optional
         Dictionary with the mixer parameters.
         More information :ref:`here <mixer>`.
+    fix_shells : str | ArrayLike[int] | None, optional
+        Which shells are fixed to their neutral charge when
+        ``charges_method='stationary_charges'`` (ignored by the other methods).
+        Options: ``'auto'`` or ``None`` (default) fixes every shell with zero neutral
+        charge (polarization d shells, excited s'/p' of double basis); ``'d'`` fixes
+        only l=2 shells; ``'none'`` leaves all shells free. Alternatively, a 0/1 mask
+        with one entry per shell in global shell order (shells of atom 1, then atom 2,
+        ...; same convention as ``get_shell_ofatom_issh``), where 1 fixes the shell.
 
     Methods
     -------
@@ -105,7 +116,8 @@ class BaseFireball:
                  charges_method: str | None = None,
                  dipole_method: str = 'improved',
                  initial_charges: ArrayLike | None = None,
-                 mixer_kws: dict | None = None) -> None:
+                 mixer_kws: dict | None = None,
+                 fix_shells: str | ArrayLike | None = None) -> None:
 
         # Init variables
         self.scf_computed = False
@@ -189,7 +201,28 @@ class BaseFireball:
         # Know system size
         self.maxshells = max([self.fdatafiles.nshells[z] for z in self.fdatafiles.nshells])
         self.norbitals = sum([self.fdatafiles.norbitals[z] for z in self.atomsystem.numbers])
+
+        # Address fixed shells for stationary_charges (module state persists between
+        # calculators in the same process, hence always set it)
+        self.fix_shells = 'auto' if fix_shells is None else fix_shells
+        nssh_tot = sum([self.fdatafiles.nshells[z] for z in self.atomsystem.numbers])
+        if isinstance(self.fix_shells, str):
+            if self.fix_shells.lower() not in _ifix_shells_table:
+                raise ValueError("Parameter 'fix_shells' as string must be one of "
+                                 f"{', '.join(_ifix_shells_table)}. Got {self.fix_shells}")
+            self.fix_shells = self.fix_shells.lower()
+            set_fix_shells(_ifix_shells_table[self.fix_shells], np.zeros(1, dtype=np.int32))
+        else:
+            self.fix_shells = np.ascontiguousarray(self.fix_shells, dtype=np.int32)
+            if self.fix_shells.shape != (nssh_tot,):
+                raise ValueError("Parameter ``fix_shells`` as a mask must have one entry per shell "
+                                 f"(shells of atom 1, then atom 2, ...). Expected shape ({nssh_tot},), "
+                                 f"got {self.fix_shells.shape}")
+            if not np.isin(self.fix_shells, (0, 1)).all():
+                raise ValueError("Parameter ``fix_shells`` as a mask must contain only 0 (free) and 1 (fixed).")
+            set_fix_shells(3, self.fix_shells)
         self._alloc_arrays()
+        call_allocate_system()
 
         if initial_charges is not None:
             if not isinstance(initial_charges, (tuple, list, np.ndarray)):
@@ -222,8 +255,8 @@ class BaseFireball:
             In general it is useful to fix the charges when making postprocessing.
         """
         if not self.scf_computed:
-            set_initial_charges(self.shell_charges.T)
             call_allocate_system()
+            set_initial_charges(self.shell_charges.T)
             converged, nbands, fb_errno, energy, fermi_level, charges = scf(self.verbose,
                                                                             fix_charges,
                                                                             self.shell_charges.T,

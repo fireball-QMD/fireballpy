@@ -2,7 +2,7 @@
 subroutine assemble_sVNL ()
   use, intrinsic :: iso_fortran_env, only: double => real64
   use M_system, only: iforce, natoms, ratom, imass, nPP_b, nPP_j, nPPn, nPP_self, numorb_max, sVNL, spVNL, xl
-  use M_fdata, only: num_orbPP, num_orb
+  use M_fdata, only: num_orbPP, num_orb, TWOCENTER_VNL
   implicit none
  
   integer iatom
@@ -50,7 +50,7 @@ subroutine assemble_sVNL ()
       call deps2cent (r1, r2, eps, deps)
     
       isorp = 0
-      interaction = 5
+      interaction = TWOCENTER_VNL
       call doscentrosPP (interaction, isorp, y, eps, deps, iforce, in1, in2, sVNLx, spVNLx)
       if (ineigh .ne. matom) then
         do inu = 1, num_orbPP(in2)

@@ -1,14 +1,16 @@
 subroutine kspace_gamma ()
   use, intrinsic :: iso_fortran_env, only: double => real64
-  use M_system, only: iqout, natoms, degelec, imass, getlssh, getissh, Kscf, blowre, bbnkre, sm12_real, eigen_k, norbitals, &
-    & norbitals_new, getiatom, neigh_b, neigh_j, neighn, neighPPn, neighPP_b, neighPP_j, vnl, s_mat, h_mat, errno, isgeneig
+  use M_system, only: iqout, natoms, degelec, imass, getlssh, getissh, &
+  & Kscf, blowre, bbnkre, sm12_real, eigen_k, norbitals, &
+  & norbitals_new, getiatom, neigh_b, neigh_j, neighn, neighPPn, &
+  & neighPP_b, neighPP_j, vnl, s_mat, h_mat, errno, isgeneig
   use M_fdata, only: num_orb, Qneutral
   implicit none
   real(double), parameter :: a0 = 0.0d0
   real(double), parameter :: a1 = 1.0d0
-  real(double), parameter :: overtol = 1.0d-4
-  integer ikpoint, iatom, imu, inu, in1, in2, ineigh, &
-    & jatom, jmu, jnu, mbeta, mineig, lm
+  real(double), parameter :: overtol = 1.0d-5
+  integer :: ikpoint, iatom, imu, inu, in1, in2, ineigh, &
+  & jatom, jmu, jnu, mbeta, mineig, lm
   real(double), dimension (norbitals) :: eigen
   real(double), dimension (:), allocatable :: ww, work
   real(double), dimension (norbitals, norbitals) :: yyyy, zzzz
@@ -17,14 +19,14 @@ subroutine kspace_gamma ()
   ikpoint = 1
   yyyy = a0
 
-  if ((Kscf .eq. 1) .and. (iqout .eq. 3)) then
+  if ((Kscf == 1) .and. (iqout == 3)) then
     allocate(ww(norbitals))
     do inu = 1, norbitals
       imu = getissh(inu)
       iatom = getiatom(inu)
       lm = getlssh(inu)
       in1 = imass(iatom)
-      if(Qneutral(getissh(inu),imass(getiatom(inu))).lt.0.01)then
+      if(Qneutral(getissh(inu),imass(getiatom(inu))) < 0.01)then
         ww(inu) = 1.0d0
       else
         ww(inu) = 10.0d0
@@ -32,7 +34,7 @@ subroutine kspace_gamma ()
     end do
   end if
 
-  if (Kscf .eq. 1) then
+  if (Kscf == 1) then
     zzzz = a0
     do iatom = 1, natoms
       in1 = imass(iatom)
@@ -49,7 +51,7 @@ subroutine kspace_gamma ()
         end do
       end do
     end do ! do iatom
-    if (iqout .eq. 3) then
+    if (iqout == 3) then
       do inu = 1, norbitals
         do imu = 1, norbitals
           zzzz(inu,imu) = zzzz(inu,imu)*ww(inu)*ww(imu)
@@ -96,20 +98,20 @@ subroutine kspace_gamma ()
     allocate(work(lwork))
     call dsygv(1, 'V', 'U', norbitals, yyyy, norbitals, zzzz, norbitals, eigen, work, lwork, info)
     deallocate(work)
-    if (info .eq. 0) then
+    if (info == 0) then
       norbitals_new = norbitals
       eigen_k(:,ikpoint) = eigen(:)
       bbnkre(:,:,ikpoint) = yyyy(:,:)
       return
     end if
-    if (info .le. norbitals) then
+    if (info <= norbitals) then
       errno = -info
       return
     end if
     isgeneig = .false.
   end if
 
-  if (Kscf .eq. 1) then
+  if (Kscf == 1) then
     allocate(work(1))
     call dsyev('V', 'U', norbitals, zzzz, norbitals, eigen, work, -1, info)
     lwork = work(1)
@@ -117,27 +119,33 @@ subroutine kspace_gamma ()
     allocate(work(lwork))
     call dsyev('V', 'U', norbitals, zzzz, norbitals, eigen, work, lwork, info)
     deallocate(work)
-    if (info .ne. 0) then
+    if (info /= 0) then
       errno = -info
       return
     end if
     mineig = 0
     do imu = 1, norbitals
-      if (eigen(imu) .lt. overtol) mineig = imu
+      if (eigen(imu) < overtol) then
+        mineig = imu
+        exit
+      end if
     end do
     mineig = mineig + 1
     norbitals_new = norbitals + 1 - mineig
-    if ((norbitals_new .ne. norbitals) .and. ((iqout .eq. 1) .or. (iqout .eq. 3))) then
-      errno = 13
-      return
+    if ((norbitals_new /= norbitals) .and. ((iqout == 1) .or. (iqout == 3))) then
+      ! errno = 13
+      ! return
+      eigen(norbitals_new:norbitals) = eigen(norbitals_new:norbitals) + overtol
+      norbitals_new = norbitals
     end if
     allocate(xxxx(norbitals, norbitals_new))
-    if ((iqout .eq. 1) .or. (iqout .eq. 3)) then
+    if ((iqout == 1) .or. (iqout == 3)) then
       do imu = 1, norbitals
         zzzz(:,imu) = zzzz(:,imu)*eigen(imu)**(-0.25d0)
       end do
-      call dgemm('N', 'C', norbitals, norbitals, norbitals, a1, zzzz, norbitals, zzzz, norbitals, a0, xxxx, norbitals)
-      if (iqout .eq. 3) then
+      call dgemm('N','C', norbitals, norbitals, norbitals, a1, zzzz, norbitals, &
+      &  zzzz, norbitals, a0, xxxx, norbitals)
+      if (iqout == 3) then
         do imu=1, norbitals
           xxxx(imu,:)=xxxx(imu,:)*ww(imu)
         end do
@@ -152,25 +160,28 @@ subroutine kspace_gamma ()
     allocate(xxxx(norbitals, norbitals_new))
     xxxx(:,:) = sm12_real(:,1:norbitals_new)
   end if
-  call dgemm('C', 'N', norbitals_new, norbitals, norbitals, a1, xxxx, norbitals_new, yyyy, norbitals, a0, zzzz(1:norbitals_new,:), norbitals_new)
-  call dgemm('N', 'N', norbitals_new, norbitals_new, norbitals, a1, zzzz(1:norbitals_new,:), norbitals_new, xxxx, norbitals, a0, yyyy(1:norbitals_new,1:norbitals_new), norbitals_new)
+  call dgemm('C','N', norbitals_new, norbitals, norbitals, a1, xxxx, norbitals_new, &
+  &  yyyy, norbitals, a0, zzzz(1:norbitals_new,:), norbitals_new)
+  call dgemm('N','N', norbitals_new, norbitals_new, norbitals, a1, zzzz(1:norbitals_new,:), &
+  &  norbitals_new, xxxx, norbitals, a0, yyyy(1:norbitals_new,1:norbitals_new), norbitals_new)
   allocate(work(1))
-  call dsyev('V', 'U', norbitals_new, yyyy, norbitals_new, eigen(1:norbitals_new), work, -1, info)
+  call dsyev('V','U', norbitals_new, yyyy, norbitals_new, eigen(1:norbitals_new), work, -1, info)
   lwork = work(1)
   deallocate(work)
   allocate(work(lwork))
-  call dsyev('V', 'U', norbitals_new, yyyy, norbitals_new, eigen(1:norbitals_new), work, lwork, info)
+  call dsyev('V','U', norbitals_new, yyyy, norbitals_new, eigen(1:norbitals_new), work, lwork, info)
   deallocate(work)
-  if (info .ne. 0) then
+  if (info /= 0) then
     errno = -info
     return
   end if
   eigen_k(1:norbitals_new,ikpoint) = eigen(1:norbitals_new)
-  call dgemm('N', 'N', norbitals, norbitals_new, norbitals_new, a1, xxxx, norbitals, yyyy(1:norbitals_new,1:norbitals_new), norbitals_new, a0, zzzz(:,1:norbitals_new), norbitals)
+  call dgemm('N','N', norbitals, norbitals_new, norbitals_new, a1, xxxx, norbitals, &
+  &  yyyy(1:norbitals_new,1:norbitals_new), norbitals_new, a0, zzzz(:,1:norbitals_new), norbitals)
   bbnkre(:,1:norbitals_new,ikpoint) = zzzz(:,1:norbitals_new)
-  if ((iqout .eq. 1) .or. (iqout .eq. 3)) blowre(:,:,ikpoint) = yyyy(:,:)
+  if ((iqout == 1) .or. (iqout == 3)) blowre(:,:,ikpoint) = yyyy(:,:)
   deallocate (xxxx)
-  if ((Kscf .eq. 1) .and. (iqout .eq. 3)) then
+  if ((Kscf == 1) .and. (iqout == 3)) then
     deallocate (ww)
   end if
 end subroutine kspace_gamma

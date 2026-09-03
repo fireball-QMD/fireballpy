@@ -3,7 +3,7 @@ subroutine Dassemble_ca_2c_dip ()
   use M_constants, only: eq2
   use M_system, only: smt_elect, natoms, ratom, imass, neigh_b, neigh_j, neighn, neigh_self, numorb_max, &
     & Qin, rho, s_mat, dipc, xl, faca, fotca
-  use M_fdata, only: nssh,rcutoff,Qneutral,num_orb
+  use M_fdata, only: nssh,rcutoff,Qneutral,num_orb, TWOCENTER_VNA_L, TWOCENTER_VNA_A
   implicit none
   integer iatom
   integer imu
@@ -116,7 +116,7 @@ subroutine Dassemble_ca_2c_dip ()
     bcca = 0.0d0
     bccap = 0.0d0
     kforce = 1
-    interaction = 4
+    interaction = TWOCENTER_VNA_A
     in3 = in1
     do isorp = 1, nssh(in2)
      call doscentros (interaction, isorp, kforce, in1, in2, in3, y,  &
@@ -150,7 +150,7 @@ subroutine Dassemble_ca_2c_dip ()
     if (iatom .eq. jatom .and. mbeta .eq. 0) then
     else
      bccap = 0.0d0
-     interaction = 2
+     interaction = TWOCENTER_VNA_L
      in3 = in2
      do isorp = 1, nssh(in1)
       call doscentros (interaction, isorp, kforce, in1, in1, in3, y,   &

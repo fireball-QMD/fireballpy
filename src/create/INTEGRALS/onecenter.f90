@@ -102,7 +102,7 @@ contains
       &              exc, vxc, dexcrho, dexcsigma, dvxcrho, dvxcsigma
     real(kind=dp) :: ddens(1), dddens(1,1)
     logical :: onecenter_interactions(ONECENTER_NUM_INTERACTIONS)
-    integer, allocatable :: s1(:), s2(:)
+    integer, allocatable :: s1(:), s2(:), l12(:)
     real(kind=dp), allocatable :: fofr(:)
 
     interaction = ishft(1, int_id - 1)
@@ -119,7 +119,7 @@ contains
 
     ! Set dimensions
     nints = onecenter_get_nints(int_id, ispec)
-    call indices_onecenter_set([(wf_atoms(ispec)%get_angular_momentum(issh), issh = 1, nssh)], index_max, s1, s2)
+    call indices_onecenter_set([(wf_atoms(ispec)%get_angular_momentum(issh), issh = 1, nssh)], index_max, s1, s2, l12)
     allocate (fofr(nints), answer(nints, index_max))
     answer = 0.0_dp
 
@@ -196,9 +196,10 @@ contains
     character(path_len), intent(in) :: fname
     real(dp), intent(in) :: answer(:,:)
     integer :: issh, jssh, ix, index, index_max, nssh, nzx, interaction, io, nints
-    integer, allocatable :: s1(:), s2(:)
+    integer, allocatable :: s1(:), s2(:), l12(:)
     real(dp) :: rcut
     real(dp), allocatable :: matrix(:,:)
+    character(64), allocatable :: names(:)
 
     ! Retrieve basic info
     nints = onecenter_get_nints(int_id, ispec)
@@ -218,9 +219,17 @@ contains
 
     ! Create the matrix to output in matrix format
     call indices_onecenter_set([(wf_atoms(ispec)%get_angular_momentum(issh), issh = 1, nssh)], &
-      &                        index_max, s1, s2)
-    allocate (matrix(nssh, nssh))
+      &                        index_max, s1, s2, l12, names)
+    write (io, "('!')", advance="no")
+    if (index_max == 0) then
+      close (io)
+      return
+    end if
+    do index = 1, index_max
+      write (io, "(4x,a)", advance="no") trim(names(index))
+    end do
     write (io, "(a)") ""
+    allocate (matrix(nssh, nssh))
     do ix = 1, nints
       matrix = 0.0_dp
       do index = 1, index_max

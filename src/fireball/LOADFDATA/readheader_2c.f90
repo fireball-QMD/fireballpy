@@ -1,7 +1,7 @@
 subroutine readheader_2c (interaction, iounit, in1, in2, nsh_max, numz, rc1, &
     & rc2, zmin, zmax, npseudo, cl_pseudo)
   use, intrinsic :: iso_fortran_env, only: double => real64
-  use M_fdata, only: nssh, Qref
+  use M_fdata, only: nssh, Qref, TWOCENTER_VNL, TWOCENTER_KINETIC, TWOCENTER_VXC_0, TWOCENTER_VXC_L, TWOCENTER_VXC_R
   implicit none
   integer, intent (in) :: interaction, iounit, nsh_max, in1, in2
   integer, intent (out) :: npseudo, numz
@@ -10,7 +10,7 @@ subroutine readheader_2c (interaction, iounit, in1, in2, nsh_max, numz, rc1, &
   integer :: iline, issh, nucz1, nucz2
 
   ! TODO: for all
-  if (interaction == 13) then
+  if (interaction == TWOCENTER_KINETIC) then
     do iline = 1, 9
         read (iounit,*)
     end do
@@ -24,10 +24,10 @@ subroutine readheader_2c (interaction, iounit, in1, in2, nsh_max, numz, rc1, &
   read (iounit,*) nucz1, nucz2
   read (iounit,*) rc1, rc2
   read (iounit,*) zmin, zmax, numz
-  if (interaction == 5) then
+  if (interaction == TWOCENTER_VNL) then
     read (iounit,*) npseudo
     read (iounit,*) (cl_pseudo(issh), issh = 1, npseudo)
-  else if (interaction >= 6 .and. interaction <= 8) then
+  else if (interaction == TWOCENTER_VXC_0 .or. interaction == TWOCENTER_VXC_L .or. interaction == TWOCENTER_VXC_R) then
     read (iounit,*)
     read (iounit,*) (Qref(issh, in1), issh = 1, nssh(in1))
     read (iounit,*) (Qref(issh, in2), issh = 1, nssh(in2))

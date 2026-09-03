@@ -1,13 +1,13 @@
 ! Set int options
 subroutine set_options(dipole_method, charges_method, &
-    & ismolecule, isgamma, total_charge, mixer_method, &
-    & max_iter, mix_order, beta, w0, tol)
+& ismolecule, isgamma, total_charge, mixer_method, &
+& max_iter, mix_order, beta, w0, tol)
   use iso_c_binding
   use M_system, only: igamma, icluster, idipole, iqout, iqmmm, &
-    & qstate, ialgmix, max_scf_iterations, idmix, w02, bmix, sigmatol
+  & qstate, ialgmix, max_scf_iterations, idmix, w02, bmix, sigmatol
   implicit none
   integer, intent(in) :: dipole_method, charges_method, &
-    & ismolecule, isgamma, total_charge, mixer_method, max_iter, mix_order
+  & ismolecule, isgamma, total_charge, mixer_method, max_iter, mix_order
   real(c_double), intent(in) :: beta, w0, tol
   iqmmm = 0 ! ensure this is off by default
   idipole = dipole_method
@@ -73,19 +73,22 @@ subroutine set_initial_charges(natoms, nsh_max, qinput)
   Qin = qinput
 end subroutine set_initial_charges
 
-subroutine set_fix_shell_charge(nsh_max, fix_shell_charge_aux)
+! Seleccion de shells fijadas a carga neutra en stationary_charges.
+! mode: 0 = ninguna, 1 = solo shells d, 2 = shells con Qneutral=0 (default),
+! 3 = mascara de usuario (mask, 0/1 por shell global: atomo1-shells, atomo2-shells, ...)
+subroutine set_fix_shells(mode, nsh, mask)
   use iso_c_binding
-  use M_system, only : fix_shell_charge
+  use M_system, only : ifix_shells, fix_shell_user
   implicit none
-  integer, intent(in) :: nsh_max
-  real(c_double), dimension(nsh_max), intent(in) :: fix_shell_charge_aux
-  integer :: iatom, issh
-  if (allocated(fix_shell_charge)) deallocate(fix_shell_charge)
-  allocate (fix_shell_charge(nsh_max))
-  do issh=1,nsh_max
-    fix_shell_charge(issh)=fix_shell_charge_aux(issh)
-  end do  
-end subroutine set_fix_shell_charge
+  integer, intent(in) :: mode, nsh
+  integer, dimension(nsh), intent(in) :: mask
+  ifix_shells = mode
+  if (allocated(fix_shell_user)) deallocate(fix_shell_user)
+  if (mode .eq. 3) then
+    allocate (fix_shell_user(nsh))
+    fix_shell_user = mask
+  end if
+end subroutine set_fix_shells
 
 
 ! Faster set coordinates for simulations
@@ -97,7 +100,7 @@ subroutine update_coords(natoms, xyz)
   real(c_double), dimension(3, natoms), intent(in) :: xyz
   ratom = xyz
 end subroutine update_coords
- 
+
 ! Set kpoints as needed by Fireball
 subroutine set_kpoints(nkpts, kpts, weights)
   use iso_c_binding
@@ -158,7 +161,7 @@ subroutine loadfdata_from_path(fdata_path)
   fdatalocation = trim(fdata_path)
   call load_fdata()
 end subroutine loadfdata_from_path
- 
+
 ! Allocate all needed arrays. Python gc handles deallocate after work
 subroutine call_allocate_system()
   use iso_c_binding
@@ -188,11 +191,11 @@ end subroutine get_initial_charges
 
 ! Compute the SCF loop
 subroutine scf(natoms, nshell, nkpts, norbitals, &
-    & verbose, fix_charges, shell_charges, eigenvalues, eigenvectors, &
-    & nbands, converged, errno_out, energy, fermi_level, charges)
+& verbose, fix_charges, shell_charges, eigenvalues, eigenvectors, &
+& nbands, converged, errno_out, energy, fermi_level, charges)
   use iso_c_binding
   use M_system, only: errno, scf_achieved, etot, efermi, eigen_k, Qin, imass, ifixcharge, icluster, &
-    & igamma, bbnkre, bbnkim, norbitals_new
+  & igamma, bbnkre, bbnkim, norbitals_new
   use M_fdata, only: Qneutral, nssh
   implicit none
   integer, intent(in) :: natoms, nshell, nkpts, norbitals
@@ -236,12 +239,16 @@ end subroutine scf
 ! Get the forces in each atom
 subroutine calc_forces(natoms, forces, errno_out)
   use iso_c_binding
-  use M_system, only : ftot, errno
+  use M_system, only : ftot, errno, iscf_fast
   implicit none
   integer, intent(in) :: natoms
   real(c_double), dimension(3, natoms), intent(inout) :: forces
   integer, intent(out) :: errno_out
   errno = 0
+  ! Speed up SCF loop: la reconstruccion rapida de Kscf>1 no actualiza los arrays de
+  ! derivadas (rhop_*, arhop_*); un ensamblado completo con las cargas convergidas
+  ! los deja consistentes antes de ensamblar las fuerzas.
+  if (iscf_fast .eq. 1) call average_ca_rho (1)
   call getforces()
   errno_out = errno
   forces = ftot

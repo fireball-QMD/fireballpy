@@ -6,6 +6,7 @@ subroutine getforces ()
   call assemble_usr (1) ! iforce=1
   call Dassemble_2c ()
   call Dassemble_2c_PP ()
+  call Dassemble_xc_2c()
   call Dassemble_ca_olsxc_on ()
   call Dassemble_ca_olsxc_2c ()
   if (idipole .eq. 0) call Dassemble_ca_2c ()

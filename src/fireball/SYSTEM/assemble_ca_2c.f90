@@ -3,8 +3,8 @@ subroutine assemble_ca_2c ()
   use, intrinsic :: iso_fortran_env, only: double => real64
   use M_constants, only: eq2
   use M_system, only: smt_elect, natoms, ratom, imass, ewaldsr, dip, neigh_b, neigh_j, neighn, neigh_self, &
-    & numorb_max, Qin, s_mat, vca, xl, g_h, kscf, iqout
-  use M_fdata, only: nssh, num_orb, rcutoff, Qneutral, lssh
+    & numorb_max, Qin, s_mat, vca, xl, g_h, get_shell_ofatom_issh, kscf, iqout
+  use M_fdata, only: nssh, num_orb, rcutoff, Qneutral, lssh, TWOCENTER_VNA_L, TWOCENTER_VNA_R, TWOCENTER_VNA_A
   implicit none
   integer iatom
   integer icount
@@ -57,7 +57,7 @@ subroutine assemble_ca_2c ()
 
   vca = 0.0d0
   ewaldsr = 0.0d0
-  if (Kscf .eq. 1 .and. iqout .eq. 6) then
+  if (Kscf .eq. 1) then
     g_h  = 0.0d0
   end if
   do iatom = 1, natoms
@@ -126,9 +126,9 @@ subroutine assemble_ca_2c ()
             emnpl(imu,inu) = (s_mat(imu,inu,matom,iatom)/y)*dq2
             emnpl_noq(imu,inu) = (s_mat(imu,inu,matom,iatom)/y)
             ewaldsr(imu,inu,matom,iatom) =  ewaldsr(imu,inu,matom,iatom) + emnpl(imu,inu)*eq2
-            if (Kscf .eq. 1 .and. iqout .eq. 6) then
+            if (Kscf .eq. 1) then
               do issh = 1, nssh(in2)
-                g_h(imu,inu,issh,jatom,matom,iatom)  =  g_h(imu,inu,issh,jatom,matom,iatom) - emnpl_noq(imu,inu)*eq2
+                g_h(get_shell_ofatom_issh(jatom,issh),imu,inu,matom,iatom)  =  g_h(get_shell_ofatom_issh(jatom,issh),imu,inu,matom,iatom) - emnpl_noq(imu,inu)*eq2
               end do 
             end if
           end do
@@ -137,7 +137,7 @@ subroutine assemble_ca_2c ()
       ! CALL DOSCENTROS AND GET VNA FOR ATOM CASE
       bcca = 0.0d0
       kforce = 0
-      interaction = 4
+      interaction = TWOCENTER_VNA_A
       in3 = in1
       do isorp = 1, nssh(in2)
         call doscentros (interaction, isorp, kforce, in1, in2, in3, y, eps, deps, bccax, bccapx)
@@ -145,8 +145,8 @@ subroutine assemble_ca_2c ()
         do inu = 1, num_orb(in3)
           do imu = 1, num_orb(in1)
             bcca(imu,inu) = bcca(imu,inu) + bccax(imu,inu)*dxn
-            if (Kscf .eq. 1 .and. iqout .eq. 6) then
-              g_h(imu,inu,isorp,jatom,matom,iatom)  =  g_h(imu,inu,isorp,jatom,matom,iatom) + (stn1(imu,inu)*bccax(imu,inu) + stn2(imu,inu)*emnpl_noq(imu,inu))*eq2
+            if (Kscf .eq. 1) then
+              g_h(get_shell_ofatom_issh(jatom,isorp),imu,inu,matom,iatom)  =  g_h(get_shell_ofatom_issh(jatom,isorp),imu,inu,matom,iatom) + (stn1(imu,inu)*bccax(imu,inu) + stn2(imu,inu)*emnpl_noq(imu,inu))*eq2
             end if
           end do
         end do
@@ -165,14 +165,14 @@ subroutine assemble_ca_2c ()
             dterm_1 = eq2*dip(imu,inu,ineigh,iatom)/(y*y)
             dterm_2 = eq2*dip(imu,inu,ineigh,iatom)/(y*y)
             ewaldsr(imu,inu,ineigh,iatom) = ewaldsr(imu,inu,ineigh,iatom) + (dq1*sterm_1 + dq1*dterm_1) + (dq2*sterm_2 - dq2*dterm_2)
-            if (Kscf .eq. 1 .and. iqout .eq. 6) then
+            if (Kscf .eq. 1) then
               do issh = 1, nssh(in2)
                 emnpl_noq(imu,inu) = sterm_2-dterm_2  ! on top right
-                g_h(imu,inu,issh,jatom,ineigh,iatom)  =  g_h(imu,inu,issh,jatom,ineigh,iatom) - emnpl_noq(imu,inu)
+                g_h(get_shell_ofatom_issh(jatom,issh),imu,inu,ineigh,iatom)  =  g_h(get_shell_ofatom_issh(jatom,issh),imu,inu,ineigh,iatom) - emnpl_noq(imu,inu)
               end do
               do issh = 1, nssh(in1)
                 emnpl_noq(imu,inu) = sterm_1+dterm_1  ! on top left
-                g_h(imu,inu,issh,iatom,ineigh,iatom)  =  g_h(imu,inu,issh,iatom,ineigh,iatom) - emnpl_noq(imu,inu)
+                g_h(get_shell_ofatom_issh(iatom,issh),imu,inu,ineigh,iatom)  =  g_h(get_shell_ofatom_issh(iatom,issh),imu,inu,ineigh,iatom) - emnpl_noq(imu,inu)
               end do
             end if
           end do
@@ -184,7 +184,7 @@ subroutine assemble_ca_2c ()
         ! Do nothing here - special case. Interaction already calculated in atm case.
       else
         bcca = 0.0d0
-        interaction = 2
+        interaction = TWOCENTER_VNA_L
         in3 = in2
         do isorp = 1, nssh(in1)
           call doscentros (interaction, isorp, kforce, in1, in1, in3, y, eps, deps, bccax, bccapx)
@@ -192,13 +192,13 @@ subroutine assemble_ca_2c ()
           do inu = 1, num_orb(in3)
             do imu = 1, num_orb(in1)
               bcca(imu,inu) = bcca(imu,inu) + dxn*bccax(imu,inu)
-              if (Kscf .eq. 1 .and. iqout .eq. 6) then
-                g_h(imu,inu,isorp,iatom,ineigh,iatom)  =  g_h(imu,inu,isorp,iatom,ineigh,iatom) + bccax(imu,inu)*eq2
+              if (Kscf .eq. 1) then
+                g_h(get_shell_ofatom_issh(iatom,isorp),imu,inu,ineigh,iatom)  =  g_h(get_shell_ofatom_issh(iatom,isorp),imu,inu,ineigh,iatom) + bccax(imu,inu)*eq2
               end if
             end do
           end do
         end do
-        interaction = 3
+        interaction = TWOCENTER_VNA_R
         in3 = in2
         do isorp = 1, nssh(in2)
           call doscentros (interaction, isorp, kforce, in1, in2, in3, y, eps, deps, bccax, bccapx)
@@ -206,8 +206,8 @@ subroutine assemble_ca_2c ()
           do inu = 1, num_orb(in3)
             do imu = 1, num_orb(in1)
               bcca(imu,inu) = bcca(imu,inu) + dxn*bccax(imu,inu)
-              if (Kscf .eq. 1 .and. iqout .eq. 6) then
-                g_h(imu,inu,isorp,jatom,ineigh,iatom)  =  g_h(imu,inu,isorp,jatom,ineigh,iatom) + bccax(imu,inu)*eq2
+              if (Kscf .eq. 1) then
+                g_h(get_shell_ofatom_issh(jatom,isorp),imu,inu,ineigh,iatom)  =  g_h(get_shell_ofatom_issh(jatom,isorp),imu,inu,ineigh,iatom) + bccax(imu,inu)*eq2
               end if
             end do
           end do

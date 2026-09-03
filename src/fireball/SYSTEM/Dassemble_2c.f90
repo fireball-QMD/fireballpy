@@ -3,7 +3,7 @@ subroutine Dassemble_2c ()
   use M_constants, only: eq2
   use M_system, only: natoms, ratom, imass, cape, neigh_b, neigh_j, neighn, neigh_self, numorb_max, sp_mat, tp_mat, rho, xl, fotna, &
     & fana, ft, fro
-  use M_fdata, only: num_orb
+  use M_fdata, only: num_orb, TWOCENTER_VNA_L, TWOCENTER_VNA_A
   implicit none
   integer iatom
   integer imu
@@ -70,7 +70,7 @@ subroutine Dassemble_2c ()
       end do ! do ix
       isorp = 0
       kforce = 1  
-      interaction = 4
+      interaction = TWOCENTER_VNA_A
       in3 = in1
       call doscentros (interaction, isorp, kforce, in1, in2, in3, y,eps, deps, bcnax, bcnapx)
       do inu = 1, num_orb(in3)
@@ -83,7 +83,7 @@ subroutine Dassemble_2c ()
       if (iatom .eq. jatom .and. mbeta .eq. 0) then
       else
        isorp = 0
-       interaction = 2
+       interaction = TWOCENTER_VNA_L
        in3 = in2
        call doscentros (interaction, isorp, kforce, in1, in1, in3, y, eps, deps, bcnax, bcnapx)
        do inu = 1, num_orb(in3)
