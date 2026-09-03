@@ -8,6 +8,7 @@ module indices
   integer, parameter, public :: INDICES_TWOCENTER_DIPX = 1
   integer, parameter, public :: INDICES_TWOCENTER_DIPY = 2
   integer, parameter, public :: INDICES_TWOCENTER_COULOMB = 3
+  integer, parameter, public :: INDICES_TWOCENTER_SPH = 4
 
 contains
 
@@ -62,6 +63,32 @@ contains
     end if
     nssh1 = size(ls1)
     nssh2 = size(ls2)
+
+    ! Spherical is special
+    if (index_type == INDICES_TWOCENTER_SPH) then
+      index_max = nssh1*nssh2
+      if (index_max == 0) return
+      allocate (s1(index_max), s2(index_max), l1(index_max), l2(index_max), m1(index_max), m2(index_max))
+      if (present(names)) allocate (names(index_max))
+      ix = 0
+      do issh = 1, nssh1
+        do jssh = 1, nssh2
+          ix = ix + 1
+          if (present(names)) then
+            auxname1 = indices_get_name(ls1(issh), 0, omit_suffix=.true.)
+            auxname2 = indices_get_name(ls2(jssh), 0, omit_suffix=.true.)
+            names(ix) = trim(auxname1)//trim(auxname2)
+          end if
+          s1(ix) = issh
+          l1(ix) = 0
+          m1(ix) = 0
+          s2(ix) = jssh
+          l2(ix) = 0
+          m2(ix) = 0
+        end do
+      end do
+      return
+    end if
 
     index_max = 0
     do issh = 1, nssh1
@@ -191,8 +218,9 @@ contains
     end select
   end function indices_get_power_y
 
-  pure character(32) function indices_get_name(l, m)
+  pure character(32) function indices_get_name(l, m, omit_suffix)
     integer, intent(in) :: l, m
+    logical, intent(in), optional :: omit_suffix
     if (m < -l .or. m > l) then
       indices_get_name = ""
       return
@@ -207,8 +235,11 @@ contains
     case (3)
       indices_get_name = fnames(m)
     case default
-      indices_get_name = ""
+      indices_get_name = " "
     end select
+    if (present(omit_suffix)) then
+      if (omit_suffix) indices_get_name = indices_get_name(1:1)
+    end if
   end function indices_get_name
 
 end module indices

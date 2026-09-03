@@ -45,10 +45,10 @@
 module xc
   use, intrinsic :: iso_fortran_env, only: int64, dp => real64, stdout => output_unit, stderr => error_unit
   use :: constants, only:abohr3, abohr4, abohr5, abohr8, abohr13, hartree, tolerance
-  use :: xc_f03_lib_m, only:xc_f03_version, xc_f03_func_init, xc_f03_func_get_info, xc_f03_func_info_get_family, &
+  use :: xc_f03_lib_m, only:xc_f03_version, xc_f03_func_init_flags, xc_f03_func_get_info, xc_f03_func_info_get_family, &
     &                       xc_f03_func_end, xc_f03_lda_exc_vxc, xc_f03_lda_fxc, xc_f03_gga_exc_vxc, &
     &                       xc_f03_gga_fxc, xc_f03_gga_kxc, xc_f03_func_t, xc_f03_func_info_t, &
-    &                       XC_UNPOLARIZED, XC_FAMILY_LDA, XC_FAMILY_GGA, XC_FAMILY_HYB_GGA
+    &                       XC_UNPOLARIZED, XC_FAMILY_LDA, XC_FAMILY_GGA, XC_FAMILY_HYB_GGA, XC_FLAGS_ON_HOST
   implicit none
   private
   public :: xc_isgga, xc_calc, xc_init, xc_end
@@ -71,7 +71,7 @@ contains
     integer :: vmajor, vminor, vmicro
     logical :: l1, l2
     xc_sep = present(iexc2)
-    call xc_f03_func_init(xc_func1, iexc1, XC_UNPOLARIZED)
+    call xc_f03_func_init_flags(xc_func1, iexc1, XC_UNPOLARIZED, XC_FLAGS_ON_HOST)
     xc_info1 = xc_f03_func_get_info(xc_func1)
     xc_family1 = xc_f03_func_info_get_family(xc_info1)
     select case (xc_family1)
@@ -85,7 +85,7 @@ contains
     end select
     l2 = .false.
     if (xc_sep) then
-      call xc_f03_func_init(xc_func2, iexc2, XC_UNPOLARIZED)
+      call xc_f03_func_init_flags(xc_func2, iexc2, XC_UNPOLARIZED, XC_FLAGS_ON_HOST)
       xc_info2 = xc_f03_func_get_info(xc_func2)
       xc_family2 = xc_f03_func_info_get_family(xc_info2)
       select case (xc_family2)
@@ -112,117 +112,97 @@ contains
     xc_isgga = xc_gga
   end function xc_isgga
 
-  subroutine xc_calc_lda(rho, exc, vxc, dexc, dvxc)
-    real(dp), intent(in) :: rho(:)
-    real(dp), intent(out) :: exc(:), vxc(:), dexc(:), dvxc(:)
-    integer(int64) :: np
-    real(dp), allocatable :: nrho(:), irho(:), sigma(:), e(:), vrho(:), v2rho2(:), &
-      &                      vsigma(:), v2rhosigma(:), v2sigma2(:)
-    np = size(rho, kind=int64)
-    allocate (nrho(np), irho(np), e(np), vrho(np), v2rho2(np))
-    nrho = rho*abohr3
-    irho = 1.0_dp/max(tolerance, nrho)
+  subroutine xc_calc_lda(dens, exc, vxc, dexc, dvxc)
+    real(dp), intent(in) :: dens
+    real(dp), intent(out) :: exc, vxc, dexc, dvxc
+    real(dp) :: rho(1), irho(1), sigma(1), e(1), vrho(1), v2rho2(1), &
+      &         vsigma(1), v2rhosigma(1), v2sigma2(1)
     exc = 0.0_dp
     vxc = 0.0_dp
     dexc = 0.0_dp
     dvxc = 0.0_dp
+    rho(1) = dens*abohr3
+    irho(1) = 1.0_dp/max(tolerance, rho(1))
     select case (xc_family1)
     case (XC_FAMILY_LDA)
-      call xc_f03_lda_exc_vxc(xc_func1, np, nrho, e, vrho)
-      call xc_f03_lda_fxc(xc_func1, np, nrho, v2rho2)
-      exc = exc + e
-      vxc = vxc + vrho
-      dexc = dexc + irho*(vrho - e)
-      dvxc = dvxc + v2rho2
+      call xc_f03_lda_exc_vxc(xc_func1, 1_int64, rho, e, vrho)
+      call xc_f03_lda_fxc(xc_func1, 1_int64, rho, v2rho2)
     case (XC_FAMILY_GGA, XC_FAMILY_HYB_GGA)
-      allocate (sigma(np), vsigma(np), v2rhosigma(np), v2sigma2(np))
-      sigma = 0.0_dp
-      call xc_f03_gga_exc_vxc(xc_func1, np, nrho, sigma, e, vrho, vsigma)
-      call xc_f03_gga_fxc(xc_func1, np, nrho, sigma, v2rho2, v2rhosigma, v2sigma2)
-      exc = exc + e
-      vxc = vxc + vrho
-      dexc = dexc + irho*(vrho - e)
-      dvxc = dvxc + v2rho2
-      deallocate (sigma, vsigma, v2rhosigma, v2sigma2)
+      sigma(1) = 0.0_dp
+      call xc_f03_gga_exc_vxc(xc_func1, 1_int64, rho, sigma, e, vrho, vsigma)
+      call xc_f03_gga_fxc(xc_func1, 1_int64, rho, sigma, v2rho2, v2rhosigma, v2sigma2)
     case default
       write (stderr, "(a)") "[ERROR]: selected functional is not LDA nor GGA"
       stop
     end select
+    exc = exc + e(1)
+    vxc = vxc + vrho(1)
+    dexc = dexc + irho(1)*(vrho(1) - e(1))
+    dvxc = dvxc + v2rho2(1)
     if (xc_sep) then
       select case (xc_family2)
       case (XC_FAMILY_LDA)
-        call xc_f03_lda_exc_vxc(xc_func2, np, nrho, e, vrho)
-        call xc_f03_lda_fxc(xc_func2, np, nrho, v2rho2)
-        exc = exc + e
-        vxc = vxc + vrho
-        dexc = dexc + irho*(vrho - e)
-        dvxc = dvxc + v2rho2
+        call xc_f03_lda_exc_vxc(xc_func2, 1_int64, rho, e, vrho)
+        call xc_f03_lda_fxc(xc_func2, 1_int64, rho, v2rho2)
       case (XC_FAMILY_GGA, XC_FAMILY_HYB_GGA)
-        allocate (sigma(np), vsigma(np), v2rhosigma(np), v2sigma2(np))
-        sigma = 0.0_dp
-        call xc_f03_gga_exc_vxc(xc_func2, np, nrho, sigma, e, vrho, vsigma)
-        call xc_f03_gga_fxc(xc_func2, np, nrho, sigma, v2rho2, v2rhosigma, v2sigma2)
-        exc = exc + e
-        vxc = vxc + vrho
-        dexc = dexc + irho*(vrho - e)
-        dvxc = dvxc + v2rho2
-        deallocate (sigma, vsigma, v2rhosigma, v2sigma2)
+        sigma(1) = 0.0_dp
+        call xc_f03_gga_exc_vxc(xc_func2, 1_int64, rho, sigma, e, vrho, vsigma)
+        call xc_f03_gga_fxc(xc_func2, 1_int64, rho, sigma, v2rho2, v2rhosigma, v2sigma2)
       case default
         write (stderr, "(a)") "[ERROR]: selected functional is not LDA nor GGA"
         stop
       end select
+      exc = exc + e(1)
+      vxc = vxc + vrho(1)
+      dexc = dexc + irho(1)*(vrho(1) - e(1))
+      dvxc = dvxc + v2rho2(1)
     end if
-    deallocate (nrho, irho, e, vrho, v2rho2)
-
     exc = exc*hartree
     vxc = vxc*hartree
     dexc = dexc*hartree*abohr3
     dvxc = dvxc*hartree*abohr3
   end subroutine xc_calc_lda
 
-  subroutine xc_calc_gga(rho, drho, ddrho, exc, vxc, dexcrho, dexcsigma, dvxcrho, dvxcsigma)
-    real(dp), intent(in) :: rho(:), drho(:, :), ddrho(:, :, :)
-    real(dp), intent(out) :: exc(:), vxc(:), dexcrho(:), dexcsigma(:), dvxcrho(:), dvxcsigma(:)
+  subroutine xc_calc_gga(dens, ddens, dddens, exc, vxc, dexcrho, dexcsigma, dvxcrho, dvxcsigma)
+    real(dp), intent(in) :: dens
+    real(dp), intent(in) :: ddens(:), dddens(:, :)
+    real(dp), intent(out) :: exc, vxc, dexcrho, dexcsigma, dvxcrho, dvxcsigma
     integer :: ndim, i, j
-    integer(int64) :: np
-    real(dp), allocatable :: nrho(:), irho(:), sigma(:), laplacian(:), crossed(:), e(:), &
-      &                      vrho(:), vsigma(:), v2rho2(:), v2rhosigma(:), v2sigma2(:), &
-      &                      v3rho3(:), v3rho2sigma(:), v3rhosigma2(:), v3sigma3(:)
-    np = size(rho, kind=int64)
-    ndim = size(drho, 2)
+    real(dp) :: rho(1), irho(1), sigma(1), laplacian(1), crossed(1), e(1), &
+      &         vrho(1), vsigma(1), v2rho2(1), v2rhosigma(1), v2sigma2(1), &
+      &         v3rho3(1), v3rho2sigma(1), v3rhosigma2(1), v3sigma3(1)
     exc = 0.0_dp
     vxc = 0.0_dp
     dexcrho = 0.0_dp
     dvxcrho = 0.0_dp
     dexcsigma = 0.0_dp
     dvxcsigma = 0.0_dp
-
+    ndim = size(ddens)
+    rho(1) = abohr3*dens
+    irho(1) = 1.0_dp/max(tolerance, rho(1))
+    sigma(1) = 0.0_dp
+    laplacian(1) = 0.0_dp
+    crossed(1) = 0.0_dp
+    do i = 1, ndim
+      sigma(1) = sigma(1) + abohr8*ddens(i)*ddens(i)
+      laplacian(1) = laplacian(1) + abohr5*dddens(i, i)
+      do j = 1, ndim
+        crossed(1) = crossed(1) + abohr13*ddens(i)*dddens(j, i)*ddens(j)
+      end do
+    end do
     select case (xc_family1)
     case (XC_FAMILY_GGA, XC_FAMILY_HYB_GGA)
-      allocate (nrho(np), irho(np), sigma(np), laplacian(np), crossed(np), e(np), &
-        &       vrho(np), vsigma(np), v2rho2(np), v2rhosigma(np), v2sigma2(np), &
-        &       v3rho3(np), v3rho2sigma(np), v3rhosigma2(np), v3sigma3(np))
-      nrho = abohr3*rho
-      irho = 1.0_dp/max(tolerance, nrho)
-      sigma = 0.0_dp
-      laplacian = 0.0_dp
-      crossed = 0.0_dp
-      do i = 1, ndim
-        sigma = sigma + abohr8*drho(:, i)*drho(:, i)
-        laplacian = laplacian + abohr5*ddrho(:, i, i)
-        do j = 1, ndim
-          crossed = crossed + abohr13*drho(:, i)*ddrho(:, j, i)*drho(:, j)
-        end do
-      end do
-      call xc_f03_gga_exc_vxc(xc_func1, np, nrho, sigma, e, vrho, vsigma)
-      call xc_f03_gga_fxc(xc_func1, np, nrho, sigma, v2rho2, v2rhosigma, v2sigma2)
-      call xc_f03_gga_kxc(xc_func1, np, nrho, sigma, v3rho3, v3rho2sigma, v3rhosigma2, v3sigma3)
-      exc = exc + e
-      vxc = vxc + vrho - 2.0_dp*(vsigma*laplacian + v2rhosigma*sigma + 2.0_dp*v2sigma2*crossed)
-      dexcrho = dexcrho + irho*(vrho - e)
-      dexcsigma = dexcsigma + irho*vsigma
-      dvxcrho = dvxcrho + v2rho2 - 2.0_dp*(v2rhosigma*laplacian + v3rho2sigma*sigma + 2.0_dp*v3rhosigma2*crossed)
-      dvxcsigma = dvxcrho - v2rhosigma - 2.0_dp*(v2sigma2*laplacian + v3rhosigma2*sigma + 2.0_dp*v3sigma3*crossed)
+      call xc_f03_gga_exc_vxc(xc_func1, 1_int64, rho, sigma, e, vrho, vsigma)
+      call xc_f03_gga_fxc(xc_func1, 1_int64, rho, sigma, v2rho2, v2rhosigma, v2sigma2)
+      call xc_f03_gga_kxc(xc_func1, 1_int64, rho, sigma, v3rho3, v3rho2sigma, v3rhosigma2, v3sigma3)
+      exc = exc + e(1)
+      vxc = vxc + vrho(1) - 2.0_dp*(vsigma(1)*laplacian(1) + v2rhosigma(1)*sigma(1) + 2.0_dp*v2sigma2(1)*crossed(1))
+      dexcrho = dexcrho + irho(1)*(vrho(1) - e(1))
+      dexcsigma = dexcsigma + irho(1)*vsigma(1)
+      dvxcrho = dvxcrho + v2rho2(1) - &
+        &       2.0_dp*(v2rhosigma(1)*laplacian(1) + v3rho2sigma(1)*sigma(1) + 2.0_dp*v3rhosigma2(1)*crossed(1))
+      dvxcsigma = dvxcrho - v2rhosigma(1) - &
+        &         2.0_dp*(v2sigma2(1)*laplacian(1) + v3rhosigma2(1)*sigma(1) + 2.0_dp*v3sigma3(1)*crossed(1))
     case default
       write (stderr, "(a)") "[ERROR]: selected functional is not GGA"
       stop
@@ -231,18 +211,17 @@ contains
     if (xc_sep) then
       select case (xc_family2)
       case (XC_FAMILY_GGA, XC_FAMILY_HYB_GGA)
-        call xc_f03_gga_exc_vxc(xc_func2, np, nrho, sigma, e, vrho, vsigma)
-        call xc_f03_gga_fxc(xc_func2, np, nrho, sigma, v2rho2, v2rhosigma, v2sigma2)
-        call xc_f03_gga_kxc(xc_func2, np, nrho, sigma, v3rho3, v3rho2sigma, v3rhosigma2, v3sigma3)
-        exc = exc + e
-        vxc = vxc + vrho - 2.0_dp*(vsigma*laplacian + v2rhosigma*sigma + 2.0_dp*v2sigma2*crossed)
-        dexcrho = dexcrho + irho*(vrho - e)
-        dexcsigma = dexcsigma + irho*vsigma
-        dvxcrho = dvxcrho + v2rho2 - 2.0_dp*(v2rhosigma*laplacian + v3rho2sigma*sigma + 2.0_dp*v3rhosigma2*crossed)
-        dvxcsigma = dvxcrho - v2rhosigma - 2.0_dp*(v2sigma2*laplacian + v3rhosigma2*sigma + 2.0_dp*v3sigma3*crossed)
-        deallocate (nrho, irho, sigma, laplacian, crossed, e, &
-          &         vrho, vsigma, v2rho2, v2rhosigma, v2sigma2, &
-          &         v3rho3, v3rho2sigma, v3rhosigma2, v3sigma3)
+        call xc_f03_gga_exc_vxc(xc_func2, 1_int64, rho, sigma, e, vrho, vsigma)
+        call xc_f03_gga_fxc(xc_func2, 1_int64, rho, sigma, v2rho2, v2rhosigma, v2sigma2)
+        call xc_f03_gga_kxc(xc_func2, 1_int64, rho, sigma, v3rho3, v3rho2sigma, v3rhosigma2, v3sigma3)
+        exc = exc + e(1)
+        vxc = vxc + vrho(1) - 2.0_dp*(vsigma(1)*laplacian(1) + v2rhosigma(1)*sigma(1) + 2.0_dp*v2sigma2(1)*crossed(1))
+        dexcrho = dexcrho + irho(1)*(vrho(1) - e(1))
+        dexcsigma = dexcsigma + irho(1)*vsigma(1)
+        dvxcrho = dvxcrho + v2rho2(1) - &
+          &       2.0_dp*(v2rhosigma(1)*laplacian(1) + v3rho2sigma(1)*sigma(1) + 2.0_dp*v3rhosigma2(1)*crossed(1))
+        dvxcsigma = dvxcrho - v2rhosigma(1) - &
+          &         2.0_dp*(v2sigma2(1)*laplacian(1) + v3rhosigma2(1)*sigma(1) + 2.0_dp*v3sigma3(1)*crossed(1))
       case default
         write (stderr, "(a)") "[ERROR]: selected functional is not GGA"
         stop
@@ -252,8 +231,8 @@ contains
     exc = exc*hartree
     vxc = vxc*hartree
     dexcrho = dexcrho*hartree*abohr3
-    dexcsigma = dexcsigma*hartree*abohr3
+    dexcsigma = dexcsigma*hartree*abohr8
     dvxcrho = dvxcrho*hartree*abohr3
-    dvxcsigma = dvxcsigma*hartree*abohr3
+    dvxcsigma = dvxcsigma*hartree*abohr8
   end subroutine xc_calc_gga
 end module xc

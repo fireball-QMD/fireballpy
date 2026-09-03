@@ -57,6 +57,10 @@ py_mod = import('python')
 py = py_mod.find_installation(pure: false)
 py_dep = py.dependency()
 
+# libXC is required
+libxc = dependency('libxcf03', method: 'pkg-config')
+libxc_dep = declare_dependency(dependencies: libxc)
+
 # Set pkg-config environment
 env = environment()
 env.append('PATH', meson.current_source_dir())
@@ -68,7 +72,7 @@ add_global_arguments(cflags, language: 'c')
 
 # Find mpifort
 if get_option('mpi')
-  mpi = dependency('mpi', language: 'fortran')
+  mpi = dependency('mpi', language: 'fortran', method: 'pkg-config')
   mpi_dep = declare_dependency(dependencies: mpi)
 endif
 
@@ -78,7 +82,7 @@ lapack_name = get_option('lapack')
 _args_blas_lapack = [] # Might be useful later
 if blas_name == 'openblas'
   # flexiblas is here for compatibility with fedora
-  blas = dependency(['openblas', 'OpenBLAS', 'flexiblas'])
+  blas = dependency(['openblas', 'OpenBLAS', 'flexiblas'], method: 'pkg-config')
 else
   blas = dependency(blas_name)
 endif

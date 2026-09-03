@@ -55,11 +55,83 @@ module math
   contains
     private
     procedure :: get_index => math_interp_get_index
+    procedure, public :: get_n => math_interp_get_n
+    procedure, public :: get_x => math_interp_get_x
+    procedure, public :: get_y => math_interp_get_y
+    procedure, public :: get_coef => math_interp_get_coef
     procedure, public :: f => math_interp_f
     procedure, public :: df => math_interp_df
     procedure, public :: ddf => math_interp_ddf
+    procedure, public :: rescale => math_interp_rescale
     procedure, public :: end => math_interp_end
   end type math_interp_t
+
+  interface
+    module pure type(math_interp_t) function math_interp_new(x, y)
+      implicit none
+      real(kind=dp), intent(in) :: x(:), y(:)
+      real(kind=dp), allocatable :: dx(:), dy(:), b(:), d(:), z(:), coefs(:, :)
+    end function math_interp_new
+
+    module pure integer function math_interp_get_index(this, x)
+      implicit none
+      class(math_interp_t), intent(in) :: this
+      real(kind=dp), intent(in) :: x
+    end function math_interp_get_index
+
+    module pure integer function math_interp_get_n(this)
+      implicit none
+      class(math_interp_t), intent(in) :: this
+    end function math_interp_get_n
+
+    module pure real(kind=dp) function math_interp_get_x(this, i)
+      implicit none
+      class(math_interp_t), intent(in) :: this
+      integer, intent(in) :: i
+    end function math_interp_get_x
+
+    module pure real(kind=dp) function math_interp_get_y(this, i)
+      implicit none
+      class(math_interp_t), intent(in) :: this
+      integer, intent(in) :: i
+    end function math_interp_get_y
+
+    module pure real(kind=dp) function math_interp_get_coef(this, i, j)
+      implicit none
+      class(math_interp_t), intent(in) :: this
+      integer, intent(in) :: i, j
+    end function math_interp_get_coef
+
+    module pure real(kind=dp) function math_interp_f(this, x)
+      implicit none
+      class(math_interp_t), intent(in) :: this
+      real(kind=dp), intent(in) :: x
+    end function math_interp_f
+
+    module pure real(kind=dp) function math_interp_df(this, x)
+      implicit none
+      class(math_interp_t), intent(in) :: this
+      real(kind=dp), intent(in) :: x
+    end function math_interp_df
+
+    module pure real(kind=dp) function math_interp_ddf(this, x)
+      implicit none
+      class(math_interp_t), intent(in) :: this
+      real(kind=dp), intent(in) :: x
+    end function math_interp_ddf
+
+    module subroutine math_interp_rescale(this, s)
+      implicit none
+      class(math_interp_t), intent(inout) :: this
+      real(kind=dp), intent(in) :: s
+    end subroutine math_interp_rescale
+
+    module subroutine math_interp_end(this)
+      implicit none
+      class(math_interp_t), intent(inout) :: this
+    end subroutine math_interp_end
+
+  end interface
 
   interface math_lstsq
     procedure :: lstsq1
@@ -114,99 +186,4 @@ contains
     if (lstsq2 /= 0) return
     lstsq2 = 0
   end function lstsq2
-
-  pure type(math_interp_t) function math_interp_new(x, y)
-    real(kind=dp), intent(in) :: x(:), y(:)
-    real(kind=dp), allocatable :: dx(:), dy(:), b(:), d(:), z(:), coefs(:, :)
-    integer :: i, np, np1, np2
-    np = size(x)
-    np1 = np - 1
-    np2 = np - 2
-    allocate (coefs(4, np1), dx(np1), dy(np1), b(np), d(np), z(np))
-    dx = x(2:np) - x(1:np1)
-    dy = y(2:np) - y(1:np1)
-
-    b(1) = 2.0_dp
-    b(2) = 3.5_dp
-    b(3:np1) = 3.75_dp
-    b(np) = 1.75_dp
-    d(1) = 0.0_dp
-    d(2:np1) = 3.0_dp*(y(3:np) - y(1:np2))
-    d(np) = 0.0_dp
-    do i = 3, np
-      d(i) = d(i) - 0.25_dp*d(i - 1)
-    end do
-
-    z(np) = d(np)/b(np)
-    do i = np1, 1, -1
-      z(i) = (d(i) - z(i + 1))/b(i)
-    end do
-    coefs(1, :) = y(1:np1)
-    coefs(2, :) = z(1:np1)/dx
-    coefs(3, :) = (3.0_dp*dy - 2*z(1:np1) - z(2:np))/dx**2
-    coefs(4, :) = (-2.0_dp*dy + z(1:np1) + z(2:np))/dx**3
-    math_interp_new = math_interp_t(np=np, x=x, y=y, coefs=coefs)
-    deallocate (dx, dy, b, d, z, coefs)
-  end function math_interp_new
-
-  pure integer function math_interp_get_index(this, x)
-    class(math_interp_t), intent(in) :: this
-    real(kind=dp), intent(in) :: x
-    integer :: i
-    math_interp_get_index = -1
-    do i = 1, (this%np - 1)
-      if ((x >= this%x(i)) .and. (x < this%x(i + 1))) then
-        math_interp_get_index = i
-        return
-      end if
-    end do
-  end function math_interp_get_index
-
-  pure real(kind=dp) function math_interp_f(this, x)
-    class(math_interp_t), intent(in) :: this
-    real(kind=dp), intent(in) :: x
-    integer :: i
-    real(kind=dp) :: dx
-    i = this%get_index(x)
-    if (i == -1) then
-      math_interp_f = 0.0_dp
-      return
-    end if
-    dx = x - this%x(i)
-    math_interp_f = this%coefs(1, i) + &
-    &               dx*(this%coefs(2, i) + dx*(this%coefs(3, i) + dx*this%coefs(4, i)))
-  end function math_interp_f
-
-  pure real(kind=dp) function math_interp_df(this, x)
-    class(math_interp_t), intent(in) :: this
-    real(kind=dp), intent(in) :: x
-    integer :: i
-    real(kind=dp) :: dx
-    i = this%get_index(x)
-    if (i == -1) then
-      math_interp_df = 0.0_dp
-      return
-    end if
-    dx = x - this%x(i)
-    math_interp_df = this%coefs(2, i) + dx*(2.0_dp*this%coefs(3, i) + dx*3.0_dp*this%coefs(4, i))
-  end function math_interp_df
-
-  pure real(kind=dp) function math_interp_ddf(this, x)
-    class(math_interp_t), intent(in) :: this
-    real(kind=dp), intent(in) :: x
-    integer :: i
-    real(kind=dp) :: dx
-    i = this%get_index(x)
-    if (i == -1) then
-      math_interp_ddf = 0.0_dp
-      return
-    end if
-    dx = x - this%x(i)
-    math_interp_ddf = 2.0_dp*this%coefs(3, i) + dx*6.0_dp*this%coefs(4, i)
-  end function math_interp_ddf
-
-  subroutine math_interp_end(this)
-    class(math_interp_t), intent(inout) :: this
-    deallocate (this%x, this%y, this%coefs)
-  end subroutine math_interp_end
 end module math

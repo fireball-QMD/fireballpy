@@ -55,8 +55,6 @@ module onecenter
   private
   public :: onecenter_calc
 
-  integer, parameter, public :: ONECENTER_NPOINTS = 1025
-
   integer, parameter :: ONECENTER_NUM_INTERACTIONS = 3
   integer, parameter, public :: ONECENTER_XC        = ishft(1, 0) ! 2^0
   integer, parameter, public :: ONECENTER_GOVERLAP1 = ishft(1, 1) ! 2^1
@@ -99,68 +97,61 @@ contains
   subroutine onecenter_calc_interaction(int_id, ispec, answer)
     integer, intent(in) :: int_id, ispec
     real(dp), allocatable, intent(out) :: answer(:,:)
-    integer :: interaction, irho, issh, jssh, isorp, index, nssh, nints, index_max
-    real(kind=dp) :: rcut, factor, drho, rho, tmp, psi1, psi2
+    integer :: interaction, irho, issh, jssh, isorp, index, nssh, nints, index_max, nrho
+    real(kind=dp) :: rcut, factor, drho, rho, tmp, psi1, psi2, dens, &
+      &              exc, vxc, dexcrho, dexcsigma, dvxcrho, dvxcsigma
+    real(kind=dp) :: ddens(1), dddens(1,1)
     logical :: onecenter_interactions(ONECENTER_NUM_INTERACTIONS)
     integer, allocatable :: s1(:), s2(:)
-    real(kind=dp), allocatable :: exc(:), vxc(:), dexcrho(:), dexcsigma(:), dvxcrho(:), dvxcsigma(:), fofr(:), &
-      &                           dens(:), ddens(:,:), dddens(:,:,:)
+    real(kind=dp), allocatable :: fofr(:)
 
     interaction = ishft(1, int_id - 1)
 
     ! Retrieve basic info
     nssh = wf_atoms(ispec)%get_nshells()
+    drho = wf_atoms(ispec)%get_dr()
     rcut = wf_atoms(ispec)%get_rcut()
+    nrho = rcut/drho + 1
+    if (iand(nrho, 1) == 0) then
+      nrho = nrho + 1
+      drho = rcut/real(nrho - 1, kind=dp)
+    end if
 
     ! Set dimensions
     nints = onecenter_get_nints(int_id, ispec)
-    call indices_onecenter_set([(wf_atoms(ispec)%get_angular_momentum(issh), issh = 1, nssh)], &
-      &                        index_max, s1, s2)
+    call indices_onecenter_set([(wf_atoms(ispec)%get_angular_momentum(issh), issh = 1, nssh)], index_max, s1, s2)
     allocate (fofr(nints), answer(nints, index_max))
     answer = 0.0_dp
 
-    ! Allocate and compute for XC
-    if (interaction == ONECENTER_XC) then
-      allocate (dens(ONECENTER_NPOINTS), exc(ONECENTER_NPOINTS), vxc(ONECENTER_NPOINTS), &
-        &       dexcrho(ONECENTER_NPOINTS), dvxcrho(ONECENTER_NPOINTS))
-      if (xc_isgga()) then
-        allocate (ddens(ONECENTER_NPOINTS, 1), dddens(ONECENTER_NPOINTS, 1, 1), &
-        &         dexcsigma(ONECENTER_NPOINTS), dvxcsigma(ONECENTER_NPOINTS))
-        call wf_dens(ispec, dens, ddens, dddens)
-        call xc_calc(dens, ddens, dddens, exc, vxc, dexcrho, dexcsigma, dvxcrho, dvxcsigma)
-      else
-        call wf_dens(ispec, dens)
-        call xc_calc(dens, exc, vxc, dexcrho, dvxcrho)
-      end if
-    end if
-
-    drho = rcut/real(ONECENTER_NPOINTS - 1, kind=dp)
-    do irho = 2, ONECENTER_NPOINTS  ! Avoid 0 problems
+    do irho = 2, nrho ! We can ignore 0 because of the factor term
       rho = real(irho - 1, kind=dp)*drho
       factor = 0.66666666666666666667_dp*drho
       if (iand(irho, 1) == 0) factor = 2.0_dp*factor
-      if (irho == 1 .or. irho == ONECENTER_NPOINTS) factor = 0.5_dp*factor
+      if (irho == nrho) factor = 0.5_dp*factor
 
       ! The integral in all its glory
       select case (interaction)
       case (ONECENTER_XC)
-        fofr(1) = vxc(irho)
+        if (xc_isgga()) then
+          call wf_dens(ispec, rho, dens, ddens, dddens)
+          call xc_calc(dens, ddens, dddens, exc, vxc, dexcrho, dexcsigma, dvxcrho, dvxcsigma)
+        else
+          call wf_dens(ispec, rho, dens)
+          call xc_calc(dens, exc, vxc, dexcrho, dvxcrho)
+          dexcsigma = 0.0_dp
+          dvxcsigma = 0.0_dp
+        end if
+        fofr(1) = vxc
         do isorp = 1, nssh
           tmp = wf_atoms(ispec)%get_psi(isorp, rho)
-          fofr(isorp + 1) = inv4pi*tmp*tmp*dvxcrho(irho)
-          if (xc_isgga()) then
-            fofr(isorp + 1) = fofr(isorp + 1) + 4.0_dp*inv4pi*tmp*dvxcsigma(irho) * &
-              &               wf_atoms(ispec)%get_psi(isorp, rho, order=1)*ddens(irho, 1)
-          end if
+          fofr(isorp + 1) = inv4pi*tmp*tmp*dvxcrho + &
+            &               4.0_dp*inv4pi*tmp*dvxcsigma*wf_atoms(ispec)%get_psi(isorp, rho, order=1)*ddens(1)
         end do
-        fofr(nssh + 2) = exc(irho)
+        fofr(nssh + 2) = exc
         do isorp = 1, nssh
           tmp = wf_atoms(ispec)%get_psi(isorp, rho)
-          fofr(isorp + 2 + nssh) = inv4pi*tmp*tmp*dexcrho(irho)
-          if (xc_isgga()) then
-            fofr(isorp + 2 + nssh) = fofr(isorp + 2 + nssh) + 4.0_dp*inv4pi*tmp*dexcsigma(irho) * &
-              &                      wf_atoms(ispec)%get_psi(isorp, rho, order=1)*ddens(irho, 1)
-          end if
+          fofr(isorp + 2 + nssh) = inv4pi*tmp*tmp*dexcrho + &
+            &                      4.0_dp*inv4pi*tmp*dexcsigma*wf_atoms(ispec)%get_psi(isorp, rho, order=1)*ddens(1)
         end do
       case default
         fofr(1) = 1.0_dp
@@ -186,12 +177,6 @@ contains
       end do
     end do
     deallocate (s1, s2, fofr)
-
-    ! Don't forget to clean XC
-    if (interaction == ONECENTER_XC) then
-      deallocate (dens, exc, vxc, dexcrho, dvxcrho)
-      if (xc_isgga()) deallocate (ddens, dddens, dexcsigma, dvxcsigma)
-    end if
   end subroutine onecenter_calc_interaction
 
   pure subroutine onecenter_get_fname(int_id, ispec, fname)
@@ -257,15 +242,6 @@ contains
     logical :: onecenter_interactions(ONECENTER_NUM_INTERACTIONS)
     character(path_len) :: fname
     real(dp), allocatable :: answer(:,:)
-
-    if (iand(ONECENTER_NPOINTS, 1) == 0) then
-      write (stderr, "('[ERROR] ',(a))") "Number of integration points must be odd"
-      error stop 1
-    end if
-    if (ONECENTER_NPOINTS == 1) then
-      write (stderr, "('[ERROR] ',(a))") "Number of integration points must be > 1"
-      error stop 1
-    end if
 
     call onecenter_get_interactions(interactions, onecenter_interactions)
     do int_id = 1, ONECENTER_NUM_INTERACTIONS

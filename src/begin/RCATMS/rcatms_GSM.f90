@@ -331,19 +331,24 @@
 
         ienergy = 0     ! do not calculate energies
         if (xc_isgga()) then
-          call xc_calc(rho/abohr3, rhop/abohr4, rhopp/abohr5, eexc, uxc, dexcrho, dexcsigma, duxcrho, duxcsigma)
-          eexc = eexc/ryd
-          uxc = uxc/ryd
-          dexcrho = dexcrho/ryd/abohr3
-          dexcsigma = dexcrho/ryd/abohr3
-          duxcrho = dexcrho/ryd/abohr3
-          duxcsigma = dexcrho/ryd/abohr3
+          do ipoint = 1, mesh
+            call xc_calc(rho(ipoint)/abohr3, rhop(ipoint,:)/abohr4, rhopp(ipoint,:,:)/abohr5, &
+              &          eexc(ipoint), uxc(ipoint), dexcrho(ipoint), dexcsigma(ipoint), duxcrho(ipoint), duxcsigma(ipoint))
+            eexc(ipoint) = eexc(ipoint)/ryd
+            uxc(ipoint) = uxc(ipoint)/ryd
+            dexcrho(ipoint) = dexcrho(ipoint)/ryd/abohr3
+            dexcsigma(ipoint) = dexcrho(ipoint)/ryd/abohr3
+            duxcrho(ipoint) = dexcrho(ipoint)/ryd/abohr3
+            duxcsigma(ipoint) = dexcrho(ipoint)/ryd/abohr3
+          end do
         else
-          call xc_calc(rho/abohr3, eexc, uxc, dexcrho, duxcrho)
-          eexc = eexc/ryd
-          uxc = uxc/ryd
-          dexcrho = dexcrho/ryd/abohr3
-          duxcrho = dexcrho/ryd/abohr3
+          do ipoint = 1, mesh
+            call xc_calc(rho(ipoint)/abohr3, eexc(ipoint), uxc(ipoint), dexcrho(ipoint), duxcrho(ipoint))
+            eexc(ipoint) = eexc(ipoint)/ryd
+            uxc(ipoint) = uxc(ipoint)/ryd
+            dexcrho(ipoint) = dexcrho(ipoint)/ryd/abohr3
+            duxcrho(ipoint) = dexcrho(ipoint)/ryd/abohr3
+          end do
         end if
         if (ienergy == 1) then
           exc = 0.0_dp
@@ -443,19 +448,24 @@
 
          ienergy = 1     ! calculate energies
          if (xc_isgga()) then
-           call xc_calc(rho/abohr3, rhop/abohr4, rhopp/abohr5, eexc, uxc, dexcrho, dexcsigma, duxcrho, duxcsigma)
-           eexc = eexc/ryd
-           uxc = uxc/ryd
-           dexcrho = dexcrho/ryd/abohr3
-           dexcsigma = dexcrho/ryd/abohr3
-           duxcrho = dexcrho/ryd/abohr3
-           duxcsigma = dexcrho/ryd/abohr3
+           do ipoint = 1, mesh
+             call xc_calc(rho(ipoint)/abohr3, rhop(ipoint,:)/abohr4, rhopp(ipoint,:,:)/abohr5, &
+               &          eexc(ipoint), uxc(ipoint), dexcrho(ipoint), dexcsigma(ipoint), duxcrho(ipoint), duxcsigma(ipoint))
+             eexc(ipoint) = eexc(ipoint)/ryd
+             uxc(ipoint) = uxc(ipoint)/ryd
+             dexcrho(ipoint) = dexcrho(ipoint)/ryd/abohr3
+             dexcsigma(ipoint) = dexcrho(ipoint)/ryd/abohr3
+             duxcrho(ipoint) = dexcrho(ipoint)/ryd/abohr3
+             duxcsigma(ipoint) = dexcrho(ipoint)/ryd/abohr3
+           end do
          else
-           call xc_calc(rho/abohr3, eexc, uxc, dexcrho, duxcrho)
-           eexc = eexc/ryd
-           uxc = uxc/ryd
-           dexcrho = dexcrho/ryd/abohr3
-           duxcrho = dexcrho/ryd/abohr3
+           do ipoint = 1, mesh
+             call xc_calc(rho(ipoint)/abohr3, eexc(ipoint), uxc(ipoint), dexcrho(ipoint), duxcrho(ipoint))
+             eexc(ipoint) = eexc(ipoint)/ryd
+             uxc(ipoint) = uxc(ipoint)/ryd
+             dexcrho(ipoint) = dexcrho(ipoint)/ryd/abohr3
+             duxcrho(ipoint) = dexcrho(ipoint)/ryd/abohr3
+           end do
          end if
          if (ienergy == 1) then
            exc = 0.0_dp

@@ -2,6 +2,7 @@ common_srcs = [
   'constants.f90',
   'indices.f90',
   'math.f90',
+  'math' / 'math_interp_t_impl.f90',
   'xc.f90',
   'utils.f90'
 ]
