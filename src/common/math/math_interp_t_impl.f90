@@ -40,37 +40,64 @@ submodule (math) math_interp_t_impl
 
 contains
 
+  subroutine math_solve_tridiag(x, upper, lower, diag)
+    real(kind=dp), intent(inout) :: x(:)
+    real(kind=dp), intent(in) :: upper(:), lower(:), diag(:)
+    integer :: i, i1, np, np1
+    real(kind=dp) :: temp
+    real(kind=dp), allocatable :: scratch(:)
+    np = size(x)
+    np1 = np - 1
+    allocate (scratch(np))
+
+    scratch(1) = upper(1)/diag(1)
+    x(1) = x(1)/diag(1)
+    do i = 2, np1
+      i1 = i - 1
+      temp = 1.0_dp/(diag(i) - lower(i1)*scratch(i1))
+      scratch(i) = upper(i)*temp
+      x(i) = (x(i) - lower(i1)*x(i1))*temp
+    end do
+    x(np) = (x(np) - lower(np1)*x(np1))*temp
+    do i = np1, 1, -1
+      x(i) = x(i) - scratch(i)*x(i + 1)
+    end do
+  end subroutine math_solve_tridiag
+
   module procedure math_interp_new
     integer :: i, np, np1, np2
-    real(kind=dp), allocatable :: dx(:), dy(:), b(:), d(:), z(:), coefs(:, :)
+    real(kind=dp), allocatable :: dx(:), s(:), a(:), b(:), c(:), d(:), temp(:), coefs(:, :)
     np = size(x)
     np1 = np - 1
     np2 = np - 2
-    allocate (coefs(4, np1), dx(np1), dy(np1), b(np), d(np), z(np))
-    dx = x(2:np) - x(1:np1)
-    dy = y(2:np) - y(1:np1)
+    allocate (coefs(4, np1), dx(np1), s(np1), a(np1), b(np), c(np1), d(np), temp(np1))
+    dx = x(2:) - x(:np1)
+    s = (y(2:) - y(:np1))/dx
 
-    b(1) = 2.0_dp
-    b(2) = 3.5_dp
-    b(3:np1) = 3.75_dp
-    b(np) = 1.75_dp
-    d(1) = 0.0_dp
-    d(2:np1) = 3.0_dp*(y(3:np) - y(1:np2))
-    d(np) = 0.0_dp
-    do i = 3, np
-      d(i) = d(i) - 0.25_dp*d(i - 1)
-    end do
+    ! Set tridiagonal coefs for middle equations
+    a(:np2) = dx(2:)
+    b(2:np1) = 2.0_dp*(dx(2:) + dx(:np2))
+    c(2:) = dx(:np2)
+    d(2:np1) = 3.0_dp*(dx(2:)*s(:np2) + dx(:np2)*s(2:))
 
-    z(np) = d(np)/b(np)
-    do i = np1, 1, -1
-      z(i) = (d(i) - z(i + 1))/b(i)
-    end do
-    coefs(1, :) = y(1:np1)
-    coefs(2, :) = z(1:np1)/dx
-    coefs(3, :) = (3.0_dp*dy - 2*z(1:np1) - z(2:np))/dx**2
-    coefs(4, :) = (-2.0_dp*dy + z(1:np1) + z(2:np))/dx**3
+    ! Left not-a-knot
+    c(1) = x(3) - x(1)
+    b(1) = dx(2)
+    d(1) = ((dx(1) + 2.0_dp*c(1))*dx(2)*s(1) + dx(1)*dx(1)*s(2))/c(1)
+
+    ! Right not-a-knot
+    a(np1) = x(np) - x(np2)
+    b(np) = dx(np2)
+    d(np) = (dx(np1)*dx(np1)*s(np2) + (2.0_dp*a(np1) + dx(np1))*dx(np2)*s(np1))/a(np1)
+
+    call math_solve_tridiag(d, c, a, b)
+
+    temp = (d(:np1) + d(2:) - 2*s)/dx
+    coefs(1, :) = y(:np1)
+    coefs(2, :) = d(:np1)
+    coefs(3, :) = (s - d(:np1))/dx - temp
+    coefs(4, :) = temp/dx
     math_interp_new = math_interp_t(np=np, x=x, y=y, coefs=coefs)
-    deallocate (dx, dy, b, d, z, coefs)
   end procedure math_interp_new
 
   module procedure math_interp_get_index
@@ -145,8 +172,8 @@ contains
   end procedure math_interp_ddf
 
   module procedure math_interp_rescale
-    this%y = this%y * s
-    this%coefs = this%coefs*s
+    this%y = s*this%y
+    this%coefs = s*this%coefs
   end procedure math_interp_rescale
 
   module procedure math_interp_end

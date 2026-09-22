@@ -67,7 +67,7 @@ module math
   end type math_interp_t
 
   interface
-    module pure type(math_interp_t) function math_interp_new(x, y)
+    module type(math_interp_t) function math_interp_new(x, y)
       implicit none
       real(kind=dp), intent(in) :: x(:), y(:)
       real(kind=dp), allocatable :: dx(:), dy(:), b(:), d(:), z(:), coefs(:, :)
@@ -152,7 +152,6 @@ contains
       lstsq1 = lstsq2(a, newb)
     end if
     b = newb(:, 1)
-    deallocate (newb)
   end function lstsq1
 
   integer function lstsq2(a, b, is_a_trans)
@@ -182,7 +181,6 @@ contains
     lwork = ibset(0, bit_size(lwork) - leadz(lwork))
     allocate (work(lwork))
     call dgels(ctrans, nrows, ncols, nrhs, a, nrows, b, nobs, work, lwork, lstsq2)
-    deallocate (work)
     if (lstsq2 /= 0) return
     lstsq2 = 0
   end function lstsq2

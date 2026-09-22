@@ -45,7 +45,7 @@
 ! ==============================================================================
 module twocenter
   use, intrinsic :: iso_fortran_env, only: dp => real64, stderr => error_unit, stdout => output_unit
-  use :: constants, only: inv4pi, sqinv4pi, twopi, invsq2, tolerance, path_len, fname_len
+  use :: constants, only: sqinv4pi, twopi, invsq2, tolerance, path_len, fname_len
   use :: utils, only: utils_open
   use :: indices, only: indices_twocenter_set, INDICES_TWOCENTER, INDICES_TWOCENTER_DIPX, &
     &                   INDICES_TWOCENTER_DIPY, INDICES_TWOCENTER_COULOMB, INDICES_TWOCENTER_SPH
@@ -125,27 +125,6 @@ contains
     end select
   end function twocenter_get_nints
 
-  pure integer function twocenter_get_index_type(int_id, issph)
-    integer, intent(in) :: int_id
-    logical, intent(in) :: issph
-    integer :: interaction
-    if (issph) then
-      twocenter_get_index_type = INDICES_TWOCENTER_SPH
-      return
-    end if
-    interaction = ishft(1, int_id - 1)
-    select case (interaction)
-    case (TWOCENTER_DIP_X)
-      twocenter_get_index_type = INDICES_TWOCENTER_DIPX
-    case (TWOCENTER_DIP_Y)
-      twocenter_get_index_type = INDICES_TWOCENTER_DIPY
-    case (TWOCENTER_COULOMB)
-      twocenter_get_index_type = INDICES_TWOCENTER_COULOMB
-    case default
-      twocenter_get_index_type = INDICES_TWOCENTER
-    end select
-  end function twocenter_get_index_type
-
   subroutine twocenter_calc_interaction(int_id, ispec, jspec, issph, index_max, answer, names)
     integer, intent(in) :: int_id, ispec, jspec
     logical, intent(in) :: issph
@@ -155,11 +134,10 @@ contains
     integer :: nssh1, nssh2, nints, interaction, igrid, iz, irho, isorp, idx, nz, nrho
     logical :: twocenter_interactions(TWOCENTER_NUM_INTERACTIONS)
     real(dp) :: d, dd, dmax, rcut1, rcut2, zmin, zmax, dz, drho, z1, z2, z12, z22, r1, r2, rhomult, rhomax, &
-      &         zmult, factor, psi1, psi2, cyl1, cyl2, psimult, tmp, rho, rho2, &
-      &         dens, exc, vxc, dexcrho, dvxcrho, dexcsigma, dvxcsigma
-    real(dp) :: ddens(2), dddens(2, 2)
+      &         zmult, factor, psi1, psi2, cyl1, cyl2, psimult, tmp, dtmp, ddtmp, rho, rho2, ir1, ir2, gdggdgr, gdggrgd, &
+      &         dens, lapl, exc, vxc, dexcrho, dvxcrho, dexcsigma, dvxcsigma, dvxclapl, dvxccross, grader, graderm
     integer, allocatable :: s1(:), s2(:), l1(:), l2(:), m1(:), m2(:), ls1(:), ls2(:)
-    real(dp), allocatable :: fofr(:)
+    real(dp), allocatable :: fofr(:), grad(:), hess(:,:)
 
     interaction = ishft(1, int_id - 1)
 
@@ -185,11 +163,19 @@ contains
 
     ! Set dimensions
     nints = twocenter_get_nints(int_id, ispec, jspec)
-    call indices_twocenter_set(twocenter_get_index_type(int_id, issph), ls1, ls2, index_max, s1, s2, l1, l2, m1, m2, names=names)
-    deallocate (ls1, ls2)
+    select case (interaction)
+    case (TWOCENTER_DIP_X)
+      call indices_twocenter_set(INDICES_TWOCENTER_DIPX, ls1, ls2, index_max, s1, s2, l1, l2, m1, m2, names=names)
+    case (TWOCENTER_DIP_Y)
+      call indices_twocenter_set(INDICES_TWOCENTER_DIPY, ls1, ls2, index_max, s1, s2, l1, l2, m1, m2, names=names)
+    case (TWOCENTER_COULOMB)
+      call indices_twocenter_set(INDICES_TWOCENTER_COULOMB, ls1, ls2, index_max, s1, s2, l1, l2, m1, m2, names=names)
+    case default
+      call indices_twocenter_set(INDICES_TWOCENTER, ls1, ls2, index_max, s1, s2, l1, l2, m1, m2, names=names)
+    end select
     if (index_max == 0) return
-    if (allocated(answer)) deallocate (answer)
-    allocate (fofr(nints), answer(nints, index_max, TWOCENTER_NPOINTS_D))
+    if (allocated(answer)) deallocate(answer)
+    allocate(fofr(nints), answer(nints, index_max, TWOCENTER_NPOINTS_D))
     answer = 0.0_dp
 
     ! Prepare integral
@@ -259,17 +245,17 @@ contains
           select case (interaction)
           case (TWOCENTER_DENS_ATOM)
             do isorp = 1, nssh2
-              tmp = wf_atoms(jspec)%get_psi(isorp, r2)
-              fofr(isorp) = inv4pi*tmp*tmp
+              tmp = sqinv4pi*wf_atoms(jspec)%get_psi(isorp, r2)
+              fofr(isorp) = tmp*tmp
             end do
           case (TWOCENTER_DENS_ONTOP)
             do isorp = 1, nssh1
-              tmp = wf_atoms(ispec)%get_psi(isorp, r1)
-              fofr(isorp) = inv4pi*tmp*tmp
+              tmp = sqinv4pi*wf_atoms(ispec)%get_psi(isorp, r1)
+              fofr(isorp) = tmp*tmp
             end do
             do isorp = 1, nssh2
-              tmp = wf_atoms(jspec)%get_psi(isorp, r2)
-              fofr(isorp + nssh1) = inv4pi*tmp*tmp
+              tmp = sqinv4pi*wf_atoms(jspec)%get_psi(isorp, r2)
+              fofr(isorp + nssh1) = tmp*tmp
             end do
           case (TWOCENTER_VNA_ATOM)
             do isorp = 0, nssh2
@@ -284,26 +270,50 @@ contains
             end do
           case (TWOCENTER_VXC)
             if (xc_isgga()) then
-              call wf_dens(ispec, jspec, rho, z1, z2, r1, r2, dens, ddens, dddens)
-              call xc_calc(dens, ddens, dddens, exc, vxc, dexcrho, dexcsigma, dvxcrho, dvxcsigma)
+              call wf_dens(ispec, jspec, rho, z1, z2, r1, r2, dens, lapl, grad, hess)
+              call xc_calc(dens, lapl, grad, hess, exc, vxc, dexcrho, dexcsigma, dvxcrho, dvxcsigma, dvxclapl, dvxccross)
+              if (r1 > tolerance) then
+                ir1 = 1.0_dp/r1
+              end if
+              if (r2 > tolerance) then
+                ir2 = 1.0_dp/r2
+              end if
             else
               call wf_dens(ispec, jspec, rho, z1, z2, r1, r2, dens)
               call xc_calc(dens, exc, vxc, dexcrho, dvxcrho)
-              dexcsigma = 0.0_dp
-              dvxcsigma = 0.0_dp
             end if
             fofr(1) = vxc
             do isorp = 1, nssh1
-              tmp = wf_atoms(ispec)%get_psi(isorp, r1)
-              fofr(isorp + 1) = inv4pi*tmp*tmp*dvxcrho
-              if (r1 > tolerance) fofr(isorp + 1) = fofr(isorp + 1) + dvxcsigma*4.0_dp*inv4pi * &
-                  &               tmp*wf_atoms(ispec)%get_psi(isorp, r1, order=1)*(ddens(1)*rho + ddens(2)*z1)/r1
+              tmp = sqinv4pi*wf_atoms(ispec)%get_psi(isorp, r1)
+              fofr(isorp + 1) = dvxcrho*tmp*tmp
+              if (xc_isgga() .and. r1 > tolerance) then
+                dtmp = sqinv4pi*wf_atoms(ispec)%get_psi(isorp, r1, order=1)
+                ddtmp = sqinv4pi*wf_atoms(ispec)%get_psi(isorp, r1, order=2)
+                grader = (grad(1)*rho + grad(2)*z1)*ir1
+                graderm = (grad(1)*rho - grad(2)*z1)*ir1
+                gdggdgr = ir1*(grad(1)*(hess(1, 1)*rho + hess(1, 2)*z1) + grad(2)*(hess(2, 1)*rho + hess(2, 2)*z1))
+                gdggrgd = ir1*(grad(1)*grad(1) + grad(2)*grad(2) - graderm*graderm)
+                fofr(isorp + 1) = fofr(isorp + 1) + &
+                  &               dvxcsigma*4.0_dp*tmp*dtmp*grader + &
+                  &               dvxclapl*2.0_dp*(dtmp*dtmp + tmp*ddtmp + 2.0_dp*ir1*tmp*dtmp) + &
+                  &               dvxccross*4.0_dp*(grader*grader*(dtmp*dtmp + tmp*ddtmp) + tmp*dtmp*(gdggdgr + gdggrgd))
+              end if
             end do
             do isorp = 1, nssh2
-              tmp = wf_atoms(jspec)%get_psi(isorp, r2)
-              fofr(isorp + 1 + nssh1) = inv4pi*tmp*tmp*dvxcrho
-              if (r2 > tolerance) fofr(isorp + 1 + nssh1) = fofr(isorp + 1 + nssh1) + dvxcsigma*4.0_dp*inv4pi * &
-                  &               tmp*wf_atoms(jspec)%get_psi(isorp, r2, order=1)*(ddens(1)*rho + ddens(2)*z2)/r2
+              tmp = sqinv4pi*wf_atoms(jspec)%get_psi(isorp, r2)
+              fofr(isorp + 1 + nssh1) = dvxcrho*tmp*tmp
+              if (xc_isgga() .and. r2 > tolerance) then
+                dtmp = sqinv4pi*wf_atoms(jspec)%get_psi(isorp, r2, order=1)
+                ddtmp = sqinv4pi*wf_atoms(jspec)%get_psi(isorp, r2, order=2)
+                grader = (grad(1)*rho + grad(2)*z2)*ir2
+                graderm = (grad(1)*rho - grad(2)*z2)*ir2
+                gdggdgr = ir2*(grad(1)*(hess(1, 1)*rho + hess(1, 2)*z2) + grad(2)*(hess(2, 1)*rho + hess(2, 2)*z2))
+                gdggrgd = ir2*(grad(1)*grad(1) + grad(2)*grad(2) - graderm*graderm)
+                fofr(isorp + nssh1 + 1) = fofr(isorp + nssh1 + 1) + &
+                  &                       dvxcsigma*4.0_dp*tmp*dtmp*grader + &
+                  &                       dvxclapl*2.0_dp*(dtmp*dtmp + tmp*ddtmp + 2.0_dp*ir2*tmp*dtmp) + &
+                  &                       dvxccross*4.0_dp*(grader*grader*(dtmp*dtmp + tmp*ddtmp) + tmp*dtmp*(gdggdgr + gdggrgd))
+              end if
             end do
           case (TWOCENTER_DIP_Z)
             fofr(1) = z1 - 0.5_dp*d
@@ -336,7 +346,6 @@ contains
         end do ! irho
       end do ! iz
     end do ! igrid
-    deallocate (s1, s2, l1, l2, m1, m2, fofr)
   end subroutine twocenter_calc_interaction
 
   subroutine twocenter_get_fnames(int_id, ispec, jspec, issph, fnames)
@@ -360,8 +369,8 @@ contains
 
     csph = " "
     if (issph) csph = "S"
-    if (allocated(fnames)) deallocate (fnames)
-    allocate (fnames(nints))
+    if (allocated(fnames)) deallocate(fnames)
+    allocate(fnames(nints))
     select case (interaction)
     case (TWOCENTER_DENS_ATOM)
       root = trim(TWOCENTER_ROOT(int_id))//trim(csph)
@@ -490,8 +499,8 @@ contains
       interaction = ishft(1, int_id - 1)
       call twocenter_get_fnames(int_id, ispec, jspec, issph, fnames)
       nints = twocenter_get_nints(int_id, ispec, jspec)
-      if (allocated(exists)) deallocate (exists)
-      allocate (exists(nints))
+      if (allocated(exists)) deallocate(exists)
+      allocate(exists(nints))
       do isorp = 1, nints
         inquire (file=fnames(isorp), exist=exists(isorp))
       end do
@@ -506,7 +515,6 @@ contains
         write (stdout, "(2x,a)") "Computing "//trim(fnames(isorp))//"... Done!"
       end do
     end do ! int_id
-    deallocate (exists, fnames, names, answer)
   end subroutine twocenter_calc
 
   real(dp) function cylindrical_harmonic(int_id, l, m, rho, z, r)

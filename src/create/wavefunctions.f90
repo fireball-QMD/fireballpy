@@ -95,7 +95,7 @@ contains
 
     io = utils_open("create.input", "r")
     read (io, *) nspec
-    allocate (wf_atoms(nspec))
+    allocate(wf_atoms(nspec))
     do i = 1, nspec
       read (io, *) inname
       io2 = utils_open(inname, "r")
@@ -105,7 +105,8 @@ contains
         read (io2, *)
       end do
       read (io2, *) nshells
-      allocate (fpaths(nshells))
+      if (allocated(fpaths)) deallocate(fpaths)
+      allocate(fpaths(nshells))
       do ish = 1, nshells
         do j = 1, 3
           read (io2, *)
@@ -115,7 +116,6 @@ contains
       end do
       close (io2)
       wf_atoms(i) = wf_new_atom(nz, nshells, fpaths)
-      deallocate (fpaths)
     end do
     close (io)
   end subroutine wf_init
@@ -126,7 +126,7 @@ contains
     integer :: i
     real(dp) :: rcut, dr
     type(wf_orbital_t), allocatable :: wfs(:)
-    allocate (wfs(nshells))
+    allocate(wfs(nshells))
     rcut = 0.0_dp
     dr = 1000000.0_dp
     do i = 1, nshells
@@ -135,7 +135,6 @@ contains
       dr = min(dr, wfs(i)%dr)
     end do
     wf_new_atom = wf_atom_t(nz=nz, nshells=nshells, rcut=rcut, dr=dr, wfs=wfs)
-    deallocate (wfs)
   end function wf_new_atom
 
   type(wf_orbital_t) function wf_new_orbital(fpath)
@@ -153,7 +152,7 @@ contains
     read (io, *) l
     nlines = np/4
     remitems = mod(np, 4)
-    allocate (r(np), psi(np))
+    allocate(r(np), psi(np))
     do i = 1, nlines
       read (io, "(4d18.10)") (psi(4*(i - 1) + j), j=1, 4)
     end do
@@ -167,7 +166,6 @@ contains
     end do
     fr = math_interp_new(r, psi)
     call wf_normalize(fr)
-    deallocate (r, psi)
     ! TODO: allow qref to be different
     wf_new_orbital = wf_orbital_t(l=l, rcut=rcut, rcut_max=rcut_max, q=q, qref=q, dr=dr, fr=fr)
   end function wf_new_orbital
@@ -292,7 +290,7 @@ contains
     do ish = 1, this%nshells
       call this%wfs(ish)%end()
     end do
-    deallocate (this%wfs)
+    deallocate(this%wfs)
   end subroutine wf_atom_end
 
   subroutine wf_end()
@@ -301,118 +299,126 @@ contains
     do ispec = 1, nspec
       call wf_atoms(ispec)%end()
     end do
-    deallocate (wf_atoms)
+    deallocate(wf_atoms)
   end subroutine wf_end
 
-  pure subroutine dens1c(ispec, r, dens, ddens, dddens)
+  pure subroutine dens1c(ispec, r, dens, lapl, grad, hess)
     integer, intent(in) :: ispec
     real(dp), intent(in) :: r
     real(dp), intent(out) :: dens
-    real(dp), intent(out), optional :: ddens(:), dddens(:,:)
+    real(dp), intent(out), optional :: lapl
+    real(dp), intent(out), allocatable, optional :: grad(:), hess(:,:)
     integer :: issh, nssh
-    real(dp) :: tpsi, tdpsi
+    real(dp) :: tpsi, tdpsi, tddpsi, tq, ir
     real(dp), allocatable :: psi(:)
-    allocate (psi(wf_atoms(ispec)%get_nshells()))
+    allocate(psi(wf_atoms(ispec)%get_nshells()))
     nssh = wf_atoms(ispec)%get_nshells()
     dens = 0.0_dp
     do issh = 1, nssh
+      tq = wf_atoms(ispec)%get_ref_charge(issh)
       tpsi = wf_atoms(ispec)%get_psi(issh, r)
       psi(issh) = tpsi
-      dens = dens + wf_atoms(ispec)%get_ref_charge(issh)*tpsi*tpsi
+      dens = dens + tq*tpsi*tpsi
     end do
     dens = dens*inv4pi
-    if (.not. present(ddens) .or. .not. present(dddens)) return
-    ddens = 0.0_dp
-    dddens = 0.0_dp
+    if (.not. present(lapl) .or. .not. present(grad) .or. .not. present(hess)) return
+    if (allocated(grad)) deallocate(grad)
+    if (allocated(hess)) deallocate(hess)
+    allocate(grad(1), hess(1, 1))
+    lapl = 0.0_dp
+    grad = 0.0_dp
+    hess = 0.0_dp
     if (r > tolerance) then
+      ir = 1.0_dp/r
       do issh = 1, nssh
+        tq = wf_atoms(ispec)%get_ref_charge(issh)
         tpsi = psi(issh)
         tdpsi = wf_atoms(ispec)%get_psi(issh, r, order=1)
-        ddens = ddens + wf_atoms(ispec)%get_ref_charge(issh)*tpsi*tdpsi
-        dddens = dddens + wf_atoms(ispec)%get_ref_charge(issh) * &
-          &               (tdpsi*tdpsi + tpsi*wf_atoms(ispec)%get_psi(issh, r, order=2))
+        tddpsi = wf_atoms(ispec)%get_psi(issh, r, order=2)
+        lapl = lapl + tq*(tdpsi*tdpsi + tpsi*tddpsi + 2.0_dp*ir*tpsi*tdpsi)
+        grad = grad + tq*tpsi*tdpsi
+        hess = hess + tq*(tdpsi*tdpsi + tpsi*tddpsi)
       end do
     end if
-    ddens = ddens*2.0_dp*inv4pi
-    dddens = dddens*2.0_dp*inv4pi
-    deallocate (psi)
+    lapl = lapl*2.0_dp*inv4pi
+    grad = grad*2.0_dp*inv4pi
+    hess = hess*2.0_dp*inv4pi
   end subroutine dens1c
 
-  pure subroutine dens2c(ispec, jspec, rho, z1, z2, r1, r2, dens, ddens, dddens)
+  pure subroutine dens2c(ispec, jspec, rho, z1, z2, r1, r2, dens, lapl, grad, hess)
     integer, intent(in) :: ispec, jspec
     real(dp), intent(in) :: rho, z1, z2, r1, r2
     real(dp), intent(out) :: dens
-    real(dp), intent(out), optional :: ddens(:), dddens(:, :)
+    real(dp), intent(out), optional :: lapl
+    real(dp), intent(out), allocatable, optional :: grad(:), hess(:, :)
     integer :: issh, jssh, nssh1, nssh2
-    real(dp) :: ir, ir2, tpsi, tdpsi, rho2, z12, z22
+    real(dp) :: ir, ir2, ir3, tpsi, tdpsi, tddpsi, tq, rho2, z12, z22
     real(dp), allocatable :: psi1(:), psi2(:)
     nssh1 = wf_atoms(ispec)%get_nshells()
     nssh2 = wf_atoms(jspec)%get_nshells()
     rho2 = rho*rho
     z12 = z1*z1
     z22 = z2*z2
-    allocate (psi1(nssh1), psi2(nssh2))
+    allocate(psi1(nssh1), psi2(nssh2))
     dens = 0.0_dp
     do issh = 1, nssh1
+      tq = wf_atoms(ispec)%get_ref_charge(issh)
       tpsi = wf_atoms(ispec)%get_psi(issh, r1)
       psi1(issh) = tpsi
-      dens = dens + wf_atoms(ispec)%get_ref_charge(issh)*tpsi*tpsi
+      dens = dens + tq*tpsi*tpsi
     end do
     do jssh = 1, nssh2
+      tq = wf_atoms(jspec)%get_ref_charge(jssh)
       tpsi = wf_atoms(jspec)%get_psi(jssh, r2)
       psi2(jssh) = tpsi
-      dens = dens + wf_atoms(jspec)%get_ref_charge(jssh)*tpsi*tpsi
+      dens = dens + tq*tpsi*tpsi
     end do
     dens = dens*inv4pi
-    if (.not. present(ddens) .or. .not. present(dddens)) return
-    ddens = 0.0_dp
-    dddens = 0.0_dp
+    if (.not. present(lapl) .or. .not. present(grad) .or. .not. present(hess)) return
+    if (allocated(grad)) deallocate(grad)
+    if (allocated(hess)) deallocate(hess)
+    allocate(grad(2), hess(2, 2))
+    lapl = 0.0_dp
+    grad = 0.0_dp
+    hess = 0.0_dp
     if (r1 > tolerance) then
       ir = 1.0_dp/r1
       ir2 = ir*ir
+      ir3 = ir2*ir
       do issh = 1, nssh1
-        tdpsi = wf_atoms(ispec)%get_psi(issh, r1, order=1)
+        tq = wf_atoms(ispec)%get_ref_charge(issh)
         tpsi = psi1(issh)
-        ddens(1) = ddens(1) + wf_atoms(ispec)%get_ref_charge(issh)*tpsi*tdpsi
-        ddens(2) = ddens(2) + wf_atoms(ispec)%get_ref_charge(issh)*tpsi*tdpsi
-        dddens(1, 1) = dddens(1, 1) + wf_atoms(ispec)%get_ref_charge(issh)* &
-          &            (tdpsi*tdpsi*rho2 + tpsi*wf_atoms(ispec)%get_psi(issh, r1, order=2)*rho2 + tpsi*tdpsi*z12*ir)
-        dddens(1, 2) = dddens(1, 2) + wf_atoms(ispec)%get_ref_charge(issh)* &
-          &            (tdpsi*tdpsi + tpsi*wf_atoms(ispec)%get_psi(issh, r1, order=2) - tpsi*tdpsi*ir)
-        dddens(2, 2) = dddens(2, 2) + wf_atoms(ispec)%get_ref_charge(issh)* &
-          &            (tdpsi*tdpsi*z12 + tpsi*wf_atoms(ispec)%get_psi(issh, r1, order=2)*z12 + tpsi*tdpsi*rho2*ir)
+        tdpsi = wf_atoms(ispec)%get_psi(issh, r1, order=1)
+        tddpsi = wf_atoms(ispec)%get_psi(issh, r1, order=2)
+        lapl = lapl + tq*(tdpsi*tdpsi + tpsi*tddpsi + tpsi*tdpsi*ir)
+        grad(1) = grad(1) + tq*tpsi*tdpsi*rho*ir
+        grad(2) = grad(2) + tq*tpsi*tdpsi*z1*ir
+        hess(1, 1) = hess(1, 1) + tq*(rho2*ir2*(tdpsi*tdpsi + tpsi*tddpsi) + (ir - 2.0_dp*rho2*ir3)*tpsi*tdpsi)
+        hess(1, 2) = hess(1, 2) + tq*(rho*z1*ir2*(tdpsi*tdpsi + tpsi*tddpsi) - 2.0_dp*rho*z1*ir3*tpsi*tdpsi)
+        hess(2, 2) = hess(2, 2) + tq*(z12*ir2*(tdpsi*tdpsi + tpsi*tddpsi) + (ir - 2.0_dp*z12*ir3)*tpsi*tdpsi)
       end do
-      ddens(1) = ddens(1)*rho*ir
-      ddens(2) = ddens(2)*z1*ir
-      dddens(1, 1) = dddens(1, 1)*ir2
-      dddens(1, 2) = dddens(1, 2)*ir2*rho*z1
-      dddens(2, 2) = dddens(2, 2)*ir2
     end if
     if (r2 > tolerance) then
       ir = 1.0_dp/r2
       ir2 = ir*ir
+      ir3 = ir2*ir
       do jssh = 1, nssh2
-        tdpsi = wf_atoms(jspec)%get_psi(jssh, r2, order=1)
+        tq = wf_atoms(jspec)%get_ref_charge(jssh)
         tpsi = psi2(jssh)
-        ddens(1) = ddens(1) + wf_atoms(jspec)%get_ref_charge(jssh)*tpsi*tdpsi
-        ddens(2) = ddens(2) + wf_atoms(jspec)%get_ref_charge(jssh)*tpsi*tdpsi
-        dddens(1, 1) = dddens(1, 1) + wf_atoms(jspec)%get_ref_charge(jssh)* &
-          &            (tdpsi*tdpsi*rho2 + tpsi*wf_atoms(jspec)%get_psi(jssh, r2, order=2)*rho2 + tpsi*tdpsi*z22*ir)
-        dddens(1, 2) = dddens(1, 2) + wf_atoms(jspec)%get_ref_charge(jssh)* &
-          &            (tdpsi*tdpsi + tpsi*wf_atoms(jspec)%get_psi(jssh, r2, order=2) - tpsi*tdpsi*ir)
-        dddens(2, 2) = dddens(2, 2) + wf_atoms(jspec)%get_ref_charge(jssh)* &
-          &            (tdpsi*tdpsi*z22 + tpsi*wf_atoms(jspec)%get_psi(jssh, r2, order=2)*z22 + tpsi*tdpsi*rho2*ir)
+        tdpsi = wf_atoms(jspec)%get_psi(jssh, r2, order=1)
+        tddpsi = wf_atoms(jspec)%get_psi(jssh, r2, order=2)
+        lapl = lapl + tq*(tdpsi*tdpsi + tpsi*tddpsi + tpsi*tdpsi*ir)
+        grad(1) = grad(1) + tq*tpsi*tdpsi*rho*ir
+        grad(2) = grad(2) + tq*tpsi*tdpsi*z2*ir
+        hess(1, 1) = hess(1, 1) + tq*(rho2*ir2*(tdpsi*tdpsi + tpsi*tddpsi) + (ir - 2.0_dp*rho2*ir3)*tpsi*tdpsi)
+        hess(1, 2) = hess(1, 2) + tq*(rho*z2*ir2*(tdpsi*tdpsi + tpsi*tddpsi) - 2.0_dp*rho*z2*ir3*tpsi*tdpsi)
+        hess(2, 2) = hess(2, 2) + tq*(z22*ir2*(tdpsi*tdpsi + tpsi*tddpsi) + (ir - 2.0_dp*z22*ir3)*tpsi*tdpsi)
       end do
-      ddens(1) = ddens(1)*rho*ir
-      ddens(2) = ddens(2)*z2*ir
-      dddens(1, 1) = dddens(1, 1)*ir2
-      dddens(1, 2) = dddens(1, 2)*ir2*rho*z2
-      dddens(2, 2) = dddens(2, 2)*ir2
     end if
-    ddens = ddens*2.0_dp*inv4pi
-    dddens = dddens*2.0_dp*inv4pi
-    dddens(2, 1) = dddens(1, 2)
-    deallocate (psi1, psi2)
+    lapl = lapl*2.0_dp*inv4pi
+    grad = grad*2.0_dp*inv4pi
+    hess = hess*2.0_dp*inv4pi
+    hess(2, 1) = hess(1, 2)
   end subroutine dens2c
 
 end module wavefunctions

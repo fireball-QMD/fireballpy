@@ -87,7 +87,7 @@ contains
 
     io = utils_open("create.input", "r")
     read (io, *) nspec
-    allocate (pot_atoms(nspec))
+    allocate(pot_atoms(nspec))
     do i = 1, nspec
       read (io, *) inname
       io2 = utils_open(inname, "r")
@@ -98,7 +98,8 @@ contains
       end do
       read (io2, *) fpathtemp
       read (io2, *) nshells
-      allocate (fpaths(0:nshells))
+      if (allocated(fpaths)) deallocate(fpaths)
+      allocate(fpaths(0:nshells))
       fpaths(0) = fpathtemp
       do ish = 1, nshells
         do j = 1, 4
@@ -108,7 +109,6 @@ contains
       end do
       close (io2)
       pot_atoms(i) = pot_new_atom(nz, nshells, fpaths)
-      deallocate (fpaths)
     end do
     close (io)
   end subroutine pot_init
@@ -118,12 +118,11 @@ contains
     character(1000), intent(in) :: fpaths(0:)
     integer :: i
     type(pot_orbital_t), allocatable :: pots(:)
-    allocate (pots(0:nshells))
+    allocate(pots(0:nshells))
     do i = 0, nshells
       pots(i) = pot_new_orbital(i, fpaths(i))
     end do
     pot_new_atom = pot_atom_t(nz=nz, nshells=nshells, pots=pots)
-    deallocate (pots)
   end function pot_new_atom
 
   type(pot_orbital_t) function pot_new_orbital(ish, fpath)
@@ -141,13 +140,12 @@ contains
     etot = 0.0_dp
     if (ish == 0) read (io, *) etot
     rcut = rcut*abohr
-    allocate (r(np), vnn(np))
+    allocate(r(np), vnn(np))
     do i = 1, np
       read (io, "(2d24.16)") r(i), vnn(i)
     end do
     close (io)
     fr = math_interp_new(r, vnn)
-    deallocate (r, vnn)
     pot_new_orbital = pot_orbital_t(rcut=rcut, etot=etot, fr=fr)
   end function pot_new_orbital
 
@@ -207,7 +205,7 @@ contains
     do ish = 0, this%nshells
       call this%pots(ish)%end()
     end do
-    deallocate (this%pots)
+    deallocate(this%pots)
   end subroutine pot_atom_end
 
   subroutine pot_end()
@@ -216,7 +214,7 @@ contains
     do ispec = 1, nspec
       call pot_atoms(ispec)%end()
     end do
-    deallocate (pot_atoms)
+    deallocate(pot_atoms)
   end subroutine pot_end
 
 end module potentials

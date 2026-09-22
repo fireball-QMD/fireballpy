@@ -101,6 +101,7 @@
         real(kind=dp) xnz
         real(kind=dp) xnorm
         real(kind=dp) zero
+        real(kind=dp) dexcrho, dexcsigma, duxcrho, duxcsigma, duxclapl, duxccross
 
         real(kind=dp), dimension (0:3,0:3,0:6) :: cgcoeff
         real(kind=dp), dimension (:), allocatable :: eigenvalue
@@ -115,7 +116,7 @@
         real(kind=dp), dimension (mesh) :: sigma
         real(kind=dp), dimension (mesh) :: sigma_old
         real(kind=dp), dimension (4) :: terms
-        real(kind=dp), dimension (mesh) :: uxc, eexc, dexcrho, dexcsigma, duxcrho, duxcsigma
+        real(kind=dp), dimension (mesh) :: uxc, eexc
         real(kind=dp), dimension (:), allocatable :: uxc_local
         real(kind=dp), dimension (mesh) :: v
         real(kind=dp), dimension (mesh) :: vc
@@ -296,22 +297,16 @@
         ienergy = 0     ! do not calculate energies
         if (xc_isgga()) then
           do ipoint = 1, mesh
-            call xc_calc(rho(ipoint)/abohr3, rhop(ipoint,:)/abohr4, rhopp(ipoint,:,:)/abohr5, &
-              &          eexc(ipoint), uxc(ipoint), dexcrho(ipoint), dexcsigma(ipoint), duxcrho(ipoint), duxcsigma(ipoint))
+            call xc_calc(rho(ipoint)/abohr3, rhopp(ipoint,1,1)/abohr5, rhop(ipoint,:)/abohr4, rhopp(ipoint,:,:)/abohr5, &
+              &          eexc(ipoint), uxc(ipoint), dexcrho, dexcsigma, duxcrho, duxcsigma, duxclapl, duxccross)
             eexc(ipoint) = eexc(ipoint)/ryd
             uxc(ipoint) = uxc(ipoint)/ryd
-            dexcrho(ipoint) = dexcrho(ipoint)/ryd/abohr3
-            dexcsigma(ipoint) = dexcrho(ipoint)/ryd/abohr3
-            duxcrho(ipoint) = dexcrho(ipoint)/ryd/abohr3
-            duxcsigma(ipoint) = dexcrho(ipoint)/ryd/abohr3
           end do
         else
           do ipoint = 1, mesh
-            call xc_calc(rho(ipoint)/abohr3, eexc(ipoint), uxc(ipoint), dexcrho(ipoint), duxcrho(ipoint))
+            call xc_calc(rho(ipoint)/abohr3, eexc(ipoint), uxc(ipoint), dexcrho, duxcrho)
             eexc(ipoint) = eexc(ipoint)/ryd
             uxc(ipoint) = uxc(ipoint)/ryd
-            dexcrho(ipoint) = dexcrho(ipoint)/ryd/abohr3
-            duxcrho(ipoint) = dexcrho(ipoint)/ryd/abohr3
           end do
         end if
         if (ienergy == 1) then
@@ -409,22 +404,16 @@
          ienergy = 1     ! calculate energies
          if (xc_isgga()) then
            do ipoint = 1, mesh
-             call xc_calc(rho(ipoint)/abohr3, rhop(ipoint,:)/abohr4, rhopp(ipoint,:,:)/abohr5, &
-               &          eexc(ipoint), uxc(ipoint), dexcrho(ipoint), dexcsigma(ipoint), duxcrho(ipoint), duxcsigma(ipoint))
+             call xc_calc(rho(ipoint)/abohr3, rhopp(ipoint,1,1)/abohr5, rhop(ipoint,:)/abohr4, rhopp(ipoint,:,:)/abohr5, &
+               &          eexc(ipoint), uxc(ipoint), dexcrho, dexcsigma, duxcrho, duxcsigma, duxclapl, duxccross)
              eexc(ipoint) = eexc(ipoint)/ryd
              uxc(ipoint) = uxc(ipoint)/ryd
-             dexcrho(ipoint) = dexcrho(ipoint)/ryd/abohr3
-             dexcsigma(ipoint) = dexcrho(ipoint)/ryd/abohr3
-             duxcrho(ipoint) = dexcrho(ipoint)/ryd/abohr3
-             duxcsigma(ipoint) = dexcrho(ipoint)/ryd/abohr3
            end do
          else
            do ipoint = 1, mesh
-             call xc_calc(rho(ipoint)/abohr3, eexc(ipoint), uxc(ipoint), dexcrho(ipoint), duxcrho(ipoint))
+             call xc_calc(rho(ipoint)/abohr3, eexc(ipoint), uxc(ipoint), dexcrho, duxcrho)
              eexc(ipoint) = eexc(ipoint)/ryd
              uxc(ipoint) = uxc(ipoint)/ryd
-             dexcrho(ipoint) = dexcrho(ipoint)/ryd/abohr3
-             duxcrho(ipoint) = dexcrho(ipoint)/ryd/abohr3
            end do
          end if
          if (ienergy == 1) then

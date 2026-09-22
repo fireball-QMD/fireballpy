@@ -90,7 +90,7 @@ contains
 
     io = utils_open("create.input", "r")
     read (io, *) nspec
-    allocate (pp_atoms(nspec))
+    allocate(pp_atoms(nspec))
     do i = 1, nspec
       read (io, *) inname
       io2 = utils_open(inname, "r")
@@ -114,7 +114,7 @@ contains
     real(dp) :: rcut, cl
     real(dp), allocatable :: r(:), vpp(:)
     type(pp_orbital_t), allocatable :: pps(:)
-    allocate (pps(nshells))
+    allocate(pps(nshells))
     io = utils_open(fpath, "r")
     do i = 1, 14
       read (io, *)
@@ -136,16 +136,16 @@ contains
     end do
     do ish = 1, nshells
       read (io, "(3x,i1,8x,i5,4x,f14.7)") l, np, cl
-      allocate (r(np), vpp(np))
+      if (allocated(r)) deallocate(r)
+      if (allocated(vpp)) deallocate(vpp)
+      allocate(r(np), vpp(np))
       do i = 1, np
         read (io, *) r(i), vpp(i)
       end do
       pps(ish) = pp_new_orbital(l, rcut, cl, r, vpp)
-      deallocate (r, vpp)
     end do
     close (io)
     pp_new_atom = pp_atom_t(nz=nz, nshells=nshells, iexc=iexc, rcut=rcut, pps=pps)
-    deallocate (pps)
   end function pp_new_atom
 
   type(pp_orbital_t) function pp_new_orbital(l, rcut, cl, r, vpp)
@@ -229,7 +229,7 @@ contains
     do ish = 1, this%nshells
       call this%pps(ish)%end()
     end do
-    deallocate (this%pps)
+    deallocate(this%pps)
   end subroutine pp_atom_end
 
   subroutine pp_end()
@@ -238,7 +238,7 @@ contains
     do ispec = 1, nspec
       call pp_atoms(ispec)%end()
     end do
-    deallocate (pp_atoms)
+    deallocate(pp_atoms)
   end subroutine pp_end
 
 end module pseudopotentials

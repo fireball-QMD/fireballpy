@@ -46,7 +46,7 @@
 ! ==============================================================================
 module onecenter
   use, intrinsic :: iso_fortran_env, only: dp => real64, stderr => error_unit, stdout => output_unit
-  use :: constants, only: inv4pi, path_len
+  use :: constants, only: sqinv4pi, path_len, tolerance
   use :: indices, only: indices_onecenter_set
   use :: utils, only: utils_open
   use :: xc, only: xc_calc, xc_isgga
@@ -98,12 +98,11 @@ contains
     integer, intent(in) :: int_id, ispec
     real(dp), allocatable, intent(out) :: answer(:,:)
     integer :: interaction, irho, issh, jssh, isorp, index, nssh, nints, index_max, nrho
-    real(kind=dp) :: rcut, factor, drho, rho, tmp, psi1, psi2, dens, &
-      &              exc, vxc, dexcrho, dexcsigma, dvxcrho, dvxcsigma
-    real(kind=dp) :: ddens(1), dddens(1,1)
+    real(kind=dp) :: ir, rcut, factor, drho, rho, tmp, dtmp, ddtmp, psi1, psi2, dens, lapl, &
+      &              exc, vxc, dexcrho, dexcsigma, dvxcrho, dvxcsigma, dvxclapl, dvxccross
     logical :: onecenter_interactions(ONECENTER_NUM_INTERACTIONS)
     integer, allocatable :: s1(:), s2(:), l12(:)
-    real(kind=dp), allocatable :: fofr(:)
+    real(kind=dp), allocatable :: fofr(:), grad(:), hess(:,:)
 
     interaction = ishft(1, int_id - 1)
 
@@ -120,7 +119,7 @@ contains
     ! Set dimensions
     nints = onecenter_get_nints(int_id, ispec)
     call indices_onecenter_set([(wf_atoms(ispec)%get_angular_momentum(issh), issh = 1, nssh)], index_max, s1, s2, l12)
-    allocate (fofr(nints), answer(nints, index_max))
+    allocate(fofr(nints), answer(nints, index_max))
     answer = 0.0_dp
 
     do irho = 2, nrho ! We can ignore 0 because of the factor term
@@ -133,25 +132,27 @@ contains
       select case (interaction)
       case (ONECENTER_XC)
         if (xc_isgga()) then
-          call wf_dens(ispec, rho, dens, ddens, dddens)
-          call xc_calc(dens, ddens, dddens, exc, vxc, dexcrho, dexcsigma, dvxcrho, dvxcsigma)
+          call wf_dens(ispec, rho, dens, lapl, grad, hess)
+          call xc_calc(dens, lapl, grad, hess, exc, vxc, dexcrho, dexcsigma, dvxcrho, dvxcsigma, dvxclapl, dvxccross)
+          if (rho > tolerance) ir = 1.0_dp/rho
         else
           call wf_dens(ispec, rho, dens)
           call xc_calc(dens, exc, vxc, dexcrho, dvxcrho)
-          dexcsigma = 0.0_dp
-          dvxcsigma = 0.0_dp
         end if
         fofr(1) = vxc
-        do isorp = 1, nssh
-          tmp = wf_atoms(ispec)%get_psi(isorp, rho)
-          fofr(isorp + 1) = inv4pi*tmp*tmp*dvxcrho + &
-            &               4.0_dp*inv4pi*tmp*dvxcsigma*wf_atoms(ispec)%get_psi(isorp, rho, order=1)*ddens(1)
-        end do
         fofr(nssh + 2) = exc
         do isorp = 1, nssh
-          tmp = wf_atoms(ispec)%get_psi(isorp, rho)
-          fofr(isorp + 2 + nssh) = inv4pi*tmp*tmp*dexcrho + &
-            &                      4.0_dp*inv4pi*tmp*dexcsigma*wf_atoms(ispec)%get_psi(isorp, rho, order=1)*ddens(1)
+          tmp = sqinv4pi*wf_atoms(ispec)%get_psi(isorp, rho)
+          fofr(isorp + 1) = dvxcrho*tmp*tmp
+          fofr(isorp + 2 + nssh) = dexcrho*tmp*tmp
+          if (xc_isgga() .and. rho > tolerance) then
+            dtmp = sqinv4pi*wf_atoms(ispec)%get_psi(isorp, rho, order=1)
+            ddtmp = sqinv4pi*wf_atoms(ispec)%get_psi(isorp, rho, order=2)
+            fofr(isorp + 1) = fofr(isorp + 1) + dvxcsigma*4.0_dp*tmp*dtmp*grad(1) + &
+              &                                 dvxclapl*2.0_dp*(dtmp*dtmp + tmp*ddtmp + 2.0_dp*ir*tmp*dtmp) + &
+              &                                 dvxccross*4.0_dp*grad(1)*(grad(1)*(dtmp*dtmp + tmp*ddtmp) + tmp*dtmp*hess(1,1))
+            fofr(isorp + 2 + nssh) = fofr(isorp + 2 + nssh) + dexcsigma*4.0_dp*tmp*dtmp*grad(1)
+          end if
         end do
       case default
         fofr(1) = 1.0_dp
@@ -176,7 +177,6 @@ contains
         end select
       end do
     end do
-    deallocate (s1, s2, fofr)
   end subroutine onecenter_calc_interaction
 
   pure subroutine onecenter_get_fname(int_id, ispec, fname)
@@ -229,7 +229,7 @@ contains
       write (io, "(4x,a)", advance="no") trim(names(index))
     end do
     write (io, "(a)") ""
-    allocate (matrix(nssh, nssh))
+    allocate(matrix(nssh, nssh))
     do ix = 1, nints
       matrix = 0.0_dp
       do index = 1, index_max
@@ -241,7 +241,6 @@ contains
       if (ix < nints) write (io, "(a)") ""
     end do
     close (io)
-    deallocate (s1, s2, matrix)
   end subroutine onecenter_write_interaction
 
   subroutine onecenter_calc(interactions, ispec)
@@ -265,7 +264,6 @@ contains
       write (stdout, "(a)", advance="no") achar(8)//achar(13)
       write (stdout, "(2x,a)") "Computing "//trim(fname)//"... Done!"
     end do ! int_id
-    deallocate (answer)
   end subroutine onecenter_calc
 
 end module onecenter

@@ -454,7 +454,6 @@ program create
     call pp_init()
 
     write (stdout, "(a)") "  ==== ONE CENTER INTEGRALS ===="
-    write (stdout, "(a)") repeat("=", 30)
     ! TODO: mpi
     do itype1 = 1, nspec
       call onecenter_calc(ONECENTER_XC + &
@@ -471,7 +470,6 @@ program create
     ! end if
 
     write (stdout, "(a)") "  ==== TWO CENTER INTEGRALS ===="
-    write (stdout, "(2x,a)") repeat("=", 30)
     ! TODO: mpi
     do itype1 = 1, nspec
       do itype2 = 1, nspec

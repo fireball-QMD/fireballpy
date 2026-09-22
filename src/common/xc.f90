@@ -163,12 +163,12 @@ contains
     dvxc = dvxc*hartree*abohr3
   end subroutine xc_calc_lda
 
-  subroutine xc_calc_gga(dens, ddens, dddens, exc, vxc, dexcrho, dexcsigma, dvxcrho, dvxcsigma)
-    real(dp), intent(in) :: dens
-    real(dp), intent(in) :: ddens(:), dddens(:, :)
-    real(dp), intent(out) :: exc, vxc, dexcrho, dexcsigma, dvxcrho, dvxcsigma
+  subroutine xc_calc_gga(dens, lapl, grad, hess, exc, vxc, dexcrho, dexcsigma, dvxcrho, dvxcsigma, dvxclapl, dvxccross)
+    real(dp), intent(in) :: dens, lapl
+    real(dp), intent(in) :: grad(:), hess(:, :)
+    real(dp), intent(out) :: exc, vxc, dexcrho, dexcsigma, dvxcrho, dvxcsigma, dvxclapl, dvxccross
     integer :: ndim, i, j
-    real(dp) :: rho(1), irho(1), sigma(1), laplacian(1), crossed(1), e(1), &
+    real(dp) :: rho(1), irho(1), sigma(1), isigma(1), laplacian(1), crossed(1), e(1), &
       &         vrho(1), vsigma(1), v2rho2(1), v2rhosigma(1), v2sigma2(1), &
       &         v3rho3(1), v3rho2sigma(1), v3rhosigma2(1), v3sigma3(1)
     exc = 0.0_dp
@@ -177,19 +177,24 @@ contains
     dvxcrho = 0.0_dp
     dexcsigma = 0.0_dp
     dvxcsigma = 0.0_dp
-    ndim = size(ddens)
+    dvxclapl = 0.0_dp
+    dvxccross = 0.0_dp
+    ndim = size(grad)
     rho(1) = abohr3*dens
     irho(1) = 1.0_dp/max(tolerance, rho(1))
+    laplacian(1) = abohr5*lapl
     sigma(1) = 0.0_dp
-    laplacian(1) = 0.0_dp
     crossed(1) = 0.0_dp
     do i = 1, ndim
-      sigma(1) = sigma(1) + abohr8*ddens(i)*ddens(i)
-      laplacian(1) = laplacian(1) + abohr5*dddens(i, i)
+      sigma(1) = sigma(1) + grad(i)*grad(i)
       do j = 1, ndim
-        crossed(1) = crossed(1) + abohr13*ddens(i)*dddens(j, i)*ddens(j)
+        crossed(1) = crossed(1) + grad(i)*hess(j, i)*grad(j)
       end do
     end do
+    isigma(1) = 0.0_dp
+    if (sigma(1) > 1e-5_dp) isigma(1) = abohr5*crossed(1)/sigma(1)
+    sigma(1) = abohr8*sigma(1)
+    crossed(1) = abohr13*crossed(1)
     select case (xc_family1)
     case (XC_FAMILY_GGA, XC_FAMILY_HYB_GGA)
       call xc_f03_gga_exc_vxc(xc_func1, 1_int64, rho, sigma, e, vrho, vsigma)
@@ -201,8 +206,11 @@ contains
       dexcsigma = dexcsigma + irho(1)*vsigma(1)
       dvxcrho = dvxcrho + v2rho2(1) - &
         &       2.0_dp*(v2rhosigma(1)*laplacian(1) + v3rho2sigma(1)*sigma(1) + 2.0_dp*v3rhosigma2(1)*crossed(1))
-      dvxcsigma = dvxcrho - v2rhosigma(1) - &
-        &         2.0_dp*(v2sigma2(1)*laplacian(1) + v3rhosigma2(1)*sigma(1) + 2.0_dp*v3sigma3(1)*crossed(1))
+      dvxcsigma = dvxcsigma - v2rhosigma(1) - &
+        &         2.0_dp*(v2sigma2(1)*(laplacian(1) + isigma(1)) + &
+        &                 v3rhosigma2(1)*sigma(1) + 2.0_dp*v3sigma3(1)*crossed(1))
+      dvxclapl = dvxclapl - 2.0_dp*vsigma(1)
+      dvxccross = dvxccross - 2.0_dp*v2sigma2(1)
     case default
       write (stderr, "(a)") "[ERROR]: selected functional is not GGA"
       stop
@@ -220,8 +228,11 @@ contains
         dexcsigma = dexcsigma + irho(1)*vsigma(1)
         dvxcrho = dvxcrho + v2rho2(1) - &
           &       2.0_dp*(v2rhosigma(1)*laplacian(1) + v3rho2sigma(1)*sigma(1) + 2.0_dp*v3rhosigma2(1)*crossed(1))
-        dvxcsigma = dvxcrho - v2rhosigma(1) - &
-          &         2.0_dp*(v2sigma2(1)*laplacian(1) + v3rhosigma2(1)*sigma(1) + 2.0_dp*v3sigma3(1)*crossed(1))
+        dvxcsigma = dvxcsigma - v2rhosigma(1) - &
+          &         2.0_dp*(v2sigma2(1)*(laplacian(1) + isigma(1)) + &
+          &                 v3rhosigma2(1)*sigma(1) + 2.0_dp*v3sigma3(1)*crossed(1))
+        dvxclapl = dvxclapl - 2.0_dp*vsigma(1)
+        dvxccross = dvxccross - 2.0_dp*v2sigma2(1)
       case default
         write (stderr, "(a)") "[ERROR]: selected functional is not GGA"
         stop
@@ -234,5 +245,7 @@ contains
     dexcsigma = dexcsigma*hartree*abohr8
     dvxcrho = dvxcrho*hartree*abohr3
     dvxcsigma = dvxcsigma*hartree*abohr8
+    dvxclapl = dvxclapl*hartree*abohr5
+    dvxccross = dvxccross*hartree*abohr13
   end subroutine xc_calc_gga
 end module xc
