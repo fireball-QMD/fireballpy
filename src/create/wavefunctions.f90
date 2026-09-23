@@ -407,12 +407,12 @@ contains
         tpsi = psi2(jssh)
         tdpsi = wf_atoms(jspec)%get_psi(jssh, r2, order=1)
         tddpsi = wf_atoms(jspec)%get_psi(jssh, r2, order=2)
-        lapl = lapl + tq*(tdpsi*tdpsi + tpsi*tddpsi + tpsi*tdpsi*ir)
+        lapl = lapl + tq*(tdpsi*tdpsi + tpsi*tddpsi + 2.0_dp*ir*tpsi*tdpsi)
         grad(1) = grad(1) + tq*tpsi*tdpsi*rho*ir
         grad(2) = grad(2) + tq*tpsi*tdpsi*z2*ir
-        hess(1, 1) = hess(1, 1) + tq*(rho2*ir2*(tdpsi*tdpsi + tpsi*tddpsi) + (ir - 2.0_dp*rho2*ir3)*tpsi*tdpsi)
-        hess(1, 2) = hess(1, 2) + tq*(rho*z2*ir2*(tdpsi*tdpsi + tpsi*tddpsi) - 2.0_dp*rho*z2*ir3*tpsi*tdpsi)
-        hess(2, 2) = hess(2, 2) + tq*(z22*ir2*(tdpsi*tdpsi + tpsi*tddpsi) + (ir - 2.0_dp*z22*ir3)*tpsi*tdpsi)
+        hess(1, 1) = hess(1, 1) + tq*(rho2*ir2*(tdpsi*tdpsi + tpsi*tddpsi) + (ir - rho2*ir3)*tpsi*tdpsi)
+        hess(1, 2) = hess(1, 2) + tq*(rho*z2*ir2*(tdpsi*tdpsi + tpsi*tddpsi) - rho*z2*ir3*tpsi*tdpsi)
+        hess(2, 2) = hess(2, 2) + tq*(z22*ir2*(tdpsi*tdpsi + tpsi*tddpsi) + (ir - z22*ir3)*tpsi*tdpsi)
       end do
     end if
     lapl = lapl*2.0_dp*inv4pi

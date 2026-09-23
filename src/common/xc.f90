@@ -192,7 +192,7 @@ contains
       end do
     end do
     isigma(1) = 0.0_dp
-    if (sigma(1) > 1e-5_dp) isigma(1) = abohr5*crossed(1)/sigma(1)
+    if (sigma(1) > tolerance) isigma(1) = abohr5*crossed(1)/sigma(1)
     sigma(1) = abohr8*sigma(1)
     crossed(1) = abohr13*crossed(1)
     select case (xc_family1)

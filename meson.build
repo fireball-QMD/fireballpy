@@ -58,7 +58,7 @@ py = py_mod.find_installation(pure: false)
 py_dep = py.dependency()
 
 # libXC is required
-libxc = dependency('libxcf03', method: 'pkg-config')
+libxc = dependency('libxcf03', method: 'pkg-config', version: '>=7.0')
 libxc_dep = declare_dependency(dependencies: libxc)
 
 # Set pkg-config environment

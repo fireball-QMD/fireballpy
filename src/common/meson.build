@@ -14,4 +14,5 @@ common_lib = library(
   install: true,
   install_dir: py.get_install_dir() / 'fireballpy.libs',
 )
-common_dep = declare_dependency(link_with: common_lib, sources: common_srcs)
+common_dep = declare_dependency(link_with: common_lib, sources: common_srcs,
+                                dependencies: [libxc_dep])

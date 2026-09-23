@@ -48,7 +48,7 @@ contains
     real(kind=dp), allocatable :: scratch(:)
     np = size(x)
     np1 = np - 1
-    allocate (scratch(np))
+    allocate (scratch(np1))
 
     scratch(1) = upper(1)/diag(1)
     x(1) = x(1)/diag(1)
@@ -58,7 +58,7 @@ contains
       scratch(i) = upper(i)*temp
       x(i) = (x(i) - lower(i1)*x(i1))*temp
     end do
-    x(np) = (x(np) - lower(np1)*x(np1))*temp
+    x(np) = (x(np) - lower(np1)*x(np1))/(diag(np) - lower(np1)*scratch(np1))
     do i = np1, 1, -1
       x(i) = x(i) - scratch(i)*x(i + 1)
     end do
