@@ -168,7 +168,7 @@ contains
     real(dp), intent(in) :: grad(:), hess(:, :)
     real(dp), intent(out) :: exc, vxc, dexcrho, dexcsigma, dvxcrho, dvxcsigma, dvxclapl, dvxccross
     integer :: ndim, i, j
-    real(dp) :: rho(1), irho(1), sigma(1), isigma(1), laplacian(1), crossed(1), e(1), &
+    real(dp) :: rho(1), irho(1), sigma(1), laplacian(1), crossed(1), e(1), &
       &         vrho(1), vsigma(1), v2rho2(1), v2rhosigma(1), v2sigma2(1), &
       &         v3rho3(1), v3rho2sigma(1), v3rhosigma2(1), v3sigma3(1)
     exc = 0.0_dp
@@ -191,8 +191,6 @@ contains
         crossed(1) = crossed(1) + grad(i)*hess(j, i)*grad(j)
       end do
     end do
-    isigma(1) = 0.0_dp
-    if (sigma(1) > tolerance) isigma(1) = abohr5*crossed(1)/sigma(1)
     sigma(1) = abohr8*sigma(1)
     crossed(1) = abohr13*crossed(1)
     select case (xc_family1)
@@ -207,10 +205,9 @@ contains
       dvxcrho = dvxcrho + v2rho2(1) - &
         &       2.0_dp*(v2rhosigma(1)*laplacian(1) + v3rho2sigma(1)*sigma(1) + 2.0_dp*v3rhosigma2(1)*crossed(1))
       dvxcsigma = dvxcsigma - v2rhosigma(1) - &
-        &         2.0_dp*(v2sigma2(1)*(laplacian(1) + isigma(1)) + &
-        &                 v3rhosigma2(1)*sigma(1) + 2.0_dp*v3sigma3(1)*crossed(1))
+        &         2.0_dp*(v2sigma2(1)*laplacian(1) + v3rhosigma2(1)*sigma(1) + 2.0_dp*v3sigma3(1)*crossed(1))
       dvxclapl = dvxclapl - 2.0_dp*vsigma(1)
-      dvxccross = dvxccross - 2.0_dp*v2sigma2(1)
+      dvxccross = dvxccross - 4.0_dp*v2sigma2(1)
     case default
       write (stderr, "(a)") "[ERROR]: selected functional is not GGA"
       stop
@@ -229,10 +226,9 @@ contains
         dvxcrho = dvxcrho + v2rho2(1) - &
           &       2.0_dp*(v2rhosigma(1)*laplacian(1) + v3rho2sigma(1)*sigma(1) + 2.0_dp*v3rhosigma2(1)*crossed(1))
         dvxcsigma = dvxcsigma - v2rhosigma(1) - &
-          &         2.0_dp*(v2sigma2(1)*(laplacian(1) + isigma(1)) + &
-          &                 v3rhosigma2(1)*sigma(1) + 2.0_dp*v3sigma3(1)*crossed(1))
+          &         2.0_dp*(v2sigma2(1)*laplacian(1) + v3rhosigma2(1)*sigma(1) + 2.0_dp*v3sigma3(1)*crossed(1))
         dvxclapl = dvxclapl - 2.0_dp*vsigma(1)
-        dvxccross = dvxccross - 2.0_dp*v2sigma2(1)
+        dvxccross = dvxccross - 4.0_dp*v2sigma2(1)
       case default
         write (stderr, "(a)") "[ERROR]: selected functional is not GGA"
         stop

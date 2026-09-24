@@ -312,7 +312,8 @@ contains
                 fofr(isorp + nssh1 + 1) = fofr(isorp + nssh1 + 1) + &
                   &                       dvxcsigma*4.0_dp*tmp*dtmp*grader + &
                   &                       dvxclapl*2.0_dp*(dtmp*dtmp + tmp*ddtmp + 2.0_dp*ir2*tmp*dtmp) + &
-                  &                       dvxccross*4.0_dp*(grader*grader*(dtmp*dtmp + tmp*ddtmp) + tmp*dtmp*(gdggdgr + gdggrgd))
+                  &                       dvxccross*2.0_dp*((grad(1)*grad(1) + grad(2)*grad(2))*(dtmp*dtmp + tmp*ddtmp) + &
+                  &                                         tmp*dtmp*(gdggrgd + 2.0_dp*gdggdgr))
               end if
             end do
           case (TWOCENTER_DIP_Z)

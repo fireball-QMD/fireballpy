@@ -390,12 +390,12 @@ contains
         tpsi = psi1(issh)
         tdpsi = wf_atoms(ispec)%get_psi(issh, r1, order=1)
         tddpsi = wf_atoms(ispec)%get_psi(issh, r1, order=2)
-        lapl = lapl + tq*(tdpsi*tdpsi + tpsi*tddpsi + tpsi*tdpsi*ir)
+        lapl = lapl + tq*(tdpsi*tdpsi + tpsi*tddpsi + 2.0_dp*tpsi*tdpsi*ir)
         grad(1) = grad(1) + tq*tpsi*tdpsi*rho*ir
         grad(2) = grad(2) + tq*tpsi*tdpsi*z1*ir
-        hess(1, 1) = hess(1, 1) + tq*(rho2*ir2*(tdpsi*tdpsi + tpsi*tddpsi) + (ir - 2.0_dp*rho2*ir3)*tpsi*tdpsi)
-        hess(1, 2) = hess(1, 2) + tq*(rho*z1*ir2*(tdpsi*tdpsi + tpsi*tddpsi) - 2.0_dp*rho*z1*ir3*tpsi*tdpsi)
-        hess(2, 2) = hess(2, 2) + tq*(z12*ir2*(tdpsi*tdpsi + tpsi*tddpsi) + (ir - 2.0_dp*z12*ir3)*tpsi*tdpsi)
+        hess(1, 1) = hess(1, 1) + tq*(rho2*ir2*(tdpsi*tdpsi + tpsi*tddpsi) + (ir - rho2*ir3)*tpsi*tdpsi)
+        hess(1, 2) = hess(1, 2) + tq*(rho*z1*ir2*(tdpsi*tdpsi + tpsi*tddpsi) - rho*z1*ir3*tpsi*tdpsi)
+        hess(2, 2) = hess(2, 2) + tq*(z12*ir2*(tdpsi*tdpsi + tpsi*tddpsi) + (ir - z12*ir3)*tpsi*tdpsi)
       end do
     end if
     if (r2 > tolerance) then
