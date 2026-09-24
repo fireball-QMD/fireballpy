@@ -135,7 +135,7 @@ contains
     logical :: twocenter_interactions(TWOCENTER_NUM_INTERACTIONS)
     real(dp) :: d, dd, dmax, rcut1, rcut2, zmin, zmax, dz, drho, z1, z2, z12, z22, r1, r2, rhomult, rhomax, &
       &         zmult, factor, psi1, psi2, cyl1, cyl2, psimult, tmp, dtmp, ddtmp, rho, rho2, ir1, ir2, gdggdgr, gdggrgd, &
-      &         dens, lapl, exc, vxc, dexcrho, dvxcrho, dexcsigma, dvxcsigma, dvxclapl, dvxccross, grader, graderm
+      &         dens, lapl, exc, vxc, dexcrho, dvxcrho, dexcsigma, dvxcsigma, dvxclapl, dvxccross, grader
     integer, allocatable :: s1(:), s2(:), l1(:), l2(:), m1(:), m2(:), ls1(:), ls2(:)
     real(dp), allocatable :: fofr(:), grad(:), hess(:,:)
 
@@ -290,13 +290,12 @@ contains
                 dtmp = sqinv4pi*wf_atoms(ispec)%get_psi(isorp, r1, order=1)
                 ddtmp = sqinv4pi*wf_atoms(ispec)%get_psi(isorp, r1, order=2)
                 grader = (grad(1)*rho + grad(2)*z1)*ir1
-                graderm = (grad(1)*rho - grad(2)*z1)*ir1
                 gdggdgr = ir1*(grad(1)*(hess(1, 1)*rho + hess(1, 2)*z1) + grad(2)*(hess(2, 1)*rho + hess(2, 2)*z1))
-                gdggrgd = ir1*(grad(1)*grad(1) + grad(2)*grad(2) - graderm*graderm)
+                gdggrgd = ir1*(grad(1)*grad(1) + grad(2)*grad(2) - grader*grader)
                 fofr(isorp + 1) = fofr(isorp + 1) + &
                   &               dvxcsigma*4.0_dp*tmp*dtmp*grader + &
                   &               dvxclapl*2.0_dp*(dtmp*dtmp + tmp*ddtmp + 2.0_dp*ir1*tmp*dtmp) + &
-                  &               dvxccross*2.0_dp*((grad(1)*grad(1) + grad(2)*grad(2))*(dtmp*dtmp + tmp*ddtmp) + &
+                  &               dvxccross*2.0_dp*(grader*grader*(dtmp*dtmp + tmp*ddtmp) + &
                   &                                 tmp*dtmp*(gdggrgd + 2.0_dp*gdggdgr))
               end if
             end do
@@ -307,13 +306,12 @@ contains
                 dtmp = sqinv4pi*wf_atoms(jspec)%get_psi(isorp, r2, order=1)
                 ddtmp = sqinv4pi*wf_atoms(jspec)%get_psi(isorp, r2, order=2)
                 grader = (grad(1)*rho + grad(2)*z2)*ir2
-                graderm = (grad(1)*rho - grad(2)*z2)*ir2
                 gdggdgr = ir2*(grad(1)*(hess(1, 1)*rho + hess(1, 2)*z2) + grad(2)*(hess(2, 1)*rho + hess(2, 2)*z2))
-                gdggrgd = ir2*(grad(1)*grad(1) + grad(2)*grad(2) - graderm*graderm)
+                gdggrgd = ir2*(grad(1)*grad(1) + grad(2)*grad(2) - grader*grader)
                 fofr(isorp + nssh1 + 1) = fofr(isorp + nssh1 + 1) + &
                   &                       dvxcsigma*4.0_dp*tmp*dtmp*grader + &
                   &                       dvxclapl*2.0_dp*(dtmp*dtmp + tmp*ddtmp + 2.0_dp*ir2*tmp*dtmp) + &
-                  &                       dvxccross*2.0_dp*((grad(1)*grad(1) + grad(2)*grad(2))*(dtmp*dtmp + tmp*ddtmp) + &
+                  &                       dvxccross*2.0_dp*(grader*grader*(dtmp*dtmp + tmp*ddtmp) + &
                   &                                         tmp*dtmp*(gdggrgd + 2.0_dp*gdggdgr))
               end if
             end do

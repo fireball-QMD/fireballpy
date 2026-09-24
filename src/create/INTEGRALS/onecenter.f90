@@ -150,7 +150,7 @@ contains
             ddtmp = sqinv4pi*wf_atoms(ispec)%get_psi(isorp, rho, order=2)
             fofr(isorp + 1) = fofr(isorp + 1) + dvxcsigma*4.0_dp*tmp*dtmp*grad(1) + &
               &                                 dvxclapl*2.0_dp*(dtmp*dtmp + tmp*ddtmp + 2.0_dp*ir*tmp*dtmp) + &
-              &                                 dvxccross*4.0_dp*grad(1)*(grad(1)*(dtmp*dtmp + tmp*ddtmp) + tmp*dtmp*hess(1,1))
+              &                                 dvxccross*2.0_dp*grad(1)*(grad(1)*(dtmp*dtmp + tmp*ddtmp) + 2.0_dp*tmp*dtmp*hess(1,1))
             fofr(isorp + 2 + nssh) = fofr(isorp + 2 + nssh) + dexcsigma*4.0_dp*tmp*dtmp*grad(1)
           end if
         end do
