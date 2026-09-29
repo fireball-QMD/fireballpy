@@ -44,7 +44,8 @@
 ! ==============================================================================
 module potentials
   use, intrinsic :: iso_fortran_env, only: dp => real64
-  use :: constants, only: abohr
+  use, intrinsic :: ieee_arithmetic, only: ieee_signaling_nan, ieee_value
+  use :: constants, only: abohr, tolerance
   use :: math, only: math_interp_t, math_interp_new
   use :: utils, only: utils_open
   implicit none
@@ -52,13 +53,9 @@ module potentials
 
   public :: pot_atoms, pot_init, pot_end
 
-  type :: pot_orbital_t
+  type, extends(math_interp_t) :: pot_orbital_t
     private
     real(dp) :: rcut, etot
-    type(math_interp_t) :: fr
-  contains
-    private
-    procedure :: end => pot_orbital_end
   end type pot_orbital_t
 
   type :: pot_atom_t
@@ -71,6 +68,7 @@ module potentials
     procedure, public :: get_nshells => pot_atom_nshells
     procedure, public :: get_rcut => pot_atom_rcut
     procedure, public :: get_energy => pot_atom_energy
+    procedure, public :: get_vneutral => pot_atom_vneutral
     procedure, public :: get_vnn => pot_atom_vnn
     procedure :: end => pot_atom_end
   end type pot_atom_t
@@ -145,14 +143,9 @@ contains
       read (io, "(2d24.16)") r(i), vnn(i)
     end do
     close (io)
-    fr = math_interp_new(r, vnn)
-    pot_new_orbital = pot_orbital_t(rcut=rcut, etot=etot, fr=fr)
+    fr = math_interp_new(r, vnn, rval=0.0_dp)
+    pot_new_orbital = pot_orbital_t(rcut=rcut, etot=etot, math_interp_t=fr)
   end function pot_new_orbital
-
-  subroutine pot_orbital_end(this)
-    class(pot_orbital_t), intent(inout) :: this
-    call this%fr%end()
-  end subroutine pot_orbital_end
 
   pure integer function pot_atom_nz(this)
     class(pot_atom_t), intent(in) :: this
@@ -167,6 +160,10 @@ contains
   pure real(dp) function pot_atom_rcut(this, ish)
     class(pot_atom_t), intent(in) :: this
     integer, intent(in) :: ish
+    if (ish < 1 .or. ish > this%nshells) then
+      pot_atom_rcut = ieee_value(pot_atom_rcut, ieee_signaling_nan)
+      return
+    end if
     pot_atom_rcut = this%pots(ish)%rcut
   end function pot_atom_rcut
 
@@ -175,28 +172,35 @@ contains
     pot_atom_energy = this%pots(0)%etot
   end function pot_atom_energy
 
+  pure real(dp) function pot_atom_vneutral(this, r, order)
+    class(pot_atom_t), intent(in) :: this
+    real(dp), intent(in) :: r
+    integer, intent(in), optional :: order
+    pot_atom_vneutral = this%pots(0)%f(r, order=order)
+  end function pot_atom_vneutral
+
   pure real(dp) function pot_atom_vnn(this, ish, r, order)
     class(pot_atom_t), intent(in) :: this
     integer, intent(in) :: ish
     real(dp), intent(in) :: r
     integer, intent(in), optional :: order
     integer :: o
-    if ((r <= 0.0_dp) .or. (r >= this%pots(ish)%rcut)) then
-      pot_atom_vnn = 0.0_dp
-      return
-    end if
     o = 0
     if (present(order)) o = order
-    select case (o)
-    case (0)
-      pot_atom_vnn = this%pots(ish)%fr%f(r)
-    case (1)
-      pot_atom_vnn = this%pots(ish)%fr%df(r)
-    case (2)
-      pot_atom_vnn = this%pots(ish)%fr%ddf(r)
-    case default
-      pot_atom_vnn = 0.0_dp
-    end select
+    if (r >= this%pots(ish)%rcut) then
+      select case (o)
+      case (0)
+        pot_atom_vnn = 1.0_dp/r
+      case (1)
+        pot_atom_vnn = -1.0_dp/(r*r)
+      case (2)
+        pot_atom_vnn = 2.0_dp/(r*r*r)
+      case default
+        pot_atom_vnn = ieee_value(pot_atom_vnn, ieee_signaling_nan)
+      end select
+      return
+    end if
+    pot_atom_vnn = this%pots(ish)%f(r, order=o)
   end function pot_atom_vnn
 
   subroutine pot_atom_end(this)

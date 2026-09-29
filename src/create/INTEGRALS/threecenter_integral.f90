@@ -559,7 +559,13 @@
 !
              do  iX=ispmin,ispmax
 !
-               IF(interaction .EQ. 1) vpot=pot_atoms(in3)%get_vnn(iX,r3)
+               IF(interaction .EQ. 1) THEN
+                 IF (iX == 0) THEN
+                   vpot=pot_atoms(in3)%get_vneutral(r3)
+                 ELSE
+                   vpot=pot_atoms(in3)%get_vnn(iX,r3)
+                 END IF
+               END IF
 !
 !               IF(interaction .EQ. 2) then
 !                IX1=IX+1

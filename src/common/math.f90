@@ -42,6 +42,7 @@
 ! ==============================================================================
 module math
   use, intrinsic :: iso_fortran_env, only: dp => real64
+  use, intrinsic :: ieee_arithmetic, only: ieee_signaling_nan, ieee_value
   implicit none
   private
 
@@ -51,6 +52,7 @@ module math
   type :: math_interp_t
     private
     integer :: np
+    real(dp) :: lval, rval
     real(dp), allocatable :: x(:), y(:), coefs(:, :)
   contains
     private
@@ -60,17 +62,15 @@ module math
     procedure, public :: get_y => math_interp_get_y
     procedure, public :: get_coef => math_interp_get_coef
     procedure, public :: f => math_interp_f
-    procedure, public :: df => math_interp_df
-    procedure, public :: ddf => math_interp_ddf
     procedure, public :: rescale => math_interp_rescale
     procedure, public :: end => math_interp_end
   end type math_interp_t
 
   interface
-    module type(math_interp_t) function math_interp_new(x, y)
+    module type(math_interp_t) function math_interp_new(x, y, lval, rval)
       implicit none
       real(kind=dp), intent(in) :: x(:), y(:)
-      real(kind=dp), allocatable :: dx(:), dy(:), b(:), d(:), z(:), coefs(:, :)
+      real(kind=dp), intent(in), optional :: lval, rval
     end function math_interp_new
 
     module pure integer function math_interp_get_index(this, x)
@@ -102,23 +102,12 @@ module math
       integer, intent(in) :: i, j
     end function math_interp_get_coef
 
-    module pure real(kind=dp) function math_interp_f(this, x)
+    module pure real(kind=dp) function math_interp_f(this, x, order)
       implicit none
       class(math_interp_t), intent(in) :: this
       real(kind=dp), intent(in) :: x
+      integer, intent(in), optional :: order
     end function math_interp_f
-
-    module pure real(kind=dp) function math_interp_df(this, x)
-      implicit none
-      class(math_interp_t), intent(in) :: this
-      real(kind=dp), intent(in) :: x
-    end function math_interp_df
-
-    module pure real(kind=dp) function math_interp_ddf(this, x)
-      implicit none
-      class(math_interp_t), intent(in) :: this
-      real(kind=dp), intent(in) :: x
-    end function math_interp_ddf
 
     module subroutine math_interp_rescale(this, s)
       implicit none

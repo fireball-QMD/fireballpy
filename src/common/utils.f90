@@ -1,11 +1,29 @@
 module utils
   use, intrinsic :: iso_fortran_env, only: stderr => error_unit
-  use :: constants, only:err_len
+  use :: constants, only: err_len
   implicit none
   private
-  public :: utils_open
+  public :: utils_open, utils_itos
 
 contains
+
+  function utils_itos(i, lpad)
+    integer, intent(in) :: i
+    integer, intent(in), optional :: lpad
+    integer :: lpad_
+    character(2*range(i)+4) :: aux, tmp, fmt
+    character(:), allocatable :: utils_itos
+    lpad_ = 0
+    if (present(lpad)) lpad_ = lpad
+    if (lpad_ > 0) then
+      write (aux, "(i0)") lpad_
+      fmt = "(i"//trim(aux)//"."//trim(aux)//")"
+    else
+      fmt = "(i0)"
+    end if
+    write (tmp, trim(fmt)) i
+    utils_itos = trim(tmp)
+  end function utils_itos
 
   integer function utils_open(filename, mode)
     character(*), intent(in) :: filename

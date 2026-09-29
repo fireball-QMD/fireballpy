@@ -9,6 +9,7 @@ module indices
   integer, parameter, public :: INDICES_TWOCENTER_DIPY = 2
   integer, parameter, public :: INDICES_TWOCENTER_COULOMB = 3
   integer, parameter, public :: INDICES_TWOCENTER_SPH = 4
+  integer, parameter, public :: INDICES_NAMES_LEN = 64
 
 contains
 
@@ -16,10 +17,10 @@ contains
     integer, intent(in) :: ls(:)
     integer, intent(out) :: index_max
     integer, allocatable, intent(out) :: s1(:), s2(:), l12(:)
-    character(64), allocatable, intent(out), optional :: names(:)
+    character(INDICES_NAMES_LEN), allocatable, intent(out), optional :: names(:)
     integer :: nssh, issh, jssh, ix, l1tmp, l2tmp
     integer :: buffer(3, 1024)
-    character(64) :: auxname
+    character(INDICES_NAMES_LEN) :: auxname
 
     if (allocated(s1)) deallocate (s1)
     if (allocated(s2)) deallocate (s2)
@@ -62,10 +63,10 @@ contains
     integer, intent(in) :: ls1(:), ls2(:)
     integer, intent(out) :: index_max
     integer, allocatable, intent(out) :: s1(:), s2(:), l1(:), l2(:), m1(:), m2(:)
-    character(64), allocatable, intent(out), optional :: names(:)
+    character(INDICES_NAMES_LEN), allocatable, intent(out), optional :: names(:)
     integer :: nssh1, nssh2, issh, jssh, ix, l1tmp, l2tmp, m1tmp, m2tmp
     integer :: buffer(6, 1024)
-    character(64) :: auxname1, auxname2
+    character(INDICES_NAMES_LEN) :: auxname1, auxname2
 
     if (allocated(s1)) deallocate (s1)
     if (allocated(s2)) deallocate (s2)

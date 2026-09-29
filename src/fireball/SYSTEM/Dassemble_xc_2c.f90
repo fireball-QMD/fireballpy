@@ -2,7 +2,7 @@ subroutine Dassemble_xc_2c ()
   use, intrinsic :: iso_fortran_env, only: double => real64
   use M_system, only: natoms, ratom, imass, neigh_b, neigh_j, neighn, neigh_self, numorb_max, sp_mat, Qin, rho, rho_off, rhoij_off, &
     & s_mat, arhoij_off, arho_off, arhopij_off, arhop_off, rhop_off, rhopij_off, xl, fotxc_ca
-  use M_fdata, only: num_orb, nssh, lssh, Qneutral, nsh_max, TWOCENTER_VXC_0, TWOCENTER_VXC_L, TWOCENTER_VXC_R
+  use M_fdata, only: num_orb, nssh, lssh, Qref, nsh_max, TWOCENTER_VXC_0, TWOCENTER_VXC_L, TWOCENTER_VXC_R
   implicit none
   integer iatom
   integer inu
@@ -58,7 +58,7 @@ subroutine Dassemble_xc_2c ()
    in1 = imass(iatom)
    dqi = 0.0d0
    do issh = 1, nssh(in1)
-     dqi(issh) = (Qin(issh,iatom) - Qneutral(issh,in1))
+     dqi(issh) = (Qin(issh,iatom) - Qref(issh,in1))
    end do
    do ineigh = 1, neighn(iatom) 
     mbeta = neigh_b(ineigh,iatom)
@@ -69,7 +69,7 @@ subroutine Dassemble_xc_2c ()
     else
      dqj = 0.0d0
      do issh = 1, nssh(in2)
-       dqj(issh) = (Qin(issh,jatom) - Qneutral(issh,in2))
+       dqj(issh) = (Qin(issh,jatom) - Qref(issh,in2))
      end do
      r21(:) = r2(:) - r1(:)
      y = sqrt(r21(1)*r21(1) + r21(2)*r21(2) + r21(3)*r21(3))

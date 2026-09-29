@@ -66,10 +66,15 @@ contains
 
   module procedure math_interp_new
     integer :: i, np, np1, np2
+    real(kind=dp) :: left, right
     real(kind=dp), allocatable :: dx(:), s(:), a(:), b(:), c(:), d(:), temp(:), coefs(:, :)
     np = size(x)
     np1 = np - 1
     np2 = np - 2
+    left = ieee_value(left, ieee_signaling_nan)
+    right = ieee_value(right, ieee_signaling_nan)
+    if (present(lval)) left = lval
+    if (present(rval)) right = rval
     allocate (coefs(4, np1), dx(np1), s(np1), a(np1), b(np), c(np1), d(np), temp(np1))
     dx = x(2:) - x(:np1)
     s = (y(2:) - y(:np1))/dx
@@ -97,13 +102,14 @@ contains
     coefs(2, :) = d(:np1)
     coefs(3, :) = (s - d(:np1))/dx - temp
     coefs(4, :) = temp/dx
-    math_interp_new = math_interp_t(np=np, x=x, y=y, coefs=coefs)
+    math_interp_new = math_interp_t(np=np, x=x, y=y, coefs=coefs, lval=left, rval=right)
   end procedure math_interp_new
 
   module procedure math_interp_get_index
     integer :: i
-    math_interp_get_index = -1
+    math_interp_get_index = 0
     if (x < this%x(1)) return
+    math_interp_get_index = -1
     if (x >= this%x(this%np)) return
     do i = 1, (this%np - 1)
       if ((x >= this%x(i)) .and. (x < this%x(i + 1))) then
@@ -111,7 +117,6 @@ contains
         return
       end if
     end do
-    math_interp_get_index = -2
   end procedure math_interp_get_index
 
   module procedure math_interp_get_n
@@ -131,45 +136,32 @@ contains
   end procedure math_interp_get_coef
 
   module procedure math_interp_f
-    integer :: i
+    integer :: i, o
     real(kind=dp) :: dx
     i = this%get_index(x)
-    if (i == -1) then
-      math_interp_f = 0.0_dp
+    if (i == 0) then
+      math_interp_f = this%lval
       return
     end if
-    if (i == -2) then
-      math_interp_f = 10000000000.0_dp
+    if (i == -1) then
+      math_interp_f = this%rval
       return
     end if
     dx = x - this%x(i)
-    math_interp_f = this%coefs(1, i) + &
-    &               dx*(this%coefs(2, i) + dx*(this%coefs(3, i) + dx*this%coefs(4, i)))
+    o = 0
+    if (present(order)) o = order
+    select case (o)
+    case (0)
+      math_interp_f = this%coefs(1, i) + &
+      &               dx*(this%coefs(2, i) + dx*(this%coefs(3, i) + dx*this%coefs(4, i)))
+    case (1)
+      math_interp_f = this%coefs(2, i) + dx*(2.0_dp*this%coefs(3, i) + dx*3.0_dp*this%coefs(4, i))
+    case (2)
+      math_interp_f = 2.0_dp*this%coefs(3, i) + dx*6.0_dp*this%coefs(4, i)
+    case default
+      math_interp_f = ieee_value(math_interp_f, ieee_signaling_nan)
+    end select
   end procedure math_interp_f
-
-  module procedure math_interp_df
-    integer :: i
-    real(kind=dp) :: dx
-    i = this%get_index(x)
-    if (i == -1) then
-      math_interp_df = 0.0_dp
-      return
-    end if
-    dx = x - this%x(i)
-    math_interp_df = this%coefs(2, i) + dx*(2.0_dp*this%coefs(3, i) + dx*3.0_dp*this%coefs(4, i))
-  end procedure math_interp_df
-
-  module procedure math_interp_ddf
-    integer :: i
-    real(kind=dp) :: dx
-    i = this%get_index(x)
-    if (i == -1) then
-      math_interp_ddf = 0.0_dp
-      return
-    end if
-    dx = x - this%x(i)
-    math_interp_ddf = 2.0_dp*this%coefs(3, i) + dx*6.0_dp*this%coefs(4, i)
-  end procedure math_interp_ddf
 
   module procedure math_interp_rescale
     this%y = s*this%y

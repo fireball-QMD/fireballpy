@@ -43,7 +43,8 @@
 ! ==============================================================================
 module wavefunctions
   use, intrinsic :: iso_fortran_env, only: dp => real64
-  use :: constants, only:abohr, inv4pi, tolerance
+  use, intrinsic :: ieee_arithmetic, only: ieee_signaling_nan, ieee_value
+  use :: constants, only: abohr, inv4pi, tolerance
   use :: math, only: math_interp_t, math_interp_new
   use :: utils, only: utils_open
   implicit none
@@ -56,14 +57,10 @@ module wavefunctions
     procedure :: dens2c
   end interface wf_dens
 
-  type :: wf_orbital_t
+  type, extends(math_interp_t) :: wf_orbital_t
     private
     integer :: l
     real(dp) :: rcut, rcut_max, q, qref, dr
-    type(math_interp_t) :: fr
-  contains
-    private
-    procedure :: end => wf_orbital_end
   end type wf_orbital_t
 
   type :: wf_atom_t
@@ -140,7 +137,7 @@ contains
   type(wf_orbital_t) function wf_new_orbital(fpath)
     character(1000), intent(in) :: fpath
     integer :: i, j, np, remitems, nlines, l, io
-    real(dp) :: dr, rcut, rcut_max, q
+    real(dp) :: dr, rcut, rcut_max, q, norm
     real(dp), allocatable :: r(:), psi(:)
     type(math_interp_t) :: fr
     io = utils_open(fpath, "r")
@@ -164,17 +161,18 @@ contains
     do i = 1, np
       r(i) = real(i - 1, kind=dp)*dr
     end do
-    fr = math_interp_new(r, psi)
-    call wf_normalize(fr)
+    fr = math_interp_new(r, psi, rval=0.0_dp)
+    norm = wf_norm(fr)
+    call fr%rescale(1.0_dp/norm)
     ! TODO: allow qref to be different
-    wf_new_orbital = wf_orbital_t(l=l, rcut=rcut, rcut_max=rcut_max, q=q, qref=q, dr=dr, fr=fr)
+    wf_new_orbital = wf_orbital_t(l=l, rcut=rcut, rcut_max=rcut_max, q=q, qref=q, dr=dr, math_interp_t=fr)
   end function wf_new_orbital
 
-  subroutine wf_normalize(fr)
-    class(math_interp_t), intent(inout) :: fr
+  pure real(kind=dp) function wf_norm(fr)
+    class(math_interp_t), intent(in) :: fr
     integer :: i
     real(dp) :: normsq, r, r2, x, a, a2, b, b2, c, c2, d, d2, ab, ac, ad, bc, bd, cd
-    normsq = 0.0_dp
+    wf_norm = 0.0_dp
     do i = 1, (fr%get_n() - 1)
       r = fr%get_x(i)
       x = fr%get_x(i + 1) - r
@@ -193,24 +191,19 @@ contains
       bc = b*c
       bd = b*d
       cd = c*d
-      normsq = normsq + x * ( &
-        &      a2*r2 + x * ( &
-        &      ab*r2 + a2*r + x * ( &
-        &      0.33333333333333333_dp*(b2*r2 + 2.0_dp*ac*r2 + 4.0_dp*ab*r + a2) + x * ( &
-        &      0.5_dp*(ad*r2 + bc*r2 + b2*r + 2.0_dp*ac*r + ab) + x * ( &
-        &      0.2_dp*(c2*r2 + 2.0_dp*bd*r2 + 4.0_dp*ad*r + 4.0_dp*bc*r + b2 + 2.0_dp*ac) + x * ( &
-        &      0.33333333333333333_dp*(cd*r2 + c2*r + 2.0_dp*bd*r + ad + bc) + x * ( &
-        &      0.14285714285714285_dp*(d2*r2 + 4.0_dp*cd*r + c2 + 2.0_dp*bd) + x * ( &
-        &      0.25_dp*(d2*r + cd) + x * ( &
-        &      0.11111111111111111_dp*d2)))))))))
+      wf_norm = wf_norm + x * ( &
+        &       a2*r2 + x * ( &
+        &       ab*r2 + a2*r + x * ( &
+        &       0.33333333333333333_dp*(b2*r2 + 2.0_dp*ac*r2 + 4.0_dp*ab*r + a2) + x * ( &
+        &       0.5_dp*(ad*r2 + bc*r2 + b2*r + 2.0_dp*ac*r + ab) + x * ( &
+        &       0.2_dp*(c2*r2 + 2.0_dp*bd*r2 + 4.0_dp*ad*r + 4.0_dp*bc*r + b2 + 2.0_dp*ac) + x * ( &
+        &       0.33333333333333333_dp*(cd*r2 + c2*r + 2.0_dp*bd*r + ad + bc) + x * ( &
+        &       0.14285714285714285_dp*(d2*r2 + 4.0_dp*cd*r + c2 + 2.0_dp*bd) + x * ( &
+        &       0.25_dp*(d2*r + cd) + x * ( &
+        &       0.11111111111111111_dp*d2)))))))))
     end do
-    call fr%rescale(1.0_dp/sqrt(normsq))
-  end subroutine wf_normalize
-
-  subroutine wf_orbital_end(this)
-    class(wf_orbital_t), intent(inout) :: this
-    call this%fr%end()
-  end subroutine wf_orbital_end
+    wf_norm = sqrt(wf_norm)
+  end function wf_norm
 
   pure integer function wf_atom_nz(this)
     class(wf_atom_t), intent(in) :: this
@@ -225,18 +218,30 @@ contains
   pure integer function wf_atom_angular_momentum(this, ish)
     class(wf_atom_t), intent(in) :: this
     integer, intent(in) :: ish
+    if (ish < 1 .or. ish > this%nshells) then
+      wf_atom_angular_momentum = -1
+      return
+    end if
     wf_atom_angular_momentum = this%wfs(ish)%l
   end function wf_atom_angular_momentum
 
   pure real(dp) function wf_atom_charge(this, ish)
     class(wf_atom_t), intent(in) :: this
     integer, intent(in) :: ish
+    if (ish < 1 .or. ish > this%nshells) then
+      wf_atom_charge = ieee_value(wf_atom_charge, ieee_signaling_nan)
+      return
+    end if
     wf_atom_charge = this%wfs(ish)%q
   end function wf_atom_charge
 
   pure real(dp) function wf_atom_ref_charge(this, ish)
     class(wf_atom_t), intent(in) :: this
     integer, intent(in) :: ish
+    if (ish < 1 .or. ish > this%nshells) then
+      wf_atom_ref_charge = ieee_value(wf_atom_ref_charge, ieee_signaling_nan)
+      return
+    end if
     wf_atom_ref_charge = this%wfs(ish)%qref
   end function wf_atom_ref_charge
 
@@ -244,6 +249,10 @@ contains
     class(wf_atom_t), intent(in) :: this
     integer, intent(in), optional :: ish
     if (present(ish)) then
+      if (ish < 1 .or. ish > this%nshells) then
+        wf_atom_rcut = ieee_value(wf_atom_rcut, ieee_signaling_nan)
+        return
+      end if
       wf_atom_rcut = this%wfs(ish)%rcut
     else
       wf_atom_rcut = this%rcut
@@ -254,6 +263,10 @@ contains
     class(wf_atom_t), intent(in) :: this
     integer, intent(in), optional :: ish
     if (present(ish)) then
+      if (ish < 1 .or. ish > this%nshells) then
+        wf_atom_dr = ieee_value(wf_atom_dr, ieee_signaling_nan)
+        return
+      end if
       wf_atom_dr = this%wfs(ish)%dr
     else
       wf_atom_dr = this%dr
@@ -265,23 +278,7 @@ contains
     integer, intent(in) :: ish
     real(dp), intent(in) :: r
     integer, intent(in), optional :: order
-    integer :: o
-    !if ((r <= 0.0_dp) .or. (r >= this%wfs(ish)%rcut)) then
-    !  wf_atom_psi = 0.0_dp
-    !  return
-    !end if
-    o = 0
-    if (present(order)) o = order
-    select case (o)
-    case (0)
-      wf_atom_psi = this%wfs(ish)%fr%f(r)
-    case (1)
-      wf_atom_psi = this%wfs(ish)%fr%df(r)
-    case (2)
-      wf_atom_psi = this%wfs(ish)%fr%ddf(r)
-    case default
-      wf_atom_psi = 0.0_dp
-    end select
+    wf_atom_psi = this%wfs(ish)%f(r, order=order)
   end function wf_atom_psi
 
   subroutine wf_atom_end(this)
@@ -308,16 +305,16 @@ contains
     real(dp), intent(out) :: dens
     real(dp), intent(out), optional :: lapl
     real(dp), intent(out), allocatable, optional :: grad(:), hess(:,:)
-    integer :: issh, nssh
+    integer :: ish, nssh
     real(dp) :: tpsi, tdpsi, tddpsi, tq, ir
     real(dp), allocatable :: psi(:)
     allocate(psi(wf_atoms(ispec)%get_nshells()))
     nssh = wf_atoms(ispec)%get_nshells()
     dens = 0.0_dp
-    do issh = 1, nssh
-      tq = wf_atoms(ispec)%get_ref_charge(issh)
-      tpsi = wf_atoms(ispec)%get_psi(issh, r)
-      psi(issh) = tpsi
+    do ish = 1, nssh
+      tq = wf_atoms(ispec)%get_ref_charge(ish)
+      tpsi = wf_atoms(ispec)%get_psi(ish, r)
+      psi(ish) = tpsi
       dens = dens + tq*tpsi*tpsi
     end do
     dens = dens*inv4pi
@@ -330,11 +327,11 @@ contains
     hess = 0.0_dp
     if (r > tolerance) then
       ir = 1.0_dp/r
-      do issh = 1, nssh
-        tq = wf_atoms(ispec)%get_ref_charge(issh)
-        tpsi = psi(issh)
-        tdpsi = wf_atoms(ispec)%get_psi(issh, r, order=1)
-        tddpsi = wf_atoms(ispec)%get_psi(issh, r, order=2)
+      do ish = 1, nssh
+        tq = wf_atoms(ispec)%get_ref_charge(ish)
+        tpsi = psi(ish)
+        tdpsi = wf_atoms(ispec)%get_psi(ish, r, order=1)
+        tddpsi = wf_atoms(ispec)%get_psi(ish, r, order=2)
         lapl = lapl + tq*(tdpsi*tdpsi + tpsi*tddpsi + 2.0_dp*ir*tpsi*tdpsi)
         grad = grad + tq*tpsi*tdpsi
         hess = hess + tq*(tdpsi*tdpsi + tpsi*tddpsi)
@@ -351,7 +348,7 @@ contains
     real(dp), intent(out) :: dens
     real(dp), intent(out), optional :: lapl
     real(dp), intent(out), allocatable, optional :: grad(:), hess(:, :)
-    integer :: issh, jssh, nssh1, nssh2
+    integer :: ish, jsh, nssh1, nssh2
     real(dp) :: ir, ir2, ir3, tpsi, tdpsi, tddpsi, tq, rho2, z12, z22
     real(dp), allocatable :: psi1(:), psi2(:)
     nssh1 = wf_atoms(ispec)%get_nshells()
@@ -361,16 +358,16 @@ contains
     z22 = z2*z2
     allocate(psi1(nssh1), psi2(nssh2))
     dens = 0.0_dp
-    do issh = 1, nssh1
-      tq = wf_atoms(ispec)%get_ref_charge(issh)
-      tpsi = wf_atoms(ispec)%get_psi(issh, r1)
-      psi1(issh) = tpsi
+    do ish = 1, nssh1
+      tq = wf_atoms(ispec)%get_ref_charge(ish)
+      tpsi = wf_atoms(ispec)%get_psi(ish, r1)
+      psi1(ish) = tpsi
       dens = dens + tq*tpsi*tpsi
     end do
-    do jssh = 1, nssh2
-      tq = wf_atoms(jspec)%get_ref_charge(jssh)
-      tpsi = wf_atoms(jspec)%get_psi(jssh, r2)
-      psi2(jssh) = tpsi
+    do jsh = 1, nssh2
+      tq = wf_atoms(jspec)%get_ref_charge(jsh)
+      tpsi = wf_atoms(jspec)%get_psi(jsh, r2)
+      psi2(jsh) = tpsi
       dens = dens + tq*tpsi*tpsi
     end do
     dens = dens*inv4pi
@@ -385,11 +382,11 @@ contains
       ir = 1.0_dp/r1
       ir2 = ir*ir
       ir3 = ir2*ir
-      do issh = 1, nssh1
-        tq = wf_atoms(ispec)%get_ref_charge(issh)
-        tpsi = psi1(issh)
-        tdpsi = wf_atoms(ispec)%get_psi(issh, r1, order=1)
-        tddpsi = wf_atoms(ispec)%get_psi(issh, r1, order=2)
+      do ish = 1, nssh1
+        tq = wf_atoms(ispec)%get_ref_charge(ish)
+        tpsi = psi1(ish)
+        tdpsi = wf_atoms(ispec)%get_psi(ish, r1, order=1)
+        tddpsi = wf_atoms(ispec)%get_psi(ish, r1, order=2)
         lapl = lapl + tq*(tdpsi*tdpsi + tpsi*tddpsi + 2.0_dp*tpsi*tdpsi*ir)
         grad(1) = grad(1) + tq*tpsi*tdpsi*rho*ir
         grad(2) = grad(2) + tq*tpsi*tdpsi*z1*ir
@@ -402,11 +399,11 @@ contains
       ir = 1.0_dp/r2
       ir2 = ir*ir
       ir3 = ir2*ir
-      do jssh = 1, nssh2
-        tq = wf_atoms(jspec)%get_ref_charge(jssh)
-        tpsi = psi2(jssh)
-        tdpsi = wf_atoms(jspec)%get_psi(jssh, r2, order=1)
-        tddpsi = wf_atoms(jspec)%get_psi(jssh, r2, order=2)
+      do jsh = 1, nssh2
+        tq = wf_atoms(jspec)%get_ref_charge(jsh)
+        tpsi = psi2(jsh)
+        tdpsi = wf_atoms(jspec)%get_psi(jsh, r2, order=1)
+        tddpsi = wf_atoms(jspec)%get_psi(jsh, r2, order=2)
         lapl = lapl + tq*(tdpsi*tdpsi + tpsi*tddpsi + 2.0_dp*ir*tpsi*tdpsi)
         grad(1) = grad(1) + tq*tpsi*tdpsi*rho*ir
         grad(2) = grad(2) + tq*tpsi*tdpsi*z2*ir

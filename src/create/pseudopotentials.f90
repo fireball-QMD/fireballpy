@@ -44,7 +44,8 @@
 ! ==============================================================================
 module pseudopotentials
   use, intrinsic :: iso_fortran_env, only: dp => real64
-  use :: constants, only:abohr
+  use, intrinsic :: ieee_arithmetic, only: ieee_signaling_nan, ieee_value
+  use :: constants, only: abohr
   use :: math, only: math_interp_t, math_interp_new
   use :: utils, only: utils_open
   implicit none
@@ -52,14 +53,10 @@ module pseudopotentials
 
   public :: pp_atoms, pp_init, pp_end
 
-  type :: pp_orbital_t
+  type, extends(math_interp_t) :: pp_orbital_t
     private
     integer :: l
     real(dp) :: rcut, cl
-    type(math_interp_t) :: fr
-  contains
-    private
-    procedure :: end => pp_orbital_end
   end type pp_orbital_t
 
   type :: pp_atom_t
@@ -153,14 +150,9 @@ contains
     real(dp), intent(in) :: rcut, cl
     real(dp), intent(in) :: r(:), vpp(:)
     type(math_interp_t) :: fr
-    fr = math_interp_new(r, vpp)
-    pp_new_orbital = pp_orbital_t(l=l, rcut=rcut, cl=cl, fr=fr)
+    fr = math_interp_new(r, vpp, rval=0.0_dp)
+    pp_new_orbital = pp_orbital_t(l=l, rcut=rcut, cl=cl, math_interp_t=fr)
   end function pp_new_orbital
-
-  subroutine pp_orbital_end(this)
-    class(pp_orbital_t), intent(inout) :: this
-    call this%fr%end()
-  end subroutine pp_orbital_end
 
   pure integer function pp_atom_nz(this)
     class(pp_atom_t), intent(in) :: this
@@ -175,6 +167,10 @@ contains
   pure integer function pp_atom_angular_momentum(this, ish)
     class(pp_atom_t), intent(in) :: this
     integer, intent(in) :: ish
+    if (ish < 1 .or. ish > this%nshells) then
+      pp_atom_angular_momentum = -1
+      return
+    end if
     pp_atom_angular_momentum = this%pps(ish)%l
   end function pp_atom_angular_momentum
 
@@ -187,6 +183,10 @@ contains
     class(pp_atom_t), intent(in) :: this
     integer, intent(in), optional :: ish
     if (present(ish)) then
+      if (ish < 1 .or. ish > this%nshells) then
+        pp_atom_rcut = ieee_value(pp_atom_rcut, ieee_signaling_nan)
+        return
+      end if
       pp_atom_rcut = this%pps(ish)%rcut
     else
       pp_atom_rcut = this%rcut
@@ -196,6 +196,10 @@ contains
   pure real(dp) function pp_atom_cl(this, ish)
     class(pp_atom_t), intent(in) :: this
     integer, intent(in) :: ish
+    if (ish < 1 .or. ish > this%nshells) then
+      pp_atom_cl = ieee_value(pp_atom_cl, ieee_signaling_nan)
+      return
+    end if
     pp_atom_cl = this%pps(ish)%cl
   end function pp_atom_cl
 
@@ -204,23 +208,7 @@ contains
     integer, intent(in) :: ish
     real(dp), intent(in) :: r
     integer, intent(in), optional :: order
-    integer :: o
-    if ((r <= 0.0_dp) .or. (r >= this%pps(ish)%rcut)) then
-      pp_atom_vpp = 0.0_dp
-      return
-    end if
-    o = 0
-    if (present(order)) o = order
-    select case (o)
-    case (0)
-      pp_atom_vpp = this%pps(ish)%fr%f(r)
-    case (1)
-      pp_atom_vpp = this%pps(ish)%fr%df(r)
-    case (2)
-      pp_atom_vpp = this%pps(ish)%fr%ddf(r)
-    case default
-      pp_atom_vpp = 0.0_dp
-    end select
+    pp_atom_vpp = this%pps(ish)%f(r, order=order)
   end function pp_atom_vpp
 
   subroutine pp_atom_end(this)

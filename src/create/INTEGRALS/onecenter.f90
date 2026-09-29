@@ -59,13 +59,39 @@ module onecenter
   integer, parameter, public :: ONECENTER_XC        = ishft(1, 0) ! 2^0
   integer, parameter, public :: ONECENTER_GOVERLAP1 = ishft(1, 1) ! 2^1
   integer, parameter, public :: ONECENTER_GOVERLAP2 = ishft(1, 2) ! 2^2
-  character(10), parameter :: ONECENTER_ROOT(ONECENTER_NUM_INTERACTIONS) = [ &
-    &  "xc        ", &
-    &  "goverlapf1", &
-    &  "goverlapf2" &
-    &  ]
 
 contains
+
+  subroutine onecenter_get_fname(interaction, ispec, fname)
+    integer, intent(in) :: interaction, ispec
+    character(path_len), intent(out) :: fname
+    character(32) :: root
+    character(2) :: auxz
+    select case (interaction)
+    case (ONECENTER_XC)
+      root = "xc"
+    case (ONECENTER_GOVERLAP1)
+      root = "goverlapf1"
+    case (ONECENTER_GOVERLAP2)
+      root = "goverlapf2"
+    case default
+      error stop
+    end select
+    write (auxz,"(i2.2)") wf_atoms(ispec)%get_nz()
+    fname = trim(root)//"."//auxz//".dat"
+  end subroutine onecenter_get_fname
+
+  pure integer function onecenter_get_nints(interaction, ispec)
+    integer, intent(in) :: interaction, ispec
+    integer :: nsh
+    nsh = wf_atoms(ispec)%get_nshells()
+    select case (interaction)
+    case (ONECENTER_XC)
+      onecenter_get_nints = 2 + 2*nsh
+    case default
+      onecenter_get_nints = 1
+    end select
+  end function onecenter_get_nints
 
   pure subroutine onecenter_get_interactions(interactions, onecenter_interactions)
     integer, intent(in) :: interactions
@@ -81,33 +107,18 @@ contains
     end do
   end subroutine onecenter_get_interactions
 
-  pure integer function onecenter_get_nints(int_id, ispec)
-    integer, intent(in) :: int_id, ispec
-    integer :: interaction, nssh
-    interaction = ishft(1, int_id - 1)
-    nssh = wf_atoms(ispec)%get_nshells()
-    select case (interaction)
-    case (ONECENTER_XC)
-      onecenter_get_nints = 2 + 2*nssh
-    case default
-      onecenter_get_nints = 1
-    end select
-  end function onecenter_get_nints
-
-  subroutine onecenter_calc_interaction(int_id, ispec, answer)
-    integer, intent(in) :: int_id, ispec
+  subroutine onecenter_calc_interaction(interaction, ispec, answer)
+    integer, intent(in) :: interaction, ispec
     real(dp), allocatable, intent(out) :: answer(:,:)
-    integer :: interaction, irho, issh, jssh, isorp, index, nssh, nints, index_max, nrho
+    integer :: irho, ish, jssh, iint, index, nsh, nints, index_max, nrho
     real(kind=dp) :: ir, rcut, factor, drho, rho, tmp, dtmp, ddtmp, psi1, psi2, dens, lapl, &
       &              exc, vxc, dexcrho, dexcsigma, dvxcrho, dvxcsigma, dvxclapl, dvxccross
     logical :: onecenter_interactions(ONECENTER_NUM_INTERACTIONS)
     integer, allocatable :: s1(:), s2(:), l12(:)
     real(kind=dp), allocatable :: fofr(:), grad(:), hess(:,:)
 
-    interaction = ishft(1, int_id - 1)
-
     ! Retrieve basic info
-    nssh = wf_atoms(ispec)%get_nshells()
+    nsh = wf_atoms(ispec)%get_nshells()
     drho = wf_atoms(ispec)%get_dr()
     rcut = wf_atoms(ispec)%get_rcut()
     nrho = rcut/drho + 1
@@ -117,8 +128,9 @@ contains
     end if
 
     ! Set dimensions
-    nints = onecenter_get_nints(int_id, ispec)
-    call indices_onecenter_set([(wf_atoms(ispec)%get_angular_momentum(issh), issh = 1, nssh)], index_max, s1, s2, l12)
+    nints = onecenter_get_nints(interaction, ispec)
+    call indices_onecenter_set([(wf_atoms(ispec)%get_angular_momentum(ish), ish = 1, nsh)], index_max, s1, s2, l12)
+    if (allocated(answer)) deallocate(answer)
     allocate(fofr(nints), answer(nints, index_max))
     answer = 0.0_dp
 
@@ -140,18 +152,18 @@ contains
           call xc_calc(dens, exc, vxc, dexcrho, dvxcrho)
         end if
         fofr(1) = vxc
-        fofr(nssh + 2) = exc
-        do isorp = 1, nssh
-          tmp = sqinv4pi*wf_atoms(ispec)%get_psi(isorp, rho)
-          fofr(isorp + 1) = dvxcrho*tmp*tmp
-          fofr(isorp + 2 + nssh) = dexcrho*tmp*tmp
+        fofr(nsh + 2) = exc
+        do iint = 1, nsh
+          tmp = sqinv4pi*wf_atoms(ispec)%get_psi(iint, rho)
+          fofr(iint + 1) = dvxcrho*tmp*tmp
+          fofr(iint + 2 + nsh) = dexcrho*tmp*tmp
           if (xc_isgga() .and. rho > tolerance) then
-            dtmp = sqinv4pi*wf_atoms(ispec)%get_psi(isorp, rho, order=1)
-            ddtmp = sqinv4pi*wf_atoms(ispec)%get_psi(isorp, rho, order=2)
-            fofr(isorp + 1) = fofr(isorp + 1) + dvxcsigma*4.0_dp*tmp*dtmp*grad(1) + &
-              &                                 dvxclapl*2.0_dp*(dtmp*dtmp + tmp*ddtmp + 2.0_dp*ir*tmp*dtmp) + &
-              &                                 dvxccross*2.0_dp*grad(1)*(grad(1)*(dtmp*dtmp + tmp*ddtmp) + 2.0_dp*tmp*dtmp*hess(1,1))
-            fofr(isorp + 2 + nssh) = fofr(isorp + 2 + nssh) + dexcsigma*4.0_dp*tmp*dtmp*grad(1)
+            dtmp = sqinv4pi*wf_atoms(ispec)%get_psi(iint, rho, order=1)
+            ddtmp = sqinv4pi*wf_atoms(ispec)%get_psi(iint, rho, order=2)
+            fofr(iint + 1) = fofr(iint + 1) + dvxcsigma*4.0_dp*tmp*dtmp*grad(1) + &
+              &                               dvxclapl*2.0_dp*(dtmp*dtmp + tmp*ddtmp + 2.0_dp*ir*tmp*dtmp) + &
+              &                               dvxccross*2.0_dp*grad(1)*(grad(1)*(dtmp*dtmp + tmp*ddtmp) + 2.0_dp*tmp*dtmp*hess(1,1))
+            fofr(iint + 2 + nsh) = fofr(iint + 2 + nsh) + dexcsigma*4.0_dp*tmp*dtmp*grad(1)
           end if
         end do
       case default
@@ -179,46 +191,33 @@ contains
     end do
   end subroutine onecenter_calc_interaction
 
-  pure subroutine onecenter_get_fname(int_id, ispec, fname)
-    integer, intent(in) :: int_id, ispec
-    character(path_len), intent(out) :: fname
-    integer :: nzx
-    character(2) :: auxz
-
-    ! Retrieve basic info
-    nzx = wf_atoms(ispec)%get_nz()
-    write (auxz,"(i2.2)") nzx
-    fname = trim(ONECENTER_ROOT(int_id))//"."//auxz//".dat"
-  end subroutine onecenter_get_fname
-
-  subroutine onecenter_write_interaction(int_id, ispec, fname, answer)
-    integer, intent(in) :: int_id, ispec
+  subroutine onecenter_write_interaction(interaction, ispec, fname, answer)
+    integer, intent(in) :: interaction, ispec
     character(path_len), intent(in) :: fname
     real(dp), intent(in) :: answer(:,:)
-    integer :: issh, jssh, ix, index, index_max, nssh, nzx, interaction, io, nints
+    integer :: ish, jssh, ix, index, index_max, nsh, nzx, io, nints
     integer, allocatable :: s1(:), s2(:), l12(:)
     real(dp) :: rcut
     real(dp), allocatable :: matrix(:,:)
     character(64), allocatable :: names(:)
 
     ! Retrieve basic info
-    nints = onecenter_get_nints(int_id, ispec)
+    nints = onecenter_get_nints(interaction, ispec)
     index_max = size(answer, dim=2)
-    nssh = wf_atoms(ispec)%get_nshells()
+    nsh = wf_atoms(ispec)%get_nshells()
     rcut = wf_atoms(ispec)%get_rcut()
     nzx = wf_atoms(ispec)%get_nz()
-    interaction = ishft(1, int_id - 1)
 
     io = utils_open(fname, "w")
     write (io, "(14x,i2,44x,'! Atomic number')") nzx
     write (io, "(2x,f14.6,44x,'! Cutoff radius')") rcut
     if (interaction == ONECENTER_XC) then
-      write (io, "(8x,i8,36x,'! Number of shells')") nssh
-      write (io, "(1000ES16.8)") (wf_atoms(ispec)%get_ref_charge(issh), issh = 1, nssh)
+      write (io, "(8x,i8,36x,'! Number of shells')") nsh
+      write (io, "(1000ES16.8)") (wf_atoms(ispec)%get_ref_charge(ish), ish = 1, nsh)
     end if
 
     ! Create the matrix to output in matrix format
-    call indices_onecenter_set([(wf_atoms(ispec)%get_angular_momentum(issh), issh = 1, nssh)], &
+    call indices_onecenter_set([(wf_atoms(ispec)%get_angular_momentum(ish), ish = 1, nsh)], &
       &                        index_max, s1, s2, l12, names)
     write (io, "('!')", advance="no")
     if (index_max == 0) then
@@ -229,14 +228,14 @@ contains
       write (io, "(4x,a)", advance="no") trim(names(index))
     end do
     write (io, "(a)") ""
-    allocate(matrix(nssh, nssh))
+    allocate(matrix(nsh, nsh))
     do ix = 1, nints
       matrix = 0.0_dp
       do index = 1, index_max
         matrix(s1(index), s2(index)) = answer(ix, index)
       end do
-      do issh = 1, nssh
-        write (io, "(1000ES16.8)") (matrix(issh, jssh), jssh = 1, nssh)
+      do ish = 1, nsh
+        write (io, "(1000ES16.8)") (matrix(ish, jssh), jssh = 1, nsh)
       end do
       if (ix < nints) write (io, "(a)") ""
     end do
@@ -245,7 +244,7 @@ contains
 
   subroutine onecenter_calc(interactions, ispec)
     integer, intent(in) :: interactions, ispec
-    integer :: interaction, int_id, isorp, nints
+    integer :: interaction, int_id, iint, nints
     logical :: exists
     logical :: onecenter_interactions(ONECENTER_NUM_INTERACTIONS)
     character(path_len) :: fname
@@ -255,12 +254,12 @@ contains
     do int_id = 1, ONECENTER_NUM_INTERACTIONS
       if (.not. onecenter_interactions(int_id)) cycle
       interaction = ishft(1, int_id - 1)
-      call onecenter_get_fname(int_id, ispec, fname)
+      call onecenter_get_fname(interaction, ispec, fname)
       inquire (file=fname, exist=exists)
       if (exists) cycle
       write (stdout, "(2x,a)") "Computing "//trim(fname)//"..."
-      call onecenter_calc_interaction(int_id, ispec, answer)
-      call onecenter_write_interaction(int_id, ispec, fname, answer)
+      call onecenter_calc_interaction(interaction, ispec, answer)
+      call onecenter_write_interaction(interaction, ispec, fname, answer)
       write (stdout, "(a)", advance="no") achar(8)//achar(13)
       write (stdout, "(2x,a)") "Computing "//trim(fname)//"... Done!"
     end do ! int_id

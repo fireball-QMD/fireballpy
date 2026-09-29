@@ -23,9 +23,9 @@ subroutine scf_loop (verbose)
     print *, 'uxcdcc_ols =', uxcdcc_ols
     print *, 'etotxc_1c  =', etotxc_1c
     print *, 'eqmmm      =', eqmmm
-    if (verbose) print '(a13,i4,a8,f12.6,a17,es10.3,a3,es10.3)', '-> Iteration ', Kscf, ': EBS = ', ebs, '; RMSD/nshells = ', sigma, ' > ', sigmatol
     if (verbose) print '(" ETOT = ",F15.6,"  Kscf = ",I3)', etot, kscf 
     if (scf_achieved .or. (Kscf .gt. max_scf_iterations)) exit
+    if (verbose) print '(a13,i4,a8,f12.6,a17,es10.3,a3,es10.3)', '-> Iteration ', Kscf, ': EBS = ', ebs, '; RMSD/nshells = ', sigma, ' > ', sigmatol
   end do 
   if (verbose) then
    if (scf_achieved) then

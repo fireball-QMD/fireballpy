@@ -73,9 +73,9 @@ module M_fdata
 !    & 'denS_ontopl','denS_ontopr','denS_atom  ','overlapS   '/)
   character(len=11), dimension(20), parameter :: twocfname = [ &
                                                  "overlap    ", "vna_ontopl ", "vna_ontopr ", "vna_atom   ", "vnl        ", &
-                                                 "vxc_neutral", "vxc_ontopl ", "vxc_ontopr ", "dipole_z   ", "dipole_y   ", &
+                                                 "vxc_refchs ", "vxc_ontopl ", "vxc_ontopr ", "dipole_z   ", "dipole_y   ", &
                                                  "dipole_x   ", "coulomb    ", "kinetic    ", "den_ontopl ", "den_ontopr ", &
-                                                 "den_atom   ", "den_ontoplS", "den_ontoprS", "den_atomS  ", "overlapS   "]
+                                                 "den_atom   ", "denS_ontopl", "denS_ontopr", "denS_atom  ", "overlapS   "]
   integer, parameter :: TWOCENTER_OVERLAP = 1
   integer, parameter :: TWOCENTER_VNA_L = 2
   integer, parameter :: TWOCENTER_VNA_R = 3
