@@ -81,7 +81,7 @@ module pseudopotentials
 contains
 
   subroutine pp_init()
-    integer :: i, j, io, io2, nspec, nshells, nz
+    integer :: i, j, io, io2, nspec, nz
     character(80) :: inname
     character(1000) :: fpath
 
@@ -96,28 +96,28 @@ contains
       read (io2, *)
       read (io2, *) fpath
       read (io2, *)
-      read (io2, *) nshells
+      read (io2, *)
       close (io2)
-      pp_atoms(i) = pp_new_atom(nz, nshells, fpath)
-      if (pp_atoms(i)%iexc /= pp_atoms(1)%iexc) stop
+      pp_atoms(i) = pp_new_atom(nz, fpath)
+      if (pp_atoms(i)%iexc /= pp_atoms(1)%iexc) error stop
     end do
     close (io)
   end subroutine pp_init
 
-  type(pp_atom_t) function pp_new_atom(nz, nshells, fpath)
-    integer, intent(in) :: nz, nshells
+  type(pp_atom_t) function pp_new_atom(nz, fpath)
+    integer, intent(in) :: nz
     character(1000), intent(in) :: fpath
-    integer :: i, ish, io, iexc, np, l
+    integer :: i, ish, io, iexc, np, l, nshells
     real(dp) :: rcut, cl
     real(dp), allocatable :: r(:), vpp(:)
     type(pp_orbital_t), allocatable :: pps(:)
-    allocate(pps(nshells))
     io = utils_open(fpath, "r")
     do i = 1, 14
       read (io, *)
     end do
     read (io, *) iexc
-    do i = 1, 4
+    read (io, *) nshells
+    do i = 1, 3
       read (io, *)
     end do
     read (io, *) rcut
@@ -131,6 +131,7 @@ contains
         read (io, *)
       end do
     end do
+    allocate(pps(nshells))
     do ish = 1, nshells
       read (io, "(3x,i1,8x,i5,4x,f14.7)") l, np, cl
       if (allocated(r)) deallocate(r)

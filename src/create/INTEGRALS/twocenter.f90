@@ -187,16 +187,18 @@ contains
     end select
   end subroutine twocenter_get_rcuts
 
-  subroutine twocenter_get_names(interaction, ispec, jspec, names)
+  subroutine twocenter_get_names(interaction, ispec, jspec, issph, index_max, names)
     integer, intent(in) :: interaction, ispec, jspec
+    logical, intent(in) :: issph
+    integer, intent(out) :: index_max
     character(INDICES_NAMES_LEN), allocatable, intent(out) :: names(:)
-    integer :: index_max
     integer, allocatable :: s1(:), s2(:), l1(:), l2(:), m1(:), m2(:)
-    call twocenter_get_indices(interaction, ispec, jspec, index_max, s1, s2, l1, l2, m1, m2, names=names)
+    call twocenter_get_indices(interaction, ispec, jspec, issph, index_max, s1, s2, l1, l2, m1, m2, names=names)
   end subroutine twocenter_get_names
 
-  subroutine twocenter_get_indices(interaction, ispec, jspec, index_max, s1, s2, l1, l2, m1, m2, names)
+  subroutine twocenter_get_indices(interaction, ispec, jspec, issph, index_max, s1, s2, l1, l2, m1, m2, names)
     integer, intent(in) :: interaction, ispec, jspec
+    logical, intent(in) :: issph
     integer, intent(out) :: index_max
     integer, allocatable, intent(out) :: s1(:), s2(:), l1(:), l2(:), m1(:), m2(:)
     character(INDICES_NAMES_LEN), allocatable, intent(out), optional :: names(:)
@@ -212,6 +214,10 @@ contains
       ls2 = [(wf_atoms(jspec)%get_angular_momentum(i), i = 1, wf_atoms(jspec)%get_nshells())]
     end select
 
+    if (issph) then
+      call indices_twocenter_set(INDICES_TWOCENTER_SPH, ls1, ls2, index_max, s1, s2, l1, l2, m1, m2, names=names)
+      return
+    end if
     select case (interaction)
     case (TWOCENTER_DIP_X)
       call indices_twocenter_set(INDICES_TWOCENTER_DIPX, ls1, ls2, index_max, s1, s2, l1, l2, m1, m2, names=names)
@@ -250,7 +256,7 @@ contains
         write (stdout, "(2x,a)") "Computing "//trim(fnames(i))//"..."
       end do
       call twocenter_integrate(interaction, ispec, jspec, issph, answer)
-      call twocenter_write(interaction, ispec, jspec, fnames, answer)
+      call twocenter_write(interaction, ispec, jspec, issph, fnames, answer)
       write (stdout, "(a)", advance="no") repeat(achar(8)//achar(13), size(fnames))
       do i = 1, size(fnames)
         write (stdout, "(2x,a)") "Computing "//trim(fnames(i))//"... Done!"
@@ -374,7 +380,7 @@ contains
     real(dp), allocatable :: fofr(:)
 
     nints = twocenter_get_nints(interaction, ispec, jspec)
-    call twocenter_get_indices(interaction, ispec, jspec, index_max, s1, s2, l1, l2, m1, m2)
+    call twocenter_get_indices(interaction, ispec, jspec, issph, index_max, s1, s2, l1, l2, m1, m2)
     if (allocated(answer)) deallocate(answer)
     allocate(fofr(nints), answer(nints, index_max, TWOCENTER_NPOINTS_D))
     if (index_max == 0) return
@@ -441,16 +447,17 @@ contains
     end do ! igrid
   end subroutine twocenter_integrate
 
-  subroutine twocenter_write(interaction, ispec, jspec, fnames, answer)
+  subroutine twocenter_write(interaction, ispec, jspec, issph, fnames, answer)
     integer, intent(in) :: interaction, ispec, jspec
+    logical, intent(in) :: issph
     character(fname_len), intent(in) :: fnames(:)
     real(dp), intent(in) :: answer(:,:,:)
-    integer :: i, ish, igrid, index, io
+    integer :: i, ish, igrid, index, io, index_max
     real(dp) :: rcut1, rcut2
     character(INDICES_NAMES_LEN), allocatable :: names(:)
 
     call twocenter_get_rcuts(interaction, ispec, jspec, rcut1, rcut2)
-    call twocenter_get_names(interaction, ispec, jspec, names=names)
+    call twocenter_get_names(interaction, ispec, jspec, issph, index_max, names=names)
     do i = 1, size(fnames)
       io = utils_open(fnames(i), "w")
       write (io, "(14x,i2,2x,i2,40x,'! Atomic numbers')") wf_atoms(ispec)%get_nz(), wf_atoms(jspec)%get_nz()
@@ -468,7 +475,12 @@ contains
         write (io, "(a)") " ! Reference charges atom 2"
       end if
       write (io, "('!')", advance="no")
-      do index = 1, size(names)
+      if (index_max == 0) then
+        write (io, "(a)") ""
+        close (io)
+        return
+      end if
+      do index = 1, index_max
         write (io, "(4x,a)", advance="no") trim(names(index))
       end do
       if (size(answer, 2) /= 0) then

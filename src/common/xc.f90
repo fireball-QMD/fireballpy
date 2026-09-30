@@ -65,9 +65,10 @@ module xc
 
 contains
 
-  subroutine xc_init(iexc1, iexc2)
+  subroutine xc_init(iexc1, iexc2, verbose)
     integer, intent(in) :: iexc1
     integer, intent(in), optional :: iexc2
+    logical, intent(in), optional :: verbose
     integer :: vmajor, vminor, vmicro
     logical :: l1, l2
     xc_sep = present(iexc2)
@@ -100,7 +101,9 @@ contains
     end if
     xc_gga = l1 .or. l2
     call xc_f03_version(vmajor, vminor, vmicro)
-    write (stdout, "('  Using libXC v',i1,'.',i1,'.',i1)") vmajor, vminor, vmicro
+    if (present(verbose)) then
+      if (verbose) write (stdout, "('  Using libXC v',i1,'.',i1,'.',i1)") vmajor, vminor, vmicro
+    end if
   end subroutine xc_init
 
   subroutine xc_end()
