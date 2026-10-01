@@ -47,7 +47,7 @@ module xc
   use :: constants, only:abohr3, abohr4, abohr5, abohr8, abohr13, hartree, tolerance
   use :: xc_f03_lib_m, only:xc_f03_version, xc_f03_func_init_flags, xc_f03_func_get_info, xc_f03_func_info_get_family, &
     &                       xc_f03_func_end, xc_f03_lda_exc_vxc, xc_f03_lda_fxc, xc_f03_gga_exc_vxc, &
-    &                       xc_f03_gga_fxc, xc_f03_gga_kxc, xc_f03_func_t, xc_f03_func_info_t, &
+    &                       xc_f03_gga_fxc, xc_f03_gga_kxc, xc_f03_lda_kxc, xc_f03_func_t, xc_f03_func_info_t, &
     &                       XC_UNPOLARIZED, XC_FAMILY_LDA, XC_FAMILY_GGA, XC_FAMILY_HYB_GGA, XC_FLAGS_ON_HOST
   implicit none
   private
@@ -115,25 +115,37 @@ contains
     xc_isgga = xc_gga
   end function xc_isgga
 
-  subroutine xc_calc_lda(dens, exc, vxc, dexc, dvxc)
+  ! d2exc y d2vxc son opcionales: d2exc = d2(exc)/d(dens)2 y d2vxc = d2(vxc)/d(dens)2.
+  ! Se obtienen de la tercera derivada de la energia (kxc), asi que libXC debe
+  ! estar compilado con MAXORDER >= 3.
+  subroutine xc_calc_lda(dens, exc, vxc, dexc, dvxc, d2exc, d2vxc)
     real(dp), intent(in) :: dens
     real(dp), intent(out) :: exc, vxc, dexc, dvxc
-    real(dp) :: rho(1), irho(1), sigma(1), e(1), vrho(1), v2rho2(1), &
-      &         vsigma(1), v2rhosigma(1), v2sigma2(1)
+    real(dp), intent(out), optional :: d2exc, d2vxc
+    real(dp) :: rho(1), irho(1), sigma(1), e(1), vrho(1), v2rho2(1), v3rho3(1), &
+      &         vsigma(1), v2rhosigma(1), v2sigma2(1), &
+      &         v3rho2sigma(1), v3rhosigma2(1), v3sigma3(1)
+    real(dp) :: ad2exc, ad2vxc
+    logical :: need2
+    need2 = present(d2exc) .or. present(d2vxc)
     exc = 0.0_dp
     vxc = 0.0_dp
     dexc = 0.0_dp
     dvxc = 0.0_dp
+    ad2exc = 0.0_dp
+    ad2vxc = 0.0_dp
     rho(1) = dens*abohr3
     irho(1) = 1.0_dp/max(tolerance, rho(1))
     select case (xc_family1)
     case (XC_FAMILY_LDA)
       call xc_f03_lda_exc_vxc(xc_func1, 1_int64, rho, e, vrho)
       call xc_f03_lda_fxc(xc_func1, 1_int64, rho, v2rho2)
+      if (need2) call xc_f03_lda_kxc(xc_func1, 1_int64, rho, v3rho3)
     case (XC_FAMILY_GGA, XC_FAMILY_HYB_GGA)
       sigma(1) = 0.0_dp
       call xc_f03_gga_exc_vxc(xc_func1, 1_int64, rho, sigma, e, vrho, vsigma)
       call xc_f03_gga_fxc(xc_func1, 1_int64, rho, sigma, v2rho2, v2rhosigma, v2sigma2)
+      if (need2) call xc_f03_gga_kxc(xc_func1, 1_int64, rho, sigma, v3rho3, v3rho2sigma, v3rhosigma2, v3sigma3)
     case default
       write (stderr, "(a)") "[ERROR]: selected functional is not LDA nor GGA"
       stop
@@ -142,15 +154,20 @@ contains
     vxc = vxc + vrho(1)
     dexc = dexc + irho(1)*(vrho(1) - e(1))
     dvxc = dvxc + v2rho2(1)
+    ! v = e + n de/dn  =>  d2e/dn2 = (dv/dn - 2 de/dn)/n ;  d2v/dn2 = v3rho3
+    if (need2) ad2exc = ad2exc + irho(1)*(v2rho2(1) - 2.0_dp*irho(1)*(vrho(1) - e(1)))
+    if (need2) ad2vxc = ad2vxc + v3rho3(1)
     if (xc_sep) then
       select case (xc_family2)
       case (XC_FAMILY_LDA)
         call xc_f03_lda_exc_vxc(xc_func2, 1_int64, rho, e, vrho)
         call xc_f03_lda_fxc(xc_func2, 1_int64, rho, v2rho2)
+        if (need2) call xc_f03_lda_kxc(xc_func2, 1_int64, rho, v3rho3)
       case (XC_FAMILY_GGA, XC_FAMILY_HYB_GGA)
         sigma(1) = 0.0_dp
         call xc_f03_gga_exc_vxc(xc_func2, 1_int64, rho, sigma, e, vrho, vsigma)
         call xc_f03_gga_fxc(xc_func2, 1_int64, rho, sigma, v2rho2, v2rhosigma, v2sigma2)
+        if (need2) call xc_f03_gga_kxc(xc_func2, 1_int64, rho, sigma, v3rho3, v3rho2sigma, v3rhosigma2, v3sigma3)
       case default
         write (stderr, "(a)") "[ERROR]: selected functional is not LDA nor GGA"
         stop
@@ -159,11 +176,15 @@ contains
       vxc = vxc + vrho(1)
       dexc = dexc + irho(1)*(vrho(1) - e(1))
       dvxc = dvxc + v2rho2(1)
+      if (need2) ad2exc = ad2exc + irho(1)*(v2rho2(1) - 2.0_dp*irho(1)*(vrho(1) - e(1)))
+      if (need2) ad2vxc = ad2vxc + v3rho3(1)
     end if
     exc = exc*hartree
     vxc = vxc*hartree
     dexc = dexc*hartree*abohr3
     dvxc = dvxc*hartree*abohr3
+    if (present(d2exc)) d2exc = ad2exc*hartree*abohr3*abohr3
+    if (present(d2vxc)) d2vxc = ad2vxc*hartree*abohr3*abohr3
   end subroutine xc_calc_lda
 
   subroutine xc_calc_gga(dens, lapl, grad, hess, exc, vxc, dexcrho, dexcsigma, dvxcrho, dvxcsigma, dvxclapl, dvxccross)
