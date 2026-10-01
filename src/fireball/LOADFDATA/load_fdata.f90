@@ -117,10 +117,9 @@ subroutine load_fdata()
   if (allocated(splineint_2c)) deallocate(splineint_2c)
   allocate (numz2c (interactions2c_max, nspecies, nspecies))
   allocate (z2cmax (interactions2c_max, nspecies, nspecies))
-  allocate (splineint_2c (4, ME2c_max, nfofx, interactions2c_max, nspecies, nspecies))
+  allocate (splineint_2c (ME2c_max, interactions2c_max, nspecies, nspecies))
   numz2c = 0
   z2cmax = 0.0d0
-  splineint_2c = 0.0d0
 
   do interaction = 1, 20
     do isorp=initype(interaction),nsh_max*maxtype_2c(interaction)

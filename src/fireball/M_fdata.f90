@@ -1,5 +1,6 @@
 module M_fdata
   use, intrinsic :: iso_fortran_env, only: double => real64
+  use math, only: math_interp_t
   implicit none
   public
 
@@ -112,7 +113,7 @@ module M_fdata
   integer, dimension(1:20, 0:8) :: ind2c
   integer, dimension(:, :, :), allocatable :: numz2c
   real(double), dimension(:, :, :), allocatable :: z2cmax
-  real(double), dimension(:, :, :, :, :, :), allocatable :: splineint_2c
+  type(math_interp_t), allocatable :: splineint_2c(:,:,:,:)
 
   ! Three-center integrals
   integer, parameter :: numXmax = 31 ! AQUI

@@ -11,7 +11,6 @@ fdata_srcs = [
   'read_1c.f90',
   'readheader_2c.f90',
   'readdata_2c.f90',
-  'buildspline_1d.f90',
   'read_2c.f90',
   'read_3c.f90',
   'readdata_3c.f90',

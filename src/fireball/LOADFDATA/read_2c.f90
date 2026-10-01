@@ -64,7 +64,7 @@ subroutine read_2c (interaction)
         if ((interaction .eq. TWOCENTER_DENS_L) .or. (interaction .eq. TWOCENTER_DENS_R)) num_nonzero = index_maxS(in1,in2)
         if (interaction .eq. TWOCENTER_OVERLAPS) num_nonzero = index_maxS(in1,in2)
 
-        if (num_nonzero > 0) call readdata_2c (interaction, iounit, num_nonzero, numz, zmax, itype, in1, in2)
+        if (num_nonzero > 0) call readdata_2c (interaction, iounit, num_nonzero, numz, zmin, zmax, itype, in1, in2)
         close(iounit)
       end do
     end do

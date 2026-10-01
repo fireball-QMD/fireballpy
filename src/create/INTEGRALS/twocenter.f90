@@ -35,7 +35,7 @@
 ! along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-! onecenter.f90
+! twocenter.f90
 ! Program Description
 ! ==============================================================================
 !       This module calculates the two-center integrals.
