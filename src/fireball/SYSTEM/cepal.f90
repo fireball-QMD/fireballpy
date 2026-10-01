@@ -55,7 +55,7 @@ subroutine cepal (rh, exc, muxc, dexc, d2exc, dmuxc, d2muxc)
    d3den = (0.75d0)*1.0529d0/(2.0d0*rs*rs*sqrs)
    dec = 0.1423d0*dden/(den*den)
    ddec = -2.0d0*0.1423d0*dden*dden/(den**3) + 0.1423d0*d2den/(den*den)
-   d2dec = 6.0d0*0.1423d0*(dden*3)/(den**4) - 6.0d0*0.1423d0*dden*d2den/(den**3) + 0.1423d0*d3den/(den*den) 
+   d2dec = 6.0d0*0.1423d0*(dden**3)/(den**4) - 6.0d0*0.1423d0*dden*d2den/(den**3) + 0.1423d0*d3den/(den*den)
   else
    rsl = log(rs)
    exc = -0.4581652d0/rs - 0.0480d0 + 0.0311d0*rsl - 0.0116d0*rs + 0.002d0*rs*rsl
