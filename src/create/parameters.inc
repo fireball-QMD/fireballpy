@@ -48,8 +48,13 @@
         integer max_points_na
         parameter (max_points_na = 1501)
 
-! Superspline anyone?
+! Superspline: DISABLED. This interpolation path tabulates the on-site
+! spherical overlap as S_aa = 1.0024-1.0028 instead of 1 (table edge, y=0).
+! That 0.24% error in the basis normalisation blows up in the total energy:
+! on the water dimer it turns a -0.158 eV hydrogen bond into -1.109 eV and
+! leaves a 0.273 eV step in the PES at d = rc + rc. Do not re-enable without
+! fixing the edge behaviour first.
         logical superspline
-        parameter (superspline = .true.)
+        parameter (superspline = .false.)
 
 
