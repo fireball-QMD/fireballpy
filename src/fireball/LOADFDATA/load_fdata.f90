@@ -4,18 +4,19 @@ subroutine load_fdata()
   use M_fdata, only: fdataLocation, infofname, nsh_max, nshPP_max, nspecies, nzx, symbolA, &
     & etotatom, smass, rc_PP, rcutoff, cl_PP, nssh, lssh, nsshPP, lsshPP, Qneutral, wavefxn, &
     & napot, ind2c, icon3c, splineint_2c, numz2c, z2cmax, &
-    & isorpmax, isorpmax_xc, ME2c_max, nfofx,initype, Qref, maxtype_2c
+    & isorpmax, isorpmax_xc, ME2c_max, nfofx,initype, Qref, maxtype_2c, iexcs, excws
   implicit none
-  integer :: in1, in2, in3, ispec, issh, aux, icount, isorp, &
-    & interaction  
+  integer :: in1, in2, in3, ispec, iexc, issh, aux, icount, isorp, interaction, nxc, interactions2c_max
   real(double), dimension (:,:), allocatable :: rcutoff_temp
-  integer :: interactions2c_max
-  ! Find nsh_max and nsh_max_PP
+  ! Find nsh_max, nsh_max_PP and nxc
   nsh_max = 0
   nshPP_max = 0
   open (unit = 12, file = trim(fdataLocation) // trim(infofname), status = 'old')
   read (12,*)
   read (12,*) nspecies
+  read (12,*) nxc
+  read (12,*)
+  read (12,*)
   do ispec = 1, nspecies
     do in1 = 1, 5
       read (12,*)
@@ -31,7 +32,6 @@ subroutine load_fdata()
   end do
   close(12)
 
-  !AQUI pensar, Qinmixer(imix) = Qin(issh,iatom) en miser, (Qinmixer(nsh_max*natoms))
   if (allocated(nzx)) deallocate(nzx)
   if (allocated(symbolA)) deallocate(symbolA)
   if (allocated(etotatom)) deallocate(etotatom)
@@ -47,13 +47,15 @@ subroutine load_fdata()
   if (allocated(Qref)) deallocate(Qref)
   if (allocated(wavefxn)) deallocate(wavefxn)
   if (allocated(napot)) deallocate(napot)
+  if (allocated(iexcs)) deallocate(iexcs)
+  if (allocated(excws)) deallocate(excws)
   allocate (nzx (nspecies))
   allocate (symbolA (nspecies))
   allocate (etotatom (nspecies))
   allocate (smass (nspecies))
   allocate (rc_PP (nspecies))
-  allocate (rcutoff (nspecies, nsh_max)) 
-  allocate (rcutoff_temp (nsh_max, nspecies)) 
+  allocate (rcutoff (nspecies, nsh_max))
+  allocate (rcutoff_temp (nsh_max, nspecies))
   allocate (cl_PP (nsh_max, nspecies))
   allocate (nssh (nspecies))
   allocate (lssh (nsh_max, nspecies))
@@ -63,6 +65,8 @@ subroutine load_fdata()
   allocate (Qref (nsh_max, nspecies))
   allocate (wavefxn (nsh_max, nspecies))
   allocate (napot (0:nsh_max, nspecies))
+  allocate (iexcs (nxc))
+  allocate (excws (nxc))
   Qneutral = 0.0d0
   Qref = 0.0d0
   rcutoff = 0.0d0
@@ -71,6 +75,9 @@ subroutine load_fdata()
   open (unit = 12, file = trim(fdataLocation) // trim(infofname), status = 'old')
   read (12,*)
   read (12,*)
+  read (12,*)
+  read (12,*) (iexcs(iexc), iexc = 1, nxc)
+  read (12,*) (excws(iexc), iexc = 1, nxc)
   do ispec = 1, nspecies
     read (12,*)
     read (12,*)

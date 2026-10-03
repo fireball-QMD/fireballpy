@@ -3,7 +3,7 @@ subroutine assemble_usr (iauxforce)
   use M_constants, only: eq2
   use M_system, only: natoms, ratom, imass, neigh_max, uiiuee, ewald, fewald, neigh_b, neigh_j, neighn, Qin, dq, xl, dusr, dxcv, &
     & Kscf, coulomb_mat, iscf_fast
-  use M_fdata, only: nsh_max, ME2c_max, nssh, Qneutral, TWOCENTER_COULOMB
+  use M_fdata, only: nsh_max, ME2c_max, nssh, Qneutral, TWOCENTER_COULOMB, splineint_2c, ind2c
   implicit none
   integer, intent (in) :: iauxforce
   integer iatom
@@ -80,7 +80,8 @@ subroutine assemble_usr (iauxforce)
         interaction = TWOCENTER_COULOMB
         ideriv = 0
         do index = 1, index_coulomb
-          call interpolate_1d (interaction, ideriv, in1, in2, index, iauxforce, distance, slist(index), dslist(index))
+          slist(index) = splineint_2c(index, ind2c(interaction, ideriv), in1, in2)%f(distance)
+          if (iauxforce == 1) dslist(index) = splineint_2c(index, ind2c(interaction, ideriv), in1, in2)%f(distance, order=1)
         end do
         call recoverC (n1, n2, slist, dslist, coulomb, coulombD)
         if (Kscf .eq. 1) coulomb_mat(1:n1,1:n2,ineigh,iatom) = coulomb(1:n1,1:n2)

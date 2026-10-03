@@ -52,6 +52,9 @@ module M_fdata
   integer, dimension(:, :), allocatable :: muR, nuR, alphaR, betaR
   real(double), dimension(:, :), allocatable :: IR
 
+  integer, allocatable :: iexcs(:)
+  real(double), allocatable :: excws(:)
+
   !TODO idipole, icluster, siempre lee interaccion 10 y 11
 
   ! One center integrals

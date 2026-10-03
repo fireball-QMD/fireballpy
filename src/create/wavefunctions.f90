@@ -9,7 +9,8 @@
 
 ! Other contributors, past and present:
 ! Auburn University - Jianjun Dong
-! Arizona State University - Gary B. Adams Arizona State University - Kevin Schmidt
+! Arizona State University - Gary B. Adams
+! Arizona State University - Kevin Schmidt
 ! Arizona State University - John Tomfohr
 ! Brigham Young University - Hao Wang
 ! Lawrence Livermore National Laboratory - Kurt Glaesemann

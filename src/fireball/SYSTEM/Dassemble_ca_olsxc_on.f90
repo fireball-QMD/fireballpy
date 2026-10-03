@@ -1,5 +1,6 @@
 subroutine Dassemble_ca_olsxc_on ()
   use, intrinsic :: iso_fortran_env, only: double => real64
+  use xc, only: xc_calc
   use M_system, only: natoms, imass, neigh_b, neigh_j, neighn, neigh_self, numorb_max, Qin, rho, rho_on, arho_on, arhop_on, rhop_on, &
     & faxc, faxc_ca, dxcdcc
   use M_fdata, only: nssh, lssh
@@ -58,7 +59,7 @@ subroutine Dassemble_ca_olsxc_on ()
           n1 = n1 + l1 + 1
           rhoxc_av = arho_on(issh,issh,iatom)
           drhoxc_av(:) = arhop_on(:,issh,issh,ineigh,iatom)
-          call cepal(rhoxc_av, exc, muxc, dexc, d2exc, dmuxc, d2muxc)
+          call xc_calc(rhoxc_av, exc, muxc, dexc, dmuxc, d2exc, d2muxc)
           q_mu = Qin(issh,iatom) / (2.0d0*l1 + 1)
           do index = -l1, l1
             imu = n1 + index
@@ -80,7 +81,7 @@ subroutine Dassemble_ca_olsxc_on ()
             ! calculate XC potentials 
             rhoxc_av      = arho_on(issh,jssh,iatom)
             drhoxc_av(:) = arhop_on(:,issh,jssh,ineigh,iatom) 
-            call cepal(rhoxc_av, exc, muxc, dexc, d2exc, dmuxc, d2muxc)
+            call xc_calc(rhoxc_av, exc, muxc, dexc, dmuxc, d2exc, d2muxc)
             do index = -l1, l1
               imu = n1 + index
               do jndex = -l2, l2

@@ -452,7 +452,7 @@ contains
     logical, intent(in) :: issph
     character(fname_len), intent(in) :: fnames(:)
     real(dp), intent(in) :: answer(:,:,:)
-    integer :: i, ish, igrid, index, io, index_max
+    integer :: i, iexc, ish, igrid, index, io, index_max
     real(dp) :: rcut1, rcut2
     character(INDICES_NAMES_LEN), allocatable :: names(:)
 

@@ -3,7 +3,7 @@
 subroutine doscentrosPP (interaction, isub, distance, eps, deps, iauxforce, in1, in2, sx, spx)
   use, intrinsic :: iso_fortran_env, only: double => real64
   use M_system, only: numorb_max
-  use M_fdata, only: index_maxPP,num_orb,num_orbpp,ME2cPP_max
+  use M_fdata, only: index_maxPP,num_orb,num_orbpp,ME2cPP_max,splineint_2c,ind2c
   implicit none
   integer, intent(in) :: iauxforce
   integer, intent(in) :: in1
@@ -28,7 +28,8 @@ subroutine doscentrosPP (interaction, isub, distance, eps, deps, iauxforce, in1,
   sx = 0.0d0
   if (iauxforce .eq. 1) spx = 0.0d0
   do index = 1, index_maxPP(in1,in2)
-    call interpolate_1d (interaction, isub, in1, in2, index, iauxforce, distance, pplist(index), dpplist(index))
+    pplist(index) = splineint_2c(index, ind2c(interaction, isub), in1, in2)%f(distance)
+    if (iauxforce == 1) dpplist(index) = splineint_2c(index, ind2c(interaction, isub), in1, in2)%f(distance, order=1)
   end do
   call recover_PP (in1, in2, pplist, sm)
   call recover_PP (in1, in2, dpplist, spm)

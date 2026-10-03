@@ -10,6 +10,7 @@ module constants
   real(kind=dp), parameter, public :: abohr3 = 0.14818471118724036_dp
   real(kind=dp), parameter, public :: abohr4 = 0.07841597211427229_dp
   real(kind=dp), parameter, public :: abohr5 = 0.04149594538708256_dp
+  real(kind=dp), parameter, public :: abohr6 = 0.02195870862964584_dp
   real(kind=dp), parameter, public :: abohr8 = 0.006149064682626328_dp
   real(kind=dp), parameter, public :: abohr13 = 0.0002551612522519003_dp
   real(kind=dp), parameter, public :: invabohr = 1.8897261258369282_dp
@@ -17,7 +18,7 @@ module constants
   real(kind=dp), parameter, public :: eq2 = 14.399645351950548_dp
   real(kind=dp), parameter, public :: hartree = 27.211386024367243_dp
   real(kind=dp), parameter, public :: ryd = 13.605693012183622_dp
-  real(kind=dp), parameter, public :: tolerance = 1.0e-5_dp
+  real(kind=dp), parameter, public :: tolerance = 1.0e-8_dp
   real(kind=dp), parameter, public :: pi = 3.141592653589793_dp
   real(kind=dp), parameter, public :: twopi = 6.283185307179586_dp
   real(kind=dp), parameter, public :: inv4pi = 0.07957747154594767_dp

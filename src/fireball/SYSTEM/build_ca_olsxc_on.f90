@@ -13,6 +13,7 @@
 ! 
 subroutine build_ca_olsxc_on (in1, iatom, bcxcx, xc)
   use, intrinsic :: iso_fortran_env, only: double => real64
+  use xc, only: xc_calc
   use M_system, only: numorb_max, Qin, rho_on, arho_on, rhoi_on, arhoi_on
   use M_fdata, only: nssh, num_orb,lssh,nsh_max
   implicit none
@@ -69,8 +70,8 @@ subroutine build_ca_olsxc_on (in1, iatom, bcxcx, xc)
   do issh = 1, nssh(in1)
     l1 = lssh(issh,in1)
     n1 = n1 + l1 + 1
-    call cepal (arhoi(issh,issh), exci, muxci, dexci, d2exci, dmuxci,  d2muxci)
-    call cepal (arho(issh,issh), exc, muxc, dexc, d2exc, dmuxc, d2muxc)
+    call xc_calc(arhoi(issh,issh), exci, muxci, dexci, dmuxci, d2exci, d2muxci)
+    call xc_calc(arho(issh,issh), exc, muxc, dexc, dmuxc, d2exc, d2muxc)
     ! Now calculate different parts of the XC-matrix 
     ! Formula:
     !  <i,mu|V_xc(n)|i,nu> =
@@ -123,8 +124,8 @@ subroutine build_ca_olsxc_on (in1, iatom, bcxcx, xc)
     do jssh = 1, nssh(in1)
       l2 = lssh(jssh,in1)
       n2 = n2 + l2 + 1
-      call cepal(arhoi(issh,jssh), exci, muxci, dexci, d2exci, dmuxci, d2muxci)
-      call cepal(arho(issh,jssh), exc, muxc, dexc, d2exc, dmuxc, d2muxc)
+      call xc_calc(arhoi(issh,jssh), exci, muxci, dexci, dmuxci, d2exci, d2muxci)
+      call xc_calc(arho(issh,jssh), exc, muxc, dexc, dmuxc, d2exc, d2muxc)
       do ind1 = -l1, l1
         imu = n1 + ind1
         do ind2 = -l2, l2

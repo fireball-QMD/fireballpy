@@ -148,6 +148,7 @@ class FDataFiles:
     def _prep_infodat(self) -> None:
         infodat = ['   fireballpy_generated ',
                    f'   {len(self.species) if not self.lazy else len(self.species_present)} - Number of species ']
+        infodat.extend(self.infodat[2:5])
         for i, j in self.blocks:
             if (not self.lazy) or (_get_specie_block(self.infodat, (i, j)) in self.species_present):
                 infodat.extend(self.infodat[i:j+1])
@@ -160,7 +161,7 @@ class FDataFiles:
         with open(self.pyinfofile, 'r') as fp:
             info = fp.read().splitlines()
         n = int(info[1].split('-')[0].strip())
-        info = info[2:]  # Remove header
+        info = info[5:]  # Remove header
         for _ in range(n):
             z = int(info[3].split('-')[0].strip())
             shellline = info[6]

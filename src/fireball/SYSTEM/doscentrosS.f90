@@ -1,6 +1,6 @@
 subroutine doscentrosS (interaction, isub, iauxforce, in1, in2, in3, distance, eps, sx, spx)
   use, intrinsic :: iso_fortran_env, only: double => real64
-  use M_fdata, only: index_maxS,nsh_max,MES_max,nssh, TWOCENTER_DENS_L
+  use M_fdata, only: index_maxS,nsh_max,MES_max,nssh, TWOCENTER_DENS_L,splineint_2c,ind2c
   implicit none
   integer, intent (in) :: iauxforce
   integer, intent (in) :: interaction
@@ -25,9 +25,11 @@ subroutine doscentrosS (interaction, isub, iauxforce, in1, in2, in3, distance, e
   if (iauxforce .eq. 1) spx = 0.0d0
   do index = 1, index_maxS(in1,in3)
     if (interaction .ne. TWOCENTER_DENS_L) then
-      call interpolate_1d (interaction, isub, in1, in2, index, iauxforce, distance, slist(index), dslist(index))
+      slist(index) = splineint_2c(index, ind2c(interaction, isub), in1, in2)%f(distance)
+      if (iauxforce == 1) dslist(index) = splineint_2c(index, ind2c(interaction, isub), in1, in2)%f(distance, order=1)
     else
-      call interpolate_1d (interaction, isub, in1, in3, index, iauxforce,  distance, slist(index), dslist(index))
+      slist(index) = splineint_2c(index, ind2c(interaction, isub), in1, in3)%f(distance)
+      if (iauxforce == 1) dslist(index) = splineint_2c(index, ind2c(interaction, isub), in1, in3)%f(distance, order=1)
     end if
   end do
   call recover_S (in1, in3, slist, sx)

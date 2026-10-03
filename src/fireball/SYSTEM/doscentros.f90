@@ -9,7 +9,7 @@
 subroutine doscentros (interaction, isub, iforceaux, in1, in2, in3, distance, eps, deps, sx, spx)
   use, intrinsic :: iso_fortran_env, only: double => real64
   use M_system, only: numorb_max
-  use M_fdata, only: index_max2c,num_orb,ME2c_max, TWOCENTER_VNA_L, TWOCENTER_VXC_L, TWOCENTER_DEN_L
+  use M_fdata, only: index_max2c,num_orb,ME2c_max, TWOCENTER_VNA_L, TWOCENTER_VXC_L, TWOCENTER_DEN_L, splineint_2c, ind2c
   implicit none
   integer, intent (in) :: interaction
   integer, intent (in) :: isub
@@ -44,9 +44,11 @@ subroutine doscentros (interaction, isub, iforceaux, in1, in2, in3, distance, ep
   if(interaction .eq. TWOCENTER_DEN_L) switch = .false.
   do index = 1, index_max2c(in1,in3)
    if ( switch ) then
-    call interpolate_1d (interaction, isub, in1, in2, index, iforceaux, distance, slist(index), dslist(index))
+    slist(index) = splineint_2c(index, ind2c(interaction, isub), in1, in2)%f(distance)
+    if (iforceaux == 1) dslist(index) = splineint_2c(index, ind2c(interaction, isub), in1, in2)%f(distance, order=1)
    else
-    call interpolate_1d (interaction, isub, in1, in3, index, iforceaux, distance, slist(index), dslist(index))
+    slist(index) = splineint_2c(index, ind2c(interaction, isub), in1, in3)%f(distance)
+    if (iforceaux == 1) dslist(index) = splineint_2c(index, ind2c(interaction, isub), in1, in3)%f(distance, order=1)
    end if
   end do
   call recover_2c (in1, in3, slist, sm)

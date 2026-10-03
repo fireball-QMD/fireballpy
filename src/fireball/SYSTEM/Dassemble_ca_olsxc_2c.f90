@@ -1,5 +1,6 @@
 subroutine Dassemble_ca_olsxc_2c ()
   use, intrinsic :: iso_fortran_env, only: double => real64
+  use xc, only: xc_calc
   use M_system, only: natoms, ratom, imass, neigh_b, neigh_j, neighn, neigh_self, numorb_max, sp_mat, Qin, rho, rho_off, rhoij_off, &
     & s_mat, arhoij_off, arho_off, arhopij_off, arhop_off, rhop_off, rhopij_off, xl, fotxc_ca
   use M_fdata, only: num_orb, nssh, lssh, Qneutral, TWOCENTER_VXC_L, TWOCENTER_VXC_R
@@ -61,7 +62,7 @@ subroutine Dassemble_ca_olsxc_2c ()
        n2 = n2 + l2 + 1
        rho_av =  arhoij_off(issh,jssh,ineigh,iatom)
        rhop_av(:) =  arhopij_off(:,issh,jssh,ineigh,iatom)
-       call cepal (rho_av, exc, muxc, dexc, d2exc, dmuxc, d2muxc)
+       call xc_calc(rho_av, exc, muxc, dexc, dmuxc, d2exc, d2muxc)
        do index1 = -l1, l1
         do index2 = -l2, l2
          imu = n1 + index1
@@ -87,7 +88,7 @@ subroutine Dassemble_ca_olsxc_2c ()
        n2 = n2 + l2 + 1
        rho_av =  arho_off(issh,jssh,ineigh,iatom)
        rhop_av =  arhop_off(:,issh,jssh,ineigh,iatom)
-       call cepal (rho_av, exc, muxc, dexc, d2exc, dmuxc, d2muxc)
+       call xc_calc(rho_av, exc, muxc, dexc, dmuxc, d2exc, d2muxc)
        do index1 = -l1, l1
         do index2 = -l2, l2
          imu = n1 + index1

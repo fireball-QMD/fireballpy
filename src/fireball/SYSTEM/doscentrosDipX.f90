@@ -1,7 +1,7 @@
 subroutine doscentrosDipX (interaction, isub, in1, in2, in3, distance, eps, deps, sx, spx)
   use, intrinsic :: iso_fortran_env, only: double => real64
   use M_system, only: iforce, numorb_max
-  use M_fdata, only: num_orb,index_max2cDipX,ME2cDipX_max
+  use M_fdata, only: num_orb,index_max2cDipX,ME2cDipX_max,splineint_2c,ind2c
   implicit none
   integer, intent (in) :: interaction
   integer, intent (in) :: isub
@@ -28,7 +28,8 @@ subroutine doscentrosDipX (interaction, isub, in1, in2, in3, distance, eps, deps
   if (iforce .eq. 1) spmx = 0.0d0
   if (iforce .eq. 1) spx = 0.0d0
   do index = 1, index_max2cDipX(in1,in3)
-    call interpolate_1d (interaction, isub, in1, in2, index, iforce, distance, slist(index), dslist(index))
+    slist(index) = splineint_2c(index, ind2c(interaction, isub), in1, in2)%f(distance)
+    if (iforce == 1) dslist(index) = splineint_2c(index, ind2c(interaction, isub), in1, in2)%f(distance, order=1)
   end do
   call recover_2cDipX (in1, in3, slist, sm)
   call recover_2cDipX (in1, in3, dslist, spm)

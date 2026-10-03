@@ -57,7 +57,7 @@
 ! ======================================================================
 program create
   use, intrinsic :: iso_fortran_env, only: dp => real64, stderr => error_unit, stdout => output_unit
-  use :: xc, only: xc_init, xc_end
+  use :: xc, only: xc_init, xc_end, xc_get_nxc, xc_get_iexc, xc_get_weight
   use :: wavefunctions, only: wf_init, wf_end
   use :: potentials, only: pot_init, pot_end
   use :: pseudopotentials, only: pp_init, pp_end
@@ -104,6 +104,7 @@ program create
   integer iderivmax
   integer iderivtmp
   integer iexc
+  integer iiexc, iexc1, iexc2
   integer iexc_new
   integer index
   integer index_max
@@ -328,6 +329,20 @@ program create
     &                 fraction, iammaster)
   end do
 
+  ! TODO: be able to pick whatever iexc we want
+  if (iexc == 3) then
+    iexc1=1
+    iexc2=9
+  else if (iexc == 9) then
+    iexc1=106
+    iexc2=131
+  else
+    write (stderr, "(a)") "TODO: be able to pick whatever iexc we want"
+    error stop 1
+  end if
+  call xc_init([iexc1, iexc2])
+
+
   if (iexc .eq. 4 .or. iexc .eq. 5 .or. iexc .eq. 6 &
   &      .or. iexc .eq. 10) then
     stop 1
@@ -399,6 +414,9 @@ program create
     if (.not. read_info) then
       write (12,104) signature
       write (12,*) nspec, ' - Number of species '
+      write (12,*) xc_get_nxc(), ' - Number of XC potentials'
+      write (12,"(2x,1000i8,8x,'- Indices of XC potentials')") (xc_get_iexc(iiexc), iiexc = 1, xc_get_nxc())
+      write (12,"(2x,1000f7.3,8x,'- Weights of XC potentials')") (xc_get_weight(iiexc), iiexc = 1, xc_get_nxc())
 
       do ispec = 1, nspec
         write (12,100)
@@ -442,15 +460,6 @@ program create
 ! Done with setup, now get to work
 ! ======================================================================
 
-    ! TODO: be able to pick whatever iexc we want
-    if (iexc == 3) then
-      call xc_init(iexc1=1, iexc2=9)
-    else if (iexc == 9) then
-      call xc_init(iexc1=106, iexc2=131)
-    else
-      write (stderr, "(a)") "TODO: be able to pick whatever iexc we want"
-      error stop 1
-    end if
     call wf_init()
     call pot_init()
     call pp_init()

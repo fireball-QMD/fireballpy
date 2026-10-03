@@ -1,5 +1,6 @@
 subroutine stationary_charges()
   use, intrinsic :: iso_fortran_env, only: double => real64
+  use xc, only: xc_calc
   use M_system, only: natoms, imass, neigh_j, neighn, numorb_max, Qin, Qout, &
   & rho, nssh_tot, neigh_self,neigh_b, fix_shell_charge, get_l_ofshell, &
   & get_orb_ofshell, get_issh_ofshell, g_h, g_xc, get_iatom_ofshell, ztot, &
@@ -373,8 +374,8 @@ subroutine stationary_charges()
           nR_aa = nR_aa + qk*den_sh(beta,issh,issh,matom,iatom)
           if (katom .eq. iatom) naR_aa = naR_aa + qk*den_sh(beta,issh,issh,matom,iatom)
         end do
-        call cepal (nR_aa, exc_R, muxc_R, dexc_dum, d2exc_dum, dmuxc_dum, d2muxc_dum)
-        call cepal (naR_aa, exc_aR, muxc_aR, dexc_dum, d2exc_dum, dmuxc_dum, d2muxc_dum)
+        call xc_calc(nR_aa, exc_R, muxc_R, dexc_dum, dmuxc_dum, d2exc_dum, d2muxc_dum)
+        call xc_calc(naR_aa, exc_aR, muxc_aR, dexc_dum, dmuxc_dum, d2exc_dum, d2muxc_dum)
         exc_aa_shell(alpha) = exc_aa_shell(alpha) + exc_R - exc_aR
         vxc_aa_shell(alpha) = vxc_aa_shell(alpha) + muxc_R - muxc_aR
         ! Delta_alpha (eq. 119): GSN response surviving at Q=Q^R,
@@ -396,10 +397,10 @@ subroutine stationary_charges()
               nR_bb = nR_bb + qg*den_sh(kalpha,kssh,kssh,kmatom,katom)
               if (get_iatom_ofshell(kalpha) .eq. katom) naR_bb = naR_bb + qg*den_sh(kalpha,kssh,kssh,kmatom,katom)
             end do
-            call cepal (nR_bb, exc_dum, muxc_dum, dexc_b, d2exc_dum, dmuxc_b, d2muxc_dum)
+            call xc_calc(nR_bb, exc_dum, muxc_dum, dexc_b, dmuxc_b, d2exc_dum, d2muxc_dum)
             delta_a = delta_a + Mba*(dexc_b - dmuxc_b)*qk
             if (katom .eq. iatom) then
-              call cepal (naR_bb, exc_dum, muxc_dum, dexc_b, d2exc_dum, dmuxc_b, d2muxc_dum)
+              call xc_calc(naR_bb, exc_dum, muxc_dum, dexc_b, dmuxc_b, d2exc_dum, d2muxc_dum)
               delta_a = delta_a - Mba*(dexc_b - dmuxc_b)*qk
             end if
           end do
@@ -418,8 +419,8 @@ subroutine stationary_charges()
         do alpha = 1, nssh_tot
           iatom = get_iatom_ofshell(alpha)
           issh = get_issh_ofshell(alpha)
-          call cepal (arho_on(issh,issh,iatom), exc_R, muxc_R, dexc_dum, d2exc_dum, dmuxc_dum, d2muxc_dum)
-          call cepal (arhoi_on(issh,issh,iatom), exc_aR, muxc_aR, dexc_dum, d2exc_dum, dmuxc_dum, d2muxc_dum)
+          call xc_calc(arho_on(issh,issh,iatom), exc_R, muxc_R, dexc_dum, dmuxc_dum, d2exc_dum, d2muxc_dum)
+          call xc_calc(arhoi_on(issh,issh,iatom), exc_aR, muxc_aR, dexc_dum, dmuxc_dum, d2exc_dum, d2muxc_dum)
           exc_aa_shell(alpha) = exc_aa_shell(alpha) + exc_R - exc_aR
           vxc_aa_shell(alpha) = vxc_aa_shell(alpha) + muxc_R - muxc_aR
         end do
@@ -432,8 +433,8 @@ subroutine stationary_charges()
           kmatom = neigh_self(katom)
           Ssh = sm_mat(kssh,kssh,kmatom,katom)
           if (abs(Ssh) .lt. xc_overtol) Ssh = sign(xc_overtol, Ssh)
-          call cepal (arho_on(kssh,kssh,katom), exc_dum, muxc_dum, dexc_b, d2exc_dum, dmuxc_b, d2muxc_dum)
-          call cepal (arhoi_on(kssh,kssh,katom), exc_dum, muxc_dum, dexc_b2, d2exc_dum, dmuxc_b2, d2muxc_dum)
+          call xc_calc(arho_on(kssh,kssh,katom), exc_dum, muxc_dum, dexc_b, dmuxc_b, d2exc_dum, d2muxc_dum)
+          call xc_calc(arhoi_on(kssh,kssh,katom), exc_dum, muxc_dum, dexc_b2, dmuxc_b2, d2exc_dum, d2muxc_dum)
           do alpha = 1, nssh_tot
             Mba = den_sh(alpha,kssh,kssh,kmatom,katom)/Ssh
             if (abs(Mba) .lt. 1.0d-14) cycle
@@ -461,8 +462,8 @@ subroutine stationary_charges()
                 end if
                 Ssh = sm_mat(issh,jssh,ineigh,iatom)
                 if (abs(Ssh) .lt. xc_overtol) Ssh = sign(xc_overtol, Ssh)
-                call cepal (abar,  exc_dum, muxc_dum, dexc_dum, d2exc_dum, dmu,  d2mu)
-                call cepal (abarL, exc_dum, muxc_dum, dexc_dum, d2exc_dum, dmuL, d2muL)
+                call xc_calc(abar, exc_dum, muxc_dum, dexc_b, dmu, d2exc_dum, d2mu)
+                call xc_calc(abarL, exc_dum, muxc_dum, dexc_b, dmuL, d2exc_dum, d2muL)
                 do imu = 1, num_orb(in1)
                   if (orb2shell(imu,in1) .ne. issh) cycle
                   do inu = 1, num_orb(in2)

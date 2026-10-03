@@ -1,7 +1,10 @@
 subroutine getforces ()
   use, intrinsic :: iso_fortran_env, only: double => real64
+  use xc, only: xc_init, xc_end
+  use M_fdata, only: iexcs, excws
   use M_system, only: idipole, iqmmm, flrew_qmmm
   implicit none
+  call xc_init(iexcs, weights=excws)
   call get_ewald (1) ! iforce=1
   call assemble_usr (1) ! iforce=1
   call Dassemble_2c ()
@@ -25,4 +28,5 @@ subroutine getforces ()
   end if
   call Dassemble_ca_olsxc_3c ()
   call assemble_F ()
+  call xc_end()
  end subroutine getforces

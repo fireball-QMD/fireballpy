@@ -1,7 +1,7 @@
 subroutine read_1c ()
   use, intrinsic :: iso_fortran_env, only: double => real64
   use M_fdata, only: nspecies, nzx, fdataLocation, onecfname, exc_1c_0, vxc_1c_0, &
-    &  gxc_1c, fxc_1c, nsh_max, nssh 
+    &  gxc_1c, fxc_1c, nsh_max, nssh, Qref
   implicit none
   integer :: iline, in1, issh, itype, jssh, kssh, numsh
   character (len=3) :: auxz
@@ -31,7 +31,7 @@ subroutine read_1c ()
     read (36,*)
     read (36,*)
     read (36,*) numsh
-    read (36,*)
+    read (36,*) (Qref(issh, in1), issh = 1, numsh)
     read (36,*)
     allocate(temp(numsh, numsh))
     do issh = 1, numsh

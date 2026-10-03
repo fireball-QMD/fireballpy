@@ -9,7 +9,8 @@
 
 ! Other contributors, past and present:
 ! Auburn University - Jianjun Dong
-! Arizona State University - Gary B. Adams Arizona State University - Kevin Schmidt
+! Arizona State University - Gary B. Adams
+! Arizona State University - Kevin Schmidt
 ! Arizona State University - John Tomfohr
 ! Brigham Young University - Hao Wang
 ! Lawrence Livermore National Laboratory - Kurt Glaesemann
@@ -213,7 +214,8 @@ contains
     write (io, "(2x,f14.6,44x,'! Cutoff radius')") rcut
     if (interaction == ONECENTER_XC) then
       write (io, "(8x,i8,36x,'! Number of shells')") nsh
-      write (io, "(1000ES16.8)") (wf_atoms(ispec)%get_ref_charge(ish), ish = 1, nsh)
+      write (io, "(1000ES16.8)", advance="no") (wf_atoms(ispec)%get_ref_charge(ish), ish = 1, nsh)
+      write (io, "(a)") " ! Reference charges"
     end if
 
     ! Create the matrix to output in matrix format

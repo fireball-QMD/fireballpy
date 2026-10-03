@@ -255,9 +255,9 @@
 
         ! TODO: be able to pick whatever iexc we want
         if (ioption == 3) then
-          call xc_init(iexc1=1, iexc2=9)
+          call xc_init([1, 9])
         else if (ioption == 9) then
-          call xc_init(iexc1=106, iexc2=131)
+          call xc_init([106, 131])
         else
           write (*, "(a)") "TODO: be able to pick whatever iexc we want"
           error stop 1
