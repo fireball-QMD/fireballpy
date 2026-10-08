@@ -11,7 +11,7 @@
 !  n^a ... average density
 !  n_i ... density on i-site
 ! 
-subroutine build_ca_olsxc_on (in1, iatom, bcxcx, xc)
+subroutine build_ca_olsxc_on (in1, iatom, bcxcx, xcdc)
   use, intrinsic :: iso_fortran_env, only: double => real64
   use xc, only: xc_calc
   use M_system, only: numorb_max, Qin, rho_on, arho_on, rhoi_on, arhoi_on
@@ -20,7 +20,7 @@ subroutine build_ca_olsxc_on (in1, iatom, bcxcx, xc)
   integer, intent (in) :: in1
   integer, intent (in) :: iatom
   real(double), intent (out), dimension (numorb_max, numorb_max) :: bcxcx
-  real(double), intent (out) :: xc
+  real(double), intent (out) :: xcdc
 
   integer imu
   integer ind1
@@ -52,7 +52,7 @@ subroutine build_ca_olsxc_on (in1, iatom, bcxcx, xc)
   real(double), dimension (numorb_max, numorb_max) :: denx
   real(double), dimension (numorb_max, numorb_max) :: deni
 
-  xc = 0.0d0
+  xcdc = 0.0d0
   bcxcx = 0.0d0
   do inu = 1, nssh(in1)
     do imu = 1, nssh(in1)
@@ -106,9 +106,9 @@ subroutine build_ca_olsxc_on (in1, iatom, bcxcx, xc)
     do ind1 = -l1, l1
       imu = n1 + ind1
       ! SNXC part
-      xc = xc + q_mu*(exc - muxc + (dexc - dmuxc)*(denx(imu,imu) - arho(issh,issh)))
+      xcdc = xcdc + q_mu*(exc - muxc + (dexc - dmuxc)*(denx(imu,imu) - arho(issh,issh)))
       ! OLSXC part
-      xc = xc + q_mu*(muxci - exci - (dexci-dmuxci)*(deni(imu,imu)-arhoi(issh,issh)) )
+      xcdc = xcdc + q_mu*(muxci - exci - (dexci-dmuxci)*(deni(imu,imu)-arhoi(issh,issh)) )
     end do
     n1 = n1 + l1
   end do   ! end 'do issh = 1, nssh(in1)'

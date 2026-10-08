@@ -1,4 +1,4 @@
-subroutine build_zw_on_na (in1, iatom, bcxcx, xc)
+subroutine build_zw_on_na (in1, iatom, bcxcx, xcdc)
   use, intrinsic :: iso_fortran_env, only: double => real64
   use xc, only: xc_calc
   use M_system, only: bcxcx, arho_on, arhoi_on, rho_on, rhoi_on, numorb_max
@@ -7,7 +7,7 @@ subroutine build_zw_on_na (in1, iatom, bcxcx, xc)
   integer, intent (in) :: in1
   integer, intent (in) :: iatom
   real, intent (out), dimension (numorb_max, numorb_max) :: bcxcx
-  real, intent (out) :: xc
+  real, intent (out) :: xcdc
   integer imu
   integer ind1
   integer ind2
@@ -35,7 +35,7 @@ subroutine build_zw_on_na (in1, iatom, bcxcx, xc)
   real, dimension (nsh_max,nsh_max) :: arhoi
   real, dimension (numorb_max, numorb_max) :: denx
   real, dimension (numorb_max, numorb_max) :: deni
-  xc = 0.0d0
+  xcdc = 0.0d0
   bcxcx = 0.0d0
   do inu = 1, nssh(in1)
    do imu = 1, nssh(in1)
@@ -65,8 +65,8 @@ subroutine build_zw_on_na (in1, iatom, bcxcx, xc)
    q_mu = Qneutral(issh,in1) / (2*l1 + 1)
    do ind1 = -l1, l1
     imu = n1 + ind1
-    xc = xc + q_mu*(exc - muxc + (dexc - dmuxc)*(denx(imu,imu) - arho(issh,issh)))
-    xc = xc + q_mu*(muxci - exci - dexci*deni(imu,imu) + dexci*arhoi(issh,issh) + dmuxci*deni(imu,imu) - dmuxci*arhoi(issh,issh))
+    xcdc = xcdc + q_mu*(exc - muxc + (dexc - dmuxc)*(denx(imu,imu) - arho(issh,issh)))
+    xcdc = xcdc + q_mu*(muxci - exci - dexci*deni(imu,imu) + dexci*arhoi(issh,issh) + dmuxci*deni(imu,imu) - dmuxci*arhoi(issh,issh))
    end do
    n1 = n1 + l1
   end do 
