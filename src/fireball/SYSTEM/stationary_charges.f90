@@ -462,8 +462,8 @@ subroutine stationary_charges()
                 end if
                 Ssh = sm_mat(issh,jssh,ineigh,iatom)
                 if (abs(Ssh) .lt. xc_overtol) Ssh = sign(xc_overtol, Ssh)
-                call xc_calc(abar, exc_dum, muxc_dum, dexc_b, dmu, d2exc_dum, d2mu)
-                call xc_calc(abarL, exc_dum, muxc_dum, dexc_b, dmuL, d2exc_dum, d2muL)
+                call xc_calc(abar, exc_dum, muxc_dum, dexc_dum, dmu, d2exc_dum, d2mu)
+                call xc_calc(abarL, exc_dum, muxc_dum, dexc_dum, dmuL, d2exc_dum, d2muL)
                 do imu = 1, num_orb(in1)
                   if (orb2shell(imu,in1) .ne. issh) cycle
                   do inu = 1, num_orb(in2)

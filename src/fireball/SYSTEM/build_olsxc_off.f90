@@ -47,8 +47,8 @@ subroutine build_olsxc_off (in1, in2, den1x, denx, sx, ineigh,iatom, bcxcx)
     do jssh = 1, nssh(in2)
       l2 = lssh(jssh,in2)
       n2 = n2 + l2 + 1
-      call xc_calc(dens(issh,issh), exc, muxc, dexc, dmuxc, d2exc, d2muxc)
-      call xc_calc(densij(issh,issh), exc, muxcij, dexc, dmuxcij, d2exc, d2muxc)
+      call xc_calc(dens(issh,jssh), exc, muxc, dexc, dmuxc, d2exc, d2muxc)
+      call xc_calc(densij(issh,jssh), exc, muxcij, dexc, dmuxcij, d2exc, d2muxc)
       do ind1 = -l1, l1
         imu = n1 + ind1
         do ind2 = -l2, l2
