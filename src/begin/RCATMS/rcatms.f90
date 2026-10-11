@@ -253,13 +253,16 @@
          end if
         end if
 
-        ! TODO: be able to pick whatever iexc we want
+        ! fhi98PP iexc -> libXC ids; keep in sync with src/create/create.f90
         if (ioption == 3) then
-          call xc_init([1, 9])
+          call xc_init([1, 9])          ! LDA  Slater X + Perdew-Zunger C
+        else if (ioption == 6) then
+          call xc_init([101, 130])      ! GGA  Perdew-Burke-Ernzerhof
         else if (ioption == 9) then
-          call xc_init([106, 131])
+          call xc_init([106, 131])      ! GGA  Becke 88 X + Lee-Yang-Parr C
         else
-          write (*, "(a)") "TODO: be able to pick whatever iexc we want"
+          write (*, "(a,i0,a)") "iexc = ", ioption, " is not mapped to libXC yet; &
+            &see the table in src/create/create.f90"
           error stop 1
         end if
 

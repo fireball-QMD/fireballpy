@@ -69,6 +69,7 @@ def raise_err(err: Exception):
 
 class ECEnum(IntEnum):
     LDA = 3
+    PBE = 6
     BLYP = 9
 
 

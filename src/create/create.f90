@@ -329,24 +329,26 @@ program create
     &                 fraction, iammaster)
   end do
 
-  ! TODO: be able to pick whatever iexc we want
-  if (iexc == 3) then
-    iexc1=1
-    iexc2=9
-  else if (iexc == 9) then
-    iexc1=106
-    iexc2=131
+  ! fhi98PP iexc (read from the .pp header) -> libXC functional ids.
+  ! The pseudopotential carries the functional it was built with, so this is a
+  ! translation, not a choice.
+  if (iexc == 3) then          ! LDA  Ceperley-Alder / Perdew-Zunger
+    iexc1=1                    !   XC_LDA_X
+    iexc2=9                    !   XC_LDA_C_PZ
+  else if (iexc == 6) then     ! GGA  Perdew-Burke-Ernzerhof
+    iexc1=101                  !   XC_GGA_X_PBE
+    iexc2=130                  !   XC_GGA_C_PBE
+  else if (iexc == 9) then     ! GGA  Becke 88 X + Lee-Yang-Parr C
+    iexc1=106                  !   XC_GGA_X_B88
+    iexc2=131                  !   XC_GGA_C_LYP
   else
-    write (stderr, "(a)") "TODO: be able to pick whatever iexc we want"
+    write (stderr, "(a,i0,a)") "iexc = ", iexc, " is not mapped to libXC yet; &
+      &see the table in src/create/create.f90"
     error stop 1
   end if
   call xc_init([iexc1, iexc2])
 
 
-  if (iexc .eq. 4 .or. iexc .eq. 5 .or. iexc .eq. 6 &
-  &      .or. iexc .eq. 10) then
-    stop 1
-  end if
   if (iexc .ne. 11 .and. (ispin .eq. 1 .or. isnuxc1c .eq. 1 .or. &
   &                                            isnuxc2c .eq. 1)) then
     if (iammaster) then
