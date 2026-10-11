@@ -327,6 +327,16 @@ class Element:
         self.ppfile = f'{symchar}.pp'
         ppfolder = get_data_from_url(PPURL, 'ppfiles', 'Pseudopotential')
         ppfile = os.path.join(ppfolder, self.symbol, str(self.ioption), self.ppfile)
+        if not os.path.isfile(ppfile):
+            have = sorted(d for d in os.listdir(os.path.join(ppfolder, self.symbol))
+                          if os.path.isdir(os.path.join(ppfolder, self.symbol, d))) \
+                if os.path.isdir(os.path.join(ppfolder, self.symbol)) else []
+            names = {'3': 'lda', '6': 'pbe', '9': 'blyp'}
+            raise FileNotFoundError(
+                f"There is no {names.get(str(self.ioption), self.ioption)} pseudopotential "
+                f"for {self.symbol} (looked for {ppfile}). "
+                f"Available for {self.symbol}: {', '.join(names.get(d, d) for d in have) or 'none'}. "
+                f"Either pick one of those with -ec, or generate the missing one.")
 
         # Use normal file if there is no ion
         self.ppionfile = f'{symchar}++.pp'
@@ -396,7 +406,7 @@ def wavefunctions(element: Annotated[str, Parameter(group=args_grp)],
                   radius: Annotated[list[float], Parameter(group=parms_grp, name=['-r', '--radius'])],
                   nelectrons_neutral: Annotated[Optional[list[float]], Parameter(group=parms_grp, name=['-n0', '--nelectrons-neutral'])]=None,
                   valence_pp: Annotated[Optional[float], Parameter(group=parms_grp, name=['-zpp', '--valence-pp'])]=None,
-                  exchange_correlation: Annotated[ECEnum, Parameter(group=args_grp, name=['-ec', '--exchange-correlation'])]=ECEnum.BLYP,
+                  exchange_correlation: Annotated[ECEnum, Parameter(group=args_grp, name=['-ec', '--exchange-correlation'])]=ECEnum.PBE,
                   output: Annotated[pathlib.Path, Parameter(validator=Path(exists=False, file_okay=False, dir_okay=True), group=args_grp,
                                                             name=['-o', '--output'])]=pathlib.Path('cinput'),
                   save: Annotated[str | None, Parameter(group=args_grp, name=['-s', '--save'])]=None,
