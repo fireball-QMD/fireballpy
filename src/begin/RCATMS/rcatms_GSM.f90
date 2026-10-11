@@ -306,7 +306,7 @@
 
 ! Check that int[0,rc] sig(r) dr = z
         difference = abs(dr*sum(sigma) - real(nzval_ion))
-        if (nznuc .ne. 1 .and. difference .gt. tolerance)                    &
+        if (nznuc .ne. 1 .and. difference .gt. tolerance_scf)                &
      &   stop ' Check: Sum of charge density - not equal to nzval_ion '
 
 ! Now find rho dependent potentials, vee and uxc.
