@@ -586,7 +586,7 @@
          difference = abs((enew - eold)/enew)
 
          !write (*,202) iteration, etot, ebs, eee, exc, difference
-         if (difference .le. tolerance) exit
+         if (difference .le. tolerance_scf) exit
          eold = enew
         end do  ! :::::::::::::::: END OF SCF LOOP :::::::::::::::::::::
 ! *****************************************************************************
@@ -595,7 +595,7 @@
          !write (*,300) lam(issh), xocc(issh), eigenvalue(issh)
         end do
 
-        if (difference .gt. tolerance) then
+        if (difference .gt. tolerance_scf) then
          !write (*,*) '  '
          !write (*,*) ' No self consistency after maximum iterations = ',    &
      !&   max_iterations

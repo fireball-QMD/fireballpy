@@ -18,7 +18,13 @@ module constants
   real(kind=dp), parameter, public :: eq2 = 14.399645351950548_dp
   real(kind=dp), parameter, public :: hartree = 27.211386024367243_dp
   real(kind=dp), parameter, public :: ryd = 13.605693012183622_dp
+  ! Numerical floor (divisions by r or rho, Gauss-Legendre cutoff).
   real(kind=dp), parameter, public :: tolerance = 1.0e-8_dp
+  ! Convergence criterion of the ATOMIC scf loop in begin (rcatms*).
+  ! This is a physical convergence threshold, not a numerical floor: at 1.0e-8
+  ! the atomic scf of O with s+p does not converge in max_iterations and begin
+  ! dies with a silent `stop`.
+  real(kind=dp), parameter, public :: tolerance_scf = 1.0e-5_dp
   real(kind=dp), parameter, public :: pi = 3.141592653589793_dp
   real(kind=dp), parameter, public :: twopi = 6.283185307179586_dp
   real(kind=dp), parameter, public :: inv4pi = 0.07957747154594767_dp
