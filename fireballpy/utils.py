@@ -4,6 +4,7 @@ import hashlib
 import json
 import os
 import shutil
+import sys
 import tarfile
 import tempfile
 import time
@@ -58,6 +59,13 @@ def get_fb_home() -> str:
     ) + os.sep
 
 
+def _stdin_is_interactive() -> bool:
+    try:
+        return sys.stdin is not None and sys.stdin.isatty()
+    except (AttributeError, ValueError):
+        return False
+
+
 # Reference: https://github.com/pytorch/pytorch/blob/main/torch/hub.py
 def download_check_tar(url: str, dst: str, filetype: str,
                        dst_have: str = '') -> tuple[str, time.struct_time]:
@@ -91,10 +99,20 @@ def download_check_tar(url: str, dst: str, filetype: str,
                 with open(os.path.join(dst_have, 'meta.json'), 'w') as fp:
                     json.dump(meta, fp)
             return dst_have, time.strptime(meta['TIME'], TIMESTR)
-        # Ask for update
+        # Ask for update. With no terminal to ask (scripts, cron, batch queues)
+        # keep the cached copy, which is what the default answer does, and say
+        # so on stderr. Otherwise input() raises EOFError and the whole run dies.
         global _quiet
+        if not _stdin_is_interactive():
+            print(f'New version of {filetype} found, but there is no terminal to ask. '
+                  f'Keeping the one already downloaded. To update it, run this '
+                  f'interactively or remove {dst_have}.', file=sys.stderr)
+            return dst_have, time.strptime(meta['TIME'], TIMESTR)
         while not _quiet:
-            answer = input(f'New version of {filetype} found. Do you want to update? [y|N|q] ')
+            try:
+                answer = input(f'New version of {filetype} found. Do you want to update? [y|N|q] ')
+            except EOFError:
+                return dst_have, time.strptime(meta['TIME'], TIMESTR)
             if answer.lower() in ['yes', 'y']:
                 break
             if answer.lower() in ['', 'no', 'n']:
