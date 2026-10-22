@@ -7,11 +7,11 @@ from numpy.typing import ArrayLike
 import numpy as np
 
 from fireballpy._errors import raise_fb_error, type_check
-from fireballpy._options import get_icharge, get_idipole, get_imixer
 from fireballpy._correction import Correction
 from fireballpy.fdata import FDataFiles
 from fireballpy.atoms import AtomSystem
 from fireballpy.kpoints import KPoints
+from fireballpy.options import ChargesMethod, DipoleMethod, MixerMethod, FixShellsMethod
 
 from ase import Atoms
 
@@ -23,9 +23,7 @@ from fireballpy._fireball import (set_options,
                                   get_initial_charges,
                                   calc_forces)
 
-_ifix_shells_table = {'none': 0, 'd': 1, 'auto': 2}
-
-DEFAULT_MIXER = {'method': 'johnson',
+DEFAULT_MIXER = {'method': MixerMethod.JOHNSON,
                  'max_iter': 200,
                  'mix_order': 6,
                  'beta': np.float64(0.1),
@@ -62,26 +60,26 @@ class BaseFireball:
         ``'params_tweaks'``. It may be forcefully shut down by providing ``False``.
         For more information, see
         `Simple DFT-D3 documentation <https://dftd3.readthedocs.io>`_.
-    charges_method : str | None, optional
+    charges_method : ChargesMethod | None, optional
         How the autoconsistency in the charges will be performed.
         By default depends on the FData (``None``).
         If a custom FData is selected, then this parameter must be specified.
         For more information see :ref:`here <charges_methods>`.
-    dipole_method : str, optional
-        Whether to use (``dipole='improved'``) or not (``dipole='legacy'``)
-        the improved dipole description.
-        By default ``'improved'`` except for periodic systems as it is not yet implemented and thus it will be ignored.
+    dipole_method : DipoleMethod, optional
+        Whether to use (``dipole=DipoleMethod.IMPROVED``) or not
+        (``dipole=DipoleMethod.LEGACY``) the improved dipole description.
+        By default improved except for periodic systems as it is not yet implemented and thus it will be ignored.
     initial_charges : ArrayLike[float], optional
         A (natoms, maxshells) array with the charges of each of the atom shells (0 if no shell for that atom is defined).
     mixer_kws : dict, optional
         Dictionary with the mixer parameters.
         More information :ref:`here <mixer>`.
-    fix_shells : str | ArrayLike[int] | None, optional
+    fix_shells : FixShellsMethod | ArrayLike[int] | None, optional
         Which shells are fixed to their neutral charge when
-        ``charges_method='stationary_charges'`` (ignored by the other methods).
-        Options: ``'auto'`` or ``None`` (default) fixes every shell with zero neutral
-        charge (polarization d shells, excited s'/p' of double basis); ``'d'`` fixes
-        only l=2 shells; ``'none'`` leaves all shells free. Alternatively, a 0/1 mask
+        ``charges_method=ChargesMethod.STATIONARY_CHARGES`` (ignored by the other methods).
+        Options: ``FixShellsMethod.AUTO`` or ``None`` (default) fixes every shell with zero neutral
+        charge (polarization d shells, excited s'/p' of double basis); ``FixShellsMethod.ONLYD`` fixes
+        only l=2 shells; ``FixShellsMethod.NONE`` leaves all shells free. Alternatively, a 0/1 mask
         with one entry per shell in global shell order (shells of atom 1, then atom 2,
         ...; same convention as ``get_shell_ofatom_issh``), where 1 fixes the shell.
 
@@ -113,11 +111,11 @@ class BaseFireball:
                  verbose: bool = False,
                  total_charge: int = 0,
                  correction: dict | None = None,
-                 charges_method: str | None = None,
-                 dipole_method: str = 'improved',
+                 charges_method: ChargesMethod | None = None,
+                 dipole_method: DipoleMethod = DipoleMethod.improved,
                  initial_charges: ArrayLike | None = None,
                  mixer_kws: dict | None = None,
-                 fix_shells: str | ArrayLike | None = None) -> None:
+                 fix_shells: FixShellsMethod | ArrayLike | None = None) -> None:
 
         # Init variables
         self.scf_computed = False
@@ -129,7 +127,6 @@ class BaseFireball:
         type_check(kpoints, KPoints, 'kpoints')
         type_check(verbose, bool, 'verbose')
         type_check(total_charge, int, 'total_charge')
-        type_check(dipole_method, str, 'dipole_method')
 
         # Save everything to self
         self.fdatafiles = fdatafiles
@@ -137,19 +134,17 @@ class BaseFireball:
         self.kpoints = kpoints
         self.verbose = verbose
         self.total_charge = total_charge
-        self.charges_method = charges_method
-        self.dipole_method = 'legacy' if self.atomsystem.isperiodic else dipole_method
+        self.dipole_method = DipoleMethod.LEGACY if self.atomsystem.isperiodic else dipole_method
 
         # Convenient aliases
         self.natoms = self.atomsystem.n
         self.nkpts = self.kpoints.n
 
         # Get charges method
-        if self.charges_method is None:
+        if charges_method is None:
             self.charges_method = self.fdatafiles.get_charges_method()
         else:
-            type_check(self.charges_method, str, 'charges_method')
-            self.charges_method = self.charges_method.lower()
+            self.charges_method = charges_method
 
         # Address correction
         self.correction = None
@@ -186,12 +181,12 @@ class BaseFireball:
         self.atomsystem.set_cell()
 
         # Set Fireball-like options
-        set_options(dipole_method=get_idipole(self.dipole_method),
-                    charges_method=get_icharge(self.charges_method),
+        set_options(dipole_method=self.dipole_method.value,
+                    charges_method=self.charges_method.value,
                     ismolecule=int(not self.atomsystem.isperiodic),
                     isgamma=int(self.kpoints.isgamma),
                     total_charge=-self.total_charge,
-                    mixer_method=get_imixer(self.mixer_kws['method']),
+                    mixer_method=self.mixer_kws['method'].value,
                     max_iter=int(self.mixer_kws['max_iter']),
                     mix_order=int(self.mixer_kws['mix_order']),
                     beta=np.float64(self.mixer_kws['beta']),
@@ -204,14 +199,10 @@ class BaseFireball:
 
         # Address fixed shells for stationary_charges (module state persists between
         # calculators in the same process, hence always set it)
-        self.fix_shells = 'auto' if fix_shells is None else fix_shells
+        self.fix_shells = FixShellsMethod.AUTO if fix_shells is None else fix_shells
         nssh_tot = sum([self.fdatafiles.nshells[z] for z in self.atomsystem.numbers])
-        if isinstance(self.fix_shells, str):
-            if self.fix_shells.lower() not in _ifix_shells_table:
-                raise ValueError("Parameter 'fix_shells' as string must be one of "
-                                 f"{', '.join(_ifix_shells_table)}. Got {self.fix_shells}")
-            self.fix_shells = self.fix_shells.lower()
-            set_fix_shells(_ifix_shells_table[self.fix_shells], np.zeros(1, dtype=np.int32))
+        if isinstance(self.fix_shells, FixShellsMethod):
+            set_fix_shells(self.fix_shells.value, np.zeros(1, dtype=np.int32))
         else:
             self.fix_shells = np.ascontiguousarray(self.fix_shells, dtype=np.int32)
             if self.fix_shells.shape != (nssh_tot,):

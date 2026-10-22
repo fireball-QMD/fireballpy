@@ -1,3 +1,4 @@
+
 ! Set int options
 subroutine set_options(dipole_method, charges_method, &
 & ismolecule, isgamma, total_charge, mixer_method, &
@@ -64,18 +65,18 @@ subroutine set_coords(naux, z, xyz)
 end subroutine set_coords
 
 ! Provide input charges
-subroutine set_initial_charges(natoms, nsh_max, qinput)
+subroutine set_initial_charges(natoms, nsh, qinput)
   use iso_c_binding
   use M_system, only : Qin
   implicit none
-  integer, intent(in) :: nsh_max, natoms
-  real(c_double), dimension(nsh_max, natoms), intent(in) :: qinput
+  integer, intent(in) :: nsh, natoms
+  real(c_double), dimension(nsh, natoms), intent(in) :: qinput
   Qin = qinput
 end subroutine set_initial_charges
 
-! Seleccion de shells fijadas a carga neutra en stationary_charges.
-! mode: 0 = ninguna, 1 = solo shells d, 2 = shells con Qneutral=0 (default),
-! 3 = mascara de usuario (mask, 0/1 por shell global: atomo1-shells, atomo2-shells, ...)
+! Selection of shells to be fixed to neutral charge in stationary_charges.
+! mode: 0 = none, 1 = only d's, 2 = shells with Qneutral=0 (default),
+!       3 = user mask (mask 0/1 per global shell: atom1-shells, atom2-shells, ...)
 subroutine set_fix_shells(mode, nsh, mask)
   use iso_c_binding
   use M_system, only : ifix_shells, fix_shell_user
@@ -89,7 +90,6 @@ subroutine set_fix_shells(mode, nsh, mask)
     fix_shell_user = mask
   end if
 end subroutine set_fix_shells
-
 
 ! Faster set coordinates for simulations
 subroutine update_coords(natoms, xyz)
@@ -153,13 +153,31 @@ subroutine update_qmmm(n, pos)
 end subroutine update_qmmm
 
 ! Load FData in the module
-subroutine loadfdata_from_path(fdata_path)
+subroutine load_fdata(nxc, nsp, nmax, fdata_path, xc_names, xc_weights, nums, nshells, nshellsPP)
   use iso_c_binding
-  use M_fdata, only: fdataLocation
+  use constants, only: FNAME_LEN
+  use M_fdata, only: nspecies, nsh_max, fdataLocation, exc_names, exc_weights, nzx, nssh, nsshPP
   implicit none
-  character(len=400), intent(in) :: fdata_path
-  fdatalocation = trim(fdata_path)
-  call load_fdata()
+  integer, intent(in) :: nxc, nsp, nmax
+  character(len=FNAME_LEN), intent(in) :: fdata_path
+  character(len=32), dimension(nxc) :: xc_names
+  real(c_double), dimension(nxc) :: xc_weights
+  integer, dimension(nsp), intent(in) :: nums, nshells, nshellsPP
+  if (allocated(exc_names)) deallocate(exc_names)
+  if (allocated(exc_weights)) deallocate(exc_weights)
+  if (allocated(nzx)) deallocate(nzx)
+  if (allocated(nssh)) deallocate(nssh)
+  if (allocated(nsshPP)) deallocate(nsshPP)
+  allocate(exc_names(nxc), exc_weights(nzx), nums(nsp), nssh(nsp), nsshPP(nsp))
+  nspecies = nsp
+  nsh_max = nmax
+  fdatalocation = fdata_path
+  exc_names = xc_names
+  exc_weights = xc_weights
+  nzx = nums
+  nssh = nshells
+  nsshPP = nshellsPP
+  call fdata_load()
 end subroutine loadfdata_from_path
 
 ! Allocate all needed arrays. Python gc handles deallocate after work
@@ -170,20 +188,20 @@ subroutine call_allocate_system()
 end subroutine call_allocate_system
 
 ! Return initial charges
-subroutine get_initial_charges(natoms, nsh_max, qinitial)
+subroutine get_initial_charges(natoms, nsh, qinitial)
   use iso_c_binding
   use M_fdata, only : Qneutral, nssh
   use M_system, only : imass
   implicit none
-  integer, intent(in) :: nsh_max, natoms
-  real(c_double), dimension(nsh_max, natoms), intent(inout) :: qinitial
+  integer, intent(in) :: nsh, natoms
+  real(c_double), dimension(nsh, natoms), intent(inout) :: qinitial
   integer :: iatom, issh, in1
   do iatom=1,natoms
     in1 = imass(iatom)
     do issh=1,nssh(in1)
       qinitial(issh, iatom) = Qneutral(issh, in1)
     end do
-    do issh=nssh(in1)+1,nsh_max
+    do issh=nssh(in1)+1,nsh
       qinitial(issh, iatom) = 0.0d0
     end do
   end do

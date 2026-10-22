@@ -1,61 +1,13 @@
 subroutine load_fdata()
   use, intrinsic :: iso_fortran_env, only: double => real64
-  use M_constants, only: abohr
-  use M_fdata, only: fdataLocation, infofname, nsh_max, nshPP_max, nspecies, nzx, symbolA, &
-    & etotatom, smass, rc_PP, rcutoff, cl_PP, nssh, lssh, nsshPP, lsshPP, Qneutral, wavefxn, &
-    & napot, ind2c, icon3c, splineint_2c, numz2c, z2cmax, &
-    & isorpmax, isorpmax_xc, ME2c_max, nfofx,initype, Qref, maxtype_2c, iexcs, excws
+  use M_fdata, only: nsh_max, nshPP_max, nspecies, nzx, nssh, lssh, nsshPP, lsshPP, &
+    & ind2c, icon3c, splineint_2c, numz2c, z2cmax, &
+    & isorpmax, isorpmax_xc, ME2c_max, initype, Qref, maxtype_2c
   implicit none
   integer :: in1, in2, in3, ispec, iexc, issh, aux, icount, isorp, interaction, nxc, interactions2c_max
-  real(double), dimension (:,:), allocatable :: rcutoff_temp
-  ! Find nsh_max, nsh_max_PP and nxc
-  nsh_max = 0
-  nshPP_max = 0
-  open (unit = 12, file = trim(fdataLocation) // trim(infofname), status = 'old')
-  read (12,*)
-  read (12,*) nspecies
-  read (12,*) nxc
-  read (12,*)
-  read (12,*)
-  do ispec = 1, nspecies
-    do in1 = 1, 5
-      read (12,*)
-    end do
-    read (12,*) aux
-    if (aux .gt. nsh_max) nsh_max = aux
-    read (12,*)
-    read (12,*) aux
-    if (aux .gt. nshPP_max) nshPP_max = aux
-    do in1 = 1, 8
-      read (12,*)
-    end do
-  end do
-  close(12)
 
-  if (allocated(nzx)) deallocate(nzx)
-  if (allocated(symbolA)) deallocate(symbolA)
-  if (allocated(etotatom)) deallocate(etotatom)
-  if (allocated(smass)) deallocate(smass)
-  if (allocated(rc_PP)) deallocate(rc_PP)
-  if (allocated(rcutoff)) deallocate(rcutoff)
-  if (allocated(cl_PP)) deallocate(cl_PP)
-  if (allocated(nssh)) deallocate(nssh)
-  if (allocated(lssh)) deallocate(lssh)
-  if (allocated(nsshPP)) deallocate(nsshPP)
-  if (allocated(lsshPP)) deallocate(lsshPP)
-  if (allocated(Qneutral)) deallocate(Qneutral)
-  if (allocated(Qref)) deallocate(Qref)
-  if (allocated(wavefxn)) deallocate(wavefxn)
-  if (allocated(napot)) deallocate(napot)
-  if (allocated(iexcs)) deallocate(iexcs)
-  if (allocated(excws)) deallocate(excws)
-  allocate (nzx (nspecies))
-  allocate (symbolA (nspecies))
-  allocate (etotatom (nspecies))
-  allocate (smass (nspecies))
   allocate (rc_PP (nspecies))
   allocate (rcutoff (nspecies, nsh_max))
-  allocate (rcutoff_temp (nsh_max, nspecies))
   allocate (cl_PP (nsh_max, nspecies))
   allocate (nssh (nspecies))
   allocate (lssh (nsh_max, nspecies))
@@ -63,27 +15,12 @@ subroutine load_fdata()
   allocate (lsshPP (nsh_max, nspecies))
   allocate (Qneutral (nsh_max, nspecies))
   allocate (Qref (nsh_max, nspecies))
-  allocate (wavefxn (nsh_max, nspecies))
-  allocate (napot (0:nsh_max, nspecies))
-  allocate (iexcs (nxc))
-  allocate (excws (nxc))
-  Qneutral = 0.0d0
-  Qref = 0.0d0
-  rcutoff = 0.0d0
 
-  ! Load info.dat
-  open (unit = 12, file = trim(fdataLocation) // trim(infofname), status = 'old')
-  read (12,*)
-  read (12,*)
-  read (12,*)
-  read (12,*) (iexcs(iexc), iexc = 1, nxc)
-  read (12,*) (excws(iexc), iexc = 1, nxc)
   do ispec = 1, nspecies
     read (12,*)
     read (12,*)
     read (12,'(2x, a2)') symbolA(ispec)
     read (12,*) nzx(ispec)
-    read (12,*) smass(ispec)
     read (12,*) nssh(ispec)
     read (12,*) (lssh(issh,ispec), issh = 1, nssh(ispec))
     read (12,*) nsshPP(ispec)
@@ -94,10 +31,6 @@ subroutine load_fdata()
     do issh=1,nssh(ispec)
       rcutoff(ispec,issh) = rcutoff_temp(issh,ispec)*abohr
     end do
-    read (12,'(9(2x,a25))') (wavefxn(issh,ispec), issh = 1, nssh(ispec))
-    read (12,'(9(2x,a25))') (napot(issh,ispec), issh = 0, nssh(ispec))
-    read (12,*) etotatom(ispec)
-    read (12,*)
   end do
   close(12)
 
@@ -106,11 +39,11 @@ subroutine load_fdata()
   isorpmax_xc = nsh_max
 
   ! Allocate arrays
-  call make_munu ()
-  call make_munuPP ()
-  call make_munuS ()
-  call make_munuDipY ()
-  call make_munuDipX ()
+  call make_munu()
+  call make_munuPP()
+  call make_munuS()
+  call make_munuDipY()
+  call make_munuDipX()
 
   ! Load one centre
   call read_1c ()
@@ -122,9 +55,9 @@ subroutine load_fdata()
   if (allocated(numz2c)) deallocate(numz2c)
   if (allocated(z2cmax)) deallocate(z2cmax)
   if (allocated(splineint_2c)) deallocate(splineint_2c)
-  allocate (numz2c (interactions2c_max, nspecies, nspecies))
-  allocate (z2cmax (interactions2c_max, nspecies, nspecies))
-  allocate (splineint_2c (ME2c_max, interactions2c_max, nspecies, nspecies))
+  allocate (numz2c(interactions2c_max, nspecies, nspecies))
+  allocate (z2cmax(interactions2c_max, nspecies, nspecies))
+  allocate (splineint_2c(ME2c_max, interactions2c_max, nspecies, nspecies))
   numz2c = 0
   z2cmax = 0.0d0
 
@@ -133,7 +66,7 @@ subroutine load_fdata()
       icount = icount + 1
       ind2c(interaction, isorp) = icount
     end do
-    call read_2c (interaction)
+    call read_2c(interaction)
   end do
 
   ! Prepare and load three centre
@@ -148,8 +81,7 @@ subroutine load_fdata()
   end do
   do interaction = 1, 4
     if (interaction .eq. 2) cycle
-    call read_3c (interaction)
+    call read_3c(interaction)
   end do
-  call setterp_2d ()
-  deallocate(rcutoff_temp)
+  call setterp_2d()
 end subroutine load_fdata

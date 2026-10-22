@@ -10,6 +10,7 @@ from fireballpy.atoms import AtomSystem
 from fireballpy.fdata import FDataFiles
 from fireballpy.kpoints import KPoints
 from fireballpy.fireball import BaseFireball
+from fireballpy.options import DipoleMethod
 
 from fireballpy._fireball import set_qmmm, update_qmmm, get_qmmm_forces
 
@@ -61,16 +62,14 @@ class Fireball(Calculator, BaseFireball):
         |                     |                      | included (``True``), forcefully excluded (``False``) or                  |
         |                     |                      | don't care whether it is included or not (``None``, default)             |
         +---------------------+----------------------+--------------------------------------------------------------------------+
-        | ``charges_method``  | ``str`` or ``None``  | How the autoconsistency in the charges will be performed.                |
-        |                     |                      | By default depends on the FData (``None``).                              |
+        | ``charges_method``  | ``ChargesMethod``    | How the autoconsistency in the charges will be performed.                |
+        |                     | or ``None``          | By default depends on the FData (``None``).                              |
         |                     |                      | If a custom FData is selected, then this parameter must be specified.    |
         |                     |                      | For more options see :ref:`here <charges_methods>`.                      |
         +---------------------+----------------------+--------------------------------------------------------------------------+
-        | ``dipole_method``   | ``str``              | Whether to use the improved dipole description (``'improved'``, default) |
-        |                     |                      | or not (``'legacy'``). In periodic systems this is ignored as only       |
+        | ``dipole_method``   | ``DipoleMethod``     | Whether to use the improved dipole description (``IMPROVED``, default)   |
+        |                     |                      | or not (``LEGACY``). In periodic systems this is ignored as only         |
         |                     |                      | the legacy description is implemented.                                   |
-        +---------------------+----------------------+--------------------------------------------------------------------------+
-        | ``fdata_path``      | ``str``              | Path to a custom FData. Ignored unless ``fdata = 'custom'``.             |
         +---------------------+----------------------+--------------------------------------------------------------------------+
         | ``total_charge``    | ``int``              | Total charge of the system in elementary charge units                    |
         |                     |                      | (1 extra electron will be ``total_charge = -1``). Default is 0.          |
@@ -94,9 +93,9 @@ class Fireball(Calculator, BaseFireball):
         | ``mixer_kws``       | ``dict``             | Dictionary with the charges mixer options. For reference                 |
         |                     |                      | see :ref:`here <mixer>`.                                                 |
         +---------------------+----------------------+--------------------------------------------------------------------------+
-        | ``fix_shells``      | ``str``,             | Shells fixed to their neutral charge by                                  |
-        |                     | ``ArrayLike[int]``   | ``charges_method='stationary_charges'``. ``'auto'``/``None`` (default):  |
-        |                     | or ``None``          | shells with zero neutral charge; ``'d'``: only l=2 shells; ``'none'``:   |
+        | ``fix_shells``      | ``FixShellsMethod``, | Shells fixed to their neutral charge by                                  |
+        |                     | ``ArrayLike[int]``   | ``charges_method=STATIONARY_CHARGES``. ``AUTO``/``None`` (default):      |
+        |                     | or ``None``          | shells with zero neutral charge; ``ONLYD'``: only l=2 shells; ``NONE``:  |
         |                     |                      | all free; or a 0/1 mask per shell in global shell order                  |
         |                     |                      | (shells of atom 1, then atom 2, ...).                                    |
         +---------------------+----------------------+--------------------------------------------------------------------------+
@@ -137,7 +136,7 @@ class Fireball(Calculator, BaseFireball):
 
     """
     _valid_kwargs = {'fdata_path': None, 'gamma': None, 'charges_method': None,
-                     'dipole_method': 'improved', 'total_charge': 0, 'fix_charges': False,
+                     'dipole_method': DipoleMethod.IMPROVED, 'total_charge': 0, 'fix_charges': False,
                      'correction': None, 'initial_charges': None, 'mixer_kws': None,
                      'fix_shells': None}
 
