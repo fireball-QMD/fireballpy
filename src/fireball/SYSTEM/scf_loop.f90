@@ -1,41 +1,34 @@
 subroutine scf_loop (verbose)
   use, intrinsic :: iso_fortran_env, only: double => real64, stdout => output_unit
   use xc, only: xc_init, xc_end
-  use M_fdata, only: iexcs, excws
+  use M_fdata, only: exc_names, exc_weights
   use M_system, only: max_scf_iterations, scf_achieved, Kscf, etot, sigma, iqout, &
-  & ebs, eqmmm, uiiuee, uxcdcc_ols, etotxc_1c, sigmatol, iforce, errno, Kbest, sigmabest, isgeneig
+    & ebs, eqmmm, uiiuee, uxcdcc_ols, etotxc_1c, sigmatol, iforce, errno, Kbest, sigmabest, isgeneig
   implicit none
   logical, intent(in) :: verbose
   Kscf = 1
   scf_achieved = .false.
   isgeneig = .true.
   if ((iqout .eq. 1) .or. (iqout .eq. 3)) isgeneig = .false.
-  call xc_init(iexcs, weights=excws)
+  call xc_init(exc_names, exc_weights)
   do Kscf=1,max_scf_iterations+1
-    call assemble_drive ()
+    call assemble_drive()
     if (errno .ne. 0) return
-    call diag_k ()
+    call diag_k()
     if (errno .ne. 0) return
-    call build_rho ()
+    call build_rho()
     if (errno .ne. 0) return
-    call assemble_usr (0)
-    if (Kscf .le. max_scf_iterations) call mixer ()
+    call assemble_usr(0)
+    if (Kscf .le. max_scf_iterations) call mixer()
     etot = ebs + uiiuee + uxcdcc_ols + etotxc_1c + eqmmm
-    print *, 'ebs        =', ebs
-    print *, 'uiiuee     =', uiiuee
-    print *, 'uxcdcc_ols =', uxcdcc_ols
-    print *, 'etotxc_1c  =', etotxc_1c
-    print *, 'eqmmm      =', eqmmm
-    if (verbose) print '(" ETOT = ",F15.6,"  Kscf = ",I3)', etot, kscf 
     if (scf_achieved .or. (Kscf .gt. max_scf_iterations)) exit
-    if (verbose) print '(a13,i4,a8,f12.6,a17,es10.3,a3,es10.3)', '-> Iteration ', Kscf, ': EBS = ', ebs, '; RMSD/nshells = ', sigma, ' > ', sigmatol
-  end do 
-  if (verbose) then
-   if (scf_achieved) then
-     print '(a13,i4,a8,f12.6,a17,es10.3,a3,es10.3)', '-> Iteration ', Kscf, ': EBS = ', ebs, '; RMSD/nshells = ', sigma, ' < ', sigmatol
-   else
-     print '(a15,i4,a8,f12.6,a17,es10.3)', 'Best iteration ', Kbest, ': EBS = ', ebs, '; RSMD/nshells = ', sigmabest
-   end if
+    if (verbose) write (stdout, "('-> i = ',i4,': EBS = ',f12.6,'; av(RMSD) = ',es10.3,' > ',es10.3)") Kscf, ebs, sigma, sigmatol
+  end do
+  if (scf_achieved) then
+    if (verbose) write (stdout, "('-> i = ',i4,': EBS = ',f12.6,'; av(RMSD) = ',es10.3,' < ',es10.3)") Kscf, ebs, sigma, sigmatol
+  else
+    write (stderr, "('[WARNING] did not converge, best iteration will be used')")
+    if (verbose) write (stdout, "('-> i_best = ',i4,': EBS = ',f12.6,'; av(RMSD) = ',es10.3)") Kbest, ebs, sigma
   end if
   call xc_end()
 end subroutine scf_loop

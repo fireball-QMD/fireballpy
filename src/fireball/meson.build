@@ -9,14 +9,12 @@ fdata_srcs = [
   'make_munuDipY.f90',
   'make_munuPP.f90',
   'read_1c.f90',
-  'readheader_2c.f90',
-  'readdata_2c.f90',
   'read_2c.f90',
   'read_3c.f90',
   'readdata_3c.f90',
   'readheader_3c.f90',
   'setterp_2d.f90',
-  'load_fdata.f90',
+  'fdata_load.f90',
 ]
 system_srcs = [
   'kspace_gamma.f90',

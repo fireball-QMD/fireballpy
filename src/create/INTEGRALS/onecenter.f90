@@ -49,7 +49,7 @@ module onecenter
   use, intrinsic :: iso_fortran_env, only: dp => real64, stderr => error_unit, stdout => output_unit
   use :: constants, only: sqinv4pi, path_len, tolerance
   use :: indices, only: indices_onecenter_set
-  use :: utils, only: utils_open
+  use :: utils, only: utils_open, utils_log, UTILS_LOG_INFO
   use :: xc, only: xc_calc, xc_isgga
   use :: wavefunctions, only: wf_atoms, wf_dens
   implicit none
@@ -210,26 +210,22 @@ contains
     nzx = wf_atoms(ispec)%get_nz()
 
     io = utils_open(fname, "w")
-    write (io, "(14x,i2,44x,'! Atomic number')") nzx
-    write (io, "(2x,f14.6,44x,'! Cutoff radius')") rcut
+    write (io, "('# Z = ',i2)") nzx
+    write (io, "('# Rc = ',f14.6)") rcut
     if (interaction == ONECENTER_XC) then
-      write (io, "(8x,i8,36x,'! Number of shells')") nsh
-      write (io, "(1000ES16.8)", advance="no") (wf_atoms(ispec)%get_ref_charge(ish), ish = 1, nsh)
-      write (io, "(a)") " ! Reference charges"
+      write (io, "('# nsh = ',i2)") nsh
+      write (io, "('# qref = ',10ES16.8)") (wf_atoms(ispec)%get_ref_charge(ish), ish = 1, nsh)
     end if
 
     ! Create the matrix to output in matrix format
     call indices_onecenter_set([(wf_atoms(ispec)%get_angular_momentum(ish), ish = 1, nsh)], &
       &                        index_max, s1, s2, l12, names)
-    write (io, "('!')", advance="no")
     if (index_max == 0) then
+      write (io, "('#')")
       close (io)
       return
     end if
-    do index = 1, index_max
-      write (io, "(4x,a)", advance="no") trim(names(index))
-    end do
-    write (io, "(a)") ""
+    write (io, "('# ',1000(4x,a))") (trim(names(index)), index = 1, index_max)
     allocate(matrix(nsh, nsh))
     do ix = 1, nints
       matrix = 0.0_dp
@@ -259,11 +255,9 @@ contains
       call onecenter_get_fname(interaction, ispec, fname)
       inquire (file=fname, exist=exists)
       if (exists) cycle
-      write (stdout, "(2x,a)") "Computing "//trim(fname)//"..."
+      call utils_log(UTILS_LOG_INFO, "  - "//trim(fname))
       call onecenter_calc_interaction(interaction, ispec, answer)
       call onecenter_write_interaction(interaction, ispec, fname, answer)
-      write (stdout, "(a)", advance="no") achar(8)//achar(13)
-      write (stdout, "(2x,a)") "Computing "//trim(fname)//"... Done!"
     end do ! int_id
   end subroutine onecenter_calc
 

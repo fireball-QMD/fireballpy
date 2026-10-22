@@ -1,11 +1,12 @@
 subroutine read_1c ()
   use, intrinsic :: iso_fortran_env, only: double => real64
+  use :: constants, only: FNAME_LEN
+  use :: utils, only: utils_itos, utils_open
   use M_fdata, only: nspecies, nzx, fdataLocation, onecfname, exc_1c_0, vxc_1c_0, &
     &  gxc_1c, fxc_1c, nsh_max, nssh, Qref
   implicit none
-  integer :: iline, in1, issh, itype, jssh, kssh, numsh
-  character (len=3) :: auxz
-  character (len=1000) :: root
+  integer :: iline, io, in1, issh, itype, jssh, kssh, numsh
+  character (len=FNAME_LEN) :: root
   real(double), allocatable :: temp(:,:)
 
   if (allocated(exc_1c_0)) deallocate(exc_1c_0)
@@ -25,41 +26,36 @@ subroutine read_1c ()
   fxc_1c = 0.0d0
 
   do in1 = 1, nspecies
-    write (auxz,'(''.'',i2.2)') nzx(in1)
-    root = trim(fdataLocation) // trim(onecfname(1)) // auxz // '.dat'
-    open (unit = 36, file = root, status = 'old')
-    read (36,*)
-    read (36,*)
-    read (36,*) numsh
-    read (36,*) (Qref(issh, in1), issh = 1, numsh)
-    read (36,*)
+    numsh = nssh(in1)
+    root = trim(fdataLocation)//trim(onecfname(1))//trim(utils_itos(nzx(in1), lpad=2)//".dat"
+    io = utils_open(root, "r", skip=5)
     allocate(temp(numsh, numsh))
     do issh = 1, numsh
-      read (36,*) (vxc_1c_0(jssh,issh,in1),jssh=1,numsh)
+      read (io,*) (vxc_1c_0(jssh,issh,in1),jssh=1,numsh)
     end do
     do kssh= 1, numsh
-      read (36,*)
+      read (io,*)
       do issh = 1, numsh
-        read (36,*) (gxc_1c(jssh,issh,kssh,in1),jssh=1,numsh)
+        read (io,*) (gxc_1c(jssh,issh,kssh,in1),jssh=1,numsh)
       end do
     end do
-    read (36,*)
+    read (io,*)
     do issh = 1, numsh
-      read (36,*) (temp(jssh,issh),jssh=1,numsh)
+      read (io,*) (temp(jssh,issh),jssh=1,numsh)
     end do
     do issh = 1, numsh
       exc_1c_0(issh, in1) = temp(issh,issh)
     end do
     do kssh= 1, numsh
-      read (36,*)
+      read (io,*)
       do issh = 1, numsh
-        read (36,*) (temp(jssh,issh),jssh=1,numsh)
+        read (io,*) (temp(jssh,issh),jssh=1,numsh)
       end do
       do issh = 1, numsh
         fxc_1c(issh,kssh,in1) = temp(issh,issh)
       end do
     end do
     deallocate(temp)
-    close (unit = 36)
+    close (unit = io)
   end do
 end subroutine read_1c

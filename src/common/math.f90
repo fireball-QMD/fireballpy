@@ -43,136 +43,100 @@
 ! Cyra Roldán Piñero
 ! ==============================================================================
 module math
-  use, intrinsic :: iso_fortran_env, only: dp => real64
-  use, intrinsic :: ieee_arithmetic, only: ieee_signaling_nan, ieee_value
-  implicit none
+use, intrinsic :: iso_fortran_env, only: dp => real64
+implicit none
+private
+
+public :: math_lstsq
+public :: math_interp_t, math_interp_new
+
+! Interpolation
+! Defines math_interp_t as a type
+type :: math_interp_t
   private
-
-  public :: math_lstsq
-  public :: math_interp_t, math_interp_new
-
-  type :: math_interp_t
-    private
-    integer :: np
-    real(dp) :: lval, rval
-    real(dp), allocatable :: x(:), y(:), coefs(:, :)
-  contains
-    private
-    procedure :: get_index => math_interp_get_index
-    procedure, public :: get_n => math_interp_get_n
-    procedure, public :: get_x => math_interp_get_x
-    procedure, public :: get_y => math_interp_get_y
-    procedure, public :: get_coef => math_interp_get_coef
-    procedure, public :: f => math_interp_f
-    procedure, public :: rescale => math_interp_rescale
-    procedure, public :: end => math_interp_end
-  end type math_interp_t
-
-  interface
-    module type(math_interp_t) function math_interp_new(x, y, lval, rval)
-      implicit none
-      real(kind=dp), intent(in) :: x(:), y(:)
-      real(kind=dp), intent(in), optional :: lval, rval
-    end function math_interp_new
-
-    module pure integer function math_interp_get_index(this, x)
-      implicit none
-      class(math_interp_t), intent(in) :: this
-      real(kind=dp), intent(in) :: x
-    end function math_interp_get_index
-
-    module pure integer function math_interp_get_n(this)
-      implicit none
-      class(math_interp_t), intent(in) :: this
-    end function math_interp_get_n
-
-    module pure real(kind=dp) function math_interp_get_x(this, i)
-      implicit none
-      class(math_interp_t), intent(in) :: this
-      integer, intent(in) :: i
-    end function math_interp_get_x
-
-    module pure real(kind=dp) function math_interp_get_y(this, i)
-      implicit none
-      class(math_interp_t), intent(in) :: this
-      integer, intent(in) :: i
-    end function math_interp_get_y
-
-    module pure real(kind=dp) function math_interp_get_coef(this, i, j)
-      implicit none
-      class(math_interp_t), intent(in) :: this
-      integer, intent(in) :: i, j
-    end function math_interp_get_coef
-
-    module pure real(kind=dp) function math_interp_f(this, x, order)
-      implicit none
-      class(math_interp_t), intent(in) :: this
-      real(kind=dp), intent(in) :: x
-      integer, intent(in), optional :: order
-    end function math_interp_f
-
-    module subroutine math_interp_rescale(this, s)
-      implicit none
-      class(math_interp_t), intent(inout) :: this
-      real(kind=dp), intent(in) :: s
-    end subroutine math_interp_rescale
-
-    module subroutine math_interp_end(this)
-      implicit none
-      class(math_interp_t), intent(inout) :: this
-    end subroutine math_interp_end
-
-  end interface
-
-  interface math_lstsq
-    procedure :: lstsq1
-    procedure :: lstsq2
-  end interface math_lstsq
-
+  integer :: np
+  real(dp) :: lval, rval
+  real(dp), allocatable :: x(:), y(:), coefs(:, :)
 contains
+  private
+  procedure :: get_index => math_interp_get_index
+  procedure, public :: get_n => math_interp_get_n
+  procedure, public :: get_x => math_interp_get_x
+  procedure, public :: get_y => math_interp_get_y
+  procedure, public :: get_coef => math_interp_get_coef
+  procedure, public :: f => math_interp_f
+  procedure, public :: rescale => math_interp_rescale
+  procedure, public :: end => math_interp_end
+end type math_interp_t
 
-  integer function lstsq1(a, b, is_a_trans)
+interface
+  module type(math_interp_t) function math_interp_new(x, y, lval, rval)
+    implicit none
+    real(kind=dp), intent(in) :: x(:), y(:)
+    real(kind=dp), intent(in), optional :: lval, rval
+  end function math_interp_new
+
+  module pure integer function math_interp_get_index(this, x)
+    implicit none
+    class(math_interp_t), intent(in) :: this
+    real(kind=dp), intent(in) :: x
+  end function math_interp_get_index
+
+  module pure integer function math_interp_get_n(this)
+    implicit none
+    class(math_interp_t), intent(in) :: this
+  end function math_interp_get_n
+
+  module pure real(kind=dp) function math_interp_get_x(this, i)
+    implicit none
+    class(math_interp_t), intent(in) :: this
+    integer, intent(in) :: i
+  end function math_interp_get_x
+
+  module pure real(kind=dp) function math_interp_get_y(this, i)
+    implicit none
+    class(math_interp_t), intent(in) :: this
+    integer, intent(in) :: i
+  end function math_interp_get_y
+
+  module pure real(kind=dp) function math_interp_get_coef(this, i, j)
+    implicit none
+    class(math_interp_t), intent(in) :: this
+    integer, intent(in) :: i, j
+  end function math_interp_get_coef
+
+  module pure real(kind=dp) function math_interp_f(this, x, order)
+    implicit none
+    class(math_interp_t), intent(in) :: this
+    real(kind=dp), intent(in) :: x
+    integer, intent(in), optional :: order
+  end function math_interp_f
+
+  module subroutine math_interp_rescale(this, s)
+    implicit none
+    class(math_interp_t), intent(inout) :: this
+    real(kind=dp), intent(in) :: s
+  end subroutine math_interp_rescale
+
+  module subroutine math_interp_end(this)
+    implicit none
+    class(math_interp_t), intent(inout) :: this
+  end subroutine math_interp_end
+end interface
+
+! Least squares
+interface math_lstsq
+  module integer function dlstsq1(a, b, is_a_trans)
+    implicit none
     real(kind=dp), intent(inout) :: a(:, :), b(:)
     logical, intent(in), optional :: is_a_trans
-    real(kind=dp), allocatable :: newb(:, :)
-    allocate (newb(size(b), 1))
-    newb(:, 1) = b
-    if (present(is_a_trans)) then
-      lstsq1 = lstsq2(a, newb, is_a_trans=is_a_trans)
-    else
-      lstsq1 = lstsq2(a, newb)
-    end if
-    b = newb(:, 1)
-  end function lstsq1
+  end function dlstsq1
 
-  integer function lstsq2(a, b, is_a_trans)
-    real(kind=dp), intent(inout) :: a(:, :), b(:, :)
+  module integer function dlstsq2(a, b, is_a_trans)
+    implicit none
+    real(kind=dp), intent(inout) :: a(:, :), b(:,:)
     logical, intent(in), optional :: is_a_trans
-    integer :: nrows, ncols, nrhs, nobs, lwork
-    character(1) :: ctrans
-    real(kind=dp), allocatable :: work(:)
+  end function dlstsq2
+end interface math_lstsq
 
-    nrows = size(a, 1)
-    ncols = size(a, 2)
-    nobs = size(b, 1)
-    nrhs = size(b, 2)
-    if (.not. present(is_a_trans)) then
-      ctrans = "N"
-    else if (is_a_trans) then
-      ctrans = "T"
-    else
-      ctrans = "N"
-    end if
-    if (((ctrans == "N") .and. (nrows /= nobs)) .or. ((ctrans == "T") .and. (ncols /= nobs))) then
-      lstsq2 = -1
-      return
-    end if
-
-    lwork = min(nrows, ncols) + max(min(nrows, ncols), nrhs)
-    lwork = ibset(0, bit_size(lwork) - leadz(lwork))
-    allocate (work(lwork))
-    call dgels(ctrans, nrows, ncols, nrhs, a, nrows, b, nobs, work, lwork, lstsq2)
-    if (lstsq2 /= 0) return
-    lstsq2 = 0
-  end function lstsq2
 end module math

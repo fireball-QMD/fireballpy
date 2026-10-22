@@ -71,9 +71,12 @@
      &                      nzx1, nzx2, rcutoff1, rcutoff2, nssh, lssh,      &
      &                      index_max, nleft, lleft, mleft, nright, lright,  &
      &                      mright, signature, iammaster)
+        use, intrinsic :: iso_fortran_env, only: dp => real64
         use dimensions
         use quadrature
-        use iso_fortran_env, only: dp => real64
+	use :: constants, only: pi, fname_len
+	use :: utils, only: utils_open, utils_itos
+	use :: indices, only: indices_twocenter_set, INDICES_TWOCENTER, INDICES_NAMES_LEN
         use :: wavefunctions, only: wf_atoms
         implicit none
  
@@ -148,7 +151,6 @@
         real(kind=dp) eV
         real(kind=dp) factor
         real(kind=dp), external :: jl2
-        real(kind=dp) pi
         real(kind=dp) q
         real(kind=dp) qmax
         real(kind=dp) r
@@ -174,24 +176,24 @@
         real(kind=dp) xnormq (2, 0:nsh_max, 5)
  
         character (len = 1) ang
-        character (len = 40) filename
-        character (len = 20) root
+        character (len = fname_len) filename
+	character (len = INDICES_NAMES_LEN), allocatable :: names(:)
+	integer, allocatable :: ls1(:), ls2(:), s1(:), s2(:), l1(:), l2(:), m1(:), m2(:)
  
         logical skip
  
 ! Procedure
 ! ===========================================================================
-! Initialize pi
-        pi = 3.141592653589793238462643D0
  
 ! ang is the Angstrom symbol (A)
         ang = char(197)
  
-! Open necessary file
-        iounit = ((itype2 - 1)*nspec_max + itype1 - 1) + 36
-        root = 'coutput/kinetic'
-        call iofile2c (root, 'dat', nzx1, nzx2, iounit, filename, skip)
+	! Open necessary file
+	filename = "kinetic."//utils_itos(nzx1, lpad=2)//"."//utils_itos(nzx2, lpad=2)//".dat"
+	inquire (file=trim(filename), exists=skip)
+	skip = .not. skip
         if (skip) return
+	iounit = utils_open(filename, "w")
  
         factor = 7.62_dp/2.0_dp
         qmax = sqrt(ecutke/factor)
@@ -457,29 +459,24 @@
 !
 ! W R I T E   T H E   O U T P U T
 ! ***************************************************************************
-! Set up the header strings:
-        write (iounit,500)
-        write (iounit,*) ' Kinetic matrix elements '
-        write (iounit,*) ' created by: '
-        write (iounit,501) signature
-        write (iounit,502) what1
-        write (iounit,502) what2
-        write (iounit,500)
- 
-        dmax = rcutoff1 + rcutoff2
-        write (iounit,503) dmax, nddke, nqke, nrke
-        write (iounit,500)
- 
-        write (iounit,504) nzx1, rcutoff1, atom1
-        write (iounit,504) nzx2, rcutoff2, atom2
- 
-        write (iounit,*) dmax, nddke
-        write (iounit,*) '  '
- 
-        do id = 1, nddke
-         write (iounit,505) (tkinetic(index,id),index = 1, index_max)
-        end do
- 
+! CRP: use new format :)
+      dmax = rcutoff1 + rcutoff2
+      write (iounit, "('# Z1, Z2 = ',i2,', ',i2)") nzx1, nzx2
+      write (iounit, "('# Rc1, Rc2 = ',f14.6,', ',f14.6)") rcutoff1, rcutoff2
+      if (index_max == 0) then
+        write (iounit, "('# z')")
+        close (iounit)
+        return
+      end if
+      ls1 = [(wf_atoms(itype1)%get_angular_momentum(id), id = 1, wf_atoms(itype1)%get_nshells())]
+      ls2 = [(wf_atoms(itype2)%get_angular_momentum(id), id = 1, wf_atoms(itype2)%get_nshells())]
+      call indices_twocenter_set(INDICES_TWOCENTER, ls1, ls2, index_max, s1, s2, l1, l2, m1, m2, names=names)
+      write (iounit, "('# z',1000(4x,a))") (trim(names(index)), index = 1, index_max)
+      do id = 1, nddke
+        write (iounit, "(f14.6,1000ES16.8)") (id - 1)*dr, tkinetic(:, id)
+      end do
+      close (iounit)
+
         write (*,506) filename
  
 ! Format Statements

@@ -108,7 +108,7 @@
 ! FAX 801-581-4353
 ! Office telephone 801-585-1078
 ! ===========================================================================
-        subroutine threecenter (in1, in2, in3, index_max, iexc,         &
+        subroutine threecenter (in1, in2, in3, index_max,               &
      &                          interaction, nzx, nssh, n1, l1, m1, n2, &
      &                          l2, m2, rcutoff1, rcutoff2, rcutoff3,   &
      &                          atom1, atom2, atom3, what1, what2,      &
@@ -126,7 +126,6 @@
         integer, intent (in) :: in1
         integer, intent (in) :: in2
         integer, intent (in) :: in3
-        integer, intent (in) :: iexc         ! type of exchange-correlation
         integer, intent (in) :: index_max    ! maximum number of matrix elements
         integer, intent (in) :: interaction  ! number for the interaction
         integer, intent (in) :: ispmax
@@ -342,7 +341,7 @@
            call threecenter_integral(dbcx, rna, rcutoff1, rcutoff2,     &
      &                               nr, ntheta, nphi, in1, in2, in3,   &
      &                               gmat, index_max, n1, l1, m1, n2,   &
-     &                               l2, m2, iexc, interaction, ispmin, &
+     &                               l2, m2, interaction, ispmin, &
      &                               ispmax, ispherical)
 
 ! ----------------------------------------------------------------------------

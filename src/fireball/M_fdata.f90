@@ -4,32 +4,23 @@ module M_fdata
   implicit none
   public
 
-  !====================================
-  ! THE CODE SHOULD RUN EVENTUALLY WITHOUT THESE VARIABLES
-  integer, parameter :: itheory = 1 !DOGS
-  integer, parameter :: itheory_xc = 2 !McWEDA
-  character(len=11), parameter :: infofname = "info.py.dat"
-  !===================================
   ! info.dat variables
   integer :: nsh_max, nshPP_max, isorpmax, isorpmax_xc, nspecies
-  character (len=1000) fdataLocation
+
   integer, dimension (:), allocatable :: nzx, nssh, nsshPP
-  real(double), dimension (:), allocatable :: etotatom, smass, rc_PP
-  character (len=2), dimension (:), allocatable :: symbolA
+  real(double), dimension (:), allocatable :: rc_PP
   integer, dimension (:,:), allocatable :: lssh, lsshPP
   real(double), dimension (:,:), allocatable :: rcutoff, cl_PP, Qneutral, Qref
-  character (len=25), dimension (:,:), allocatable :: wavefxn, napot
 
-  ! Maximum number of two-center matrix elements: (calculated in make_munu.f90)
+  ! Maximum number of two-center matrix elements
   ! Examples: s ==> 1, sp^3 ==>  6, ss*p^3p*^3 ==> 24, sp^3d^5 ==> 39
   integer :: ME2c_max, ME2cPP_max, ME2cDipY_max, ME2cDipX_max
 
-  ! Maximum number of three-center matrix elements: (calculated in make_munu.f90)
+  ! Maximum number of three-center matrix elements
   ! Examples: s ==> 1, sp^3 ==> 10, ss*p^3p*^3 ==> 40, sp^3d^5 ==> 45
   integer :: ME3c_max
 
-  ! Maximum number of two and three-center matrix elements in spherical density
-  ! approximation (OLSXC) (calculated in make_munuS.f90)
+  ! Maximum number of two and three-center matrix elements in spherical density approximation (OLSXC)
   ! Examples: s ==> 1, sp^3 ==> 4, sp^3d^5 ==> 9
   integer :: MES_max
 
@@ -48,12 +39,8 @@ module M_fdata
   integer, dimension(:, :), allocatable :: index_maxS
   integer, dimension(:, :, :), allocatable :: muS, nuS, mvalueS
 
-  ! new Intra-atomic Dipole: One-center case (for the time being)
-  integer, dimension(:, :), allocatable :: muR, nuR, alphaR, betaR
-  real(double), dimension(:, :), allocatable :: IR
-
-  integer, allocatable :: iexcs(:)
-  real(double), allocatable :: excws(:)
+  character(len=32), allocatable :: exc_names(:)
+  real(double), allocatable :: exc_weights(:)
 
   !TODO idipole, icluster, siempre lee interaccion 10 y 11
 
@@ -62,19 +49,8 @@ module M_fdata
   real(double), dimension (:,:), allocatable :: exc_1c_0
   real(double), dimension (:,:,:), allocatable :: vxc_1c_0, fxc_1c
   real(double), dimension (:,:,:,:), allocatable :: gxc_1c
-!  real(double), dimension (:,:), allocatable :: exc1c_0
-!  real(double), dimension (:,:,:), allocatable :: xcnu1c
-!  real(double), dimension (:,:,:), allocatable :: xcnu1cs, exc1c0, nuxc1c, d2exc1c
-!  real(double), dimension (:,:,:,:), allocatable :: exc1c, dexc1c, dnuxc1c
-!  real(double), dimension (:,:,:,:,:), allocatable :: d2nuxc1c
 
-  ! Two center integrals
-  integer, parameter :: nfofx = 207 ! AQUI
-!  character (len=11), dimension (23), parameter :: twocfname = (/'overlap    ','vna_ontopl ','vna_ontopr ', &
-!    & 'vna_atom   ','vnl        ','(igual orden)xc_ontop   ','xc_atom    ','xc_corr    ','dipole_z   ','dipole_y   ', &
-!    & 'dipole_x   ', &
-!    & 'coulomb    ','kinetic    ','nuxc       ','den_ontopl ','den_ontopr ','den_atom   ','*dnuxc_ol*   ','*dnuxc_or*   ', &
-!    & 'denS_ontopl','denS_ontopr','denS_atom  ','overlapS   '/)
+
   character(len=11), dimension(20), parameter :: twocfname = [ &
                                                  "overlap    ", "vna_ontopl ", "vna_ontopr ", "vna_atom   ", "vnl        ", &
                                                  "vxc_refchs ", "vxc_ontopl ", "vxc_ontopr ", "dipole_z   ", "dipole_y   ", &
@@ -114,8 +90,6 @@ module M_fdata
                         0]                  ! 20
 
   integer, dimension(1:20, 0:8) :: ind2c
-  integer, dimension(:, :, :), allocatable :: numz2c
-  real(double), dimension(:, :, :), allocatable :: z2cmax
   type(math_interp_t), allocatable :: splineint_2c(:,:,:,:)
 
   ! Three-center integrals
@@ -129,35 +103,9 @@ module M_fdata
   integer, dimension(:, :), allocatable :: numx3c_bcna, numy3c_bcna
   real(double), dimension(:, :), allocatable :: hx_bcna, hy_bcna, x3cmax_bcna, y3cmax_bcna
   real(double), dimension(:, :, :, :, :), allocatable :: bcna_01, bcna_02, bcna_03, bcna_04, bcna_05
-  ! XC interactions; 7 implies different derivative types; there are five xc3c arrays - one for each theta
-  !integer, dimension (:,:), allocatable :: numx3c_xc3c, numy3c_xc3c
-  !real(double), dimension (:,:), allocatable :: hx_xc3c, hy_xc3c, x3cmax_xc3c, y3cmax_xc3c
-  !real(double), dimension (:,:,:,:,:), allocatable :: xc3c_01, xc3c_02, xc3c_03, xc3c_04, xc3c_05
-  ! XC interactions; 7 implies different derivative types; there are five den3 arrays -
-  ! - one for each theta, used only for SNXC method
   integer, dimension(:, :), allocatable :: numx3c_den3, numy3c_den3
   real(double), dimension(:, :), allocatable :: hx_den3, hy_den3, x3cmax_den3, y3cmax_den3
   real(double), dimension(:, :, :, :, :), allocatable :: den3_01, den3_02, den3_03, den3_04, den3_05
   real(double), dimension(:, :, :, :, :), allocatable :: den3S_01, den3S_02, den3S_03, den3S_04, den3S_05
-
-contains
-  character(len=200) function append_string(filename, extension)
-    character(len=200), intent(in) :: filename
-    character(len=200), intent(in) :: extension
-    integer :: lenx
-    integer :: leny
-    integer :: len_trim
-    lenx = len_trim(filename)
-    if (lenx == 0) then
-      append_string = " "
-    else
-      leny = len_trim(extension)
-      if (leny == 0) then
-        append_string = filename(1:lenx)
-      else
-        append_string = filename(1:lenx)//extension(1:leny)
-      end if
-    end if
-  end function append_string
 
 end module M_fdata

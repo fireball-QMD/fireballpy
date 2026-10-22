@@ -1,32 +1,32 @@
 subroutine getforces ()
   use, intrinsic :: iso_fortran_env, only: double => real64
   use xc, only: xc_init, xc_end
-  use M_fdata, only: iexcs, excws
+  use M_fdata, only: exc_names, exc_weights
   use M_system, only: idipole, iqmmm, flrew_qmmm
   implicit none
-  call xc_init(iexcs, weights=excws)
-  call get_ewald (1) ! iforce=1
-  call assemble_usr (1) ! iforce=1
-  call Dassemble_2c ()
-  call Dassemble_2c_PP ()
+  call xc_init(exc_names, exc_weights)
+  call get_ewald(1) ! iforce=1
+  call assemble_usr(1) ! iforce=1
+  call Dassemble_2c()
+  call Dassemble_2c_PP()
   call Dassemble_xc_2c()
-  call Dassemble_ca_olsxc_on ()
-  call Dassemble_ca_olsxc_2c ()
-  if (idipole .eq. 0) call Dassemble_ca_2c ()
-  if (idipole .eq. 1) call Dassemble_ca_2c_dip ()
-  call Dassemble_3c ()
-  call Dassemble_3c_PP ()
-  if (idipole .eq. 0) call Dassemble_ca_3c ()
-  if (idipole .eq. 1) call Dassemble_ca_3c_dip ()
-  if (idipole .eq. 0) call Dassemble_lr ()
-  if (idipole .eq. 1) call Dassemble_lr_dip ()
+  call Dassemble_ca_olsxc_on()
+  call Dassemble_ca_olsxc_2c()
+  if (idipole .eq. 0) call Dassemble_ca_2c()
+  if (idipole .eq. 1) call Dassemble_ca_2c_dip()
+  call Dassemble_3c()
+  call Dassemble_3c_PP()
+  if (idipole .eq. 0) call Dassemble_ca_3c()
+  if (idipole .eq. 1) call Dassemble_ca_3c_dip()
+  if (idipole .eq. 0) call Dassemble_lr()
+  if (idipole .eq. 1) call Dassemble_lr_dip()
   if (iqmmm .eq. 1) then
-    if (idipole .eq. 0) call Dassemble_qmmm ()
-    if (idipole .eq. 1) call Dassemble_qmmm_dip ()
+    if (idipole .eq. 0) call Dassemble_qmmm()
+    if (idipole .eq. 1) call Dassemble_qmmm_dip()
   else
     flrew_qmmm = 0.0d0
   end if
-  call Dassemble_ca_olsxc_3c ()
-  call assemble_F ()
+  call Dassemble_ca_olsxc_3c()
+  call assemble_F()
   call xc_end()
  end subroutine getforces

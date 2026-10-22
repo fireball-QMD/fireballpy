@@ -38,7 +38,7 @@
 !     ============================================================
        subroutine threecenter_integral(dbcx,rna,rc1,rc2,nrr,nt,nphi, &
      &                   in1,in2,in3,gmat,index_max,n1,l1,m1,n2,l2,m2, &
-     &                   iexc,interaction,ispmin,ispmax,ispher)
+     &                   interaction,ispmin,ispmax,ispher)
 !     ============================================================
 !
 !     Calculates the matrix elements of the neutral atom for the
@@ -72,7 +72,6 @@
       parameter (numInthpP=25)
 !
       integer in1,in2,in3      ! types of the atoms
-      integer iexc             ! exchange-correlation approximation
       integer nrr,nt,nphi      ! number of integration points
 !
       integer index_max        ! maximal number of matrix elements
@@ -566,11 +565,6 @@
                    vpot=pot_atoms(in3)%get_vnn(iX,r3)
                  END IF
                END IF
-!
-!               IF(interaction .EQ. 2) then
-!                IX1=IX+1
-!                vpot = dvxc3c (iexc, r1, r2, r3, in1, in2, in3, IX1)
-!               END IF
 ! xc3c_SN
                IF(interaction .EQ. 3) then
                   psipsi = wf_atoms(in3)%get_psi(ix,r3)

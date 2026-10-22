@@ -46,7 +46,7 @@
 module twocenter
   use, intrinsic :: iso_fortran_env, only: dp => real64, stderr => error_unit, stdout => output_unit
   use :: constants, only: sqinv4pi, twopi, invsq2, tolerance, fname_len, inv4pi
-  use :: utils, only: utils_open, utils_itos
+  use :: utils, only: utils_open, utils_itos, utils_log, UTILS_LOG_INFO, UTILS_LOG_ERROR
   use :: indices, only: indices_twocenter_set, INDICES_TWOCENTER, INDICES_TWOCENTER_DIPX, &
     &                   INDICES_TWOCENTER_DIPY, INDICES_TWOCENTER_COULOMB, INDICES_TWOCENTER_SPH, &
     &                   INDICES_NAMES_LEN
@@ -253,14 +253,10 @@ contains
       end do
       if (exists) cycle
       do i = 1, size(fnames)
-        write (stdout, "(2x,a)") "Computing "//trim(fnames(i))//"..."
+	call utils_log(UTILS_LOG_INFO, "  - "//trim(fnames(i)))
       end do
       call twocenter_integrate(interaction, ispec, jspec, issph, answer)
       call twocenter_write(interaction, ispec, jspec, issph, fnames, answer)
-      write (stdout, "(a)", advance="no") repeat(achar(8)//achar(13), size(fnames))
-      do i = 1, size(fnames)
-        write (stdout, "(2x,a)") "Computing "//trim(fnames(i))//"... Done!"
-      end do
     end do
   end subroutine twocenter_calc
 
@@ -453,42 +449,36 @@ contains
     character(fname_len), intent(in) :: fnames(:)
     real(dp), intent(in) :: answer(:,:,:)
     integer :: i, iexc, ish, igrid, index, io, index_max
-    real(dp) :: rcut1, rcut2
+    real(dp) :: rcut1, rcut2, zmin, zmax, dz
     character(INDICES_NAMES_LEN), allocatable :: names(:)
 
     call twocenter_get_rcuts(interaction, ispec, jspec, rcut1, rcut2)
     call twocenter_get_names(interaction, ispec, jspec, issph, index_max, names=names)
+    zmin = 0.0_dp
+    zmax = rcut1 + rcut2
+    dz = (zmax - zmin)/real(TWOCENTER_NPOINTS_D - 1, kind=dp)
     do i = 1, size(fnames)
       io = utils_open(fnames(i), "w")
-      write (io, "(14x,i2,2x,i2,40x,'! Atomic numbers')") wf_atoms(ispec)%get_nz(), wf_atoms(jspec)%get_nz()
-      write (io, "(2x,f14.6,2x,f14.6,28x,'! Cutoff radii')") rcut1, rcut2
-      write (io, "(2x,f14.6,2x,f14.6,2x,i8,18x,'! zmin, zmax, nz')") 0.0_dp, rcut1 + rcut2, TWOCENTER_NPOINTS_D
+      write (io, "('# Z1, Z2 = ',i2,', ',i2)") wf_atoms(ispec)%get_nz(), wf_atoms(jspec)%get_nz()
+      write (io, "('# Rc1, Rc2 = ',f14.6,', ',f14.6)") rcut1, rcut2
       if (interaction == TWOCENTER_VPP) then
-        write (io, "(8x,i8,36x,'! npp')") pp_atoms(jspec)%get_nshells()
-        write (io, "(1000ES16.8)") (pp_atoms(jspec)%get_cl(ish), ish = 1, pp_atoms(jspec)%get_nshells())
+        write (io, "('# npp = ',i2)") pp_atoms(jspec)%get_nshells()
+        write (io, "('# cl = ',10ES16.8)") (pp_atoms(jspec)%get_cl(ish), ish = 1, pp_atoms(jspec)%get_nshells())
       end if
       if (interaction == TWOCENTER_VXC) then
-        write (io, "(8x,i8,2x,i8,26x,'! Number of shells')") wf_atoms(ispec)%get_nshells(), wf_atoms(jspec)%get_nshells()
-        write (io, "(1000ES16.8)", advance="no") (wf_atoms(ispec)%get_ref_charge(ish), ish = 1, wf_atoms(ispec)%get_nshells())
-        write (io, "(a)") " ! Reference charges atom 1"
-        write (io, "(1000ES16.8)", advance="no") (wf_atoms(jspec)%get_ref_charge(ish), ish = 1, wf_atoms(jspec)%get_nshells())
-        write (io, "(a)") " ! Reference charges atom 2"
+        write (io, "('# nsh1, nsh2 = ',i2,', ',i2)") wf_atoms(ispec)%get_nshells(), wf_atoms(jspec)%get_nshells()
+        write (io, "('# qref1 = ',10ES16.8)") (wf_atoms(ispec)%get_ref_charge(ish), ish = 1, wf_atoms(ispec)%get_nshells())
+        write (io, "('# qref2 = ',10ES16.8)") (wf_atoms(jspec)%get_ref_charge(ish), ish = 1, wf_atoms(jspec)%get_nshells())
       end if
-      write (io, "('!')", advance="no")
       if (index_max == 0) then
-        write (io, "(a)") ""
+      	write (io, "('# z')")
         close (io)
         return
       end if
-      do index = 1, index_max
-        write (io, "(4x,a)", advance="no") trim(names(index))
+      write (io, "('# z',1000(4x,a))") (trim(names(index)), index = 1, index_max)
+      do igrid = 1, TWOCENTER_NPOINTS_D
+        write (io, "(f14.6,1000ES16.8)") zmin + (igrid - 1)*dz, answer(i, :, igrid)
       end do
-      if (size(answer, 2) /= 0) then
-        write (io, "(a)") ""
-        do igrid = 1, TWOCENTER_NPOINTS_D
-          write (io, "(1000ES16.8)") answer(i, :, igrid)
-        end do
-      end if
       close (io)
     end do
   end subroutine twocenter_write
