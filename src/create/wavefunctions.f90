@@ -48,6 +48,7 @@ module wavefunctions
   use :: constants, only: abohr, inv4pi, tolerance
   use :: math, only: math_interp_t, math_interp_new
   use :: utils, only: utils_open
+  use :: input, only: input_t
   implicit none
   private
 
@@ -86,41 +87,32 @@ module wavefunctions
 
 contains
 
-  subroutine wf_init()
-    integer :: i, j, io, io2, ish, nspec, nshells, nz
-    character(80) :: inname
+  subroutine wf_init(inp)
+    type(input_t), intent(in) :: inp
+    integer :: i, ish, nshells
     character(1000), allocatable :: fpaths(:)
+    real(dp), allocatable :: qrefs(:)
 
-    io = utils_open("create.input", "r")
-    read (io, *) nspec
-    allocate(wf_atoms(nspec))
-    do i = 1, nspec
-      read (io, *) inname
-      io2 = utils_open(inname, "r")
-      read (io2, *)
-      read (io2, *) nz
-      do j = 1, 3
-        read (io2, *)
-      end do
-      read (io2, *) nshells
-      if (allocated(fpaths)) deallocate(fpaths)
-      allocate(fpaths(nshells))
-      do ish = 1, nshells
-        do j = 1, 3
-          read (io2, *)
+    allocate(wf_atoms(size(inp%species)))
+    do i = 1, size(inp%species)
+      associate (sp => inp%species(i))
+        nshells = sp%nshells
+        if (allocated(fpaths)) deallocate(fpaths)
+        if (allocated(qrefs)) deallocate(qrefs)
+        allocate(fpaths(nshells), qrefs(nshells))
+        do ish = 1, nshells
+          fpaths(ish) = sp%shells(ish)%fwf
+          qrefs(ish) = sp%shells(ish)%qref
         end do
-        read (io2, *) fpaths(ish)
-        read (io2, *)
-      end do
-      close (io2)
-      wf_atoms(i) = wf_new_atom(nz, nshells, fpaths)
+        wf_atoms(i) = wf_new_atom(sp%znuc, nshells, fpaths, qrefs)
+      end associate
     end do
-    close (io)
   end subroutine wf_init
 
-  type(wf_atom_t) function wf_new_atom(nz, nshells, fpaths)
+  type(wf_atom_t) function wf_new_atom(nz, nshells, fpaths, qrefs)
     integer, intent(in) :: nz, nshells
     character(1000), intent(in) :: fpaths(:)
+    real(dp), intent(in) :: qrefs(:)
     integer :: i
     real(dp) :: rcut, dr
     type(wf_orbital_t), allocatable :: wfs(:)
@@ -128,15 +120,16 @@ contains
     rcut = 0.0_dp
     dr = 1000000.0_dp
     do i = 1, nshells
-      wfs(i) = wf_new_orbital(fpaths(i))
+      wfs(i) = wf_new_orbital(fpaths(i), qrefs(i))
       rcut = max(rcut, wfs(i)%rcut)
       dr = min(dr, wfs(i)%dr)
     end do
     wf_new_atom = wf_atom_t(nz=nz, nshells=nshells, rcut=rcut, dr=dr, wfs=wfs)
   end function wf_new_atom
 
-  type(wf_orbital_t) function wf_new_orbital(fpath)
+  type(wf_orbital_t) function wf_new_orbital(fpath, qref)
     character(1000), intent(in) :: fpath
+    real(dp), intent(in) :: qref
     integer :: i, j, np, remitems, nlines, l, io
     real(dp) :: dr, rcut, rcut_max, q, norm
     real(dp), allocatable :: r(:), psi(:)
@@ -165,8 +158,9 @@ contains
     fr = math_interp_new(r, psi, rval=0.0_dp)
     norm = wf_norm(fr)
     call fr%rescale(1.0_dp/norm)
-    ! TODO: allow qref to be different
-    wf_new_orbital = wf_orbital_t(l=l, rcut=rcut, rcut_max=rcut_max, q=q, qref=q, dr=dr, math_interp_t=fr)
+    ! qref is the reference ("neutral") charge, and it comes from the input
+    ! file: it is not necessarily the q written in the wavefunction header.
+    wf_new_orbital = wf_orbital_t(l=l, rcut=rcut, rcut_max=rcut_max, q=q, qref=qref, dr=dr, math_interp_t=fr)
   end function wf_new_orbital
 
   pure real(kind=dp) function wf_norm(fr)

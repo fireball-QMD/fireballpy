@@ -49,6 +49,7 @@ module potentials
   use :: constants, only: abohr, tolerance
   use :: math, only: math_interp_t, math_interp_new
   use :: utils, only: utils_open
+  use :: input, only: input_t
   implicit none
   private
 
@@ -78,38 +79,24 @@ module potentials
 
 contains
 
-  subroutine pot_init()
-    integer :: i, j, io, io2, ish, nspec, nshells, nz
-    character(80) :: inname
-    character(1000) :: fpathtemp
+  subroutine pot_init(inp)
+    type(input_t), intent(in) :: inp
+    integer :: i, ish, nshells
     character(1000), allocatable :: fpaths(:)
 
-    io = utils_open("create.input", "r")
-    read (io, *) nspec
-    allocate(pot_atoms(nspec))
-    do i = 1, nspec
-      read (io, *) inname
-      io2 = utils_open(inname, "r")
-      read (io2, *)
-      read (io2, *) nz
-      do j = 1, 2
-        read (io2, *)
-      end do
-      read (io2, *) fpathtemp
-      read (io2, *) nshells
-      if (allocated(fpaths)) deallocate(fpaths)
-      allocate(fpaths(0:nshells))
-      fpaths(0) = fpathtemp
-      do ish = 1, nshells
-        do j = 1, 4
-          read (io2, *)
+    allocate(pot_atoms(size(inp%species)))
+    do i = 1, size(inp%species)
+      associate (sp => inp%species(i))
+        nshells = sp%nshells
+        if (allocated(fpaths)) deallocate(fpaths)
+        allocate(fpaths(0:nshells))
+        fpaths(0) = sp%na0file
+        do ish = 1, nshells
+          fpaths(ish) = sp%shells(ish)%fna
         end do
-        read (io2, *) fpaths(ish)
-      end do
-      close (io2)
-      pot_atoms(i) = pot_new_atom(nz, nshells, fpaths)
+        pot_atoms(i) = pot_new_atom(sp%znuc, nshells, fpaths)
+      end associate
     end do
-    close (io)
   end subroutine pot_init
 
   type(pot_atom_t) function pot_new_atom(nz, nshells, fpaths)

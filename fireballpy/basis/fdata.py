@@ -21,7 +21,8 @@ from rich.text import Text
 from ase.data import atomic_numbers, atomic_names, atomic_masses, chemical_symbols
 
 from fireballpy import __version__ as __fb_version__
-from fireballpy.utils import get_data_from_url, read_wf, read_wf_info, ANGULAR_MOMENTUM, ANGULAR_MOMENTUM_REV
+from fireballpy.utils import (get_data_from_url, read_wf, read_wf_info, ANGULAR_MOMENTUM,
+                              ANGULAR_MOMENTUM_REV, XC_FUNCTIONALS)
 from fireballpy.basis import __file__ as __basis_file__
 from fireballpy.basis._wfs import generate_wavefunctions, generate_vnn
 
@@ -518,7 +519,11 @@ def wavefunctions(element: Annotated[str, Parameter(group=args_grp)],
                            nznuc_in=ele.nznuc,
                            nzval_in=ele.nzval,
                            nzval_ion_in=ele.nzval_ion,
-                           nzval_pp_in=int(ele.nzval_pp),
+                           # float, no int: en wfs.f90 esta declarado
+                           # real(c_double) y los valores utiles son
+                           # fraccionarios (las bases publicadas usan
+                           # 9.20, 10.60, 10.80...). Con int() se truncaba.
+                           nzval_pp_in=float(ele.nzval_pp),
                            ioptim_in=ele.ioptim,
                            atomname_in=ele.atomname,
                            ppfile_in=ele.ppfile,
@@ -621,32 +626,157 @@ def compute_vnn(ele: Element, output: pathlib.Path) -> None:
                  filename_ena_in=ele.filename_ena)
 
 
-def write_lines(ele: Element) -> str:
-    lines = [ele.symbol,
-             ele.nznuc,
-             ele.mass,
-             ele.ppfile,
-             ele.filename_na[0],
-             (1 + int(ele.nexcite in [1, 2]))*len(ele.orbitals)]
-    for o, n0, r, fw, fn in zip(ele.orbitals, ele.xocc0, ele.rcutoff, ele.filename_wf, ele.filename_na[1:]):
-        lines.append(ANGULAR_MOMENTUM[o])
-        lines.append(n0)
-        lines.append(r)
-        lines.append(fw)
-        lines.append(fn)
-    if ele.nexcite in [1, 2]:
-        for o, r, fw, fn in zip(ele.orbitals, ele.rcutoff, ele.filename_ewf, ele.filename_ena):
-            lines.append(ANGULAR_MOMENTUM[o])
-            lines.append('0')
-            lines.append(r)
-            lines.append(fw)
-            lines.append(fn)
-    lines += ['1', '0.5', '0.25 0.25 0.25 0.25 0.25 0.25']
+def read_pp_header(path: str) -> dict[str, Any]:
+    """Shells, angular momenta and cutoff of a fhi98PP pseudopotential.
 
-    with open(f'{ele.symbol}.input', 'w') as fp:
-        fp.write(os.linesep.join(map(lambda x: str(x), lines)))
+    The offsets are the ones ``pp_init`` uses in
+    ``src/create/pseudopotentials.f90``, which is the authority on this
+    format: line 15 is ``iexc``, 16 the number of shells, 17 their L values
+    and 20 the cutoff radius.
+    """
+    with open(path) as fp:
+        lines = fp.read().splitlines()
+    if len(lines) < 21:
+        raise_err(ValueError(f'Pseudopotential "{path}" is too short to be valid.'))
+    nshells = int(lines[15].split()[0])
+    return {'nshells': nshells,
+            'l': [int(x) for x in lines[16].split()[:nshells]],
+            'rcutoff': float(lines[19].split()[0])}
+
+
+def _json_dump(obj: Any, indent: int = 0) -> str:
+    """Like json.dumps(indent=1), but a list of numbers or strings stays on one
+    line. The file is meant to be read by a person as well as by the code."""
+    pad = ' '*indent
+    if isinstance(obj, dict):
+        inner = ',\n'.join(f'{pad}  {json.dumps(k)}: {_json_dump(v, indent + 2)}'
+                            for k, v in obj.items())
+        return '{\n' + inner + '\n' + pad + '}'
+    if isinstance(obj, list):
+        if any(isinstance(x, (dict, list)) for x in obj):
+            inner = ',\n'.join(f'{pad}  {_json_dump(x, indent + 2)}' for x in obj)
+            return '[\n' + inner + '\n' + pad + ']'
+        return '[' + ', '.join(json.dumps(x) for x in obj) + ']'
+    return json.dumps(obj)
+
+
+def write_info_json(els: list[Element], path: str = 'info.json') -> None:
+    """Write what ``fireball`` needs in order to read this FData.
+
+    Written **after** ``create`` has finished successfully, so that its mere
+    presence means the FData is complete: if ``create`` dies halfway there is
+    no ``info.json`` and the folder cannot be mistaken for a usable FData.
+
+    It carries **only what is actually read during a calculation**, as a
+    structure instead of the old fixed layout of 16 lines per species that
+    every reader had to count by hand. Several fields that ``info.dat``
+    carried are left out because nothing in a calculation uses them: the
+    atomic mass (``smass``), the atomic energy (``etotatom``), the lists of
+    wavefunction and neutral potential files (``wavefxn``, ``napot``) and the
+    pseudopotential filenames. The numeric libXC ids are left out too: what
+    will initialise the functionals is ``xc_init(names, weights)``.
+    """
+    iexc = {el.ioption for el in els}.pop()
+    names, weights = XC_FUNCTIONALS[iexc]
+    info: dict[str, Any] = {
+        'version': 1,
+        'generator': f'fireballpy {_version()}',
+        'xc': {'names': names, 'weights': weights},
+        'species': [],
+    }
+    for el in els:
+        pp = read_pp_header(el.ppfile)
+        shells = list(zip(el.orbitals, el.xocc0, el.rcutoff))
+        if el.nexcite in [1, 2]:
+            shells += list(zip(el.orbitals, [0.0]*len(el.orbitals), el.rcutoff))
+        info['species'].append({
+            'symbol': el.symbol,
+            'znuc': el.nznuc,
+            'nshells': len(shells),
+            'l': [ANGULAR_MOMENTUM[o] for o, _, _ in shells],
+            'qneutral': [float(q) for _, q, _ in shells],
+            'rcutoff': [float(r) for _, _, r in shells],
+            'pseudopotential': {'nshells': pp['nshells'], 'l': pp['l'],
+                                'rcutoff': pp['rcutoff']},
+        })
+    with open(path, 'w') as fp:
+        fp.write(_json_dump(info))
         fp.write(os.linesep)
-    return f'{ele.symbol}.input'
+
+
+def _version() -> str:
+    """Version string for the header. 'fdata.py' is also run as a standalone
+    script, where importing the package may not work, so this never raises."""
+    try:
+        import fireballpy
+        return fireballpy.__version__
+    except Exception:
+        return 'unknown'
+
+
+def write_create_input(els: list[Element], path: str = 'create.input') -> None:
+    """Write the single file that ``create`` parses.
+
+    One file, sections plus ``key = value``, so adding a field does not shift
+    everything by one line. It replaces the old pair (an index ``create.input``
+    listing one ``<El>.input`` per species, both positional).
+
+    Only what ``create`` actually consumes is written. Left out on purpose:
+
+    - the atomic mass, which ``create`` declares but never uses;
+    - the cutoff radii and the angular momentum of each shell, which already
+      travel in the header of the ``.wf`` file;
+    - ``ioption``/``dqorb``/``dqint``, which were already ignored on the
+      Fortran side and are recomputed there.
+
+    The occupation each orbital was *generated* with (the ``-n`` of
+    ``wavefunctions``) is not written either: it is a ``begin`` artefact used
+    to compress the basis and means nothing to ``create``. What is written is
+    the reference charge of the shell, ``-n0``, neutral unless asked
+    otherwise.
+    """
+    iexcs = {el.ioption for el in els}
+    if len(iexcs) != 1:
+        raise_err(ValueError('All species must share the same exchange-correlation functional, '
+                             f'got {sorted(iexcs)}.'))
+    iexc = iexcs.pop()
+    if iexc not in XC_FUNCTIONALS:
+        raise_err(ValueError(f'Exchange-correlation "{iexc}" has no libXC mapping yet.'))
+    names, weights = XC_FUNCTIONALS[iexc]
+
+    lines = ['# create.input - written by fireballpy.basis, parsed by create',
+             '[meta]',
+             'version   = 1',
+             f'generator = fireballpy {_version()}',
+             '',
+             '[xc]',
+             f'names   = {" ".join(names)}',
+             f'weights = {" ".join(f"{w:g}" for w in weights)}',
+             '',
+             '[species]',
+             f'count = {len(els)}']
+
+    for i, el in enumerate(els, start=1):
+        shells = [(ANGULAR_MOMENTUM[o], n0, fw, fn)
+                  for o, n0, fw, fn in zip(el.orbitals, el.xocc0, el.filename_wf, el.filename_na[1:])]
+        if el.nexcite in [1, 2]:
+            # Excited shells carry no reference charge; they used to be a
+            # second, unlabelled copy of the shell block.
+            shells += [(ANGULAR_MOMENTUM[o], 0.0, fw, fn)
+                       for o, fw, fn in zip(el.orbitals, el.filename_ewf, el.filename_ena)]
+        lines += ['',
+                  f'[species.{i}]',
+                  f'symbol  = {el.symbol}',
+                  f'znuc    = {el.nznuc}',
+                  f'ppfile  = {el.ppfile}',
+                  f'na0file = {el.filename_na[0]}',
+                  f'nshells = {len(shells)}',
+                  '# shell = l  reference charge  wavefunction file  neutral potential file']
+        lines += [f'shell = {l}  {n0:.6f}  {fw}  {fn}' for l, n0, fw, fn in shells]
+
+    with open(path, 'w') as fp:
+        fp.write(os.linesep.join(lines))
+        fp.write(os.linesep)
 
 @app.command
 def basis(folder: Annotated[pathlib.Path, Parameter(validator=Path(exists=True, file_okay=False,
@@ -702,6 +832,7 @@ def basis(folder: Annotated[pathlib.Path, Parameter(validator=Path(exists=True, 
         el.xocc0 = [meta[el.symbol][o]['nelectrons_neutral'] for o in el.orbitals]
         el.rcutoff = [meta[el.symbol][o]['radius'] for o in el.orbitals]
         el.nexcite = meta[el.symbol]['nexcite']
+        el.ioption = meta[el.symbol]['ioption']
         el.filename_wf = [meta[el.symbol][o]['filename_wf'] for o in el.orbitals]
         el.filename_na = [meta[el.symbol]['filename_na0']] + [meta[el.symbol][o]['filename_na'] for o in el.orbitals]
         if el.nexcite in [1, 2]:
@@ -716,22 +847,17 @@ def basis(folder: Annotated[pathlib.Path, Parameter(validator=Path(exists=True, 
 
     nowfolder = os.getcwd()
     os.chdir(output)
-    with open('create.input', 'w') as fp:
-        fp.write(f'{len(els)}{os.linesep}')
-        for el in els:
-            shutil.copy2(folder/el.ppfile, el.ppfile)
-            shutil.copy2(folder/el.ppionfile, el.ppionfile)
-            for f in el.filename_wf + el.filename_na:
+    for el in els:
+        shutil.copy2(folder/el.ppfile, el.ppfile)
+        shutil.copy2(folder/el.ppionfile, el.ppionfile)
+        for f in el.filename_wf + el.filename_na:
+            if os.path.isfile(folder/f):
+                shutil.copy2(folder/f, f)
+        if el.nexcite in [1, 2]:
+            for f in el.filename_ewf + el.filename_ena:
                 if os.path.isfile(folder/f):
                     shutil.copy2(folder/f, f)
-            if el.nexcite in [1, 2]:
-                for f in el.filename_ewf + el.filename_ena:
-                    if os.path.isfile(folder/f):
-                        shutil.copy2(folder/f, f)
-            fp.write(write_lines(el))
-            fp.write(os.linesep)
-
-    os.makedirs('coutput', exist_ok=False)
+    write_create_input(els)
 
     if njobs == -1:
         njobs = cpu_count()
@@ -753,13 +879,18 @@ def basis(folder: Annotated[pathlib.Path, Parameter(validator=Path(exists=True, 
         shutil.rmtree(output)
         raise e
 
+    # Only now that create has finished without error. Writing it earlier
+    # would leave a half-made folder looking like a usable FData.
+    # It has to happen before the files are moved into 'basis', because the
+    # pseudopotential and the .na0 are read from here.
+    write_info_json(els)
+
     os.makedirs('basis')
     shutil.copy2(folder/'meta.json', os.path.join('basis', 'meta.json'))
     shutil.move('create.input', os.path.join('basis', 'create.input'))
     for el in els:
         shutil.move(el.ppfile, os.path.join('basis', el.ppfile))
         shutil.move(el.ppionfile, os.path.join('basis', el.ppionfile))
-        shutil.move(f'{el.symbol}.input', os.path.join('basis', f'{el.symbol}.input'))
         for f in el.filename_wf + el.filename_na:
             if os.path.isfile(f):
                 shutil.move(f, os.path.join('basis', f))
@@ -768,9 +899,6 @@ def basis(folder: Annotated[pathlib.Path, Parameter(validator=Path(exists=True, 
                 if os.path.isfile(f):
                     shutil.move(f, os.path.join('basis', f))
 
-    for f in filter(lambda x: x.endswith('.dat'), os.listdir('coutput')):
-        shutil.move(os.path.join('coutput', f), f)
-    os.removedirs('coutput')
     os.chdir(nowfolder)
 
 

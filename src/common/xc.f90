@@ -117,8 +117,8 @@ subroutine xc_end()
   deallocate(xc_family, xc_weights, xc_funcs)
 end subroutine xc_end
 
-subroutine _xc_calc(dens, lapl, grad, hess, exc, vxc, dexcrho, dexcsigma, dvxcrho, dvxcsigma, dvxclapl, dvxccross, &
-		   dexcrho2, dvxcrho2)
+subroutine xc_calc_impl(dens, lapl, grad, hess, exc, vxc, dexcrho, dexcsigma, dvxcrho, dvxcsigma, dvxclapl, dvxccross, &
+		   d2excrho2, d2vxcrho2)
   real(dp), intent(in) :: dens, lapl
   real(dp), intent(in) :: grad(:), hess(:, :)
   real(dp), intent(out) :: exc, vxc, dexcrho, dexcsigma, dvxcrho, dvxcsigma, dvxclapl, dvxccross
@@ -128,7 +128,7 @@ subroutine _xc_calc(dens, lapl, grad, hess, exc, vxc, dexcrho, dexcsigma, dvxcrh
   real(dp) :: rho(1), irho(1), sigma(1), laplacian(1), crossed(1), e(1), &
               vrho(1), vsigma(1), v2rho2(1), v2rhosigma(1), v2sigma2(1), &
 	      v3rho3(1), v3rho2sigma(1), v3rhosigma2(1), v3sigma3(1)
-  need2 = present(dexcrho2) .and. present(dvxcrho2)  ! Will only happen in LDA
+  need2 = present(d2excrho2) .and. present(d2vxcrho2)  ! Will only happen in LDA
   exc = 0.0_dp
   vxc = 0.0_dp
   dexcrho = 0.0_dp
@@ -200,7 +200,7 @@ subroutine _xc_calc(dens, lapl, grad, hess, exc, vxc, dexcrho, dexcsigma, dvxcrh
     d2excrho2 = irho(1)*(dvxcrho - 2.0_dp*dexcrho)*abohr3
     d2vxcrho2 = d2vxcrho2*hartree*abohr6
   end if
-end subroutine _xc_calc
+end subroutine xc_calc_impl
 
 subroutine xc_calc_lda(dens, exc, vxc, dexc, dvxc, d2exc, d2vxc)
   real(dp), intent(in) :: dens
@@ -211,14 +211,14 @@ subroutine xc_calc_lda(dens, exc, vxc, dexc, dvxc, d2exc, d2vxc)
   lapl = 0.0_dp
   grad = 0.0_dp
   hess = 0.0_dp
-  call _xc_calc(dens, lapl, grad, hess, exc, vxc, dexc, dexcsigma, dvxc, dvxcsigma, dvxclapl, dvxccross, d2exc, d2vxc)
+  call xc_calc_impl(dens, lapl, grad, hess, exc, vxc, dexc, dexcsigma, dvxc, dvxcsigma, dvxclapl, dvxccross, d2exc, d2vxc)
 end subroutine xc_calc_lda
 
-subroutine xc_calc_gga(dens, lapl, grad, hess, exc, vxc, dexc, dexcsigma, dvxc, dvxcsigma, dvxclapl, dvxccross)
+subroutine xc_calc_gga(dens, lapl, grad, hess, exc, vxc, dexcrho, dexcsigma, dvxcrho, dvxcsigma, dvxclapl, dvxccross)
   real(dp), intent(in) :: dens, lapl
   real(dp), intent(in) :: grad(:), hess(:, :)
   real(dp), intent(out) :: exc, vxc, dexcrho, dexcsigma, dvxcrho, dvxcsigma, dvxclapl, dvxccross
-  call _xc_calc(dens, lapl, grad, hess, exc, vxc, dexcrho, dexcsigma, dvxcrho, dvxcsigma, dvxclapl, dvxccross)
+  call xc_calc_impl(dens, lapl, grad, hess, exc, vxc, dexcrho, dexcsigma, dvxcrho, dvxcsigma, dvxclapl, dvxccross)
 end subroutine xc_calc_gga
 
 end module xc

@@ -29,6 +29,16 @@ SHA256SUMS = 'https://fireball.ftmc.uam.es/fireballpy/sha256sums_fireballpy.txt'
 ANGULAR_MOMENTUM = {'s': 0, 'p': 1, 'd': 2, 'f': 3}
 ANGULAR_MOMENTUM_REV = {v: k for k, v in ANGULAR_MOMENTUM.items()}
 
+# libXC functionals, by the name libXC itself accepts, and their numeric id.
+# fhi98PP's iexc picks a pair of them. Keep in sync with the table in
+# src/begin/RCATMS/rcatms.f90.
+XC_IDS = {'lda_x': 1, 'lda_c_pz': 9,
+          'gga_x_pbe': 101, 'gga_c_pbe': 130,
+          'gga_x_b88': 106, 'gga_c_lyp': 131}
+XC_FUNCTIONALS = {3: (['lda_x', 'lda_c_pz'], [1.0, 1.0]),
+                  6: (['gga_x_pbe', 'gga_c_pbe'], [1.0, 1.0]),
+                  9: (['gga_x_b88', 'gga_c_lyp'], [1.0, 1.0])}
+
 _quiet = False
 
 

@@ -4,7 +4,10 @@ module M_fdata
   implicit none
   public
 
-  ! info.dat variables
+  ! Where the FData tables live. The rest of what used to come out of
+  ! 'info.dat' is now set from Python through 'set_fdata_info'.
+  character(len=400) :: fdataLocation
+
   integer :: nsh_max, nshPP_max, isorpmax, isorpmax_xc, nspecies
 
   integer, dimension (:), allocatable :: nzx, nssh, nsshPP

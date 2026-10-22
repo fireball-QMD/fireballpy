@@ -152,14 +152,93 @@ subroutine update_qmmm(n, pos)
   qmmm_qm_xcrd(1:3, :) = pos
 end subroutine update_qmmm
 
-! Load FData in the module
+! Describe the FData: allocate and set everything 'fireball' needs before the
+! integral tables can be read. It is what 'load_fdata' used to pull out of
+! 'info.dat', now handed over by Python from 'info.json'.
+!
+! Shapes follow M_fdata: anything per shell comes in as (nsh_max, nspecies).
+! 'rcutoff_in' is in bohr, like the file always had it; it is stored in
+! angstrom, which is what the rest of the code expects. 'nshPP_max' is not an
+! argument: it can only be max(nsshPP), so it is worked out here instead of
+! being one more thing that can arrive inconsistent.
+! 'xcnames' is a single string holding one 32 character slot per functional.
+subroutine set_fdata_info(nspecies_in, nsh_max_in, nxc_in, &
+  & znuc, nssh_in, lssh_in, nsshPP_in, lsshPP_in, rcPP_in, &
+  & qneutral_in, rcutoff_in, xcnames, xcweights)
+  use iso_c_binding
+  use M_constants, only: abohr
+  use M_fdata, only: nsh_max, nshPP_max, nspecies, nzx, nssh, lssh, nsshPP, lsshPP, &
+    & rc_PP, rcutoff, cl_PP, Qneutral, Qref, exc_names, exc_weights
+  implicit none
+  integer, intent(in) :: nspecies_in, nsh_max_in, nxc_in
+  integer, dimension(nspecies_in), intent(in) :: znuc, nssh_in, nsshPP_in
+  integer, dimension(nsh_max_in, nspecies_in), intent(in) :: lssh_in, lsshPP_in
+  real(c_double), dimension(nspecies_in), intent(in) :: rcPP_in
+  real(c_double), dimension(nsh_max_in, nspecies_in), intent(in) :: qneutral_in, rcutoff_in
+  character(len=*), intent(in) :: xcnames
+  real(c_double), dimension(nxc_in), intent(in) :: xcweights
+  integer :: ispec, issh, ixc
+
+  nspecies = nspecies_in
+  nsh_max = nsh_max_in
+  nshPP_max = maxval(nsshPP_in)
+
+  if (allocated(nzx)) deallocate(nzx)
+  if (allocated(nssh)) deallocate(nssh)
+  if (allocated(nsshPP)) deallocate(nsshPP)
+  if (allocated(lssh)) deallocate(lssh)
+  if (allocated(lsshPP)) deallocate(lsshPP)
+  if (allocated(rc_PP)) deallocate(rc_PP)
+  if (allocated(rcutoff)) deallocate(rcutoff)
+  if (allocated(cl_PP)) deallocate(cl_PP)
+  if (allocated(Qneutral)) deallocate(Qneutral)
+  if (allocated(Qref)) deallocate(Qref)
+  if (allocated(exc_names)) deallocate(exc_names)
+  if (allocated(exc_weights)) deallocate(exc_weights)
+  allocate (nzx (nspecies))
+  allocate (nssh (nspecies))
+  allocate (nsshPP (nspecies))
+  allocate (lssh (nsh_max, nspecies))
+  allocate (lsshPP (nsh_max, nspecies))
+  allocate (rc_PP (nspecies))
+  allocate (rcutoff (nspecies, nsh_max))
+  allocate (cl_PP (nsh_max, nspecies))
+  allocate (Qneutral (nsh_max, nspecies))
+  allocate (Qref (nsh_max, nspecies))
+  allocate (exc_names (nxc_in))
+  allocate (exc_weights (nxc_in))
+
+  nzx = znuc
+  nssh = nssh_in
+  nsshPP = nsshPP_in
+  lssh = lssh_in
+  lsshPP = lsshPP_in
+  rc_PP = rcPP_in
+  cl_PP = 0.0d0
+  Qneutral = 0.0d0
+  Qref = 0.0d0
+  rcutoff = 0.0d0
+  do ispec = 1, nspecies
+    do issh = 1, nssh(ispec)
+      Qneutral(issh, ispec) = qneutral_in(issh, ispec)
+      rcutoff(ispec, issh) = rcutoff_in(issh, ispec)*abohr
+    end do
+  end do
+
+  do ixc = 1, nxc_in
+    exc_names(ixc) = xcnames(32*(ixc - 1) + 1 : 32*ixc)
+  end do
+  exc_weights = xcweights
+end subroutine set_fdata_info
+
+! Read the integral tables. 'set_fdata_info' must have been called first.
 subroutine loadfdata_from_path(fdata_path)
   use iso_c_binding
   use M_fdata, only: fdataLocation
   implicit none
   character(len=400), intent(in) :: fdata_path
   fdatalocation = trim(fdata_path)
-  call load_fdata()
+  call load_fdata_tables()
 end subroutine loadfdata_from_path
 
 ! Allocate all needed arrays. Python gc handles deallocate after work

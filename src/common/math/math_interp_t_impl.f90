@@ -38,9 +38,9 @@
 ! Cyra Roldán Piñero
 ! ==============================================================================
 submodule (math) math_interp_t_impl
-implicit none
 use, intrinsic :: ieee_arithmetic, only: ieee_signaling_nan, ieee_value
 use utils, only: utils_log, UTILS_LOG_ERROR
+implicit none
 
 contains
 

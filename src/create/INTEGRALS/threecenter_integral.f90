@@ -53,8 +53,6 @@
       implicit none
 !
       include '../parameters.inc'
-      include '../vnonneutral.inc'
-      include '../wavefunctions.inc'
 
 !
 !     ------------------------------------------------------------

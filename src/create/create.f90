@@ -57,11 +57,13 @@
 ! ======================================================================
 program create
 use, intrinsic :: iso_fortran_env, only: dp => real64
-use :: utils, only: utils_log, UTILS_LOG_INFO, UTILS_LOG_ERROR
+use :: constants, only: abohr
+use :: utils, only: utils_log, utils_itos, UTILS_LOG_INFO, UTILS_LOG_ERROR
 use :: xc, only: xc_init, xc_end
-use :: wavefunctions, only: wf_init, wf_end
+use :: input, only: input_t, input_read
+use :: wavefunctions, only: wf_init, wf_end, wf_atoms
 use :: potentials, only: pot_init, pot_end
-use :: pseudopotentials, only: pp_init, pp_end
+use :: pseudopotentials, only: pp_init, pp_end, pp_atoms
 use :: onecenter, only: onecenter_calc, &
   & ONECENTER_XC, &
   & ONECENTER_GOVERLAP1, &
@@ -88,8 +90,6 @@ include 'exchange.inc'
 ! The file "quadrature.inc" specifies all the quadrature and grid
 ! parameters for all of the matrix elements.
 include 'quadrature.inc'
-include 'wavefunctions.inc'
-include 'pseudopotentials.inc'
 ! Argument Declaration and Description
 ! ======================================================================
 
@@ -114,11 +114,14 @@ integer :: index_max2c(nspec_max, nspec_max), index_max2cPP(nspec_max, nspec_max
 	   l2PP(inter_max), m1(inter_max), m1PP(inter_max), m2(inter_max), m2PP(inter_max), &
 	   n1(inter_max), n1PP(inter_max), n2(inter_max), n2PP(inter_max), n1sp(1), l1sp(1), &
 	   m1sp(1), n2sp(1), l2sp(1), m2sp(1), lssh(nspec_max, nsh_max), lsshPP(nspec_max, nsh_max), &
-	   nssh(nspec_max), nsshPP(nspec_max, nzx(nspec_max))
+	   nssh(nspec_max), nsshPP(nspec_max), nzx(nspec_max)
 real(kind=dp) :: ctheta(ntheta_max), ctheta_weights(ntheta_max), etotatom(nspec_max), &
 		 rcutoff(nspec_max, nsh_max), rcutoffa(nspec_max, nsh_max), rcutoffa_max(nspec_max), xmass(nspec_max)
 character(2) atom(nspec_max)
 character(70) what(nspec_max)
+
+! Single input file written by 'fireballpy.basis'
+type(input_t) :: inp
 
 ! MPI
 integer :: my_proc, nproc
@@ -133,12 +136,44 @@ call setup_clm()
 call init_MPI(iammaster, iammpi, my_proc, nproc)
 
 if (iammaster) then
-  call utils_log(UTILS_LOG_INFO, "Running basis creation on "//trim(cnproc)//" nodes")
+  call utils_log(UTILS_LOG_INFO, "Running basis creation on "//utils_itos(nproc)//" nodes")
   signature = ' fireballpy '
 end if ! end master
 
 !  MPI Broadcast signature
 call signature_MPI (signature)
+
+! Read the single input file and assign everything that comes from it. This
+! must happen before mk_index, which already needs nssh and lssh.
+inp = input_read("create.input")
+call xc_init(inp%xc_names, inp%xc_weights)
+nspec = size(inp%species)
+if (nspec .gt. nspec_max) then
+  call utils_log(UTILS_LOG_ERROR, "too many species; raise nspec_max in parameters.inc")
+  error stop 1
+end if
+do ispec = 1, nspec
+  atom(ispec) = inp%species(ispec)%symbol
+  nzx(ispec) = inp%species(ispec)%znuc
+  nssh(ispec) = inp%species(ispec)%nshells
+  nsshxc(ispec) = nssh(ispec)
+  if (nssh(ispec) .gt. nsh_max) then
+    call utils_log(UTILS_LOG_ERROR, "too many shells; raise nsh_max in parameters.inc")
+    error stop 1
+  end if
+  do issh = 1, nssh(ispec)
+    lssh(ispec,issh) = inp%species(ispec)%shells(issh)%l
+    lsshxc(ispec,issh) = lssh(ispec,issh)
+    xnocc(issh,ispec) = inp%species(ispec)%shells(issh)%qref
+  end do
+  ! Same convention as the old readcreate: the changed shell is the last one.
+  iderorb(ispec) = nssh(ispec)
+  dqorb(ispec) = 0.5_dp
+  if (nssh(ispec) .eq. 1) dqorb(ispec) = 0.25_dp
+  do issh = 1, nssh(ispec)
+    dqint(issh,ispec) = dqorb(ispec)/nssh(ispec)
+  end do
+end do
 
 ! **********************************************************************
 do itype1 = 1, nspec
@@ -164,9 +199,26 @@ end do
 ! Done with setup, now get to work
 ! ======================================================================
 if (iammaster) then
-  call wf_init()
-  call pot_init()
-  call pp_init()
+  call wf_init(inp)
+  call pot_init(inp)
+  call pp_init(inp)
+
+  ! The cutoffs live in the wavefunction headers, so they are only known once
+  ! wf_init has run. 'what' is the human-readable tag stamped on every table.
+  do ispec = 1, nspec
+    do issh = 1, nssh(ispec)
+      rcutoffa(ispec,issh) = wf_atoms(ispec)%get_rcut(issh)
+      rcutoff(ispec,issh) = rcutoffa(ispec,issh)/abohr
+    end do
+    rcutoffa_max(ispec) = wf_atoms(ispec)%get_rcut()
+    nsshPP(ispec) = pp_atoms(ispec)%get_nshells()
+    do issh = 1, nsshPP(ispec)
+      lsshPP(ispec,issh) = pp_atoms(ispec)%get_angular_momentum(issh)
+    end do
+    write (what(ispec),400) atom(ispec), nzx(ispec), &
+      (rcutoffa(ispec,issh), issh = 1, nssh(ispec))
+  end do
+400 format (2x, a2, '(',i2,')', ': Rc''s (A) = ', 8f6.3)
 
   call utils_log(UTILS_LOG_INFO, "Computing one center integrals")
   ! TODO: mpi

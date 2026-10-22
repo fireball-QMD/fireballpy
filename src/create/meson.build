@@ -1,4 +1,5 @@
 basic_srcs = [
+  'input.f90',
   'wavefunctions.f90',
   'potentials.f90',
   'pseudopotentials.f90'

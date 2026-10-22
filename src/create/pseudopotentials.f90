@@ -48,7 +48,8 @@ module pseudopotentials
   use, intrinsic :: ieee_arithmetic, only: ieee_signaling_nan, ieee_value
   use :: constants, only: abohr
   use :: math, only: math_interp_t, math_interp_new
-  use :: utils, only: utils_open
+  use :: utils, only: utils_open, utils_log, UTILS_LOG_ERROR
+  use :: input, only: input_t
   implicit none
   private
 
@@ -81,28 +82,20 @@ module pseudopotentials
 
 contains
 
-  subroutine pp_init()
-    integer :: i, j, io, io2, nspec, nz
-    character(80) :: inname
+  subroutine pp_init(inp)
+    type(input_t), intent(in) :: inp
+    integer :: i
     character(1000) :: fpath
 
-    io = utils_open("create.input", "r")
-    read (io, *) nspec
-    allocate(pp_atoms(nspec))
-    do i = 1, nspec
-      read (io, *) inname
-      io2 = utils_open(inname, "r")
-      read (io2, *)
-      read (io2, *) nz
-      read (io2, *)
-      read (io2, *) fpath
-      read (io2, *)
-      read (io2, *)
-      close (io2)
-      pp_atoms(i) = pp_new_atom(nz, fpath)
-      if (pp_atoms(i)%iexc /= pp_atoms(1)%iexc) error stop
+    allocate(pp_atoms(size(inp%species)))
+    do i = 1, size(inp%species)
+      fpath = inp%species(i)%ppfile
+      pp_atoms(i) = pp_new_atom(inp%species(i)%znuc, fpath)
+      if (pp_atoms(i)%iexc /= pp_atoms(1)%iexc) then
+        call utils_log(UTILS_LOG_ERROR, "all species must share the same pseudopotential iexc")
+        error stop 1
+      end if
     end do
-    close (io)
   end subroutine pp_init
 
   type(pp_atom_t) function pp_new_atom(nz, fpath)

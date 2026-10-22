@@ -75,7 +75,7 @@
         use dimensions
         use quadrature
 	use :: constants, only: pi, fname_len
-	use :: utils, only: utils_open, utils_itos
+	use :: utils, only: utils_open, utils_itos, utils_log, UTILS_LOG_ERROR
 	use :: indices, only: indices_twocenter_set, INDICES_TWOCENTER, INDICES_NAMES_LEN
         use :: wavefunctions, only: wf_atoms
         implicit none
@@ -178,7 +178,8 @@
         character (len = 1) ang
         character (len = fname_len) filename
 	character (len = INDICES_NAMES_LEN), allocatable :: names(:)
-	integer, allocatable :: ls1(:), ls2(:), s1(:), s2(:), l1(:), l2(:), m1(:), m2(:)
+	integer, allocatable :: ls1(:), ls2(:), s1(:), s2(:), nl1(:), nl2(:), nm1(:), nm2(:)
+	integer nindex
  
         logical skip
  
@@ -190,8 +191,10 @@
  
 	! Open necessary file
 	filename = "kinetic."//utils_itos(nzx1, lpad=2)//"."//utils_itos(nzx2, lpad=2)//".dat"
-	inquire (file=trim(filename), exists=skip)
-	skip = .not. skip
+	! Con 'exists' (que no existe como especificador) skip quedaba sin
+	! definir; y con la negacion la logica salia al reves: se saltaba el
+	! calculo cuando el fichero NO estaba, asi que no se escribia nunca.
+	inquire (file=trim(filename), exist=skip)
         if (skip) return
 	iounit = utils_open(filename, "w")
  
@@ -470,7 +473,13 @@
       end if
       ls1 = [(wf_atoms(itype1)%get_angular_momentum(id), id = 1, wf_atoms(itype1)%get_nshells())]
       ls2 = [(wf_atoms(itype2)%get_angular_momentum(id), id = 1, wf_atoms(itype2)%get_nshells())]
-      call indices_twocenter_set(INDICES_TWOCENTER, ls1, ls2, index_max, s1, s2, l1, l2, m1, m2, names=names)
+      ! index_max llega como intent(in) desde mk_index; esta llamada solo se
+      ! usa para los nombres de columna, asi que su cuenta va a un local.
+      call indices_twocenter_set(INDICES_TWOCENTER, ls1, ls2, nindex, s1, s2, nl1, nl2, nm1, nm2, names=names)
+      if (nindex /= index_max) then
+        call utils_log(UTILS_LOG_ERROR, "kinetic: mk_index and indices_twocenter_set disagree")
+        error stop 1
+      end if
       write (iounit, "('# z',1000(4x,a))") (trim(names(index)), index = 1, index_max)
       do id = 1, nddke
         write (iounit, "(f14.6,1000ES16.8)") (id - 1)*dr, tkinetic(:, id)

@@ -67,14 +67,14 @@ interface
     implicit none
     integer, intent(in) :: i
     integer, intent(in), optional :: lpad
-    character(:), allocatable, intent(out) :: utils_itos
+    character(:), allocatable :: utils_itos
   end function utils_itos
 end interface
 
 interface
   module subroutine utils_log(level, msg)
   integer, intent(in) :: level
-  character(err_len), intent(in) :: msg
+  character(*), intent(in) :: msg
   end subroutine utils_log
 end interface
 
