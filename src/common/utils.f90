@@ -1,8 +1,5 @@
 ! copyright info:
-!
-!                             @Copyright 2004
-!                           Fireball Committee
-! Brigham Young University - James P. Lewis, Chair
+! @Copyright 2004 Fireball Committee Brigham Young University - James P. Lewis, Chair
 ! Arizona State University - Otto F. Sankey
 ! Universidad de Madrid - Jose Ortega
 ! Universidad de Madrid - Pavel Jelinek

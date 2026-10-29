@@ -1,5 +1,5 @@
 subroutine Dtrescentros (interaction, isorp, in1, in2, indna, x, y, cost, eps, depsA, depsB, rhat, sighat, bcnax, f3naXa, f3naXb, f3naXc)
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use M_system, only: numorb_max
   use M_fdata, only: hx_bcna, hy_bcna, hx_den3, hy_den3, numx3c_bcna, numy3c_bcna, &
     & numx3c_den3, numy3c_den3, x3cmax_bcna, y3cmax_bcna, x3cmax_den3, y3cmax_den3, &
@@ -12,18 +12,18 @@ subroutine Dtrescentros (interaction, isorp, in1, in2, indna, x, y, cost, eps, d
   integer, intent (in) :: indna
   integer, intent (in) :: interaction
   integer, intent (in) :: isorp
-  real(double), intent (in) :: cost
-  real(double), intent (in) :: x
-  real(double), intent (in) :: y
-  real(double), intent (in), dimension (3, 3) :: eps
-  real(double), intent (in), dimension (3, 3, 3) :: depsA
-  real(double), intent (in), dimension (3, 3, 3) :: depsB
-  real(double), intent (in), dimension (3) :: rhat
-  real(double), intent (in), dimension (3) :: sighat
-  real(double), intent (out), dimension (numorb_max, numorb_max) :: bcnax
-  real(double), intent (out), dimension (3, numorb_max, numorb_max) :: f3naXa
-  real(double), intent (out), dimension (3, numorb_max, numorb_max) :: f3naXb
-  real(double), intent (out), dimension (3, numorb_max, numorb_max) :: f3naXc
+  real(dp), intent (in) :: cost
+  real(dp), intent (in) :: x
+  real(dp), intent (in) :: y
+  real(dp), intent (in), dimension (3, 3) :: eps
+  real(dp), intent (in), dimension (3, 3, 3) :: depsA
+  real(dp), intent (in), dimension (3, 3, 3) :: depsB
+  real(dp), intent (in), dimension (3) :: rhat
+  real(dp), intent (in), dimension (3) :: sighat
+  real(dp), intent (out), dimension (numorb_max, numorb_max) :: bcnax
+  real(dp), intent (out), dimension (3, numorb_max, numorb_max) :: f3naXa
+  real(dp), intent (out), dimension (3, numorb_max, numorb_max) :: f3naXb
+  real(dp), intent (out), dimension (3, numorb_max, numorb_max) :: f3naXc
   integer imu
   integer iME
   integer index
@@ -31,30 +31,30 @@ subroutine Dtrescentros (interaction, isorp, in1, in2, indna, x, y, cost, eps, d
   integer ix
   integer kforce
   integer nl
-  real(double) amt
-  real(double) argument
-  real(double) bmt
-  real(double) cost2
-  real(double) dQ_Ldx
-  real(double) dQ_Ldy
-  real(double) Q_L
-  real(double) sint
-  real(double) hx, hy
+  real(dp) amt
+  real(dp) argument
+  real(dp) bmt
+  real(dp) cost2
+  real(dp) dQ_Ldx
+  real(dp) dQ_Ldy
+  real(dp) Q_L
+  real(dp) sint
+  real(dp) hx, hy
   integer nx, ny
-  real(double) xxmax, yymax, xinv
-  real(double), dimension (0:ntheta - 1, ME3c_max) :: bcnalist
-  real(double), dimension (numorb_max, numorb_max) :: bcnam
-  real(double), dimension (0:ntheta - 1) :: dp
-  real(double), dimension (ME3c_max) :: dphlist
-  real(double), dimension (0:ntheta - 1, ME3c_max) :: dxbcnalist
-  real(double), dimension (ME3c_max) :: dxhlist
-  real(double), dimension (0:ntheta - 1, ME3c_max) :: dybcnalist
-  real(double), dimension (ME3c_max) :: dyhlist
-  real(double), dimension (3, numorb_max, numorb_max) :: f3naMa
-  real(double), dimension (3, numorb_max, numorb_max) :: f3naMb
-  real(double), dimension (ME3c_max) :: hlist
-  real(double), dimension (0:ntheta - 1) :: p
-  real(double), dimension (numorb_max, numorb_max) :: temp
+  real(dp) xxmax, yymax, xinv
+  real(dp), dimension (0:ntheta - 1, ME3c_max) :: bcnalist
+  real(dp), dimension (numorb_max, numorb_max) :: bcnam
+  real(dp), dimension (0:ntheta - 1) :: dpp
+  real(dp), dimension (ME3c_max) :: dphlist
+  real(dp), dimension (0:ntheta - 1, ME3c_max) :: dxbcnalist
+  real(dp), dimension (ME3c_max) :: dxhlist
+  real(dp), dimension (0:ntheta - 1, ME3c_max) :: dybcnalist
+  real(dp), dimension (ME3c_max) :: dyhlist
+  real(dp), dimension (3, numorb_max, numorb_max) :: f3naMa
+  real(dp), dimension (3, numorb_max, numorb_max) :: f3naMb
+  real(dp), dimension (ME3c_max) :: hlist
+  real(dp), dimension (0:ntheta - 1) :: p
+  real(dp), dimension (numorb_max, numorb_max) :: temp
   kforce = 1
   index = icon3c(in1,in2,indna)
   if (interaction .eq. 1) then
@@ -146,28 +146,28 @@ subroutine Dtrescentros (interaction, isorp, in1, in2, indna, x, y, cost, eps, d
     dybcnalist(4,iME) = dQ_Ldy
    end do
   end if
-  argument = 1.0d0 - cost**2
-  if (argument .lt. 1.0d-5) argument = 1.0d-5
+  argument = 1.0_dp - cost**2
+  if (argument .lt. 1.0e-5_dp) argument = 1.0e-5_dp
   sint = sqrt(argument) 
-  p(0) = 1.0d0
+  p(0) = 1.0_dp
   p(1) = cost
   cost2 = cost*cost
-  p(2) = (3.0d0*cost2 - 1.0d0)/2.0d0
-  p(3) = (5.0d0*cost2*cost - 3.0d0*cost)/2.0d0
-  p(4) = (35.0d0*cost2*cost2 - 30.0d0*cost2 + 3.0d0)/8.0d0
-  dp(0) = 0.0d0
-  dp(1) = 1.0d0
-  dp(2) = 3.0d0*cost
-  dp(3) = (15.0d0*cost2 - 3.0d0)/2.0d0
-  dp(4) = (35.0d0*cost*cost2 - 15.0d0*cost)/2.0d0
+  p(2) = (3.0_dp*cost2 - 1.0_dp)/2.0_dp
+  p(3) = (5.0_dp*cost2*cost - 3.0_dp*cost)/2.0_dp
+  p(4) = (35.0_dp*cost2*cost2 - 30.0_dp*cost2 + 3.0_dp)/8.0_dp
+  dpp(0) = 0.0_dp
+  dpp(1) = 1.0_dp
+  dpp(2) = 3.0_dp*cost
+  dpp(3) = (15.0_dp*cost2 - 3.0_dp)/2.0_dp
+  dpp(4) = (35.0_dp*cost*cost2 - 15.0_dp*cost)/2.0_dp
   do iME = 1, index_max3c(in1,in2)
-   hlist(iME) = 0.0d0
-   dphlist(iME) = 0.0d0
-   dxhlist(iME) = 0.0d0
-   dyhlist(iME) = 0.0d0
+   hlist(iME) = 0.0_dp
+   dphlist(iME) = 0.0_dp
+   dxhlist(iME) = 0.0_dp
+   dyhlist(iME) = 0.0_dp
    do nl = 0, ntheta - 1
     hlist(iME) = hlist(iME) + p(nl)*bcnalist(nl,iME)
-    dphlist(iME) = dphlist(iME) + dp(nl)*bcnalist(nl,iME)
+    dphlist(iME) = dphlist(iME) + dpp(nl)*bcnalist(nl,iME)
     dxhlist(iME) = dxhlist(iME) + p(nl)*dxbcnalist(nl,iME)
     dyhlist(iME) = dyhlist(iME) + p(nl)*dybcnalist(nl,iME)
    end do
@@ -181,7 +181,7 @@ subroutine Dtrescentros (interaction, isorp, in1, in2, indna, x, y, cost, eps, d
   call recover_3c (in1, in2, hlist, bcnam)
   call rotate_fb (in1, in2,  eps, bcnam, bcnax)
   do ix = 1, 3
-   if (x .gt. 1.0d-03) then
+   if (x .gt. 1.0e-03_dp) then
      xinv = 1/x
    else
      xinv = x/(0.001**2) 
@@ -198,7 +198,7 @@ subroutine Dtrescentros (interaction, isorp, in1, in2, indna, x, y, cost, eps, d
    end do
    bmt = (cost*sighat(ix) - rhat(ix))/y
    do iME = 1, index_max3c(in1,in2)
-     hlist(iME) = - sighat(ix)*dyhlist(iME) + bmt*dphlist(iME) - hlist(iME)/2.0d0
+     hlist(iME) = - sighat(ix)*dyhlist(iME) + bmt*dphlist(iME) - hlist(iME)/2.0_dp
    end do
    call recover_3c (in1, in2, hlist, temp)
    do inu = 1, num_orb(in2)

@@ -139,7 +139,7 @@
         do ipoint = 1, 7
          read (88,*)
         end do
-        read (88,100) charge
+        read (88,"(31x,f6.2)") charge
         do ipoint = 9, 14
          read (88,*)
         end do
@@ -199,7 +199,7 @@
         do issh = 1, nsshPP
 
 ! We put the pseuodpotentials in as S, P, D etc.
-         read (88,200) npoints_nl(issh)
+         read (88,"(12x,i5)") npoints_nl(issh)
 
 ! Allocate the non-local arrays
          do ipoint = 1, npoints_nl(issh)
@@ -311,11 +311,5 @@
         deallocate (r_nl)
         deallocate (rrc_nl)
         deallocate (v_nl)
-
-! Format Statements
-! ===========================================================================
-100     format (31x, f6.2)
-200     format (12x, i5)
-
         return
         end

@@ -1,18 +1,18 @@
 subroutine buildh ()
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use M_system, only: natoms, imass, vxc_1c, ewaldsr, neigh_j, neighn, vxc, vca, ewaldlr, h_mat, t_mat, vna, ewaldqmmm, &
     & h_mat0, g_h, Qin, Kscf, nssh_tot, get_issh_ofshell, get_iatom_ofshell
   use M_fdata, only: num_orb, Qneutral
   implicit none
   integer :: iatom, jatom, imu, inu, ineigh, in1, in2
   integer :: alpha, issh_a, iatom_a
-  real(double), dimension(nssh_tot) :: dQ
+  real(dp), dimension(nssh_tot) :: dQ
 
   ! ---- Cargas estaticas: H_{mu nu} = h^0_{mu nu} + sum_alpha g_h^alpha_{mu nu} (Q_alpha - Q^0_alpha) ----
   ! Kscf=1 (dQ=0): reensamblado completo -> h^0 (en este paso vca=ewaldlr=ewaldsr=0).
   ! Kscf>1       : Coulomb/Ewald via g_h congelado (dot_product), XC reconstruido cada paso.
   if (Kscf .eq. 1) then
-    h_mat = 0.0d0
+    h_mat = 0.0_dp
     do iatom = 1, natoms
       in1 = imass(iatom)
       do ineigh = 1, neighn(iatom)
@@ -35,7 +35,7 @@ subroutine buildh ()
       iatom_a = get_iatom_ofshell(alpha)
       dQ(alpha) = Qin(issh_a,iatom_a) - Qneutral(issh_a,imass(iatom_a))
     end do
-    h_mat = 0.0d0
+    h_mat = 0.0_dp
     do iatom = 1, natoms
       in1 = imass(iatom)
       do ineigh = 1, neighn(iatom)

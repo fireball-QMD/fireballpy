@@ -1,14 +1,14 @@
 !subroutine unocentros (in1, iatom, exc_1c, muexc_1c, dccexc_1c, mu1xc)
 subroutine unocentros (in1, iatom, dccexc_1c, mu1xc)
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use M_system, only: degelec, getmssh, getlssh, getissh, numorb_max, Qin, neigh_self, g_xc, get_shell_ofatom_issh, Kscf
   use M_fdata, only: nsh_max, nssh, num_orb, Qref, exc_1c_0, vxc_1c_0, gxc_1c, fxc_1c
 !borrar nuxc1c, dnuxc1c, exc1c0, dexc1c, 
   implicit none
   integer, intent(in) :: iatom
   integer, intent(in) :: in1
-  real(double), intent(out) :: dccexc_1c     ! XC DCC term
-  real(double), intent(out), dimension (numorb_max, numorb_max) :: mu1xc
+  real(dp), intent(out) :: dccexc_1c     ! XC DCC term
+  real(dp), intent(out), dimension (numorb_max, numorb_max) :: mu1xc
   integer imu
   integer issh
   integer l1, l2
@@ -16,11 +16,11 @@ subroutine unocentros (in1, iatom, dccexc_1c, mu1xc)
   integer inu
   integer jssh
   integer kssh
-  real(double), dimension (nsh_max) :: dqi
+  real(dp), dimension (nsh_max) :: dqi
 
-  dccexc_1c = 0.0d0
-  mu1xc = 0.0d0
-  dqi = 0.0d0
+  dccexc_1c = 0.0_dp
+  mu1xc = 0.0_dp
+  dqi = 0.0_dp
   do issh = 1, nssh(in1)
     dqi(issh) = (Qin(issh,iatom) - Qref(issh,in1))
   end do

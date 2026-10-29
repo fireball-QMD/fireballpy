@@ -1,5 +1,5 @@
 subroutine assemble_3c_PP ()
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use M_system, only: natoms, ratom, imass, numorb_max, sVNL, vnl, neighPP_comn, neighPP_comm, neighPP_comj, neighPP_comb, xl
   use M_fdata, only: num_orb, num_orbPP 
   implicit none
@@ -21,13 +21,13 @@ subroutine assemble_3c_PP ()
  
   integer, external :: mpairnay
 
-  real(double), dimension (numorb_max, numorb_max) :: bcnlx
-  real(double), dimension (numorb_max) :: cl
-  real(double), dimension (3) :: r1
-  real(double), dimension (3) :: r2
-  real(double), dimension (3) :: r31
-  real(double), dimension (3) :: r32
-  real(double), dimension (3) :: rna
+  real(dp), dimension (numorb_max, numorb_max) :: bcnlx
+  real(dp), dimension (numorb_max) :: cl
+  real(dp), dimension (3) :: r1
+  real(dp), dimension (3) :: r2
+  real(dp), dimension (3) :: r31
+  real(dp), dimension (3) :: r32
+  real(dp), dimension (3) :: rna
   do ialp = 1, natoms
     rna(:) = ratom(:,ialp)
     indna = imass(ialp)
@@ -49,7 +49,7 @@ subroutine assemble_3c_PP ()
         m32 = mpairnay (jatom, ialp, r32)
         do inu = 1, num_orb(in2)
           do imu = 1, num_orb(in1)
-            bcnlx(imu,inu) = 0.0d0
+            bcnlx(imu,inu) = 0.0_dp
             do ncc = 1, num_orbPP(indna)
               bcnlx(imu,inu) = bcnlx(imu,inu) + cl(ncc)*sVNL(imu,ncc,m31,iatom)*sVNL(inu,ncc,m32,jatom)
             end do ! do ncc

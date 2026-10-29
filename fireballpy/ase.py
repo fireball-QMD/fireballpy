@@ -4,11 +4,11 @@ from typing import SupportsFloat
 import warnings
 
 import numpy as np
-from numpy.typing import ArrayLike
+from numpy.typing import ArrayLike, NDArray
 from ase.calculators.calculator import Calculator, PropertyNotPresent, all_changes
 
 from fireballpy.atoms import AtomSystem
-from fireballpy.fdata import FDataFiles
+from fireballpy.fdata import FDataFiles, FData
 from fireballpy.kpoints import KPoints
 from fireballpy.fireball import BaseFireball
 from fireballpy.options import DipoleMethod
@@ -32,12 +32,9 @@ class Fireball(Calculator, BaseFireball):
 
     Parameters
     ----------
-    fdata : str | pathlib.Path
-        Name of the FData to be used. See ``available_fdatas()``
-        for a table of available FData. If set to ``'custom'`` then
-        an ``fdata_path`` pointing to a local FData folder must be provided.
-        Please note that the first time an FData is used it needs to download
-        all the necessary files.
+    fdata : str | pathlib.Path | FData
+        FData to be used. See ``FData.available_fdatas()``
+        for a table of provided FData.
     lazy : bool, optional
         If set to ``True`` (default) it will only load necessary files for the species
         which are involved in the computation. If set to ``False`` it will load
@@ -148,22 +145,22 @@ class Fireball(Calculator, BaseFireball):
 
     ignored_changes = set(['initial_magmoms'])
 
-    def __init__(self, fdata: str | Path, *,
+    def __init__(self, fdata: str | Path | FData, *,
                  lazy: bool = True,
                  verbose: bool = False,
                  kpts: ArrayLike | SupportsFloat = (1, 1, 1),
-                 **kwargs):
+                 **kwargs) -> None:
         Calculator.__init__(self, **kwargs)
         self._fb_started = False
         self.nspin = 1
-
-        # Sadly for us we cannot check many things here, we have
-        # to wait for the call to calculate.
-        # We just check the most basic thing and pray the user is not mad about it.
         self.fdata = fdata
         self.lazy = lazy
         self.verbose = verbose
         self.kpts = kpts
+
+        # Sadly for us we cannot check many things here, we have
+        # to wait for the call to calculate.
+        # We just check the most basic thing and pray the user is not mad about it.
         for k in kwargs:
             if k not in self._valid_kwargs:
                 raise ValueError(f"Parameter ``{k}`` not recognised.")
@@ -173,7 +170,7 @@ class Fireball(Calculator, BaseFireball):
         self.gamma = bool(self._kwargs.pop('gamma'))
         self.isfix_charges = bool(self._kwargs.pop('fix_charges'))
 
-    def get_eigenvalues(self, kpt=0, spin=0):
+    def get_eigenvalues(self, kpt=0, spin=0) -> NDArray[np.float64]:
         """Get the eigenvalues of the hamiltonian in electronvolts.
 
         Parameters
@@ -200,7 +197,7 @@ class Fireball(Calculator, BaseFireball):
             raise PropertyNotPresent('eigenvalues')
         return self.eigenvalues[kpt]
 
-    def get_eigenvectors(self, kpt=0, spin=0):
+    def get_eigenvectors(self, kpt=0, spin=0) -> NDArray[np.float64] | NDArray[np.complex128]:
         """Get the coefficients for each wave function.
 
         Parameters
@@ -228,7 +225,7 @@ class Fireball(Calculator, BaseFireball):
             raise PropertyNotPresent('eigenvectors')
         return self.eigenvectors[kpt] if not self.kpoints.isgamma else np.real(self.eigenvectors[kpt])
 
-    def get_fermi_level(self):
+    def get_fermi_level(self) -> float:
         """Get the Fermi level in electronvolts.
 
         Returns
@@ -245,7 +242,7 @@ class Fireball(Calculator, BaseFireball):
             raise PropertyNotPresent('fermi_level')
         return self.fermi_level
 
-    def get_ibz_k_points(self):
+    def get_ibz_k_points(self) -> NDArray[np.float64]:
         """Get the k-points used for computation.
         Note that there may be less than imputed as redundant k-points are deleted.
 
@@ -264,7 +261,7 @@ class Fireball(Calculator, BaseFireball):
         self.results.update({'ibz_kpoints': self.kpoints.coords})
         return self.kpoints.coords
 
-    def get_k_point_weights(self):
+    def get_k_point_weights(self) -> NDArray[np.float64]:
         """Get the weights of the k-points used for computation.
         Note that there may be less than imputed as redundant k-points are deleted.
 
@@ -283,7 +280,7 @@ class Fireball(Calculator, BaseFireball):
         self.results.update({'kpoint_weights': self.kpoints.weights})
         return self.kpoints.weights
 
-    def get_number_of_bands(self):
+    def get_number_of_bands(self) -> int:
         """Get the number of bands.
 
         Returns
@@ -298,9 +295,9 @@ class Fireball(Calculator, BaseFireball):
         """
         if not self._fb_started:
             raise PropertyNotPresent('shell_charges')
-        return self.nbands
+        return int(self.nbands)
 
-    def get_number_of_shells(self):
+    def get_number_of_shells(self) -> int:
         """Get the number of shells.
 
         Returns
@@ -315,9 +312,9 @@ class Fireball(Calculator, BaseFireball):
         """
         if not self._fb_started:
             raise PropertyNotPresent('shell_charges')
-        return self.nshells
+        return self.maxshells
 
-    def get_number_of_spins(self):
+    def get_number_of_spins(self) -> int:
         """Get the number of spins.
 
         Returns
@@ -327,7 +324,7 @@ class Fireball(Calculator, BaseFireball):
         """
         return self.nspin
 
-    def get_shell_charges(self):
+    def get_shell_charges(self) -> NDArray[np.float64]:
         """Get the charges of each shell if computed.
 
         Returns
@@ -355,7 +352,7 @@ class Fireball(Calculator, BaseFireball):
         """
         self.isfix_charges = False
 
-    def embed(self, q_p, rc=0.1, rc2=1e200, width=1.0):
+    def embed(self, q_p, rc=0.1, rc2=1e200, width=1.0) -> PointChargePotential:
         return PointChargePotential(q_p, rc=rc, rc2=rc2, width=width)
 
     def calculate(self, atoms=None, properties=['energy'],
@@ -394,7 +391,7 @@ class Fireball(Calculator, BaseFireball):
 
 
 class PointChargePotential:
-    def __init__(self, charges, positions=None, rc=0.2, rc2=np.inf, width=1.0):
+    def __init__(self, charges, positions=None, rc=0.2, rc2=np.inf, width=1.0) -> None:
         """Point-charge potential.
 
         charges: list of float
@@ -439,7 +436,7 @@ class PointChargePotential:
             warnings.warn('Long range cutoff chosen but will not be applied\
                            for negative inner cutoff values!')
 
-    def set_positions(self, positions, **kwargs):
+    def set_positions(self, positions, **kwargs) -> None:
         """Update positions."""
         positions = np.ascontiguousarray(positions, dtype=np.float64)
         if positions.shape != (self.n, 3):
@@ -451,7 +448,7 @@ class PointChargePotential:
             update_qmmm(positions.T)
         self.positions = positions
 
-    def get_forces(self, calc: Fireball):
+    def get_forces(self, calc: Fireball) -> NDArray[np.float64]:
         """Calculate forces from QM charge density on point-charges."""
         forces = np.zeros((self.n, 3), dtype=np.float64, order='C')
         get_qmmm_forces(forces.T)

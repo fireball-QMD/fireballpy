@@ -1,6 +1,6 @@
 ! This routine assembles all of the two-center sVNL (separable pseudopotential) interactions.
 subroutine assemble_sVNL ()
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use M_system, only: iforce, natoms, ratom, imass, nPP_b, nPP_j, nPPn, nPP_self, numorb_max, sVNL, spVNL, xl
   use M_fdata, only: num_orbPP, num_orb, TWOCENTER_VNL
   implicit none
@@ -17,15 +17,15 @@ subroutine assemble_sVNL ()
   integer matom
   integer mbeta
  
-  real(double) y
-  real(double), dimension (3, 3) :: eps
-  real(double), dimension (3, 3, 3) :: deps
-  real(double), dimension (3) :: r1
-  real(double), dimension (3) :: r2
-  real(double), dimension (3) :: r21
-  real(double), dimension (3) :: sighat
-  real(double), dimension (numorb_max, numorb_max) :: sVNLx
-  real(double), dimension (3, numorb_max, numorb_max) :: spVNLx
+  real(dp) y
+  real(dp), dimension (3, 3) :: eps
+  real(dp), dimension (3, 3, 3) :: deps
+  real(dp), dimension (3) :: r1
+  real(dp), dimension (3) :: r2
+  real(dp), dimension (3) :: r21
+  real(dp), dimension (3) :: sighat
+  real(dp), dimension (numorb_max, numorb_max) :: sVNLx
+  real(dp), dimension (3, numorb_max, numorb_max) :: spVNLx
  
   do iatom = 1, natoms 
     matom = nPP_self(iatom)
@@ -38,10 +38,10 @@ subroutine assemble_sVNL ()
       in2 = imass(jatom)
       r21(:) = r2(:) - r1(:)
       y = sqrt(r21(1)*r21(1) + r21(2)*r21(2) + r21(3)*r21(3))
-      if (y .lt. 1.0d-05) then
-        sighat(1) = 0.0d0
-        sighat(2) = 0.0d0
-        sighat(3) = 1.0d0
+      if (y .lt. 1.0e-05_dp) then
+        sighat(1) = 0.0_dp
+        sighat(2) = 0.0_dp
+        sighat(3) = 1.0_dp
       else
         sighat(:) = r21(:)/y
       end if
@@ -65,7 +65,7 @@ subroutine assemble_sVNL ()
         do inu = 1, num_orbPP(in2)
           do imu = 1, num_orb(in1)
             sVNL(imu,inu,ineigh,iatom) = sVNLx(imu,inu)
-            spVNL(:,imu,inu,ineigh,iatom) = 0.0d0
+            spVNL(:,imu,inu,ineigh,iatom) = 0.0_dp
           end do
         end do
       end if

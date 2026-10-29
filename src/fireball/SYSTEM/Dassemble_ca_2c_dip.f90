@@ -1,5 +1,5 @@
 subroutine Dassemble_ca_2c_dip ()
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use M_constants, only: eq2
   use M_system, only: smt_elect, natoms, ratom, imass, neigh_b, neigh_j, neighn, neigh_self, numorb_max, &
     & Qin, rho, s_mat, dipc, xl, faca, fotca
@@ -20,41 +20,41 @@ subroutine Dassemble_ca_2c_dip ()
   integer kforce
   integer matom
   integer mbeta
-  real(double) dq1
-  real(double) dq2
-  real(double) dstn_temp
-  real(double) dterm
-  real(double) dxn
-  real(double) rcutoff_j
-  real(double) rend
-  real(double) y
-  real(double) rcutoff_i
-  real(double), dimension (numorb_max, numorb_max) :: bcca
-  real(double), dimension (3, numorb_max, numorb_max) :: bccap
-  real(double), dimension (3, numorb_max, numorb_max) :: bccapx
-  real(double), dimension (numorb_max, numorb_max) :: bccax
-  real(double), dimension (3,numorb_max, numorb_max) :: demnpl
-  real(double), dimension (3, 3, 3) :: deps
-  real(double), dimension (3, numorb_max, numorb_max) :: dewaldsr
-  real(double) dstn1
-  real(double) dstn2
-  real(double), dimension (numorb_max, numorb_max) :: emnpl
-  real(double), dimension (3, 3) :: eps
-  real(double), dimension (3) :: r1
-  real(double), dimension (3) :: r2
-  real(double), dimension (3) :: r21
-  real(double), dimension (3) :: sighat
-  real(double) stn1
-  real(double) stn2 
-  faca = 0.0d0
-  fotca = 0.0d0
+  real(dp) dq1
+  real(dp) dq2
+  real(dp) dstn_temp
+  real(dp) dterm
+  real(dp) dxn
+  real(dp) rcutoff_j
+  real(dp) rend
+  real(dp) y
+  real(dp) rcutoff_i
+  real(dp), dimension (numorb_max, numorb_max) :: bcca
+  real(dp), dimension (3, numorb_max, numorb_max) :: bccap
+  real(dp), dimension (3, numorb_max, numorb_max) :: bccapx
+  real(dp), dimension (numorb_max, numorb_max) :: bccax
+  real(dp), dimension (3,numorb_max, numorb_max) :: demnpl
+  real(dp), dimension (3, 3, 3) :: deps
+  real(dp), dimension (3, numorb_max, numorb_max) :: dewaldsr
+  real(dp) dstn1
+  real(dp) dstn2
+  real(dp), dimension (numorb_max, numorb_max) :: emnpl
+  real(dp), dimension (3, 3) :: eps
+  real(dp), dimension (3) :: r1
+  real(dp), dimension (3) :: r2
+  real(dp), dimension (3) :: r21
+  real(dp), dimension (3) :: sighat
+  real(dp) stn1
+  real(dp) stn2 
+  faca = 0.0_dp
+  fotca = 0.0_dp
   do iatom = 1, natoms
    matom = neigh_self(iatom)
    r1(:) = ratom(:,iatom)
    in1 = imass(iatom)
     rcutoff_i = 0
     do imu = 1, nssh(in1)
-     if (rcutoff(in1,imu) .gt. rcutoff_i) rcutoff_i = rcutoff(in1,imu)
+     if (rcutoff(imu,in1) .gt. rcutoff_i) rcutoff_i = rcutoff(imu,in1)
     end do
    dq1 = 0.0
    do issh = 1, nssh(in1)
@@ -67,34 +67,34 @@ subroutine Dassemble_ca_2c_dip ()
     in2 = imass(jatom)
     rcutoff_j = 0
     do imu = 1, nssh(in2)
-     if (rcutoff(in2,imu) .gt. rcutoff_j) rcutoff_j = rcutoff(in2,imu)
+     if (rcutoff(imu,in2) .gt. rcutoff_j) rcutoff_j = rcutoff(imu,in2)
     end do
-    dq2 = 0.0d0
+    dq2 = 0.0_dp
     do issh = 1, nssh(in2)
      dq2 = dq2 + (Qin(issh,jatom) - Qneutral(issh,in2))
     end do
     r21(:) = r2(:) - r1(:)
     y = sqrt(r21(1)*r21(1) + r21(2)*r21(2) + r21(3)*r21(3))
-    if (y .lt. 1.0d-05) then
-     sighat(1) = 0.0d0
-     sighat(2) = 0.0d0
-     sighat(3) = 1.0d0
+    if (y .lt. 1.0e-05_dp) then
+     sighat(1) = 0.0_dp
+     sighat(2) = 0.0_dp
+     sighat(3) = 1.0_dp
     else
      sighat(:) = r21(:)/y
     end if
     call epsilon (r2, sighat, eps)
     call deps2cent (r1, r2, eps, deps)
-    stn1 = 1.0d0
-    dstn1 = 0.0d0
-    stn2 = 0.0d0
-    dstn2 = 0.0d0
-    emnpl = 0.0d0
-    demnpl = 0.0d0
-    dewaldsr = 0.0d0
-    if (y .gt. 1.0d-4) then
+    stn1 = 1.0_dp
+    dstn1 = 0.0_dp
+    stn2 = 0.0_dp
+    dstn2 = 0.0_dp
+    emnpl = 0.0_dp
+    demnpl = 0.0_dp
+    dewaldsr = 0.0_dp
+    if (y .gt. 1.0e-4_dp) then
        rend = rcutoff_i + rcutoff_j
        call smoother (y, rend, smt_elect, stn1, dstn_temp)
-       stn2 = 1.0d0 - stn1
+       stn2 = 1.0_dp - stn1
        dstn1 = dstn_temp
        dstn2 = - dstn_temp
      do inu = 1, num_orb(in1)
@@ -113,8 +113,8 @@ subroutine Dassemble_ca_2c_dip ()
       end do !end do imu = 1,num_orb(in1)
      end do  !end do inu = 1,num_orb(in1)
     end if
-    bcca = 0.0d0
-    bccap = 0.0d0
+    bcca = 0.0_dp
+    bccap = 0.0_dp
     kforce = 1
     interaction = TWOCENTER_VNA_A
     in3 = in1
@@ -149,7 +149,7 @@ subroutine Dassemble_ca_2c_dip ()
     end do
     if (iatom .eq. jatom .and. mbeta .eq. 0) then
     else
-     bccap = 0.0d0
+     bccap = 0.0_dp
      interaction = TWOCENTER_VNA_L
      in3 = in2
      do isorp = 1, nssh(in1)

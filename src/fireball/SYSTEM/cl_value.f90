@@ -1,16 +1,16 @@
 subroutine cl_value (itype, cl)
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use M_system, only: numorb_max
   use M_fdata, only: nsshPP,lsshPP,cl_PP
   implicit none                  
   integer, intent (in) :: itype
-  real(double), intent (out), dimension (numorb_max) :: cl
+  real(dp), intent (out), dimension (numorb_max) :: cl
   integer imu
   integer index
   integer issh
   integer Lvalue
   integer Lmax
-  cl(1:numorb_max) = 0.0d0
+  cl(1:numorb_max) = 0.0_dp
   index = 0
   do issh = 1, nsshPP(itype)
     Lvalue = lsshPP(issh,itype)

@@ -1,5 +1,5 @@
 subroutine Dassemble_2c_PP ()
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use M_system, only: natoms, imass, rhoPP, nPP_b, nPP_j, nPPn, nPP_self, nPPx_b, nPPx_j, nPPx_map, nPPx_point, nPPxn, &
     & numorb_max, neighPP_self, sVNL, spVNL, fotnl, fanl
   use M_fdata, only: num_orb, num_orbPP
@@ -18,10 +18,10 @@ subroutine Dassemble_2c_PP ()
   integer mbeta
   integer mneigh_self
   integer ncc
-  real(double), dimension (numorb_max) :: cl
-  real(double), dimension (3, numorb_max, numorb_max) :: fnlb
-  fanl = 0.0d0
-  fotnl = 0.0d0
+  real(dp), dimension (numorb_max) :: cl
+  real(dp), dimension (3, numorb_max, numorb_max) :: fnlb
+  fanl = 0.0_dp
+  fotnl = 0.0_dp
   do iatom = 1, natoms
     matom = neighPP_self(iatom)
     in1 = imass(iatom)
@@ -33,7 +33,7 @@ subroutine Dassemble_2c_PP ()
       mneigh_self = nPP_self(iatom)
       do inu = 1, num_orb(in1)
         do imu = 1, num_orb(in1)
-          fnlb(:,imu,inu) = 0.0d0
+          fnlb(:,imu,inu) = 0.0_dp
           if (ineigh .ne. mneigh_self) then
             do ncc = 1, num_orbPP(in2)
               do ix = 1,3
@@ -63,7 +63,7 @@ subroutine Dassemble_2c_PP ()
         jneigh = nPPx_point(ineigh,iatom)
         do inu = 1, num_orb(in2)
           do imu = 1, num_orb(in1)
-            fnlb(:,imu,inu) = 0.0d0
+            fnlb(:,imu,inu) = 0.0_dp
             do ncc = 1, num_orbPP(in1)
               do ix = 1,3
                 fnlb(ix,imu,inu) = fnlb(ix,imu,inu)  - cl(ncc)*sVNL(imu,ncc,mneigh_self,iatom)*spVNL(ix,inu,ncc,jneigh,jatom)

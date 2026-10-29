@@ -45,7 +45,6 @@ contains
 module procedure utils_itos
   integer :: lpad_
   character(2*range(i)+4) :: aux, tmp, fmt
-  character(:), allocatable :: utils_itos
   lpad_ = 0
   if (present(lpad)) lpad_ = lpad
   if (lpad_ > 0) then

@@ -1,5 +1,5 @@
 subroutine neighbors_pairs ()
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use M_system, only: icluster, natoms, neigh_j, neighn, neigh_back, neigh_pair_a1, neigh_pair_a2, neigh_pair_n1, neigh_pair_n2, &
     & tot_pairs
   implicit none

@@ -7,7 +7,7 @@
 ! This routine also calculates the derivative with respect to the
 ! position of the orbital of the BRA.
 subroutine doscentros (interaction, isub, iforceaux, in1, in2, in3, distance, eps, deps, sx, spx)
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use M_system, only: numorb_max
   use M_fdata, only: index_max2c,num_orb,ME2c_max, TWOCENTER_VNA_L, TWOCENTER_VXC_L, TWOCENTER_DEN_L, splineint_2c, ind2c
   implicit none
@@ -17,27 +17,27 @@ subroutine doscentros (interaction, isub, iforceaux, in1, in2, in3, distance, ep
   integer, intent (in) :: in1
   integer, intent (in) :: in2
   integer, intent (in) :: in3
-  real(double), intent (inout) :: distance
-  real(double), intent (in), dimension (3, 3, 3) :: deps
-  real(double), intent (in), dimension (3, 3) :: eps
-  real(double), intent (out), dimension (numorb_max, numorb_max) :: sx
-  real(double), intent (out), dimension (3, numorb_max, numorb_max) :: spx
+  real(dp), intent (inout) :: distance
+  real(dp), intent (in), dimension (3, 3, 3) :: deps
+  real(dp), intent (in), dimension (3, 3) :: eps
+  real(dp), intent (out), dimension (numorb_max, numorb_max) :: sx
+  real(dp), intent (out), dimension (3, numorb_max, numorb_max) :: spx
   integer imu
   integer inu
   integer index
-  real(double), dimension (3) :: eta
-  real(double), dimension (ME2c_max) :: dslist
-  real(double), dimension (ME2c_max) :: slist
-  real(double), dimension (numorb_max,numorb_max) :: sm
-  real(double), dimension (numorb_max,numorb_max) :: spm
-  real(double), dimension (3,numorb_max,numorb_max) :: spmx
+  real(dp), dimension (3) :: eta
+  real(dp), dimension (ME2c_max) :: dslist
+  real(dp), dimension (ME2c_max) :: slist
+  real(dp), dimension (numorb_max,numorb_max) :: sm
+  real(dp), dimension (numorb_max,numorb_max) :: spm
+  real(dp), dimension (3,numorb_max,numorb_max) :: spmx
   logical switch
 
-  sm = 0.0d0
-  sx = 0.0d0
-  if (iforceaux .eq. 1) spm = 0.0d0
-  if (iforceaux .eq. 1) spmx = 0.0d0
-  if (iforceaux .eq. 1) spx = 0.0d0
+  sm = 0.0_dp
+  sx = 0.0_dp
+  if (iforceaux .eq. 1) spm = 0.0_dp
+  if (iforceaux .eq. 1) spmx = 0.0_dp
+  if (iforceaux .eq. 1) spx = 0.0_dp
   switch = .true.
   if(interaction .eq. TWOCENTER_VNA_L) switch = .false.
   if(interaction .eq. TWOCENTER_VXC_L) switch = .false.
@@ -58,7 +58,7 @@ subroutine doscentros (interaction, isub, iforceaux, in1, in2, in3, distance, ep
    eta(:) = eps(:,3)
    do inu = 1, num_orb(in3)
     do imu = 1, num_orb(in1)
-     if (distance .gt. 1.0d-3) then
+     if (distance .gt. 1.0e-3_dp) then
       spmx(:,imu,inu) = - eta(:)*spm(imu,inu)
      end if
     end do

@@ -1,5 +1,5 @@
 subroutine Dassemble_2c ()
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use M_constants, only: eq2
   use M_system, only: natoms, ratom, imass, cape, neigh_b, neigh_j, neighn, neigh_self, numorb_max, sp_mat, tp_mat, rho, xl, fotna, &
     & fana, ft, fro
@@ -19,21 +19,21 @@ subroutine Dassemble_2c ()
   integer kforce
   integer matom
   integer mbeta
-  real(double) sumS
-  real(double) sumT
-  real(double) y
-  real(double), dimension (numorb_max, numorb_max) :: bcnax
-  real(double), dimension (3, numorb_max, numorb_max) :: bcnapx
-  real(double), dimension (3, 3) :: eps
-  real(double), dimension (3, 3, 3) :: deps
-  real(double), dimension (3) :: r1
-  real(double), dimension (3) :: r2
-  real(double), dimension (3) :: r21
-  real(double), dimension (3) :: sighat
-  fana = 0.0d0
-  fotna = 0.0d0
-  ft = 0.0d0
-  fro = 0.0d0
+  real(dp) sumS
+  real(dp) sumT
+  real(dp) y
+  real(dp), dimension (numorb_max, numorb_max) :: bcnax
+  real(dp), dimension (3, numorb_max, numorb_max) :: bcnapx
+  real(dp), dimension (3, 3) :: eps
+  real(dp), dimension (3, 3, 3) :: deps
+  real(dp), dimension (3) :: r1
+  real(dp), dimension (3) :: r2
+  real(dp), dimension (3) :: r21
+  real(dp), dimension (3) :: sighat
+  fana = 0.0_dp
+  fotna = 0.0_dp
+  ft = 0.0_dp
+  fro = 0.0_dp
   do iatom = 1, natoms
     matom = neigh_self(iatom)
     r1(:) = ratom(:,iatom)
@@ -45,27 +45,27 @@ subroutine Dassemble_2c ()
       in2 = imass(jatom)
       r21(:) = r2(:) - r1(:)
       y = sqrt(r21(1)*r21(1) + r21(2)*r21(2) + r21(3)*r21(3))
-      if (y .lt. 1.0d-05) then
-        sighat(1) = 0.0d0
-        sighat(2) = 0.0d0
-        sighat(3) = 1.0d0
+      if (y .lt. 1.0e-05_dp) then
+        sighat(1) = 0.0_dp
+        sighat(2) = 0.0_dp
+        sighat(3) = 1.0_dp
       else
        sighat(:) = r21(:)/y
       end if
       call epsilon (r2, sighat, eps)
       call deps2cent (r1, r2, eps, deps)
       do ix = 1, 3
-        sumT = 0.0d0
-        sumS = 0.0d0
+        sumT = 0.0_dp
+        sumS = 0.0_dp
         do inu = 1, num_orb(in2)
           do imu = 1, num_orb(in1)
             sumT = sumT  + rho(imu,inu,ineigh,iatom)*tp_mat(ix,imu,inu,ineigh,iatom)
             sumS = sumS  + cape(imu,inu,ineigh,iatom)*sp_mat(ix,imu,inu,ineigh,iatom)
           end do
          end do
-      ft(ix,iatom) = ft(ix,iatom) + (-1.0d0)*sumT
+      ft(ix,iatom) = ft(ix,iatom) + (-1.0_dp)*sumT
       fro(ix,iatom) = fro(ix,iatom) + sumS
-      ft(ix,jatom) = ft(ix,jatom) - (-1.0d0)*sumT
+      ft(ix,jatom) = ft(ix,jatom) - (-1.0_dp)*sumT
       fro(ix,jatom) = fro(ix,jatom) - sumS
       end do ! do ix
       isorp = 0

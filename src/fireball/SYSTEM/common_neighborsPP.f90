@@ -1,5 +1,5 @@
 subroutine common_neighborsPP ()
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use M_system, only: icluster, natoms, ratom, imass, mbeta_max, nPPx_b, nPPx_j, nPPxn, neighPPn, neighPP_b, neighPP_j, neighPP_comn, &
     & neighPP_comm, neighPP_comj, neighPP_comb, xl, neighPP_max, errno
   implicit none
@@ -16,8 +16,8 @@ subroutine common_neighborsPP ()
   integer kneigh
   integer num_neigh
 
-  real(double), dimension (3) :: diff
-  real(double), dimension (3) :: vec1, vec2, vec3, vec
+  real(dp), dimension (3) :: diff
+  real(dp), dimension (3) :: vec1, vec2, vec3, vec
 
   if(icluster .eq. 1) mbeta_max = 0
   do ialp = 1, natoms
@@ -53,7 +53,7 @@ subroutine common_neighborsPP ()
               katom = neighPP_j(kneigh,iatom)
               kbeta = neighPP_b(kneigh,iatom)
               vec(:) = xl(:,kbeta) + ratom(:,katom) - ratom(:,iatom)
-              if ((abs(vec(1) - diff(1)) .lt. 1.0d-4) .and. (abs(vec(2) - diff(2)) .lt. 1.0d-4) .and.(abs(vec(3) - diff(3)) .lt. 1.0d-4))  neighPP_comm(num_neigh,ialp) = kneigh
+              if ((abs(vec(1) - diff(1)) .lt. 1.0e-4_dp) .and. (abs(vec(2) - diff(2)) .lt. 1.0e-4_dp) .and.(abs(vec(3) - diff(3)) .lt. 1.0e-4_dp))  neighPP_comm(num_neigh,ialp) = kneigh
             end do ! do kneigh
             if (neighPP_comm(num_neigh,ialp) .eq. -9999) num_neigh = num_neigh - 1 
           end if ! if(.not.(jatom .eq. ialp)

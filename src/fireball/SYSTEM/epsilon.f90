@@ -31,20 +31,20 @@
 !
 ! ===========================================================================
 subroutine epsilon(R1,R2,spe)
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   implicit none
  
-  real(double), intent(in) :: r1(3)
-  real(double), intent(in) :: r2(3)
-  real(double), intent(out) :: spe(3,3)
+  real(dp), intent(in) :: r1(3)
+  real(dp), intent(in) :: r2(3)
+  real(dp), intent(out) :: spe(3,3)
  
   integer i,j,ii,jj,kk,ix
-  real(double) r1mag,r2mag,ypmag,unit
-  real(double) XPHAT(3),YPHAT(3),ZPHAT(3),R1HAT(3)
+  real(dp) r1mag,r2mag,ypmag,unit
+  real(dp) XPHAT(3),YPHAT(3),ZPHAT(3),R1HAT(3)
  
   r1mag=sqrt(r1(1)*r1(1)+r1(2)*r1(2)+r1(3)*r1(3))
   r2mag=sqrt(r2(1)*r2(1)+r2(2)*r2(2)+r2(3)*r2(3))
-  if (r2mag .lt. 1.0d-4) then
+  if (r2mag .lt. 1.0e-4_dp) then
     !r2vector = (0,0,0) ----- set eps = unit matrix
     do i=1,3
       do j=1,3
@@ -60,7 +60,7 @@ subroutine epsilon(R1,R2,spe)
   zphat(3)=r2(3)/r2mag
 
   ! yphat = zphat-cross-r1hat
-  if(r1mag.gt.1.0d-4)then
+  if(r1mag.gt.1.0e-4_dp)then
     r1hat(1)=r1(1)/r1mag
     r1hat(2)=r1(2)/r1mag
     r1hat(3)=r1(3)/r1mag
@@ -72,13 +72,13 @@ subroutine epsilon(R1,R2,spe)
   end if
   ! zphat and r1hat are colinear or r1vector=(0,0,0)
   !   find the first non-zero component of zphat
-  if(abs(zphat(1)).gt.1.0d-4)then
+  if(abs(zphat(1)).gt.1.0e-4_dp)then
   ! zphat(1) not equal to zero
     yphat(1)=-(zphat(2)+zphat(3))/zphat(1)
     yphat(2)=1.0e0
     yphat(3)=1.0e0
     ypmag=sqrt(yphat(1)*yphat(1)+yphat(2)*yphat(2)+yphat(3)*yphat(3))
-  else if(abs(zphat(2)).gt.1.0d-4)then
+  else if(abs(zphat(2)).gt.1.0e-4_dp)then
   ! zphat(2) not equal to zero
     yphat(1)=1.0e0
     yphat(2)=-(zphat(1)+zphat(3))/zphat(2)
@@ -111,7 +111,7 @@ subroutine epsilon(R1,R2,spe)
   ! test by computing spe*spe(dagger)
   do ii=1,3
     do jj=1,3
-      unit=0.0d0
+      unit=0.0_dp
       do kk=1,3
         unit=unit+spe(ii,kk)*spe(jj,kk)
       end do

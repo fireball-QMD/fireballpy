@@ -1,5 +1,5 @@
 subroutine mixer ()
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use M_system, only: sigma, sigmaold, scf_achieved, natoms, imass, Kscf, ztot, nssh_tot, Qin, Qinmixer, Qout, Qoutmixer
   use M_fdata, only: nssh
   implicit none
@@ -7,15 +7,15 @@ subroutine mixer ()
   integer in1
   integer issh
   integer imix
-  real(double) dqrms
-  real(double) dqmax
-  real(double) renorm
-  real(double) zcheck
-  real(double) zouttot
+  real(dp) dqrms
+  real(dp) dqmax
+  real(dp) renorm
+  real(dp) zcheck
+  real(dp) zouttot
   dqrms = 0
   dqmax = -99
-  Qinmixer=0.0d0
-  Qoutmixer=0.0d0
+  Qinmixer=0.0_dp
+  Qoutmixer=0.0_dp
   do iatom = 1, natoms
     in1 = imass(iatom)
     do issh = 1, nssh(in1)
@@ -66,7 +66,7 @@ subroutine mixer ()
     end do
   end do
   renorm = (zouttot - ztot)/nssh_tot
-  zcheck = 0.0d0
+  zcheck = 0.0_dp
   do iatom = 1, natoms
     in1 = imass(iatom)
     do issh = 1, nssh(in1)

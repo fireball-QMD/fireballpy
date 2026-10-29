@@ -1,18 +1,18 @@
 integer function mpairnay (iatom, jatom, rdiff)
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use M_system, only: ratom, nPP_b, nPP_j, nPPn, xl
   implicit none
   integer, intent(in) :: iatom
   integer, intent(in) :: jatom
-  real(double), intent(in), dimension (3) :: rdiff
+  real(dp), intent(in), dimension (3) :: rdiff
   integer imatch
   integer ineigh
   integer jjatom
   integer mbeta
-  real(double) diff
-  real(double), dimension (3) :: r1
-  real(double), dimension (3) :: r2
-  real(double), dimension (3) :: r21
+  real(dp) diff
+  real(dp), dimension (3) :: r1
+  real(dp), dimension (3) :: r2
+  real(dp), dimension (3) :: r21
   mpairnay = 0
   r1(:) = ratom(:,iatom)
   imatch = 0
@@ -24,7 +24,7 @@ integer function mpairnay (iatom, jatom, rdiff)
     r21(:) = r2(:) - r1(:)
     diff = (r21(1) - rdiff(1))**2 + (r21(2) - rdiff(2))**2       &
     + (r21(3) - rdiff(3))**2
-    if (diff .lt. 0.0001d0) then
+    if (diff .lt. 0.0001_dp) then
      imatch = imatch + 1
      mpairnay = ineigh
     end if

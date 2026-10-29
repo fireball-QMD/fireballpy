@@ -1,5 +1,5 @@
 subroutine getforces ()
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use xc, only: xc_init, xc_end
   use M_fdata, only: exc_names, exc_weights
   use M_system, only: idipole, iqmmm, flrew_qmmm
@@ -24,7 +24,7 @@ subroutine getforces ()
     if (idipole .eq. 0) call Dassemble_qmmm()
     if (idipole .eq. 1) call Dassemble_qmmm_dip()
   else
-    flrew_qmmm = 0.0d0
+    flrew_qmmm = 0.0_dp
   end if
   call Dassemble_ca_olsxc_3c()
   call assemble_F()

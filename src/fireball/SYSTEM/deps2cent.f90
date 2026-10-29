@@ -1,17 +1,17 @@
 subroutine deps2cent(r1,r2,eps2,deps2)
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use M_constants, only: xlevi, delk
 
   implicit none
-  real(double), dimension(3), intent(in) :: r1, r2
-  real(double), dimension(3, 3), intent(in) :: eps2
-  real(double), dimension (3, 3, 3), intent(out) :: deps2
+  real(dp), dimension(3), intent(in) :: r1, r2
+  real(dp), dimension(3, 3), intent(in) :: eps2
+  real(dp), dimension (3, 3, 3), intent(out) :: deps2
   integer :: i,ii,ix
-  real(double) :: r2mag2,r2mag,r1mag,denom,crossmag,dd,dot,term,ddinv,crossinv
-  real(double), dimension(3) :: crossa
+  real(dp) :: r2mag2,r2mag,r1mag,denom,crossmag,dd,dot,term,ddinv,crossinv
+  real(dp), dimension(3) :: crossa
   deps2=0.e0
   dd=sqrt((r2(1)-r1(1))**2+(r2(2)-r1(2))**2+(r2(3)-r1(3))**2) 
-  if(dd.lt.1.0d-4)return
+  if(dd.lt.1.0e-4_dp)return
   ddinv=1.0/dd 
   r2mag2= r2(1)**2 + r2(2)**2 + r2(3)**2
   r2mag=sqrt(r2mag2)
@@ -25,10 +25,10 @@ subroutine deps2cent(r1,r2,eps2,deps2)
     dot=dot+r1(i)*r2(i)
   end do
   denom=r1mag*r2mag
-  if(denom.lt.1.0d-3)then
+  if(denom.lt.1.0e-3_dp)then
     return
   endif
-  if(abs(crossmag).lt.1.0d-3)then
+  if(abs(crossmag).lt.1.0e-3_dp)then
     return
   endif
   crossinv=1.0/crossmag

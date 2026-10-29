@@ -1,5 +1,5 @@
 subroutine Dassemble_3c_PP () 
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use M_system, only: natoms, ratom, imass, rhoPP, numorb_max, sVNL, spVNL, neighPP_comn, neighPP_comm, neighPP_comj, neighPP_comb, &
     & xl, f3nla, f3nlb, f3nlc
   use M_fdata, only: num_orb,num_orbPP
@@ -21,19 +21,19 @@ subroutine Dassemble_3c_PP ()
   integer mneigh
   integer ncc
   integer, external :: mpairnay
-  real(double), dimension (numorb_max, numorb_max) :: bcnlx
-  real(double), dimension (numorb_max) :: cl
-  real(double), dimension (3, numorb_max, numorb_max) :: f3nlXa
-  real(double), dimension (3, numorb_max, numorb_max) :: f3nlXb
-  real(double), dimension (3, numorb_max, numorb_max) :: f3nlXc
-  real(double), dimension (3) :: r1
-  real(double), dimension (3) :: r2
-  real(double), dimension (3) :: r31
-  real(double), dimension (3) :: r32
-  real(double), dimension (3) :: rna
-  f3nla = 0.0d0
-  f3nlb = 0.0d0
-  f3nlc = 0.0d0
+  real(dp), dimension (numorb_max, numorb_max) :: bcnlx
+  real(dp), dimension (numorb_max) :: cl
+  real(dp), dimension (3, numorb_max, numorb_max) :: f3nlXa
+  real(dp), dimension (3, numorb_max, numorb_max) :: f3nlXb
+  real(dp), dimension (3, numorb_max, numorb_max) :: f3nlXc
+  real(dp), dimension (3) :: r1
+  real(dp), dimension (3) :: r2
+  real(dp), dimension (3) :: r31
+  real(dp), dimension (3) :: r32
+  real(dp), dimension (3) :: rna
+  f3nla = 0.0_dp
+  f3nlb = 0.0_dp
+  f3nlc = 0.0_dp
   do ialp = 1, natoms
    rna(:) = ratom(:,ialp)
    indna = imass(ialp)
@@ -55,9 +55,9 @@ subroutine Dassemble_3c_PP ()
      m32 = mpairnay (jatom, ialp, r32)
      do inu = 1, num_orb(in2)
       do imu = 1, num_orb(in1)
-       f3nlXb(:,imu,inu) = 0.0d0
-       f3nlXc(:,imu,inu) = 0.0d0
-       bcnlx(imu,inu) = 0.0d0
+       f3nlXb(:,imu,inu) = 0.0_dp
+       f3nlXc(:,imu,inu) = 0.0_dp
+       bcnlx(imu,inu) = 0.0_dp
        do ncc = 1, num_orbPP(indna)
         do ix = 1, 3
          f3nlXb(ix,imu,inu) = f3nlXb(ix,imu,inu)  - cl(ncc)*spVNL(ix,imu,ncc,m31,iatom)*sVNL(inu,ncc,m32,jatom)

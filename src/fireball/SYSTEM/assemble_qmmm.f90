@@ -1,17 +1,17 @@
 subroutine assemble_qmmm ()
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use M_constants, only: eq2
   use M_system, only: natoms, ratom, imass, eqmmm, dip, neigh_b, neigh_j, neighn, s_mat, ewaldqmmm, xl, qmmm_qm_mm_pairs, &
     & qmmm_qm_xcrd
   use M_fdata, only: nssh, Qneutral, num_orb
   implicit none
   integer :: iatom, imu, inu, in1, in2, in3, ineigh, issh, jatom, katom, mbeta
-  real(double) :: distance12, dij, dterm, sterm, dq3
-  real(double), dimension (3) :: r1, r2
-  real(double), dimension (natoms) :: sub_ewaldqmmm
+  real(dp) :: distance12, dij, dterm, sterm, dq3
+  real(dp), dimension (3) :: r1, r2
+  real(dp), dimension (natoms) :: sub_ewaldqmmm
 
-  ewaldqmmm = 0.0d0
-  sub_ewaldqmmm = 0.0d0
+  ewaldqmmm = 0.0_dp
+  sub_ewaldqmmm = 0.0_dp
   do iatom = 1, natoms
     do katom = 1, qmmm_qm_mm_pairs
       dij = sqrt ( (qmmm_qm_xcrd(1,katom)-ratom(1,iatom))*(qmmm_qm_xcrd(1,katom)-ratom(1,iatom)) &
@@ -31,21 +31,21 @@ subroutine assemble_qmmm ()
       distance12 = sqrt((r2(1) - r1(1))**2 + (r2(2) - r1(2))**2  + (r2(3) - r1(3))**2)
       do inu = 1, num_orb(in2)
         do imu = 1, num_orb(in1)
-          sterm = s_mat(imu,inu,ineigh,iatom)/2.0d0
-          if (distance12 .gt. 1.0d-4) then
+          sterm = s_mat(imu,inu,ineigh,iatom)/2.0_dp
+          if (distance12 .gt. 1.0e-4_dp) then
             dterm = dip(imu,inu,ineigh,iatom)/distance12
           else
-            dterm = 0.0d0
+            dterm = 0.0_dp
           end if
           ewaldqmmm(imu,inu,ineigh,iatom) =  ewaldqmmm(imu,inu,ineigh,iatom)  + (sterm - dterm)*sub_ewaldqmmm(iatom)*eq2  + (sterm + dterm)*sub_ewaldqmmm(jatom)*eq2
         end do
       end do
     end do
   end do
-  eqmmm = 0.0d0
+  eqmmm = 0.0_dp
   do iatom = 1,natoms
     in3 = imass(iatom)
-    dq3 = 0.0d0
+    dq3 = 0.0_dp
     do issh = 1, nssh(in3)
       dq3 = dq3  + Qneutral(issh,in3)
     end do

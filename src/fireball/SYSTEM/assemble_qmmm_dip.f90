@@ -1,16 +1,16 @@
 subroutine assemble_qmmm_dip () 
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use M_constants, only: eq2
   use M_system, only: natoms, ratom, imass, eqmmm, neigh_b, neigh_j, neighn, s_mat, ewaldqmmm, dipc, &
     & qmmm_qm_mm_pairs, qmmm_qm_xcrd
   use M_fdata, only  : nssh, Qneutral, num_orb
   implicit none
   integer :: iatom, imu, inu, in1, in2, in3, ineigh, issh, jatom, katom, mbeta
-  real(double) :: dij, dterm, sterm, dq3, dq4, x, emnpl
-  real(double), dimension (3) :: rna, rnabc, r1, r2, r21
+  real(dp) :: dij, dterm, sterm, dq3, dq4, x, emnpl
+  real(dp), dimension (3) :: rna, rnabc, r1, r2, r21
 
-  ewaldqmmm = 0.0d0
-  emnpl = 0.0d0
+  ewaldqmmm = 0.0_dp
+  emnpl = 0.0_dp
   do iatom = 1, natoms
     r1(:) = ratom(:,iatom)
     in1 = imass(iatom)
@@ -25,7 +25,7 @@ subroutine assemble_qmmm_dip ()
         rna(3) = qmmm_qm_xcrd(3,katom)
         dq3 = - qmmm_qm_xcrd(4,katom) ! charge in amber have opposite sign
         r21(:) = r2(:) - r1(:)
-        rnabc(:) = rna(:) - (r1(:) + r21(:)/2.0d0)
+        rnabc(:) = rna(:) - (r1(:) + r21(:)/2.0_dp)
         x = sqrt(rnabc(1)**2 + rnabc(2)**2 + rnabc(3)**2)
         do inu = 1, num_orb(in2)
           do imu = 1, num_orb(in1)
@@ -38,10 +38,10 @@ subroutine assemble_qmmm_dip ()
       end do    ! end do katom: mm atom
     end do  ! end do ineigh = 1, neighn(iatom)
   end do   ! end do iatom = 1, natoms
-  eqmmm = 0.0d0
+  eqmmm = 0.0_dp
   do iatom = 1, natoms
     in3 = imass(iatom)
-    dq4 = 0.0d0
+    dq4 = 0.0_dp
     do issh = 1, nssh(in3)
       dq4 = dq4  + Qneutral(issh,in3)
     end do

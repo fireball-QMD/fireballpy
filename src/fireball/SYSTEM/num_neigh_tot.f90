@@ -1,6 +1,6 @@
 ! The subroutine gets total number of neighbors (normal+PP) of each atom
 subroutine num_neigh_tot ()
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use M_system, only: natoms, neigh_max, neigh_b, neigh_j, neighn, neighj_tot, neighb_tot, neighn_tot, numorb_max, neighPPn, neighPP_b, &
     & neighPP_j, neighj_aux, neighPP_max, num_neig_maxtot, hr_box
   implicit none
@@ -57,7 +57,7 @@ subroutine num_neigh_tot ()
   allocate (hr_box(numorb_max,numorb_max,natoms,0:num_neig_maxtot))
   neighj_tot = 0
   neighb_tot = 0
-  hr_box = 0.0d0
+  hr_box = 0.0_dp
   ! Loop over atoms
   do iatom = 1,natoms
     neighj_tot(1:neighn_tot(iatom),iatom) =  neighj_aux(1:neighn_tot(iatom),iatom)

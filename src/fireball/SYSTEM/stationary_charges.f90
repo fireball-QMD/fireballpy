@@ -1,44 +1,44 @@
 subroutine stationary_charges()
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use xc, only: xc_calc
   use M_system, only: natoms, imass, neigh_j, neighn, numorb_max, Qin, Qout, &
   & rho, nssh_tot, neigh_self,neigh_b, fix_shell_charge, get_l_ofshell, &
   & get_orb_ofshell, get_issh_ofshell, g_h, g_xc, get_iatom_ofshell, ztot, &
   & g_h_shell, g_xc_shell,f_xc_shell,exc_aa_shell,vxc_aa_shell, qstate, symbol, &
   & get_shell_ofatom_issh, Kscf, ratom, ifix_shells, fix_shell_user
-  use M_fdata, only: num_orb,nssh,lssh,Qneutral
+  use M_fdata, only: num_orb,nssh,lssh,Qneutral,nzx
   implicit none
   integer imu, inu          
   integer in1, in2          
   integer issh, jssh, beta_iatom
   integer ineigh ,jatom         
   integer i,j
-  real(double),dimension(nssh_tot,nssh_tot) :: A
-  real(double),dimension(nssh_tot) :: c, SQ ! carga
+  real(dp),dimension(nssh_tot,nssh_tot) :: A
+  real(dp),dimension(nssh_tot) :: c, SQ ! carga
   ! correcciones GSN del sistema completo linealizado (igsn=4), calculadas en load_M
-  real(double),dimension(nssh_tot,nssh_tot) :: gsnM
-  real(double),dimension(nssh_tot) :: gsnB
-  real(double) :: Ep2
+  real(dp),dimension(nssh_tot,nssh_tot) :: gsnM
+  real(dp),dimension(nssh_tot) :: gsnB
+  real(dp) :: Ep2
   integer issh1, mu_min, mu_max, l, inumorb
-  real(double) aux, ztot_aux
+  real(dp) aux, ztot_aux
   integer :: beta, alpha, ina, matom, iatom
   integer :: alpha_iatom2, alpha2, nssh_tot2 
   integer, dimension (:), allocatable :: mapindex, ipiv
   integer :: info, lwork
-  real(double), dimension (:), allocatable :: B, work
-  real(double), dimension (:,:), allocatable :: M
+  real(dp), dimension (:), allocatable :: B, work
+  real(dp), dimension (:,:), allocatable :: M
   ! isolver: 0 = dgesv directo; 1 = dgelsd (truncamiento SVD; OJO: saltos de rango entre
   ! geometrias -> PES discontinua, solo para diagnostico); 2 = Tikhonov suave en dQ=Q-Q0
   ! con ligadura exacta (recomendado con shells casi degeneradas: 2+ atomos O, L repetido).
   integer, parameter :: isolver = 0
-  real(double), parameter :: rcond_sc = 1.0d-3   ! umbral relativo isolver=1
-  real(double), parameter :: ridge_sc = 3.0d-2   ! lambda de Tikhonov isolver=2 (unidades de M ~ eV/e)
+  real(dp), parameter :: rcond_sc = 1.0e-3_dp   ! umbral relativo isolver=1
+  real(dp), parameter :: ridge_sc = 3.0e-2_dp   ! lambda de Tikhonov isolver=2 (unidades de M ~ eV/e)
   integer :: rank_sc
   integer, dimension (:), allocatable :: iwork_lsd
-  real(double), dimension (:), allocatable :: Q0v, sing, bp, xv
-  real(double), dimension (:,:), allocatable :: Gm
-  SQ = 0.0d0
-  c = 0.0d0
+  real(dp), dimension (:), allocatable :: Q0v, sing, bp, xv
+  real(dp), dimension (:,:), allocatable :: Gm
+  SQ = 0.0_dp
+  c = 0.0_dp
   alpha = 0
   call load_M()
   !todos libres
@@ -57,14 +57,14 @@ subroutine stationary_charges()
     end do
   else if (ifix_shells .eq. 2) then
     do issh=1,nssh_tot
-      if (Qneutral(get_issh_ofshell(issh), imass(get_iatom_ofshell(issh))) .lt. 1.0d-10) fix_shell_charge(issh)=1
+      if (Qneutral(get_issh_ofshell(issh), imass(get_iatom_ofshell(issh))) .lt. 1.0e-10_dp) fix_shell_charge(issh)=1
     end do
   else if (ifix_shells .eq. 3) then
     if ((.not. allocated(fix_shell_user)) .or. (size(fix_shell_user) .ne. nssh_tot)) then
       print*, 'stationary_charges: fix_shell_user no alocada o de tamano incorrecto', &
         & size(fix_shell_user), nssh_tot, '-- se usa el criterio Qneutral=0 (ifix_shells=2)'
       do issh=1,nssh_tot
-        if (Qneutral(get_issh_ofshell(issh), imass(get_iatom_ofshell(issh))) .lt. 1.0d-10) fix_shell_charge(issh)=1
+        if (Qneutral(get_issh_ofshell(issh), imass(get_iatom_ofshell(issh))) .lt. 1.0e-10_dp) fix_shell_charge(issh)=1
       end do
     else
       do issh=1,nssh_tot
@@ -98,7 +98,7 @@ subroutine stationary_charges()
     print*, "========  positions ========",'Kscf = ',Kscf
     do iatom = 1, natoms
        in1 = imass(iatom)
-       write (*,'(2X,A2,3F12.6)') symbol(iatom), ratom(:,iatom)  - (/ 3.141593, 0.367879, 1.414214 /)
+       write (*,'(2X,I3,3F12.6)') nzx(iatom), ratom(:,iatom)  - (/ 3.141593, 0.367879, 1.414214 /)
      enddo
    end if
    print*, "======== Qin  CHARGES ======== Kscf = " ,Kscf
@@ -120,8 +120,8 @@ subroutine stationary_charges()
   allocate(mapindex(nssh_tot))
   allocate(M(nssh_tot2+1,nssh_tot2+1))
   allocate(B(nssh_tot2+1))
-  M=0.0d0
-  B=0.0d0
+  M=0.0_dp
+  B=0.0_dp
   !SOLVE SYSTEM Mx = B.  x are the charges
   M(:,nssh_tot2+1) = 1.0
   M(nssh_tot2+1,:) = 1.0
@@ -173,7 +173,7 @@ subroutine stationary_charges()
     ! simetrizo M = (M + M^T)/2
     !do i = 1, nssh_tot2
     !  do j = i+1, nssh_tot2
-    !    aux = (M(i,j) + M(j,i)) / 2.0d0
+    !    aux = (M(i,j) + M(j,i)) / 2.0_dp
     !    M(i,j) = aux
     !    M(j,i) = aux
     !  end do
@@ -189,7 +189,7 @@ subroutine stationary_charges()
     ! solve regularizado SVD (dgelsd) en dQ = Q - Q0: las direcciones casi nulas
     ! (valor singular < rcond_sc * sigma_max) quedan con dQ = 0 (cargas neutras)
     allocate(Q0v(nssh_tot2+1))
-    Q0v = 0.0d0
+    Q0v = 0.0_dp
     do alpha = 1, nssh_tot
       if (fix_shell_charge(alpha) .eq. 0) then
         Q0v(mapindex(alpha)) = Qneutral(get_issh_ofshell(alpha), imass(get_iatom_ofshell(alpha)))
@@ -221,7 +221,7 @@ subroutine stationary_charges()
     !   min ||M_fis dQ + mu*1 - b'||^2 + ridge_sc^2 ||dQ||^2   s.a.  sum(dQ) = qlibre
     ! (suave con la geometria: sin saltos de rango como el truncamiento SVD)
     allocate(Q0v(nssh_tot2+1))
-    Q0v = 0.0d0
+    Q0v = 0.0_dp
     do alpha = 1, nssh_tot
       if (fix_shell_charge(alpha) .eq. 0) then
         Q0v(mapindex(alpha)) = Qneutral(get_issh_ofshell(alpha), imass(get_iatom_ofshell(alpha)))
@@ -229,14 +229,14 @@ subroutine stationary_charges()
     end do
     allocate(bp(nssh_tot2), Gm(nssh_tot2+2,nssh_tot2+2), xv(nssh_tot2+2))
     bp = B(1:nssh_tot2) - matmul(M(1:nssh_tot2,1:nssh_tot2), Q0v(1:nssh_tot2))
-    Gm = 0.0d0
+    Gm = 0.0_dp
     ! A1 = [M_fis | 1] (n x n+1); G = A1^T A1 + ridge^2 (solo bloque dQ)
     Gm(1:nssh_tot2+1,1:nssh_tot2+1) = matmul(transpose(M(1:nssh_tot2,1:nssh_tot2+1)), M(1:nssh_tot2,1:nssh_tot2+1))
     do i = 1, nssh_tot2
       Gm(i,i) = Gm(i,i) + ridge_sc*ridge_sc
     end do
-    Gm(1:nssh_tot2,nssh_tot2+2) = 1.0d0
-    Gm(nssh_tot2+2,1:nssh_tot2) = 1.0d0
+    Gm(1:nssh_tot2,nssh_tot2+2) = 1.0_dp
+    Gm(nssh_tot2+2,1:nssh_tot2) = 1.0_dp
     xv(1:nssh_tot2+1) = matmul(transpose(M(1:nssh_tot2,1:nssh_tot2+1)), bp)
     xv(nssh_tot2+2) = B(nssh_tot2+1) - sum(Q0v(1:nssh_tot2))
     allocate(ipiv(nssh_tot2+2))
@@ -265,7 +265,7 @@ subroutine stationary_charges()
     do i = 1, nssh_tot2+1
         write(*,'(1x,F14.6)') B(i)
     end do
-    aux = 0.0d0
+    aux = 0.0_dp
     do i = 1, nssh_tot2
       aux = aux + B(i)
     end do
@@ -316,17 +316,17 @@ subroutine stationary_charges()
       ! igsn=0: 1.21 mA / 0.055 eV/A ; igsn=1: 3.22 mA / 0.35 ; igsn=2: 1.83 mA / 0.43 ; igsn=3: 5.16 mA / 0.30
       ! igsn=4: 0.22 mA / 0.012 eV/A  (mulliken_dipole como referencia: 3.02 mA / 0.15)
       integer, parameter :: igsn = 4
-      real(double) :: nR_aa, naR_aa, qk, exc_R, muxc_R, exc_aR, muxc_aR
-      real(double) :: dexc_dum, d2exc_dum, dmuxc_dum, d2muxc_dum
-      real(double) :: Mba, nR_bb, naR_bb, qg, dexc_b, dmuxc_b, exc_dum, muxc_dum, delta_a
-      real(double) :: dexc_b2, dmuxc_b2, Ssh, abar, abarL, dmu, d2mu, dmuL, d2muL
-      real(double) :: dn, dnL, Smunu, dv, pref, Mv, Nv
-      g_h_shell = 0.0d0
-      g_xc_shell=0.0d0
-      vxc_aa_shell = 0.0d0
-      f_xc_shell=0.0d0
-      gsnM = 0.0d0
-      gsnB = 0.0d0
+      real(dp) :: nR_aa, naR_aa, qk, exc_R, muxc_R, exc_aR, muxc_aR
+      real(dp) :: dexc_dum, d2exc_dum, dmuxc_dum, d2muxc_dum
+      real(dp) :: Mba, nR_bb, naR_bb, qg, dexc_b, dmuxc_b, exc_dum, muxc_dum, delta_a
+      real(dp) :: dexc_b2, dmuxc_b2, Ssh, abar, abarL, dmu, d2mu, dmuL, d2muL
+      real(dp) :: dn, dnL, Smunu, dv, pref, Mv, Nv
+      g_h_shell = 0.0_dp
+      g_xc_shell=0.0_dp
+      vxc_aa_shell = 0.0_dp
+      f_xc_shell=0.0_dp
+      gsnM = 0.0_dp
+      gsnB = 0.0_dp
       count=0
       do iatom=1,natoms
         do issh=1,nssh(imass(iatom))
@@ -366,8 +366,8 @@ subroutine stationary_charges()
         iatom = get_iatom_ofshell(alpha)
         issh = get_issh_ofshell(alpha)
         matom = neigh_self(iatom)
-        nR_aa = 0.0d0
-        naR_aa = 0.0d0
+        nR_aa = 0.0_dp
+        naR_aa = 0.0_dp
         do beta = 1, nssh_tot
           katom = get_iatom_ofshell(beta)
           qk = Qneutral(get_issh_ofshell(beta), imass(katom))
@@ -382,16 +382,16 @@ subroutine stationary_charges()
         ! Delta = sum_beta M^beta_aa (e'-V')(n^R_bb) Q^R_beta
         !       - sum_{beta in a} M^beta_aa (e'-V')(n^{a,R}_bb) Q^R_beta
         if (igsn .ge. 2) then
-          delta_a = 0.0d0
+          delta_a = 0.0_dp
           do beta = 1, nssh_tot
             katom = get_iatom_ofshell(beta)
             kssh = get_issh_ofshell(beta)
             qk = Qneutral(kssh, imass(katom))
             Mba = den_sh(beta,issh,issh,matom,iatom)
-            if (abs(Mba*qk) .lt. 1.0d-12) cycle
+            if (abs(Mba*qk) .lt. 1.0e-12_dp) cycle
             kmatom = neigh_self(katom)
-            nR_bb = 0.0d0
-            naR_bb = 0.0d0
+            nR_bb = 0.0_dp
+            naR_bb = 0.0_dp
             do kalpha = 1, nssh_tot
               qg = Qneutral(get_issh_ofshell(kalpha), imass(get_iatom_ofshell(kalpha)))
               nR_bb = nR_bb + qg*den_sh(kalpha,kssh,kssh,kmatom,katom)
@@ -437,7 +437,7 @@ subroutine stationary_charges()
           call xc_calc(arhoi_on(kssh,kssh,katom), exc_dum, muxc_dum, dexc_b2, dmuxc_b2, d2exc_dum, d2muxc_dum)
           do alpha = 1, nssh_tot
             Mba = den_sh(alpha,kssh,kssh,kmatom,katom)/Ssh
-            if (abs(Mba) .lt. 1.0d-14) cycle
+            if (abs(Mba) .lt. 1.0e-14_dp) cycle
             gsnM(alpha,beta) = gsnM(alpha,beta) - (dexc_b - dmuxc_b)*Mba
             if (get_iatom_ofshell(alpha) .eq. katom) gsnM(alpha,beta) = gsnM(alpha,beta) + (dexc_b2 - dmuxc_b2)*Mba
           end do
@@ -471,19 +471,19 @@ subroutine stationary_charges()
                     if (onsite) then
                       dn  = rho_on(imu,inu,iatom)
                       dnL = rhoi_on(imu,inu,iatom)
-                      Smunu = 0.0d0
-                      if (imu .eq. inu) Smunu = 1.0d0
+                      Smunu = 0.0_dp
+                      if (imu .eq. inu) Smunu = 1.0_dp
                     else
                       dn  = rho_off(imu,inu,ineigh,iatom)
                       dnL = rhoij_off(imu,inu,ineigh,iatom)
                       Smunu = s_mat(imu,inu,ineigh,iatom)
                     end if
                     pref = rho(imu,inu,ineigh,iatom)
-                    if (abs(pref) .lt. 1.0d-14) cycle
+                    if (abs(pref) .lt. 1.0e-14_dp) cycle
                     do alpha = 1, nssh_tot
                       Mv = den_sh(alpha,issh,jssh,ineigh,iatom)/Ssh
                       Nv = den_or(alpha,imu,inu,ineigh,iatom)
-                      if (abs(Mv) .lt. 1.0d-14 .and. abs(Nv) .lt. 1.0d-14) cycle
+                      if (abs(Mv) .lt. 1.0e-14_dp .and. abs(Nv) .lt. 1.0e-14_dp) cycle
                       dv = d2mu*Mv*(dn - Smunu*abar) + dmu*Nv
                       katom = get_iatom_ofshell(alpha)
                       if (katom .eq. iatom .or. katom .eq. jatom) then

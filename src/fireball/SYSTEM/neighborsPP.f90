@@ -17,7 +17,7 @@
 ! xl(:,neighbPP(iatom,ineigh)) + ratom(:,neighjPP(iatom,ineigh)).
 
 subroutine neighborsPP ()
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use M_system, only: icluster, natoms, ratom, imass, mbeta_max, nPP_b, nPP_j, nPP_map, nPPn, nPP_self, nPPx_b, &
     & nPPx_j, nPPx_map, nPPx_point, nPPxn, nPPx_self, neighPPn, neighPP_b, neighPP_j, xl, neighPP_max, errno
   use M_fdata,only : nssh, rcutoff, rc_PP    
@@ -37,16 +37,16 @@ subroutine neighborsPP ()
   integer ialp
   integer mbeta
   integer num_neigh
-  real(double) distance
-  real(double) distance2
-  real(double) range2
-  real(double) rcutoff_i
-  real(double) rcutoff_j
-  real(double), dimension (3) :: vec1, vec2, vec3, vec
+  real(dp) distance
+  real(dp) distance2
+  real(dp) range2
+  real(dp) rcutoff_i
+  real(dp) rcutoff_j
+  real(dp), dimension (3) :: vec1, vec2, vec3, vec
   logical flag
 
-  neighPP_j = 0.0d0
-  neighPP_b  = 0.0d0
+  neighPP_j = 0.0_dp
+  neighPP_b  = 0.0_dp
 
   !   LIST nPP
   ! First we'are going to build nPP list of neighbors. The list includes all
@@ -55,10 +55,10 @@ subroutine neighborsPP ()
   if (icluster .eq. 1) mbeta_max = 0
   do iatom = 1, natoms
    num_neigh = 0
-   rcutoff_i = 0.0d0
+   rcutoff_i = 0.0_dp
    in1 = imass(iatom)
    do imu = 1, nssh(in1)
-    if (rcutoff(in1,imu) .gt. rcutoff_i) rcutoff_i = rcutoff(in1,imu)
+    if (rcutoff(imu,in1) .gt. rcutoff_i) rcutoff_i = rcutoff(imu,in1)
    end do
    do mbeta = 0, mbeta_max
     do jatom = 1, natoms
@@ -68,7 +68,7 @@ subroutine neighborsPP ()
      &    + (ratom(2,iatom) - (xl(2,mbeta) + ratom(2,jatom)))**2 &
      &    + (ratom(3,iatom) - (xl(3,mbeta) + ratom(3,jatom)))**2
      distance = sqrt(distance2)
-     range2 = (rcutoff_i + rcutoff_j - 0.01d0)**2
+     range2 = (rcutoff_i + rcutoff_j - 0.01_dp)**2
      if (distance2 .le. range2) then
       num_neigh = num_neigh + 1
       nPP_j(num_neigh,iatom) = jatom
@@ -88,16 +88,16 @@ subroutine neighborsPP ()
    rcutoff_i = rc_PP(in1)
    do mbeta = 0, mbeta_max
     do jatom = 1, natoms
-     rcutoff_j = 0.0d0
+     rcutoff_j = 0.0_dp
      in2 = imass(jatom) 
      do imu = 1, nssh(in2)
-      if (rcutoff(in2,imu) .gt. rcutoff_j) rcutoff_j = rcutoff(in2,imu)
+      if (rcutoff(imu,in2) .gt. rcutoff_j) rcutoff_j = rcutoff(imu,in2)
      end do
      distance2 = (ratom(1,iatom) - (xl(1,mbeta) + ratom(1,jatom)))**2  &
      &    + (ratom(2,iatom) - (xl(2,mbeta) + ratom(2,jatom)))**2 &
      &    + (ratom(3,iatom) - (xl(3,mbeta) + ratom(3,jatom)))**2
      distance = sqrt(distance2)
-     range2 = (rcutoff_i + rcutoff_j - 0.01d0)**2
+     range2 = (rcutoff_i + rcutoff_j - 0.01_dp)**2
      if (distance2 .le. range2) then
       num_neigh = num_neigh + 1
       nPPx_j(num_neigh,iatom) = jatom
@@ -162,7 +162,7 @@ subroutine neighborsPP ()
          distance = sqrt( ( vec1(1) - vec2(1) )**2  +      &
                &          ( vec1(2) - vec2(2) )**2  +      &
                &          ( vec1(3) - vec2(3) )**2  )
-         if (distance .lt. 0.0001d0) then
+         if (distance .lt. 0.0001_dp) then
            nPPx_point(ineigh,iatom) = kneigh
            exit
          endif ! if (distance)

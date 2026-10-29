@@ -1,5 +1,5 @@
 subroutine assemble_lr_dip () 
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use M_constants, only: eq2
   use M_system, only: natoms, ratom, imass, neigh_self, neigh_pair_a1, neigh_pair_a2, neigh_pair_n1, neigh_pair_n2, &
     & numorb_max, tot_pairs, Qin, s_mat, ewaldlr, dipc, g_h, get_shell_ofatom_issh, iqout, kscf
@@ -17,22 +17,22 @@ subroutine assemble_lr_dip ()
   integer inalp
   integer jneigh
   integer ipair
-  real(double) dist13
-  real(double) dist23
-  real(double) dq3
-  real(double) dterm
-  real(double) sterm
-  real(double) x
-  real(double), dimension (3) :: r1
-  real(double), dimension (3) :: r2
-  real(double), dimension (3) :: rna
-  real(double), dimension (3) :: r13
-  real(double), dimension (3) :: r23
-  real(double), dimension (3) :: r21
-  real(double), dimension (3) :: rnabc
-  real(double), dimension (numorb_max, numorb_max) :: emnpl
-  real(double), dimension (numorb_max, numorb_max) :: emnpl_noq
-  ewaldlr = 0.0d0
+  real(dp) dist13
+  real(dp) dist23
+  real(dp) dq3
+  real(dp) dterm
+  real(dp) sterm
+  real(dp) x
+  real(dp), dimension (3) :: r1
+  real(dp), dimension (3) :: r2
+  real(dp), dimension (3) :: rna
+  real(dp), dimension (3) :: r13
+  real(dp), dimension (3) :: r23
+  real(dp), dimension (3) :: r21
+  real(dp), dimension (3) :: rnabc
+  real(dp), dimension (numorb_max, numorb_max) :: emnpl
+  real(dp), dimension (numorb_max, numorb_max) :: emnpl_noq
+  ewaldlr = 0.0_dp
   do ipair = 1,tot_pairs
     iatom = neigh_pair_a1(ipair)
     jatom = neigh_pair_a2(ipair)
@@ -45,7 +45,7 @@ subroutine assemble_lr_dip ()
     do ialp = 1, natoms    !the ialp is the "distant" atom.
       rna(:) = ratom(:,ialp)
       inalp = imass(ialp)
-      dq3 = 0.0d0
+      dq3 = 0.0_dp
       do issh = 1, nssh(inalp)
         dq3 = dq3 + (Qin(issh,ialp) - Qneutral(issh,inalp))
       end do ! end do issh = 1m nssh(inalp)
@@ -53,13 +53,13 @@ subroutine assemble_lr_dip ()
       r23=rna(:)-r2(:)
       dist13=sqrt(r13(1)*r13(1) + r13(2)*r13(2) + r13(3)*r13(3))
       dist23=sqrt(r23(1)*r23(1) + r23(2)*r23(2) + r23(3)*r23(3))
-      if ((dist13 .lt. 1.0d-5) .or. (dist23 .lt. 1.0d-5)) then
+      if ((dist13 .lt. 1.0e-5_dp) .or. (dist23 .lt. 1.0e-5_dp)) then
       else
         r21(:) = r2(:) - r1(:)
-        rnabc(:) = rna(:) - (r1(:) + r21(:)/2.0d0)
+        rnabc(:) = rna(:) - (r1(:) + r21(:)/2.0_dp)
         x = sqrt(rnabc(1)**2 + rnabc(2)**2 + rnabc(3)**2)
-        if (x .lt. 1.0d-05) then
-          emnpl = 0.0d0
+        if (x .lt. 1.0e-05_dp) then
+          emnpl = 0.0_dp
         else
           do inu = 1, num_orb(in2)
             do imu = 1, num_orb(in1)
@@ -77,8 +77,8 @@ subroutine assemble_lr_dip ()
               end if
             end do !end do imu = 1, num_orb(in1)
           end do  ! end do inu = 1, num_orb(in2)
-        end if    ! end if (x .lt. 1.0d-05)
-      end if    ! (dist13 .lt. 1.0d-5) .or. (dist23 .lt. 1.0d-5)
+        end if    ! end if (x .lt. 1.0e-05_dp)
+      end if    ! (dist13 .lt. 1.0e-5_dp) .or. (dist23 .lt. 1.0e-5_dp)
     end do     ! end do ialp = 1, natoms
   end do !end do ipair
   do iatom = 1,natoms
@@ -91,7 +91,7 @@ subroutine assemble_lr_dip ()
     do ialp = 1, natoms    !the ialp is the "distant" atom.
       rna(:) = ratom(:,ialp)
       inalp = imass(ialp)
-      dq3 = 0.0d0
+      dq3 = 0.0_dp
       do issh = 1, nssh(inalp)
         dq3 = dq3 + (Qin(issh,ialp) - Qneutral(issh,inalp))
       end do ! end do issh = 1m nssh(inalp)
@@ -99,13 +99,13 @@ subroutine assemble_lr_dip ()
       r23=rna(:)-r2(:)
       dist13=sqrt(r13(1)*r13(1) + r13(2)*r13(2) + r13(3)*r13(3))
       dist23=sqrt(r23(1)*r23(1) + r23(2)*r23(2) + r23(3)*r23(3))
-      if ((dist13 .lt. 1.0d-5) .or. (dist23 .lt. 1.0d-5)) then
+      if ((dist13 .lt. 1.0e-5_dp) .or. (dist23 .lt. 1.0e-5_dp)) then
       else
         r21(:) = r2(:) - r1(:)
-        rnabc(:) = rna(:) - (r1(:) + r21(:)/2.0d0)
+        rnabc(:) = rna(:) - (r1(:) + r21(:)/2.0_dp)
         x = sqrt(rnabc(1)**2 + rnabc(2)**2 + rnabc(3)**2)
-        if (x .lt. 1.0d-05) then
-          emnpl = 0.0d0
+        if (x .lt. 1.0e-05_dp) then
+          emnpl = 0.0_dp
         else
           do inu = 1, num_orb(in2)
             do imu = 1, num_orb(in1)
@@ -123,8 +123,8 @@ subroutine assemble_lr_dip ()
                end if
             end do !end do imu = 1, num_orb(in1)
           end do  ! end do inu = 1, num_orb(in2)
-       end if    ! end if (x .lt. 1.0d-05)
-     end if    ! (dist13 .lt. 1.0d-5) .or. (dist23 .lt. 1.0d-5)
+       end if    ! end if (x .lt. 1.0e-05_dp)
+     end if    ! (dist13 .lt. 1.0e-5_dp) .or. (dist23 .lt. 1.0e-5_dp)
    end do     ! end do ialp = 1, natoms
  end do      ! end do iatom = 1,natoms
  return

@@ -1,20 +1,20 @@
 subroutine kspace_gamma ()
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use M_system, only: iqout, natoms, degelec, imass, getlssh, getissh, &
   & Kscf, blowre, bbnkre, sm12_real, eigen_k, norbitals, &
   & norbitals_new, getiatom, neigh_b, neigh_j, neighn, neighPPn, &
   & neighPP_b, neighPP_j, vnl, s_mat, h_mat, errno, isgeneig
   use M_fdata, only: num_orb, Qneutral
   implicit none
-  real(double), parameter :: a0 = 0.0d0
-  real(double), parameter :: a1 = 1.0d0
-  real(double), parameter :: overtol = 1.0d-5
+  real(dp), parameter :: a0 = 0.0_dp
+  real(dp), parameter :: a1 = 1.0_dp
+  real(dp), parameter :: overtol = 1.0e-5_dp
   integer :: ikpoint, iatom, imu, inu, in1, in2, ineigh, &
   & jatom, jmu, jnu, mbeta, mineig, lm
-  real(double), dimension (norbitals) :: eigen
-  real(double), dimension (:), allocatable :: ww, work
-  real(double), dimension (norbitals, norbitals) :: yyyy, zzzz
-  real(double), dimension (:, :), allocatable :: xxxx
+  real(dp), dimension (norbitals) :: eigen
+  real(dp), dimension (:), allocatable :: ww, work
+  real(dp), dimension (norbitals, norbitals) :: yyyy, zzzz
+  real(dp), dimension (:, :), allocatable :: xxxx
   integer :: lwork, info
   ikpoint = 1
   yyyy = a0
@@ -27,9 +27,9 @@ subroutine kspace_gamma ()
       lm = getlssh(inu)
       in1 = imass(iatom)
       if(Qneutral(getissh(inu),imass(getiatom(inu))) < 0.01)then
-        ww(inu) = 1.0d0
+        ww(inu) = 1.0_dp
       else
-        ww(inu) = 10.0d0
+        ww(inu) = 10.0_dp
       end if
     end do
   end if
@@ -141,7 +141,7 @@ subroutine kspace_gamma ()
     allocate(xxxx(norbitals, norbitals_new))
     if ((iqout == 1) .or. (iqout == 3)) then
       do imu = 1, norbitals
-        zzzz(:,imu) = zzzz(:,imu)*eigen(imu)**(-0.25d0)
+        zzzz(:,imu) = zzzz(:,imu)*eigen(imu)**(-0.25_dp)
       end do
       call dgemm('N','C', norbitals, norbitals, norbitals, a1, zzzz, norbitals, &
       &  zzzz, norbitals, a0, xxxx, norbitals)
@@ -152,7 +152,7 @@ subroutine kspace_gamma ()
       end if
     else
       do imu = mineig, norbitals
-        xxxx(:,imu-mineig+1) = zzzz(:,imu)*eigen(imu)**(-0.5d0)
+        xxxx(:,imu-mineig+1) = zzzz(:,imu)*eigen(imu)**(-0.5_dp)
       end do
     end if
     sm12_real(:,1:norbitals_new) = xxxx(:,:)

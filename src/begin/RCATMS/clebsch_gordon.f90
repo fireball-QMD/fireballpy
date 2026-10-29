@@ -121,6 +121,7 @@
 
         function factorial (ix)
         use, intrinsic :: iso_fortran_env, only: dp => real64
+        use :: utils, only: utils_log, UTILS_LOG_ERROR
         real(kind=dp) factorial
 
         integer ix
@@ -128,8 +129,8 @@
         real(kind=dp) fprod
 
         if (ix .lt. 0) then
-         write(6,*) 'Stop !!!!   Factorial for negative x'
-         stop
+         call utils_log(UTILS_LOG_ERROR, "factorial for negative x")
+         error stop 1
         end if
         fprod = 1.0
         do k = 1, ix

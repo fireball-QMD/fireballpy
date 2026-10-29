@@ -6,7 +6,7 @@
 !            consumen las rutinas de fuerzas tras converger el SCF.
 ! imode = 1: fuerza el ensamblado completo (refresh de derivadas antes de getforces).
 subroutine average_ca_rho (imode)
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use M_system, only: iforce, xc_overtol, natoms, ratom, imass, neigh_max, Kscf, neigh_b, neigh_j, neighn, neigh_comb, neigh_comj, &
     & neigh_comm, neigh_comn, neigh_back, numorb_max, Qin, rho_off, rhoij_off, sm_mat, spm_mat, rho_on, arho_on, rhoi_on, &
     & arhoi_on, arhop_on, rhop_on, arhoij_off, arho_off, arhopij_off, arhop_off, rhop_off, rhopij_off, xl, &
@@ -40,35 +40,35 @@ subroutine average_ca_rho (imode)
   ! den_or/den_sh verification
   logical, parameter :: debug_den = .false.
   integer kalpha
-  real(double) qk, val, err_on, err_off, err_sh
-  real(double) cost
-  real(double) x
-  real(double) y
-  real(double), dimension (3, 3, 3) :: deps
-  real(double), dimension (3, 3) :: eps
-  real(double), dimension (3) :: r1
-  real(double), dimension (3) :: r2
-  real(double), dimension (3) :: r21
-  real(double), dimension (3) :: rhat
+  real(dp) qk, val, err_on, err_off, err_sh
+  real(dp) cost
+  real(dp) x
+  real(dp) y
+  real(dp), dimension (3, 3, 3) :: deps
+  real(dp), dimension (3, 3) :: eps
+  real(dp), dimension (3) :: r1
+  real(dp), dimension (3) :: r2
+  real(dp), dimension (3) :: r21
+  real(dp), dimension (3) :: rhat
   ! crystaline matrices
-  real(double), dimension (numorb_max, numorb_max) :: rho_2c
-  real(double), dimension (numorb_max, numorb_max) :: rhoi_2c
+  real(dp), dimension (numorb_max, numorb_max) :: rho_2c
+  real(dp), dimension (numorb_max, numorb_max) :: rhoi_2c
   ! molecular spehrical matrices
-  real(double), dimension (numorb_max, numorb_max) :: rhomx
-  real(double), dimension (3, numorb_max, numorb_max) :: rhompx
-  real(double), dimension (nsh_max, nsh_max) :: rhom_2c
-  real(double), dimension (nsh_max, nsh_max) :: rhomi_2c
-  real(double), dimension (3, nsh_max, nsh_max) :: rhomp_2c
-  real(double), dimension (:, :, :, :), allocatable :: rhom_3c
-  real(double), dimension (nsh_max, nsh_max) :: rhomm
-  real(double), dimension (3, nsh_max, nsh_max) :: rhompm
-  real(double), dimension (3) :: rnabc
-  real(double), dimension (3) :: rna
-  real(double), dimension (3) :: sighat
-  real(double), dimension (nsh_max, nsh_max) :: sm
-  real(double), dimension (3, nsh_max, nsh_max) :: spm
+  real(dp), dimension (numorb_max, numorb_max) :: rhomx
+  real(dp), dimension (3, numorb_max, numorb_max) :: rhompx
+  real(dp), dimension (nsh_max, nsh_max) :: rhom_2c
+  real(dp), dimension (nsh_max, nsh_max) :: rhomi_2c
+  real(dp), dimension (3, nsh_max, nsh_max) :: rhomp_2c
+  real(dp), dimension (:, :, :, :), allocatable :: rhom_3c
+  real(dp), dimension (nsh_max, nsh_max) :: rhomm
+  real(dp), dimension (3, nsh_max, nsh_max) :: rhompm
+  real(dp), dimension (3) :: rnabc
+  real(dp), dimension (3) :: rna
+  real(dp), dimension (3) :: sighat
+  real(dp), dimension (nsh_max, nsh_max) :: sm
+  real(dp), dimension (3, nsh_max, nsh_max) :: spm
   !
-  real(double) rho_modified
+  real(dp) rho_modified
 
   ! Fast path: en Kscf>1 todas las integrales ya estan tabuladas (Kscf=1); las densidades
   ! son lineales en Q, asi que basta contraer las tablas con las cargas actuales.
@@ -77,21 +77,21 @@ subroutine average_ca_rho (imode)
     return
   end if
 
-  rhomx=0.0d0
-  rhompx=0.0d0
+  rhomx=0.0_dp
+  rhompx=0.0_dp
 
   allocate (rhom_3c (nsh_max, nsh_max, neigh_max, natoms))
 
-  if (Kscf .eq. 1) sm_mat = 0.0d0
-  if (Kscf .eq. 1 .and. iforce .eq. 1) spm_mat = 0.0d0
+  if (Kscf .eq. 1) sm_mat = 0.0_dp
+  if (Kscf .eq. 1 .and. iforce .eq. 1) spm_mat = 0.0_dp
   ! N^gamma_munu and M^gamma_alphabeta are charge-independent: fill only at Kscf=1
   if (Kscf .eq. 1) then
-    den_or = 0.0d0
-    den_sh = 0.0d0
-    denij_or = 0.0d0
-    denij_sh = 0.0d0
-    deni_or = 0.0d0
-    deni_sh = 0.0d0
+    den_or = 0.0_dp
+    den_sh = 0.0_dp
+    denij_or = 0.0_dp
+    denij_sh = 0.0_dp
+    deni_or = 0.0_dp
+    deni_sh = 0.0_dp
   end if
   
   !   -----  ON SITE PART  ------
@@ -99,33 +99,33 @@ subroutine average_ca_rho (imode)
   ! <mu i| rho_i^o | nu i>  ......  rhoi0_on; arhoi0_on
   ! <mu i| rho_j | nu i>    ......  rho_on; arho_on
 
-  arho_on   = 0.0d0
-  arhoi_on  = 0.0d0
-  rho_on    = 0.0d0
-  rhoi_on   = 0.0d0
+  arho_on   = 0.0_dp
+  arhoi_on  = 0.0_dp
+  rho_on    = 0.0_dp
+  rhoi_on   = 0.0_dp
   ! forces
-  arhop_on = 0.0d0
-  rhop_on  = 0.0d0
+  arhop_on = 0.0_dp
+  rhop_on  = 0.0_dp
 
   do iatom = 1,natoms
     r1(:) = ratom(:,iatom)
     in1 = imass(iatom)
 
-    rho_2c   = 0.0d0
-    rhoi_2c  = 0.0d0
-    rhom_2c   = 0.0d0
-    rhomi_2c  = 0.0d0
+    rho_2c   = 0.0_dp
+    rhoi_2c  = 0.0_dp
+    rhom_2c   = 0.0_dp
+    rhomi_2c  = 0.0_dp
     ! spherical overlap <i,mu| i,nu>
-    y = 0.0d0
+    y = 0.0_dp
     in2 = in1
     isorp = 0
     interaction0 = TWOCENTER_OVERLAPS
     in3 = in2
-    sighat = 0.0d0
-    eps = 0.0d0
+    sighat = 0.0_dp
+    eps = 0.0_dp
 
     do issh = 1,3
-      eps(issh,issh) = 1.0d0
+      eps(issh,issh) = 1.0_dp
     enddo
     call doscentrosS (interaction0, isorp, iforce, in1, in2, in3, y, eps, sm, spm)
     ! store the raw on-site spherical overlap in the self-neighbor slot of sm_mat
@@ -140,7 +140,7 @@ subroutine average_ca_rho (imode)
     end if
 
     do ineigh = 1, neighn(iatom)
-      rhomp_2c  = 0.0d0
+      rhomp_2c  = 0.0_dp
       mbeta = neigh_b(ineigh,iatom)
       jatom = neigh_j(ineigh,iatom)
       r2(:) = ratom(:,jatom) + xl(:,mbeta)
@@ -148,10 +148,10 @@ subroutine average_ca_rho (imode)
       r21(:) = r2(:) - r1(:)
       y = sqrt(r21(1)*r21(1) + r21(2)*r21(2) + r21(3)*r21(3))
 
-      if (y .lt. 1.0d-05) then
-        sighat(1) = 0.0d0
-        sighat(2) = 0.0d0
-        sighat(3) = 1.0d0
+      if (y .lt. 1.0e-05_dp) then
+        sighat(1) = 0.0_dp
+        sighat(2) = 0.0_dp
+        sighat(3) = 1.0_dp
       else
         sighat(:) = r21(:)/y
       end if
@@ -240,10 +240,10 @@ subroutine average_ca_rho (imode)
       do issh = 1,nssh(in1)
         do jssh = 1,nssh(in1)
           if(abs(sm(issh,jssh)) .lt. xc_overtol) then
-            if (sm(issh,jssh) .gt. 0.0d0) then
+            if (sm(issh,jssh) .gt. 0.0_dp) then
               sm(issh,jssh) =  xc_overtol
             else
-              sm(issh,jssh) =  -1.0d0*xc_overtol
+              sm(issh,jssh) =  -1.0_dp*xc_overtol
             endif
           endif
           arhop_on(:,issh,jssh,ineigh,iatom) =  arhop_on(:,issh,jssh,ineigh,iatom) &
@@ -257,10 +257,10 @@ subroutine average_ca_rho (imode)
     do issh = 1,nssh(in1)
       do jssh = 1,nssh(in1)
         if(abs(sm(issh,jssh)) .lt. xc_overtol) then
-          if (sm(issh,jssh) .gt. 0.0d0) then
+          if (sm(issh,jssh) .gt. 0.0_dp) then
             sm(issh,jssh) =  xc_overtol
           else
-            sm(issh,jssh) =  -1.0d0*xc_overtol
+            sm(issh,jssh) =  -1.0_dp*xc_overtol
           endif
         endif
         arho_on(issh,jssh,iatom) = (arho_on(issh,jssh,iatom)  + rhom_2c(issh,jssh) / sm(issh,jssh))
@@ -273,15 +273,15 @@ subroutine average_ca_rho (imode)
   ! <mu i| (rho_i+rho_j) | nu j>  ......  rhoij_off; arhoij_off
   ! <mu i| rho_k | nu j>   ......  rho_off; arho_off
   ! Initialize arrays to zero.
-  arhoij_off  = 0.0d0
-  arhopij_off = 0.0d0
-  arho_off   = 0.0d0
-  arhop_off  = 0.0d0
-  rho_off = 0.0d0
-  rhop_off = 0.0d0
-  rhoij_off = 0.0d0
-  rhopij_off = 0.0d0
-  rhom_3c = 0.0d0
+  arhoij_off  = 0.0_dp
+  arhopij_off = 0.0_dp
+  arho_off   = 0.0_dp
+  arhop_off  = 0.0_dp
+  rho_off = 0.0_dp
+  rhop_off = 0.0_dp
+  rhoij_off = 0.0_dp
+  rhopij_off = 0.0_dp
+  rhom_3c = 0.0_dp
 
   !    T H R E E - C E N T E R   P A R T
   do ialp = 1, natoms
@@ -301,19 +301,19 @@ subroutine average_ca_rho (imode)
         jneigh = neigh_back(iatom,mneigh)
         r21(:) = r2(:) - r1(:)
         y = sqrt(r21(1)*r21(1) + r21(2)*r21(2) + r21(3)*r21(3))
-        if (y .lt. 1.0d-05) then
-          sighat(1) = 0.0d0
-          sighat(2) = 0.0d0
-          sighat(3) = 1.0d0
+        if (y .lt. 1.0e-05_dp) then
+          sighat(1) = 0.0_dp
+          sighat(2) = 0.0_dp
+          sighat(3) = 1.0_dp
         else
           sighat(:) = r21(:)/y
         end if
-        rnabc(:) = rna(:) - (r1(:) + r21(:)/2.0d0)
+        rnabc(:) = rna(:) - (r1(:) + r21(:)/2.0_dp)
         x = sqrt(rnabc(1)**2 + rnabc(2)**2 + rnabc(3)**2)
-        if (x .lt. 1.0d-05) then
-          rhat(1) = 0.0d0
-          rhat(2) = 0.0d0
-          rhat(3) = 0.0d0
+        if (x .lt. 1.0e-05_dp) then
+          rhat(1) = 0.0_dp
+          rhat(2) = 0.0_dp
+          rhat(3) = 0.0_dp
         else
           rhat(:) = rnabc(:)/x
         end if
@@ -369,10 +369,10 @@ subroutine average_ca_rho (imode)
       else
         r21(:) = r2(:) - r1(:)
         y = sqrt(r21(1)*r21(1) + r21(2)*r21(2) + r21(3)*r21(3))
-        if (y .lt. 1.0d-05) then
-          sighat(1) = 0.0d0
-          sighat(2) = 0.0d0
-          sighat(3) = 1.0d0
+        if (y .lt. 1.0e-05_dp) then
+          sighat(1) = 0.0_dp
+          sighat(2) = 0.0_dp
+          sighat(3) = 1.0_dp
         else
           sighat(:) = r21(:)/y
         end if
@@ -381,8 +381,8 @@ subroutine average_ca_rho (imode)
         interaction = TWOCENTER_DEN_L
         interaction0 = TWOCENTER_DENS_L
         in3 = in1
-        rhom_2c = 0.0d0
-        rhomp_2c = 0.0d0
+        rhom_2c = 0.0_dp
+        rhomp_2c = 0.0_dp
         do isorp = 1, nssh(in3)
           call doscentros (interaction, isorp, iforce, in1, in3, in2, y, eps, deps, rhomx, rhompx)
           call doscentrosS (interaction0, isorp, iforce, in1, in3, in2, y, eps, rhomm, rhompm)
@@ -477,10 +477,10 @@ subroutine average_ca_rho (imode)
         do issh = 1, nssh(in1)
           do jssh = 1, nssh(in2)
             if (abs(sm(issh,jssh)) .lt. xc_overtol) then
-              if (sm(issh,jssh) .gt. 0.0d0) then
+              if (sm(issh,jssh) .gt. 0.0_dp) then
                 sm(issh,jssh) =  xc_overtol
               else
-                sm(issh,jssh) =  -1.0d0*xc_overtol
+                sm(issh,jssh) =  -1.0_dp*xc_overtol
               endif
             endif
             arhoij_off(issh,jssh,ineigh,iatom) =  arhoij_off(issh,jssh,ineigh,iatom) +  rhom_2c(issh,jssh)/sm(issh,jssh)
@@ -498,9 +498,9 @@ subroutine average_ca_rho (imode)
   ! densities assembled above. At Kscf>1 this also validates that the Kscf=1
   ! cached integrals are charge-independent.
   if (debug_den) then
-    err_on = 0.0d0
-    err_off = 0.0d0
-    err_sh = 0.0d0
+    err_on = 0.0_dp
+    err_off = 0.0_dp
+    err_sh = 0.0_dp
     do iatom = 1, natoms
       in1 = imass(iatom)
       matom = neigh_self(iatom)
@@ -511,7 +511,7 @@ subroutine average_ca_rho (imode)
         if (iatom .eq. jatom .and. mbeta .eq. 0) then
           do inu = 1, num_orb(in1)
             do imu = 1, num_orb(in1)
-              val = 0.0d0
+              val = 0.0_dp
               do kalpha = 1, nssh_tot
                 qk = Qin(get_issh_ofshell(kalpha), get_iatom_ofshell(kalpha))
                 val = val + qk*den_or(kalpha,imu,inu,matom,iatom)
@@ -522,7 +522,7 @@ subroutine average_ca_rho (imode)
         else
           do inu = 1, num_orb(in2)
             do imu = 1, num_orb(in1)
-              val = 0.0d0
+              val = 0.0_dp
               do kalpha = 1, nssh_tot
                 qk = Qin(get_issh_ofshell(kalpha), get_iatom_ofshell(kalpha))
                 val = val + qk*den_or(kalpha,imu,inu,ineigh,iatom)
@@ -532,7 +532,7 @@ subroutine average_ca_rho (imode)
           end do
           do jssh = 1, nssh(in2)
             do issh = 1, nssh(in1)
-              val = 0.0d0
+              val = 0.0_dp
               do kalpha = 1, nssh_tot
                 qk = Qin(get_issh_ofshell(kalpha), get_iatom_ofshell(kalpha))
                 val = val + qk*den_sh(kalpha,issh,jssh,ineigh,iatom)
@@ -562,21 +562,21 @@ contains
   ! derivadas (rhop_*, arhop_*) NO se tocan: se refrescan con imode=1 antes de las fuerzas.
   subroutine rebuild_rho_from_tables ()
     integer kiatom, kineigh, kjatom, kmbeta, kin1, kin2, kimu, kinu, kissh, kjssh, kmatom, kgsh
-    real(double), dimension (nssh_tot) :: Qg
-    real(double) smval
+    real(dp), dimension (nssh_tot) :: Qg
+    real(dp) smval
 
     do kgsh = 1, nssh_tot
       Qg(kgsh) = Qin(get_issh_ofshell(kgsh), get_iatom_ofshell(kgsh))
     end do
 
-    rho_on = 0.0d0
-    rhoi_on = 0.0d0
-    arho_on = 0.0d0
-    arhoi_on = 0.0d0
-    rho_off = 0.0d0
-    rhoij_off = 0.0d0
-    arho_off = 0.0d0
-    arhoij_off = 0.0d0
+    rho_on = 0.0_dp
+    rhoi_on = 0.0_dp
+    arho_on = 0.0_dp
+    arhoi_on = 0.0_dp
+    rho_off = 0.0_dp
+    rhoij_off = 0.0_dp
+    arho_off = 0.0_dp
+    arhoij_off = 0.0_dp
 
     do kiatom = 1, natoms
       kin1 = imass(kiatom)
@@ -591,7 +591,7 @@ contains
         do kissh = 1, nssh(kin1)
           smval = sm_mat(kissh,kjssh,kmatom,kiatom)
           if (abs(smval) .lt. xc_overtol) then
-            if (smval .gt. 0.0d0) then
+            if (smval .gt. 0.0_dp) then
               smval = xc_overtol
             else
               smval = -xc_overtol
@@ -616,7 +616,7 @@ contains
           do kissh = 1, nssh(kin1)
             smval = sm_mat(kissh,kjssh,kineigh,kiatom)
             if (abs(smval) .lt. xc_overtol) then
-            if (smval .gt. 0.0d0) then
+            if (smval .gt. 0.0_dp) then
               smval = xc_overtol
             else
               smval = -xc_overtol

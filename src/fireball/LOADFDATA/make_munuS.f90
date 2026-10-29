@@ -1,5 +1,5 @@
 subroutine make_munuS ()
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use M_fdata, only: MES_max, nspecies, nssh, index_maxS, muS, mvalueS, nuS
   implicit none
   integer :: index, in1, in2, issh1, issh2, n1, n2

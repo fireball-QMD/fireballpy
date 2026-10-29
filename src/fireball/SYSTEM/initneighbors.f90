@@ -2,7 +2,7 @@
 ! old neighbor file exists, then this will be used to determine the neighbors
 ! If not, then the neighbors will be calculated as normal. 
 subroutine initneighbors ()
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use M_system, only: natoms, nPP_b, nPP_j, nPPn, nPP_self, nPPx_b, nPPx_j, nPPxn, nPPx_self
   implicit none
   integer :: iatom

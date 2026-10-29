@@ -1,13 +1,13 @@
 ! This subroutine takes a 1D list of integrals and generates a 2x2 array with respect to the shells.
 subroutine recoverC (n1, n2, hlist, dhlist, hbox, dhbox)
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use M_fdata, only: ME2c_max, nsh_max
   implicit none
   integer, intent (in) :: n1, n2
-  real(double), intent(in), dimension (ME2c_max) :: hlist 
-  real(double), intent(in), dimension (ME2c_max) :: dhlist 
-  real(double), intent(out), dimension (nsh_max, nsh_max) :: hbox
-  real(double), intent(out), dimension (nsh_max, nsh_max) :: dhbox
+  real(dp), intent(in), dimension (ME2c_max) :: hlist 
+  real(dp), intent(in), dimension (ME2c_max) :: dhlist 
+  real(dp), intent(out), dimension (nsh_max, nsh_max) :: hbox
+  real(dp), intent(out), dimension (nsh_max, nsh_max) :: dhbox
 
   integer index
   integer indexcoulomb

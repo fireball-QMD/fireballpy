@@ -528,22 +528,5 @@
         deallocate (v_local)
         deallocate (vna_local)
 
-! Format Statements
-! ===========================================================================
-100     format (2x, 4f6.2)
-101     format (2x, a12)
-102     format (2x, i5, 2x, a11)
-103     format (2x, i8)
-104     format (2x, 2(2x,f7.4), 2x, f7.2)
-105     format (2x, i3)
-200     format (2x, ' iteration ', 2x, ' e(tot) ', 2x, ' eigenvalue ', 3x, &
-     &          ' u(e-e) ', 6x, ' u(xc) ', 4x, ' tolerance ')
-201     format (2x, 75('='))
-202     format (5x, i3, 5x, 1e11.4, 4(2x,e11.5))
-300     format (2x, ' l = ', i1, ' contains ', f6.3, ' electrons --- ' ,   &
-     &              ' eigenvalue = ', f12.7)
-400     format (4d18.10)
-401     format (2x, f6.3, 2x, f12.6)
-
         return
         end

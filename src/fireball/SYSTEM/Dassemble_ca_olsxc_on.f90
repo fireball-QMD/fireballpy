@@ -1,5 +1,5 @@
 subroutine Dassemble_ca_olsxc_on ()
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use xc, only: xc_calc
   use M_system, only: natoms, imass, neigh_b, neigh_j, neighn, neigh_self, numorb_max, Qin, rho, rho_on, arho_on, arhop_on, rhop_on, &
     & faxc, faxc_ca, dxcdcc
@@ -23,25 +23,25 @@ subroutine Dassemble_ca_olsxc_on ()
   integer mbeta
   integer n1
   integer n2
-  real(double) exc
-  real(double) dexc
-  real(double) d2exc
-  real(double) d2muxc
-  real(double) dmuxc
-  real(double) muxc
-  real(double) rhoxc
-  real(double) rhoxc_av
-  real(double) q_mu
-  real(double), dimension (3, numorb_max, numorb_max) :: bcxcpx
-  real(double), dimension (numorb_max, numorb_max) :: delta
-  real(double), dimension (3) :: drhoxc
-  real(double), dimension (3) :: drhoxc_av
-  faxc = 0.0d0
-  faxc_ca = 0.0d0
-  dxcdcc  = 0.0d0
-  delta = 0.0d0
+  real(dp) exc
+  real(dp) dexc
+  real(dp) d2exc
+  real(dp) d2muxc
+  real(dp) dmuxc
+  real(dp) muxc
+  real(dp) rhoxc
+  real(dp) rhoxc_av
+  real(dp) q_mu
+  real(dp), dimension (3, numorb_max, numorb_max) :: bcxcpx
+  real(dp), dimension (numorb_max, numorb_max) :: delta
+  real(dp), dimension (3) :: drhoxc
+  real(dp), dimension (3) :: drhoxc_av
+  faxc = 0.0_dp
+  faxc_ca = 0.0_dp
+  dxcdcc  = 0.0_dp
+  delta = 0.0_dp
   do imu = 1,numorb_max
-    delta(imu,imu) = 1.0d0
+    delta(imu,imu) = 1.0_dp
   enddo
   do iatom = 1, natoms
     in1 = imass(iatom)
@@ -50,7 +50,7 @@ subroutine Dassemble_ca_olsxc_on ()
       mbeta = neigh_b(ineigh,iatom)
       jatom = neigh_j(ineigh,iatom)
       in2 = imass(jatom)
-      bcxcpx = 0.0d0
+      bcxcpx = 0.0_dp
       if (iatom .eq. jatom .and. mbeta .eq. 0) then
       else
         n1 = 0
@@ -60,7 +60,7 @@ subroutine Dassemble_ca_olsxc_on ()
           rhoxc_av = arho_on(issh,issh,iatom)
           drhoxc_av(:) = arhop_on(:,issh,issh,ineigh,iatom)
           call xc_calc(rhoxc_av, exc, muxc, dexc, dmuxc, d2exc, d2muxc)
-          q_mu = Qin(issh,iatom) / (2.0d0*l1 + 1)
+          q_mu = Qin(issh,iatom) / (2.0_dp*l1 + 1)
           do index = -l1, l1
             imu = n1 + index
             rhoxc  = rho_on(imu,imu,iatom)

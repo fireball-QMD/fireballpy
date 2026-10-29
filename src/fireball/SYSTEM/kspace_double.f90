@@ -1,25 +1,25 @@
-subroutine kspace_double (ikpoint, sks)
-  use, intrinsic :: iso_fortran_env, only: double => real64
+subroutine kspace_dp (ikpoint, sks)
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use M_system, only: iqout, natoms, degelec, imass, getlssh, getissh, Kscf, blowre, blowim, bbnkre, bbnkim, sm12_complex, eigen_k, norbitals, &
   & norbitals_new, getiatom, neigh_b, neigh_j, neighn, neighPPn, neighPP_b, neighPP_j, vnl, s_mat, h_mat, errno, isgeneig, xl, ratom
   use M_fdata, only: num_orb, Qneutral
   implicit none
   integer, intent(in) :: ikpoint
-  real(double), dimension(3), intent(in) :: sks
-  complex(double), parameter :: a0 = cmplx(0.0d0, 0.0d0, double)
-  complex(double), parameter :: a1 = cmplx(1.0d0, 0.0d0, double)
-  real(double), parameter :: overtol = 1.0d-5
+  real(dp), dimension(3), intent(in) :: sks
+  complex(dp), parameter :: a0 = cmplx(0.0_dp, 0.0_dp, dp)
+  complex(dp), parameter :: a1 = cmplx(1.0_dp, 0.0_dp, dp)
+  real(dp), parameter :: overtol = 1.0e-5_dp
   integer iatom, imu, inu, in1, in2, ineigh, &
   & jatom, jmu, jnu, mbeta, mineig, lm
-  real(double) :: dot
-  complex(double) :: phase
-  real(double), dimension(3) :: vec
-  real(double), dimension (norbitals) :: eigen
-  real(double), dimension(3*norbitals-2) :: rwork
-  real(double), dimension (:), allocatable :: ww
-  complex(double), dimension (:), allocatable :: work
-  complex(double), dimension (norbitals, norbitals) :: yyyy, zzzz
-  complex(double), dimension (:, :), allocatable :: xxxx
+  real(dp) :: dot
+  complex(dp) :: phase
+  real(dp), dimension(3) :: vec
+  real(dp), dimension (norbitals) :: eigen
+  real(dp), dimension(3*norbitals-2) :: rwork
+  real(dp), dimension (:), allocatable :: ww
+  complex(dp), dimension (:), allocatable :: work
+  complex(dp), dimension (norbitals, norbitals) :: yyyy, zzzz
+  complex(dp), dimension (:, :), allocatable :: xxxx
   integer :: lwork, info
   yyyy = a0
 
@@ -31,9 +31,9 @@ subroutine kspace_double (ikpoint, sks)
       lm = getlssh(inu)
       in1 = imass(iatom)
       if(Qneutral(getissh(inu),imass(getiatom(inu))).lt.0.01)then
-        ww(inu) = 1.0d0
+        ww(inu) = 1.0_dp
       else
-        ww(inu) = 10.0d0
+        ww(inu) = 10.0_dp
       end if
     end do
   end if
@@ -48,7 +48,7 @@ subroutine kspace_double (ikpoint, sks)
         in2 = imass(jatom)
         vec(:) = xl(:,mbeta) + ratom(:,jatom) - ratom(:,iatom)
         dot = sks(1)*vec(1) + sks(2)*vec(2) + sks(3)*vec(3)
-        phase = cmplx(cos(dot), sin(dot), double)
+        phase = cmplx(cos(dot), sin(dot), dp)
         do inu = 1, num_orb(in2)
           jnu = inu + degelec(jatom)
           do imu = 1, num_orb(in1)
@@ -76,7 +76,7 @@ subroutine kspace_double (ikpoint, sks)
       in2 = imass(jatom)
       vec(:) = xl(:,mbeta) + ratom(:,jatom) - ratom(:,iatom)
       dot = sks(1)*vec(1) + sks(2)*vec(2) + sks(3)*vec(3)
-      phase = cmplx(cos(dot), sin(dot), double)
+      phase = cmplx(cos(dot), sin(dot), dp)
       do inu = 1, num_orb(in2)
         jnu = inu + degelec(jatom)
         do imu = 1, num_orb(in1)
@@ -91,7 +91,7 @@ subroutine kspace_double (ikpoint, sks)
       in2 = imass(jatom)
       vec(:) = xl(:,mbeta) + ratom(:,jatom) - ratom(:,iatom)
       dot = sks(1)*vec(1) + sks(2)*vec(2) + sks(3)*vec(3)
-      phase = cmplx(cos(dot), sin(dot), double)
+      phase = cmplx(cos(dot), sin(dot), dp)
       do inu = 1, num_orb(in2)
         jnu = inu + degelec(jatom)
         do imu = 1, num_orb(in1)
@@ -155,7 +155,7 @@ subroutine kspace_double (ikpoint, sks)
     allocate(xxxx(norbitals, norbitals_new))
     if ((iqout .eq. 1) .or. (iqout .eq. 3)) then
       do imu = 1, norbitals
-        zzzz(:,imu) = zzzz(:,imu)*eigen(imu)**(-0.25d0)
+        zzzz(:,imu) = zzzz(:,imu)*eigen(imu)**(-0.25_dp)
       end do
       call zgemm('N', 'C', norbitals, norbitals, norbitals, a1, zzzz, norbitals, zzzz, norbitals, a0, xxxx, norbitals)
       if (iqout .eq. 3) then
@@ -165,7 +165,7 @@ subroutine kspace_double (ikpoint, sks)
       end if
     else
       do imu = mineig, norbitals
-        xxxx(:,imu-mineig+1) = zzzz(:,imu)*eigen(imu)**(-0.5d0)
+        xxxx(:,imu-mineig+1) = zzzz(:,imu)*eigen(imu)**(-0.5_dp)
       end do
     end if
     sm12_complex(:,1:norbitals_new,ikpoint) = xxxx(:,:)
@@ -198,4 +198,4 @@ subroutine kspace_double (ikpoint, sks)
   if ((Kscf .eq. 1) .and. (iqout .eq. 3)) then
     deallocate (ww)
   end if
-end subroutine kspace_double
+end subroutine kspace_dp

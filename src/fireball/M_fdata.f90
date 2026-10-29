@@ -1,5 +1,5 @@
 module M_fdata
-use, intrinsic :: iso_fortran_env, only: double => real64
+use, intrinsic :: iso_fortran_env, only: dp => real64
 use :: constants, only: FNAME_LEN
 use :: xc, only: XC_NAMES_LEN
 use :: math, only: math_interp_t
@@ -13,9 +13,9 @@ character(len=FNAME_LEN) :: fdataLocation
 integer :: nsh_max, nshPP_max, isorpmax, isorpmax_xc, nspecies
 
 integer, dimension(:), allocatable :: nzx, nssh, nsshPP
-real(double), dimension(:), allocatable :: rc_PP
+real(dp), dimension(:), allocatable :: rc_PP
 integer, dimension(:,:), allocatable :: lssh, lsshPP, cl_PP
-real(double), dimension(:,:), allocatable :: rcutoff, Qneutral, Qref
+real(dp), dimension(:,:), allocatable :: rcutoff, Qneutral, Qref
 
 ! Maximum number of two-center matrix elements
 ! Examples: s ==> 1, sp^3 ==>  6, ss*p^3p*^3 ==> 24, sp^3d^5 ==> 39
@@ -45,15 +45,15 @@ integer, dimension(:, :), allocatable :: index_maxS
 integer, dimension(:, :, :), allocatable :: muS, nuS, mvalueS
 
 character(len=XC_NAMES_LEN), allocatable :: exc_names(:)
-real(double), allocatable :: exc_weights(:)
+real(dp), allocatable :: exc_weights(:)
 
 !TODO idipole, icluster, siempre lee interaccion 10 y 11
 
 ! One center integrals
 character (len=2), dimension(1), parameter :: onecfname = ["xc"]
-real(double), dimension(:,:), allocatable :: exc_1c_0
-real(double), dimension(:,:,:), allocatable :: vxc_1c_0, fxc_1c
-real(double), dimension(:,:,:,:), allocatable :: gxc_1c
+real(dp), dimension(:,:), allocatable :: exc_1c_0
+real(dp), dimension(:,:,:), allocatable :: vxc_1c_0, fxc_1c
+real(dp), dimension(:,:,:,:), allocatable :: gxc_1c
 
 
 character(len=11), dimension(20), parameter :: twocfname = [ &
@@ -106,11 +106,11 @@ character(len=4), dimension(4), parameter :: threecfname = ["bcna", "xc3c", "den
 integer, dimension(:, :, :), allocatable :: icon3c
 ! Neutral (charged) atom interactions; there are five bcna arrays - one for each theta
 integer, dimension(:, :), allocatable :: numx3c_bcna, numy3c_bcna
-real(double), dimension(:, :), allocatable :: hx_bcna, hy_bcna, x3cmax_bcna, y3cmax_bcna
-real(double), dimension(:, :, :, :, :), allocatable :: bcna_01, bcna_02, bcna_03, bcna_04, bcna_05
+real(dp), dimension(:, :), allocatable :: hx_bcna, hy_bcna, x3cmax_bcna, y3cmax_bcna
+real(dp), dimension(:, :, :, :, :), allocatable :: bcna_01, bcna_02, bcna_03, bcna_04, bcna_05
 integer, dimension(:, :), allocatable :: numx3c_den3, numy3c_den3
-real(double), dimension(:, :), allocatable :: hx_den3, hy_den3, x3cmax_den3, y3cmax_den3
-real(double), dimension(:, :, :, :, :), allocatable :: den3_01, den3_02, den3_03, den3_04, den3_05
-real(double), dimension(:, :, :, :, :), allocatable :: den3S_01, den3S_02, den3S_03, den3S_04, den3S_05
+real(dp), dimension(:, :), allocatable :: hx_den3, hy_den3, x3cmax_den3, y3cmax_den3
+real(dp), dimension(:, :, :, :, :), allocatable :: den3_01, den3_02, den3_03, den3_04, den3_05
+real(dp), dimension(:, :, :, :, :), allocatable :: den3S_01, den3S_02, den3S_03, den3S_04, den3S_05
 
 end module M_fdata

@@ -12,15 +12,15 @@
 !  n_i ... density on i-site
 ! 
 subroutine build_ca_olsxc_on (in1, iatom, bcxcx, xcdc)
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use xc, only: xc_calc
   use M_system, only: numorb_max, Qin, rho_on, arho_on, rhoi_on, arhoi_on
   use M_fdata, only: nssh, num_orb,lssh,nsh_max
   implicit none
   integer, intent (in) :: in1
   integer, intent (in) :: iatom
-  real(double), intent (out), dimension (numorb_max, numorb_max) :: bcxcx
-  real(double), intent (out) :: xcdc
+  real(dp), intent (out), dimension (numorb_max, numorb_max) :: bcxcx
+  real(dp), intent (out) :: xcdc
 
   integer imu
   integer ind1
@@ -33,27 +33,27 @@ subroutine build_ca_olsxc_on (in1, iatom, bcxcx, xcdc)
   integer n1
   integer n2
 
-  real(double) dexc
-  real(double) d2exc 
-  real(double) dmuxc
-  real(double) d2muxc
-  real(double) exc
-  real(double) muxc
-  real(double) dexci
-  real(double) d2exci
-  real(double) dmuxci
-  real(double) d2muxci
-  real(double) exci
-  real(double) muxci
-  real(double) q_mu
+  real(dp) dexc
+  real(dp) d2exc 
+  real(dp) dmuxc
+  real(dp) d2muxc
+  real(dp) exc
+  real(dp) muxc
+  real(dp) dexci
+  real(dp) d2exci
+  real(dp) dmuxci
+  real(dp) d2muxci
+  real(dp) exci
+  real(dp) muxci
+  real(dp) q_mu
 
-  real(double), dimension (nsh_max,nsh_max) :: arho
-  real(double), dimension (nsh_max,nsh_max) :: arhoi
-  real(double), dimension (numorb_max, numorb_max) :: denx
-  real(double), dimension (numorb_max, numorb_max) :: deni
+  real(dp), dimension (nsh_max,nsh_max) :: arho
+  real(dp), dimension (nsh_max,nsh_max) :: arhoi
+  real(dp), dimension (numorb_max, numorb_max) :: denx
+  real(dp), dimension (numorb_max, numorb_max) :: deni
 
-  xcdc = 0.0d0
-  bcxcx = 0.0d0
+  xcdc = 0.0_dp
+  bcxcx = 0.0_dp
   do inu = 1, nssh(in1)
     do imu = 1, nssh(in1)
       arho(imu,inu) = arho_on(imu,inu,iatom)

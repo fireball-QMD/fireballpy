@@ -1,17 +1,17 @@
 subroutine Dassemble_qmmm_dip () 
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use M_constants, only: eq2
   use M_system, only: natoms, ratom, imass, neigh_b, neigh_j, neighn, numorb_max, sp_mat, dippc, rho, s_mat, dipc, xl, &
     & flrew_qmmm, qmmm_qm_mm_pairs, qmmm_dxyzcl, qmmm_qm_xcrd
   use M_fdata, only: nssh, Qneutral, num_orb
   implicit none
   integer :: iatom, imu, inu, in1, in2, in3, ineigh, issh, jatom, katom, mbeta, ix
-  real(double) :: dij, dq3, dq4, dterm, x, sterm
-  real(double), dimension (3) :: rna, rnabc, r1, r2, r21, vij, ddterm, dptermA, dptermB, spterm
-  real(double), dimension (3, numorb_max, numorb_max) :: demnplA, demnplB, demnplC
+  real(dp) :: dij, dq3, dq4, dterm, x, sterm
+  real(dp), dimension (3) :: rna, rnabc, r1, r2, r21, vij, ddterm, dptermA, dptermB, spterm
+  real(dp), dimension (3, numorb_max, numorb_max) :: demnplA, demnplB, demnplC
 
-  flrew_qmmm = 0.0d0
-  qmmm_dxyzcl = 0.0d0
+  flrew_qmmm = 0.0_dp
+  qmmm_dxyzcl = 0.0_dp
   do iatom=1, natoms
     r1(:) = ratom(:,iatom)
     in1 = imass(iatom)
@@ -26,7 +26,7 @@ subroutine Dassemble_qmmm_dip ()
         rna(3) = qmmm_qm_xcrd(3,katom)
         dq3 = - qmmm_qm_xcrd(4,katom) ! charge in amber have opposite sign
         r21(:) = r2(:) - r1(:)
-        rnabc(:) = rna(:) - (r1(:) + r21(:)/2.0d0)
+        rnabc(:) = rna(:) - (r1(:) + r21(:)/2.0_dp)
         x = sqrt(rnabc(1)**2 + rnabc(2)**2 + rnabc(3)**2)
         do inu = 1, num_orb(in2)
           do imu = 1, num_orb(in1)
@@ -40,7 +40,7 @@ subroutine Dassemble_qmmm_dip ()
             demnplB(:,imu,inu) = dq3*0.50*sterm*rnabc(:)/(x*x*x) + dq3*spterm(:)/(x) + dq3*dptermB(:)
             demnplC(:,imu,inu) = - demnplA(:,imu,inu) - demnplB(:,imu,inu)
             do ix = 1, 3
-              qmmm_dxyzcl(ix,katom)  = qmmm_dxyzcl(ix,katom) + rho(imu,inu,ineigh,iatom)*demnplA(ix,imu,inu)*eq2*23.061d0
+              qmmm_dxyzcl(ix,katom)  = qmmm_dxyzcl(ix,katom) + rho(imu,inu,ineigh,iatom)*demnplA(ix,imu,inu)*eq2*23.061_dp
               flrew_qmmm(ix,iatom) =  flrew_qmmm(ix,iatom) - rho(imu,inu,ineigh,iatom)*demnplB(ix,imu,inu)*eq2
               flrew_qmmm(ix,jatom) =  flrew_qmmm(ix,jatom) - rho(imu,inu,ineigh,iatom)*demnplC(ix,imu,inu)*eq2
             end do ! do ix
@@ -51,7 +51,7 @@ subroutine Dassemble_qmmm_dip ()
   end do   ! end do iatom = 1, natoms
   do iatom=1, natoms
     in3 = imass(iatom)
-    dq4 = 0.0d0
+    dq4 = 0.0_dp
     do issh = 1, nssh(in3)
       dq4 = dq4  + Qneutral(issh,in3)
     end do
@@ -61,7 +61,7 @@ subroutine Dassemble_qmmm_dip ()
         & + (qmmm_qm_xcrd(3,katom)-ratom(3,iatom))*(qmmm_qm_xcrd(3,katom)-ratom(3,iatom)) )
       vij(:) = qmmm_qm_xcrd(:,katom)-ratom(:,iatom)
       do ix = 1, 3
-        qmmm_dxyzcl(ix,katom) = qmmm_dxyzcl(ix,katom) - dq4*qmmm_qm_xcrd(4,katom)*(vij(ix) / dij**3)*eq2*23.061d0
+        qmmm_dxyzcl(ix,katom) = qmmm_dxyzcl(ix,katom) - dq4*qmmm_qm_xcrd(4,katom)*(vij(ix) / dij**3)*eq2*23.061_dp
         flrew_qmmm(ix,iatom) = flrew_qmmm(ix,iatom) - dq4*qmmm_qm_xcrd(4,katom)*(vij(ix) / dij**3)*eq2
       end do
     end do

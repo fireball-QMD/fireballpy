@@ -1,5 +1,5 @@
 subroutine assemble_F ()
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use M_system, only: natoms, neigh_j, neighn, nPP_j, nPPn, nPPx_j, nPPxn, fotnl, fanl, fotna, fana, faxc, faxc_ca, dxcdcc, ft, dusr, &
     & fotxc_ca, faca, fotca, f3naa, f3nab, f3nac, f3nla, f3nlb, f3nlc, f3caa, f3cab, f3cac, flrew, f3xca_ca, f3xcb_ca, f3xcc_ca, &
     & f3xca, f3xcb, f3xcc, flrew_qmmm, fro, ftot, dxcv
@@ -8,28 +8,28 @@ subroutine assemble_F ()
   integer ineigh
   integer jatom
   integer ix
-  real(double) rms
-  real(double) maximum
-  real(double) minimum
-  real(double), dimension (3, natoms) :: f3ca       ! three-center charged atom
-  real(double), dimension (3, natoms) :: f3na       ! three-center neutral atom
-  real(double), dimension (3, natoms) :: f3nl       ! three-center non-local
-  real(double), dimension (3, natoms) :: f3xc       ! three-center xc
-  real(double), dimension (3, natoms) :: f3xc_ca    ! three-center xc - charges
-  real(double), dimension (3, natoms) :: fbs  ! total band-structure force
-  real(double), dimension (3, natoms) :: fca  ! total charged atom force
-  real(double), dimension (3, natoms) :: fcaatm     ! charged atom/atom force
-  real(double), dimension (3, natoms) :: fcaot      ! charged atom/ontop force
-  real(double), dimension (3, natoms) :: fna  ! total neutral atom force
-  real(double), dimension (3, natoms) :: fnaatm     ! neutral atom/atom force
-  real(double), dimension (3, natoms) :: fnaot      ! neutral atom/ontop force
-  real(double), dimension (3, natoms) :: fnl  ! total non-local force
-  real(double), dimension (3, natoms) :: fnlatm     ! non-local/atom force
-  real(double), dimension (3, natoms) :: fnlot      ! non-local/ontop force
-  real(double), dimension (3, natoms) :: fxc_ca     ! total xc force - charges
-  real(double), dimension (3, natoms) :: fxcatm     ! xc atm/atm force
-  real(double), dimension (3, natoms) :: fxcatm_ca  ! xc atm/atm force - charges
-  real(double), dimension (3, natoms) :: fxcot_ca   ! xc ontop force - charges
+  real(dp) rms
+  real(dp) maximum
+  real(dp) minimum
+  real(dp), dimension (3, natoms) :: f3ca       ! three-center charged atom
+  real(dp), dimension (3, natoms) :: f3na       ! three-center neutral atom
+  real(dp), dimension (3, natoms) :: f3nl       ! three-center non-local
+  real(dp), dimension (3, natoms) :: f3xc       ! three-center xc
+  real(dp), dimension (3, natoms) :: f3xc_ca    ! three-center xc - charges
+  real(dp), dimension (3, natoms) :: fbs  ! total band-structure force
+  real(dp), dimension (3, natoms) :: fca  ! total charged atom force
+  real(dp), dimension (3, natoms) :: fcaatm     ! charged atom/atom force
+  real(dp), dimension (3, natoms) :: fcaot      ! charged atom/ontop force
+  real(dp), dimension (3, natoms) :: fna  ! total neutral atom force
+  real(dp), dimension (3, natoms) :: fnaatm     ! neutral atom/atom force
+  real(dp), dimension (3, natoms) :: fnaot      ! neutral atom/ontop force
+  real(dp), dimension (3, natoms) :: fnl  ! total non-local force
+  real(dp), dimension (3, natoms) :: fnlatm     ! non-local/atom force
+  real(dp), dimension (3, natoms) :: fnlot      ! non-local/ontop force
+  real(dp), dimension (3, natoms) :: fxc_ca     ! total xc force - charges
+  real(dp), dimension (3, natoms) :: fxcatm     ! xc atm/atm force
+  real(dp), dimension (3, natoms) :: fxcatm_ca  ! xc atm/atm force - charges
+  real(dp), dimension (3, natoms) :: fxcot_ca   ! xc ontop force - charges
   do iatom = 1, natoms
     f3nl(:,iatom) = f3nla(:,iatom) + f3nlb(:,iatom) + f3nlc(:,iatom)
     f3na(:,iatom) = f3naa(:,iatom) + f3nab(:,iatom) + f3nac(:,iatom)
@@ -37,16 +37,16 @@ subroutine assemble_F ()
     f3xc(:,iatom) = f3xca(:,iatom) + f3xcb(:,iatom) + f3xcc(:,iatom)
     f3xc_ca(:,iatom) = f3xca_ca(:,iatom) + f3xcb_ca(:,iatom) + f3xcc_ca(:,iatom)
   end do
-  fcaatm = 0.0d0
-  fnaatm = 0.0d0
-  fcaot = 0.0d0
-  fnaot = 0.0d0
-  fxcatm = 0.0d0
-  fxcatm_ca = 0.0d0
-  fxcot_ca = 0.0d0
-  fnlatm = 0.0d0
-  fnlot = 0.0d0
-  dxcv = 0.0d0
+  fcaatm = 0.0_dp
+  fnaatm = 0.0_dp
+  fcaot = 0.0_dp
+  fnaot = 0.0_dp
+  fxcatm = 0.0_dp
+  fxcatm_ca = 0.0_dp
+  fxcot_ca = 0.0_dp
+  fnlatm = 0.0_dp
+  fnlot = 0.0_dp
+  dxcv = 0.0_dp
   do iatom = 1, natoms
     do ineigh = 1, neighn(iatom)
       jatom = neigh_j(ineigh,iatom)
@@ -58,10 +58,10 @@ subroutine assemble_F ()
       fxcatm(:,jatom) = fxcatm(:,jatom) - faxc(:,ineigh,iatom)
       fxcatm_ca(:,iatom) = fxcatm_ca(:,iatom) + faxc_ca(:,ineigh,iatom)
       fxcatm_ca(:,jatom) = fxcatm_ca(:,jatom) - faxc_ca(:,ineigh,iatom)
-      fnaot(:,iatom) = fnaot(:,iatom) + 2.0d0*fotna(:,ineigh,iatom)
-      fnaot(:,jatom) = fnaot(:,jatom) - 2.0d0*fotna(:,ineigh,iatom)
-      fcaot(:,iatom) = fcaot(:,iatom) + 2.0d0*fotca(:,ineigh,iatom)
-      fcaot(:,jatom) = fcaot(:,jatom) - 2.0d0*fotca(:,ineigh,iatom)
+      fnaot(:,iatom) = fnaot(:,iatom) + 2.0_dp*fotna(:,ineigh,iatom)
+      fnaot(:,jatom) = fnaot(:,jatom) - 2.0_dp*fotna(:,ineigh,iatom)
+      fcaot(:,iatom) = fcaot(:,iatom) + 2.0_dp*fotca(:,ineigh,iatom)
+      fcaot(:,jatom) = fcaot(:,jatom) - 2.0_dp*fotca(:,ineigh,iatom)
       fxcot_ca(:,iatom) = fxcot_ca(:,iatom) + fotxc_ca(:,ineigh,iatom)
       fxcot_ca(:,jatom) = fxcot_ca(:,jatom) - fotxc_ca(:,ineigh,iatom)
       dxcv(:,iatom) = dxcv(:,iatom) + dxcdcc(:,ineigh,iatom)
@@ -78,8 +78,8 @@ subroutine assemble_F ()
   do iatom = 1, natoms
     do ineigh = 1, nPPxn(iatom)
       jatom = nPPx_j(ineigh,iatom)
-      fnlot(:,iatom) = fnlot(:,iatom) + 2.0d0*fotnl(:,ineigh,iatom)
-      fnlot(:,jatom) = fnlot(:,jatom) - 2.0d0*fotnl(:,ineigh,iatom)
+      fnlot(:,iatom) = fnlot(:,iatom) + 2.0_dp*fotnl(:,ineigh,iatom)
+      fnlot(:,jatom) = fnlot(:,jatom) - 2.0_dp*fotnl(:,ineigh,iatom)
     end do     ! end loop over PP-neighbors
   end do      ! end loop over atoms
   do iatom = 1, natoms
@@ -97,7 +97,7 @@ subroutine assemble_F ()
   do iatom = 1, natoms
     ftot(:,iatom) = fbs(:,iatom) + dusr(:,iatom) + dxcv(:,iatom) + fro(:,iatom)
   end do
-  rms = 0.0d0
+  rms = 0.0_dp
   do iatom = 1, natoms
     do ix = 1,3
       rms = rms + ftot(ix,iatom)**2

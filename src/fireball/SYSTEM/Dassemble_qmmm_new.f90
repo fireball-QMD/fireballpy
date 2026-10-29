@@ -1,23 +1,23 @@
 subroutine Dassemble_qmmm ()
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use M_constants, only: eq2
   use M_system, only: natoms, ratom, imass, dip, dipp, neigh_b, neigh_j, neighn, sp_mat, rho, s_mat, &
     & xl, flrew_qmmm, qmmm_qm_natoms, qmmm_dxyzcl, qmmm_qm_xcrd
   use M_fdata, only  : nssh, Qneutral, num_orb
   implicit none
   integer :: iatom, imu, in1, in2, in3, ineigh, inu, issh, jatom, jmu, katom, mbeta
-  real(double) :: distance12, dij, dq3, dterm, sterm, sff
-  real(double), dimension (3) :: dewaldlr_i_qmmm, dewaldlr_j_qmmm, dpterm, r1, r2, rhat12, spterm, vij, u
-  real(double), dimension (natoms) :: sub_ewaldqmmm
-  real(double), dimension (3, natoms) :: sub_dewaldqmmm
-  real(double), dimension (3, natoms, qmmm_qm_natoms) :: dqmmm
-  real(double), external :: sf
+  real(dp) :: distance12, dij, dq3, dterm, sterm, sff
+  real(dp), dimension (3) :: dewaldlr_i_qmmm, dewaldlr_j_qmmm, dpterm, r1, r2, rhat12, spterm, vij, u
+  real(dp), dimension (natoms) :: sub_ewaldqmmm
+  real(dp), dimension (3, natoms) :: sub_dewaldqmmm
+  real(dp), dimension (3, natoms, qmmm_qm_natoms) :: dqmmm
+  real(dp), external :: sf
 
-  flrew_qmmm = 0.0d0
-  sub_ewaldqmmm = 0.0d0
-  sub_dewaldqmmm = 0.0d0
-  dqmmm(:,:,:) = 0.0d0
-  qmmm_dxyzcl = 0.0d0
+  flrew_qmmm = 0.0_dp
+  sub_ewaldqmmm = 0.0_dp
+  sub_dewaldqmmm = 0.0_dp
+  dqmmm(:,:,:) = 0.0_dp
+  qmmm_dxyzcl = 0.0_dp
   do iatom = 1, natoms
     do katom = 1, qmmm_qm_natoms
       vij = qmmm_qm_xcrd(:, katom) - ratom(:, iatom)
@@ -40,14 +40,14 @@ subroutine Dassemble_qmmm ()
       r2(:) = ratom(:,jatom) + xl(:,mbeta)
       in2 = imass(jatom)
       distance12 = norm2(r2 - r1)
-      if (distance12 .gt. 1.0d-4) rhat12(:) = (r2(:) - r1(:))/distance12
+      if (distance12 .gt. 1.0e-4_dp) rhat12(:) = (r2(:) - r1(:))/distance12
       do inu = 1, num_orb(in2)
         do imu = 1, num_orb(in1)
-          sterm = s_mat(imu,inu,ineigh,iatom)/2.0d0
-          if (distance12 .gt. 1.0d-4) then
+          sterm = s_mat(imu,inu,ineigh,iatom)/2.0_dp
+          if (distance12 .gt. 1.0e-4_dp) then
             dterm = dip(imu,inu,ineigh,iatom)/distance12
             dpterm(:) = dipp(:,imu,inu,ineigh,iatom)/distance12 + dip(imu,inu,ineigh,iatom)*rhat12(:)/distance12**2
-            spterm(:) = sp_mat(:,imu,inu,ineigh,iatom)/2.0d0
+            spterm(:) = sp_mat(:,imu,inu,ineigh,iatom)/2.0_dp
             dewaldlr_i_qmmm(:) = (sterm - dterm)*sub_dewaldqmmm(:,iatom) &
               & + (spterm(:) - dpterm(:))*sub_ewaldqmmm(iatom) &
               & + (spterm(:) + dpterm(:))*sub_ewaldqmmm(jatom)
@@ -55,9 +55,9 @@ subroutine Dassemble_qmmm ()
               & + (sterm + dterm)*sub_dewaldqmmm(:,jatom) &
               & - (spterm(:) + dpterm(:))*sub_ewaldqmmm(jatom)
           else
-            dterm = 0.0d0
-            dpterm(:) = 0.0d0
-            spterm(:) = 0.0d0
+            dterm = 0.0_dp
+            dpterm(:) = 0.0_dp
+            spterm(:) = 0.0_dp
             dewaldlr_i_qmmm(:) = sterm*sub_dewaldqmmm(:,iatom)
             dewaldlr_j_qmmm(:) = sterm*sub_dewaldqmmm(:,jatom)
           end if
@@ -78,7 +78,7 @@ subroutine Dassemble_qmmm ()
   end do
   do iatom = 1, natoms
     in3 = imass(iatom)
-    dq3 = 0.0d0
+    dq3 = 0.0_dp
     do issh = 1, nssh(in3)
       dq3 = dq3  + Qneutral(issh,in3)
     end do

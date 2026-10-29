@@ -1,5 +1,5 @@
 subroutine allocate_system ()
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use M_constants, only: xlevi, delk
   use M_system, only: icluster, natoms, ratom, degelec, imass, mbeta_max, neigh_max, getmssh, getlssh, getissh, vxc_1c, &
     & Q0_TOT, nelectron, eigen_k, norbitals, nkpoints, getiatom, ioccupy_k, ioccupy, foccupy, cape, rhoPP, ztot, nssh_tot, ewald, &
@@ -31,19 +31,19 @@ subroutine allocate_system ()
   integer:: numorb
   integer:: numorbPP_max
   integer:: counter,counter_ini,l,imu_aux 
-  real(double) :: rcutoff_i
-  real(double) :: rcutoff_j
-  real(double) :: distance2
-  real(double) :: range2
+  real(dp) :: rcutoff_i
+  real(dp) :: rcutoff_j
+  real(dp) :: distance2
+  real(dp) :: range2
 
   !Shift the coordinates none of the atoms fall on (0.0, 0.0, 0.0)
-  !shifter(1) = 4.0d0*atan(1.0d0)    ! pi
-  !shifter(2) = 1.0/exp(1.0d0)       ! 1/e
-  !shifter(3) = sqrt(2.0d0)          ! square root of 2
+  !shifter(1) = 4.0_dp*atan(1.0_dp)    ! pi
+  !shifter(2) = 1.0/exp(1.0_dp)       ! 1/e
+  !shifter(3) = sqrt(2.0_dp)          ! square root of 2
   !ishiftO = 0
   !do iatom = 1, natoms
   !  distance = ratom(1,iatom)**2 + ratom(2,iatom)**2 + ratom(3,iatom)**2
-  !  if (distance .lt. 1.0d-8) then
+  !  if (distance .lt. 1.0e-8_dp) then
   !    ishiftO = 1
   !    exit
   !  end if
@@ -121,7 +121,7 @@ subroutine allocate_system ()
 
 
   ! By default the input charges are initialized to the neutral atom charges
-  !Qin = 0.0d0
+  !Qin = 0.0_dp
   !do iatom = 1, natoms
   !  in1 = imass(iatom)
   !  do issh = 1, nssh(in1)
@@ -130,8 +130,8 @@ subroutine allocate_system ()
   !end do
 
 
-  ztot = real(qstate, double)
-  nelectron = 0.0d0
+  ztot = real(qstate, dp)
+  nelectron = 0.0_dp
   do iatom = 1, natoms
    in1 = imass(iatom)
    do issh = 1, nssh(in1)
@@ -221,20 +221,20 @@ subroutine allocate_system ()
   neigh_max = -99
   do iatom = 1, natoms
     num_neigh = 0
-    rcutoff_i = 0.0d0
+    rcutoff_i = 0.0_dp
     in1 = imass(iatom)
     do imu = 1, nssh(in1)
-      if (rcutoff(in1,imu) .gt. rcutoff_i) rcutoff_i = rcutoff(in1,imu)
+      if (rcutoff(imu,in1) .gt. rcutoff_i) rcutoff_i = rcutoff(imu,in1)
     end do
     do mbeta = 0, mbeta_max
       do jatom = 1, natoms
-        rcutoff_j = 0.0d0
+        rcutoff_j = 0.0_dp
         in2 = imass(jatom)
         do imu = 1, nssh(in2)
-          if (rcutoff(in2,imu) .gt. rcutoff_j) rcutoff_j = rcutoff(in2,imu)
+          if (rcutoff(imu,in2) .gt. rcutoff_j) rcutoff_j = rcutoff(imu,in2)
         end do
         distance2 = (ratom(1,iatom) - (xl(1,mbeta) + ratom(1,jatom)))**2 + (ratom(2,iatom) - (xl(2,mbeta) + ratom(2,jatom)))**2  + (ratom(3,iatom) - (xl(3,mbeta) + ratom(3,jatom)))**2
-        range2 = (rcutoff_i + rcutoff_j - 0.01d0)**2
+        range2 = (rcutoff_i + rcutoff_j - 0.01_dp)**2
         if (distance2 .le. range2) num_neigh = num_neigh + 1
       end do
     end do
@@ -248,10 +248,10 @@ subroutine allocate_system ()
   neighPP_max = -99
   do iatom = 1, natoms
     num_neigh = 0
-    rcutoff_i = 0.0d0
+    rcutoff_i = 0.0_dp
     in1 = imass(iatom)
     do imu = 1, nssh(in1)
-      if (rcutoff(in1,imu) .gt. rcutoff_i) rcutoff_i = rcutoff(in1,imu)
+      if (rcutoff(imu,in1) .gt. rcutoff_i) rcutoff_i = rcutoff(imu,in1)
     end do
 
     ! Loop over all possible neighbors (VNL atoms)
@@ -264,7 +264,7 @@ subroutine allocate_system ()
         &         + (ratom(3,iatom) - (xl(3,mbeta) + ratom(3,jatom)))**2
 
         ! Add a small displacement to the sum of cutoffs. 
-        range2 = (rcutoff_i + rcutoff_j - 0.01d0)**2
+        range2 = (rcutoff_i + rcutoff_j - 0.01_dp)**2
 
         if (distance2 .le. range2) then
           num_neigh = num_neigh + 1
@@ -281,15 +281,15 @@ subroutine allocate_system ()
     ! Loop over all possible neighbors (VNL atoms)
     do mbeta = 0, mbeta_max
       do jatom = 1, natoms
-        rcutoff_j = 0.0d0
+        rcutoff_j = 0.0_dp
         in2 = imass(jatom)
         do imu = 1, nssh(in2)
-          if (rcutoff(in2,imu) .gt. rcutoff_j) rcutoff_j = rcutoff(in2,imu)
+          if (rcutoff(imu,in2) .gt. rcutoff_j) rcutoff_j = rcutoff(imu,in2)
         end do
         distance2 = (ratom(1,iatom) - (xl(1,mbeta) + ratom(1,jatom)))**2  &
         &         + (ratom(2,iatom) - (xl(2,mbeta) + ratom(2,jatom)))**2  &
         &         + (ratom(3,iatom) - (xl(3,mbeta) + ratom(3,jatom)))**2
-        range2 = (rcutoff_i + rcutoff_j - 0.01d0)**2
+        range2 = (rcutoff_i + rcutoff_j - 0.01_dp)**2
         if (distance2 .le. range2) then
           num_neigh = num_neigh + 1
         end if
@@ -491,17 +491,17 @@ subroutine allocate_system ()
 
   call initamat()
   
-  delk = 0.0d0
-  delk(1,1) = 1.0d0
-  delk(2,2) = 1.0d0
-  delk(3,3) = 1.0d0
-  xlevi = 0.0d0
-  xlevi(1,2,3) = 1.0d0
-  xlevi(1,3,2) = -1.0d0
-  xlevi(3,1,2) = 1.0d0
-  xlevi(3,2,1) = -1.0d0
-  xlevi(2,3,1) = 1.0d0
-  xlevi(2,1,3) = -1.0d0
+  delk = 0.0_dp
+  delk(1,1) = 1.0_dp
+  delk(2,2) = 1.0_dp
+  delk(3,3) = 1.0_dp
+  xlevi = 0.0_dp
+  xlevi(1,2,3) = 1.0_dp
+  xlevi(1,3,2) = -1.0_dp
+  xlevi(3,1,2) = 1.0_dp
+  xlevi(3,2,1) = -1.0_dp
+  xlevi(2,3,1) = 1.0_dp
+  xlevi(2,1,3) = -1.0_dp
 
   if (allocated(fana)) deallocate(fana)
   allocate (fana (3, neigh_max, natoms))
@@ -581,8 +581,8 @@ subroutine allocate_system ()
   allocate (den_or(nssh_tot,numorb_max,numorb_max,neigh_max,natoms))
   if (allocated(den_sh)) deallocate(den_sh)
   allocate (den_sh(nssh_tot,nsh_max,nsh_max,neigh_max,natoms))
-  den_or = 0.0d0
-  den_sh = 0.0d0
+  den_or = 0.0_dp
+  den_sh = 0.0_dp
   if (allocated(denij_or)) deallocate(denij_or)
   allocate (denij_or(nssh_tot,numorb_max,numorb_max,neigh_max,natoms))
   if (allocated(denij_sh)) deallocate(denij_sh)
@@ -595,12 +595,12 @@ subroutine allocate_system ()
   allocate (vxc_ca0(numorb_max,numorb_max,neigh_max,natoms))
   if (allocated(coulomb_mat)) deallocate(coulomb_mat)
   allocate (coulomb_mat(nsh_max,nsh_max,neigh_max,natoms))
-  denij_or = 0.0d0
-  denij_sh = 0.0d0
-  deni_or = 0.0d0
-  deni_sh = 0.0d0
-  vxc_ca0 = 0.0d0
-  coulomb_mat = 0.0d0
+  denij_or = 0.0_dp
+  denij_sh = 0.0_dp
+  deni_or = 0.0_dp
+  deni_sh = 0.0_dp
+  vxc_ca0 = 0.0_dp
+  coulomb_mat = 0.0_dp
   if (allocated(f_xc)) deallocate(f_xc)
   allocate (f_xc(numorb_max,nsh_max,natoms,neigh_max,natoms))
   if (allocated(exc_aa)) deallocate(exc_aa)

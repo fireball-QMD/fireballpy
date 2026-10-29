@@ -5,7 +5,7 @@
 ! from Python. Fortran no longer parses 'info.dat': the description travels as
 ! arguments, not as a file whose layout every reader had to count by hand.
 subroutine load_fdata_tables()
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use M_fdata, only: nsh_max, nspecies, ind2c, icon3c, splineint_2c, &
     & isorpmax, isorpmax_xc, ME2c_max, initype, maxtype_2c
   implicit none

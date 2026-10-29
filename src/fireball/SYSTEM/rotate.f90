@@ -1,24 +1,24 @@
 subroutine rotate_fb (in1, in2, eps, mmatrix, xmatrix)
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use M_system, only: numorb_max
   use M_fdata, only: nssh,lssh
   implicit none
   integer, intent(in) :: in1
   integer, intent(in) :: in2
-  real(double), intent(in) :: eps (3, 3)
-  real(double), intent(in) :: mmatrix (numorb_max, numorb_max)
-  real(double), intent(out) :: xmatrix (numorb_max, numorb_max)
+  real(dp), intent(in) :: eps (3, 3)
+  real(dp), intent(in) :: mmatrix (numorb_max, numorb_max)
+  real(dp), intent(out) :: xmatrix (numorb_max, numorb_max)
   integer issh
   integer jssh
   integer k1, k2
   integer n1, l1, m1
   integer n2, l2, m2
-  real(double) dmat (5, 5)
-  real(double) left (5, 5)
-  real(double) pmat (3, 3)
-  real(double) right (5, 5)
+  real(dp) dmat (5, 5)
+  real(dp) left (5, 5)
+  real(dp) pmat (3, 3)
+  real(dp) right (5, 5)
   call twister (eps, dmat, pmat)
-  xmatrix=0.0d0
+  xmatrix=0.0_dp
   n1 = 0
   do issh = 1, nssh(in1)
    l1 = lssh(issh,in1)

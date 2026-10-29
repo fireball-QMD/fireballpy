@@ -1,5 +1,5 @@
 subroutine doscentrosS (interaction, isub, iauxforce, in1, in2, in3, distance, eps, sx, spx)
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use M_fdata, only: index_maxS,nsh_max,MES_max,nssh, TWOCENTER_DENS_L,splineint_2c,ind2c
   implicit none
   integer, intent (in) :: iauxforce
@@ -8,21 +8,21 @@ subroutine doscentrosS (interaction, isub, iauxforce, in1, in2, in3, distance, e
   integer, intent (in) :: in1
   integer, intent (in) :: in2
   integer, intent (in) :: in3
-  real(double), intent (inout) :: distance
-  real(double), intent (in), dimension (3, 3) :: eps
-  real(double), intent (out), dimension (nsh_max, nsh_max) :: sx
-  real(double), intent (out), dimension (3, nsh_max, nsh_max) :: spx
+  real(dp), intent (inout) :: distance
+  real(dp), intent (in), dimension (3, 3) :: eps
+  real(dp), intent (out), dimension (nsh_max, nsh_max) :: sx
+  real(dp), intent (out), dimension (3, nsh_max, nsh_max) :: spx
   integer imu
   integer inu
   integer index
-  real(double), dimension (3) :: eta
-  real(double), dimension (MES_max) :: dslist
-  real(double), dimension (MES_max) :: slist
-  real(double), dimension (nsh_max,nsh_max) :: spm
+  real(dp), dimension (3) :: eta
+  real(dp), dimension (MES_max) :: dslist
+  real(dp), dimension (MES_max) :: slist
+  real(dp), dimension (nsh_max,nsh_max) :: spm
 
-  sx = 0.0d0
-  if (iauxforce .eq. 1) spm = 0.0d0
-  if (iauxforce .eq. 1) spx = 0.0d0
+  sx = 0.0_dp
+  if (iauxforce .eq. 1) spm = 0.0_dp
+  if (iauxforce .eq. 1) spx = 0.0_dp
   do index = 1, index_maxS(in1,in3)
     if (interaction .ne. TWOCENTER_DENS_L) then
       slist(index) = splineint_2c(index, ind2c(interaction, isub), in1, in2)%f(distance)
@@ -38,7 +38,7 @@ subroutine doscentrosS (interaction, isub, iauxforce, in1, in2, in3, distance, e
     eta(:) = eps(:,3)
     do inu = 1, nssh(in3)
       do imu = 1, nssh(in1)
-        if (distance .gt. 1.0d-3) then
+        if (distance .gt. 1.0e-3_dp) then
           spx(:,imu,inu) = - eta(:)*spm(imu,inu)
         end if
       end do

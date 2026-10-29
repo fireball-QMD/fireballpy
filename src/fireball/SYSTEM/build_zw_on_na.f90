@@ -1,5 +1,5 @@
 subroutine build_zw_on_na (in1, iatom, bcxcx, xcdc)
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use xc, only: xc_calc
   use M_system, only: bcxcx, arho_on, arhoi_on, rho_on, rhoi_on, numorb_max
   use M_fdata, only: nssh, Qneutral, lssh, nsh_max, num_orb
@@ -35,8 +35,8 @@ subroutine build_zw_on_na (in1, iatom, bcxcx, xcdc)
   real, dimension (nsh_max,nsh_max) :: arhoi
   real, dimension (numorb_max, numorb_max) :: denx
   real, dimension (numorb_max, numorb_max) :: deni
-  xcdc = 0.0d0
-  bcxcx = 0.0d0
+  xcdc = 0.0_dp
+  bcxcx = 0.0_dp
   do inu = 1, nssh(in1)
    do imu = 1, nssh(in1)
     arho(imu,inu) = arho_on(imu,inu,iatom)

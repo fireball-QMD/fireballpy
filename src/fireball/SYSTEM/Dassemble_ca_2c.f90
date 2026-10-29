@@ -1,5 +1,5 @@
 subroutine Dassemble_ca_2c ()
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use M_constants, only: eq2
   use M_system, only: smt_elect, natoms, ratom, imass, dip, dipp, neigh_b, neigh_j, neighn, neigh_self, &
     & numorb_max, sp_mat, Qin, rho, s_mat, xl, faca, fotca
@@ -25,50 +25,50 @@ subroutine Dassemble_ca_2c ()
  integer kforce
  integer matom
  integer mbeta
- real(double) dq1
- real(double) dq2
- real(double) dstn_temp
- real(double) dterm_1
- real(double) dterm_2
- real(double) dxn
- real(double) rcutoff_j
- real(double) rend
- real(double) sterm_1
- real(double) sterm_2
- real(double) stn_temp1
- real(double) stn_temp2
- real(double) y
- real(double) rcutoff_i
- real(double), dimension (numorb_max, numorb_max) :: bcca
- real(double), dimension (3, numorb_max, numorb_max) :: bccap
- real(double), dimension (3, numorb_max, numorb_max) :: bccapx
- real(double), dimension (numorb_max, numorb_max) :: bccax
- real(double), dimension (numorb_max, numorb_max) :: demnpl
- real(double), dimension (3, 3, 3) :: deps
- real(double), dimension (3, numorb_max, numorb_max) :: dewaldsr
- real(double), dimension (3) :: dpterm_1
- real(double), dimension (3) :: dpterm_2
- real(double), dimension (numorb_max, numorb_max) :: dstn1
- real(double), dimension (numorb_max, numorb_max) :: dstn2
- real(double), dimension (numorb_max, numorb_max) :: emnpl
- real(double), dimension (3, 3) :: eps
- real(double), dimension (3) :: r1
- real(double), dimension (3) :: r2
- real(double), dimension (3) :: r21
- real(double), dimension (3) :: sighat
- real(double), dimension (3) :: spterm_1
- real(double), dimension (3) :: spterm_2
- real(double), dimension (numorb_max, numorb_max) :: stn1
- real(double), dimension (numorb_max, numorb_max) :: stn2
- faca = 0.0d0
- fotca = 0.0d0
+ real(dp) dq1
+ real(dp) dq2
+ real(dp) dstn_temp
+ real(dp) dterm_1
+ real(dp) dterm_2
+ real(dp) dxn
+ real(dp) rcutoff_j
+ real(dp) rend
+ real(dp) sterm_1
+ real(dp) sterm_2
+ real(dp) stn_temp1
+ real(dp) stn_temp2
+ real(dp) y
+ real(dp) rcutoff_i
+ real(dp), dimension (numorb_max, numorb_max) :: bcca
+ real(dp), dimension (3, numorb_max, numorb_max) :: bccap
+ real(dp), dimension (3, numorb_max, numorb_max) :: bccapx
+ real(dp), dimension (numorb_max, numorb_max) :: bccax
+ real(dp), dimension (numorb_max, numorb_max) :: demnpl
+ real(dp), dimension (3, 3, 3) :: deps
+ real(dp), dimension (3, numorb_max, numorb_max) :: dewaldsr
+ real(dp), dimension (3) :: dpterm_1
+ real(dp), dimension (3) :: dpterm_2
+ real(dp), dimension (numorb_max, numorb_max) :: dstn1
+ real(dp), dimension (numorb_max, numorb_max) :: dstn2
+ real(dp), dimension (numorb_max, numorb_max) :: emnpl
+ real(dp), dimension (3, 3) :: eps
+ real(dp), dimension (3) :: r1
+ real(dp), dimension (3) :: r2
+ real(dp), dimension (3) :: r21
+ real(dp), dimension (3) :: sighat
+ real(dp), dimension (3) :: spterm_1
+ real(dp), dimension (3) :: spterm_2
+ real(dp), dimension (numorb_max, numorb_max) :: stn1
+ real(dp), dimension (numorb_max, numorb_max) :: stn2
+ faca = 0.0_dp
+ fotca = 0.0_dp
  do iatom = 1, natoms
   matom = neigh_self(iatom)
   r1(:) = ratom(:,iatom)
   in1 = imass(iatom)
    rcutoff_i = 0
    do imu = 1, nssh(in1)
-    if (rcutoff(in1,imu) .gt. rcutoff_i) rcutoff_i = rcutoff(in1,imu)
+    if (rcutoff(imu,in1) .gt. rcutoff_i) rcutoff_i = rcutoff(imu,in1)
    end do
   dq1 = 0.0
   do issh = 1, nssh(in1)
@@ -81,38 +81,38 @@ subroutine Dassemble_ca_2c ()
    in2 = imass(jatom)
    rcutoff_j = 0
    do imu = 1, nssh(in2)
-    if (rcutoff(in2,imu) .gt. rcutoff_j) rcutoff_j = rcutoff(in2,imu)
+    if (rcutoff(imu,in2) .gt. rcutoff_j) rcutoff_j = rcutoff(imu,in2)
    end do
-   dq2 = 0.0d0
+   dq2 = 0.0_dp
    do issh = 1, nssh(in2)
     dq2 = dq2 + (Qin(issh,jatom) - Qneutral(issh,in2))
    end do
    r21(:) = r2(:) - r1(:)
    y = sqrt(r21(1)*r21(1) + r21(2)*r21(2) + r21(3)*r21(3))
-   if (y .lt. 1.0d-05) then
-    sighat(1) = 0.0d0
-    sighat(2) = 0.0d0
-    sighat(3) = 1.0d0
+   if (y .lt. 1.0e-05_dp) then
+    sighat(1) = 0.0_dp
+    sighat(2) = 0.0_dp
+    sighat(3) = 1.0_dp
    else
     sighat(:) = r21(:)/y
    end if
    call epsilon (r2, sighat, eps)
    call deps2cent (r1, r2, eps, deps)
-   stn1 = 1.0d0
-   dstn1 = 0.0d0
-   stn2 = 0.0d0
-   dstn2 = 0.0d0
-   emnpl = 0.0d0
-   demnpl = 0.0d0
-   dewaldsr = 0.0d0
-   if (y .gt. 1.0d-4) then
+   stn1 = 1.0_dp
+   dstn1 = 0.0_dp
+   stn2 = 0.0_dp
+   dstn2 = 0.0_dp
+   emnpl = 0.0_dp
+   demnpl = 0.0_dp
+   dewaldsr = 0.0_dp
+   if (y .gt. 1.0e-4_dp) then
     icount_sav = 0
     do issh = 1, nssh(in1)
      jcount_sav = 0
      do jssh = 1, nssh(in1)
       rend = rcutoff_i + rcutoff_j
       call smoother (y, rend, smt_elect, stn_temp1, dstn_temp)
-      stn_temp2 = 1.0d0 - stn_temp1
+      stn_temp2 = 1.0_dp - stn_temp1
       do inu = 1, lssh(issh,in1)*2 + 1
        icount = icount_sav + inu
        do imu = 1, lssh(jssh,in1)*2 + 1
@@ -135,8 +135,8 @@ subroutine Dassemble_ca_2c ()
      end do
     end do
    end if
-   bcca = 0.0d0
-   bccap = 0.0d0
+   bcca = 0.0_dp
+   bccap = 0.0_dp
    kforce = 1
    interaction = TWOCENTER_VNA_A
    in3 = in1
@@ -166,18 +166,18 @@ subroutine Dassemble_ca_2c ()
    else
     do inu = 1, num_orb(in2)
      do imu = 1, num_orb(in1)
-      sterm_1 = dq1*eq2*s_mat(imu,inu,ineigh,iatom)/(2.0d0*y)
-      sterm_2 = dq2*eq2*s_mat(imu,inu,ineigh,iatom)/(2.0d0*y)
+      sterm_1 = dq1*eq2*s_mat(imu,inu,ineigh,iatom)/(2.0_dp*y)
+      sterm_2 = dq2*eq2*s_mat(imu,inu,ineigh,iatom)/(2.0_dp*y)
       dterm_1 = dq1*eq2*dip(imu,inu,ineigh,iatom)/(y*y)
       dterm_2 = dq2*eq2*dip(imu,inu,ineigh,iatom)/(y*y)
-      spterm_1(:) = dq1*eq2*sp_mat(:,imu,inu,ineigh,iatom)/(2.0d0*y)
-      spterm_2(:) = dq2*eq2*sp_mat(:,imu,inu,ineigh,iatom)/(2.0d0*y)
+      spterm_1(:) = dq1*eq2*sp_mat(:,imu,inu,ineigh,iatom)/(2.0_dp*y)
+      spterm_2(:) = dq2*eq2*sp_mat(:,imu,inu,ineigh,iatom)/(2.0_dp*y)
       dpterm_1(:) = dq1*eq2*dipp(:,imu,inu,ineigh,iatom)/(y*y)
       dpterm_2(:) = dq2*eq2*dipp(:,imu,inu,ineigh,iatom)/(y*y)
-      dewaldsr(:,imu,inu) =  + (spterm_1(:) + dpterm_1(:)) + (sterm_1 + 2.0d0*dterm_1)*sighat(:)/y  + (spterm_2(:) - dpterm_2(:)) + (sterm_2 - 2.0d0*dterm_2)*sighat(:)/y
+      dewaldsr(:,imu,inu) =  + (spterm_1(:) + dpterm_1(:)) + (sterm_1 + 2.0_dp*dterm_1)*sighat(:)/y  + (spterm_2(:) - dpterm_2(:)) + (sterm_2 - 2.0_dp*dterm_2)*sighat(:)/y
      end do
     end do
-    bccap = 0.0d0
+    bccap = 0.0_dp
     interaction = TWOCENTER_VNA_L
     in3 = in2
     do isorp = 1, nssh(in1)
@@ -192,7 +192,7 @@ subroutine Dassemble_ca_2c ()
     do inu = 1, num_orb(in3)
      do imu = 1, num_orb(in1)
       do ix = 1, 3
-       fotca(ix,ineigh,iatom) = fotca(ix,ineigh,iatom)  - rho(imu,inu,ineigh,iatom)*bccap(ix,imu,inu)*eq2  + 0.5d0*rho(imu,inu,ineigh,iatom)*dewaldsr(ix,imu,inu)
+       fotca(ix,ineigh,iatom) = fotca(ix,ineigh,iatom)  - rho(imu,inu,ineigh,iatom)*bccap(ix,imu,inu)*eq2  + 0.5_dp*rho(imu,inu,ineigh,iatom)*dewaldsr(ix,imu,inu)
       end do
      end do
     end do

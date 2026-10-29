@@ -1,19 +1,19 @@
 subroutine anderson ( x_try, x_old, nmsh )
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use M_system, only: ialgmix, idmix, max_scf_iterations, bmix, sigma, sigmatol, sigmabest, w02, scf_achieved, Kscf, Fv, Xv, delF, delX, &
     & r2_sav, wi, x_best, Kbest
   implicit none
   integer, intent(in) :: nmsh    ! Size of vectors being optimized
-  real(double), intent(in), dimension(nmsh) :: x_try ! potential new vector on input
-  real(double), intent(inout), dimension(nmsh) :: x_old ! old vector in input, real(double) new vector on output
+  real(dp), intent(in), dimension(nmsh) :: x_try ! potential new vector on input
+  real(dp), intent(inout), dimension(nmsh) :: x_old ! old vector in input, real(dp) new vector on output
   integer :: iloop, jloop, mix_order, imix, Kscfm1
-  real(double), allocatable, dimension(:) :: delF_F    ! <delF|F> in Eq. 5.31
-  real(double), allocatable, dimension(:,:) :: a_matrix
+  real(dp), allocatable, dimension(:) :: delF_F    ! <delF|F> in Eq. 5.31
+  real(dp), allocatable, dimension(:,:) :: a_matrix
   ! BLAS stuff
   integer :: lwork
   integer :: info
   integer, allocatable, dimension(:) :: ipiv
-  real(double), allocatable, dimension(:) :: work
+  real(dp), allocatable, dimension(:) :: work
 
   if(Kscf .eq. 1)then
     if (allocated(Fv)) deallocate(Fv)
@@ -30,7 +30,7 @@ subroutine anderson ( x_try, x_old, nmsh )
     allocate (x_best(nmsh))
     if (allocated(wi)) deallocate(wi)
     allocate (wi(max_scf_iterations))
-    wi = 1.0d0
+    wi = 1.0_dp
 
     Xv(:,1) = x_old(:)
     Fv(:,1) = x_try(:) - x_old(:)
@@ -66,7 +66,7 @@ subroutine anderson ( x_try, x_old, nmsh )
 
   Kscfm1 = Kscf - 1
   if (ialgmix .eq. 2) then
-    wi(Kscfm1) = real(nmsh, double) / r2_sav(Kscfm1)
+    wi(Kscfm1) = real(nmsh, dp) / r2_sav(Kscfm1)
   end if
 
   delX(:,Kscfm1) = wi(Kscfm1)*(x_old(:) - Xv(:,Kscfm1))

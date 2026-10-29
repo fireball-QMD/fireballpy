@@ -35,6 +35,8 @@ if fc.get_id() == 'gcc'
       '-march=native',
     ]
     fflags += ['-fstack-arrays']
+  else
+    fflags += ['-g', '-fcheck=bounds']
   endif
 elif fc.get_id() in ['intel', 'intel-llvm']
   # Intel

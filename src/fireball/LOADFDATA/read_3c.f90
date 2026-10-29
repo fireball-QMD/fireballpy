@@ -1,5 +1,5 @@
 subroutine read_3c (interaction)
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use M_fdata, only: isorpmax, isorpmax_xc, numXmax, numYmax, ME3c_max, nspecies, icon3c, nssh, nzx, index_max3c, index_maxS, &
     & bcna_01, bcna_02, bcna_03, bcna_04, bcna_05, numx3c_bcna, numy3c_bcna, x3cmax_bcna, y3cmax_bcna, hx_bcna, hy_bcna, &
     & den3_01, den3_02, den3_03, den3_04, den3_05, numx3c_den3, numy3c_den3, x3cmax_den3, y3cmax_den3, hx_den3, hy_den3, &
@@ -7,7 +7,7 @@ subroutine read_3c (interaction)
   implicit none
   integer, intent (in) :: interaction
   integer :: iounit, in1, in2, in3, index, isorp, itheta, maxtype, mintype, numx, numy, nz1, nz2, nz3
-  real(double) :: xmax, ymax
+  real(dp) :: xmax, ymax
   character (len=1000) :: extension, filename, root, root1, root2
 
   iounit = 71
@@ -37,15 +37,15 @@ subroutine read_3c (interaction)
     allocate (hy_bcna(0:maxtype, nspecies**3))
     allocate (x3cmax_bcna(0:maxtype, nspecies**3))
     allocate (y3cmax_bcna(0:maxtype, nspecies**3))
-    bcna_01 = 0.0d0
-    bcna_02 = 0.0d0
-    bcna_03 = 0.0d0
-    bcna_04 = 0.0d0
-    bcna_05 = 0.0d0
+    bcna_01 = 0.0_dp
+    bcna_02 = 0.0_dp
+    bcna_03 = 0.0_dp
+    bcna_04 = 0.0_dp
+    bcna_05 = 0.0_dp
     numx3c_bcna = 0
     numy3c_bcna = 0
-    x3cmax_bcna = 0.0d0
-    y3cmax_bcna = 0.0d0
+    x3cmax_bcna = 0.0_dp
+    y3cmax_bcna = 0.0_dp
   !else if (interaction .eq. 2) then
   !  maxtype = ideriv_max
   !  allocate (xc3c_01(numXmax, numYmax, ME3c_max, 0:maxtype, nspecies**3))
@@ -59,15 +59,15 @@ subroutine read_3c (interaction)
   !  allocate (hy_xc3c(0:maxtype, nspecies**3))
   !  allocate (x3cmax_xc3c(0:maxtype, nspecies**3))
   !  allocate (y3cmax_xc3c(0:maxtype, nspecies**3))
-  !  xc3c_01 = 0.0d0
-  !  xc3c_02 = 0.0d0
-  !  xc3c_03 = 0.0d0
-  !  xc3c_04 = 0.0d0
-  !  xc3c_05 = 0.0d0
+  !  xc3c_01 = 0.0_dp
+  !  xc3c_02 = 0.0_dp
+  !  xc3c_03 = 0.0_dp
+  !  xc3c_04 = 0.0_dp
+  !  xc3c_05 = 0.0_dp
   !  numx3c_xc3c = 0
   !  numy3c_xc3c = 0
-  !  x3cmax_xc3c = 0.0d0
-  !  y3cmax_xc3c = 0.0d0
+  !  x3cmax_xc3c = 0.0_dp
+  !  y3cmax_xc3c = 0.0_dp
   else if (interaction .eq. 3) then
     maxtype = isorpmax_xc
     if (allocated(den3_01)) deallocate(den3_01)
@@ -92,15 +92,15 @@ subroutine read_3c (interaction)
     allocate (hy_den3(0:maxtype, nspecies**3))
     allocate (x3cmax_den3(0:maxtype, nspecies**3))
     allocate (y3cmax_den3(0:maxtype, nspecies**3))
-    den3_01 = 0.0d0
-    den3_02 = 0.0d0
-    den3_03 = 0.0d0
-    den3_04 = 0.0d0
-    den3_05 = 0.0d0
+    den3_01 = 0.0_dp
+    den3_02 = 0.0_dp
+    den3_03 = 0.0_dp
+    den3_04 = 0.0_dp
+    den3_05 = 0.0_dp
     numx3c_den3 = 0
     numy3c_den3 = 0
-    x3cmax_den3 = 0.0d0
-    y3cmax_den3 = 0.0d0
+    x3cmax_den3 = 0.0_dp
+    y3cmax_den3 = 0.0_dp
   else if (interaction .eq. 4 ) then 
     maxtype = isorpmax_xc
     if (allocated(den3S_01)) deallocate(den3S_01)
@@ -113,11 +113,11 @@ subroutine read_3c (interaction)
     allocate (den3S_03(numXmax, numYmax, ME3c_max, 0:maxtype, nspecies**3))
     allocate (den3S_04(numXmax, numYmax, ME3c_max, 0:maxtype, nspecies**3))
     allocate (den3S_05(numXmax, numYmax, ME3c_max, 0:maxtype, nspecies**3))
-    den3S_01 = 0.0d0
-    den3S_02 = 0.0d0
-    den3S_03 = 0.0d0
-    den3S_04 = 0.0d0
-    den3S_05 = 0.0d0
+    den3S_01 = 0.0_dp
+    den3S_02 = 0.0_dp
+    den3S_03 = 0.0_dp
+    den3S_04 = 0.0_dp
+    den3S_05 = 0.0_dp
   end if
 
   do in1 = 1, nspecies

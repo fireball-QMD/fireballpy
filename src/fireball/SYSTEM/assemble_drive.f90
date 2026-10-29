@@ -1,5 +1,5 @@
 subroutine assemble_drive()
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use M_system, only: idipole, iqmmm, natoms, eqmmm, Kscf, neigh_b, neigh_j, neighn, neigh_self, neighPP_self, neighPPn, &
     & neighPP_b, neighPP_j, ewaldqmmm, errno
   implicit none
@@ -53,7 +53,7 @@ subroutine assemble_drive()
     if (idipole .eq. 1) call assemble_ca_2c_dip ()
   end if
 
-  !call assemble_zw_on_na() !AQUI vxc = 0.0d0
+  !call assemble_zw_on_na() !AQUI vxc = 0.0_dp
   !call assemble_zw_off_na() !AQUI
   !call assemble_zw_2c_ct() !AQUI
   call assemble_xc_2c()
@@ -65,8 +65,8 @@ subroutine assemble_drive()
       if (idipole .eq. 0) call assemble_qmmm ()
       if (idipole .eq. 1) call assemble_qmmm_dip ()
     else
-      eqmmm = 0.0d0
-      ewaldqmmm = 0.0d0
+      eqmmm = 0.0_dp
+      ewaldqmmm = 0.0_dp
     end if
   end if
   ! Coulomb 3c / Ewald LR (vca 3c, ewaldlr) solo en Kscf=1; en Kscf>1 via g_h.dQ congelado

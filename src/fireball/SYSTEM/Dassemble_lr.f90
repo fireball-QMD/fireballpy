@@ -1,5 +1,5 @@
 subroutine Dassemble_lr ()
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use M_constants, only: eq2
   use M_system, only: natoms, ratom, imass, ewald, dewald, dip, dipp, neigh_b, neigh_j, neighn, sp_mat, Qin, rho, s_mat, xl, flrew
   use M_fdata, only: num_orb,nssh,Qneutral
@@ -16,29 +16,29 @@ subroutine Dassemble_lr ()
   integer jmu
   integer katom
   integer mbeta
-  real(double) distance12
-  real(double) dq1
-  real(double) dq2
-  real(double) dq3
-  real(double) dterm
-  real(double) sterm
-  real(double), dimension (3) :: dewaldlr_i
-  real(double), dimension (3) :: dewaldlr_j
-  real(double), dimension (3) :: dewaldlr_k
-  real(double), dimension (3) :: dpterm
-  real(double), dimension (3) :: r1
-  real(double), dimension (3) :: r2
-  real(double), dimension (3) :: rhat12
-  real(double), dimension (3) :: spterm
-  real(double), dimension (natoms) :: sub_ewald
-  real(double), dimension (3, natoms) :: sub_dewald
-  flrew = 0.0d0
-  sub_ewald = 0.0d0
-  sub_dewald = 0.0d0
+  real(dp) distance12
+  real(dp) dq1
+  real(dp) dq2
+  real(dp) dq3
+  real(dp) dterm
+  real(dp) sterm
+  real(dp), dimension (3) :: dewaldlr_i
+  real(dp), dimension (3) :: dewaldlr_j
+  real(dp), dimension (3) :: dewaldlr_k
+  real(dp), dimension (3) :: dpterm
+  real(dp), dimension (3) :: r1
+  real(dp), dimension (3) :: r2
+  real(dp), dimension (3) :: rhat12
+  real(dp), dimension (3) :: spterm
+  real(dp), dimension (natoms) :: sub_ewald
+  real(dp), dimension (3, natoms) :: sub_dewald
+  flrew = 0.0_dp
+  sub_ewald = 0.0_dp
+  sub_dewald = 0.0_dp
   do iatom = 1, natoms
     do jatom = 1, natoms
       in2 = imass(jatom)
-      dq2 = 0.0d0
+      dq2 = 0.0_dp
       do issh = 1, nssh(in2)
         dq2 = dq2 + (Qin(issh,jatom) - Qneutral(issh,in2))
       end do
@@ -49,7 +49,7 @@ subroutine Dassemble_lr ()
   do iatom = 1, natoms
     r1(:) = ratom(:,iatom)
     in1 = imass(iatom)
-    dq1 = 0.0d0
+    dq1 = 0.0_dp
     do issh = 1, nssh(in1)
       dq1 = dq1 + (Qin(issh,iatom) - Qneutral(issh,in1))
     end do
@@ -58,27 +58,27 @@ subroutine Dassemble_lr ()
       mbeta = neigh_b(ineigh,iatom)
       r2(:) = ratom(:,jatom) + xl(:,mbeta)
       in2 = imass(jatom)
-      dq2 = 0.0d0
+      dq2 = 0.0_dp
       do issh = 1, nssh(in2)
         dq2 = dq2 + (Qin(issh,jatom) - Qneutral(issh,in2))
       end do
       distance12 = sqrt((r2(1) - r1(1))**2 + (r2(2) - r1(2))**2 + (r2(3) - r1(3))**2)
-      if (distance12 .gt. 1.0d-4) then
+      if (distance12 .gt. 1.0e-4_dp) then
         rhat12(:) = (r2(:) - r1(:))/distance12
       end if
       do inu = 1, num_orb(in2)
         do imu = 1, num_orb(in1)
-          sterm = s_mat(imu,inu,ineigh,iatom)/2.0d0
-          if (distance12 .gt. 1.0d-4) then
+          sterm = s_mat(imu,inu,ineigh,iatom)/2.0_dp
+          if (distance12 .gt. 1.0e-4_dp) then
             dterm = dip(imu,inu,ineigh,iatom)/distance12
             dpterm(:) = dipp(:,imu,inu,ineigh,iatom)/distance12  + dip(imu,inu,ineigh,iatom)*rhat12(:)/distance12**2
-            spterm(:) = sp_mat(:,imu,inu,ineigh,iatom)/2.0d0
+            spterm(:) = sp_mat(:,imu,inu,ineigh,iatom)/2.0_dp
             dewaldlr_i(:) = (sterm - dterm)*sub_dewald(:,iatom)  + (spterm(:) - dpterm(:))*sub_ewald(iatom)    + (sterm + dterm)*dewald(:,iatom,jatom)*dq1  + (spterm(:) + dpterm(:))*sub_ewald(jatom )
             dewaldlr_j(:) = (sterm - dterm)*dewald(:,jatom,iatom)*dq2  - (spterm(:) - dpterm(:))*sub_ewald(iatom)    + (sterm + dterm)*sub_dewald(:,jatom)  - (spterm(:) + dpterm(:))*sub_ewald(jatom)
           else
-            dterm = 0.0d0
-            dpterm(:) = 0.0d0
-            spterm(:) = 0.0d0
+            dterm = 0.0_dp
+            dpterm(:) = 0.0_dp
+            spterm(:) = 0.0_dp
             dewaldlr_i(:) = sterm*sub_dewald(:,iatom)
             dewaldlr_j(:) = sterm*sub_dewald(:,jatom)
           end if
@@ -89,7 +89,7 @@ subroutine Dassemble_lr ()
           do katom = 1, natoms
             if (katom .ne. iatom .and. katom .ne. jatom) then
               in3 = imass(katom)
-              dq3 = 0.0d0
+              dq3 = 0.0_dp
               do issh = 1, nssh(in3)
                 dq3 = dq3 + (Qin(issh,katom) - Qneutral(issh,in3))
               end do

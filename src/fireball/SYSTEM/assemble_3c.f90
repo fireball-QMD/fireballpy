@@ -1,5 +1,5 @@
 subroutine assemble_3c ()
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use M_constants, only: eq2
   use M_system, only: natoms, ratom, imass, neigh_comb, neigh_comj, neigh_comm, neigh_comn, neigh_back, numorb_max, vna, xl
   use M_fdata, only: num_orb
@@ -21,23 +21,23 @@ subroutine assemble_3c ()
   integer mneigh
   integer jneigh       
 
-  real(double) cost
-  real(double) distance_13
-  real(double) distance_23
-  real(double) x
-  real(double) y
+  real(dp) cost
+  real(dp) distance_13
+  real(dp) distance_23
+  real(dp) x
+  real(dp) y
 
-  real(double), dimension (numorb_max, numorb_max) :: bcnax
-  real(double), dimension (3, 3) :: eps
-  real(double), dimension (3) :: r1
-  real(double), dimension (3) :: r2
-  real(double), dimension (3) :: r21
-  real(double), dimension (3) :: r13
-  real(double), dimension (3) :: r23
-  real(double), dimension (3) :: rhat
-  real(double), dimension (3) :: rna
-  real(double), dimension (3) :: rnabc
-  real(double), dimension (3) :: sighat
+  real(dp), dimension (numorb_max, numorb_max) :: bcnax
+  real(dp), dimension (3, 3) :: eps
+  real(dp), dimension (3) :: r1
+  real(dp), dimension (3) :: r2
+  real(dp), dimension (3) :: r21
+  real(dp), dimension (3) :: r13
+  real(dp), dimension (3) :: r23
+  real(dp), dimension (3) :: rhat
+  real(dp), dimension (3) :: rna
+  real(dp), dimension (3) :: rnabc
+  real(dp), dimension (3) :: sighat
 
   do ialp = 1, natoms
     rna(:) = ratom(:,ialp)
@@ -60,19 +60,19 @@ subroutine assemble_3c ()
         r23(:) = r2(:) - rna(:)
         distance_13 = sqrt(r13(1)**2 + r13(2)**2 + r13(3)**2)
         distance_23 = sqrt(r23(1)**2 + r23(2)**2 + r23(3)**2)
-        if (y .lt. 1.0d-05) then
-          sighat(1) = 0.0d0
-          sighat(2) = 0.0d0
-          sighat(3) = 1.0d0
+        if (y .lt. 1.0e-05_dp) then
+          sighat(1) = 0.0_dp
+          sighat(2) = 0.0_dp
+          sighat(3) = 1.0_dp
         else
           sighat(:) = r21(:)/y
         end if
-        rnabc(:) = rna(:) - (r1(:) + r21(:)/2.0d0)
+        rnabc(:) = rna(:) - (r1(:) + r21(:)/2.0_dp)
         x = sqrt(rnabc(1)**2 + rnabc(2)**2 + rnabc(3)**2)
-        if (x .lt. 1.0d-05) then
-          rhat(1) = 0.0d0
-          rhat(2) = 0.0d0
-          rhat(3) = 0.0d0
+        if (x .lt. 1.0e-05_dp) then
+          rhat(1) = 0.0_dp
+          rhat(2) = 0.0_dp
+          rhat(3) = 0.0_dp
         else
           rhat(:) = rnabc(:)/x
         end if

@@ -1,5 +1,5 @@
 subroutine read_1c ()
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use :: constants, only: FNAME_LEN
   use :: utils, only: utils_itos, utils_open
   use M_fdata, only: nspecies, nzx, fdataLocation, onecfname, exc_1c_0, vxc_1c_0, &
@@ -7,7 +7,7 @@ subroutine read_1c ()
   implicit none
   integer :: iline, io, in1, issh, itype, jssh, kssh, numsh
   character (len=FNAME_LEN) :: root
-  real(double), allocatable :: temp(:,:)
+  real(dp), allocatable :: temp(:,:)
 
   if (allocated(exc_1c_0)) deallocate(exc_1c_0)
   if (allocated(vxc_1c_0)) deallocate(vxc_1c_0)
@@ -20,10 +20,10 @@ subroutine read_1c ()
   allocate(gxc_1c (nsh_max,nsh_max,nsh_max,nspecies))
   allocate(vxc_1c_0 (nsh_max,nsh_max,nspecies))
 
-  exc_1c_0 = 0.0d0
-  vxc_1c_0 = 0.0d0
-  gxc_1c = 0.0d0
-  fxc_1c = 0.0d0
+  exc_1c_0 = 0.0_dp
+  vxc_1c_0 = 0.0_dp
+  gxc_1c = 0.0_dp
+  fxc_1c = 0.0_dp
 
   do in1 = 1, nspecies
     numsh = nssh(in1)

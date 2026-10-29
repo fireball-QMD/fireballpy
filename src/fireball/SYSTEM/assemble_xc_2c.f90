@@ -1,5 +1,5 @@
 subroutine assemble_xc_2c ()
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use M_system, only: numorb_max, natoms, neigh_self, ratom, imass, neighn, neigh_b, neigh_j, xl, vxc, rho_off, rhoij_off, s_mat, Kscf, g_xc, get_shell_ofatom_issh, Qin, iqout, &
     & vxc_ca0, iscf_fast, nssh_tot, get_issh_ofshell, get_iatom_ofshell
   use M_fdata, only: num_orb, nssh, nsh_max, Qref, TWOCENTER_VXC_0, TWOCENTER_VXC_L, TWOCENTER_VXC_R
@@ -18,25 +18,25 @@ subroutine assemble_xc_2c ()
   integer mbeta
   integer natomsp
   integer issh
-  real(double)  y 
-  real(double) dxn
-  real(double), dimension (numorb_max, numorb_max) :: bcxcx
-  real(double), dimension (numorb_max, numorb_max) :: denmx
-  real(double), dimension (numorb_max, numorb_max) :: den1x
-  real(double), dimension (numorb_max, numorb_max) :: rhomx
-  real(double), dimension (3, numorb_max, numorb_max) :: rhompx
-  real(double), dimension (3, 3) :: eps
-  real(double), dimension (3, 3, 3) :: deps
-  real(double), dimension (3) :: r1, r2, r21
-  real(double), dimension (3) :: sighat
-  real(double), dimension (numorb_max, numorb_max) :: sx
-  real(double), dimension (nsh_max) :: dqi
-  real(double), dimension (nsh_max) :: dqj
+  real(dp)  y 
+  real(dp) dxn
+  real(dp), dimension (numorb_max, numorb_max) :: bcxcx
+  real(dp), dimension (numorb_max, numorb_max) :: denmx
+  real(dp), dimension (numorb_max, numorb_max) :: den1x
+  real(dp), dimension (numorb_max, numorb_max) :: rhomx
+  real(dp), dimension (3, numorb_max, numorb_max) :: rhompx
+  real(dp), dimension (3, 3) :: eps
+  real(dp), dimension (3, 3, 3) :: deps
+  real(dp), dimension (3) :: r1, r2, r21
+  real(dp), dimension (3) :: sighat
+  real(dp), dimension (numorb_max, numorb_max) :: sx
+  real(dp), dimension (nsh_max) :: dqi
+  real(dp), dimension (nsh_max) :: dqj
   ! Speed up SCF loop: en Kscf>1 el termino de cargas estaticas se reconstruye como
   ! vxc_ca0 + g_xc.dQ (exactamente lineal en dQ), sin llamadas a doscentros.
   logical :: fast
   integer :: alpha
-  real(double), dimension (nssh_tot) :: dQg
+  real(dp), dimension (nssh_tot) :: dQg
 
   fast = (Kscf .gt. 1) .and. (iscf_fast .eq. 1)
   if (fast) then
@@ -45,14 +45,14 @@ subroutine assemble_xc_2c ()
         & - Qref(get_issh_ofshell(alpha), imass(get_iatom_ofshell(alpha)))
     end do
   end if
-  if (Kscf .eq. 1) vxc_ca0 = 0.0d0
+  if (Kscf .eq. 1) vxc_ca0 = 0.0_dp
 
   kforce = 0
   do iatom = 1, natoms
     matom = neigh_self(iatom)
     r1(:) = ratom(:,iatom)
     in1 = imass(iatom)
-    dqi = 0.0d0
+    dqi = 0.0_dp
     do issh = 1, nssh(in1)
       dqi(issh) = (Qin(issh,iatom) - Qref(issh,in1))
     end do
@@ -64,14 +64,14 @@ subroutine assemble_xc_2c ()
       in2 = imass(jatom)
       r21(:) = r2(:) - r1(:)
       y = sqrt(r21(1)*r21(1) + r21(2)*r21(2) + r21(3)*r21(3))
-      if (y .lt. 1.0d-05) then
-        sighat(1) = 0.0d0
-        sighat(2) = 0.0d0
-        sighat(3) = 1.0d0
+      if (y .lt. 1.0e-05_dp) then
+        sighat(1) = 0.0_dp
+        sighat(2) = 0.0_dp
+        sighat(3) = 1.0_dp
       else
         sighat(:) = r21(:)/y
       end if
-      dqj = 0.0d0
+      dqj = 0.0_dp
       do issh = 1, nssh(in2)
         dqj(issh) = (Qin(issh,jatom) - Qref(issh,in2))
       end do
@@ -148,6 +148,6 @@ subroutine assemble_xc_2c ()
       end if
     end do
   end do
-  ! vxc = 0.0d0
+  ! vxc = 0.0_dp
   return
 end subroutine assemble_xc_2c

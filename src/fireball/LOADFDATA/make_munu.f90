@@ -1,5 +1,5 @@
 subroutine make_munu ()
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use M_fdata, only: ME2c_max, ME3c_max, num_orb, index_max2c, index_max3c, &
     & nspecies, lssh, nssh, mu, nu, mvalue, numorb_max
   implicit none

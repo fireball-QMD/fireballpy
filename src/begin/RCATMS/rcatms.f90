@@ -428,7 +428,6 @@
          enew = abs(etot) + abs(ebs)
          difference = abs((enew - eold)/enew)
 
-         !write (*,202) iteration, etot, ebs, eee, exc, difference
          if (difference .le. tolerance_scf) exit
          eold = enew
         end do  ! :::::::::::::::: END OF SCF LOOP :::::::::::::::::::::

@@ -1,5 +1,5 @@
 subroutine make_munuPP ()
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use M_fdata, only: nspecies, num_orbPP, lssh, lsshPP, ME2cPP_max, ME2c_max, &
     & index_maxPP, num_orbPP, muPP, nuPP, nssh, nsshPP
   implicit none

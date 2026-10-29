@@ -1,5 +1,5 @@
 subroutine assemble_usr (iauxforce)
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use M_constants, only: eq2
   use M_system, only: natoms, ratom, imass, neigh_max, uiiuee, ewald, fewald, neigh_b, neigh_j, neighn, Qin, dq, xl, dusr, dxcv, &
     & Kscf, coulomb_mat, iscf_fast
@@ -18,34 +18,34 @@ subroutine assemble_usr (iauxforce)
   integer jssh
   integer mbeta
   integer n1, n2
-  real(double) distance
-  real(double) dq1
-  real(double) dqi
-  real(double) eklr
-  real(double) qi, qj
-  real(double) QQ
-  real(double) u0tot
-  real(double) ue0tot
-  real(double) xforce
-  real(double) Zi, Zj
-  real(double), dimension (natoms, neigh_max) :: corksr
-  real(double), dimension (nsh_max, nsh_max) :: coulomb
-  real(double), dimension (nsh_max, nsh_max) :: coulombD
-  real(double), dimension (3) :: dcorksr
-  real(double), dimension (ME2c_max) :: dslist
-  real(double), dimension (3) :: eta
-  real(double), dimension (natoms) :: Q, Q0
-  real(double), dimension (3) :: r1, r2
-  real(double), dimension (ME2c_max) :: slist
-  real(double), dimension (natoms, neigh_max) :: u0
-  real(double), dimension (natoms) :: uee00
-  dusr = 0.0d0
-  dxcv = 0.0d0
-  u0 = 0.0d0
+  real(dp) distance
+  real(dp) dq1
+  real(dp) dqi
+  real(dp) eklr
+  real(dp) qi, qj
+  real(dp) QQ
+  real(dp) u0tot
+  real(dp) ue0tot
+  real(dp) xforce
+  real(dp) Zi, Zj
+  real(dp), dimension (natoms, neigh_max) :: corksr
+  real(dp), dimension (nsh_max, nsh_max) :: coulomb
+  real(dp), dimension (nsh_max, nsh_max) :: coulombD
+  real(dp), dimension (3) :: dcorksr
+  real(dp), dimension (ME2c_max) :: dslist
+  real(dp), dimension (3) :: eta
+  real(dp), dimension (natoms) :: Q, Q0
+  real(dp), dimension (3) :: r1, r2
+  real(dp), dimension (ME2c_max) :: slist
+  real(dp), dimension (natoms, neigh_max) :: u0
+  real(dp), dimension (natoms) :: uee00
+  dusr = 0.0_dp
+  dxcv = 0.0_dp
+  u0 = 0.0_dp
 
   do iatom = 1, natoms
-    Q(iatom) = 0.0d0
-    Q0(iatom) = 0.0d0
+    Q(iatom) = 0.0_dp
+    Q0(iatom) = 0.0_dp
     in1 = imass(iatom)
     do issh = 1, nssh(in1)
       Q(iatom) = Q(iatom) + Qin(issh,iatom)
@@ -88,35 +88,35 @@ subroutine assemble_usr (iauxforce)
       end if
 
       if (iatom .eq. jatom .and. mbeta .eq. 0) then
-        uee00(iatom) = 0.0d0
+        uee00(iatom) = 0.0_dp
         do issh = 1, nssh(in1)
           do jssh = 1, nssh(in1)
             uee00(iatom) = uee00(iatom) + Qin(issh,iatom)*Qin(jssh,jatom)*coulomb(issh,jssh)
           end do
         end do
-        uee00(iatom) = uee00(iatom)*(eq2/2.0d0)
-        u0(iatom,ineigh) = 0.0d0
-        corksr(iatom,ineigh) = 0.0d0
+        uee00(iatom) = uee00(iatom)*(eq2/2.0_dp)
+        u0(iatom,ineigh) = 0.0_dp
+        corksr(iatom,ineigh) = 0.0_dp
       else
-        u0(iatom,ineigh) = 0.0d0
+        u0(iatom,ineigh) = 0.0_dp
         do issh = 1, nssh(in1)
           do jssh = 1, nssh(in2)
             u0(iatom,ineigh) = u0(iatom,ineigh) + Qin(issh,iatom)*Qin(jssh,jatom)*coulomb(issh,jssh)
           end do
         end do
-        u0(iatom,ineigh)=(eq2/2.0d0)*(Zi*Zj/distance-u0(iatom,ineigh))
-        corksr(iatom,ineigh) = - (eq2/2.0d0)*QQ/distance
+        u0(iatom,ineigh)=(eq2/2.0_dp)*(Zi*Zj/distance-u0(iatom,ineigh))
+        corksr(iatom,ineigh) = - (eq2/2.0_dp)*QQ/distance
         if (iauxforce .eq. 1) then
           eta(:) = (r2(:) - r1(:))/distance
-          xforce = 0.0d0
+          xforce = 0.0_dp
           do issh = 1, nssh(in1)
             do jssh = 1, nssh(in2)
               xforce = xforce + Qin(issh,iatom)*Qin(jssh,jatom)*coulombD(issh,jssh)
             end do
           end do
-          dusr(:,iatom) = dusr(:,iatom) -  eta(:)*(eq2/2.0d0)*(Zi*Zj/distance**2 + xforce)
-          dusr(:,jatom) = dusr(:,jatom) +  eta(:)*(eq2/2.0d0)*(Zi*Zj/distance**2 + xforce)
-          dcorksr(:) = - eta(:)*(eq2/2.0d0)*QQ/distance**2
+          dusr(:,iatom) = dusr(:,iatom) -  eta(:)*(eq2/2.0_dp)*(Zi*Zj/distance**2 + xforce)
+          dusr(:,jatom) = dusr(:,jatom) +  eta(:)*(eq2/2.0_dp)*(Zi*Zj/distance**2 + xforce)
+          dcorksr(:) = - eta(:)*(eq2/2.0_dp)*QQ/distance**2
           dusr(:,iatom) = dusr(:,iatom) - dcorksr(:)
           dusr(:,jatom) = dusr(:,jatom) + dcorksr(:)
 
@@ -126,11 +126,11 @@ subroutine assemble_usr (iauxforce)
   end do !iatom
 
   do iatom = 1, natoms
-    dusr(:,iatom) = dusr(:,iatom) - (eq2/2.0d0)*fewald(:,iatom)
+    dusr(:,iatom) = dusr(:,iatom) - (eq2/2.0_dp)*fewald(:,iatom)
   end do
 
-  u0tot = 0.0d0
-  ue0tot = 0.0d0
+  u0tot = 0.0_dp
+  ue0tot = 0.0_dp
   do iatom = 1, natoms
     ue0tot = ue0tot + uee00(iatom)
     do ineigh = 1, neighn(iatom)
@@ -138,14 +138,14 @@ subroutine assemble_usr (iauxforce)
       u0tot = u0tot + corksr(iatom,ineigh)
     end do                                     
   end do
-  eklr = 0.0d0
+  eklr = 0.0_dp
   do iatom = 1, natoms
     do jatom = iatom, natoms
      QQ = Q(iatom)*Q(jatom) - Q0(iatom)*Q0(jatom)
      if (iatom .eq. jatom) then
-       eklr = eklr + (eq2/2.0d0)*ewald(iatom,jatom)*QQ
+       eklr = eklr + (eq2/2.0_dp)*ewald(iatom,jatom)*QQ
      else
-       eklr = eklr + (eq2/2.0d0)*ewald(iatom,jatom)*QQ + (eq2/2.0d0)*ewald(jatom,iatom)*QQ
+       eklr = eklr + (eq2/2.0_dp)*ewald(iatom,jatom)*QQ + (eq2/2.0_dp)*ewald(jatom,iatom)*QQ
      end if
     end do
   end do

@@ -1,18 +1,18 @@
 subroutine Dassemble_qmmm_dip () 
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use M_constants, only: eq2
   use M_system, only: natoms, ratom, imass, neigh_b, neigh_j, neighn, numorb_max, sp_mat, dippc, rho, s_mat, dipc, xl, &
     & flrew_qmmm, qmmm_qm_natoms, qmmm_dxyzcl, qmmm_qm_xcrd
   use M_fdata, only: nssh, Qneutral, num_orb
   implicit none
   integer :: iatom, imu, inu, in1, in2, in3, ineigh, issh, jatom, katom, mbeta, ix
-  real(double) :: dij, dq3, dq4, dterm, x, sterm, sff, sff3, sff5
-  real(double), dimension (3) :: rna, rnabc, r1, r2, r21, vij, ddterm, dptermA, dptermB, spterm
-  real(double), dimension (3, numorb_max, numorb_max) :: demnplA, demnplB, demnplC
-  real(double), external :: sf
+  real(dp) :: dij, dq3, dq4, dterm, x, sterm, sff, sff3, sff5
+  real(dp), dimension (3) :: rna, rnabc, r1, r2, r21, vij, ddterm, dptermA, dptermB, spterm
+  real(dp), dimension (3, numorb_max, numorb_max) :: demnplA, demnplB, demnplC
+  real(dp), external :: sf
 
-  flrew_qmmm = 0.0d0
-  qmmm_dxyzcl = 0.0d0
+  flrew_qmmm = 0.0_dp
+  qmmm_dxyzcl = 0.0_dp
   do iatom=1, natoms
     r1(:) = ratom(:,iatom)
     in1 = imass(iatom)
@@ -27,7 +27,7 @@ subroutine Dassemble_qmmm_dip ()
         rna(3) = qmmm_qm_xcrd(3,katom)
         dq3 = - qmmm_qm_xcrd(4,katom) ! charge in amber have opposite sign
         r21(:) = r2(:) - r1(:)
-        rnabc(:) = rna(:) - (r1(:) + r21(:)/2.0d0)
+        rnabc(:) = rna(:) - (r1(:) + r21(:)/2.0_dp)
         x = norm2(rnabc)
         sff = sf(x)
         sff3 = sff*sff*sff
@@ -55,7 +55,7 @@ subroutine Dassemble_qmmm_dip ()
   end do   ! end do iatom = 1, natoms
   do iatom=1, natoms
     in3 = imass(iatom)
-    dq4 = 0.0d0
+    dq4 = 0.0_dp
     do issh = 1, nssh(in3)
       dq4 = dq4  + Qneutral(issh,in3)
     end do

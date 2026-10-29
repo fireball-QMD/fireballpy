@@ -1,6 +1,6 @@
 ! This routine assembles all of the two-center and degenerate two-center interactions.
 subroutine assemble_2c ()
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use M_constants, only: eq2
   use M_system, only: iforce, iqout, idipole, natoms, ratom, imass, dip, dipp, neigh_b, neigh_j, neighn, neigh_self, numorb_max, sp_mat, &
     & tp_mat, dipcm, dippcm, dippc, s_mat, t_mat, vna, dipc, xl
@@ -24,32 +24,32 @@ subroutine assemble_2c ()
   integer iy
   integer iz
  
-  real(double) y
-  real(double), dimension (numorb_max, numorb_max) :: bcna
-  real(double), dimension (3, numorb_max, numorb_max) :: bcnapx
-  real(double), dimension (numorb_max, numorb_max) :: bcnax
-  real(double), dimension (3, 3, 3) :: deps
-  real(double), dimension (3, 3) :: eps
-  real(double), dimension (3) :: r1
-  real(double), dimension (3) :: r2
-  real(double), dimension (3) :: r21
-  real(double), dimension (3) :: sighat
-  real(double), dimension (numorb_max, numorb_max) :: sx
-  real(double), dimension (3, numorb_max, numorb_max) :: spx
-  real(double), dimension (numorb_max, numorb_max) :: tx
-  real(double), dimension (3, numorb_max, numorb_max) :: tpx
-  real(double), dimension (numorb_max, numorb_max) :: dipx
-  real(double), dimension (3, numorb_max, numorb_max) :: dippx
+  real(dp) y
+  real(dp), dimension (numorb_max, numorb_max) :: bcna
+  real(dp), dimension (3, numorb_max, numorb_max) :: bcnapx
+  real(dp), dimension (numorb_max, numorb_max) :: bcnax
+  real(dp), dimension (3, 3, 3) :: deps
+  real(dp), dimension (3, 3) :: eps
+  real(dp), dimension (3) :: r1
+  real(dp), dimension (3) :: r2
+  real(dp), dimension (3) :: r21
+  real(dp), dimension (3) :: sighat
+  real(dp), dimension (numorb_max, numorb_max) :: sx
+  real(dp), dimension (3, numorb_max, numorb_max) :: spx
+  real(dp), dimension (numorb_max, numorb_max) :: tx
+  real(dp), dimension (3, numorb_max, numorb_max) :: tpx
+  real(dp), dimension (numorb_max, numorb_max) :: dipx
+  real(dp), dimension (3, numorb_max, numorb_max) :: dippx
 
-  vna = 0.0d0
-  s_mat = 0.0d0
-  t_mat = 0.0d0
-  sp_mat = 0.0d0
-  tp_mat = 0.0d0
-  dipcm = 0.0d0
-  dipc = 0.0d0
-  dippcm = 0.0d0
-  dippc = 0.0d0
+  vna = 0.0_dp
+  s_mat = 0.0_dp
+  t_mat = 0.0_dp
+  sp_mat = 0.0_dp
+  tp_mat = 0.0_dp
+  dipcm = 0.0_dp
+  dipc = 0.0_dp
+  dippcm = 0.0_dp
+  dippc = 0.0_dp
 
   do iatom = 1, natoms
     matom = neigh_self(iatom)
@@ -62,10 +62,10 @@ subroutine assemble_2c ()
       in2 = imass(jatom)
       r21(:) = r2(:) - r1(:)
       y = sqrt(r21(1)*r21(1) + r21(2)*r21(2) + r21(3)*r21(3))
-      if (y .lt. 1.0d-05) then
-        sighat(1) = 0.0d0
-        sighat(2) = 0.0d0
-        sighat(3) = 1.0d0
+      if (y .lt. 1.0e-05_dp) then
+        sighat(1) = 0.0_dp
+        sighat(2) = 0.0_dp
+        sighat(3) = 1.0_dp
       else
         sighat(:) = r21(:)/y
       end if

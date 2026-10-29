@@ -125,7 +125,7 @@
         end do
 
         do issh = 1, nssh
-         read (15,100) meshin
+         read (15,"(12x,i5)") meshin
          do ipoint = 1, meshin
           read (15,*) r_nl, v_nl
          end do
@@ -133,10 +133,5 @@
         end do
 
         close (unit = 15)
-
-! Format Statements
-! ===========================================================================
-100     format (12x, i5)
-
         return
         end

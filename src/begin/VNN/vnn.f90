@@ -124,9 +124,10 @@
 ! Procedure
 ! ===========================================================================
 ! Initialize some constants
+        mesh = mesh_rcatms
 
 !-------dani.JOM 
- call pp (0, mesh_rcatms, r, vc, vl, ioptionpp, exmix)
+        call pp (0, mesh_rcatms, r, vc, vl, ioptionpp, exmix)
 !------------------	
 
 ! Read in the wavefunctions

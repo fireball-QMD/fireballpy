@@ -1,5 +1,5 @@
 module M_system
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
 
   !========================
   integer :: iforce     = 1
@@ -22,31 +22,31 @@ module M_system
   integer :: errno = 0
 
   integer :: ialgmix  = 2 !1:anderson 2:johnson 3:custom
-  real(double), parameter :: xc_overtol = 5.0d-5
-  real(double), parameter :: xc_overtolG = 5.0d-5
-  real(double), parameter :: smt_elect = 0.8d0 ! Ewald and electrostatic
+  real(dp), parameter :: xc_overtol = 5.0e-5_dp
+  real(dp), parameter :: xc_overtolG = 5.0e-5_dp
+  real(dp), parameter :: smt_elect = 0.8_dp ! Ewald and electrostatic
   integer, parameter :: ithetamax = 5
   integer :: idmix = 6
   integer :: max_scf_iterations = 200
-  real(double) :: tempfe = 100.0d0
-  real(double) :: bmix = 0.1d0
+  real(dp) :: tempfe = 100.0_dp
+  real(dp) :: bmix = 0.1_dp
   integer :: Kbest
-  real(double) :: sigma = 0.0d0
-  real(double) :: sigmaold = 0.0d0
-  real(double) :: sigmatol = 1.0d-8
-  real(double) :: sigmabest
-  real(double) :: w02 = 0.0d0
+  real(dp) :: sigma = 0.0_dp
+  real(dp) :: sigmaold = 0.0_dp
+  real(dp) :: sigmatol = 1.0e-8_dp
+  real(dp) :: sigmabest
+  real(dp) :: w02 = 0.0_dp
   logical :: scf_achieved = .false.
  
   integer :: natoms
-  real(double), dimension (:, :), allocatable :: ratom
+  real(dp), dimension (:, :), allocatable :: ratom
   integer, dimension (:), allocatable :: degelec
   integer, dimension (:), allocatable :: imass
   character (len = 2), dimension (:), allocatable:: symbol
   integer :: mbeta_max  
   integer :: neigh_max
   !integer :: ishiftO
-  !real(double), dimension (3) :: shifter
+  !real(dp), dimension (3) :: shifter
 
   !--- mandar a M_fdata ? AQUI
   integer, dimension (:), allocatable :: getmssh
@@ -61,62 +61,62 @@ module M_system
   integer, dimension (:,:), allocatable :: get_shell_ofatom_issh
 
   ! --- ETOT ----
-  real(double) :: etot
-  real(double) :: etotold, etotnew
-  real(double) :: etotper
-  real(double) :: atomic_energy, efermi
-  real(double) :: uiiuee
-  real(double) :: uxcdcc
-  real(double) :: uxcdcc_zw
-  real(double) :: uxcdcc_ols
-  real(double) :: etotxc_1c
-  real(double) :: ebs
-  real(double) :: eqmmm
-  real(double) :: dc_v_intra_dip_1c
+  real(dp) :: etot
+  real(dp) :: etotold, etotnew
+  real(dp) :: etotper
+  real(dp) :: atomic_energy, efermi
+  real(dp) :: uiiuee
+  real(dp) :: uxcdcc
+  real(dp) :: uxcdcc_zw
+  real(dp) :: uxcdcc_ols
+  real(dp) :: etotxc_1c
+  real(dp) :: ebs
+  real(dp) :: eqmmm
+  real(dp) :: dc_v_intra_dip_1c
   integer :: Kscf  
-  real(double) :: Uexc_1c
-  real(double) ::  Umuxc_1c
-  real(double), dimension (:, :, :, :), allocatable :: vxc_1c
+  real(dp) :: Uexc_1c
+  real(dp) ::  Umuxc_1c
+  real(dp), dimension (:, :, :, :), allocatable :: vxc_1c
 
   !Charges
-  real(double), dimension(:), allocatable  :: Q0_TOT
+  real(dp), dimension(:), allocatable  :: Q0_TOT
   integer, dimension (:), allocatable :: nelectron
 
   !--diag--
-  real(double), dimension (:, :, :), allocatable :: blowre
-  real(double), dimension (:, :, :), allocatable :: bbnkre
-  real(double), dimension (:, :, :), allocatable :: blowim
-  real(double), dimension (:, :, :), allocatable :: bbnkim
-  real(double), dimension (:, :), allocatable :: sm12_real
-  complex(double), dimension (:, :, :), allocatable :: sm12_complex
+  real(dp), dimension (:, :, :), allocatable :: blowre
+  real(dp), dimension (:, :, :), allocatable :: bbnkre
+  real(dp), dimension (:, :, :), allocatable :: blowim
+  real(dp), dimension (:, :, :), allocatable :: bbnkim
+  real(dp), dimension (:, :), allocatable :: sm12_real
+  complex(dp), dimension (:, :, :), allocatable :: sm12_complex
   
 
-  real(double), dimension (:, :), allocatable :: eigen_k
-  real(double), dimension (:, :), allocatable :: special_k
+  real(dp), dimension (:, :), allocatable :: eigen_k
+  real(dp), dimension (:, :), allocatable :: special_k
   integer :: norbitals
   integer :: norbitals_new
   integer :: nkpoints  
   integer, dimension (:), allocatable :: getiatom
   integer, dimension (:,:),allocatable :: ioccupy_k !AQUI pensar allo en denmat
   integer, dimension (:), allocatable :: ioccupy   !AQUI
-  real(double), dimension (:,:), allocatable :: foccupy !AQUI
+  real(dp), dimension (:,:), allocatable :: foccupy !AQUI
   
   !scf
-  real(double), dimension (:, :, :, :), allocatable :: cape
-  real(double), dimension (:, :, :, :), allocatable :: rhoPP
-  real(double) :: ztot
-  real(double), dimension (:), allocatable :: weight_k
+  real(dp), dimension (:, :, :, :), allocatable :: cape
+  real(dp), dimension (:, :, :, :), allocatable :: rhoPP
+  real(dp) :: ztot
+  real(dp), dimension (:), allocatable :: weight_k
   integer ::  nssh_tot
-  real(double), dimension (:), allocatable :: mwe
-  real(double), dimension (:), allocatable :: drwe
+  real(dp), dimension (:), allocatable :: mwe
+  real(dp), dimension (:), allocatable :: drwe
 
   ! -- EWALD--
-  real(double), dimension (:, :), allocatable :: ewald
-  real(double), dimension (:, :, :), allocatable :: dewald
-  real(double), dimension (:, :), allocatable :: fewald
-  real(double), dimension (:, :, :, :), allocatable :: ewaldsr
-  real(double), dimension (:, :, :, :), allocatable :: dip
-  real(double), dimension (:, :, :, :, :), allocatable :: dipp
+  real(dp), dimension (:, :), allocatable :: ewald
+  real(dp), dimension (:, :, :), allocatable :: dewald
+  real(dp), dimension (:, :), allocatable :: fewald
+  real(dp), dimension (:, :, :, :), allocatable :: ewaldsr
+  real(dp), dimension (:, :, :, :), allocatable :: dip
+  real(dp), dimension (:, :, :, :, :), allocatable :: dipp
  
   ! --- NEIGH ----
   integer, dimension (:, :), allocatable :: neigh_b  
@@ -153,15 +153,15 @@ module M_system
   integer, dimension (:, :), allocatable :: neighPP_b
   integer, dimension (:, :), allocatable :: neighPP_j
   integer :: tot_pairs
-  real(double), dimension (:, :, :, :), allocatable :: sVNL
-  real(double), dimension (:, :, :, :, :), allocatable :: spVNL
-  real(double), dimension (:, :, :, :, :), allocatable :: sp_mat
-  real(double), dimension (:, :, :, :, :), allocatable :: tp_mat
-  real(double), dimension (:, :, :), allocatable :: dipcm
-  real(double), dimension (:, :, :, :), allocatable :: dippcm
-  real(double), dimension (:, :, :, :, :, :), allocatable :: dippc
-  real(double), dimension(3,3) :: eps2  
-  real(double), dimension (:, :, :, :), allocatable :: vnl
+  real(dp), dimension (:, :, :, :), allocatable :: sVNL
+  real(dp), dimension (:, :, :, :, :), allocatable :: spVNL
+  real(dp), dimension (:, :, :, :, :), allocatable :: sp_mat
+  real(dp), dimension (:, :, :, :, :), allocatable :: tp_mat
+  real(dp), dimension (:, :, :), allocatable :: dipcm
+  real(dp), dimension (:, :, :, :), allocatable :: dippcm
+  real(dp), dimension (:, :, :, :, :, :), allocatable :: dippc
+  real(dp), dimension(3,3) :: eps2  
+  real(dp), dimension (:, :, :, :), allocatable :: vnl
   integer, dimension (:), allocatable :: neighPP_comn
   integer, dimension (:, :), allocatable :: neighPP_comm
   integer, dimension (:, :, :), allocatable :: neighPP_comj
@@ -171,141 +171,141 @@ module M_system
   integer :: num_neig_maxtot
  
   !CHARGES
-  real(double), dimension (:, :), allocatable :: Qin
-  real(double), dimension (:), allocatable :: Qinmixer
-  real(double), dimension (:, :), allocatable :: Qout
-  real(double), dimension (:), allocatable :: Qoutmixer
-  real(double), dimension (:), allocatable :: dq
-  real(double), dimension(:), allocatable  :: Q_partial
-  real(double), dimension (:, :), allocatable :: Qin_es
-  real(double), dimension (:), allocatable :: QLowdin_TOT
-  real(double), dimension (:), allocatable :: QMulliken_TOT
-  real(double), allocatable, dimension(:,:) :: qaux
-  real(double) :: dip_x, dipQout_x, dipTot_x, dipProy_x, dipIntra_x, dip_res_x, dipQin_x, dipRes_x
-  real(double) :: dip_y, dipQout_y, dipTot_y, dipProy_y, dipIntra_y, dip_res_y, dipQin_y, dipRes_y
-  real(double) :: dip_z, dipQout_z, dipTot_z, dipProy_z, dipIntra_z, dip_res_z, dipQin_z, dipRes_z
-  real(double) :: dip_tot, dip_proy, dipQin_tot, dipTot_tot, dipIntra_tot, dipQout_tot, dip_res_tot, dipRes_tot 
-  real(double), dimension (:), allocatable :: dq_DP
+  real(dp), dimension (:, :), allocatable :: Qin
+  real(dp), dimension (:), allocatable :: Qinmixer
+  real(dp), dimension (:, :), allocatable :: Qout
+  real(dp), dimension (:), allocatable :: Qoutmixer
+  real(dp), dimension (:), allocatable :: dq
+  real(dp), dimension(:), allocatable  :: Q_partial
+  real(dp), dimension (:, :), allocatable :: Qin_es
+  real(dp), dimension (:), allocatable :: QLowdin_TOT
+  real(dp), dimension (:), allocatable :: QMulliken_TOT
+  real(dp), allocatable, dimension(:,:) :: qaux
+  real(dp) :: dip_x, dipQout_x, dipTot_x, dipProy_x, dipIntra_x, dip_res_x, dipQin_x, dipRes_x
+  real(dp) :: dip_y, dipQout_y, dipTot_y, dipProy_y, dipIntra_y, dip_res_y, dipQin_y, dipRes_y
+  real(dp) :: dip_z, dipQout_z, dipTot_z, dipProy_z, dipIntra_z, dip_res_z, dipQin_z, dipRes_z
+  real(dp) :: dip_tot, dip_proy, dipQin_tot, dipTot_tot, dipIntra_tot, dipQout_tot, dip_res_tot, dipRes_tot 
+  real(dp), dimension (:), allocatable :: dq_DP
 
   !interaccions
-  real(double), dimension (:, :, :, :), allocatable :: vxc
-  real(double), dimension (:, :, :, :), allocatable :: vxc_ca
-  real(double), dimension (:, :, :, :), allocatable :: rho
-  real(double), dimension (:, :, :, :), allocatable :: rho_off
-  real(double), dimension (:, :, :, :), allocatable :: rhoij_off
-  real(double), dimension (:, :, :, :), allocatable :: s_mat 
-  real(double), dimension (:, :, :, :), allocatable :: sm_mat
-  real(double), dimension (:, :, :, :, :), allocatable :: spm_mat
-  real(double), dimension (:, :, :), allocatable :: rho_on
-  real(double), dimension (:, :, :), allocatable :: arho_on
-  real(double), dimension (:, :, :), allocatable :: rhoi_on
-  real(double), dimension (:, :, :), allocatable :: arhoi_on
-  real(double), dimension (:, :, :, :, :), allocatable :: arhop_on
-  real(double), dimension (:, :, :, :, :), allocatable :: rhop_on
-  real(double), dimension (:, :, :, :), allocatable :: arhoij_off
-  real(double), dimension (:, :, :, :), allocatable :: arho_off
-  real(double), dimension (:, :, :, :, :), allocatable :: arhopij_off 
-  real(double), dimension (:, :, :, :, :), allocatable :: arhop_off
-  real(double), dimension (:, :, :, :, :), allocatable :: rhop_off
-  real(double), dimension (:, :, :, :, :), allocatable :: rhopij_off
-  real(double), dimension (:, :, :, :), allocatable :: vca
-  real(double), dimension (:, :, :, :), allocatable :: ewaldlr
-  real(double), dimension (:, :, :, :), allocatable :: h_mat
-  real(double), dimension (:, :, :, :), allocatable :: h_mat0   ! h^0_{mu nu}: H a cargas neutras (Kscf=1, dQ=0)
-  real(double), dimension (:, :, :, :), allocatable :: t_mat
-  real(double), dimension (:, :, :, :), allocatable :: vna
-  real(double), dimension (:, :, :, :), allocatable :: ewaldqmmm
-  real(double), dimension (:, :, :, :, :), allocatable :: dipc
+  real(dp), dimension (:, :, :, :), allocatable :: vxc
+  real(dp), dimension (:, :, :, :), allocatable :: vxc_ca
+  real(dp), dimension (:, :, :, :), allocatable :: rho
+  real(dp), dimension (:, :, :, :), allocatable :: rho_off
+  real(dp), dimension (:, :, :, :), allocatable :: rhoij_off
+  real(dp), dimension (:, :, :, :), allocatable :: s_mat 
+  real(dp), dimension (:, :, :, :), allocatable :: sm_mat
+  real(dp), dimension (:, :, :, :, :), allocatable :: spm_mat
+  real(dp), dimension (:, :, :), allocatable :: rho_on
+  real(dp), dimension (:, :, :), allocatable :: arho_on
+  real(dp), dimension (:, :, :), allocatable :: rhoi_on
+  real(dp), dimension (:, :, :), allocatable :: arhoi_on
+  real(dp), dimension (:, :, :, :, :), allocatable :: arhop_on
+  real(dp), dimension (:, :, :, :, :), allocatable :: rhop_on
+  real(dp), dimension (:, :, :, :), allocatable :: arhoij_off
+  real(dp), dimension (:, :, :, :), allocatable :: arho_off
+  real(dp), dimension (:, :, :, :, :), allocatable :: arhopij_off 
+  real(dp), dimension (:, :, :, :, :), allocatable :: arhop_off
+  real(dp), dimension (:, :, :, :, :), allocatable :: rhop_off
+  real(dp), dimension (:, :, :, :, :), allocatable :: rhopij_off
+  real(dp), dimension (:, :, :, :), allocatable :: vca
+  real(dp), dimension (:, :, :, :), allocatable :: ewaldlr
+  real(dp), dimension (:, :, :, :), allocatable :: h_mat
+  real(dp), dimension (:, :, :, :), allocatable :: h_mat0   ! h^0_{mu nu}: H a cargas neutras (Kscf=1, dQ=0)
+  real(dp), dimension (:, :, :, :), allocatable :: t_mat
+  real(dp), dimension (:, :, :, :), allocatable :: vna
+  real(dp), dimension (:, :, :, :), allocatable :: ewaldqmmm
+  real(dp), dimension (:, :, :, :, :), allocatable :: dipc
   integer, dimension(:,:), allocatable :: muR
   integer, dimension(:,:), allocatable :: nuR
   integer, dimension(:,:), allocatable :: alphaR
   integer, dimension(:,:), allocatable :: betaR
-  real(double), dimension(:,:,:,:), allocatable   :: hr_box
+  real(dp), dimension(:,:,:,:), allocatable   :: hr_box
 
   
-  real(double), allocatable, dimension(:,:) :: Fv   
-  real(double), allocatable, dimension(:,:) :: Xv    
-  real(double), allocatable, dimension(:,:) :: delF 
-  real(double), allocatable, dimension(:,:) :: delX 
-  real(double), allocatable, dimension(:)   :: r2_sav
-  real(double), allocatable, dimension(:)   :: wi
-  real(double), allocatable, dimension(:)   :: x_best
+  real(dp), allocatable, dimension(:,:) :: Fv   
+  real(dp), allocatable, dimension(:,:) :: Xv    
+  real(dp), allocatable, dimension(:,:) :: delF 
+  real(dp), allocatable, dimension(:,:) :: delX 
+  real(dp), allocatable, dimension(:)   :: r2_sav
+  real(dp), allocatable, dimension(:)   :: wi
+  real(dp), allocatable, dimension(:)   :: x_best
  
-  real(double), allocatable, dimension(:,:) :: RJac
-  real(double), allocatable, dimension(:,:) :: betaInvH
-  real(double), allocatable, dimension(:,:) :: gamaH
-  real(double), dimension (:,:), allocatable :: xl
+  real(dp), allocatable, dimension(:,:) :: RJac
+  real(dp), allocatable, dimension(:,:) :: betaInvH
+  real(dp), allocatable, dimension(:,:) :: gamaH
+  real(dp), dimension (:,:), allocatable :: xl
 
   ! Lattice vectors
-  real(double), dimension (3) :: a1vec
-  real(double), dimension (3) :: a2vec
-  real(double), dimension (3) :: a3vec
+  real(dp), dimension (3) :: a1vec
+  real(dp), dimension (3) :: a2vec
+  real(dp), dimension (3) :: a3vec
 
   ! allocate_f
-  real(double), dimension (:, :, :), allocatable :: fotnl
-  real(double), dimension (:, :, :), allocatable :: fanl
-  real(double), dimension (:, :, :), allocatable :: fotna
-  real(double), dimension (:, :, :), allocatable :: fana
-  real(double), dimension (:, :, :), allocatable :: faxc 
-  real(double), dimension (:, :, :), allocatable :: faxc_ca 
-  real(double), dimension (:, :, :), allocatable :: dxcdcc
-  real(double), dimension (:, :, :), allocatable :: dxcdcc_zw
-  real(double), dimension (:, :), allocatable :: ft
-  real(double), dimension (:, :), allocatable :: dusr
-  real(double), dimension (:, :, :), allocatable :: fotxc_ca
-  real(double), dimension (:, :, :), allocatable :: faca 
-  real(double), dimension (:, :, :), allocatable :: fotca
-  real(double), dimension (:, :), allocatable :: f3naa, f3nab, f3nac
-  real(double), dimension (:, :), allocatable :: f3nla, f3nlb, f3nlc
-  real(double), dimension (:, :), allocatable :: f3caa, f3cab, f3cac
-  real(double), dimension (:, :), allocatable :: flrew
-  real(double), dimension (:, :), allocatable :: f3xca_ca, f3xcb_ca, f3xcc_ca
-  real(double), dimension (:, :), allocatable :: f3xca, f3xcb, f3xcc
-  real(double), dimension (:, :), allocatable :: flrew_qmmm
-  real(double), dimension (:, :), allocatable :: fro
-  real(double), dimension (:, :), allocatable :: ftot
-  real(double), dimension (:, :), allocatable :: dxcv
+  real(dp), dimension (:, :, :), allocatable :: fotnl
+  real(dp), dimension (:, :, :), allocatable :: fanl
+  real(dp), dimension (:, :, :), allocatable :: fotna
+  real(dp), dimension (:, :, :), allocatable :: fana
+  real(dp), dimension (:, :, :), allocatable :: faxc 
+  real(dp), dimension (:, :, :), allocatable :: faxc_ca 
+  real(dp), dimension (:, :, :), allocatable :: dxcdcc
+  real(dp), dimension (:, :, :), allocatable :: dxcdcc_zw
+  real(dp), dimension (:, :), allocatable :: ft
+  real(dp), dimension (:, :), allocatable :: dusr
+  real(dp), dimension (:, :, :), allocatable :: fotxc_ca
+  real(dp), dimension (:, :, :), allocatable :: faca 
+  real(dp), dimension (:, :, :), allocatable :: fotca
+  real(dp), dimension (:, :), allocatable :: f3naa, f3nab, f3nac
+  real(dp), dimension (:, :), allocatable :: f3nla, f3nlb, f3nlc
+  real(dp), dimension (:, :), allocatable :: f3caa, f3cab, f3cac
+  real(dp), dimension (:, :), allocatable :: flrew
+  real(dp), dimension (:, :), allocatable :: f3xca_ca, f3xcb_ca, f3xcc_ca
+  real(dp), dimension (:, :), allocatable :: f3xca, f3xcb, f3xcc
+  real(dp), dimension (:, :), allocatable :: flrew_qmmm
+  real(dp), dimension (:, :), allocatable :: fro
+  real(dp), dimension (:, :), allocatable :: ftot
+  real(dp), dimension (:, :), allocatable :: dxcv
 
 
   !integer                        :: qmmm_qm_mm_pairs     !Number of pairs per QM atom. - length of pair_list. 
   integer                        :: qmmm_qm_natoms
-  real(double), dimension(:,:), allocatable :: qmmm_dxyzcl  !Used to store the forces generated by qm_mm before adding them to the main f array.
-  real(double), dimension(:,:),  allocatable ::  qmmm_qm_xcrd         !Contains imaged mm coordinates and scaled mm charges.
-  real(double), dimension(:), allocatable :: qmmm_scf_mchg
-  real(double), dimension(:), allocatable :: qmmm_Qneutral_TOT
-  real(double) :: qmmm_rc1, qmmm_rc2, qmmm_width
+  real(dp), dimension(:,:), allocatable :: qmmm_dxyzcl  !Used to store the forces generated by qm_mm before adding them to the main f array.
+  real(dp), dimension(:,:),  allocatable ::  qmmm_qm_xcrd         !Contains imaged mm coordinates and scaled mm charges.
+  real(dp), dimension(:), allocatable :: qmmm_scf_mchg
+  real(dp), dimension(:), allocatable :: qmmm_Qneutral_TOT
+  real(dp) :: qmmm_rc1, qmmm_rc2, qmmm_width
 
 
-  real(double), dimension(3, 3, 5) :: amat
+  real(dp), dimension(3, 3, 5) :: amat
   
-  real(double), dimension (:,:,:,:,:), allocatable :: g_h
-  real(double), dimension (:,:,:,:,:), allocatable :: g_xc
+  real(dp), dimension (:,:,:,:,:), allocatable :: g_h
+  real(dp), dimension (:,:,:,:,:), allocatable :: g_xc
   ! N^gamma_munu = <phi_mu|(phi^S_gamma)^2|phi_nu>, gamma: global shell index
-  real(double), dimension (:,:,:,:,:), allocatable :: den_or
+  real(dp), dimension (:,:,:,:,:), allocatable :: den_or
   ! M^gamma_alphabeta = <phi^S_alpha|(phi^S_gamma)^2|phi^S_beta>, gamma: global shell index
-  real(double), dimension (:,:,:,:,:), allocatable :: den_sh
+  real(dp), dimension (:,:,:,:,:), allocatable :: den_sh
   ! Speed up SCF loop (seccion 4 de doc/XC_basic_claude_fable.tex): tablas Q-independientes
   ! adicionales rellenadas en Kscf=1 para reconstruir densidades/vxc sin interpolar en Kscf>1.
   ! iscf_fast=0 recupera el camino clasico (reensamblado con interpolaciones en cada paso).
   integer :: iscf_fast = 1
   ! pieza 2c (L+R) de den_or/den_sh: reconstruye rhoij_off/arhoij_off (gamma: indice global)
-  real(double), dimension (:,:,:,:,:), allocatable :: denij_or
-  real(double), dimension (:,:,:,:,:), allocatable :: denij_sh
+  real(dp), dimension (:,:,:,:,:), allocatable :: denij_or
+  real(dp), dimension (:,:,:,:,:), allocatable :: denij_sh
   ! pieza self (atomo i sobre si mismo, indice de shell local): reconstruye rhoi_on/arhoi_on
-  real(double), dimension (:,:,:,:), allocatable :: deni_or
-  real(double), dimension (:,:,:,:), allocatable :: deni_sh
+  real(dp), dimension (:,:,:,:), allocatable :: deni_or
+  real(dp), dimension (:,:,:,:), allocatable :: deni_sh
   ! termino constante VXC_0 (isorp=0) off-site de assemble_xc_2c, congelado en Kscf=1
-  real(double), dimension (:,:,:,:), allocatable :: vxc_ca0
+  real(dp), dimension (:,:,:,:), allocatable :: vxc_ca0
   ! integrales de Coulomb 2c por par de vecinos (assemble_usr), congeladas en Kscf=1
-  real(double), dimension (:,:,:,:), allocatable :: coulomb_mat
-  real(double), dimension (:,:,:,:,:), allocatable :: f_xc
-  real(double), dimension (:,:,:,:), allocatable :: exc_aa
-  real(double), dimension (:,:,:,:), allocatable :: vxc_aa
-  real(double), dimension (:,:), allocatable :: g_h_shell
-  real(double), dimension (:,:), allocatable :: g_xc_shell  
-  real(double), dimension (:,:), allocatable :: f_xc_shell
-  real(double), dimension (:), allocatable :: exc_aa_shell
-  real(double), dimension (:), allocatable :: vxc_aa_shell
+  real(dp), dimension (:,:,:,:), allocatable :: coulomb_mat
+  real(dp), dimension (:,:,:,:,:), allocatable :: f_xc
+  real(dp), dimension (:,:,:,:), allocatable :: exc_aa
+  real(dp), dimension (:,:,:,:), allocatable :: vxc_aa
+  real(dp), dimension (:,:), allocatable :: g_h_shell
+  real(dp), dimension (:,:), allocatable :: g_xc_shell  
+  real(dp), dimension (:,:), allocatable :: f_xc_shell
+  real(dp), dimension (:), allocatable :: exc_aa_shell
+  real(dp), dimension (:), allocatable :: vxc_aa_shell
   integer, dimension (:), allocatable :: fix_shell_charge
   ! Seleccion de shells fijadas a carga neutra en stationary_charges (se fija desde Python
   ! con set_fix_shells): 0 = ninguna, 1 = solo shells d, 2 = shells con Qneutral=0 (default),

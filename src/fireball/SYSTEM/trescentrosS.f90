@@ -1,5 +1,5 @@
 subroutine trescentrosS ( isorp, in1, in2, indna, x, y, cost, bcnax)
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use M_system, only: ithetamax
   use M_fdata, only: hx_den3, hy_den3, numx3c_den3, numy3c_den3, x3cmax_den3, y3cmax_den3, &
     & den3S_01, den3S_02, den3S_03, den3S_04, den3S_05, &
@@ -9,10 +9,10 @@ subroutine trescentrosS ( isorp, in1, in2, indna, x, y, cost, bcnax)
   integer, intent (in) :: in2
   integer, intent (in) :: indna
   integer, intent (in) :: isorp
-  real(double), intent (in) :: cost
-  real(double), intent (in) :: x
-  real(double), intent (in) :: y
-  real(double), intent (out), dimension (nsh_max, nsh_max) :: bcnax
+  real(dp), intent (in) :: cost
+  real(dp), intent (in) :: x
+  real(dp), intent (in) :: y
+  real(dp), intent (out), dimension (nsh_max, nsh_max) :: bcnax
   integer imu
   integer iME
   integer index
@@ -21,22 +21,22 @@ subroutine trescentrosS ( isorp, in1, in2, indna, x, y, cost, bcnax)
   integer nl
   integer nx
   integer ny
-  real(double) argument
-  real(double) cost2
-  real(double) dQ_Ldx
-  real(double) dQ_Ldy
-  real(double) Q_L
-  real(double) sint
-  real(double) xxmax
-  real(double) yymax
-  real(double) hx
-  real(double) hy
-  real(double), dimension (0:ithetamax - 1, MES_max) :: bcnalist
-  real(double), dimension (MES_max) :: hlist
-  real(double), dimension (0:ithetamax - 1) :: p
+  real(dp) argument
+  real(dp) cost2
+  real(dp) dQ_Ldx
+  real(dp) dQ_Ldy
+  real(dp) Q_L
+  real(dp) sint
+  real(dp) xxmax
+  real(dp) yymax
+  real(dp) hx
+  real(dp) hy
+  real(dp), dimension (0:ithetamax - 1, MES_max) :: bcnalist
+  real(dp), dimension (MES_max) :: hlist
+  real(dp), dimension (0:ithetamax - 1) :: p
   do inu = 1, nssh(in2)
     do imu = 1, nssh(in1)
-      bcnax(imu,inu) = 0.0d0
+      bcnax(imu,inu) = 0.0_dp
     end do
   end do
   kforce = 0
@@ -60,16 +60,16 @@ subroutine trescentrosS ( isorp, in1, in2, indna, x, y, cost, bcnax)
     bcnalist(4,iME) = Q_L
   end do
   cost2 = cost**2
-  argument = 1.0d0 - cost2
-  if (argument .lt. 0.0d0) argument = 1.0d-5
+  argument = 1.0_dp - cost2
+  if (argument .lt. 0.0_dp) argument = 1.0e-5_dp
   sint = sqrt(argument)
-  p(0) = 1.0d0
+  p(0) = 1.0_dp
   p(1) = cost
-  p(2) = (3.0d0*cost2 - 1.0d0)/2.0d0
-  p(3) = (5.0d0*cost2*cost - 3.0d0*cost)/2.0d0
-  p(4) = (35.0d0*cost2*cost2 - 30.0d0*cost2 + 3.0d0)/8.0d0
+  p(2) = (3.0_dp*cost2 - 1.0_dp)/2.0_dp
+  p(3) = (5.0_dp*cost2*cost - 3.0_dp*cost)/2.0_dp
+  p(4) = (35.0_dp*cost2*cost2 - 30.0_dp*cost2 + 3.0_dp)/8.0_dp
   do iME = 1, index_maxS(in1,in2)
-    hlist(iME) = 0.0d0
+    hlist(iME) = 0.0_dp
     do nl = 0, ntheta - 1
       hlist(iME) = hlist(iME) + p(nl)*bcnalist(nl,iME)
     end do

@@ -1,14 +1,14 @@
 subroutine geth (overlap, hamiltonian)
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use M_system, only: natoms, imass, neighn, neigh_j, h_mat, s_mat, neighPP_j, neighn, neighPPn, &
     & vnl, degelec, norbitals
   use M_fdata, only: num_orb
   implicit none
   integer :: iatom, jatom, imu, inu, in1, in2, ineigh, jmu, jnu
-  real(double), dimension (norbitals, norbitals), intent(out) :: overlap, hamiltonian
+  real(dp), dimension (norbitals, norbitals), intent(out) :: overlap, hamiltonian
 
-  overlap = 0.0d0
-  hamiltonian = 0.0d0
+  overlap = 0.0_dp
+  hamiltonian = 0.0_dp
   do iatom = 1, natoms
     in1 = imass(iatom)
     do ineigh = 1, neighn(iatom)

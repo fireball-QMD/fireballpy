@@ -1,5 +1,5 @@
 subroutine Dassemble_ca_olsxc_3c ()
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use xc, only: xc_calc
   use M_system, only: xc_overtol, natoms, ratom, imass, neigh_comb, neigh_comj, neigh_comm, neigh_comn, numorb_max, Qin, rho, rho_off, &
     & s_mat, sm_mat, spm_mat, arho_off, xl, f3xca_ca, f3xcb_ca, f3xcc_ca, f3xca, f3xcb, f3xcc
@@ -28,58 +28,58 @@ subroutine Dassemble_ca_olsxc_3c ()
   integer mneigh
   integer n1
   integer n2
-  real(double) cost
-  real(double) x
-  real(double) y
-  real(double) muxc
-  real(double) dmuxc
-  real(double) d2muxc
-  real(double) exc
-  real(double) dexc
-  real(double) d2exc
-  real(double) sx
-  real(double) sm
-  real(double) rho_av
-  real(double), dimension (3, 3, 3) :: depsA
-  real(double), dimension (3, 3, 3) :: depsB
-  real(double), dimension (3, 3) :: eps
-  real(double), dimension (nsh_max, nsh_max) :: rho_3c
-  real(double), dimension (3, nsh_max, nsh_max) :: rhop_3ca
-  real(double), dimension (3, nsh_max, nsh_max) :: rhop_3cb
-  real(double), dimension (3, nsh_max, nsh_max) :: rhop_3cc
-  real(double), dimension (3, numorb_max, numorb_max) :: rhoxpa
-  real(double), dimension (3, numorb_max, numorb_max) :: rhoxpb
-  real(double), dimension (3, numorb_max, numorb_max) :: rhoxpc
-  real(double), dimension (3, nsh_max, nsh_max) :: rhompa
-  real(double), dimension (3, nsh_max, nsh_max) :: rhompb
-  real(double), dimension (3, nsh_max, nsh_max) :: rhompc
-  real(double), dimension (3, numorb_max, numorb_max) :: rhoinpa
-  real(double), dimension (3, numorb_max, numorb_max) :: rhoinpb
-  real(double), dimension (3, numorb_max, numorb_max) :: rhoinpc
-  real(double), dimension (3, numorb_max, numorb_max) :: avrhop_a
-  real(double), dimension (3, numorb_max, numorb_max) :: avrhop_b
-  real(double), dimension (3, numorb_max, numorb_max) :: avrhop_c
-  real(double), dimension (3, numorb_max, numorb_max) :: mxca
-  real(double), dimension (3, numorb_max, numorb_max) :: mxcb
-  real(double), dimension (3, numorb_max, numorb_max) :: mxcc
-  real(double), dimension (numorb_max, numorb_max) :: rhoin
-  real(double), dimension (nsh_max, nsh_max) :: rhomm
-  real(double), dimension (3) :: spm
-  real(double), dimension (3) :: rhop_avb
-  real(double), dimension (3) :: rhop_avc
-  real(double), dimension (3) :: r1
-  real(double), dimension (3) :: r2
-  real(double), dimension (3) :: r21
-  real(double), dimension (3) :: rhat
-  real(double), dimension (3) :: rna
-  real(double), dimension (3) :: rnabc
-  real(double), dimension (3) :: sighat
-  f3xca = 0.0d0
-  f3xcb = 0.0d0
-  f3xcc = 0.0d0
-  f3xca_ca = 0.0d0
-  f3xcb_ca = 0.0d0
-  f3xcc_ca = 0.0d0
+  real(dp) cost
+  real(dp) x
+  real(dp) y
+  real(dp) muxc
+  real(dp) dmuxc
+  real(dp) d2muxc
+  real(dp) exc
+  real(dp) dexc
+  real(dp) d2exc
+  real(dp) sx
+  real(dp) sm
+  real(dp) rho_av
+  real(dp), dimension (3, 3, 3) :: depsA
+  real(dp), dimension (3, 3, 3) :: depsB
+  real(dp), dimension (3, 3) :: eps
+  real(dp), dimension (nsh_max, nsh_max) :: rho_3c
+  real(dp), dimension (3, nsh_max, nsh_max) :: rhop_3ca
+  real(dp), dimension (3, nsh_max, nsh_max) :: rhop_3cb
+  real(dp), dimension (3, nsh_max, nsh_max) :: rhop_3cc
+  real(dp), dimension (3, numorb_max, numorb_max) :: rhoxpa
+  real(dp), dimension (3, numorb_max, numorb_max) :: rhoxpb
+  real(dp), dimension (3, numorb_max, numorb_max) :: rhoxpc
+  real(dp), dimension (3, nsh_max, nsh_max) :: rhompa
+  real(dp), dimension (3, nsh_max, nsh_max) :: rhompb
+  real(dp), dimension (3, nsh_max, nsh_max) :: rhompc
+  real(dp), dimension (3, numorb_max, numorb_max) :: rhoinpa
+  real(dp), dimension (3, numorb_max, numorb_max) :: rhoinpb
+  real(dp), dimension (3, numorb_max, numorb_max) :: rhoinpc
+  real(dp), dimension (3, numorb_max, numorb_max) :: avrhop_a
+  real(dp), dimension (3, numorb_max, numorb_max) :: avrhop_b
+  real(dp), dimension (3, numorb_max, numorb_max) :: avrhop_c
+  real(dp), dimension (3, numorb_max, numorb_max) :: mxca
+  real(dp), dimension (3, numorb_max, numorb_max) :: mxcb
+  real(dp), dimension (3, numorb_max, numorb_max) :: mxcc
+  real(dp), dimension (numorb_max, numorb_max) :: rhoin
+  real(dp), dimension (nsh_max, nsh_max) :: rhomm
+  real(dp), dimension (3) :: spm
+  real(dp), dimension (3) :: rhop_avb
+  real(dp), dimension (3) :: rhop_avc
+  real(dp), dimension (3) :: r1
+  real(dp), dimension (3) :: r2
+  real(dp), dimension (3) :: r21
+  real(dp), dimension (3) :: rhat
+  real(dp), dimension (3) :: rna
+  real(dp), dimension (3) :: rnabc
+  real(dp), dimension (3) :: sighat
+  f3xca = 0.0_dp
+  f3xcb = 0.0_dp
+  f3xcc = 0.0_dp
+  f3xca_ca = 0.0_dp
+  f3xcb_ca = 0.0_dp
+  f3xcc_ca = 0.0_dp
   do ialp = 1, natoms
     rna(:) = ratom(:,ialp)
     indna = imass(ialp)
@@ -96,19 +96,19 @@ subroutine Dassemble_ca_olsxc_3c ()
         in2 = imass(jatom)
         r21(:) = r2(:) - r1(:)
         y = sqrt(r21(1)*r21(1) + r21(2)*r21(2) + r21(3)*r21(3))
-        if (y .lt. 1.0d-05) then
-          sighat(1) = 0.0d0
-          sighat(2) = 0.0d0
-          sighat(3) = 1.0d0
+        if (y .lt. 1.0e-05_dp) then
+          sighat(1) = 0.0_dp
+          sighat(2) = 0.0_dp
+          sighat(3) = 1.0_dp
         else
           sighat(:) = r21(:)/y
         end if
-        rnabc(:) = rna(:) - (r1(:) + r21(:)/2.0d0)
+        rnabc(:) = rna(:) - (r1(:) + r21(:)/2.0_dp)
         x = sqrt(rnabc(1)**2 + rnabc(2)**2 + rnabc(3)**2)
-        if (x .lt. 1.0d-03) then
-          rhat(1) = 0.0d0
-          rhat(2) = 0.0d0
-          rhat(3) = 0.0d0
+        if (x .lt. 1.0e-03_dp) then
+          rhat(1) = 0.0_dp
+          rhat(2) = 0.0_dp
+          rhat(3) = 0.0_dp
         else
           rhat(:) = rnabc(:)/x
         end if
@@ -116,16 +116,16 @@ subroutine Dassemble_ca_olsxc_3c ()
         call epsilon (rhat, sighat, eps)
         call deps3center (r1, r2, r21, y, rna, rnabc, eps, depsA, depsB)
         interaction = 3
-        rho_3c = 0.0d0
-        rhop_3ca = 0.0d0
-        rhop_3cb = 0.0d0
-        rhop_3cc = 0.0d0
-        rhoinpa = 0.0d0
-        rhoinpb = 0.0d0
-        rhoinpc = 0.0d0
-        avrhop_a = 0.0d0
-        avrhop_b = 0.0d0
-        avrhop_c = 0.0d0
+        rho_3c = 0.0_dp
+        rhop_3ca = 0.0_dp
+        rhop_3cb = 0.0_dp
+        rhop_3cc = 0.0_dp
+        rhoinpa = 0.0_dp
+        rhoinpb = 0.0_dp
+        rhoinpc = 0.0_dp
+        avrhop_a = 0.0_dp
+        avrhop_b = 0.0_dp
+        avrhop_c = 0.0_dp
         do isorp = 1, nssh(indna)
           call Dtrescentros (interaction, isorp, in1, in2, indna, x, y, cost, eps, depsA, depsB, rhat, sighat, rhoin, rhoxpa, rhoxpb, rhoxpc)
           call DtrescentrosS (isorp, in1, in2, indna, x, y, cost, rhat, sighat, rhomm, rhompa, rhompb, rhompc)
@@ -150,10 +150,10 @@ subroutine Dassemble_ca_olsxc_3c ()
           do jssh = 1, nssh(in2)
             sm = sm_mat(issh,jssh,mneigh,iatom)
             if (abs(sm) .lt. xc_overtol) then
-              if(sm .gt. 0.0d0) then
+              if(sm .gt. 0.0_dp) then
                 sm = xc_overtol
               else
-                sm = -1.0d0*xc_overtol
+                sm = -1.0_dp*xc_overtol
               endif
             endif
             spm(:) = spm_mat(:,issh,jssh,mneigh,iatom)

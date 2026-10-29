@@ -1,5 +1,5 @@
 subroutine make_munuDipY ()
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use indices, only: indices_twocenter_set, INDICES_TWOCENTER_DIPY
   use M_fdata, only: ME2cDipY_max, nspecies, nssh, num_orb, lssh, &
     & index_max2cDipY, ME2c_max, muDipY, nuDipY

@@ -1,5 +1,5 @@
 subroutine lowdin_charges()
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use M_constants, only: spin
   use M_system, only: igamma, natoms, degelec, imass, blowre, blowim, norbitals, nkpoints, ioccupy_k, foccupy, weight_k, Qout, &
     & QLowdin_TOT
@@ -12,9 +12,9 @@ subroutine lowdin_charges()
   integer issh, mmu
   integer mqn
   integer iorbital
-  real(double) aux1, aux2, aux3
-  Qout = 0.0d0
-  QLowdin_TOT = 0.0d0
+  real(dp) aux1, aux2, aux3
+  Qout = 0.0_dp
+  QLowdin_TOT = 0.0_dp
   do iatom = 1, natoms
     in1 = imass(iatom)
     do ikpoint = 1, nkpoints

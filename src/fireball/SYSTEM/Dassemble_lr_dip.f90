@@ -1,5 +1,5 @@
 subroutine Dassemble_lr_dip ()
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use M_constants, only: eq2
   use M_system, only: natoms, ratom, imass, neigh_self, neigh_pair_a1, neigh_pair_a2, neigh_pair_n1, neigh_pair_n2, &
     & numorb_max, tot_pairs, sp_mat, dippc, Qin, rho, s_mat, dipc, flrew
@@ -18,29 +18,29 @@ subroutine Dassemble_lr_dip ()
   integer ix
   integer jneigh
   integer ipair
-  real(double) dist13
-  real(double) dist23
-  real(double) dq3
-  real(double) dterm 
-  real(double) x
-  real(double) sterm
-  real(double), dimension(3)  :: rnabc
-  real(double), dimension(3)  :: r13
-  real(double), dimension(3)  :: r23
-  real(double), dimension(3)  :: r21
-  real(double), dimension(3)  :: ddterm
-  real(double), dimension(3)  :: dptermA
-  real(double), dimension(3)  :: dptermB
-  real(double), dimension(3)  :: rna
-  real(double), dimension (3) :: r1
-  real(double), dimension (3) :: r2
-  real(double), dimension (3) :: spterm
-  real(double), dimension (numorb_max, numorb_max) :: emnpl
-  real(double), dimension (3, numorb_max, numorb_max) :: demnplA
-  real(double), dimension (3, numorb_max, numorb_max) :: demnplB
-  real(double), dimension (3, numorb_max, numorb_max) :: demnplC
+  real(dp) dist13
+  real(dp) dist23
+  real(dp) dq3
+  real(dp) dterm 
+  real(dp) x
+  real(dp) sterm
+  real(dp), dimension(3)  :: rnabc
+  real(dp), dimension(3)  :: r13
+  real(dp), dimension(3)  :: r23
+  real(dp), dimension(3)  :: r21
+  real(dp), dimension(3)  :: ddterm
+  real(dp), dimension(3)  :: dptermA
+  real(dp), dimension(3)  :: dptermB
+  real(dp), dimension(3)  :: rna
+  real(dp), dimension (3) :: r1
+  real(dp), dimension (3) :: r2
+  real(dp), dimension (3) :: spterm
+  real(dp), dimension (numorb_max, numorb_max) :: emnpl
+  real(dp), dimension (3, numorb_max, numorb_max) :: demnplA
+  real(dp), dimension (3, numorb_max, numorb_max) :: demnplB
+  real(dp), dimension (3, numorb_max, numorb_max) :: demnplC
 
-  flrew = 0.0d0
+  flrew = 0.0_dp
   do ipair = 1,tot_pairs
     iatom = neigh_pair_a1(ipair)
     jatom = neigh_pair_a2(ipair)
@@ -53,7 +53,7 @@ subroutine Dassemble_lr_dip ()
     do ialp = 1, natoms   !the ialp is the "distant" atom.
       rna(:) = ratom(:,ialp)
       inalp = imass(ialp)
-      dq3 = 0.0d0
+      dq3 = 0.0_dp
       do issh = 1, nssh(inalp)
         dq3 = dq3 + (Qin(issh,ialp) - Qneutral(issh,inalp))
       end do ! end do issh = 1m nssh(inalp)
@@ -62,16 +62,16 @@ subroutine Dassemble_lr_dip ()
       r23=rna(:)-r2(:)
       dist13=sqrt(r13(1)*r13(1) + r13(2)*r13(2) + r13(3)*r13(3))
       dist23=sqrt(r23(1)*r23(1) + r23(2)*r23(2) + r23(3)*r23(3))
-      if ((dist13 .lt. 1.0d-5) .or. (dist23 .lt. 1.0d-5)) then
+      if ((dist13 .lt. 1.0e-5_dp) .or. (dist23 .lt. 1.0e-5_dp)) then
       else
         r21(:) = r2(:) - r1(:)
-        rnabc(:) = rna(:) - (r1(:) + r21(:)/2.0d0)
+        rnabc(:) = rna(:) - (r1(:) + r21(:)/2.0_dp)
         x = sqrt(rnabc(1)**2 + rnabc(2)**2 + rnabc(3)**2)
-        if (x .lt. 1.0d-05) then
-          emnpl = 0.0d0
-          demnplA = 0.0d0
-          demnplB = 0.0d0
-          demnplC = 0.0d0
+        if (x .lt. 1.0e-05_dp) then
+          emnpl = 0.0_dp
+          demnplA = 0.0_dp
+          demnplB = 0.0_dp
+          demnplC = 0.0_dp
           else
           do inu = 1, num_orb(in2)
             do imu = 1, num_orb(in1)
@@ -91,8 +91,8 @@ subroutine Dassemble_lr_dip ()
               end do 
             end do  !imu
           end do   !inu
-        end if   ! (x .lt. 1.0d-05)
-      end if  ! end if if ((dist13 .lt. 1.0d-5) .or. (dist23 .lt.1.0d-5)) 
+        end if   ! (x .lt. 1.0e-05_dp)
+      end if  ! end if if ((dist13 .lt. 1.0e-5_dp) .or. (dist23 .lt.1.0e-5_dp)) 
     end do     ! end do ialp = 1, natoms
   end do !end do ipair 
 
@@ -106,7 +106,7 @@ subroutine Dassemble_lr_dip ()
     do ialp = 1, natoms   !the ialp is the "distant" atom.
       rna(:) = ratom(:,ialp)
       inalp = imass(ialp)
-      dq3 = 0.0d0
+      dq3 = 0.0_dp
       do issh = 1, nssh(inalp)
         dq3 = dq3 + (Qin(issh,ialp) - Qneutral(issh,inalp))
       end do ! end do issh = 1m nssh(inalp)
@@ -115,16 +115,16 @@ subroutine Dassemble_lr_dip ()
       r23=rna(:)-r2(:)
       dist13=sqrt(r13(1)*r13(1) + r13(2)*r13(2) + r13(3)*r13(3))
       dist23=sqrt(r23(1)*r23(1) + r23(2)*r23(2) + r23(3)*r23(3))
-      if ((dist13 .lt. 1.0d-5) .or. (dist23 .lt. 1.0d-5)) then
+      if ((dist13 .lt. 1.0e-5_dp) .or. (dist23 .lt. 1.0e-5_dp)) then
       else
         r21(:) = r2(:) - r1(:)
-        rnabc(:) = rna(:) - (r1(:) + r21(:)/2.0d0)
+        rnabc(:) = rna(:) - (r1(:) + r21(:)/2.0_dp)
         x = sqrt(rnabc(1)**2 + rnabc(2)**2 + rnabc(3)**2)
-        if (x .lt. 1.0d-05) then
-          emnpl = 0.0d0
-          demnplA = 0.0d0
-          demnplB = 0.0d0
-          demnplC = 0.0d0
+        if (x .lt. 1.0e-05_dp) then
+          emnpl = 0.0_dp
+          demnplA = 0.0_dp
+          demnplB = 0.0_dp
+          demnplC = 0.0_dp
         else
           do inu = 1, num_orb(in2)
             do imu = 1, num_orb(in1)
@@ -144,8 +144,8 @@ subroutine Dassemble_lr_dip ()
               end do 
             end do  
           end do   
-        end if   !(x .lt. 1.0d-05)
-      end if  !end if if ((dist13 .lt. 1.0d-5) .or. (dist23 .lt.1.0d-5)) 
+        end if   !(x .lt. 1.0e-05_dp)
+      end if  !end if if ((dist13 .lt. 1.0e-5_dp) .or. (dist23 .lt.1.0e-5_dp)) 
     end do !ialp 
   end do !iatom 
 end subroutine Dassemble_lr_dip

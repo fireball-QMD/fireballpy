@@ -1,5 +1,5 @@
 subroutine Dassemble_xc_2c ()
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use M_system, only: natoms, ratom, imass, neigh_b, neigh_j, neighn, neigh_self, numorb_max, sp_mat, Qin, rho, rho_off, rhoij_off, &
     & s_mat, arhoij_off, arho_off, arhopij_off, arhop_off, rhop_off, rhopij_off, xl, fotxc_ca
   use M_fdata, only: num_orb, nssh, lssh, Qref, nsh_max, TWOCENTER_VXC_0, TWOCENTER_VXC_L, TWOCENTER_VXC_R
@@ -26,37 +26,37 @@ subroutine Dassemble_xc_2c ()
   integer matom
   integer n1
   integer n2
-  real(double) y
-  real(double) muxc
-  real(double) dmuxc
-  real(double) d2muxc
-  real(double) exc
-  real(double) dexc
-  real(double) d2exc
-  real(double) sx
-  real(double) rho_av
-  real(double) rhoin
-  real(double) dxn
-  real(double), dimension (numorb_max, numorb_max) :: bcxcx
-  real(double), dimension (3, numorb_max, numorb_max) :: bcxcpx
-  real(double), dimension (3, numorb_max, numorb_max) :: mxcb
-  real(double), dimension (3) :: rhoinp
-  real(double), dimension (3) :: rhop_av
-  real(double), dimension (3) :: spx
-  real(double), dimension (3, 3) :: eps
-  real(double), dimension (3, 3, 3) :: deps
-  real(double), dimension (3) :: r1
-  real(double), dimension (3) :: r2
-  real(double), dimension (3) :: r21
-  real(double), dimension (3) :: sighat
-  real(double), dimension (nsh_max) :: dqi
-  real(double), dimension (nsh_max) :: dqj
-  fotxc_ca = 0.0d0
+  real(dp) y
+  real(dp) muxc
+  real(dp) dmuxc
+  real(dp) d2muxc
+  real(dp) exc
+  real(dp) dexc
+  real(dp) d2exc
+  real(dp) sx
+  real(dp) rho_av
+  real(dp) rhoin
+  real(dp) dxn
+  real(dp), dimension (numorb_max, numorb_max) :: bcxcx
+  real(dp), dimension (3, numorb_max, numorb_max) :: bcxcpx
+  real(dp), dimension (3, numorb_max, numorb_max) :: mxcb
+  real(dp), dimension (3) :: rhoinp
+  real(dp), dimension (3) :: rhop_av
+  real(dp), dimension (3) :: spx
+  real(dp), dimension (3, 3) :: eps
+  real(dp), dimension (3, 3, 3) :: deps
+  real(dp), dimension (3) :: r1
+  real(dp), dimension (3) :: r2
+  real(dp), dimension (3) :: r21
+  real(dp), dimension (3) :: sighat
+  real(dp), dimension (nsh_max) :: dqi
+  real(dp), dimension (nsh_max) :: dqj
+  fotxc_ca = 0.0_dp
   do iatom = 1, natoms
    matom = neigh_self(iatom)
    r1(:) = ratom(:,iatom)
    in1 = imass(iatom)
-   dqi = 0.0d0
+   dqi = 0.0_dp
    do issh = 1, nssh(in1)
      dqi(issh) = (Qin(issh,iatom) - Qref(issh,in1))
    end do
@@ -67,16 +67,16 @@ subroutine Dassemble_xc_2c ()
     in2 = imass(jatom)
     if (iatom .eq. jatom .and. mbeta .eq. 0) then
     else
-     dqj = 0.0d0
+     dqj = 0.0_dp
      do issh = 1, nssh(in2)
        dqj(issh) = (Qin(issh,jatom) - Qref(issh,in2))
      end do
      r21(:) = r2(:) - r1(:)
      y = sqrt(r21(1)*r21(1) + r21(2)*r21(2) + r21(3)*r21(3))
-     if (y .lt. 1.0d-05) then
-      sighat(1) = 0.0d0
-      sighat(2) = 0.0d0
-      sighat(3) = 1.0d0
+     if (y .lt. 1.0e-05_dp) then
+      sighat(1) = 0.0_dp
+      sighat(2) = 0.0_dp
+      sighat(3) = 1.0_dp
      else
       sighat(:) = r21(:)/y
      end if

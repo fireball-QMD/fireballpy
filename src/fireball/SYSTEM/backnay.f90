@@ -1,5 +1,5 @@
 subroutine backnay ()
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use M_system, only: natoms, neigh_b, neigh_j, neighn, neigh_back, xl, errno
   implicit none
   integer :: iatom
@@ -21,7 +21,7 @@ subroutine backnay ()
         do jneigh = 1, neighn(jatom)
           jbeta = neigh_b(jneigh,jatom)
           katom = neigh_j(jneigh,jatom)
-          if (katom .eq. iatom .and. sum((xl(:,jbeta) + xl(:,mbeta))**2) .lt. 1.0d-5) then
+          if (katom .eq. iatom .and. sum((xl(:,jbeta) + xl(:,mbeta))**2) .lt. 1.0e-5_dp) then
             neigh_back (iatom,ineigh) = jneigh
             icount = icount + 1
           end if

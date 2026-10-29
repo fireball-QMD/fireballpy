@@ -1,5 +1,5 @@
 subroutine trescentros (interaction, isorp, in1, in2, indna, x, y, cost, eps, bcnax)
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use M_system, only: numorb_max
   use M_fdata, only: hx_bcna, hy_bcna, hx_den3, hy_den3, numx3c_bcna, numy3c_bcna, &
     & numx3c_den3, numy3c_den3, x3cmax_bcna, y3cmax_bcna, x3cmax_den3, y3cmax_den3, &
@@ -12,28 +12,28 @@ subroutine trescentros (interaction, isorp, in1, in2, indna, x, y, cost, eps, bc
   integer, intent (in) :: indna
   integer, intent (in) :: interaction
   integer, intent (in) :: isorp
-  real(double), intent (in) :: cost
-  real(double), intent (in) :: x
-  real(double), intent (in) :: y
-  real(double), intent (in), dimension (3, 3) :: eps
-  real(double), intent (out), dimension (numorb_max, numorb_max) :: bcnax
+  real(dp), intent (in) :: cost
+  real(dp), intent (in) :: x
+  real(dp), intent (in) :: y
+  real(dp), intent (in), dimension (3, 3) :: eps
+  real(dp), intent (out), dimension (numorb_max, numorb_max) :: bcnax
   integer iME
   integer index
   integer kforce
   integer nl
-  real(double) argument
-  real(double) cost2
-  real(double) dQ_Ldx
-  real(double) dQ_Ldy
-  real(double) Q_L
-  real(double) sint
+  real(dp) argument
+  real(dp) cost2
+  real(dp) dQ_Ldx
+  real(dp) dQ_Ldy
+  real(dp) Q_L
+  real(dp) sint
   integer nx, ny
-  real(double) xxmax, yymax
-  real(double) hx, hy
-  real(double), dimension (0:ntheta - 1, ME3c_max) :: bcnalist
-  real(double), dimension (numorb_max, numorb_max) :: bcnam
-  real(double), dimension (ME3c_max) :: hlist
-  real(double), dimension (0:ntheta - 1) :: p
+  real(dp) xxmax, yymax
+  real(dp) hx, hy
+  real(dp), dimension (0:ntheta - 1, ME3c_max) :: bcnalist
+  real(dp), dimension (numorb_max, numorb_max) :: bcnam
+  real(dp), dimension (ME3c_max) :: hlist
+  real(dp), dimension (0:ntheta - 1) :: p
   kforce = 0
   index = icon3c(in1,in2,indna)
   if (interaction .eq. 1) then
@@ -95,16 +95,16 @@ subroutine trescentros (interaction, isorp, in1, in2, indna, x, y, cost, eps, bc
     end do
   end if
   cost2 = cost**2
-  argument = 1.0d0 - cost2
-  if (argument .lt. 1.0d-5) argument = 1.0d-5
+  argument = 1.0_dp - cost2
+  if (argument .lt. 1.0e-5_dp) argument = 1.0e-5_dp
   sint = sqrt(argument) 
-  p(0) = 1.0d0
+  p(0) = 1.0_dp
   p(1) = cost
-  p(2) = (3.0d0*cost2 - 1.0d0)/2.0d0
-  p(3) = (5.0d0*cost2*cost - 3.0d0*cost)/2.0d0
-  p(4) = (35.0d0*cost2*cost2 - 30.0d0*cost2 + 3.0d0)/8.0d0
+  p(2) = (3.0_dp*cost2 - 1.0_dp)/2.0_dp
+  p(3) = (5.0_dp*cost2*cost - 3.0_dp*cost)/2.0_dp
+  p(4) = (35.0_dp*cost2*cost2 - 30.0_dp*cost2 + 3.0_dp)/8.0_dp
   do iME = 1, index_max3c(in1,in2)
-    hlist(iME) = 0.0d0
+    hlist(iME) = 0.0_dp
     do nl = 0, ntheta - 1
       hlist(iME) = hlist(iME) + p(nl)*bcnalist(nl,iME)
     end do

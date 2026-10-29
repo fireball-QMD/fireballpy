@@ -122,10 +122,6 @@
                  endif
               end do ! enddo ipoint
            enddo ! enddo  issh
-! write vX        
-           do ipoint = 1, mesh
-!              write (100,*) r(ipoint),(vXe(issh,ipoint),issh=1,nssh)
-           enddo
         endif ! if(ioptim)
 
 ! Loop over shell
@@ -194,16 +190,5 @@
 
 ! Deallocate Arrays
 ! ===========================================================================
-
-! Format Statements
-! ===========================================================================
-101     format (2x, a12)
-102     format (2x, i5, 2x, a12)
-103     format (2x, i8)
-104     format (2x, 2(2x,f7.4), 2x, f7.2)
-105     format (2x, i3)
-400     format (4d18.10)
-401     format (2x, f6.3, 2x, f12.6)
-
         return
         end

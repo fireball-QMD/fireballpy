@@ -1,5 +1,5 @@
 subroutine Dassemble_3c ()
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use M_constants, only: eq2
   use M_system, only: natoms, ratom, imass, neigh_comb, neigh_comj, neigh_comm, neigh_comn, numorb_max, rho, xl, f3naa, f3nab, f3nac
   use M_fdata, only: num_orb
@@ -19,26 +19,26 @@ subroutine Dassemble_3c ()
   integer jbeta
   integer mneigh
   integer ialp
-  real(double) cost
-  real(double) x
-  real(double) y
-  real(double), dimension (numorb_max, numorb_max) :: bcnax
-  real(double), dimension (3, 3, 3) :: depsA
-  real(double), dimension (3, 3, 3) :: depsB
-  real(double), dimension (3, 3) :: eps
-  real(double), dimension (3, numorb_max, numorb_max) :: f3naXa
-  real(double), dimension (3, numorb_max, numorb_max) :: f3naXb
-  real(double), dimension (3, numorb_max, numorb_max) :: f3naXc
-  real(double), dimension (3) :: r1
-  real(double), dimension (3) :: r2
-  real(double), dimension (3) :: r21
-  real(double), dimension (3) :: rhat
-  real(double), dimension (3) :: rna
-  real(double), dimension (3) :: rnabc
-  real(double), dimension (3) :: sighat
-  f3naa = 0.0d0
-  f3nab = 0.0d0
-  f3nac = 0.0d0
+  real(dp) cost
+  real(dp) x
+  real(dp) y
+  real(dp), dimension (numorb_max, numorb_max) :: bcnax
+  real(dp), dimension (3, 3, 3) :: depsA
+  real(dp), dimension (3, 3, 3) :: depsB
+  real(dp), dimension (3, 3) :: eps
+  real(dp), dimension (3, numorb_max, numorb_max) :: f3naXa
+  real(dp), dimension (3, numorb_max, numorb_max) :: f3naXb
+  real(dp), dimension (3, numorb_max, numorb_max) :: f3naXc
+  real(dp), dimension (3) :: r1
+  real(dp), dimension (3) :: r2
+  real(dp), dimension (3) :: r21
+  real(dp), dimension (3) :: rhat
+  real(dp), dimension (3) :: rna
+  real(dp), dimension (3) :: rnabc
+  real(dp), dimension (3) :: sighat
+  f3naa = 0.0_dp
+  f3nab = 0.0_dp
+  f3nac = 0.0_dp
   do ialp = 1, natoms
    rna(:) = ratom(:,ialp)
    indna = imass(ialp)
@@ -55,19 +55,19 @@ subroutine Dassemble_3c ()
      in2 = imass(jatom)
      r21(:) = r2(:) - r1(:)
      y = sqrt(r21(1)*r21(1) + r21(2)*r21(2) + r21(3)*r21(3))
-     if (y .lt. 1.0d-05) then
-      sighat(1) = 0.0d0
-      sighat(2) = 0.0d0
-      sighat(3) = 1.0d0
+     if (y .lt. 1.0e-05_dp) then
+      sighat(1) = 0.0_dp
+      sighat(2) = 0.0_dp
+      sighat(3) = 1.0_dp
      else
       sighat(:) = r21(:)/y
      end if
-     rnabc(:) = rna(:) - (r1(:) + r21(:)/2.0d0)
+     rnabc(:) = rna(:) - (r1(:) + r21(:)/2.0_dp)
      x = sqrt(rnabc(1)**2 + rnabc(2)**2 + rnabc(3)**2)
-     if (x .lt. 1.0d-03) then
-      rhat(1) = 0.0d0
-      rhat(2) = 0.0d0
-      rhat(3) = 0.0d0
+     if (x .lt. 1.0e-03_dp) then
+      rhat(1) = 0.0_dp
+      rhat(2) = 0.0_dp
+      rhat(3) = 0.0_dp
      else
       rhat(:) = rnabc(:)/x
      end if
@@ -80,9 +80,9 @@ subroutine Dassemble_3c ()
      do inu = 1, num_orb(in2)
       do imu = 1, num_orb(in1)
        do ix = 1, 3
-        f3naa(ix,ialp) = f3naa(ix,ialp) + 2.0d0*rho(imu,inu,mneigh,iatom)*f3naXa(ix,imu,inu)*eq2
-        f3nab(ix,iatom) = f3nab(ix,iatom) + 2.0d0*rho(imu,inu,mneigh,iatom)*f3naXb(ix,imu,inu)*eq2
-        f3nac(ix,jatom) = f3nac(ix,jatom) + 2.0d0*rho(imu,inu,mneigh,iatom)*f3naXc(ix,imu,inu)*eq2
+        f3naa(ix,ialp) = f3naa(ix,ialp) + 2.0_dp*rho(imu,inu,mneigh,iatom)*f3naXa(ix,imu,inu)*eq2
+        f3nab(ix,iatom) = f3nab(ix,iatom) + 2.0_dp*rho(imu,inu,mneigh,iatom)*f3naXb(ix,imu,inu)*eq2
+        f3nac(ix,jatom) = f3nac(ix,jatom) + 2.0_dp*rho(imu,inu,mneigh,iatom)*f3naXc(ix,imu,inu)*eq2
        end do
       end do
      end do

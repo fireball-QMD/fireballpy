@@ -1,5 +1,5 @@
 subroutine Dassemble_ca_olsxc_2c ()
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use xc, only: xc_calc
   use M_system, only: natoms, ratom, imass, neigh_b, neigh_j, neighn, neigh_self, numorb_max, sp_mat, Qin, rho, rho_off, rhoij_off, &
     & s_mat, arhoij_off, arho_off, arhopij_off, arhop_off, rhop_off, rhopij_off, xl, fotxc_ca
@@ -27,21 +27,21 @@ subroutine Dassemble_ca_olsxc_2c ()
   integer matom
   integer n1
   integer n2
-  real(double) y
-  real(double) muxc
-  real(double) dmuxc
-  real(double) d2muxc
-  real(double) exc
-  real(double) dexc
-  real(double) d2exc
-  real(double) sx
-  real(double) rho_av
-  real(double) rhoin
-  real(double) dxn
-  real(double), dimension (3, numorb_max, numorb_max) :: mxcb
-  real(double), dimension (3) :: rhoinp
-  real(double), dimension (3) :: rhop_av
-  real(double), dimension (3) :: spx
+  real(dp) y
+  real(dp) muxc
+  real(dp) dmuxc
+  real(dp) d2muxc
+  real(dp) exc
+  real(dp) dexc
+  real(dp) d2exc
+  real(dp) sx
+  real(dp) rho_av
+  real(dp) rhoin
+  real(dp) dxn
+  real(dp), dimension (3, numorb_max, numorb_max) :: mxcb
+  real(dp), dimension (3) :: rhoinp
+  real(dp), dimension (3) :: rhop_av
+  real(dp), dimension (3) :: spx
   do iatom = 1, natoms
    matom = neigh_self(iatom)
    in1 = imass(iatom)

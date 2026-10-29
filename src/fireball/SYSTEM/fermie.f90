@@ -1,25 +1,25 @@
 subroutine fermie ()
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use M_constants, only: spin, kconvert
   use M_system, only: tempfe, efermi, eigen_k, norbitals, nkpoints, ioccupy_k, foccupy, ztot, weight_k
   implicit none
   integer, parameter :: imax = 1000 ! maximum sc iterations
   integer, parameter :: nmax = 5000 ! cutoff for degeneracy check
-  real(double), parameter :: tol = 1.0d-10
+  real(dp), parameter :: tol = 1.0e-10_dp
   integer ikpoint
   integer imu
   integer inu
   integer iter
   integer jkpoint
-  real(double) delta
-  real(double) emin
-  real(double) emax
-  real(double) qcharge
-  real(double) qztot
-  real(double) temp
+  real(dp) delta
+  real(dp) emin
+  real(dp) emax
+  real(dp) qcharge
+  real(dp) qztot
+  real(dp) temp
   qztot = ztot 
   ioccupy_k = 0
-  foccupy = 0.0d0
+  foccupy = 0.0_dp
   temp = tempfe/kconvert
 
   if (norbitals**2*nkpoints**2 .lt. nmax) then
@@ -32,7 +32,7 @@ subroutine fermie ()
      do jkpoint = ikpoint, nkpoints
       do inu = imu, norbitals
        if (abs(eigen_k(imu,ikpoint) - eigen_k(inu,jkpoint)) .lt. tol) then
-        eigen_k(inu,jkpoint) = (eigen_k(imu,ikpoint) + eigen_k(inu,jkpoint))/2.0d0
+        eigen_k(inu,jkpoint) = (eigen_k(imu,ikpoint) + eigen_k(inu,jkpoint))/2.0_dp
         eigen_k(imu,ikpoint) = eigen_k(inu,jkpoint)
        end if
       end do
@@ -49,25 +49,25 @@ subroutine fermie ()
     end do
    end do
   end if
-  emax=emax+0.20d0 
+  emax=emax+0.20_dp 
   iter = 0
-  qcharge = 0.0d0
+  qcharge = 0.0_dp
   do while (abs(qcharge - qztot) .gt. tol .and. iter .le. imax)
     iter = iter + 1
-    efermi = (emax + emin)/2.0d0
-    qcharge = 0.0d0
+    efermi = (emax + emin)/2.0_dp
+    qcharge = 0.0_dp
     do ikpoint = 1, nkpoints
       do imu = 1, norbitals
         delta = (eigen_k(imu,ikpoint) - efermi)/temp
-        if (delta .gt. 10.0d0) then
-          foccupy(imu,ikpoint) = 0.0d0
+        if (delta .gt. 10.0_dp) then
+          foccupy(imu,ikpoint) = 0.0_dp
           ioccupy_k(imu,ikpoint) = 0
-        else if (delta .lt. -10.0d0) then
-          foccupy(imu,ikpoint) = 1.0d0
+        else if (delta .lt. -10.0_dp) then
+          foccupy(imu,ikpoint) = 1.0_dp
           ioccupy_k(imu,ikpoint) = 1
         else
-          foccupy(imu,ikpoint) = 1.0d0/(1.0d0 + exp(delta))
-          if (foccupy(imu,ikpoint) .gt. 1.0d-5) then
+          foccupy(imu,ikpoint) = 1.0_dp/(1.0_dp + exp(delta))
+          if (foccupy(imu,ikpoint) .gt. 1.0e-5_dp) then
             ioccupy_k(imu,ikpoint) = 1
           else
             ioccupy_k(imu,ikpoint) = 0

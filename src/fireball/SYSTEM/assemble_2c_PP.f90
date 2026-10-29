@@ -1,6 +1,6 @@
 ! This routine assembles all of the two-center and degenerate two-center interactions.
 subroutine assemble_2c_PP ()
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use M_system, only: natoms, imass, nPP_b, nPP_j, nPP_map, nPPn, nPP_self, nPPx_b, nPPx_j, nPPx_map, nPPx_point, nPPxn, &
     & numorb_max, neighPP_self, sVNL, vnl
   use M_fdata, only: num_orb, num_orbPP
@@ -19,10 +19,10 @@ subroutine assemble_2c_PP ()
   integer mneigh_self
   integer ncc
  
-  real(double), dimension (numorb_max) :: cl
-  real(double), dimension (numorb_max, numorb_max) :: PPx
+  real(dp), dimension (numorb_max) :: cl
+  real(dp), dimension (numorb_max, numorb_max) :: PPx
 
-  vnl = 0.0d0
+  vnl = 0.0_dp
 
   do iatom = 1, natoms
     matom = neighPP_self(iatom)
@@ -35,7 +35,7 @@ subroutine assemble_2c_PP ()
       ! in1 twice because it is an atom case.
       do inu = 1, num_orb(in1)
         do imu = 1, num_orb(in1)
-          PPx(imu,inu) = 0.0d0
+          PPx(imu,inu) = 0.0_dp
           do ncc = 1, num_orbPP(in2)
             PPx(imu,inu) = PPx(imu,inu)+ cl(ncc)*sVNL(imu,ncc,ineigh,iatom)*sVNL(inu,ncc,ineigh,iatom)
           end do
@@ -66,7 +66,7 @@ subroutine assemble_2c_PP ()
         mneigh_self = nPP_self(iatom)
         do inu = 1, num_orb(in2)
           do imu = 1, num_orb(in1)
-            PPx(imu,inu) = 0.0d0
+            PPx(imu,inu) = 0.0_dp
             do ncc = 1, num_orbPP(in1)
               PPx(imu,inu) = PPx(imu,inu)+ cl(ncc)*sVNL(imu,ncc,mneigh_self,iatom)*sVNL(inu,ncc,jneigh,jatom)
             end do   ! do ncc
@@ -99,7 +99,7 @@ subroutine assemble_2c_PP ()
         mneigh_self = nPP_self(jatom)
         do inu = 1, num_orb(in2)
           do imu = 1, num_orb(in1)
-            PPx(imu,inu) = 0.0d0
+            PPx(imu,inu) = 0.0_dp
             do ncc = 1, num_orbPP(in2)
               PPx(imu,inu) = PPx(imu,inu) + cl(ncc)*sVNL(imu,ncc,ineigh,iatom)*sVNL(inu,ncc,mneigh_self,jatom)
             end do

@@ -1,12 +1,12 @@
 subroutine readheader_3c (iounit, numx, numy, xmax, ymax)
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use M_fdata, only: numXmax, numYmax
   implicit none
   integer, intent (in) :: iounit
   integer, intent (out) :: numx, numy
-  real(double), intent (out) :: xmax, ymax
+  real(dp), intent (out) :: xmax, ymax
   integer :: iline, nucZ1, nucZ2, nucZ3, nr, ntheta_in, nphi2
-  real(double) :: rc1a, rc2a, rc3a
+  real(dp) :: rc1a, rc2a, rc3a
 
   do iline = 1, 10
       read (iounit,*)

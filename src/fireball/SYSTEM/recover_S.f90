@@ -1,15 +1,15 @@
 subroutine recover_S (in1, in2, hlist, hbox)
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use M_fdata, only: nssh, index_maxS, muS, nuS, MES_max, nsh_max, nsh_max
   implicit none
   integer, intent(in) :: in1, in2
-  real(double), intent(in) :: hlist (MES_max)
-  real(double), intent(out) :: hbox (nsh_max, nsh_max)
+  real(dp), intent(in) :: hlist (MES_max)
+  real(dp), intent(out) :: hbox (nsh_max, nsh_max)
   integer imu, inu
   integer index
   do inu = 1, nssh(in2)
     do imu = 1, nssh(in1)
-      hbox(imu,inu) = 0.0d0
+      hbox(imu,inu) = 0.0_dp
     end do
   end do
   do index = 1, index_maxS(in1,in2)

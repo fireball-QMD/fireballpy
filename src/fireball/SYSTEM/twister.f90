@@ -1,13 +1,13 @@
 subroutine twister (eps, dmat, pmat)
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use M_constants, only: haveDorbitals
   use M_system, only: amat
   implicit none
-  real(double), dimension(3, 3), intent(in) :: eps
-  real(double), dimension(5, 5), intent(out) :: dmat
-  real(double), dimension(3, 3), intent(out) :: pmat
+  real(dp), dimension(3, 3), intent(in) :: eps
+  real(dp), dimension(5, 5), intent(out) :: dmat
+  real(dp), dimension(3, 3), intent(out) :: pmat
   integer :: imu, jx, ix
-  real(double) :: amat_term, xlambda11, xlambda12, xlambda13, xlambda32, xlambda33
+  real(dp) :: amat_term, xlambda11, xlambda12, xlambda13, xlambda32, xlambda33
 
   pmat(1,1) = eps(2,2) 
   pmat(1,2) = eps(2,3) 
@@ -27,7 +27,7 @@ subroutine twister (eps, dmat, pmat)
    xlambda33 = 0
    do jx = 1, 3
     do ix = 1, 3
-     if (amat(ix,jx,imu) .ne. 0.0d0) then
+     if (amat(ix,jx,imu) .ne. 0.0_dp) then
       amat_term = amat(ix,jx,imu)
       xlambda11 = xlambda11 + amat_term*eps(jx,1)*eps(ix,1)
       xlambda12 = xlambda12 + amat_term*eps(jx,1)*eps(ix,2)
@@ -37,11 +37,11 @@ subroutine twister (eps, dmat, pmat)
      end if
     end do
    end do
-   dmat(imu,1) = 2.0d0*xlambda12
-   dmat(imu,2) = 2.0d0*xlambda32
-   dmat(imu,3) = sqrt(3.0d0)*xlambda33
-   dmat(imu,4) = 2.0d0*xlambda13
-   dmat(imu,5) = 2.0d0*xlambda11 + xlambda33
+   dmat(imu,1) = 2.0_dp*xlambda12
+   dmat(imu,2) = 2.0_dp*xlambda32
+   dmat(imu,3) = sqrt(3.0_dp)*xlambda33
+   dmat(imu,4) = 2.0_dp*xlambda13
+   dmat(imu,5) = 2.0_dp*xlambda11 + xlambda33
   end do
   return
 end subroutine twister

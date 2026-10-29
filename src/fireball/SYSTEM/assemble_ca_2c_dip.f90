@@ -1,6 +1,6 @@
 ! This routine assembles all of the two-center and degenerate two-center interactions for DOGS.
 subroutine assemble_ca_2c_dip ()
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use M_constants, only: eq2
   use M_system, only: smt_elect, natoms, ratom, imass, ewaldsr, neigh_b, neigh_j, neighn, neigh_self, numorb_max, Qin, &
     & s_mat, vca, dipc, xl,  g_h, get_shell_ofatom_issh, Kscf, iqout
@@ -21,33 +21,33 @@ subroutine assemble_ca_2c_dip ()
   integer matom
   integer mbeta
   integer alpha,beta
-  real(double) dq1
-  real(double) dq2
-  real(double) dterm
-  real(double) dstn_temp
-  real(double) dxn
-  real(double) rcutoff_j
-  real(double) rend
-  real(double) y
-  real(double) rcutoff_i
-  real(double), dimension (numorb_max, numorb_max) :: bcca
-  real(double), dimension (3, numorb_max, numorb_max) :: bccapx
-  real(double), dimension (numorb_max, numorb_max) :: bccax
-  real(double), dimension (3, 3, 3) :: deps
-  real(double), dimension (numorb_max, numorb_max) :: emnpl
-  real(double), dimension (numorb_max, numorb_max) :: emnpl_noq
-  real(double), dimension (3, 3) :: eps
-  real(double), dimension (3) :: r1
-  real(double), dimension (3) :: r2
-  real(double), dimension (3) :: r21
-  real(double), dimension (3) :: sighat
-  real(double) stn1
-  real(double) stn2
+  real(dp) dq1
+  real(dp) dq2
+  real(dp) dterm
+  real(dp) dstn_temp
+  real(dp) dxn
+  real(dp) rcutoff_j
+  real(dp) rend
+  real(dp) y
+  real(dp) rcutoff_i
+  real(dp), dimension (numorb_max, numorb_max) :: bcca
+  real(dp), dimension (3, numorb_max, numorb_max) :: bccapx
+  real(dp), dimension (numorb_max, numorb_max) :: bccax
+  real(dp), dimension (3, 3, 3) :: deps
+  real(dp), dimension (numorb_max, numorb_max) :: emnpl
+  real(dp), dimension (numorb_max, numorb_max) :: emnpl_noq
+  real(dp), dimension (3, 3) :: eps
+  real(dp), dimension (3) :: r1
+  real(dp), dimension (3) :: r2
+  real(dp), dimension (3) :: r21
+  real(dp), dimension (3) :: sighat
+  real(dp) stn1
+  real(dp) stn2
 
-  vca = 0.0d0
-  ewaldsr = 0.0d0
+  vca = 0.0_dp
+  ewaldsr = 0.0_dp
   if (Kscf .eq. 1) then
-    g_h  = 0.0d0
+    g_h  = 0.0_dp
   end if
   do iatom = 1,natoms
     matom = neigh_self(iatom)
@@ -55,9 +55,9 @@ subroutine assemble_ca_2c_dip ()
     in1 = imass(iatom)
     rcutoff_i = 0
     do imu = 1, nssh(in1)
-      if (rcutoff(in1,imu) .gt. rcutoff_i) rcutoff_i = rcutoff(in1,imu)
+      if (rcutoff(imu,in1) .gt. rcutoff_i) rcutoff_i = rcutoff(imu,in1)
     end do
-    dq1 = 0.0d0
+    dq1 = 0.0_dp
     do issh = 1, nssh(in1)
       dq1 = dq1 + (Qin(issh,iatom) - Qneutral(issh,in1))
     end do
@@ -68,32 +68,32 @@ subroutine assemble_ca_2c_dip ()
       in2 = imass(jatom)
       rcutoff_j = 0
       do imu = 1, nssh(in2)
-        if (rcutoff(in2,imu) .gt. rcutoff_j) rcutoff_j = rcutoff(in2,imu)
+        if (rcutoff(imu,in2) .gt. rcutoff_j) rcutoff_j = rcutoff(imu,in2)
       end do
       r21(:) = r2(:) - r1(:)
       y = sqrt(r21(1)*r21(1) + r21(2)*r21(2) + r21(3)*r21(3))
-      if (y .lt. 1.0d-05) then
-        sighat(1) = 0.0d0
-        sighat(2) = 0.0d0
-        sighat(3) = 1.0d0
+      if (y .lt. 1.0e-05_dp) then
+        sighat(1) = 0.0_dp
+        sighat(2) = 0.0_dp
+        sighat(3) = 1.0_dp
       else
         sighat(:) = r21(:)/y
       end if
       call epsilon (r2, sighat, eps)
       call deps2cent (r1, r2, eps, deps)
       ! ASSEMBLE EWALDSR AND EMNPL FOR ATM CASE
-      dq2 = 0.0d0
+      dq2 = 0.0_dp
       do issh = 1, nssh(in2)
         dq2 = dq2 + (Qin(issh,jatom) - Qneutral(issh,in2))
       end do
-      stn1 = 1.0d0
-      stn2 = 0.0d0
-      emnpl = 0.0d0
-      emnpl_noq = 0.0d0
-      if (y .gt. 1.0d-4) then
+      stn1 = 1.0_dp
+      stn2 = 0.0_dp
+      emnpl = 0.0_dp
+      emnpl_noq = 0.0_dp
+      if (y .gt. 1.0e-4_dp) then
         rend = rcutoff_i + rcutoff_j
         call smoother (y, rend, smt_elect, stn1, dstn_temp)
-        stn2 = 1.0d0 - stn1
+        stn2 = 1.0_dp - stn1
         do inu = 1, num_orb(in1)
           do imu = 1, num_orb(in1)
             dterm = (dipc(1,imu,inu,matom,iatom)*r21(1)  + dipc(2,imu,inu,matom,iatom)*r21(2) + dipc(3,imu,inu,matom,iatom)*r21(3))
@@ -110,7 +110,7 @@ subroutine assemble_ca_2c_dip ()
       end if
  
       ! CALL DOSCENTROS AND GET VNA FOR ATOM CASE
-      bcca = 0.0d0
+      bcca = 0.0_dp
       kforce = 0
       interaction = TWOCENTER_VNA_A
       in3 = in1
@@ -139,7 +139,7 @@ subroutine assemble_ca_2c_dip ()
         ! Do nothing here - special case. Interaction already calculated in atm case.
       else
         ! Initialize bcca for charged atom interactions.
-        bcca = 0.0d0
+        bcca = 0.0_dp
         interaction = TWOCENTER_VNA_L
         in3 = in2
         do isorp = 1, nssh(in1)

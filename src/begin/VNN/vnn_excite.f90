@@ -111,7 +111,8 @@
 ! Procedure
 ! ===========================================================================
 ! Initialize some constants
-
+        mesh = mesh_rcatms
+          
 ! Read in the wavefunctions
         do issh = 1, nssh
 	  l = lam(issh)

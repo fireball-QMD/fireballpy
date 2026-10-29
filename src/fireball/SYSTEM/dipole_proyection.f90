@@ -1,13 +1,13 @@
 subroutine dipole_proyection()
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use M_system, only: natoms, ratom, imass, neigh_max, Q0_TOT, neigh_b, neigh_j, neighn, neigh_self, Qin, Qout, dip_x, &
     & dipQout_x, dipTot_x, dipIntra_x, dip_res_x, dipQin_x, dipRes_x, dip_y, dipQout_y, dipTot_y, dipIntra_y, dip_res_y, dipQin_y, &
     & dipRes_y, dip_z, dipQout_z, dipTot_z, dipIntra_z, dip_res_z, dipQin_z, dipRes_z, dip_tot, dip_proy, dipQin_tot, dipTot_tot, &
     & dipIntra_tot, dipQout_tot, dip_res_tot, dipRes_tot, dq_DP, rho, s_mat, dipc, xl
   use M_fdata, only: num_orb,nssh,Qneutral
   implicit none
-  real(double), parameter ::  Debye = 0.208194d0
-  real(double), parameter ::  klambda = 1.4d0
+  real(dp), parameter ::  Debye = 0.208194_dp
+  real(dp), parameter ::  klambda = 1.4_dp
   integer iatom
   integer imu
   integer in1, in2
@@ -16,22 +16,22 @@ subroutine dipole_proyection()
   integer issh
   integer jatom
   integer mbeta
-  real(double)      Qtot, Qtot1, Qtot2
-  real(double), dimension(3) :: r1,r2,Rbc,u21
-  real(double), dimension(3) :: rmedio, raux
-  real(double)      w_suma  
-  real(double), dimension(3,3) :: bwrr, bwrr_inv, u_bwrr, ut_bwrr, v_bwrr, vt_bwrr, zero_bwrr
-  real(double), dimension (natoms) :: c_k
-  real(double), dimension (neigh_max) :: w_k
-  real(double), dimension(3,natoms) :: intra_dip, res_dip
-  real(double), dimension(3,1) :: intra_dip_aux, delta_ck
+  real(dp)      Qtot, Qtot1, Qtot2
+  real(dp), dimension(3) :: r1,r2,Rbc,u21
+  real(dp), dimension(3) :: rmedio, raux
+  real(dp)      w_suma  
+  real(dp), dimension(3,3) :: bwrr, bwrr_inv, u_bwrr, ut_bwrr, v_bwrr, vt_bwrr, zero_bwrr
+  real(dp), dimension (natoms) :: c_k
+  real(dp), dimension (neigh_max) :: w_k
+  real(dp), dimension(3,natoms) :: intra_dip, res_dip
+  real(dp), dimension(3,1) :: intra_dip_aux, delta_ck
   integer :: n_bwrr = 3
   integer :: lda_bwrr = 3
   integer :: lwork = 15 !MAX(1,3*MIN(M,N) + MAX(M,N),5*MIN(M,N)) 
   integer i
   integer :: info
-  real(double), dimension(3) :: s_bwrr
-  real(double), dimension(15) :: dummy
+  real(dp), dimension(3) :: s_bwrr
+  real(dp), dimension(15) :: dummy
   do iatom = 1, natoms
     Q0_TOT(iatom) = 0
     in1 = imass(iatom)
@@ -39,9 +39,9 @@ subroutine dipole_proyection()
       Q0_TOT(iatom) = Q0_TOT(iatom) + Qneutral(issh,in1)
     end do
   end do
-  dip_x=0.0d0
-  dip_y=0.0d0
-  dip_z=0.0d0
+  dip_x=0.0_dp
+  dip_y=0.0_dp
+  dip_z=0.0_dp
   do iatom = 1, natoms
     Qtot=-Q0_TOT(iatom)
     in1 = imass(iatom)
@@ -57,9 +57,9 @@ subroutine dipole_proyection()
   dipQin_y    = dip_y
   dipQin_z    = dip_z
   dipQin_tot = dip_tot
-  dip_x = 0.0d0
-  dip_y = 0.0d0
-  dip_z = 0.0d0
+  dip_x = 0.0_dp
+  dip_y = 0.0_dp
+  dip_z = 0.0_dp
   do iatom = 1, natoms
     in1 = imass(iatom)
     r1(:) = ratom(:,iatom)
@@ -78,7 +78,7 @@ subroutine dipole_proyection()
       jatom = neigh_j(ineigh,iatom)
       r2(:) = ratom(:,jatom) + xl(:,mbeta)
       in2 = imass(jatom)      
-      Rbc(:)=(r1(:)+r2(:))/2.0d0
+      Rbc(:)=(r1(:)+r2(:))/2.0_dp
       u21(:)=(r2(:)-r1(:))/(sqrt((r2(1)-r1(1))**2+(r2(2)-r1(2))**2+(r2(3)-r1(3))**2))
       do imu = 1,num_orb(in1)
         do inu = 1,num_orb(in2)
@@ -95,9 +95,9 @@ subroutine dipole_proyection()
   dipTot_z    = dip_z
   dipTot_tot = dip_tot
   ! save the intraatomic dipole
-  dip_x = 0.0d0
-  dip_y = 0.0d0
-  dip_z = 0.0d0      
+  dip_x = 0.0_dp
+  dip_y = 0.0_dp
+  dip_z = 0.0_dp      
   do iatom = 1, natoms
     in1 = imass(iatom)
     r1(:) = ratom(:,iatom)
@@ -106,7 +106,7 @@ subroutine dipole_proyection()
       jatom = neigh_j(ineigh,iatom)
       r2(:) = ratom(:,jatom) + xl(:,mbeta)
       in2 = imass(jatom)
-      Rbc(:)=(r1(:)+r2(:))/2.0d0
+      Rbc(:)=(r1(:)+r2(:))/2.0_dp
       u21(:)=(r2(:)-r1(:))/(sqrt((r2(1)-r1(1))**2+(r2(2)-r1(2))**2+(r2(3)-r1(3))**2))
       do imu = 1,num_orb(in1)
         do inu = 1,num_orb(in2)
@@ -125,13 +125,13 @@ subroutine dipole_proyection()
   dipIntra_z    = dip_z
   dipIntra_tot = dip_tot
   !DIP RES = DIP_TOT - PROY
-  dip_res_x = 0.0d0
-  dip_res_y = 0.0d0
-  dip_res_z = 0.0d0
+  dip_res_x = 0.0_dp
+  dip_res_y = 0.0_dp
+  dip_res_z = 0.0_dp
   do iatom = 1, natoms
-    dip_res_x = 0.0d0
-    dip_res_y = 0.0d0
-    dip_res_z = 0.0d0
+    dip_res_x = 0.0_dp
+    dip_res_y = 0.0_dp
+    dip_res_z = 0.0_dp
     in1 = imass(iatom)
     r1(:) = ratom(:,iatom)    
     do ineigh = 1,neighn(iatom)
@@ -139,7 +139,7 @@ subroutine dipole_proyection()
       jatom = neigh_j(ineigh,iatom)
       r2(:) = ratom(:,jatom) + xl(:,mbeta)
       in2 = imass(jatom)
-      Rbc(:)=(r1(:)+r2(:))/2.0d0
+      Rbc(:)=(r1(:)+r2(:))/2.0_dp
       do imu = 1,num_orb(in1)
         do inu = 1,num_orb(in2)
           if (iatom .ne. jatom) then !.or. imu .eq. inu) then
@@ -162,18 +162,18 @@ subroutine dipole_proyection()
   end do ! end do iatom = 1,natoms
   dipRes_tot = sqrt (dipRes_x**2 + dipRes_y**2 + dipRes_z**2 ) 
   do iatom = 1, natoms
-    dip_x = 0.0d0
-    dip_y = 0.0d0
-    dip_z = 0.0d0
+    dip_x = 0.0_dp
+    dip_y = 0.0_dp
+    dip_z = 0.0_dp
     in1 = imass(iatom)
     r1(:) = ratom(:,iatom)
-    Qtot=0.0d0
-    Qtot1=0.0d0
+    Qtot=0.0_dp
+    Qtot1=0.0_dp
     do issh = 1,nssh(in1)
       Qtot1 = Qtot1+Qin(issh,iatom)
     end do !end do issh = 1,nssh(in1)
-    Qtot=0.0d0
-    Qtot2=0.0d0
+    Qtot=0.0_dp
+    Qtot2=0.0_dp
     do issh = 1,nssh(in1)
       Qtot2 = Qtot2+Qout(issh,iatom)
     end do !end do issh = 1,nssh(in1)
@@ -181,7 +181,7 @@ subroutine dipole_proyection()
     ineigh=neigh_self(iatom)
     in2=in1
     r2(:)=r1(:)
-    Rbc(:)=(r1(:)+r2(:))/2.0d0
+    Rbc(:)=(r1(:)+r2(:))/2.0_dp
     do imu = 1,num_orb(in1)
       do inu = 1,num_orb(in2)
         if ( (imu .ne. inu)) then
@@ -196,12 +196,12 @@ subroutine dipole_proyection()
     intra_dip(3,iatom) = dip_z + res_dip(3,iatom)!/Debye
     dip_tot = sqrt (dip_x**2 + dip_y**2 + dip_z**2 )
   end do !end do iatom = 1,natoms
-  dq_DP = 0.0d0
+  dq_DP = 0.0_dp
   do iatom = 1, natoms
     in1 = imass(iatom)
     r1(:) = ratom(:,iatom)
-    rmedio = 0.0d0
-    w_suma = 0.0d0
+    rmedio = 0.0_dp
+    w_suma = 0.0_dp
     do ineigh = 1,neighn(iatom)
       mbeta = neigh_b(ineigh,iatom)
       jatom = neigh_j(ineigh,iatom)
@@ -212,7 +212,7 @@ subroutine dipole_proyection()
       w_suma = w_suma + w_k(ineigh)
     end do !end ineigh = 1,natoms
     rmedio = rmedio / w_suma
-    bwrr = 0.0d0
+    bwrr = 0.0_dp
     do ineigh = 1,neighn(iatom)
       mbeta = neigh_b(ineigh,iatom)
       jatom = neigh_j(ineigh,iatom)
@@ -257,9 +257,9 @@ subroutine dipole_proyection()
       Q0_TOT(iatom) = Q0_TOT(iatom) + Qneutral(issh,in1)
     end do
   end do
-  dip_x = 0.0d0
-  dip_y = 0.0d0
-  dip_z = 0.0d0
+  dip_x = 0.0_dp
+  dip_y = 0.0_dp
+  dip_z = 0.0_dp
   do iatom = 1, natoms
     Qtot=-Q0_TOT(iatom)+dq_DP(iatom)
     in1 = imass(iatom)
@@ -278,9 +278,9 @@ subroutine dipole_proyection()
 end subroutine dipole_proyection
 
 function get_min_parabola(x1,x2,x3,y1,y2,y3)
-  use, intrinsic :: iso_fortran_env, only: double => real64
-  real(double),intent(in) :: x1,x2,x3,y1,y2,y3
-  real(double) a,b,c,get_min_parabola
+  use, intrinsic :: iso_fortran_env, only: dp => real64
+  real(dp),intent(in) :: x1,x2,x3,y1,y2,y3
+  real(dp) a,b,c,get_min_parabola
   b=(y2-y3)-(y1-y2)*(x2**2-x3**2)/(x1**2-x2**2)
   b=b/( (x2-x3)-(x1-x2)*(x2**2-x3**2)/(x1**2-x2**2) )
   a=(y1-y2)/(x1**2-x2**2)-b*(x1-x2)/(x1**2-x2**2)

@@ -50,6 +50,7 @@
 ! ===========================================================================
         subroutine psirc (mesh, nexcite, l, rcutoff, v, eout, psi)
         use, intrinsic :: iso_fortran_env, only: dp => real64
+        use :: utils, only: utils_log, UTILS_LOG_ERROR, UTILS_LOG_WARNING
         implicit none
 
 ! Argument Declaration and Description
@@ -100,8 +101,10 @@
          if (test(node,nexcite,alnd)) exit
          ebind_upper = ebind
         end do
-        if (.not. test(node,nexcite,alnd))                                  &
-     &   stop ' no upper bound found -- stopping '
+        if (.not. test(node,nexcite,alnd)) then
+          call utils_log(UTILS_LOG_ERROR, "no upper bound found (psirc.f90)")
+          error stop 1
+        end if
         node_upper = node
         alnd_upper = alnd
         ebind_upper = ebind
@@ -114,7 +117,10 @@
          if (.not. test(node,nexcite,alnd)) exit
          ebind_lower = ebind
         end do
-        if (test(node,nexcite,alnd)) stop ' no upper bound found -- stopping '
+        if (test(node,nexcite,alnd)) then
+          call utils_log(UTILS_LOG_ERROR, "no upper bound found (psirc.f90)")
+          error stop 1
+        end if
         node_lower = node
         alnd_lower = alnd
         ebind_lower = ebind
@@ -135,10 +141,7 @@
          end if
         end do
         if (node_lower .ne. node_upper) then
-         write (*,*) ' ******************* WARNING ************************* '
-         write (*,*) ' No convergence in binary chop. Generally, this means  '
-         write (*,*) ' your grid is too course or something else is causing  '
-         write (*,*) ' an extra node. '
+          call utils_log(UTILS_LOG_WARNING, "no convergence in binary chop, grid too coarse")
         end if
 
 ! Linearly interpolate to get good eigenvalues
@@ -164,8 +167,10 @@
          ebind2 = ebind1
          ebind1 = ebind
         end do
-        if (abs(alnd1-alnd2) .gt. small)                                  &
-     &   stop ' No convergence in linear extrapolation '
+        if (abs(alnd1-alnd2) .gt. small) then
+          call utils_log(UTILS_LOG_ERROR, "no convergence in linear extrapolation (psirc.f90)")
+          error stop 1
+        end if
         eout = -ebind
         call get_psi (mesh, l, rcutoff, ebind, v, psi)
 

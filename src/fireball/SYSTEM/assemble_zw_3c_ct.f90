@@ -1,5 +1,6 @@
 subroutine assemble_zw_3c_ct ()
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
+  use :: utils, only: utils_log, UTILS_LOG_ERROR
   use M_system, only: numorb_max, natoms, neigh_comn, neigh_comm, neigh_comj, neigh_comb, neigh_com_ng, neigh_back, imass, ratom, xl, Qin, orb2shell, s_mat, dip, vxc_ca, g_h, get_shell_ofatom_issh, iqout, Kscf, neigh_max
   use M_fdata, only: nssh, Qneutral, num_orb, nsh_max
   implicit none
@@ -88,7 +89,7 @@ subroutine assemble_zw_3c_ct ()
   do ialp = 1, natoms
     rna(:) = ratom(:,ialp)
     indna = imass(ialp)
-    dq3 = 0.0d0
+    dq3 = 0.0_dp
     do issh = 1, nssh(indna)
       dq3 = dq3 + (Qin(issh,ialp) - Qneutral(issh,indna))
     end do
@@ -108,21 +109,20 @@ subroutine assemble_zw_3c_ct ()
         jneigh = neigh_back(iatom,mneigh)
         r21(:) = r2(:) - r1(:)
         y = sqrt(r21(1)*r21(1) + r21(2)*r21(2) + r21(3)*r21(3))
-        if (y .lt. 1.0d-05) then
-          sighat(1) = 0.0d0
-          sighat(2) = 0.0d0
-          sighat(3) = 1.0d0
-          write (*,*) ' There is an error here in assemble_3c.f '
-          write (*,*) ' r1 = r2!!!! BAD!!!! '
+        if (y .lt. 1.0e-05_dp) then
+          sighat(1) = 0.0_dp
+          sighat(2) = 0.0_dp
+          sighat(3) = 1.0_dp
+          call utils_log(UTILS_LOG_ERROR, "r1 = r2 (assemble_zw_3c_ct.f90)")
         else
           sighat(:) = r21(:)/y
         end if
-        rnabc(:) = rna(:) - (r1(:) + r21(:)/2.0d0)
+        rnabc(:) = rna(:) - (r1(:) + r21(:)/2.0_dp)
         x = sqrt(rnabc(1)**2 + rnabc(2)**2 + rnabc(3)**2)
-        if (x .lt. 1.0d-05) then
-          rhat(1) = 0.0d0
-          rhat(2) = 0.0d0
-          rhat(3) = 0.0d0
+        if (x .lt. 1.0e-05_dp) then
+          rhat(1) = 0.0_dp
+          rhat(2) = 0.0_dp
+          rhat(3) = 0.0_dp
         else
           rhat(:) = rnabc(:)/x
         end if
@@ -130,8 +130,8 @@ subroutine assemble_zw_3c_ct ()
         call epsilon (rhat, sighat, eps)
         distance_13 = sqrt((rna(1) - r1(1))**2 + (rna(2) - r1(2))**2 + (rna(3) - r1(3))**2)
         distance_23 = sqrt((rna(1) - r2(1))**2 + (rna(2) - r2(2))**2 + (rna(3) - r2(3))**2)
-        bcca = 0.0d0
-        bccax=0.0d0
+        bcca = 0.0_dp
+        bccax=0.0_dp
         do isorp = 1, nssh(indna)
           dxn = (Qin(isorp,ialp) - Qneutral(isorp,indna))
           do inu = 1, num_orb(in2)

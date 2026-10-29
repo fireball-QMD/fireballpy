@@ -1,5 +1,5 @@
 subroutine assemble_ca_3c_dip ()
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use M_constants, only: eq2
   use M_system, only: smt_elect, natoms, ratom, imass, neigh_max, ewaldsr, neigh_b, neigh_j, neighn, neigh_comb, neigh_comj, &
     & neigh_comm, neigh_comn, neigh_back, neigh_self, numorb_max, Qin, s_mat, vca, dipc, xl, g_h, get_shell_ofatom_issh, kscf, iqout
@@ -25,51 +25,51 @@ subroutine assemble_ca_3c_dip ()
   integer mbeta
   integer mneigh
   integer alpha, beta
-  real(double) aux
-  real(double) cost
-  real(double) distance_13
-  real(double) distance_23
-  real(double) dq3
-  real(double) dstn_temp
-  real(double) dterm
-  real(double) dxn
-  real(double) rcutoff_ialp
-  real(double) rend1
-  real(double) rend2
-  real(double) sterm
-  real(double) stn_temp1
-  real(double) stn_temp2
-  real(double) x
-  real(double) y
-  real(double) rcutoff_i
-  real(double) rcutoff_j
-  real(double), dimension (numorb_max, numorb_max) :: bcca
-  real(double), dimension (numorb_max, numorb_max) :: bccax
-  real(double), dimension (numorb_max, numorb_max) :: emnpl
-  real(double), dimension (numorb_max, numorb_max) :: emnpl_noq
-  real(double), dimension (3, 3, 3) :: deps
-  real(double), dimension (3, 3) :: eps
-  real(double), dimension (3) :: r1
-  real(double), dimension (3) :: r2
-  real(double), dimension (3) :: r21
-  real(double), dimension (3) :: rhat
-  real(double), dimension (3) :: rna
-  real(double), dimension (3) :: rnabc
-  real(double), dimension (3) :: sighat
-  real(double) stn1
-  real(double) stn2
-  real(double), dimension (:,:), allocatable :: smG
-  real(double), dimension (:,:,:), allocatable :: spmG
-  real(double), dimension (:, :, :, :), allocatable :: smatG
-  real(double), dimension (:, :, :, :), allocatable :: spmatG
+  real(dp) aux
+  real(dp) cost
+  real(dp) distance_13
+  real(dp) distance_23
+  real(dp) dq3
+  real(dp) dstn_temp
+  real(dp) dterm
+  real(dp) dxn
+  real(dp) rcutoff_ialp
+  real(dp) rend1
+  real(dp) rend2
+  real(dp) sterm
+  real(dp) stn_temp1
+  real(dp) stn_temp2
+  real(dp) x
+  real(dp) y
+  real(dp) rcutoff_i
+  real(dp) rcutoff_j
+  real(dp), dimension (numorb_max, numorb_max) :: bcca
+  real(dp), dimension (numorb_max, numorb_max) :: bccax
+  real(dp), dimension (numorb_max, numorb_max) :: emnpl
+  real(dp), dimension (numorb_max, numorb_max) :: emnpl_noq
+  real(dp), dimension (3, 3, 3) :: deps
+  real(dp), dimension (3, 3) :: eps
+  real(dp), dimension (3) :: r1
+  real(dp), dimension (3) :: r2
+  real(dp), dimension (3) :: r21
+  real(dp), dimension (3) :: rhat
+  real(dp), dimension (3) :: rna
+  real(dp), dimension (3) :: rnabc
+  real(dp), dimension (3) :: sighat
+  real(dp) stn1
+  real(dp) stn2
+  real(dp), dimension (:,:), allocatable :: smG
+  real(dp), dimension (:,:,:), allocatable :: spmG
+  real(dp), dimension (:, :, :, :), allocatable :: smatG
+  real(dp), dimension (:, :, :, :), allocatable :: spmatG
   allocate (smG (numorb_max, numorb_max))
   allocate (spmG (3, numorb_max, numorb_max))
   allocate (smatG (numorb_max, numorb_max, neigh_max, natoms))
   allocate (spmatG (numorb_max, numorb_max, neigh_max, natoms))
-  smG = 0.0d0
-  smatG = 0.0d0
-  spmG = 0.0d0
-  spmatG = 0.0d0
+  smG = 0.0_dp
+  smatG = 0.0_dp
+  spmG = 0.0_dp
+  spmatG = 0.0_dp
   do iatom = 1, natoms
     matom = neigh_self(iatom)
     r1(:) = ratom(:,iatom)
@@ -81,10 +81,10 @@ subroutine assemble_ca_3c_dip ()
       in2 = imass(jatom)
       r21(:) = r2(:) - r1(:)
       y = sqrt(r21(1)*r21(1) + r21(2)*r21(2) + r21(3)*r21(3))
-      if (y .lt. 1.0d-05) then
-        sighat(1) = 0.0d0
-        sighat(2) = 0.0d0
-        sighat(3) = 1.0d0
+      if (y .lt. 1.0e-05_dp) then
+        sighat(1) = 0.0_dp
+        sighat(2) = 0.0_dp
+        sighat(3) = 1.0_dp
       else
         sighat(:) = r21(:)/y
       end if
@@ -95,13 +95,13 @@ subroutine assemble_ca_3c_dip ()
   do ialp = 1, natoms
     rna(:) = ratom(:,ialp)
     indna = imass(ialp)
-    dq3 = 0.0d0
+    dq3 = 0.0_dp
     do issh = 1, nssh(indna)
       dq3 = dq3 + (Qin(issh,ialp) - Qneutral(issh,indna))
     end do
-    rcutoff_ialp = 0.0d0
+    rcutoff_ialp = 0.0_dp
     do imu = 1, nssh(indna)
-      if (rcutoff(indna,imu) .gt. rcutoff_ialp) rcutoff_ialp = rcutoff(indna,imu)
+      if (rcutoff(imu,indna) .gt. rcutoff_ialp) rcutoff_ialp = rcutoff(imu,indna)
     end do
     do ineigh = 1, neigh_comn(ialp)
       mneigh = neigh_comm(ineigh,ialp)
@@ -112,7 +112,7 @@ subroutine assemble_ca_3c_dip ()
         in1 = imass(iatom)
         rcutoff_i = 0
         do imu = 1, nssh(in1)
-          if (rcutoff(in1,imu) .gt. rcutoff_i) rcutoff_i = rcutoff(in1,imu)
+          if (rcutoff(imu,in1) .gt. rcutoff_i) rcutoff_i = rcutoff(imu,in1)
         end do
         jatom = neigh_comj(2,ineigh,ialp)
         jbeta = neigh_comb(2,ineigh,ialp)
@@ -121,23 +121,23 @@ subroutine assemble_ca_3c_dip ()
         jneigh = neigh_back(iatom,mneigh)
         rcutoff_j = 0
         do imu = 1, nssh(in2)
-          if (rcutoff(in2,imu) .gt. rcutoff_j) rcutoff_j = rcutoff(in2,imu)
+          if (rcutoff(imu,in2) .gt. rcutoff_j) rcutoff_j = rcutoff(imu,in2)
         end do
         r21(:) = r2(:) - r1(:)
         y = sqrt(r21(1)*r21(1) + r21(2)*r21(2) + r21(3)*r21(3))
-        if (y .lt. 1.0d-05) then
-          sighat(1) = 0.0d0
-          sighat(2) = 0.0d0
-          sighat(3) = 1.0d0
+        if (y .lt. 1.0e-05_dp) then
+          sighat(1) = 0.0_dp
+          sighat(2) = 0.0_dp
+          sighat(3) = 1.0_dp
         else
           sighat(:) = r21(:)/y
         end if
-        rnabc(:) = rna(:) - (r1(:) + r21(:)/2.0d0)
+        rnabc(:) = rna(:) - (r1(:) + r21(:)/2.0_dp)
         x = sqrt(rnabc(1)**2 + rnabc(2)**2 + rnabc(3)**2)
-        if (x .lt. 1.0d-05) then
-          rhat(1) = 0.0d0
-          rhat(2) = 0.0d0
-          rhat(3) = 0.0d0
+        if (x .lt. 1.0e-05_dp) then
+          rhat(1) = 0.0_dp
+          rhat(2) = 0.0_dp
+          rhat(3) = 0.0_dp
         else
           rhat(:) = rnabc(:)/x
         end if
@@ -150,10 +150,10 @@ subroutine assemble_ca_3c_dip ()
         call smoother (distance_13, rend1, smt_elect, stn_temp1, dstn_temp)
         call smoother (distance_23, rend2, smt_elect, stn_temp2, dstn_temp)
         stn1 = stn_temp1*stn_temp2
-        stn2 = 1.0d0 - stn1
-        if (x .lt. 1.0d-05) then
-          emnpl = 0.0d0
-          emnpl_noq = 0.0d0
+        stn2 = 1.0_dp - stn1
+        if (x .lt. 1.0e-05_dp) then
+          emnpl = 0.0_dp
+          emnpl_noq = 0.0_dp
         else
           do inu = 1, num_orb(in2)
             do imu = 1, num_orb(in1)
@@ -171,8 +171,8 @@ subroutine assemble_ca_3c_dip ()
               ewaldsr(inu,imu,jneigh,jatom) = ewaldsr(imu,inu,mneigh,iatom)
             end do
           end do
-        end if    ! end if (x .lt. 1.0d-05)  
-        bcca = 0.0d0
+        end if    ! end if (x .lt. 1.0e-05_dp)  
+        bcca = 0.0_dp
         do isorp = 1, nssh(indna)
           interaction = 1
           call trescentros (interaction, isorp, in1, in2, indna, x, y, cost, eps, bccax)

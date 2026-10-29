@@ -1,5 +1,5 @@
 subroutine read_2c (interaction)
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use :: constants, only: FNAME_LEN
   use :: utils, only: utils_itos, utils_open
   use :: math, only: math_interp_new
@@ -12,7 +12,7 @@ subroutine read_2c (interaction)
   integer, intent (in) :: interaction
   integer :: in1, in2, iounit, isorp, issh, isub2c, itype, numz, num_nonzero, header, ipoint, integral
   character (len = FNAME_LEN) :: filename, root
-  real(double), allocatable :: zarr(:), xintegral_2c(:,:)
+  real(dp), allocatable :: zarr(:), xintegral_2c(:,:)
 
   select case (interaction)
   case (TWOCENTER_VNL)
@@ -69,7 +69,7 @@ subroutine read_2c (interaction)
           read (iounit,*) zarr(ipoint), (xintegral_2c(integral,ipoint), integral = 1, num_nonzero)
         end do
         do integral = 1, num_nonzero
-          splineint_2c(integral,itype,in1,in2) = math_interp_new(zarr, xintegral_2c(integral,:), rval=0.0d0)
+          splineint_2c(integral,itype,in1,in2) = math_interp_new(zarr, xintegral_2c(integral,:), rval=0.0_dp)
         end do
         close(iounit)
       end do

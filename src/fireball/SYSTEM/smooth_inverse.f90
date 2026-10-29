@@ -1,10 +1,10 @@
 pure function sf(d)
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use M_system, only: qmmm_rc1, qmmm_rc2, qmmm_width
   implicit none
-  real(double), intent(in) :: d
-  real(double) :: rc12, aux1, aux2, y, sf
-  if (qmmm_rc1 < 0.0d0) then
+  real(dp), intent(in) :: d
+  real(dp) :: rc12, aux1, aux2, y, sf
+  if (qmmm_rc1 < 0.0_dp) then
     aux1 = d*d
     aux1 = aux1*aux1
     aux2 = qmmm_rc1*qmmm_rc1
@@ -13,16 +13,16 @@ pure function sf(d)
   else
     rc12 = qmmm_rc2 - qmmm_width
     if (d > qmmm_rc2) then
-      sf = 0.0d0
+      sf = 0.0_dp
     else if (d > rc12) then
       y = (d - rc12) / qmmm_width
-      sf = (1.0d0 - y*y*(3.0d0 - 2.0d0*y))/d
+      sf = (1.0_dp - y*y*(3.0_dp - 2.0_dp*y))/d
     else if (d > qmmm_rc1) then
-      sf = 1.0d0/d
+      sf = 1.0_dp/d
     else
       y = d/qmmm_rc1
       y = y*y
-      sf = (3.28125d0 + y*(-5.46875d0 + y*(4.59375d0 + y*(-1.40625d0))))/qmmm_rc1
+      sf = (3.28125_dp + y*(-5.46875_dp + y*(4.59375_dp + y*(-1.40625_dp))))/qmmm_rc1
     end if
   end if
 end function

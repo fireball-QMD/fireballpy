@@ -1,5 +1,5 @@
 subroutine mulliken_dipole_charges()                   
-  use, intrinsic :: iso_fortran_env, only: double => real64
+  use, intrinsic :: iso_fortran_env, only: dp => real64
   use M_system, only: natoms, ratom, xl, imass, dip, neigh_j, neigh_b, neighn, neigh_back, numorb_max, Qout, QMulliken_TOT, rho, s_mat
   use M_fdata, only: num_orb,nssh,lssh
   implicit none
@@ -9,11 +9,11 @@ subroutine mulliken_dipole_charges()
   integer issh, jssh
   integer ineigh , jatom,jneigh, mbeta                        
   integer mqn                          
-  real(double) y
-  real(double), dimension (numorb_max, natoms) :: QMulliken
-  real(double), dimension (3) :: r1, r2, r21
+  real(dp) y
+  real(dp), dimension (numorb_max, natoms) :: QMulliken
+  real(dp), dimension (3) :: r1, r2, r21
 
-  QMulliken = 0.0d0
+  QMulliken = 0.0_dp
   do iatom = 1, natoms
     in1 = imass(iatom)
     r1(:) = ratom(:,iatom)
@@ -29,17 +29,17 @@ subroutine mulliken_dipole_charges()
        jneigh = neigh_back(iatom,ineigh)
        do imu = 1, num_orb(in1)
           do inu = 1, num_orb(in2)
-            QMulliken(imu,iatom) = QMulliken(imu,iatom) + 0.5d0*(rho(imu,inu,ineigh,iatom)*s_mat(imu,inu,ineigh,iatom) + rho(inu,imu,jneigh,jatom)*s_mat(inu,imu,jneigh,jatom))
+            QMulliken(imu,iatom) = QMulliken(imu,iatom) + 0.5_dp*(rho(imu,inu,ineigh,iatom)*s_mat(imu,inu,ineigh,iatom) + rho(inu,imu,jneigh,jatom)*s_mat(inu,imu,jneigh,jatom))
           end do
        end do
        ! dipole correction. Only if the two atoms are different
-       if (y .gt. 1.0d-05) then
+       if (y .gt. 1.0e-05_dp) then
           do imu = 1, num_orb(in1)
             do inu = 1, num_orb(in2)
               QMulliken(imu,iatom) = QMulliken(imu,iatom)+ (-rho(imu,inu,ineigh,iatom)*dip(imu,inu,ineigh,iatom)+ rho(inu,imu,jneigh,jatom)*dip(inu,imu,jneigh,jatom))/y
             end do
           end do
-        end if !end if y .gt. 1.0d-05)
+        end if !end if y .gt. 1.0e-05_dp)
       end do !ineig 
       imu = 0
       do issh = 1, nssh(in1)
@@ -59,7 +59,7 @@ subroutine mulliken_dipole_charges()
             Qout(jssh,iatom) = Qout(jssh,iatom) + Qout(issh,iatom)/(nssh(in1)-1)
           end if !end if jssh .ne. issh 
         end do !end if jssh = 1,nssh(in1)
-        Qout(issh,iatom) = 0.0d0              
+        Qout(issh,iatom) = 0.0_dp              
       end if !end if  Qout(issh,iatom) .lt. 0
     end do !end do issh = 1, nssh(in1)
   end do !iatoms
