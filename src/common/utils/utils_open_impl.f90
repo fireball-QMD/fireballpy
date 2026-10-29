@@ -95,7 +95,7 @@ module procedure utils_open
     position_ = "asis"
     status_ = "new"
   case default
-    call utils_log(UTILS_LOG_ERROR, "unknown mode '"//mode_(1:2)//"-'")
+    call utils_log(UTILS_LOG_ERROR, "Unknown mode '"//mode_(1:2)//"-'")
     error stop 1
   end select
 
@@ -107,14 +107,14 @@ module procedure utils_open
     form_ = "unformatted"
     access_ = "stream"
   case default
-    call utils_log(UTILS_LOG_ERROR, "unknown mode '--"//mode_(3:3)//"'")
+    call utils_log(UTILS_LOG_ERROR, "Unknown mode '--"//mode_(3:3)//"'")
     error stop 1
   end select
 
   open (newunit=utils_open, file=trim(filename), action=action_, position=position_, status=status_, &
       access=access_, form=form_, iostat=stat, iomsg=errmsg)
   if (stat /= 0) then
-    call utils_log(UTILS_LOG_ERROR, "could not open '"//trim(filename)//"': "//trim(errmsg))
+    call utils_log(UTILS_LOG_ERROR, achar(iachar(errmsg(1:1))+32)//trim(errmsg(2:)))
     error stop 1
   end if
 

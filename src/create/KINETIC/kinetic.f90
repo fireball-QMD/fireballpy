@@ -373,6 +373,7 @@
       write (iounit, "('# Z1, Z2 = ',i3,', ',i3)") nzx1, nzx2
       write (iounit, "('# Rc1, Rc2 = ',f14.6,', ',f14.6)") rcutoff1, rcutoff2
       if (index_max == 0) then
+        write (iounit, "('# n = ',i8)") 0
         write (iounit, "('# z')")
         close (iounit)
         return
@@ -384,6 +385,7 @@
         call utils_log(UTILS_LOG_ERROR, "kinetic: mk_index and indices_twocenter_set disagree")
         error stop 1
       end if
+      write (iounit, "('# n = ',i8)") nddke
       write (iounit, "('# z',1000(4x,a))") (trim(names(index)), index = 1, index_max)
       do id = 1, nddke
         write (iounit, "(f14.6,1000ES16.8)") (id - 1)*dr, tkinetic(:, id)

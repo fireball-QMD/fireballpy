@@ -588,7 +588,18 @@ def basis(folder: Annotated[pathlib.Path, Parameter(validator=Path(exists=True, 
     # Only now that create has finished without error.
     write_info_json(els, folder, output, refchs, exc, exc_weights)
     basis_folder = output / "basis"
-    shutil.copytree(folder, basis_folder)
+    basis_folder.mkdir(exist_ok=True)
+    for el in els:
+        shutil.copy2(folder / el.ppfile, basis_folder)
+        shutil.copy2(folder / el.ppionfile, basis_folder)
+        for o in el.orbitals:
+            shutil.copy2(folder / f"{int(el.nznuc):03}_{o}.wf", basis_folder)
+            shutil.copy2(folder / f"{int(el.nznuc):03}_{o}.na", basis_folder)
+            shutil.copy2(folder / f"{int(el.nznuc):03}.na0", basis_folder)
+            if el.exnum == ExcitedEnum.NODE or el.exnum == ExcitedEnum.DMOL:
+                shutil.copy2(folder / f"{int(el.nznuc):03}_{o}.ewf", basis_folder)
+                shutil.copy2(folder / f"{int(el.nznuc):03}_{o}.ena", basis_folder)
+    shutil.copy2(folder / "meta.json", basis_folder)
     shutil.copy2(create_input, basis_folder)
 
 @app.command

@@ -171,7 +171,9 @@ contains
       fnames(wf_atoms(ispec)%get_nshells()+2:) = [(roots(3)//"_"//utils_itos(i, lpad=2)//tail, &
         &                                          i = 1, wf_atoms(jspec)%get_nshells())]
     case default
-      fnames = [(roots(i)//tail, i = 1, nints)]
+      do i = 1, nints
+        fnames(i) = roots(i)//tail
+      end do
     end select
   end subroutine twocenter_get_fnames
 
@@ -471,13 +473,15 @@ contains
         write (io, "('# qref2 = ',10f14.6)") (wf_atoms(jspec)%get_ref_charge(ish), ish = 1, wf_atoms(jspec)%get_nshells())
       end if
       if (index_max == 0) then
+        write (io, "('# n = ',i8)") 0
         write (io, "('# z')")
         close (io)
         return
       end if
+      write (io, "('# n = ',i8)") TWOCENTER_NPOINTS_D
       write (io, "('# z',1000(4x,a))") (trim(names(index)), index = 1, index_max)
       do igrid = 1, TWOCENTER_NPOINTS_D
-        write (io, "(f14.6,1000ES16.8)") zmin + (igrid - 1)*dz, answer(i, :, igrid)
+        write (io, "(1000ES16.8)") zmin + (igrid - 1)*dz, answer(i, :, igrid)
       end do
       close (io)
     end do

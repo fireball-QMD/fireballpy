@@ -139,9 +139,9 @@
            pup = xx
            nup = node
           end if
-          if (abs(pl2) .lt. tolerance**2) exit 
+          if (abs(pl2) .lt. max(tolerance**2, 1.0e-14_dp)) exit 
          end do
-         if (abs(pl2) .gt. tolerance**2) then
+         if (abs(pl2) .gt. max(tolerance**2, 1.0e-14_dp)) then
            call utils_log(UTILS_LOG_WARNING, "no convergence in gleg after "//trim(utils_itos(jterm))//" iterations")
          end if
          ctheta(iterm) = xx
