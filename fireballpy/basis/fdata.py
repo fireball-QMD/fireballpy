@@ -137,7 +137,7 @@ class Element:
             raise_err(ValueError(f"{err} All values must be positive."))
         err = f"Invalid value '{xocc0}' for '-n0' / '--nelectrons-neutral'."
         if xocc0 is None:
-            xocc0 = list(map(float, filter(lambda x: x > 0, self.valence)))
+            xocc0 = [self.valence[int(x)] for x in self.lam]
         if len(xocc0) != self.norbs:
             raise_err(ValueError(f"{err} Must provide one value per orbital."))
         self.xocc0 = np.ascontiguousarray(xocc0, dtype=np.float64)
@@ -180,7 +180,6 @@ class Element:
         self.cmix = np.ascontiguousarray(cmix, dtype=np.float64)
         if np.any(self.cmix < 0.0):
             raise_err(ValueError(f"{err} All values must be positive."))
-        self.cmix /= self.cmix.sum()
         self.nzval_ion = np.int32(self.xocc_ion.sum() + 0.1)
 
         # exc_names, exc_weights
@@ -201,10 +200,10 @@ class Element:
             if exc_names[0] != exc_names[1] and exc_names[0] in ["gga_x_b88", "gga_c_lyp"] and exc_names[1] in ["gga_x_b88", "gga_c_lyp"]:
                 ioption = XCEnum.BLYP
                 warnings.warn("BLYP XC (and pseudopotentials) is not recommended in Fireball as it is not based in the free gas", UserWarning)
-        self.exc_names = np.ascontiguousarray([x.ljust(XC_NAMES_LEN) for x in exc_names], dtype=np.str_)
+        self.exc_names = [x.ljust(XC_NAMES_LEN) for x in exc_names]
         self.exc_weights = np.ascontiguousarray(exc_weights, dtype=np.float64)
         asort = np.argsort(self.exc_names)
-        self.exc_names = self.exc_names[asort]
+        self.exc_names = [self.exc_names[int(x)] for x in asort]
         self.exc_weights = self.exc_weights[asort]
 
         # ppfile, ppionfile

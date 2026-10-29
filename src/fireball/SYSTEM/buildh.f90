@@ -35,7 +35,6 @@ subroutine buildh ()
       iatom_a = get_iatom_ofshell(alpha)
       dQ(alpha) = Qin(issh_a,iatom_a) - Qneutral(issh_a,imass(iatom_a))
     end do
-    dQ = 0.0d0 ! HERE HERE HERE HERE
     h_mat = 0.0d0
     do iatom = 1, natoms
       in1 = imass(iatom)

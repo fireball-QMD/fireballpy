@@ -128,6 +128,7 @@ type(pot_orbital_t) function pot_new_orbital(ish, fpath)
   end do
   close (io)
   fr = math_interp_new(r, vnn, rval=0.0_dp)
+  rcut = r(np)
   pot_new_orbital = pot_orbital_t(rcut=rcut, math_interp_t=fr)
 end function pot_new_orbital
 
