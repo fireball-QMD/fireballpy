@@ -29,7 +29,7 @@
 ! subdivsion { (b) (3) (ii) } of the Rights in Technical Data and
 ! Computer Software clause at 52.227-7013.
 
-! create.f
+! create.f90
 ! Program Description
 ! ======================================================================
 !       Create matrix element interactions as a function of atomtype and
@@ -57,11 +57,13 @@
 ! ======================================================================
 program create
 use, intrinsic :: iso_fortran_env, only: dp => real64
-use :: utils, only: utils_log, UTILS_LOG_INFO, UTILS_LOG_ERROR
+use :: constants, only: abohr
+use :: utils, only: utils_log, utils_itos, utils_log_set_threshold, UTILS_LOG_INFO, UTILS_LOG_WARNING, UTILS_LOG_ERROR
 use :: xc, only: xc_init, xc_end
-use :: wavefunctions, only: wf_init, wf_end
+use :: input, only: input_t, input_read
+use :: wavefunctions, only: wf_init, wf_end, wf_atoms
 use :: potentials, only: pot_init, pot_end
-use :: pseudopotentials, only: pp_init, pp_end
+use :: pseudopotentials, only: pp_init, pp_end, pp_atoms
 use :: onecenter, only: onecenter_calc, &
   & ONECENTER_XC, &
   & ONECENTER_GOVERLAP1, &
@@ -88,8 +90,6 @@ include 'exchange.inc'
 ! The file "quadrature.inc" specifies all the quadrature and grid
 ! parameters for all of the matrix elements.
 include 'quadrature.inc'
-include 'wavefunctions.inc'
-include 'pseudopotentials.inc'
 ! Argument Declaration and Description
 ! ======================================================================
 
@@ -97,28 +97,32 @@ include 'pseudopotentials.inc'
 ! ======================================================================
 logical :: ispher
 integer :: ideriv, iderivmin, iderivmax, iderivtmp, index, index_max, index_maxPP, index_maxsp, &
-	   interaction, ispec, isorp, isorpmax, isorpmin, ispnum, istyle, issh, itmp, itype1, itype2, &
-	   itype3, nstyles, looper2, looper23, looper24, looper25, looper3, looper3a, minderiv2c, &
-	   maxderiv2c, nspec, nssh2, nssh2PP, nzx1, nzx2, itype, lalpha, malpha, nalpha
+           interaction, ispec, isorp, isorpmax, isorpmin, ispnum, istyle, issh, itmp, itype1, itype2, &
+           itype3, nstyles, looper2, looper23, looper24, looper25, looper3, looper3a, &
+           maxderiv2c, nspec, nssh2, nssh2PP, nzx1, nzx2, itype, lalpha, malpha, nalpha
 real(kind=dp) :: fraction, rcutoff1, rcutoff2, rcutoff3, dbc, dna
 character(2) :: atom1, atom2, atom3
+character(32) :: arg
 character(70) :: signature, what1, what2, what3
 integer :: index_max2c(nspec_max, nspec_max), index_max2cPP(nspec_max, nspec_max),  &
-	   index_max3c(nspec_max, nspec_max), lleft(nspec_max, nspec_max, inter_max), &
-	   lleftPP(nspec_max, nspec_max, inter_max), lright(nspec_max, nspec_max, inter_max), &
-	   lrightPP(nspec_max, nspec_max, inter_max), mleft(nspec_max, nspec_max, inter_max), &
-	   mleftPP(nspec_max, nspec_max, inter_max), mright(nspec_max, nspec_max, inter_max), &
-	   mrightPP(nspec_max, nspec_max, inter_max), nleft(nspec_max, nspec_max, inter_max), &
-	   nleftPP(nspec_max, nspec_max, inter_max), nright(nspec_max, nspec_max, inter_max), &
-	   nrightPP(nspec_max, nspec_max, inter_max), l1(inter_max), l1PP(inter_max), l2(inter_max), &
-	   l2PP(inter_max), m1(inter_max), m1PP(inter_max), m2(inter_max), m2PP(inter_max), &
-	   n1(inter_max), n1PP(inter_max), n2(inter_max), n2PP(inter_max), n1sp(1), l1sp(1), &
-	   m1sp(1), n2sp(1), l2sp(1), m2sp(1), lssh(nspec_max, nsh_max), lsshPP(nspec_max, nsh_max), &
-	   nssh(nspec_max), nsshPP(nspec_max, nzx(nspec_max))
+           index_max3c(nspec_max, nspec_max), lleft(nspec_max, nspec_max, inter_max), &
+           lleftPP(nspec_max, nspec_max, inter_max), lright(nspec_max, nspec_max, inter_max), &
+           lrightPP(nspec_max, nspec_max, inter_max), mleft(nspec_max, nspec_max, inter_max), &
+           mleftPP(nspec_max, nspec_max, inter_max), mright(nspec_max, nspec_max, inter_max), &
+           mrightPP(nspec_max, nspec_max, inter_max), nleft(nspec_max, nspec_max, inter_max), &
+           nleftPP(nspec_max, nspec_max, inter_max), nright(nspec_max, nspec_max, inter_max), &
+           nrightPP(nspec_max, nspec_max, inter_max), l1(inter_max), l1PP(inter_max), l2(inter_max), &
+           l2PP(inter_max), m1(inter_max), m1PP(inter_max), m2(inter_max), m2PP(inter_max), &
+           n1(inter_max), n1PP(inter_max), n2(inter_max), n2PP(inter_max), n1sp(1), l1sp(1), &
+           m1sp(1), n2sp(1), l2sp(1), m2sp(1), lssh(nspec_max, nsh_max), lsshPP(nspec_max, nsh_max), &
+           nssh(nspec_max), nsshPP(nspec_max), nzx(nspec_max)
 real(kind=dp) :: ctheta(ntheta_max), ctheta_weights(ntheta_max), etotatom(nspec_max), &
-		 rcutoff(nspec_max, nsh_max), rcutoffa(nspec_max, nsh_max), rcutoffa_max(nspec_max), xmass(nspec_max)
-character(2) atom(nspec_max)
-character(70) what(nspec_max)
+                 rcutoff(nspec_max, nsh_max), rcutoffa(nspec_max, nsh_max), rcutoffa_max(nspec_max), xmass(nspec_max)
+character(2) :: atom(nspec_max)
+character(70) :: what(nspec_max)
+
+! Single input file written by 'fireballpy.basis'
+type(input_t) :: inp
 
 ! MPI
 integer :: my_proc, nproc
@@ -126,6 +130,20 @@ logical :: iammaster, iammpi
 
 ! Procedure
 ! ======================================================================
+select case (command_argument_count())
+case (0)
+  call utils_log_set_threshold(UTILS_LOG_WARNING)
+case (1)
+  call get_command_argument(1, arg)
+  if (trim(arg) /= "-v") then
+    call utils_log(UTILS_LOG_ERROR, "unrecognized cli argument "//trim(arg))
+    error stop 1
+  end if
+  call utils_log_set_threshold(UTILS_LOG_INFO)
+case default
+  call utils_log(UTILS_LOG_ERROR, "unrecognized cli arguments")
+end select
+
 ! Setup the clm coefficients
 call setup_clm()
 
@@ -133,12 +151,44 @@ call setup_clm()
 call init_MPI(iammaster, iammpi, my_proc, nproc)
 
 if (iammaster) then
-  call utils_log(UTILS_LOG_INFO, "Running basis creation on "//trim(cnproc)//" nodes")
-  signature = ' fireballpy '
+  call utils_log(UTILS_LOG_INFO, "Running basis creation on "//utils_itos(nproc)//" nodes")
+  signature = " fireballpy "
 end if ! end master
 
 !  MPI Broadcast signature
 call signature_MPI (signature)
+
+! Read the single input file and assign everything that comes from it. This
+! must happen before mk_index, which already needs nssh and lssh.
+inp = input_read("create.ini")
+call xc_init(inp%xc_names, inp%xc_weights)
+nspec = size(inp%species)
+if (nspec > nspec_max) then
+  call utils_log(UTILS_LOG_ERROR, "too many species; raise nspec_max in parameters.inc")
+  error stop 1
+end if
+do ispec = 1, nspec
+  atom(ispec) = inp%species(ispec)%symbol
+  nzx(ispec) = inp%species(ispec)%znuc
+  nssh(ispec) = inp%species(ispec)%nshells
+  nsshxc(ispec) = nssh(ispec)
+  if (nssh(ispec) > nsh_max) then
+    call utils_log(UTILS_LOG_ERROR, "too many shells; raise nsh_max in parameters.inc")
+    error stop 1
+  end if
+  do issh = 1, nssh(ispec)
+    lssh(ispec,issh) = inp%species(ispec)%shells(issh)%l
+    lsshxc(ispec,issh) = lssh(ispec,issh)
+    xnocc(issh,ispec) = inp%species(ispec)%shells(issh)%q
+  end do
+  ! Same convention as the old readcreate: the changed shell is the last one.
+  iderorb(ispec) = nssh(ispec)
+  dqorb(ispec) = 0.5_dp
+  if (nssh(ispec) == 1) dqorb(ispec) = 0.25_dp
+  do issh = 1, nssh(ispec)
+    dqint(issh,ispec) = dqorb(ispec)/nssh(ispec)
+  end do
+end do
 
 ! **********************************************************************
 do itype1 = 1, nspec
@@ -148,7 +198,7 @@ do itype1 = 1, nspec
                   lright, mright, index_max2c, index_max3c)
 
     ! TODO: this should not happen
-    if (index_max3c(itype1,itype2) .gt. inter_max) then
+    if (index_max3c(itype1,itype2) > inter_max) then
       call utils_log(UTILS_LOG_ERROR, "inter_max too small")
       error stop 1
     end if
@@ -164,9 +214,26 @@ end do
 ! Done with setup, now get to work
 ! ======================================================================
 if (iammaster) then
-  call wf_init()
-  call pot_init()
-  call pp_init()
+  call wf_init(inp)
+  call pot_init(inp)
+  call pp_init(inp)
+
+  ! The cutoffs live in the wavefunction headers, so they are only known once
+  ! wf_init has run. 'what' is the human-readable tag stamped on every table.
+  do ispec = 1, nspec
+    do issh = 1, nssh(ispec)
+      rcutoffa(ispec,issh) = wf_atoms(ispec)%get_rcut(issh)
+      rcutoff(ispec,issh) = rcutoffa(ispec,issh)/abohr
+    end do
+    rcutoffa_max(ispec) = wf_atoms(ispec)%get_rcut()
+    nsshPP(ispec) = pp_atoms(ispec)%get_nshells()
+    do issh = 1, nsshPP(ispec)
+      lsshPP(ispec,issh) = pp_atoms(ispec)%get_angular_momentum(issh)
+    end do
+    write (what(ispec),400) atom(ispec), nzx(ispec), &
+      (rcutoffa(ispec,issh), issh = 1, nssh(ispec))
+  end do
+400 format (2x, a2, "(",i2,")", ": Rc's (A) = ", 8f6.3)
 
   call utils_log(UTILS_LOG_INFO, "Computing one center integrals")
   ! TODO: mpi
@@ -202,6 +269,53 @@ if (iammaster) then
 end if ! end master
 
 ! ======================================================================
+! II. Compute purely two center cases (overlap, dipole, coulomb
+! integrals, and kinetic energy).
+! ======================================================================
+do looper2 = 1, nspec*nspec
+  if (mod(looper2,nproc) == my_proc) then
+    itmp   = looper2
+    itype2 = 1 + int((itmp - 1)/nspec)
+    itmp   = itmp - (itype2 - 1)*nspec
+    itype1 = itmp
+
+    nzx1 = nzx(itype1)
+    nzx2 = nzx(itype2)
+
+    rcutoff1 = rcutoffa_max(itype1)
+    rcutoff2 = rcutoffa_max(itype2)
+
+    nssh2 = nssh(itype2)
+
+    atom1 = atom(itype1)
+    atom2 = atom(itype2)
+
+    what1 = what(itype1)
+    what2 = what(itype2)
+
+    index_max = index_max2c(itype1,itype2)
+    do index = 1, index_max
+      n1(index) = nleft(itype1,itype2,index)
+      l1(index) = lleft(itype1,itype2,index)
+      m1(index) = mleft(itype1,itype2,index)
+      n2(index) = nright(itype1,itype2,index)
+      l2(index) = lright(itype1,itype2,index)
+      m2(index) = mright(itype1,itype2,index)
+    end do
+
+    ! **********************************************************************
+    !
+    !  =====>         1. Kinetic
+    !
+    ! **********************************************************************
+    call kinetic (itype1, itype2, atom1, atom2, what1, what2, &
+                 nzx1, nzx2, rcutoff1, rcutoff2, nssh, lssh, &
+                 index_max, n1, l1, m1, n2, l2, m2, signature, &
+                 iammaster)
+  end if
+end do
+
+! ======================================================================
 ! I. Perform three-center calculations
 ! ======================================================================
 ! **********************************************************************
@@ -215,7 +329,6 @@ ideriv = 0
 
 if (iammaster) then
   call utils_log(UTILS_LOG_INFO, "Computing three center integrals")
-  call utils_log(UTILS_LOG_INFO, "  SNXC")
 end if
 nstyles = ideriv
 call gleg (ctheta, ctheta_weights, ntheta_max)
@@ -282,12 +395,9 @@ end do
 !  =====>         2. Three center neutral atom matrix element
 !
 ! **********************************************************************
-if (iammaster) then
-  call utils_log(UTILS_LOG_INFO, "  charged atom interactions")
-end if
 call gleg (ctheta, ctheta_weights, ntheta_max)
 do looper3a = 1, nspec*nspec*nspec
-  if (mod(looper3a + nspec*nspec*nspec*nstyles, nproc) .eq. my_proc) then
+  if (mod(looper3a + nspec*nspec*nspec*nstyles, nproc) == my_proc) then
     itmp   = looper3a
     itype3 = 1 + int((itmp - 1)/(nspec*nspec))
     itmp   = itmp - (itype3 - 1)*(nspec*nspec)
@@ -337,54 +447,6 @@ do looper3a = 1, nspec*nspec*nspec
   end if ! end MPI which node
 end do
 
-! ======================================================================
-! II. Compute purely two center cases (overlap, dipole, coulomb
-! integrals, and kinetic energy).
-! ======================================================================
-do looper2 = 1, nspec*nspec
-  if (mod(looper2,nproc) .eq. my_proc) then
-    itmp   = looper2
-    itype2 = 1 + int((itmp - 1)/nspec)
-    itmp   = itmp - (itype2 - 1)*nspec
-    itype1 = itmp
-
-    nzx1 = nzx(itype1)
-    nzx2 = nzx(itype2)
-
-    rcutoff1 = rcutoffa_max(itype1)
-    rcutoff2 = rcutoffa_max(itype2)
-
-    nssh2 = nssh(itype2)
-
-    atom1 = atom(itype1)
-    atom2 = atom(itype2)
-
-    what1 = what(itype1)
-    what2 = what(itype2)
-
-    index_max = index_max2c(itype1,itype2)
-    do index = 1, index_max
-      n1(index) = nleft(itype1,itype2,index)
-      l1(index) = lleft(itype1,itype2,index)
-      m1(index) = mleft(itype1,itype2,index)
-      n2(index) = nright(itype1,itype2,index)
-      l2(index) = lright(itype1,itype2,index)
-      m2(index) = mright(itype1,itype2,index)
-    end do
-
-    ! **********************************************************************
-    !
-    !  =====>         1. Kinetic
-    !
-    ! **********************************************************************
-    call kinetic (itype1, itype2, atom1, atom2, what1, what2, &
-                 nzx1, nzx2, rcutoff1, rcutoff2, nssh, lssh, &
-                 index_max, n1, l1, m1, n2, l2, m2, signature, &
-                 iammaster)
-  end if
-end do
-
-
 !
 ! SPHERIC APPROXIMATION (only OLSXC Method)
 !
@@ -412,10 +474,6 @@ end do
 ! **********************************************************************
 
 ideriv = 0
-
-if (iammaster) then
-  call utils_log(UTILS_LOG_INFO, "  OLSXC")
-end if
 nstyles = ideriv
 call gleg (ctheta, ctheta_weights, ntheta_max)
 do looper3a = 1, nspec*nspec*nspec

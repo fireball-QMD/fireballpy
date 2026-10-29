@@ -27,7 +27,7 @@ subroutine read_1c ()
 
   do in1 = 1, nspecies
     numsh = nssh(in1)
-    root = trim(fdataLocation)//trim(onecfname(1))//trim(utils_itos(nzx(in1), lpad=2)//".dat"
+    root = trim(fdataLocation)//trim(onecfname(1))//"."//trim(utils_itos(nzx(in1), lpad=2))//".dat"
     io = utils_open(root, "r", skip=5)
     allocate(temp(numsh, numsh))
     do issh = 1, numsh

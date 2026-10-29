@@ -1,10 +1,11 @@
 from ase.build import molecule
 from fireballpy import Fireball
+from fireballpy.options import ChargesMethod
 from fireballpy.outputs import get_hamiltonian
 import sys
 
 atoms = molecule('CH4')
-atoms.calc = Fireball(fdata='custom', fdata_path=sys.argv[1], verbose=True, charges_method=sys.argv[2])
+atoms.calc = Fireball(fdata=sys.argv[1], verbose=True, charges_method=ChargesMethod[sys.argv[2].upper()])
 
 print("=== COORDINATES ===")
 for z, c in zip(atoms.get_chemical_symbols(), atoms.get_positions()):

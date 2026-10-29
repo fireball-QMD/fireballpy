@@ -1,3 +1,8 @@
+from __future__ import annotations
+from copy import deepcopy
+from enum import IntEnum
+from multiprocessing import cpu_count
+from typing import Annotated, Any
 import json
 import os
 import pathlib
@@ -5,73 +10,74 @@ import shutil
 import subprocess
 import sys
 import re
-from enum import IntEnum
-from multiprocessing import cpu_count
-from typing import Annotated, Any, Optional
-import numpy as np
-from numpy.typing import NDArray
-import matplotlib.pyplot as plt
+import warnings
 from cyclopts import App, Parameter, Group
 from cyclopts.validators import Path
 from rich import box
 from rich.console import Console
 from rich.panel import Panel
 from rich.text import Text
-
-from ase.data import atomic_numbers, atomic_names, atomic_masses, chemical_symbols
+from ase.data import atomic_numbers, chemical_symbols
+import numpy as np
+import matplotlib.pyplot as plt
 
 from fireballpy import __version__ as __fb_version__
-from fireballpy.utils import get_data_from_url, read_wf, read_wf_info, ANGULAR_MOMENTUM, ANGULAR_MOMENTUM_REV
+from fireballpy.utils import get_data_from_url, ANGULAR_MOMENTUM
+from fireballpy.wavefunctions import WaveFunction
 from fireballpy.basis import __file__ as __basis_file__
+from fireballpy.basis._valence import VALENCE_ELECTRONS
 from fireballpy.basis._wfs import generate_wavefunctions, generate_vnn
 
-PPURL = 'https://fireball.ftmc.uam.es/fireballpy/ppfiles.tar.xz'
-A0 = {'s': 2.0, 'p': 1.0, 'd': 0.8, 'f': 0.7}
-ELECTRONS_PER_ORB = {'s': 2, 'p': 6, 'd': 10, 'f': 14}
-ELECTRONIC_CONFIG = ('1s','2s','2p','3s','3p','4s','3d','4p','5s','4d','5p','6s','4f','5d','6p','7s','5f','6d','7p','8s')
-
+INPUT_VERSION = 1
+INFO_VERSION = 1
+XC_NAMES_LEN = 32
+PPURL = "https://fireball.ftmc.uam.es/fireballpy/ppfiles.tar.xz"
+REORBS = re.compile(r"^s?p?d?$")
 
 # Commands preparation
 console = Console()
 app = App(console=console, version=__fb_version__)
 
-## Wavefunctions groups
-pot_help = r'The confining potential has the form: V = [r > r_0] * V_0 * exp[-(r_c - r_0)/(r - r_0)/(r_c - r)]'
+# Wavefunctions groups
 args_grp = Group.create_ordered("Basic arguments")
-parms_grp = Group.create_ordered("Orbital parameters", default_parameter=Parameter(negative='', consume_multiple=True))
-exc_grp = Group.create_ordered("Excited states (default: none)")
-pot_grp = Group.create_ordered("Confining potential (default: none)", help=pot_help)
+parms_grp = Group.create_ordered("Orbital parameters", default_parameter=Parameter(negative=False, consume_multiple=True))
+ex_grp = Group.create_ordered("Excited states (default: none)")
+pot_grp = Group.create_ordered("Confining potential (default: none)",
+                               help=r"The confining potential has the form: V = [r > r_0] * V_0 * exp[-(r_c - r_0)/(r - r_0)/(r_c - r)]")
 
+def _json_dump(obj: Any, indent: int = 0) -> str:
+    """Like json.dumps(indent=2), but a list of numbers or strings stays on one
+    line. The file is meant to be read by a person as well as by the code."""
+    pad = " "*indent
+    if isinstance(obj, dict):
+        inner = f",{os.linesep}".join(f"{pad}  {json.dumps(k)}: {_json_dump(v, indent + 2)}"
+                            for k, v in obj.items())
+        return f"{{{os.linesep}{inner}{os.linesep}{pad}}}"
+    if isinstance(obj, list):
+        if any(isinstance(x, (dict, list)) for x in obj):
+            inner = f",{os.linesep}".join(f"{pad}  {_json_dump(x, indent + 2)}" for x in obj)
+            return f"[{os.linesep}{inner}{os.linesep}{pad}]"
+        return f"[{', '.join(json.dumps(x) for x in obj)}]"
+    return json.dumps(obj)
 
-def info(msg: str):
-    panel = Panel(
-        Text(msg, "default"),
-        title="Information",
-        box=box.ROUNDED,
-        expand=True,
-        title_align="left",
-        style="cyan",
-    )
+def info(msg: str) -> None:
+    panel = Panel(Text(msg, "default"),
+                  title="Info",
+                  box=box.ROUNDED,
+                  expand=True,
+                  title_align="left",
+                  style="cyan")
     console.print(panel)
 
-def raise_err(err: Exception):
-    panel = Panel(
-        Text(str(err), "default"),
-        title="Error",
-        box=box.ROUNDED,
-        expand=True,
-        title_align="left",
-        style="red",
-    )
+def raise_err(err: Exception) -> None:
+    panel = Panel(Text(str(err), "default"),
+                  title="Error",
+                  box=box.ROUNDED,
+                  expand=True,
+                  title_align="left",
+                  style="red")
     console.print(panel)
     exit(1)
-
-
-class ECEnum(IntEnum):
-    LDA = 3
-    PBE = 6
-    BLYP = 9
-
 
 class ExcitedEnum(IntEnum):
     NONE = 0
@@ -79,348 +85,256 @@ class ExcitedEnum(IntEnum):
     DMOL = 2
     MIX = 3
 
+class XCEnum(IntEnum):
+    LDA = 3
+    GGA = 6
+    BLYP = 9
 
 class Element:
+    def __init__(self, *, element: str, orbitals: str, xocc: list[float], rcutoff: list[float],
+                 output: pathlib.Path = pathlib.Path("cinput"), sav: str | None = None, xocc0: list[float] | None = None,
+                 nzval_pp: float | None = None,
+                 nexcite: ExcitedEnum = ExcitedEnum.NONE, xocc_ion: list[float] | None = None, cmix: list[float] | None = None,
+                 exc_names: list[str] | None = None, exc_weights: list[float] | None = None,
+                 v0: list[float] | None = None, r0: list[float] | None = None) -> None:
+        # nznuc, symbol and valence
+        err = f"Invalid value '{element}' for 'ELEMENT' / '--element'."
+        if element not in atomic_numbers or element == "X":
+            raise_err(ValueError(f"{err} Unrecognized element."))
+        self.nznuc = np.int32(atomic_numbers[element])
+        self.symbol = element
+        self.valence = np.ascontiguousarray(VALENCE_ELECTRONS[int(self.nznuc)], dtype=np.int32)
+        if self.valence[3] != 0:
+            raise_err(ValueError(f"{err} F-Shell elements are unsupported"))
 
-    def __init__(self) -> None:
-        pass
+        # output (existance checks are handled by the CLI)
+        self.output = output
+        output.mkdir(parents=True, exist_ok=True)
+        self.outpath = str(self.output / "_")[:-1]
 
-    def _valence_electrons(self, err: str) -> None:
-        if self.nznuc == 1 or self.nznuc == 2:
-            self._valence = [float(self.nznuc), 0.0, 0.0, 0.0]
-            return
+        # orbitals, save and lam
+        if REORBS.match(orbitals) is None:
+            err = f"Invalid value '{orbitals}' for 'ORBITALS' / '--orbitals'."
+            raise_err(ValueError(f"{err} Only supported orbitals are 's', 'p' and 'd'. "
+                                 "No repetition is supported and they must be provided in order"))
+        self.orbitals = orbitals
+        self.norbs = len(orbitals)
+        self.lam = np.ascontiguousarray([ANGULAR_MOMENTUM[o] for o in self.orbitals], dtype=np.int32)
+        if sav is None:
+            sav = orbitals
+        if REORBS.match(sav) is None:
+            err = f"Invalid value '{sav}' for '-s' / '--save'."
+            raise_err(ValueError(f"{err} Only supported orbitals are 's', 'p' and 'd'. "
+                                 "No repetition is supported and they must be provided in order"))
+        self.sav = [o in sav for o in self.orbitals]
 
-        ec: dict[int, dict[str, float]] = {}
-        zrem = self.nznuc
-        maxn = 0
-        l = ''
-        for orb in ELECTRONIC_CONFIG:
-            n = int(orb[0])
-            l = orb[1]
-            s = min(zrem, ELECTRONS_PER_ORB[l])
-            if n not in ec:
-                maxn = n
-                ec[n] = {}
-            ec[n][l] = ec[n].get(l, 0.0) + float(s)
-            zrem -= s
-            if zrem == 0:
-                break
+        # xocc, xocc0, nzval, nzval_pp
+        err = f"Invalid value '{xocc}' for '-n' / '--nelectrons'."
+        if len(xocc) != self.norbs:
+            raise_err(ValueError(f"{err} Must provide one value per orbital."))
+        self.xocc = np.ascontiguousarray(xocc, dtype=np.float64)
+        if np.any(self.xocc < 0.0):
+            raise_err(ValueError(f"{err} All values must be positive."))
+        err = f"Invalid value '{xocc0}' for '-n0' / '--nelectrons-neutral'."
+        if xocc0 is None:
+            xocc0 = list(map(float, filter(lambda x: x > 0, self.valence)))
+        if len(xocc0) != self.norbs:
+            raise_err(ValueError(f"{err} Must provide one value per orbital."))
+        self.xocc0 = np.ascontiguousarray(xocc0, dtype=np.float64)
+        if np.any(self.xocc0 < 0.0):
+            raise_err(ValueError(f"{err} All values must be positive."))
+        if not np.allclose(self.xocc0.sum(), sum(self.valence)):
+            raise_err(ValueError(f"{err} They do not add up to the valence electrons."))
+        self.nzval = np.int32(self.xocc.sum() + 0.1)
+        self.nzval_pp = np.float64(-1.0) if nzval_pp is None else np.float64(nzval_pp)
 
-        self._valence = [ec[maxn].get('s', 0.0), ec[maxn].get('p', 0.0), 0.0, 0.0]
-        if l == 's' or l == 'p':
-            return
-        self._valence[2] = ec[maxn-1]['d']
-        if l == 'd':
-            if self.nznuc in [29, 47, 79, 111]:
-                self._valence = [1.0, 0.0, 10.0, 0.0]
-            return
-        # No f orbitals
-        raise_err(ValueError(f'{err} Element with unsupported "f" valence orbitals.'))
+        # rcutoff
+        err = f"Invalid value '{rcutoff}' for '-r' / '--radius'."
+        if len(rcutoff) != self.norbs:
+            raise_err(ValueError(f"{err} Must provide one value per orbital."))
+        self.rcutoff = np.ascontiguousarray(rcutoff, dtype=np.float64)
+        if np.any(self.rcutoff < 0.0):
+            raise_err(ValueError(f"{err} All values must be positive."))
 
-    @property
-    def nznuc(self) -> int:
-        return self._nznuc
+        # nexcite, xocc_ion, cmix, nzval_ion
+        self.exnum = nexcite
+        self.excite = nexcite.name
+        self.nexcite = np.int32(nexcite.value)
+        if xocc_ion is None and (nexcite == ExcitedEnum.DMOL or nexcite == ExcitedEnum.MIX):
+            raise_err(TypeError("If '--excite dmol/mix' is specified, then '--nion' must be provided"))
+        if xocc_ion is None:
+            xocc_ion = [0.0] * self.norbs
+        err = f"Invalid value '{xocc_ion}' for '--nion'."
+        if len(xocc_ion) != self.norbs:
+            raise_err(ValueError(f"{err} Must provide one value per orbital."))
+        self.xocc_ion = np.ascontiguousarray(xocc_ion, dtype=np.float64)
+        if np.any(self.xocc_ion < 0.0):
+            raise_err(ValueError("All values must be positive."))
+        if cmix is None and nexcite == ExcitedEnum.MIX:
+            raise_err(TypeError("If '--excite mix' is specified, then '--pmix' must be provided"))
+        if cmix is None:
+            cmix = [1.0] * self.norbs
+        err = f"Invalid value '{cmix}' for '--pmix'."
+        if len(cmix) != self.norbs:
+            raise_err(ValueError(f"{err} Must provide one value per orbital."))
+        self.cmix = np.ascontiguousarray(cmix, dtype=np.float64)
+        if np.any(self.cmix < 0.0):
+            raise_err(ValueError(f"{err} All values must be positive."))
+        self.cmix /= self.cmix.sum()
+        self.nzval_ion = np.int32(self.xocc_ion.sum() + 0.1)
 
-    @nznuc.setter
-    def nznuc(self, value: str):
-        self.provided = value
-        err = f'Invalid value "{value}" for "ELEMENT" / "--element".'
-        if not value.isnumeric():
-            if value not in atomic_numbers:
-                raise_err(ValueError(f'{err} Unrecognized element.'))
-            value = str(atomic_numbers[value])
-        self._nznuc = int(value)
-        if self._nznuc not in atomic_numbers.values() or self._nznuc < 1:
-            raise_err(ValueError(f'{err} Unrecognized element.'))
-        self._valence_electrons(err)
+        # exc_names, exc_weights
+        if exc_names is None:
+            exc_names = ["gga_x_pbe", "gga_c_pbe"]
+            if exc_weights is not None:
+                raise_err(TypeError("If '--exc' is not specified, then '--exc-weights' must not be"))
+        if exc_weights is None:
+            exc_weights = [1.0 for _ in exc_names]
+        if len(exc_names) != len(exc_weights):
+            raise_err(TypeError("'--exc' and  '--exc-weights' have different lengths"))
+        ioption = XCEnum.GGA
+        if all(map(lambda x: x.startswith("lda"), exc_names)):
+            ioption = XCEnum.LDA
+        if not all(map(lambda x: x.startswith("gga"), exc_names)):
+            warnings.warn("Some specified XC were LDA and others GGA, we will use GGA pseudopotentials", UserWarning)
+        if len(exc_names) == 2:
+            if exc_names[0] != exc_names[1] and exc_names[0] in ["gga_x_b88", "gga_c_lyp"] and exc_names[1] in ["gga_x_b88", "gga_c_lyp"]:
+                ioption = XCEnum.BLYP
+                warnings.warn("BLYP XC (and pseudopotentials) is not recommended in Fireball as it is not based in the free gas", UserWarning)
+        self.exc_names = np.ascontiguousarray([x.ljust(XC_NAMES_LEN) for x in exc_names], dtype=np.str_)
+        self.exc_weights = np.ascontiguousarray(exc_weights, dtype=np.float64)
+        asort = np.argsort(self.exc_names)
+        self.exc_names = self.exc_names[asort]
+        self.exc_weights = self.exc_weights[asort]
 
-    @property
-    def atomname(self) -> str:
-        return atomic_names[self._nznuc]
-
-    @property
-    def symbol(self) -> str:
-        return chemical_symbols[self._nznuc]
-
-    @property
-    def mass(self) -> float:
-        return atomic_masses[self._nznuc]
-
-    @property
-    def orbitals(self) -> str:
-        return self._orbitals
-
-    @orbitals.setter
-    def orbitals(self, value: str) -> None:
-        if re.match(r'^s?p?d?$', value) is None:
-            err = f'Invalid value "{value}" for "ORBITALS" / "--orbitals".'
-            raise_err(ValueError(f'{err} Only supported orbitals are "s", "p" and "d". No repetition is supported and they must be provided in order'))
-        self._orbitals = value
-
-    @property
-    def sav(self) -> NDArray[np.bool_]:
-        return self._sav
-
-    @sav.setter
-    def sav(self, value: str | None) -> None:
-        if value is None:
-            self._sav = np.array([True for _ in self._orbitals])
-            return
-        if re.match(r'^s?p?d?$', value) is None:
-            err = f'Invalid value "{value}" for "-s" / "--save".'
-            raise_err(ValueError(f'{err} Only supported orbitals are "s", "p" and "d". No repetition is supported and they must be provided in order'))
-        self._sav = np.array([x in value for x in self._orbitals])
-
-    @property
-    def lam(self) -> list[int]:
-        return [ANGULAR_MOMENTUM[o] for o in self._orbitals]
-
-    @property
-    def a0(self) -> list[float]:
-        return [A0[o] for o in self._orbitals]
-
-    @property
-    def xocc(self) -> NDArray[np.float64]:
-        return self._xocc
-
-    @xocc.setter
-    def xocc(self, value: list[float]) -> None:
-        if len(value) != len(self._orbitals):
-            err = f'Invalid value "{value}" for "-n" / "--nelectrons".'
-            raise_err(ValueError('Must provide one value per orbital.'))
-        for v in value:
-            err = f'Invalid value "{v}" for "-n" / "--nelectrons".'
-            if v < 0.0:
-                raise_err(ValueError(f'{err} Must be >= 0.'))
-        self._xocc = np.ascontiguousarray(value, dtype=np.float64)
-
-    @property
-    def nzval(self) -> int:
-        return int(self._xocc.sum() + 0.1)
-
-    @property
-    def nzval_pp(self) -> np.float64:
-        return self._nzval_pp
-
-    @nzval_pp.setter
-    def nzval_pp(self, value: float | None) -> None:
-        if value is None:
-            value = -1
-        self._nzval_pp = np.float64(value)
-
-    @property
-    def rcutoff(self) -> NDArray[np.float64]:
-        return self._rcutoff
-
-    @rcutoff.setter
-    def rcutoff(self, value: list[float]) -> None:
-        if len(value) != len(self._orbitals):
-            err = f'Invalid value "{value}" for "-r" / "--radius".'
-            raise_err(ValueError('Must provide one value per orbital.'))
-        for v in value:
-            err = f'Invalid value "{v}" for "-r" / "--radius".'
-            if v < 0.0:
-                raise_err(ValueError(f'{err} Must be >= 0.'))
-            if v >= 100.0:
-                raise_err(ValueError(f'{err} Must be < 100.'))
-        self._rcutoff = np.ascontiguousarray(value, dtype=np.float64)
-
-    @property
-    def rc_max(self) -> float:
-        return np.max(self._rcutoff)
-
-    @property
-    def xocc0(self) -> NDArray[np.float64]:
-        return self._xocc0
-
-    @xocc0.setter
-    def xocc0(self, value: list[float] | None) -> None:
-        valence: list[float] = []
-        for l in ANGULAR_MOMENTUM:
-            if l in self._orbitals:
-                valence.append(self._valence[ANGULAR_MOMENTUM[l]])
-        if value is None:
-            value = valence
-        err = f'Invalid value "{value}" for "-n0" / "--nelectrons-neutral".'
-        if len(value) != len(self._orbitals):
-            raise_err(ValueError('Must provide one value per orbital.'))
-
-        zval = int(sum(valence) + 0.1)
-        if np.abs(sum(value) - zval) > 1e-8:
-            raise_err(ValueError(f'{err} They do not add up to valence electrons ({zval}).'))
-        for v in value:
-            err = f'Invalid value "{v}" for "-n0" / "--nelectrons-neutral".'
-            if v < 0.0:
-                raise_err(ValueError(f'{err} Must be >= 0.'))
-        self._xocc0: NDArray[np.float64] = np.ascontiguousarray(value, dtype=np.float64)
-
-    @property
-    def ioption(self) -> int:
-        return self._ioption
-
-    @ioption.setter
-    def ioption(self, value: int):
-        self._ioption = value
-
-    @property
-    def nexcite(self) -> int:
-        return self._nexcite
-
-    @nexcite.setter
-    def nexcite(self, value: int):
-        self._nexcite = value
-
-    @property
-    def xocc_ion(self) -> NDArray[np.float64]:
-        return self._xocc_ion
-
-    @xocc_ion.setter
-    def xocc_ion(self, value: list[float] | None):
-        if value is None:
-            if self._nexcite == 3:
-                raise_err(TypeError('If "--excite mix" is specified, then "--nion" must be provided.'))
-            elif self._nexcite == 2:
-                raise_err(TypeError('If "--excite dmol" is specified, then "--nion" must be provided.'))
-            else:
-                self._xocc_ion = np.ascontiguousarray(len(self._orbitals) * [0.0], dtype=np.float64)
-            return
-        if len(value) != len(self._orbitals):
-            err = f'Invalid value "{value}" for "--nion".'
-            raise_err(ValueError(f'{err} Must provide one value per orbital.'))
-        for v in value:
-            err = f'Invalid value "{v}" for "--nion".'
-            if v < 0.0:
-                raise_err(ValueError(f'{err} Must be >= 0.'))
-        self._xocc_ion = np.ascontiguousarray(value, dtype=np.float64)
-
-    @property
-    def nzval_ion(self) -> int:
-        return int(self._xocc_ion.sum() + 0.1)
-
-    @property
-    def cmix(self) -> NDArray[np.float64]:
-        return self._cmix
-
-    @cmix.setter
-    def cmix(self, value: list[float] | None):
-        if value is None:
-            if self._nexcite == 3:
-                raise_err(TypeError('If "--excite mix" is specified, then "--pmix" must be provided.'))
-            self._cmix = np.ascontiguousarray(len(self._orbitals) * [1.0], dtype=np.float64)
-            return
-        if len(value) != len(self._orbitals):
-            err = f'Invalid value "{value}" for "--pmix".'
-            raise_err(ValueError(f'{err} Must provide one value per orbital.'))
-            exit(1)
-        for v in value:
-            err = f'Invalid value "{v}" for "--pmix".'
-            if v < 0.0:
-                raise_err(ValueError(f'{err} Must be >= 0.'))
-            if v > 1.0:
-                raise_err(ValueError(f'{err} Must be <= 1.'))
-        self._cmix = np.ascontiguousarray(value, dtype=np.float64)
-
-    def pp_filenames(self, output: pathlib.Path) -> None:
-        symchar = str(self._nznuc).rjust(3, '0')
-
-        # Download if needed
-        self.ppfile = f'{symchar}.pp'
-        ppfolder = get_data_from_url(PPURL, 'ppfiles', 'Pseudopotential')
-        ppfile = os.path.join(ppfolder, self.symbol, str(self.ioption), self.ppfile)
-        if not os.path.isfile(ppfile):
-            have = sorted(d for d in os.listdir(os.path.join(ppfolder, self.symbol))
-                          if os.path.isdir(os.path.join(ppfolder, self.symbol, d))) \
-                if os.path.isdir(os.path.join(ppfolder, self.symbol)) else []
-            names = {'3': 'lda', '6': 'pbe', '9': 'blyp'}
-            raise FileNotFoundError(
-                f"There is no {names.get(str(self.ioption), self.ioption)} pseudopotential "
-                f"for {self.symbol} (looked for {ppfile}). "
-                f"Available for {self.symbol}: {', '.join(names.get(d, d) for d in have) or 'none'}. "
-                f"Either pick one of those with -ec, or generate the missing one.")
-
-        # Use normal file if there is no ion
-        self.ppionfile = f'{symchar}++.pp'
-        ppionfile = os.path.join(ppfolder, self.symbol, str(self.ioption), self.ppionfile)
-        if not os.path.isfile(ppionfile):
+        # ppfile, ppionfile
+        symchar = str(self.nznuc).rjust(3, '0')
+        self.ppfile = f"{symchar}.pp"
+        self.ppionfile = f"{symchar}++.pp"
+        ppfolder = pathlib.Path(get_data_from_url(PPURL, 'ppfiles', 'Pseudopotential'))
+        ppfile = ppfolder / self.symbol / str(ioption) / self.ppfile
+        ppionfile = ppfolder / self.symbol / str(ioption) / self.ppionfile
+        if not ppionfile.is_file():
             ppionfile = ppfile
-
-        # Copy them
         shutil.copy2(ppfile, output / self.ppfile)
         shutil.copy2(ppionfile, output / self.ppionfile)
 
-    def wf_filenames(self) -> None:
-        symchar = str(self._nznuc).rjust(3, '0')
-        rcchar = [str(self.rc_max).replace('.', '')[:3].ljust(3, '0')]
-        for r in self._rcutoff:
-            rcchar.append(str(r).replace('.', '')[:3].ljust(3, '0'))
-        self.filename_wf, self.filename_ewf = [], []
-        for r, o in zip(rcchar[1:], self._orbitals):
-            self.filename_wf.append(f'{symchar}_{r}.wf{ANGULAR_MOMENTUM[o] + 1}')
-            self.filename_ewf.append(f'{symchar}_{r}.ewf{ANGULAR_MOMENTUM[o] + 1}')
+        # v0, r0 and ioptim
+        if v0 is None and r0 is not None or v0 is not None and r0 is None:
+            raise_err(TypeError("If '--vpot'/'--rpot' is specified, then '--rpot'/'--vpot' must be provided."))
+        if v0 is None or r0 is None:
+            self.v0 = np.ascontiguousarray([0.0 for _ in self.orbitals], dtype=np.float64)
+            self.r0 = np.ascontiguousarray([0.0 for _ in self.orbitals], dtype=np.float64)
+            self.ioptim = np.int32(0)
+        else:
+            err = f"Invalid value '{v0}' for '--vpot'."
+            if len(v0) != self.norbs:
+                raise_err(ValueError(f"{err} Must provide one value per orbital."))
+            self.v0 = np.ascontiguousarray(v0, dtype=np.float64)
+            if np.any(self.v0 < 0.0):
+                raise_err(ValueError(f"{err} All values must be positive."))
+            err = f"Invalid value '{r0}' for '--rpot'."
+            if len(r0) != self.norbs:
+                raise_err(ValueError(f"{err} Must provide one value per orbital."))
+            self.r0 = np.ascontiguousarray(r0, dtype=np.float64)
+            if np.any(self.r0 < 0.0):
+                raise_err(ValueError(f"{err} All values must be positive."))
+            self.ioptim = np.int32(1)
 
-    def na_filenames(self) -> None:
-        symchar = str(self._nznuc).rjust(3, '0')
-        rcchar = [str(self.rc_max).replace('.', '')[:3].ljust(3, '0')]
-        for r in self._rcutoff:
-            rcchar.append(str(r).replace('.', '')[:3].ljust(3, '0'))
-        self.filename_na, self.filename_ena = [f'{symchar}_{rcchar[0]}.na0'], []
-        for r, o in zip(rcchar[1:], self._orbitals):
-            self.filename_na.append(f'{symchar}_{r}.na{ANGULAR_MOMENTUM[o] + 1}')
-            self.filename_ena.append(f'{symchar}_{r}.ena{ANGULAR_MOMENTUM[o] + 1}')
+    def serialize_and_check(self, metadata: dict[str, Any]) -> dict[str, Any]:
+        meta: dict[str, Any] = deepcopy(metadata)
+        meta["commands"] = meta.get("commands", [])
+        meta["commands"].append(" ".join(sys.argv))
+        meta["excite"] = meta.get("excite", self.excite)
+        if meta["excite"] != self.excite:
+            raise_err(RuntimeError("Cannot use different methods for excitation for the same element"))
+        meta["exc"] = meta.get("exc", self.exc_names)
+        meta["exc_weights"] = meta.get("exc_weights", self.exc_weights)
+        if not np.all(meta["exc"] == self.exc_names) or not np.all(meta["exc_weights"] == self.exc_weights):
+            raise_err(RuntimeError("Cannot use different XC for the same element"))
+        meta["exc"] = [x.strip() for x in self.exc_names]
+        meta["exc_weights"] = [x for x in self.exc_weights]
+        meta["ppfile"], meta["ppionfile"] = self.ppfile, self.ppionfile
 
-    def prep_confining(self, vpot: list[float] | None, rpot: list[float] | None) -> None:
-        if vpot is None and rpot is None:
-            self.v0 = np.ascontiguousarray(len(self._orbitals) * [0.0], dtype=np.float64)
-            self.r0 = np.ascontiguousarray(len(self._orbitals) * [0.0], dtype=np.float64)
-            self.ioptim = 0
-            return
-        if vpot is not None and rpot is not None:
-            if len(vpot) != len(self._orbitals):
-                err = f'Invalid value "{vpot}" for "--vpot".'
-                raise_err(ValueError(f'{err} Must provide one value per orbital.'))
-            if len(rpot) != len(self._orbitals):
-                err = f'Invalid value "{rpot}" for "--rpot".'
-                raise_err(ValueError(f'{err} Must provide one value per orbital.'))
-            for v in vpot:
-                err = f'Invalid value "{v}" for "--vpot".'
-                if v < 0.0:
-                    raise_err(ValueError(f'{err} Must be >= 0.'))
-            for v in rpot:
-                err = f'Invalid value "{v}" for "--rpot".'
-                if v < 0.0:
-                    raise_err(ValueError(f'{err} Must be >= 0.'))
-            self.v0 = np.ascontiguousarray(vpot, dtype=np.float64)
-            self.r0 = np.ascontiguousarray(rpot, dtype=np.float64)
-            self.ioptim = 1
-            return
-        if vpot is None:
-            raise_err(TypeError('If "--rpot" is specified, then "--vpot" must be provided.'))
-        if rpot is None:
-            raise_err(TypeError('If "--vpot" is specified, then "--rpot" must be provided.'))
+        meta["orbitals"] = meta.get("orbitals", "")
+        for i, o in enumerate(self.orbitals):
+            if not self.sav[i]:
+                continue
+            meta["orbitals"] += o
+            meta[o] = {"nelectrons": self.xocc[i], "nelectrons_neutral": self.xocc0[i], "nzval_pp": self.nzval_pp, "radius": self.rcutoff[i]}
+            if self.nexcite == ExcitedEnum.DMOL or self.nexcite == ExcitedEnum.MIX:
+                meta[o]["nion"] = self.xocc_ion[i]
+                if self.nexcite == ExcitedEnum.MIX:
+                    meta[o]["pmix"] = self.cmix[i]
+        return meta
 
+    @classmethod
+    def load(cls, element: str | list[str] | None, opt: str, folder: pathlib.Path = pathlib.Path("cinput")) -> list[Element]:
+        metafile = folder / "meta.json"
+        if not metafile.is_file():
+            raise_err(ValueError(f"Invalid value '{folder}' for '{opt}'. There is no 'meta.json' file."))
+        with metafile.open('r') as fp:
+            meta: dict[str, dict[str, Any]] = json.load(fp)
+        if element is None:
+            elements = [k for k in meta]
+        elif isinstance(element, str):
+            elements = element
+        else:
+            elements = element
+        ret: list[Element] = []
+        for el in elements:
+            if el not in meta:
+                raise_err(RuntimeError(f"The 'meta.json' does not have information about el '{el}'."))
+            elmeta = meta[el]
+            orbitals = ""
+            if "s" in elmeta["orbitals"]:
+                orbitals += "s"
+            if "p" in elmeta["orbitals"]:
+                orbitals += "p"
+            if "d" in elmeta["orbitals"]:
+                orbitals += "d"
+            assert len(orbitals) > 0
+            xocc = [float(elmeta[o]["nelectrons"]) for o in orbitals]
+            rcutoff = [float(elmeta[o]["radius"]) for o in orbitals]
+            xocc0 = [float(elmeta[o]["nelectrons_neutral"]) for o in orbitals]
+            xocc_ion = None
+            cmix = None
+            if elmeta["excite"] == ExcitedEnum.DMOL.name or elmeta["excite"] == ExcitedEnum.MIX.name:
+                xocc_ion = [float(elmeta[o]["nion"]) for o in orbitals]
+                if elmeta["excite"] == ExcitedEnum.MIX.name:
+                    cmix = [float(elmeta[o]["pmix"]) for o in orbitals]
+            ret.append(cls(element=el, orbitals=orbitals, output=folder, xocc=xocc, rcutoff=rcutoff, xocc0=xocc0,
+                       nzval_pp=elmeta[orbitals[0]]["nzval_pp"], nexcite=ExcitedEnum[elmeta["excite"]],
+                       xocc_ion=xocc_ion, cmix=cmix, exc_names=elmeta["exc"], exc_weights=elmeta["exc_weights"]))
+        return ret
 
 @app.command
 def wavefunctions(element: Annotated[str, Parameter(group=args_grp)],
                   orbitals: Annotated[str, Parameter(group=args_grp)], *,
-                  nelectrons: Annotated[list[float], Parameter(group=parms_grp, name=['-n', '--nelectrons'])],
-                  radius: Annotated[list[float], Parameter(group=parms_grp, name=['-r', '--radius'])],
-                  nelectrons_neutral: Annotated[Optional[list[float]], Parameter(group=parms_grp, name=['-n0', '--nelectrons-neutral'])]=None,
-                  valence_pp: Annotated[Optional[float], Parameter(group=parms_grp, name=['-zpp', '--valence-pp'])]=None,
-                  exchange_correlation: Annotated[ECEnum, Parameter(group=args_grp, name=['-ec', '--exchange-correlation'])]=ECEnum.PBE,
+                  nelectrons: Annotated[list[float], Parameter(group=parms_grp, name=["-n", "--nelectrons"])],
+                  radius: Annotated[list[float], Parameter(group=parms_grp, name=["-r", "--radius"])],
+                  nelectrons_neutral: Annotated[list[float] | None, Parameter(group=parms_grp, name=["-n0", "--nelectrons-neutral"],
+                                                                              show_default="valence electrons")]=None,
+                  valence_pp: Annotated[float | None, Parameter(group=parms_grp, name=["-zpp", "--valence-pp"],
+                                                                show_default="nuclear number")]=None,
+                  exc: Annotated[list[str] | None, Parameter(group=args_grp, consume_multiple=True, negative=False,
+                                                             show_default="gga_x_pbe gga_c_pbe")]=None,
+                  exc_weights: Annotated[list[float] | None, Parameter(group=args_grp, consume_multiple=True, negative=False,
+                                                                       show_default="1.0 each")]=None,
                   output: Annotated[pathlib.Path, Parameter(validator=Path(exists=False, file_okay=False, dir_okay=True), group=args_grp,
-                                                            name=['-o', '--output'])]=pathlib.Path('cinput'),
-                  save: Annotated[str | None, Parameter(group=args_grp, name=['-s', '--save'])]=None,
-                  excite: Annotated[ExcitedEnum, Parameter(group=exc_grp, show_default=False)]=ExcitedEnum.NONE,
-                  nion: Annotated[Optional[list[float]], Parameter(group=exc_grp, negative='', consume_multiple=True)]=None,
-                  pmix: Annotated[Optional[list[float]], Parameter(group=exc_grp, negative='', consume_multiple=True)]=None,
-                  vpot: Annotated[Optional[list[float]], Parameter(group=pot_grp, negative='', consume_multiple=True)]=None,
-                  rpot: Annotated[Optional[list[float]], Parameter(group=pot_grp, negative='', consume_multiple=True)]=None):
+                                                            name=["-o", "--output"])]=pathlib.Path("cinput"),
+                  save: Annotated[str | None, Parameter(group=args_grp, name=["-s", "--save"])]=None,
+                  excite: Annotated[ExcitedEnum, Parameter(group=ex_grp, show_default=False)]=ExcitedEnum.NONE,
+                  nion: Annotated[list[float] | None, Parameter(group=ex_grp, negative=False, consume_multiple=True)]=None,
+                  pmix: Annotated[list[float] | None, Parameter(group=ex_grp, negative=False, consume_multiple=True)]=None,
+                  vpot: Annotated[list[float] | None, Parameter(group=pot_grp, negative=False, consume_multiple=True)]=None,
+                  rpot: Annotated[list[float] | None, Parameter(group=pot_grp, negative=False, consume_multiple=True)]=None) -> None:
     """Application to generate wavefunctions for an ELEMENT with specified ORBITALS.
 
     Parameters
     ----------
-    element: str | int
-        Name or atomic number of the desired element.
+    element: str
+        Name of the desired element.
     orbitals: str
         Orbitals that the element will have ('s', 'p' and 'd').
         No repetition is allowed and they must be provided in order.
@@ -430,16 +344,17 @@ def wavefunctions(element: Annotated[str, Parameter(group=args_grp)],
     radius: list[float]
         Cutoff radius for each of the orbitals in atomic units.
     nelectrons_neutral: list[float] | None
-        Number of electrons in the ground state for each of the orbitals. [default: valence electrons]
+        Number of electrons in the ground state for each of the orbitals.
     nval_pp: float | None
         Number of electrons considered for the pseudopotential. Increasing will lead to more constrained orbitals.
-        [default: atomic number]
-    exchange_correlation: ECEnum
-        Exchange-correlation (EC) functional that will be used.
+    exc: list[str] | None
+        List of exchange-correlation (EXC) functional that will be used following LibXC naming.
+    exc_weights: list[float] | None
+        Weights associated to each exchange-correlation functional.
     output: pathlib.Path
         Folder where to save generated files. Will create it if it does not exist.
     save: str
-        Which orbitals will be saved. Use only for ion computations. [default: all that enter the computation]
+        Which orbitals will be saved. Use only for ion computations.
     excite: ExcitedEnum
         If desired, how excited states should be computed: adding a node, using DMOL
         or mixing excited and ground states.
@@ -452,115 +367,48 @@ def wavefunctions(element: Annotated[str, Parameter(group=args_grp)],
     rpot: list[float]
         Parameter r_0 in atomic units for each of the orbitals.
     """
-    ele = Element()
-    ele.nznuc = str(element)
-    ele.orbitals = orbitals
-    ele.xocc = nelectrons
-    ele.rcutoff = radius
-    ele.xocc0 = nelectrons_neutral
-    ele.nzval_pp = valence_pp
-    ele.ioption = exchange_correlation
-    ele.nexcite = excite
-    ele.xocc_ion = nion
-    ele.cmix = pmix
-    ele.sav = save
-    ele.prep_confining(vpot, rpot)
+    el = Element(element=element, orbitals=orbitals, xocc=nelectrons, rcutoff=radius, output=output, sav=save,
+                 xocc0=nelectrons_neutral, nzval_pp=valence_pp, nexcite=excite, xocc_ion=nion, cmix=pmix,
+                 exc_names=exc, exc_weights=exc_weights, v0=vpot, r0=rpot)
 
     # Finish early if files exist already
-    output = output.absolute()
-    os.makedirs(output, exist_ok=True)
-    metafile = os.path.join(output, 'meta.json')
-    meta: dict[str, dict[str, Any]] = {ele.symbol: {}}
-    if os.path.isfile(metafile):
-        with open(metafile, 'r') as fp:
-            meta = json.load(fp)
-        if ele.symbol in meta:
-            for o, s in zip(ele.orbitals, ele.sav):
-                if not s:
-                    continue
-                if o in meta[ele.symbol]:
-                    raise_err(RuntimeError(f'Files for element "{ele.provided}", orbital "{o}" already exist.'))
-            if ele.nexcite != meta[ele.symbol]['nexcite']:
-                raise_err(ValueError('Excitation method must be consistent in same element computations.'))
-            if ele.ioption != meta[ele.symbol]['ioption']:
-                raise_err(ValueError('Exchange-correlation functional must be consistent in same element computations.'))
-        else:
-            meta[ele.symbol] = {}
-    ele.pp_filenames(output)
-    ele.wf_filenames()
-
-    save_orbs = ''
-    if 'commands' not in meta[ele.symbol]:
-        meta[ele.symbol]['commands'] = []
-    meta[ele.symbol]['commands'].append(' '.join(sys.argv))
-    meta[ele.symbol]['nexcite'] = ele.nexcite
-    meta[ele.symbol]['ioption'] = ele.ioption
-    meta[ele.symbol]['ppfile'] = ele.ppfile
-    meta[ele.symbol]['ppionfile'] = ele.ppionfile
-    for i, o in enumerate(ele.orbitals):
-        if not ele.sav[i]:
+    for i, o in enumerate(el.orbitals):
+        if not el.sav[i]:
             continue
-        save_orbs += o
-        meta[ele.symbol][o] = {'nelectrons': ele.xocc[i],
-                               'nelectrons_neutral': ele.xocc0[i],
-                               'nzval_pp': ele.nzval_pp,
-                               'radius': ele.rcutoff[i],
-                               'nion': ele.xocc_ion[i],
-                               'pmix': ele.cmix[i],
-                               'vpot': ele.v0[i],
-                               'rpot': ele.r0[i],
-                               'filename_wf': ele.filename_wf[i]}
-        if ele.nexcite in [1, 2]:
-            meta[ele.symbol][o]['filename_ewf'] = ele.filename_ewf[i]
+        if (output / f"{el.nznuc:03}_{o}.wf").is_file():
+            raise_err(RuntimeError(f"Files for element '{el.symbol}', orbital '{o}' already exist"))
 
-    generate_wavefunctions(ioption_in=int(ele.ioption),
-                           nexcite_in=int(ele.nexcite),
-                           nznuc_in=ele.nznuc,
-                           nzval_in=ele.nzval,
-                           nzval_ion_in=ele.nzval_ion,
-                           nzval_pp_in=int(ele.nzval_pp),
-                           ioptim_in=ele.ioptim,
-                           atomname_in=ele.atomname,
-                           ppfile_in=ele.ppfile,
-                           ppionfile_in=ele.ppionfile,
-                           sav_in=ele.sav,
-                           outpath_in=str(output) + os.path.sep,
-                           lam_in=np.ascontiguousarray(ele.lam, dtype=np.int32),
-                           a0_in=np.ascontiguousarray(ele.a0, dtype=np.float64),
-                           rcutoff_in=ele.rcutoff,
-                           xocc_in=ele.xocc,
-                           xocc0_in=ele.xocc0,
-                           xocc_ion_in=ele.xocc_ion,
-                           cmix_in=ele.cmix,
-                           r0_in=ele.r0,
-                           v0_in=ele.v0,
-                           filename_wf_in=ele.filename_wf,
-                           filename_ewf_in=ele.filename_ewf)
-    if ele.nexcite == 3:
-        for few in ele.filename_ewf:
-            os.remove(os.path.join(output, few))
+    # Prepare serialization and handle inconsistencies
+    metafile = output / "meta.json"
+    meta: dict[str, dict[str, Any]] = {}
+    if metafile.is_file():
+        with metafile.open('r') as fp:
+            meta = json.load(fp)
+    if el.symbol in meta and save is None:
+        raise_err(RuntimeError(f"Files for element '{el.symbol}', already exist, please specify '-s'/'--save' explicitely"))
+    elmeta: dict[str, Any] = meta.get(el.symbol, {})
+    meta[el.symbol] = elmeta | el.serialize_and_check(elmeta)
+    generate_wavefunctions(nznuc_in=el.nznuc, nexcite_in=el.nexcite, nzval_in=el.nzval,
+                           nzval_ion_in=el.nzval_ion, nzval_pp_in=el.nzval_pp, ioptim_in=el.ioptim,
+                           ppfile_in=el.ppfile, ppionfile_in=el.ppionfile, outpath_in=el.outpath,
+                           sav_in=el.sav, lam_in=el.lam, rcutoff_in=el.rcutoff,
+                           xocc_in=el.xocc, xocc0_in=el.xocc0, xocc_ion_in=el.xocc_ion, cmix_in=el.cmix,
+                           exc_names_in=el.exc_names, exc_weights_in=el.exc_weights, r0_in=el.r0, v0_in=el.v0)
 
-    with open(metafile, 'w') as fp:
+    with metafile.open('w') as fp:
         json.dump(meta, fp)
-
     if save is not None:
-        info(f'Wavefunctions for element "{ele.provided}", orbital{"s" if len(save_orbs) > 1 else ""} "{save_orbs}" saved.\n'
-             f'Please remember to run "fdata wavefunctions finnish {ele.provided} -o {output}" once all desired orbitals have been computed.')
+        info(f"Wavefunctions for element '{el.symbol}', orbitals '{''.join(o for i, o in enumerate(el.orbitals) if save[i])}' saved.\n"
+             f"Please remember to run 'fdata wavefunctions finnish {el.symbol} -o {output}' once all desired orbitals have been computed.")
     else:
-        compute_vnn(ele, output)
-        for i, o in enumerate(ele.orbitals):
-            meta[ele.symbol]['filename_na0'] = ele.filename_na[0]
-            meta[ele.symbol][o]['filename_na'] = ele.filename_na[i+1]
-            if ele.nexcite in [1, 2]:
-                meta[ele.symbol][o]['filename_ena'] = ele.filename_ena[i]
-        with open(metafile, 'w') as fp:
-            json.dump(meta, fp)
-
+        generate_vnn(nexcite_in=el.nexcite, nznuc_in=el.nznuc, ppfile_in=el.ppfile,
+                     ppionfile_in=el.ppionfile, outpath_in=el.outpath,
+                     lam_in=el.lam, rcutoff_in=el.rcutoff)
 
 @app['wavefunctions'].command
 def finnish(element: Annotated[str, Parameter(group=args_grp)], *,
             output: Annotated[pathlib.Path, Parameter(validator=Path(exists=True, file_okay=False, dir_okay=True), group=args_grp,
-                                                      name=['-o', '--output'])]=pathlib.Path('cinput')):
+                                                      name=["-o", "--output"])]=pathlib.Path("cinput")) -> None:
     """Generate neutral potentials for the wavefunctions of ELEMENT. Only needed if "-s" / "--save" was specified.
 
     Parameters
@@ -570,91 +418,100 @@ def finnish(element: Annotated[str, Parameter(group=args_grp)], *,
     output: pathlib.Path
         Folder where wavefunctions are located. Neutral potentials will be saved there.
     """
-    ele = Element()
-    ele.nznuc = element
+    el = Element.load(element, opt="'-o' / '--output'", folder=output)[0]
+    generate_vnn(nexcite_in=el.nexcite, nznuc_in=el.nznuc, ppfile_in=el.ppfile,
+                 ppionfile_in=el.ppionfile, outpath_in=el.outpath,
+                 lam_in=el.lam, rcutoff_in=el.rcutoff)
 
-    output = output.absolute()
-    metafile = os.path.join(output, 'meta.json')
-    if not os.path.isfile(metafile):
-        raise_err(ValueError(f'Invalid value {output} for "-o" / "--output". There is no "meta.json" file.'))
-    with open(metafile, 'r') as fp:
-        meta = json.load(fp)
-    if ele.symbol not in meta:
-        raise_err(RuntimeError(f'The "meta.json" does not have information about element "{ele.provided}".'))
+def write_create_input(els: list[Element], path: pathlib.Path, infolder: pathlib.Path,
+                       refchs: list[list[float]], exc_names: list[str], exc_weights: list[float]) -> None:
+    """Write the single file that ``create`` parses."""
+    lines = ["# create.ini - written by fireballpy.basis, to be parsed by create",
+             "[meta]",
+             f"version   = {INPUT_VERSION}",
+             f"generator = fireballpy {__fb_version__}",
+             f"folder    = {str(infolder / '_')[:-1]}",
+             "",
+             "[xc]",
+             f"names   = {' '.join(exc_names)}",
+             f"weights = {' '.join(f'{w:g}' for w in exc_weights)}",
+             "",
+             "[species]",
+             f"count = {len(els)}"]
+    for i, el in enumerate(els):
+        shells = [(0, o, float(n0), qref) for o, n0, qref in zip(el.orbitals, el.xocc0, refchs[i][:el.norbs])]
+        if el.exnum == ExcitedEnum.NODE or el.exnum == ExcitedEnum.DMOL:
+            shells += [(1, o, 0.0, qref) for o, qref in zip(el.orbitals, refchs[i][el.norbs:])]
+        lines += ["",
+                  f"[species.{i + 1}]",
+                  f"symbol  = {el.symbol}",
+                  f"znuc    = {el.nznuc}",
+                  f"ppfile  = {el.ppfile}",
+                  f"nshells = {len(shells)}",
+                  "# shell = excited angular_momentum qneutral qrefxc"]
+        lines += [f"shell = {ex} {ANGULAR_MOMENTUM[l]} {n0:.6f} {qref:.6f}" for ex, l, n0, qref in shells]
+    lines += ""
+    path.write_text(os.linesep.join(lines))
 
-    orbitals = [o for o in ANGULAR_MOMENTUM if o in meta[ele.symbol]]
-    ele.orbitals = ''.join(orbitals)
-    ele.nexcite = meta[ele.symbol]['nexcite']
-    ele.ioption = meta[ele.symbol]['ioption']
-    ele.ppfile = meta[ele.symbol]['ppfile']
-    ele.ppionfile = meta[ele.symbol]['ppionfile']
-    ele.xocc0 = [meta[ele.symbol][o]['nelectrons_neutral'] for o in orbitals]
-    ele.rcutoff = [meta[ele.symbol][o]['radius'] for o in orbitals]
-    ele.filename_wf = [meta[ele.symbol][o]['filename_wf'] for o in orbitals]
-    if ele.nexcite in [1, 2]:
-        ele.filename_ewf = [meta[ele.symbol][o]['filename_ewf'] for o in orbitals]
+def read_pp_data(path: pathlib.Path) -> dict[str, Any]:
+    """Shells, angular momenta and cutoff of a fhi98PP pseudopotential."""
+    with path.open('r') as fp:
+        lines = fp.read().splitlines()
+    nshells = int(lines[15].split()[0])
+    angular_momentum = [int(x) for x in lines[16].split()[:nshells]]
+    rcutoff = float(lines[19].split()[0])
+    np = int(lines[20].strip())
+    rest = lines[(21 + np):]
+    cl: list[float] = []
+    for _ in range(nshells):
+        np = int(rest[0].split()[2].strip())
+        rest = rest[(np + 1):]
+    for _ in range(nshells):
+        np = int(rest[0].split()[2].strip())
+        cl.append(float(rest[0].split()[4].strip()))
+        rest = rest[(np + 1):]
+    return {"angular_momentum": angular_momentum, "rcutoff": rcutoff, "cl": cl}
 
-    compute_vnn(ele, output)
-    for i, o in enumerate(ele.orbitals):
-        meta[ele.symbol]['filename_na0'] = ele.filename_na[0]
-        meta[ele.symbol][o]['filename_na'] = ele.filename_na[i+1]
-        if ele.nexcite in [1, 2]:
-            meta[ele.symbol][o]['filename_ena'] = ele.filename_ena[i]
-    with open(metafile, 'w') as fp:
-        json.dump(meta, fp)
-
-
-def compute_vnn(ele: Element, output: pathlib.Path) -> None:
-    if not hasattr(ele, 'filename_ewf'):
-        ele.filename_ewf = [x + 'x' for x in ele.filename_wf]
-    ele.na_filenames()
-    generate_vnn(nexcite_in=int(ele.nexcite),
-                 nznuc_in=ele.nznuc,
-                 ppfile_in=ele.ppfile,
-                 ppionfile_in=ele.ppionfile,
-                 outpath_in=str(output) + os.path.sep,
-                 lam_in=np.ascontiguousarray(ele.lam, dtype=np.int32),
-                 rcutoff_in=ele.rcutoff,
-                 filename_wf_in=ele.filename_wf,
-                 filename_ewf_in=ele.filename_ewf,
-                 filename_na_in=ele.filename_na,
-                 filename_ena_in=ele.filename_ena)
-
-
-def write_lines(ele: Element) -> str:
-    lines = [ele.symbol,
-             ele.nznuc,
-             ele.mass,
-             ele.ppfile,
-             ele.filename_na[0],
-             (1 + int(ele.nexcite in [1, 2]))*len(ele.orbitals)]
-    for o, n0, r, fw, fn in zip(ele.orbitals, ele.xocc0, ele.rcutoff, ele.filename_wf, ele.filename_na[1:]):
-        lines.append(ANGULAR_MOMENTUM[o])
-        lines.append(n0)
-        lines.append(r)
-        lines.append(fw)
-        lines.append(fn)
-    if ele.nexcite in [1, 2]:
-        for o, r, fw, fn in zip(ele.orbitals, ele.rcutoff, ele.filename_ewf, ele.filename_ena):
-            lines.append(ANGULAR_MOMENTUM[o])
-            lines.append('0')
-            lines.append(r)
-            lines.append(fw)
-            lines.append(fn)
-    lines += ['1', '0.5', '0.25 0.25 0.25 0.25 0.25 0.25']
-
-    with open(f'{ele.symbol}.input', 'w') as fp:
-        fp.write(os.linesep.join(map(lambda x: str(x), lines)))
+def write_info_json(els: list[Element], inpath: pathlib.Path, outpath: pathlib.Path,
+                    refchs: list[list[float]], exc_names: list[str], exc_weights: list[float]) -> None:
+    """Write what ``fireball`` needs in order to read this FData."""
+    info: dict[str, Any] = {
+        f"version": INFO_VERSION,
+        "generator": f"fireballpy {__fb_version__}",
+        "xc": {"names": [x.strip() for x in exc_names],
+               "weights": [x for x in exc_weights]},
+        "species": [],
+    }
+    for i, el in enumerate(els):
+        shells = [(o, float(q), qref, float(r))
+                  for o, q, qref, r in zip(el.orbitals, el.xocc0, refchs[i][:el.norbs], el.rcutoff)]
+        if el.exnum == ExcitedEnum.NODE or el.exnum == ExcitedEnum.DMOL:
+            shells += [(o, 0.0, qref, float(r)) for o, qref, r in zip(el.orbitals, refchs[i][el.norbs:], el.rcutoff)]
+        pp = read_pp_data(inpath / el.ppfile)
+        info["species"].append({
+            "symbol": el.symbol,
+            "znuc": int(el.nznuc),
+            "angular_momentum": [ANGULAR_MOMENTUM[o] for o, _, _, _ in shells],
+            "qneutral": [q for _, q, _, _ in shells],
+            "qrefxc": [qref for _, _, qref, _ in shells],
+            "rcutoff": [r for _, _, _, r in shells],
+            "pseudopotential": {"angular_momentum": pp["angular_momentum"],
+                                "rcutoff": pp["rcutoff"],
+                                "cl": pp["cl"]},
+        })
+    with (outpath / "info.json").open('w') as fp:
+        fp.write(_json_dump(info))
         fp.write(os.linesep)
-    return f'{ele.symbol}.input'
 
 @app.command
-def basis(folder: Annotated[pathlib.Path, Parameter(validator=Path(exists=True, file_okay=False,
-                                                                   dir_okay=True))]=pathlib.Path('cinput'), *,
-          output: Annotated[pathlib.Path, Parameter(validator=Path(exists=False, file_okay=False, dir_okay=False))]=pathlib.Path('coutput'),
-          elements: Annotated[Optional[list[str]], Parameter(show_default=False, negative=False, consume_multiple=True)]=None,
+def basis(folder: Annotated[pathlib.Path, Parameter(validator=Path(exists=True, file_okay=False, dir_okay=True))]=pathlib.Path("cinput"), *,
+          output: Annotated[pathlib.Path, Parameter(validator=Path(exists=False, file_okay=False, dir_okay=True))]=pathlib.Path("coutput"),
+          elements: Annotated[list[str] | None, Parameter(show_default="all inside 'FOLDER'", negative=False, consume_multiple=True)]=None,
+          exc: Annotated[list[str] | None, Parameter(consume_multiple=True, negative=False, show_default="gga_x_pbe gga_c_pbe")]=None,
+          exc_weights: Annotated[list[float] | None, Parameter(consume_multiple=True, negative=False, show_default="1.0 each")]=None,
+          exc_charges: Annotated[list[str] | None, Parameter(consume_multiple=True, negative=False, show_default="neutral charges")]=None,
           verbose: Annotated[bool, Parameter(negative=False)]=False,
-          njobs: Annotated[int, Parameter()]=1):
+          njobs: Annotated[int, Parameter()]=1) -> None:
     """Generate the FData for the elements with computed wavefunctions in FOLDER. This process may take some time.
 
     Parameters
@@ -664,119 +521,80 @@ def basis(folder: Annotated[pathlib.Path, Parameter(validator=Path(exists=True, 
     output: pathlib.Path
         Folder where the FData will be generated.
     elements: list[str] | None
-        List of elements (either symbol or atomic number) to consider for the base. [default: all computed in "FOLDER"]
+        List of elements (either symbol or atomic number) to consider for the base.
+    exc: list[str] | None
+        List of exchange-correlation (EXC) functional that will be used following LibXC naming.
+    exc_weights: list[float] | None
+        Weights associated to each exchange-correlation functional.
+    exc_charges: list[str] | None
+        Reference charges for XC in the format of ELEMENT_1 SHELL_CHARGE_1 SHELL_CHARGE_2 ... ELEMENT_2 ...
     verbose: bool
         Print which file is being written.
     njobs: int
         Number of processors to use. If set to "-1" all available will be used. To use this option "mpirun" must be available.
     """
     if njobs < 0 and njobs != -1:
-        raise_err(ValueError('Invalid value for "--njobs". Must be positive or -1.'))
-
+        raise_err(ValueError("Invalid value for '--njobs'. Must be positive or -1."))
     folder = folder.absolute()
-    metafile = os.path.join(folder, 'meta.json')
-    if not os.path.isfile(metafile):
-        raise_err(ValueError(f'Invalid value "{folder}" for "FOLDER" / "--folder". There is no "meta.json" file.'))
-    with open(metafile, 'r') as fp:
-        meta = json.load(fp)
-
-    if elements is None:
-        elements = [k for k in meta]
-    else:
-        for e in elements:
-            if e not in meta:
-                raise_err(RuntimeError(f'Element "{e}" was not finalized.'))
-
-    # Sort elements
-    nzs = np.argsort([atomic_numbers[e] for e in elements])
-    elements = [elements[i] for i in nzs]
-
-    els: list[Element] = []
-    for e in elements:
-        el = Element()
-        el.nznuc = e
-        for ee in els:
-            if el.nznuc == ee.nznuc:
-                raise_err(ValueError(f'Invalid value "{elements}" for "ELEMENTS" / "--elements". Contains repeated values.'))
-        el.orbitals = ''.join(o for o in ANGULAR_MOMENTUM if o in meta[el.symbol])
-        el.xocc0 = [meta[el.symbol][o]['nelectrons_neutral'] for o in el.orbitals]
-        el.rcutoff = [meta[el.symbol][o]['radius'] for o in el.orbitals]
-        el.nexcite = meta[el.symbol]['nexcite']
-        el.filename_wf = [meta[el.symbol][o]['filename_wf'] for o in el.orbitals]
-        el.filename_na = [meta[el.symbol]['filename_na0']] + [meta[el.symbol][o]['filename_na'] for o in el.orbitals]
-        if el.nexcite in [1, 2]:
-            el.filename_ewf = [meta[el.symbol][o]['filename_ewf'] for o in el.orbitals]
-            el.filename_ena = [meta[el.symbol][o]['filename_ena'] for o in el.orbitals]
-        el.ppfile = meta[el.symbol]['ppfile']
-        el.ppionfile = meta[el.symbol]['ppionfile']
-        els.append(el)
-
     output = output.absolute()
-    os.makedirs(output, exist_ok=False)
-
-    nowfolder = os.getcwd()
-    os.chdir(output)
-    with open('create.input', 'w') as fp:
-        fp.write(f'{len(els)}{os.linesep}')
+    els = sorted(Element.load(elements, opt="'FOLDER' / '--folder'", folder=folder), key=lambda el: el.nznuc)
+    if exc is None:
+        exc = ["gga_x_pbe", "gga_c_pbe"]
+        if exc_weights is not None:
+            raise_err(TypeError("If '--exc' is not specified, then '--exc-weights' must not be"))
+    if exc_weights is None:
+        exc_weights = [1.0 for _ in exc]
+    if len(exc) != len(exc_weights):
+        raise_err(TypeError("'--exc' and  '--exc-weights' have different lengths"))
+    if exc_charges is None:
+        refchs = [[float(el.xocc0[i]) for i in range(el.norbs)] for el in els]
+    else:
+        split_charges = list(map(str.strip, exc_charges))
+        refchs: list[list[float]] = []
         for el in els:
-            shutil.copy2(folder/el.ppfile, el.ppfile)
-            shutil.copy2(folder/el.ppionfile, el.ppionfile)
-            for f in el.filename_wf + el.filename_na:
-                if os.path.isfile(folder/f):
-                    shutil.copy2(folder/f, f)
-            if el.nexcite in [1, 2]:
-                for f in el.filename_ewf + el.filename_ena:
-                    if os.path.isfile(folder/f):
-                        shutil.copy2(folder/f, f)
-            fp.write(write_lines(el))
-            fp.write(os.linesep)
+            if el.symbol not in split_charges:
+                refchs.append([float(el.xocc0[i]) for i in range(el.norbs)])
+                continue
+            i = split_charges.index(el.symbol)
+            try:
+                refchs.append([float(split_charges[i + j + 1]) for j in range(el.norbs)])
+            except ValueError:
+                raise_err(ValueError("Invalid value for '--exc-charges'. Could not be parsed."))
+    output.mkdir(parents=True, exist_ok=True)
+    create_input = output / "create.ini"
+    write_create_input(els, create_input, folder, refchs, exc, exc_weights)
 
-    os.makedirs('coutput', exist_ok=False)
-
-    if njobs == -1:
-        njobs = cpu_count()
-    stdout = sys.stdout if verbose else subprocess.DEVNULL
+    njobs = cpu_count() if njobs == -1 else njobs
     try:
-        exepath = os.path.join(os.path.split(__basis_file__)[0], 'create.x')
+        exepath = pathlib.Path(__basis_file__).parent / "create.x"
         if njobs == 1:
-            p = subprocess.Popen(exepath, stdout=stdout, stderr=sys.stderr)
+            command = [str(exepath)]
+            if verbose:
+                command += ["-v"]
+            p = subprocess.Popen(command, cwd=output, stdout=sys.stdout, stderr=sys.stderr)
         else:
-            p = subprocess.Popen(['mpirun', '-np', str(njobs), exepath],
-                                    stdout=stdout, stderr=sys.stderr)
+            command = ["mpirun", "-np", f"{njobs}", str(exepath)]
+            if verbose:
+                command += ["-v"]
+            p = subprocess.Popen(command, cwd=output, stdout=sys.stdout, stderr=sys.stderr)
         p.communicate()
         if p.returncode != 0:
-            os.chdir(nowfolder)
             shutil.rmtree(output)
-            raise_err(RuntimeError('Basis creation failed!'))
+            raise_err(RuntimeError("Basis creation failed!"))
     except (KeyboardInterrupt, FileNotFoundError) as e:
-        os.chdir(nowfolder)
         shutil.rmtree(output)
         raise e
 
-    os.makedirs('basis')
-    shutil.copy2(folder/'meta.json', os.path.join('basis', 'meta.json'))
-    shutil.move('create.input', os.path.join('basis', 'create.input'))
-    for el in els:
-        shutil.move(el.ppfile, os.path.join('basis', el.ppfile))
-        shutil.move(el.ppionfile, os.path.join('basis', el.ppionfile))
-        shutil.move(f'{el.symbol}.input', os.path.join('basis', f'{el.symbol}.input'))
-        for f in el.filename_wf + el.filename_na:
-            if os.path.isfile(f):
-                shutil.move(f, os.path.join('basis', f))
-        if el.nexcite in [1, 2]:
-            for f in el.filename_ewf + el.filename_ena:
-                if os.path.isfile(f):
-                    shutil.move(f, os.path.join('basis', f))
-
-    for f in filter(lambda x: x.endswith('.dat'), os.listdir('coutput')):
-        shutil.move(os.path.join('coutput', f), f)
-    os.removedirs('coutput')
-    os.chdir(nowfolder)
-
+    # Only now that create has finished without error.
+    write_info_json(els, folder, output, refchs, exc, exc_weights)
+    basis_folder = output / "basis"
+    shutil.copytree(folder, basis_folder)
+    shutil.copy2(create_input, basis_folder)
 
 @app.command
 def plot(wavefunctions: Annotated[list[pathlib.Path],
-                                  Parameter(negative=False, validator=Path(exists=True, file_okay=True, dir_okay=False))]):
+                                  Parameter(negative=False, validator=Path(exists=True, file_okay=True, dir_okay=False),
+                                            consume_multiple=True)]):
     """Plot wavefunctions.
 
     It will generate a matplotlib.pyplot plot of the specified wavefunctions.
@@ -784,43 +602,40 @@ def plot(wavefunctions: Annotated[list[pathlib.Path],
 
     Parameters
     ----------
-    wavefunctions: pathlib.Path
-        List of wavefunction files (.wf* or .ewf*) to be plotted. It will raise an exception
+    wavefunctions: list[pathlib.Path]
+        List of wavefunction files (.wf or .ewf) to be plotted. It will raise an exception
         if unknown file extensions are provided.
     """
     excited = []
     for path in wavefunctions:
-        extension = os.path.splitext(path)[1]
-        if extension[:-1] == '.ewf':
+        if path.suffix == ".ewf":
             excited.append(True)
-        elif extension[:-1] == '.wf':
+        elif path.suffix == ".wf":
             excited.append(False)
         else:
-            raise_err(ValueError(f'Invalid value "{path}" for "wavefunctions". Unrecognized file extension.'))
+            raise_err(ValueError(f"Invalid value '{path}' for 'WAVEFUNCTIONS'. Unrecognized file extension."))
 
-    colors = list(plt.rcParams['axes.prop_cycle'].by_key()['color'])
+    colors = list(plt.rcParams["axes.prop_cycle"].by_key()["color"])
     my_colors = colors * (len(wavefunctions) // len(colors)) + colors[:len(wavefunctions) % len(colors)]
-    _, ax = plt.subplots(figsize=(6.9, 4.3), layout='constrained')
+    _, ax = plt.subplots(figsize=(6.9, 4.3), layout="constrained")
     for i, path in enumerate(wavefunctions):
-        z, l, rcutoff = read_wf_info(path)
-        x, y = read_wf(path)
-        symbol = chemical_symbols[z]
-        orbital = ANGULAR_MOMENTUM_REV[l]
+        wf = WaveFunction.load(path)
+        symbol = chemical_symbols[wf.z]
+        orbital = wf.lsym
 
-        sub = f'{orbital}{"*" if excited[i] else ""}'
-        label = r'$\phi_{' + sub + r'}(' + symbol + r')\ \ R_c=' + str(rcutoff) + r'$'
-        ax.plot(x, y, lw=2, ls='-', color=my_colors[i], label=label)
+        sub = f"{orbital}{'*' if excited[i] else ''}"
+        label = r"$\phi_{" + sub + r"}(" + symbol + r")\ \ R_c=" + f"{wf.rcut:3f}" + r"$"
+        ax.plot(wf.r, wf.psi, lw=2, ls='-', color=my_colors[i], label=label)
 
     ax.axhline(lw=1, color='k')
-    ax.set_xlabel('Distance ($a_0$)', fontsize=16)
-    ax.set_ylabel(r'$| \phi |$', fontsize=16)
+    ax.set_xlabel("Distance ($a_0$)", fontsize=16)
+    ax.set_ylabel(r"$| \phi |$", fontsize=16)
     ax.set_xlim(left=0)
     ax.legend(fontsize=14)
     plt.show()
 
-
 def main():
     app()
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app()

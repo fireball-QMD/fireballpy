@@ -1,38 +1,15 @@
-subroutine load_fdata()
+! Build the index tables and read the integrals.
+!
+! Everything that describes the FData -- how many species, which shells, which
+! charges and radii -- is already in M_fdata, put there by 'set_fdata_info'
+! from Python. Fortran no longer parses 'info.dat': the description travels as
+! arguments, not as a file whose layout every reader had to count by hand.
+subroutine load_fdata_tables()
   use, intrinsic :: iso_fortran_env, only: double => real64
-  use M_fdata, only: nsh_max, nshPP_max, nspecies, nzx, nssh, lssh, nsshPP, lsshPP, &
-    & ind2c, icon3c, splineint_2c, numz2c, z2cmax, &
-    & isorpmax, isorpmax_xc, ME2c_max, initype, Qref, maxtype_2c
+  use M_fdata, only: nsh_max, nspecies, ind2c, icon3c, splineint_2c, &
+    & isorpmax, isorpmax_xc, ME2c_max, initype, maxtype_2c
   implicit none
-  integer :: in1, in2, in3, ispec, iexc, issh, aux, icount, isorp, interaction, nxc, interactions2c_max
-
-  allocate (rc_PP (nspecies))
-  allocate (rcutoff (nspecies, nsh_max))
-  allocate (cl_PP (nsh_max, nspecies))
-  allocate (nssh (nspecies))
-  allocate (lssh (nsh_max, nspecies))
-  allocate (nsshPP (nspecies))
-  allocate (lsshPP (nsh_max, nspecies))
-  allocate (Qneutral (nsh_max, nspecies))
-  allocate (Qref (nsh_max, nspecies))
-
-  do ispec = 1, nspecies
-    read (12,*)
-    read (12,*)
-    read (12,'(2x, a2)') symbolA(ispec)
-    read (12,*) nzx(ispec)
-    read (12,*) nssh(ispec)
-    read (12,*) (lssh(issh,ispec), issh = 1, nssh(ispec))
-    read (12,*) nsshPP(ispec)
-    read (12,*) (lsshPP(issh,ispec), issh = 1, nsshPP(ispec))
-    read (12,*) rc_PP(ispec)
-    read (12,*) (Qneutral(issh,ispec), issh = 1, nssh(ispec))
-    read (12,*) (rcutoff_temp(issh, ispec), issh = 1, nssh(ispec))
-    do issh=1,nssh(ispec)
-      rcutoff(ispec,issh) = rcutoff_temp(issh,ispec)*abohr
-    end do
-  end do
-  close(12)
+  integer :: in1, in2, in3, icount, isorp, interaction, interactions2c_max
 
   ! Compatibility
   isorpmax = nsh_max
@@ -52,14 +29,10 @@ subroutine load_fdata()
   icount = 0
   ind2c = 0
   interactions2c_max = (nsh_max+1)*3+8*nsh_max+9
-  if (allocated(numz2c)) deallocate(numz2c)
-  if (allocated(z2cmax)) deallocate(z2cmax)
+  ! 'numz2c' and 'z2cmax' are gone: the z grid of every two centre table now
+  ! travels inside its own math_interp_t, so there is nothing to book-keep.
   if (allocated(splineint_2c)) deallocate(splineint_2c)
-  allocate (numz2c(interactions2c_max, nspecies, nspecies))
-  allocate (z2cmax(interactions2c_max, nspecies, nspecies))
-  allocate (splineint_2c(ME2c_max, interactions2c_max, nspecies, nspecies))
-  numz2c = 0
-  z2cmax = 0.0d0
+  allocate (splineint_2c (ME2c_max, interactions2c_max, nspecies, nspecies))
 
   do interaction = 1, 20
     do isorp=initype(interaction),nsh_max*maxtype_2c(interaction)
@@ -80,8 +53,8 @@ subroutine load_fdata()
     end do
   end do
   do interaction = 1, 4
-    if (interaction .eq. 2) cycle
+    if (interaction == 2) cycle
     call read_3c(interaction)
   end do
-  call setterp_2d()
-end subroutine load_fdata
+  call setterp_2d ()
+end subroutine load_fdata_tables

@@ -38,9 +38,9 @@
 ! Cyra Roldán Piñero
 ! ==============================================================================
 submodule (math) math_interp_t_impl
-implicit none
 use, intrinsic :: ieee_arithmetic, only: ieee_signaling_nan, ieee_value
 use utils, only: utils_log, UTILS_LOG_ERROR
+implicit none
 
 contains
 
@@ -124,17 +124,18 @@ module procedure math_interp_get_index
   math_interp_get_index = -1
   if (x >= xr) return
   do while (x >= this%x(l + 1))
-    m = l + int((x - xl)/(xr - xl))*(r - l)
+    m = l + int((x - xl)/(xr - xl)*(r - l + 1))
+    if (m >= r) m = r - 1  ! Could happen because of rounding errors
     xm = this%x(m)
-    if (x < xm) then
-      r = m
-      xr = xm
-    else
+    if (x >= xm) then
       l = m
       xl = xm
+    else
+      r = m
+      xr = xm
     end if
   end do
-  math_interp_get_index = l    
+  math_interp_get_index = l
 end procedure math_interp_get_index
 
 module procedure math_interp_get_n

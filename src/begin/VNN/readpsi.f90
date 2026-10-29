@@ -49,22 +49,20 @@
 ! ===========================================================================
         subroutine readpsi (nssh, filein, mesh_max, npoints, rrc, drr,      &
      &                      xnocc, rr, psi)
-        use constants
         use, intrinsic :: iso_fortran_env, only: dp => real64
+        use constants
+	use :: utils, only: utils_open  
         use begin_input, only: outpath
         implicit none
 
 ! Argument Declaration and Description
 ! ===========================================================================
 !Input
-        integer, intent(in) :: mesh_max
         integer, intent(in) :: nssh
-
-        character(len=11), intent(in), dimension (nssh) :: filein
-
+        character(len=9), intent(in), dimension (nssh) :: filein
+        integer, intent(in) :: mesh_max
 ! Output
         integer, intent(out), dimension (nssh) :: npoints
-
         real(kind=dp), intent(out), dimension (nssh) :: drr
         real(kind=dp), intent(out), dimension (nssh, mesh_max) :: psi
         real(kind=dp), intent(out), dimension (nssh, mesh_max) :: rr
@@ -76,117 +74,25 @@
 
 ! Local Variable Declaration and Description
 ! ===========================================================================
-        integer inum
         integer ipoint
-        integer iremainder
-        integer issh
-        integer mesh
-        integer nzx
-
-        real(kind=dp) r
-        real(kind=dp) rc
-        real(kind=dp) rc_max
-        real(kind=dp) sum
-
-        real(kind=dp), dimension (:), allocatable :: psitemp
-
-        character(len=15) fileinwf
-
-! Allocate Arrays
-! ===========================================================================
-        allocate (psitemp(mesh_max))
+        integer issh, io
 
 ! Procedure
 ! ===========================================================================
-        !write (*,*) ' '
-        !write (*,*) '*--------------------------------------------------*'
-        !write (*,*) '|                 Welcome to READPSI               |'
-        !write (*,*) '| Reading now the radial wavefunction of your atom |'
-        !write (*,*) '*--------------------------------------------------*'
-        !write (*,*) ' '
 
 ! Open the input file
-        do issh = 1, nssh
-         open (unit = 21, file = trim(outpath)//trim(filein(issh)), status = 'old')
-
-         read (21,90) fileinwf
-         !write (*,90) fileinwf
-         read (21,*) nzx
-         read (21,*) mesh
-         read (21,*) rrc(issh), rc_max, xnocc(issh)
-         read (21,*)
-
-! Set some things up
-         rc = rrc(issh)*abohr
-         npoints(issh) = mesh
-
-         !write (*,*) '  '
-         !write (*,200) rrc(issh), rc
-         drr(issh) = rc/real(mesh - 1)
-
-! Read in the points
-         inum = int(real(mesh)/4.0_dp)
-         iremainder = mesh - (inum*4)
-         psitemp = 0.0_dp
-         do ipoint = 1, mesh - iremainder, 4
-          read (21,100) psitemp(ipoint), psitemp(ipoint+1),                 &
-     &                  psitemp(ipoint+2), psitemp(ipoint+3)
-         end do
-
-         if (iremainder .eq. 1) then
-          read (21,100) psitemp(mesh)
-         else if (iremainder .eq. 2) then
-          read (21,100) psitemp(mesh-1), psitemp(mesh)
-         else if (iremainder .eq. 3) then
-          read (21,100) psitemp(mesh-2), psitemp(mesh-1), psitemp(mesh)
-         end if
-
-         close (unit = 21)
-
-! Write psitemp to psi - the real wavefunction for all orbitals
-         psi(issh,1:mesh) = psitemp(1:mesh)
-         psi(issh,mesh+1:mesh_max) = 0.0_dp
-
-! Check normalization
-         !write (*,*) '  '
-         !write (*,*) ' Now checking normalization [NORM(l) should be 1]:'
-         !write (*,*) '  '
-
-         r = - drr(issh)
-         do ipoint = 1, mesh
-          r = r + drr(issh)
-          rr(issh,ipoint) = r
-         end do
-
-         sum = 0.0_dp
-         do ipoint = 1, mesh
-          if (ipoint .ne. 1 .or. ipoint .ne. mesh) then
-           sum = sum + drr(issh)*rr(issh,ipoint)**2*psitemp(ipoint)**2
-          else
-           sum = sum + 0.5_dp*drr(issh)*rr(issh,ipoint)**2*psitemp(ipoint)**2
-          end if
-         end do
-
-         !write (*,300) issh, sum
-         !write (*,*) '  '
-         !write (*,*) '  '
-
-        end do
-
-        !write (*,*) '  '
-        !write (*,*) ' *----------------- END READPSI -------------------*'
-        !write (*,*) '  '
-
-! Deallocate Arrays
-! ===========================================================================
-        deallocate (psitemp)
+       do issh = 1, nssh
+	 io = utils_open(trim(outpath)//trim(filein(issh)), "r", skip=1)
+	 read (io, "(6x,f14.6)") xnocc(issh)
+	 read (io, "(6x,i8)") npoints(issh)
+	 psi(issh, :) = 0.0_dp
+	 do ipoint = 1, npoints(issh)
+	   read (io, "(2ES16.8)") rr(issh, ipoint), psi(issh, ipoint)
+	 end do
+	 rrc(issh) = rr(issh, npoints(issh))*invabohr
+	 drr(issh) = rr(issh, npoints(issh))/real(npoints(issh) - 1, kind=dp)
+       end do
 
 ! Format Statements
 ! ===========================================================================
-90      format (2x, a15)
-100     format (4d18.10)
-200     format (' + Rc read in =', f8.4, ' abohr = ', f8.4, ' Angstroms')
-300     format (' NORM (shell = ', i1, ') = ', f16.12)
-
-        return
         end

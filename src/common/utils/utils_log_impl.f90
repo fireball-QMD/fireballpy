@@ -42,12 +42,17 @@ implicit none
 
 contains
 
+module procedure utils_log_set_threshold
+  utils_log_threshold = level
+end procedure utils_log_set_threshold
+
 module procedure utils_log
+  if (level < utils_log_threshold) return
   select case (level)
   case (UTILS_LOG_INFO)
     write (stderr, "('[INFO] ',a)") trim(msg)
-  case (UTILS_LOG_WARN)
-    write (stderr, "('[WARN] ',a)") trim(msg)
+  case (UTILS_LOG_WARNING)
+    write (stderr, "('[WARNING] ',a)") trim(msg)
   case (UTILS_LOG_ERROR)
     write (stderr, "('[ERROR] ',a)") trim(msg)
   case default

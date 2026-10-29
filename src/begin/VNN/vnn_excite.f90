@@ -48,6 +48,8 @@
         subroutine vnn_excite
         use begin_input
         use, intrinsic :: iso_fortran_env, only: dp => real64
+        use :: constants
+	use :: utils, only: utils_open, utils_itos
         implicit none
 
 ! Argument Declaration and Description
@@ -56,8 +58,9 @@
 ! Local Parameters and Data Declaration
 ! ===========================================================================
 ! grid sizes
-        integer, parameter :: nrr = 399
-        integer, parameter :: nrrp = 401
+        integer, parameter :: nrr = 2049
+        integer, parameter :: nrrp = 2043
+        integer, parameter :: mesh_rcatms = 2049
 
 ! Local Variable Declaration and Description
 ! ===========================================================================
@@ -66,7 +69,7 @@
         integer irp
         integer issh
         integer itenth
-        integer l
+        integer l, io
         integer mesh
 
         integer, dimension (:), allocatable :: npoints
@@ -92,6 +95,7 @@
         real(kind=dp), dimension (:,:), allocatable :: vvrho
         real(kind=dp), dimension (:), allocatable :: xnocc
         real(kind=dp), dimension (nrr) :: xrr
+	character(len=9), dimension(:), allocatable :: filename_ewf
 
 ! Allocate Arrays
 ! ===========================================================================
@@ -102,48 +106,31 @@
         allocate (term2(nssh))
         allocate (vvrho(nssh,nrr))
         allocate (xnocc(nssh))
+	allocate (filename_ewf(nssh))
 
 ! Procedure
 ! ===========================================================================
 ! Initialize some constants
-        !write (*,*) '  '
-        !write (*,*) '  '
-        !write (*,*) '  *------------------------------------------------*'
-        !write (*,*) '  |            Starting subroutine vnn             |'
-        !write (*,*) '  |               for excited states               |'
-        !write (*,*) '  *------------------------------------------------*'
-        !write (*,*) '  '
-        !write (*,*) '  Atomic number = ', nznuc
-        !write (*,*) '  '
-
-        !write (*,*) ' We read the wavefunctions from: '
-        do issh = 1, nssh
-         !write (*,100) filename_ewf(issh)
-        end do
 
 ! Read in the wavefunctions
-! First get the maximum mesh size from all of the wavefuntion files
-        call get_ewfmesh_size (nssh, filename_ewf, mesh)
-        allocate (rr(nssh,mesh))
-        allocate (psi(nssh,mesh))
+        do issh = 1, nssh
+	  l = lam(issh)
+	  filename_ewf(issh) = trim(utils_itos(nznuc, lpad=3))//"_"//lnames(l)//".ewf"
+	end do
+        allocate (rr(nssh,mesh_rcatms))
+        allocate (psi(nssh,mesh_rcatms))
+        call readpsi  (nssh, filename_ewf, mesh, npoints, rrc,          &
+     &                 drr, xnocc, rr, psi)
 
-        call readpsi_excite (nssh, filename_ewf, mesh, npoints, rrc, drr,    &
-     &                       xnocc, rr, psi)
-
-        rc_max = -1.0_dp
+	rc_max = -1.0_dp
         do issh = 1, nssh
          rc_max = max(rc_max,rrc(issh))
         end do
-        rc_max = rc_max*0.529177249_dp
+        rc_max = rc_max*abohr
 
 
 ! *****************************************************************************
 ! first set up vna matrix
-        !write (*,*) '  '
-        !write (*,*) ' Setting up V_na matrix for excited states. '
-        !write (*,*) '   '
-        !write (*,*) ' Write out the potential at 10 points:'
-        !write (*,*) ' ====================================='
         dr = rc_max/real(nrr - 1)
         r = - dr
 
@@ -185,44 +172,18 @@
          vvrho(:,ir) = vrho
          xrr(ir) = r
 
-! Write out 10 values
-         itenth = int(float(nrr)/10.0_dp)
-         if (mod(ir,itenth) .eq. 1) then
-          !write (*,*) '  '
-          !write (*,200) ir, xrr(ir)
-          do issh = 1, nssh
-           !write (*,201) issh - 1, vvrho(issh,ir)
-          end do
-         end if
         end do
 
-! Write out the information to the files
-        !write (*,*) ' '
-        !write (*,*) ' Finished setting up V_na matrix. '
-        !write (*,*) ' Now write values on the following data files: '
+	! Write out the information to the files
         do issh = 1, nssh
-         !write (*,100) filename_ena(issh)
-         open (unit = 66, file = trim(outpath)//trim(filename_ena(issh)),  status = 'unknown')
-         write (66,101) filename_ena(issh)
-         write (66,*) nznuc
-         write (66,*) rcutoff(issh)
-         write (66,*) nrr
-
-         do ipoint = 1, nrr
-          write (66,300) xrr(ipoint), vvrho(issh,ipoint)
-         end do
-         close (unit = 66)
-
-! For plotting purposes
-      !   l = lam(issh)
-      !   if (l .eq. 0) open (unit = 47, file = 'NAe_splot', status = 'unknown')
-      !   if (l .eq. 1) open (unit = 47, file = 'NAe_pplot', status = 'unknown')
-      !   if (l .eq. 2) open (unit = 47, file = 'NAe_dplot', status = 'unknown')
-      !   if (l .eq. 3) open (unit = 47, file = 'NAe_fplot', status = 'unknown')
-      !   do ipoint = 1, nrr
-      !    write (47,301) xrr(ipoint), vvrho(issh,ipoint)
-      !   end do
-      !   close (unit = 47)
+	  l = lam(issh)
+	  io = utils_open(trim(outpath)//trim(utils_itos(nznuc, lpad=3))//"_"//lnames(l)//".ena", "w")
+	  write (io, "('# Z, l = ',i3,2x,i2)") nznuc, l
+	  write (io, "('# n = ',i8)") nrr
+	  do ipoint = 1, nrr
+	    write (io, "(2ES16.8)") xrr(ipoint), vvrho(issh,ipoint)
+	  end do
+	  close(io)
         end do
 
 ! Deallocate Arrays
@@ -236,15 +197,5 @@
         deallocate (term2)
         deallocate (vvrho)
         deallocate (xnocc)
-
-! Format Statements
-! ===========================================================================
-100     format (2x, a12)
-101     format (a12)
-200     format (2x, ' ir = ', i4, 2x, ' r = ', f9.5)
-201     format (22x, ' Vvrho(issh = ', i1, ') = ', d16.5)
-300     format (2d24.16)
-301     format (2x, f6.3, 2x, f12.6)
-
-        return
+	deallocate (filename_ewf)
         end

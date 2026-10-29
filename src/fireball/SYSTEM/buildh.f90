@@ -2,7 +2,7 @@ subroutine buildh ()
   use, intrinsic :: iso_fortran_env, only: double => real64
   use M_system, only: natoms, imass, vxc_1c, ewaldsr, neigh_j, neighn, vxc, vca, ewaldlr, h_mat, t_mat, vna, ewaldqmmm, &
     & h_mat0, g_h, Qin, Kscf, nssh_tot, get_issh_ofshell, get_iatom_ofshell
-  use M_fdata, only: num_orb, Qneutral
+  use M_fdata, only: num_orb, Qref
   implicit none
   integer :: iatom, jatom, imu, inu, ineigh, in1, in2
   integer :: alpha, issh_a, iatom_a
@@ -33,8 +33,9 @@ subroutine buildh ()
     do alpha = 1, nssh_tot
       issh_a  = get_issh_ofshell(alpha)
       iatom_a = get_iatom_ofshell(alpha)
-      dQ(alpha) = Qin(issh_a,iatom_a) - Qneutral(issh_a,imass(iatom_a))
+      dQ(alpha) = Qin(issh_a,iatom_a) - Qref(issh_a,imass(iatom_a))
     end do
+    dQ = 0.0d0 ! HERE HERE HERE HERE
     h_mat = 0.0d0
     do iatom = 1, natoms
       in1 = imass(iatom)

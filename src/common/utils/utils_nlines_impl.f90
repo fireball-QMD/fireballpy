@@ -51,6 +51,7 @@ module procedure utils_nlines
     if (is_iostat_end(stat)) exit
     utils_nlines = utils_nlines + 1
   end do
+  close (io)
 end procedure utils_nlines
 
 end submodule utils_nlines_impl

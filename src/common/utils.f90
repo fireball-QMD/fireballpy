@@ -47,11 +47,13 @@ use, intrinsic :: iso_fortran_env, only: stderr => error_unit
 use :: constants, only: err_len
 implicit none
 private
-public :: utils_open, utils_itos, utils_log, utils_nlines
+public :: utils_open, utils_itos, utils_log, utils_log_set_threshold, utils_nlines
 
-integer, parameter, public :: UTILS_LOG_INFO = 0
-integer, parameter, public :: UTILS_LOG_WARN = 1
-integer, parameter, public :: UTILS_LOG_ERROR = 2
+integer, parameter, public :: UTILS_LOG_INFO = 1
+integer, parameter, public :: UTILS_LOG_WARNING = 2
+integer, parameter, public :: UTILS_LOG_ERROR = 3
+
+integer :: utils_log_threshold = 3
 
 interface
   module integer function utils_open(filename, mode, skip)
@@ -67,15 +69,23 @@ interface
     implicit none
     integer, intent(in) :: i
     integer, intent(in), optional :: lpad
-    character(:), allocatable, intent(out) :: utils_itos
+    character(:), allocatable :: utils_itos
   end function utils_itos
 end interface
 
 interface
   module subroutine utils_log(level, msg)
-  integer, intent(in) :: level
-  character(err_len), intent(in) :: msg
+  implicit none
+    integer, intent(in) :: level
+    character(*), intent(in) :: msg
   end subroutine utils_log
+end interface
+
+interface
+  module subroutine utils_log_set_threshold(level)
+    implicit none
+    integer, intent(in) :: level
+  end subroutine utils_log_set_threshold
 end interface
 
 interface

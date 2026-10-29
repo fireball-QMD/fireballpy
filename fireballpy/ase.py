@@ -1,4 +1,5 @@
 from __future__ import annotations
+from pathlib import Path
 from typing import SupportsFloat
 import warnings
 
@@ -31,7 +32,7 @@ class Fireball(Calculator, BaseFireball):
 
     Parameters
     ----------
-    fdata : str
+    fdata : str | pathlib.Path
         Name of the FData to be used. See ``available_fdatas()``
         for a table of available FData. If set to ``'custom'`` then
         an ``fdata_path`` pointing to a local FData folder must be provided.
@@ -135,7 +136,7 @@ class Fireball(Calculator, BaseFireball):
                    <https://doi.org/10.1002/pssb.201147259>`_
 
     """
-    _valid_kwargs = {'fdata_path': None, 'gamma': None, 'charges_method': None,
+    _valid_kwargs = {'gamma': None, 'charges_method': None,
                      'dipole_method': DipoleMethod.IMPROVED, 'total_charge': 0, 'fix_charges': False,
                      'correction': None, 'initial_charges': None, 'mixer_kws': None,
                      'fix_shells': None}
@@ -147,7 +148,7 @@ class Fireball(Calculator, BaseFireball):
 
     ignored_changes = set(['initial_magmoms'])
 
-    def __init__(self, fdata: str, *,
+    def __init__(self, fdata: str | Path, *,
                  lazy: bool = True,
                  verbose: bool = False,
                  kpts: ArrayLike | SupportsFloat = (1, 1, 1),
@@ -159,8 +160,6 @@ class Fireball(Calculator, BaseFireball):
         # Sadly for us we cannot check many things here, we have
         # to wait for the call to calculate.
         # We just check the most basic thing and pray the user is not mad about it.
-        if fdata == 'custom' and 'fdata_path' not in kwargs:
-            raise ValueError("If ``fdata='custom'`` then ``fdata_path`` must be set")
         self.fdata = fdata
         self.lazy = lazy
         self.verbose = verbose
@@ -171,7 +170,6 @@ class Fireball(Calculator, BaseFireball):
         self._kwargs = {}
         for k in self._valid_kwargs:
             self._kwargs[k] = kwargs.get(k, self._valid_kwargs[k])
-        self.fdata_path = self._kwargs.pop('fdata_path')
         self.gamma = bool(self._kwargs.pop('gamma'))
         self.isfix_charges = bool(self._kwargs.pop('fix_charges'))
 
@@ -371,11 +369,10 @@ class Fireball(Calculator, BaseFireball):
                                     numbers=atoms.get_atomic_numbers(),
                                     positions=atoms.get_positions(),
                                     a1=atoms.cell[0], a2=atoms.cell[1], a3=atoms.cell[2])
-            fdatafiles = FDataFiles(fdata=self.fdata, atomsystem=atomsystem if self.lazy else None,
-                                    fdata_path=self.fdata_path)
+            fdatafiles = FDataFiles(fdata=self.fdata, atomsystem=atomsystem)
             kpoints = KPoints(kpts=self.kpts, atomsystem=atomsystem, gamma=self.gamma)
             BaseFireball.__init__(self, atomsystem=atomsystem, fdatafiles=fdatafiles, kpoints=kpoints,
-                                  verbose=self.verbose, **self._kwargs)
+                                  verbose=self.verbose, lazy=self.lazy, **self._kwargs)
             self._fb_started = True
 
         # If positions change we just need to update them not repeat anything else

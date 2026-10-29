@@ -4,8 +4,7 @@ incdir_numpy = run_command(
   [
     '-c', 'import numpy; import os; os.chdir(os.path.join("..", "tools")); print(os.path.relpath(numpy.get_include()))',
   ],
-  check: true,
-).stdout().strip()
+  check: true,).stdout().strip()
 incdir_f2py = run_command(
   py,
   [
@@ -80,14 +79,14 @@ py.install_sources(
     '__init__.py',
     '_fireball.pyi',
     '_errors.py',
-    '_options.py',
     '_correction.py',
     'utils.py',
     'fdata.py',
     'atoms.py',
     'kpoints.py',
     'fireball.py',
-    'orbitals.py',
+    'options.py',
+    'wavefunctions.py',
     'ase.py',
     'fdata.toml',
   ],

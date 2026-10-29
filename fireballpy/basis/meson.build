@@ -30,6 +30,7 @@ py.install_sources(
     '__init__.py',
     '__main__.py',
     '_wfs.pyi',
+    '_valence.py',
     'fdata.py',
   ],
   subdir: 'fireballpy/basis',

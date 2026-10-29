@@ -118,6 +118,7 @@
         use dimensions
         use quadrature
         use iso_fortran_env, only: dp => real64
+        use :: utils, only: utils_log, UTILS_LOG_INFO
         implicit none
  
 ! Argument Declaration and Description
@@ -236,14 +237,14 @@
 ! what you get looks like this: bcna_01_01.14.06.14.dat
 !                           or  xc3c_05_07.06.06.14.dat
         if (interaction .eq. 1) then
-         ftype = 'coutput/bcna'
+         ftype = 'bcna'
         else if (interaction .eq. 2)  then
-         ftype = 'coutput/xc3c'
+         ftype = 'xc3c'
         else if (interaction .eq. 3) then
          if (ispherical) then
-          ftype = 'coutput/deS3'
+          ftype = 'deS3'
          else
-          ftype = 'coutput/den3'
+          ftype = 'den3'
          end if
         end if
  
@@ -256,7 +257,7 @@
           call iofile3c (ftype, 'dat', itheta, isorp, nzx(in1),         &
      &                   nzx(in2), nzx(in3), iounit, fname, skip)
           if (skip) return 
-          if (iammaster) write (*,*) ' writing to: ', fname
+          if (iammaster) call utils_log(UTILS_LOG_INFO, "  - "//trim(fname))
  
 ! Write out basic information to files.
 ! Additional writes to specify what combination of atoms for the non-elemental 

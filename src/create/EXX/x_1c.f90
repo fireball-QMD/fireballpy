@@ -129,7 +129,7 @@
 ! Procedure
 ! ===========================================================================
 ! Open the file to store the onecenter data.
-        open (unit = 36, file = 'coutput/exchange_1c.dat', status = 'unknown')
+        open (unit = 36, file = 'exchange_1c.dat', status = 'unknown')
  
 ! Set up the header for the output file.
         write (36,100)
@@ -258,7 +258,7 @@
         end do
  
         write (*,*) '  '
-        write (*,*) ' Writing output to: coutput/exchange_1c.dat '
+        write (*,*) ' Writing output to: exchange_1c.dat '
         write (*,*) '  '
  
         close (unit = 36)

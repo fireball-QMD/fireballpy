@@ -5,14 +5,14 @@ subroutine read_2c (interaction)
   use :: math, only: math_interp_new
   use M_fdata, only: fdataLocation, twocfname, nspecies, nssh, nsshPP, nzx, &
     & ind2c, index_max2c, index_maxS, index_maxPP, index_max2cDipX, index_max2cDipY, nsh_max, initype, splineint_2c, &
-    & TWOCENTER_VNA_L, TWOCENTER_VNA_R, TWOCENTER_VNA_A, TWOCENTER_VXC_L, TWOCENTER_VXC_R, TWOCENTER_DEN_L, TWOCENTER_DEN_R, &
-    & TWOCENTER_DEN_A, TWOCENTER_DENS_L, TWOCENTER_DENS_R, TWOCENTER_DENS_A, TWOCENTER_VNL, TWOCENTER_COULOMB, TWOCENTER_OVERLAPS, &
-    & TWOCENTER_DIP_Y, TWOCENTER_DIP_X
+    & TWOCENTER_VNA_L, TWOCENTER_VNA_R, TWOCENTER_VNA_A, TWOCENTER_VXC_0, TWOCENTER_VXC_L, TWOCENTER_VXC_R, TWOCENTER_DEN_L, &
+    & TWOCENTER_DEN_R, TWOCENTER_DEN_A, TWOCENTER_DENS_L, TWOCENTER_DENS_R, TWOCENTER_DENS_A, TWOCENTER_VNL, &
+    & TWOCENTER_COULOMB, TWOCENTER_OVERLAPS, TWOCENTER_DIP_Y, TWOCENTER_DIP_X
   implicit none
   integer, intent (in) :: interaction
   integer :: in1, in2, iounit, isorp, issh, isub2c, itype, numz, num_nonzero, header, ipoint, integral
   character (len = FNAME_LEN) :: filename, root
-  real(double), allocatable :: xintegral_2c(:,:)
+  real(double), allocatable :: zarr(:), xintegral_2c(:,:)
 
   select case (interaction)
   case (TWOCENTER_VNL)
@@ -36,11 +36,10 @@ subroutine read_2c (interaction)
       do isorp = initype(interaction), isub2c
 	root = trim(fdataLocation)//trim(twocfname(interaction))
         if (isub2c .ge. 1) then
-          root = trim(root)//trim(utils_itos(isorp, lpad=2))
+          root = trim(root)//"_"//trim(utils_itos(isorp, lpad=2))
         end if
-        filename = trim(root)//trim(utils_itos(nzx(in1), lpad=2))//"."//trim(utils_itos(nzx(in2), lpad=2))//".dat"
+        filename = trim(root)//"."//trim(utils_itos(nzx(in1), lpad=2))//"."//trim(utils_itos(nzx(in2), lpad=2))//".dat"
 	numz = utils_nlines(filename) - header
-	iounit = utils_open(filename, "r", skip=header)
         itype = ind2c(interaction,isorp)
         num_nonzero = index_max2c(in1,in2)
         if ((interaction .eq. TWOCENTER_VNA_A) .or. (interaction .eq. TWOCENTER_DEN_A))   num_nonzero = index_max2c(in1,in1)
@@ -53,14 +52,16 @@ subroutine read_2c (interaction)
         if (interaction .eq. TWOCENTER_OVERLAPS) num_nonzero = index_maxS(in1,in2)
 
         if (num_nonzero == 0) cycle
-	allocate(xintegral_2c(0:num_nonzero, numz))
+	iounit = utils_open(filename, "r", skip=header)
+        if (allocated(zarr)) deallocate(zarr)
+        if (allocated(xintegral_2c)) deallocate(xintegral_2c)
+	allocate(zarr(numz), xintegral_2c(num_nonzero, numz))
 	do ipoint = 1, numz
-	  read (iounit,*) (xintegral_2c(integral,ipoint), integral = 0, num_nonzero)
+	  read (iounit,"(f14.6,1000ES16.8)") zarr(ipoint), (xintegral_2c(integral,ipoint), integral = 1, num_nonzero)
 	end do
 	do integral = 1, num_nonzero
-	  splineint_2c(integral,itype,in1,in2) = math_interp_new(xintegral_2c(0, :), xintegral_2c(integral,:), rval=0.0d0)
+	  splineint_2c(integral,itype,in1,in2) = math_interp_new(zarr, xintegral_2c(integral,:), rval=0.0d0)
 	end do
-	deallocate(xintegral_2c)
         close(iounit)
       end do
     end do

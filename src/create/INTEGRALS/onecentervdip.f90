@@ -143,7 +143,7 @@
 ! Open the file to store the onecenter data.
 
          !root = trim(fdataLocation)//'/vdip_onecenter' 
-         root = 'coutput/vdip_onecenter' 
+         root = 'vdip_onecenter' 
          write (extension,'(''_'',i2.2)') itype
          !filename = trim(root)//trim(extension)
          filename = trim(root)//trim(extension)
@@ -318,7 +318,7 @@ write(36, 500) Orbitals(iline,1), Orbitals(iline,2), Orbitals(iline,3), Orbitals
 
         !write (36,*) '  '
         write (*,*) '  '
-        write (*,*) ' Writing output to: coutput/vdip_onecenter.dat '
+        write (*,*) ' Writing output to: vdip_onecenter.dat '
         write (*,*) '  '
         close (unit = 36)
 

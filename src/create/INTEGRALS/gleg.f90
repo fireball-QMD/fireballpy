@@ -55,6 +55,7 @@
         subroutine gleg (ctheta, ctheta_weights, ntheta_max)
         use, intrinsic :: iso_fortran_env, only: dp => real64
         use :: constants, only: tolerance
+        use :: utils, only: utils_itos, utils_log, UTILS_LOG_WARNING
         implicit none
  
 ! Argument Declaration and Description
@@ -140,9 +141,9 @@
           end if
           if (abs(pl2) .lt. tolerance**2) exit 
          end do
-         if (abs(pl2) .gt. tolerance**2)                                          &
-     &    write (*,*) ' Warning no convergence in gleg after', jterm,        &
-     &                ' iterations'
+         if (abs(pl2) .gt. tolerance**2) then
+           call utils_log(UTILS_LOG_WARNING, "no convergence in gleg after "//trim(utils_itos(jterm))//" iterations")
+         end if
          ctheta(iterm) = xx
 
 ! Gauss-Legendre weights

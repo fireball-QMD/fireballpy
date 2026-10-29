@@ -147,7 +147,7 @@
         iounit = ((itype2 - 1)*nspec_max + itype1 - 1) + 36
  
 ! Open the file to store the onecenter data.
-        call iofile2c_x ('coutput/xontopr_2c', 'dat', isorp, nzx1, nzx2, fname)
+        call iofile2c_x ('xontopr_2c', 'dat', isorp, nzx1, nzx2, fname)
         open (unit = iounit, file = fname, status = 'unknown')
  
         if (iammaster) then

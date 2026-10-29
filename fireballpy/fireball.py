@@ -47,6 +47,8 @@ class BaseFireball:
     verbose : bool, optional
         If ``True`` information of the convergence of the SCF loop will be printed on screen.
         Default is ``False``.
+    lazy : bool, optional
+        Whether to load or not all the species in the FData. Default is ``True``.
     total_charge : int, optional
         Total charge of the system in elementary charge units (1 extra electron would be ``total_charge = -1``).
         By default this is 0.
@@ -109,10 +111,11 @@ class BaseFireball:
                  fdatafiles: FDataFiles,
                  kpoints: KPoints,
                  verbose: bool = False,
+                 lazy: bool = True,
                  total_charge: int = 0,
                  correction: dict | None = None,
                  charges_method: ChargesMethod | None = None,
-                 dipole_method: DipoleMethod = DipoleMethod.improved,
+                 dipole_method: DipoleMethod = DipoleMethod.IMPROVED,
                  initial_charges: ArrayLike | None = None,
                  mixer_kws: dict | None = None,
                  fix_shells: FixShellsMethod | ArrayLike | None = None) -> None:
@@ -167,7 +170,7 @@ class BaseFireball:
                 raise ValueError("Parameter ``mixer_kws`` if specified must contain the key ``'method'``.")
             for prop in ['max_iter', 'mix_order', 'beta', 'tol', 'w0']:
                 self.mixer_kws[prop] = mixer_kws.get(prop, DEFAULT_MIXER[prop])
-        assert isinstance(self.mixer_kws['method'], str)
+        assert isinstance(self.mixer_kws['method'], MixerMethod)
         assert isinstance(self.mixer_kws['max_iter'], SupportsInt)
         assert isinstance(self.mixer_kws['mix_order'], SupportsInt)
         assert isinstance(self.mixer_kws['beta'], SupportsFloat)
@@ -175,20 +178,20 @@ class BaseFireball:
         assert isinstance(self.mixer_kws['w0'], SupportsFloat)
 
         # Save variables to modules
-        self.fdatafiles.load_fdata()
+        self.fdatafiles.load_fdata(lazy=lazy)
         self.atomsystem.set_coords()
         self.kpoints.set_kpoints()
         self.atomsystem.set_cell()
 
         # Set Fireball-like options
-        set_options(dipole_method=self.dipole_method.value,
-                    charges_method=self.charges_method.value,
-                    ismolecule=int(not self.atomsystem.isperiodic),
-                    isgamma=int(self.kpoints.isgamma),
-                    total_charge=-self.total_charge,
-                    mixer_method=self.mixer_kws['method'].value,
-                    max_iter=int(self.mixer_kws['max_iter']),
-                    mix_order=int(self.mixer_kws['mix_order']),
+        set_options(dipole_method=np.int32(self.dipole_method.value),
+                    charges_method=np.int32(self.charges_method.value),
+                    ismolecule=np.int32(not self.atomsystem.isperiodic),
+                    isgamma=np.int32(self.kpoints.isgamma),
+                    total_charge=-np.int32(self.total_charge),
+                    mixer_method=np.int32(self.mixer_kws['method'].value),
+                    max_iter=np.int32(self.mixer_kws['max_iter']),
+                    mix_order=np.int32(self.mixer_kws['mix_order']),
                     beta=np.float64(self.mixer_kws['beta']),
                     tol=np.float64(self.mixer_kws['tol']),
                     w0=np.float64(self.mixer_kws['w0']))
@@ -202,7 +205,7 @@ class BaseFireball:
         self.fix_shells = FixShellsMethod.AUTO if fix_shells is None else fix_shells
         nssh_tot = sum([self.fdatafiles.nshells[z] for z in self.atomsystem.numbers])
         if isinstance(self.fix_shells, FixShellsMethod):
-            set_fix_shells(self.fix_shells.value, np.zeros(1, dtype=np.int32))
+            set_fix_shells(np.int32(self.fix_shells.value), np.zeros(1, dtype=np.int32))
         else:
             self.fix_shells = np.ascontiguousarray(self.fix_shells, dtype=np.int32)
             if self.fix_shells.shape != (nssh_tot,):
@@ -211,7 +214,7 @@ class BaseFireball:
                                  f"got {self.fix_shells.shape}")
             if not np.isin(self.fix_shells, (0, 1)).all():
                 raise ValueError("Parameter ``fix_shells`` as a mask must contain only 0 (free) and 1 (fixed).")
-            set_fix_shells(3, self.fix_shells)
+            set_fix_shells(np.int32(3), self.fix_shells)
         self._alloc_arrays()
         call_allocate_system()
 
@@ -263,7 +266,7 @@ class BaseFireball:
             self.charges = charges
             self.scf_computed = True
             if self.correction:
-                self._correction.correct()  # type: ignore
+                self._correction.correct()
 
     def calc_forces(self, fix_charges: bool = False) -> None:
         """Check if SCF is computed, execute the loop if not,
@@ -293,7 +296,7 @@ class BaseFireball:
         """
         self.atomsystem.update_coords(positions)
         if self.correction:
-            self._correction.update_coords(self.atomsystem)  # type: ignore
+            self._correction.update_coords(self.atomsystem)
         self.scf_computed = False
         self.forces_computed = False
 

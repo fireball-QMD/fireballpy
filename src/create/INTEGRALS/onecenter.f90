@@ -210,11 +210,11 @@ contains
     nzx = wf_atoms(ispec)%get_nz()
 
     io = utils_open(fname, "w")
-    write (io, "('# Z = ',i2)") nzx
+    write (io, "('# Z = ',i3)") nzx
     write (io, "('# Rc = ',f14.6)") rcut
     if (interaction == ONECENTER_XC) then
       write (io, "('# nsh = ',i2)") nsh
-      write (io, "('# qref = ',10ES16.8)") (wf_atoms(ispec)%get_ref_charge(ish), ish = 1, nsh)
+      write (io, "('# qref = ',10f14.6)") (wf_atoms(ispec)%get_ref_charge(ish), ish = 1, nsh)
     end if
 
     ! Create the matrix to output in matrix format

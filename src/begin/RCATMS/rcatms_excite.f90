@@ -51,6 +51,7 @@
         use begin_input
         use constants
         use, intrinsic :: iso_fortran_env, only: dp => real64
+	use :: utils, only: utils_itos, utils_open
         implicit none
 
 ! Argument Declaration and Description
@@ -79,7 +80,7 @@
         integer iremainder
         integer issh
         integer jssh
-        integer l
+        integer l, io
         integer mesh_new
 
         real(kind=dp) eout
@@ -143,13 +144,6 @@
          psi(issh,mesh_psirc(issh):mesh) = 0.0_dp
         end do
 
-! Write out the excited state wavefunction.
-        !write (*,*) ' This program writes out the following data files: '
-        !write (*,*) '  '
-        !write (*,*) '  '
-        !write (*,*) ' s.ewf [p.ewf...]  u_s(r) [u_p...] r = 100 points '
-        !write (*,*) '  '
-
 ! Write wavefunction onto outputfile (named FILENAME)
 ! First convert to angstrom units :    r   ---> r    /  (0.529177249)
 !                                     r(r) ---> r(r) / (0.529177249)**1.5
@@ -161,14 +155,6 @@
         do issh = 1, nssh
          mesh_new = mesh_psirc(issh)
          l = lam(issh)
-         if(sav(issh)) open (unit = 14, file = trim(outpath)//trim(filename_ewf(issh)), status = 'unknown')
-         if(sav(issh)) write(14,101) filename_ewf(issh)
-         if(sav(issh)) write(14,102) nznuc, atomname
-         if(sav(issh)) write(14,103) mesh_new
-         if(sav(issh)) write(14,104) rcutoff_psirc(issh), rc_max, 0.0_dp
-!                               ^
-!                               |---------- zero occupation
-         if(sav(issh)) write(14,105) lam(issh)
 
 ! Find (approximately) the value at r=0
          xx(2) = r(2)*abohr
@@ -187,30 +173,17 @@
          xx(mesh_new) = r(mesh_new)*abohr
          yy(mesh_new) = 0.0_dp
 
-         inum = idint(real(mesh_new)/4.0_dp)
-         iremainder = mesh_new - (inum*4)
-         do jpoint = 1, mesh_new - iremainder,4
-          if(sav(issh)) write(14,400) yy(jpoint), yy(jpoint+1), yy(jpoint+2), yy(jpoint+3)
-         end do
+	 if (sav(issh)) then
+	   io = utils_open(trim(outpath)//trim(utils_itos(nznuc, lpad=3))//"_"//lnames(l)//".ewf", "w")
+	   write (io, "('# Z, l = ',i3,2x,i2)") nznuc, l
+	   write (io, "('# q = ',f14.6)") 0.0_dp
+	   write (io, "('# n = ',i8)") mesh_new
+	   do jpoint = 1, mesh_new
+	     write (io, "(2ES16.8)") xx(jpoint), yy(jpoint)
+	   end do
+	   close(io)
+	 end if
 
-         if (iremainder .eq. 1) then
-          if(sav(issh)) write(14,400) yy(mesh_new)
-         else if (iremainder .eq. 2) then
-          if(sav(issh)) write(14,400) yy(mesh_new-1), yy(mesh_new)
-         else if (iremainder .eq. 3) then
-          if(sav(issh)) write(14,400) yy(mesh_new-2), yy(mesh_new-1), yy(mesh_new)
-         end if
-         if(sav(issh)) close (unit = 14)
-
-! Write out the wavefunctions for plotting purposes.
-!dani.         if (l .eq. 0) open (unit = 17, file = 'sstate1', status = 'unknown')
-!dani.         if (l .eq. 1) open (unit = 17, file = 'pstate1', status = 'unknown')
-!dani.         if (l .eq. 2) open (unit = 17, file = 'dstate1', status = 'unknown')
-!dani.         if (l .eq. 3) open (unit = 17, file = 'fstate1', status = 'unknown')
-!dani.         do ipoint = 1, mesh_new
-!dani.          write (17,401) r(ipoint), yy(ipoint)
-!dani.         end do
-!dani.         close (unit = 17)
         end do
         deallocate (xx)
         deallocate (yy)

@@ -37,7 +37,6 @@ subroutine assemble_drive()
   end do
 
   call assemble_xc_1c ()
-
   if (Kscf .eq. 1) then
     call assemble_sVNL ()
     call assemble_2c ()

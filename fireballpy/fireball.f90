@@ -1,14 +1,13 @@
-
 ! Set int options
 subroutine set_options(dipole_method, charges_method, &
-& ismolecule, isgamma, total_charge, mixer_method, &
-& max_iter, mix_order, beta, w0, tol)
-  use iso_c_binding
+  &                    ismolecule, isgamma, total_charge, mixer_method, &
+  &                    max_iter, mix_order, beta, w0, tol)
+  use, intrinsic :: iso_c_binding, only: c_double
   use M_system, only: igamma, icluster, idipole, iqout, iqmmm, &
-  & qstate, ialgmix, max_scf_iterations, idmix, w02, bmix, sigmatol
+    & qstate, ialgmix, max_scf_iterations, idmix, w02, bmix, sigmatol
   implicit none
   integer, intent(in) :: dipole_method, charges_method, &
-  & ismolecule, isgamma, total_charge, mixer_method, max_iter, mix_order
+    &                    ismolecule, isgamma, total_charge, mixer_method, max_iter, mix_order
   real(c_double), intent(in) :: beta, w0, tol
   iqmmm = 0 ! ensure this is off by default
   idipole = dipole_method
@@ -26,7 +25,7 @@ end subroutine set_options
 
 ! Set cell vectors
 subroutine set_cell(a1, a2, a3)
-  use iso_c_binding
+  use, intrinsic :: iso_c_binding, only: c_double
   use M_system, only: a1vec, a2vec, a3vec
   implicit none
   real(c_double), dimension(3), intent(in) :: a1, a2, a3
@@ -37,9 +36,9 @@ end subroutine set_cell
 
 ! Set coordinates
 subroutine set_coords(naux, z, xyz)
-  use iso_c_binding
-  use M_system, only: natoms, ratom, symbol, imass
-  use M_fdata, only : symbolA, nspecies, nzx
+  use, intrinsic :: iso_c_binding, only: c_double
+  use M_system, only: natoms, ratom, imass
+  use M_fdata, only : nspecies, nzx
   implicit none
   integer, intent(in) :: naux
   integer, dimension(naux), intent(in) :: z
@@ -47,17 +46,14 @@ subroutine set_coords(naux, z, xyz)
   integer :: iatom, ispec
   natoms = naux
   if (allocated(ratom)) deallocate(ratom)
-  if (allocated(symbol)) deallocate(symbol)
   if (allocated(imass)) deallocate(imass)
   allocate (ratom (3, naux))
-  allocate (symbol (naux))
   allocate (imass (naux))
   do iatom = 1, naux
     ratom(:, iatom) = xyz(:, iatom)
     do ispec = 1, nspecies
-      if (z(iatom) .eq. nzx(ispec)) then
+      if (z(iatom) == nzx(ispec)) then
         imass(iatom) = ispec
-        symbol(iatom) = symbolA(ispec)
         exit
       end if
     end do
@@ -66,7 +62,7 @@ end subroutine set_coords
 
 ! Provide input charges
 subroutine set_initial_charges(natoms, nsh, qinput)
-  use iso_c_binding
+  use, intrinsic :: iso_c_binding, only: c_double
   use M_system, only : Qin
   implicit none
   integer, intent(in) :: nsh, natoms
@@ -77,15 +73,15 @@ end subroutine set_initial_charges
 ! Selection of shells to be fixed to neutral charge in stationary_charges.
 ! mode: 0 = none, 1 = only d's, 2 = shells with Qneutral=0 (default),
 !       3 = user mask (mask 0/1 per global shell: atom1-shells, atom2-shells, ...)
-subroutine set_fix_shells(mode, nsh, mask)
-  use iso_c_binding
+subroutine set_fix_shells(nsh, mode, mask)
+  use, intrinsic :: iso_c_binding, only: c_double
   use M_system, only : ifix_shells, fix_shell_user
   implicit none
-  integer, intent(in) :: mode, nsh
+  integer, intent(in) :: nsh, mode
   integer, dimension(nsh), intent(in) :: mask
   ifix_shells = mode
   if (allocated(fix_shell_user)) deallocate(fix_shell_user)
-  if (mode .eq. 3) then
+  if (mode == 3) then
     allocate (fix_shell_user(nsh))
     fix_shell_user = mask
   end if
@@ -93,7 +89,7 @@ end subroutine set_fix_shells
 
 ! Faster set coordinates for simulations
 subroutine update_coords(natoms, xyz)
-  use iso_c_binding
+  use, intrinsic :: iso_c_binding, only: c_double
   use M_system, only: ratom
   implicit none
   integer, intent(in) :: natoms
@@ -103,7 +99,7 @@ end subroutine update_coords
 
 ! Set kpoints as needed by Fireball
 subroutine set_kpoints(nkpts, kpts, weights)
-  use iso_c_binding
+  use, intrinsic :: iso_c_binding, only: c_double
   use M_system, only: nkpoints, special_k, weight_k
   implicit none
   integer, intent(in) :: nkpts
@@ -121,7 +117,7 @@ end subroutine set_kpoints
 ! Set MM positions and charges
 ! positions are in Angstroms and charges in |e| units
 subroutine set_qmmm(n, pos, qs, rc1, rc2, width)
-  use iso_c_binding
+  use, intrinsic :: iso_c_binding, only: c_double
   use M_system, only: iqmmm, qmmm_qm_natoms, qmmm_qm_xcrd, qmmm_dxyzcl, qmmm_rc1, qmmm_rc2, qmmm_width
   implicit none
   integer, intent(in) :: n
@@ -143,7 +139,7 @@ end subroutine set_qmmm
 
 ! Update MM positions
 subroutine update_qmmm(n, pos)
-  use iso_c_binding
+  use, intrinsic :: iso_c_binding, only: c_double
   use M_system, only: iqmmm, qmmm_qm_xcrd
   implicit none
   integer, intent(in) :: n
@@ -152,44 +148,96 @@ subroutine update_qmmm(n, pos)
   qmmm_qm_xcrd(1:3, :) = pos
 end subroutine update_qmmm
 
-! Load FData in the module
-subroutine load_fdata(nxc, nsp, nmax, fdata_path, xc_names, xc_weights, nums, nshells, nshellsPP)
-  use iso_c_binding
-  use constants, only: FNAME_LEN
-  use M_fdata, only: nspecies, nsh_max, fdataLocation, exc_names, exc_weights, nzx, nssh, nsshPP
+! Describe the FData: allocate and set everything 'fireball' needs before the
+! integral tables can be read. It is what 'load_fdata' used to pull out of
+! 'info.dat', now handed over by Python from 'info.json'.
+!
+! Shapes follow M_fdata: anything per shell comes in as (nsh_max, nspecies).
+! 'rcutoff_in' is in bohr, like the file always had it; it is stored in
+! angstrom, which is what the rest of the code expects. 'nshPP_max' is not an
+! argument: it can only be max(nsshPP), so it is worked out here instead of
+! being one more thing that can arrive inconsistent.
+! 'xcnames' is a single string holding one 32 character slot per functional.
+subroutine set_fdata_info(nspecies_in, nsh_max_in, nxc_in, &
+  & znuc_in, nssh_in, nsshPP_in, lssh_in, lsshPP_in, rcutoff_in, &
+  & qneutral_in, qrefxc_in, rcpp_in, cl_pp_in, exc_names_in, exc_weights_in)
+  use, intrinsic :: iso_c_binding, only: c_double
+  use M_constants, only: abohr
+  use M_fdata, only: nsh_max, nshPP_max, nspecies, nzx, nssh, lssh, nsshPP, lsshPP, &
+    & rc_PP, rcutoff, Qneutral, Qref, cl_PP, exc_names, exc_weights
   implicit none
-  integer, intent(in) :: nxc, nsp, nmax
-  character(len=FNAME_LEN), intent(in) :: fdata_path
-  character(len=32), dimension(nxc) :: xc_names
-  real(c_double), dimension(nxc) :: xc_weights
-  integer, dimension(nsp), intent(in) :: nums, nshells, nshellsPP
-  if (allocated(exc_names)) deallocate(exc_names)
-  if (allocated(exc_weights)) deallocate(exc_weights)
+  integer, intent(in) :: nspecies_in, nsh_max_in, nxc_in
+  integer, dimension(nspecies_in), intent(in) :: znuc_in, nssh_in, nsshPP_in
+  integer, dimension(nsh_max_in, nspecies_in), intent(in) :: lssh_in, lsshPP_in
+  real(c_double), dimension(nspecies_in), intent(in) :: rcPP_in
+  real(c_double), dimension(nsh_max_in, nspecies_in), intent(in) :: qneutral_in, qrefxc_in, rcutoff_in, cl_pp_in
+  character(len=32), dimension(nxc_in), intent(in) :: exc_names_in
+  real(c_double), dimension(nxc_in), intent(in) :: exc_weights_in
+  integer :: ispec, issh, ixc
+
+  nspecies = nspecies_in
+  nsh_max = nsh_max_in
+  nshPP_max = maxval(nsshPP_in)
+
   if (allocated(nzx)) deallocate(nzx)
   if (allocated(nssh)) deallocate(nssh)
   if (allocated(nsshPP)) deallocate(nsshPP)
-  allocate(exc_names(nxc), exc_weights(nzx), nums(nsp), nssh(nsp), nsshPP(nsp))
-  nspecies = nsp
-  nsh_max = nmax
-  fdatalocation = fdata_path
-  exc_names = xc_names
-  exc_weights = xc_weights
-  nzx = nums
-  nssh = nshells
-  nsshPP = nshellsPP
-  call fdata_load()
+  if (allocated(lssh)) deallocate(lssh)
+  if (allocated(lsshPP)) deallocate(lsshPP)
+  if (allocated(rc_PP)) deallocate(rc_PP)
+  if (allocated(rcutoff)) deallocate(rcutoff)
+  if (allocated(Qneutral)) deallocate(Qneutral)
+  if (allocated(Qref)) deallocate(Qref)
+  if (allocated(cl_PP)) deallocate(cl_PP)
+  if (allocated(exc_names)) deallocate(exc_names)
+  if (allocated(exc_weights)) deallocate(exc_weights)
+  allocate (nzx (nspecies))
+  allocate (nssh (nspecies))
+  allocate (nsshPP (nspecies))
+  allocate (lssh (nsh_max, nspecies))
+  allocate (lsshPP (nsh_max, nspecies))
+  allocate (rc_PP (nspecies))
+  allocate (rcutoff (nspecies, nsh_max))
+  allocate (Qneutral (nsh_max, nspecies))
+  allocate (Qref (nsh_max, nspecies))
+  allocate (cl_PP (nsh_max, nspecies))
+  allocate (exc_names (nxc_in))
+  allocate (exc_weights (nxc_in))
+
+  nzx = znuc_in
+  nssh = nssh_in
+  nsshPP = nsshPP_in
+  lssh = lssh_in
+  lsshPP = lsshPP_in
+  rc_PP = rcPP_in
+  Qneutral = qneutral_in
+  Qref = qrefxc_in
+  rcutoff = rcutoff_in*abohr
+  cl_PP = cl_pp_in
+  exc_names = exc_names_in
+  exc_weights = exc_weights_in
+end subroutine set_fdata_info
+
+! Read the integral tables. 'set_fdata_info' must have been called first.
+subroutine loadfdata_from_path(fdata_path)
+  use, intrinsic :: iso_c_binding, only: c_double
+  use M_fdata, only: fdataLocation
+  implicit none
+  character(len=4096), intent(in) :: fdata_path
+  fdatalocation = trim(fdata_path)
+  call load_fdata_tables()
 end subroutine loadfdata_from_path
 
 ! Allocate all needed arrays. Python gc handles deallocate after work
 subroutine call_allocate_system()
-  use iso_c_binding
+  use, intrinsic :: iso_c_binding, only: c_double
   implicit none
   call allocate_system()
 end subroutine call_allocate_system
 
 ! Return initial charges
 subroutine get_initial_charges(natoms, nsh, qinitial)
-  use iso_c_binding
+  use, intrinsic :: iso_c_binding, only: c_double
   use M_fdata, only : Qneutral, nssh
   use M_system, only : imass
   implicit none
@@ -202,18 +250,18 @@ subroutine get_initial_charges(natoms, nsh, qinitial)
       qinitial(issh, iatom) = Qneutral(issh, in1)
     end do
     do issh=nssh(in1)+1,nsh
-      qinitial(issh, iatom) = 0.0d0
+      qinitial(issh, iatom) = 0.0_c_double
     end do
   end do
 end subroutine get_initial_charges
 
 ! Compute the SCF loop
 subroutine scf(natoms, nshell, nkpts, norbitals, &
-& verbose, fix_charges, shell_charges, eigenvalues, eigenvectors, &
-& nbands, converged, errno_out, energy, fermi_level, charges)
-  use iso_c_binding
+  &            verbose, fix_charges, shell_charges, eigenvalues, eigenvectors, &
+  &            nbands, converged, errno_out, energy, fermi_level, charges)
+  use, intrinsic :: iso_c_binding, only: c_double, c_double_complex
   use M_system, only: errno, scf_achieved, etot, efermi, eigen_k, Qin, imass, ifixcharge, icluster, &
-  & igamma, bbnkre, bbnkim, norbitals_new
+    & igamma, bbnkre, bbnkim, norbitals_new
   use M_fdata, only: Qneutral, nssh
   implicit none
   integer, intent(in) :: natoms, nshell, nkpts, norbitals
@@ -239,14 +287,14 @@ subroutine scf(natoms, nshell, nkpts, norbitals, &
   fermi_level = efermi
   do iatom = 1, natoms
     in1 = imass(iatom)
-    charges(iatom) = 0.0d0
+    charges(iatom) = 0.0_c_double
     do issh = 1, nssh(in1)
       charges(iatom) = charges(iatom) + Qneutral(issh,in1) - Qin(issh,iatom)
     end do
   end do
   shell_charges = Qin
   eigenvalues = eigen_k(:, :)
-  if (icluster .eq. 0 .and. igamma .eq. 0) then
+  if (icluster == 0 .and. igamma == 0) then
     eigenvectors = cmplx(bbnkre, bbnkim, kind=c_double_complex)
   else
     eigenvectors = cmplx(bbnkre, kind=c_double_complex)
@@ -256,7 +304,7 @@ end subroutine scf
 
 ! Get the forces in each atom
 subroutine calc_forces(natoms, forces, errno_out)
-  use iso_c_binding
+  use, intrinsic :: iso_c_binding, only: c_double
   use M_system, only : ftot, errno, iscf_fast
   implicit none
   integer, intent(in) :: natoms
@@ -266,7 +314,7 @@ subroutine calc_forces(natoms, forces, errno_out)
   ! Speed up SCF loop: la reconstruccion rapida de Kscf>1 no actualiza los arrays de
   ! derivadas (rhop_*, arhop_*); un ensamblado completo con las cargas convergidas
   ! los deja consistentes antes de ensamblar las fuerzas.
-  if (iscf_fast .eq. 1) call average_ca_rho (1)
+  if (iscf_fast == 1) call average_ca_rho (1)
   call getforces()
   errno_out = errno
   forces = ftot
@@ -274,7 +322,7 @@ end subroutine calc_forces
 
 ! Get the forces of the QM region on the MM region
 subroutine get_qmmm_forces(natoms, forces)
-  use iso_c_binding
+  use, intrinsic :: iso_c_binding, only: c_double
   use M_system, only : qmmm_dxyzcl
   implicit none
   integer, intent(in) :: natoms
@@ -284,7 +332,7 @@ end subroutine get_qmmm_forces
 
 ! Get hamiltonian and overlap matrix
 subroutine get_orbitals(natoms, orbitals)
-  use iso_c_binding
+  use, intrinsic :: iso_c_binding, only: c_double
   use M_system, only : imass
   use M_fdata, only : num_orb
   implicit none
@@ -298,11 +346,9 @@ end subroutine get_orbitals
 
 ! Get hamiltonian and overlap matrix
 subroutine get_hs(norbitals, sdat, hdat)
-  use iso_c_binding
+  use, intrinsic :: iso_c_binding, only: c_double
   implicit none
   integer, intent(in) :: norbitals
   real(c_double), dimension(norbitals, norbitals), intent(inout) :: sdat, hdat
   call geth(sdat, hdat)
 end subroutine get_hs
-
-

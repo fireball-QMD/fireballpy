@@ -1,4 +1,5 @@
 basic_srcs = [
+  'input.f90',
   'wavefunctions.f90',
   'potentials.f90',
   'pseudopotentials.f90'
@@ -52,14 +53,8 @@ kinetic_srcs = [
 ]
 
 readfiles_srcs = [
-  'iofile2c.f90',
   'iofile2c_x.f90',
   'iofile3c.f90',
-  'readcreate.f90',
-  'readpsi.f90',
-  'readtheory.f90',
-  'readvnn.f90',
-  'readvpp.f90',
 ]
 
 create_srcs = ['create.f90']

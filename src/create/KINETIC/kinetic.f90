@@ -75,7 +75,7 @@
         use dimensions
         use quadrature
 	use :: constants, only: pi, fname_len
-	use :: utils, only: utils_open, utils_itos
+	use :: utils, only: utils_open, utils_itos, utils_log, UTILS_LOG_INFO, UTILS_LOG_ERROR
 	use :: indices, only: indices_twocenter_set, INDICES_TWOCENTER, INDICES_NAMES_LEN
         use :: wavefunctions, only: wf_atoms
         implicit none
@@ -178,7 +178,8 @@
         character (len = 1) ang
         character (len = fname_len) filename
 	character (len = INDICES_NAMES_LEN), allocatable :: names(:)
-	integer, allocatable :: ls1(:), ls2(:), s1(:), s2(:), l1(:), l2(:), m1(:), m2(:)
+	integer, allocatable :: ls1(:), ls2(:), s1(:), s2(:), nl1(:), nl2(:), nm1(:), nm2(:)
+	integer nindex
  
         logical skip
  
@@ -190,45 +191,15 @@
  
 	! Open necessary file
 	filename = "kinetic."//utils_itos(nzx1, lpad=2)//"."//utils_itos(nzx2, lpad=2)//".dat"
-	inquire (file=trim(filename), exists=skip)
-	skip = .not. skip
+	! Con 'exists' (que no existe como especificador) skip quedaba sin
+	! definir; y con la negacion la logica salia al reves: se saltaba el
+	! calculo cuando el fichero NO estaba, asi que no se escribia nunca.
+	inquire (file=trim(filename), exist=skip)
         if (skip) return
 	iounit = utils_open(filename, "w")
  
         factor = 7.62_dp/2.0_dp
         qmax = sqrt(ecutke/factor)
- 
-        if (iammaster) then
-         write (*,*) '  '
-         write (*,*) ' *------------------------------------------* '
-         write (*,*) ' | Welcome to the kinetic-energy subroutine | '
-         write (*,*) ' *------------------------------------------* '
-         write (*,*) '  '
-         write (*,*) ' Who and when: ', signature
-         write (*,*) '  '
- 
-         write (*,100) itype1, itype2
- 
-! .............................this gets qmax...............................
-         write (*,*) '  '
-         write (*,*) '  '
-         write (*,101) ecutke
-         write (*,*) ' (10 keV could be a good choice) '
-         write (*,*) '  '
-         write (*,102) qmax, ang
- 
-! ..............................this gets nq................................
-         write (*,*) '  '
-         write (*,103) nqke
-         write (*,*) ' (a good choice would be 400) '
-         write (*,*) '  '
- 
-! ..............................this gets nr................................
-         write (*,104) nrke
-         write (*,*) ' (a good choice would be 240) '
-         write (*,*) '  '
-         write (*,*) '  '
-        end if  !end master
  
 ! **************************************************************************
 ! This section finds the numbers and limits necessary for integration.
@@ -239,12 +210,6 @@
         nqq = 2*nqke + 1
         nrr = 2*nrke + 1
         dq = qmax/real(nqq - 1)
-        if (iammaster) then
-         write (*,105) rmax(1), ang, rmax(2), ang
-         write (*,*) '  '
-         write (*,*) ' One moment, we calculate the Fourier transforms of the '
-         write (*,*) ' radial WF. '
-        end if  !end master
  
 ! This section caculates and stores R0(q), R1(q), R2(q), R3(q).
 ! RL(q)=int {jL(qr) * RL(r) * r**2} dr
@@ -266,11 +231,6 @@
          m1 = mleft(index)
          l2 = lright(index)
          m2 = mright(index)
- 
-        if(iammaster)then
-         write (*,601) index, nleft(index), lleft(index), mleft(index),      &
-     &                        nright(index), lright(index), mright(index)
-        end if  !end master
  
 ! The variable angular(k) is the integral of Ylm*Pk[cos(theta)]*Yl'm'.
 ! We only consider terms up to k = 6. This is for the following reason
@@ -351,27 +311,6 @@
          end do
         end do
  
-        if (iammaster) then
-         write (*,*)
-         write (*,*) ' **** Test normalization in q space **** '
-         do iatom = 1, 2
-          write (*,*) '  '
-          write (*,200) iatom
-          do issh = 1, nssh(inj(iatom))
-           write (*,*) '  '
-           write (*,201) issh
-           write (*,*) '  '
-           write (*,202) issh
-           write (*,*) '  '
-           do isplit = 1, 5
-            write (*,203) qsplit(isplit), esplit(isplit),                   &
-     &                    xnormq(iatom,issh,isplit)
-           end do
-          end do
-         end do
-         write (*,*) '  '
-        end if  !end master
- 
 ! ***************************************************************************
 ! E N D   F O U R I E R   T R A N S F O R M
 !
@@ -384,28 +323,6 @@
         rrmax = rcutoff1 + rcutoff2
         dr = rrmax/real(nddke - 1)
         d = - dr
- 
-        if (iammaster) then
-         write (*,*) ' Now calculate the kinetic matrix element for '
-         write (*,*) ' each d from 0 to rmax.'
-         write (*,*) '  '
-         write (*,300) nddke
-         write (*,*) ' (107 would have been a good choice, e.g.) '
-         write (*,*) '  '
-         write (*,301) rrmax, ang
-         write (*,*) '  '
-         write (*,302) dr, ang
-         write (*,*) '  '
-         write (*,*) '  '
- 
-! The following section calculates the kinetic energy matrix elements
-! for all the possible values of d
-! Some preliminaries. Set up simpson rule factors and eV.
-! Do a convergence test for d = 0.0
- 
-         write (*,*) ' Convergence tests of Kinetic energy integral '
-         write (*,*) ' at d = 0.0 <Phi(atom1)| T | Phi(atom2>. '
-        end if  !end master
  
 ! eV= ((h/2pi)**2)/m/pi (in eV times angstroms squared)
         eV = 2.4255_dp
@@ -444,15 +361,6 @@
      &      + factor*rjj(n1,1,iq)*rjj(n2,2,iq)*ang_integral*q**4*dq
           end do
          end do
-         if (id .eq. 1) then
-          if (iammaster) then
-           write (*,*) '  '
-           do isplit = 1, 5
-            write (*,400) qsplit(isplit), esplit(isplit),                    &
-     &                    (tkinetic(index,id), index = 1, index_max)
-           end do
-          end if  !end master
-         end if
         end do
  
 ! ***************************************************************************
@@ -460,8 +368,9 @@
 ! W R I T E   T H E   O U T P U T
 ! ***************************************************************************
 ! CRP: use new format :)
+      call utils_log(UTILS_LOG_INFO, "  - "//trim(filename))
       dmax = rcutoff1 + rcutoff2
-      write (iounit, "('# Z1, Z2 = ',i2,', ',i2)") nzx1, nzx2
+      write (iounit, "('# Z1, Z2 = ',i3,', ',i3)") nzx1, nzx2
       write (iounit, "('# Rc1, Rc2 = ',f14.6,', ',f14.6)") rcutoff1, rcutoff2
       if (index_max == 0) then
         write (iounit, "('# z')")
@@ -470,42 +379,16 @@
       end if
       ls1 = [(wf_atoms(itype1)%get_angular_momentum(id), id = 1, wf_atoms(itype1)%get_nshells())]
       ls2 = [(wf_atoms(itype2)%get_angular_momentum(id), id = 1, wf_atoms(itype2)%get_nshells())]
-      call indices_twocenter_set(INDICES_TWOCENTER, ls1, ls2, index_max, s1, s2, l1, l2, m1, m2, names=names)
+      call indices_twocenter_set(INDICES_TWOCENTER, ls1, ls2, nindex, s1, s2, nl1, nl2, nm1, nm2, names=names)
+      if (nindex /= index_max) then
+        call utils_log(UTILS_LOG_ERROR, "kinetic: mk_index and indices_twocenter_set disagree")
+        error stop 1
+      end if
       write (iounit, "('# z',1000(4x,a))") (trim(names(index)), index = 1, index_max)
       do id = 1, nddke
         write (iounit, "(f14.6,1000ES16.8)") (id - 1)*dr, tkinetic(:, id)
       end do
       close (iounit)
-
-        write (*,506) filename
- 
-! Format Statements
-! ===========================================================================
-100     format (' Doing kinetic for type ', i2, ' and type ', i2)
-101     format (2x, ' The energy cutoff (for q sum) is ', f9.2, ' eV.')
-102     format (2x, ' The k-space cutoff qmax = ', f8.4, ' 1/', a1, '.')
-103     format (2x, ' The number of q points is 2*nq+1; nq = ', i5)
-104     format (2x, ' The number of r points is 2*nr+1; nr = ', i5)
-105     format (2x, ' In the Fourier transform we use rmax1 = ',f7.4,1x,     &
-     &          a1,' and rmax2 = ', f7.4, 1x, a1, '.')
-200     format (2x, ' Atomic species #', i2, ':')
-201     format (2x, ' Convergence: Shell = ', i2)
-202     format (8x, 'q', 12x, 'E', 5x, 'Int[psi (l = ', i1,',q)**2]')
-203     format (3x, f9.3, 1x, f11.2, 1x, f12.7)
-300     format (2x, 'You chose', i4, ' grid points between 0 and rmax.')
-301     format (2x, ' Rc(type1) + Rc(type2) = ', f7.4, 1x, a1, '.')
-302     format (2x, ' The point separation is ', f7.4, 1x, a1, '.')
-400     format (2x, ' q(max) = ', f8.2, 3x, ' E(max) = ', f10.2, /,          &
-     &          5f9.4, /, 5f9.4, /, 5f9.4, /, 5f9.4, /, 5f9.4)
-500     format (70('='))
-501     format (2x, a45)
-502     format (a70)
-503     format (2x, 'R(d) = ', f8.4, 1x, 2x, ' nddke = ', i4,                &
-     &          2x, ' nz_points = ', i4, 2x, ' nrhopoints = ', i4)
-504     format (i5, f9.4, ' <=== ', a4)
-505     format (4d20.10)
-506     format (2x, ' Finished writing to file: ', a40)
-601     format (' index = ', i3, 3x, '<',3i2,' |  |',3i2,'>')
  
         close (iounit)
         return

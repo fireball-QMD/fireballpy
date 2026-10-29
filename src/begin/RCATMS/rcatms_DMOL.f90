@@ -50,7 +50,8 @@
         use begin_input
         use constants
         use, intrinsic :: iso_fortran_env, only: dp => real64
-        use :: xc, only: xc_init, xc_end, xc_calc, xc_isgga
+	use :: utils, only: utils_itos, utils_open, utils_log, UTILS_LOG_ERROR
+        use :: xc, only: xc_calc, xc_isgga
         implicit none
 
 ! Argument Declaration and Description
@@ -80,7 +81,7 @@
         integer iteration
         integer issh
         integer jssh
-        integer k
+        integer k, io
         integer l, l1, l2
         integer mesh_new
 
@@ -147,14 +148,6 @@
 
 ! Procedure
 ! ===========================================================================
-        !write (*,*) ' Determining the wavefunctions for the 2+ ion. Once '
-        !write (*,*) ' the wavefunctions are found then orthogonalize to the '
-        !write (*,*) ' ground state wavefunctions to obtain a double '
-        !write (*,*) ' numerical basis set. '
-        !write (*,*) '  '
-
-        !write (*,*) ' mesh = ', mesh
-
 ! Initialize the wavefunctions and the exact exchange potential.
         psi = 0.0_dp
         psi_new = 0.0_dp
@@ -170,56 +163,11 @@
         end do
 
 ! Construct r at each mesh point.
-        dr = rc_max/real(mesh - 1)
-        !write (*,*) '  '
-        !write (*,*) ' Number of points in mesh = ', mesh
-        !write (*,*) ' r(mesh) = ', r(mesh), ' must = rc_max = ', rc_max
-        if (abs(r(mesh) - rc_max) .gt. 1.0e-6_dp) stop ' bad agreement between r(mesh) and rc '
-
-        !write (*,*) '  '
-        !write (*,*) ' We average the output and input charge densities at each '
-        !write (*,*) ' iteration as: '
-        !write (*,*) ' RHO(next iteration) = (1-BETA)*RHO(out) + BETA*RHO(in) '
-        !write (*,*) ' BETA = 0.5 is almost always the best choice.'
-        !write (*,*) ' You have BETA = ', beta
-        !write (*,*) '  '
-
-        !write (*,*) ' Tolerance checks closeness to self-consistentcy. It is '
-        !write (*,*) ' the average difference between the old and new Etot and '
-        !write (*,*) ' sum of eigenvalues, divided by the new average. '
-        !write (*,*) ' The standard tolerance is 1.0e-5_dp. '
-        !write (*,*) ' You have a tolerance of ', tolerance
-        !write (*,*) '  '
-
+          dr = rc_max/real(mesh - 1)
+	  
 ! Determine the non-local pseudopotential.
         xnz = real(nzval_ion, kind=dp)
-!        call pp(ppionfile, nssh, mesh, xnz, r, vc, vl, ioptionpp, exmix)
         call pp(1, mesh, r, vc, vl, ioptionpp, exmix)
-
-        if (ioptionpp .ne. ioption) then
-         !write (*,*) ' The exchange-correlation potential option in your '
-         !write (*,*) ' pseudopotential file does not match the option chosen '
-         !write (*,*) ' by running initial.x! Are you positive that you want '
-         !write (*,*) ' to proceed? Enter 1-yes, 0-no. '
-        ! read (*,*) ioptionpp
-        ! if (ioptionpp .eq. 0) then
-          !write (*,*) ' You have chosen to stop! '
-          stop
-        ! end if
-        end if
-
-        !write (*,*) ' This program will write out data files containing the '
-        !write (*,*) ' s, p, d, or f excited wavefunctions created from the '
-        !write (*,*) ' DMOL formalism. File-name convention: '
-        !write (*,*) ' The name begins with the chemical symbol Z (e.g. 014 for '
-        !write (*,*) ' Si or 006 for C), this is then followed by the value for '
-        !write (*,*) ' Rc (for example, 500 for 5.00), and finally it is '
-        !write (*,*) ' appended by .ewf#, where # is the shell number '
-        !write (*,*) ' (not l quantum number). An example for Si is 014_500.ewf1'
-        !write (*,*) '  '
-        !write (*,*) ' You have chosen: '
-        !write (*,101) filename_ewf
-        !write (*,*) '  '
 
 ! create additional X-potential for excited orbitals to optimize 
 ! pseudoatomic w.f.
@@ -239,22 +187,18 @@
                     vXe(issh,ipoint) = 0.0_dp
                  endif
               end do ! enddo ipoint
-           enddo ! enddo  issh
-! write vX        
-!           do ipoint = 1, mesh
-!              write (100,*) r(ipoint),(vXe(issh,ipoint),issh=1,nssh)
-!           enddo
+           end do ! enddo  issh
         endif ! if(ioptim)
 
 
 ! Construct approximate starting potential. We do this by forming hydrogenic
-! wavefunctions using an effective bohr radius a0(m).
+! wavefunctions using an effective bohr radius a0_eff(m).
         sigma = 0.0_dp
         do issh = 1, nssh
          l = lam(issh)
          do ipoint = 1, mesh - 1
           if (r(ipoint) .lt. rcutoff_psirc(issh)) then
-           psi0(ipoint) = r(ipoint)**(l+1)*exp(-r(ipoint)/a0(issh))
+           psi0(ipoint) = r(ipoint)**(l+1)*exp(-r(ipoint)/a0_eff(issh))
           else
            psi0(ipoint) = 0.0_dp
           end if
@@ -267,11 +211,6 @@
          psi(issh,:) = psi0/xnorm
          sigma = sigma + xocc_ion(issh)*psi(issh,:)**2
         end do
-
-! Check that int[0,rc] sig(r) dr = z
-        difference = abs(dr*sum(sigma) - real(nzval_ion, kind=dp))
-!dani.        if (nznuc .ne. 1 .and. difference .gt. tolerance)                    &
-!dani.     &   stop ' Check: Sum of charge density - not equal to nzval_ion '
 
 ! Now find rho dependent potentials, vee and uxc.
 ! The subroutine get_uxc depends on the actual density rho, calculate rho
@@ -295,26 +234,12 @@
         rhopp(mesh,1,1) = 2.0_dp*rhopp(mesh-1,1,1) - rhopp(mesh-2,1,1)
 
         ienergy = 0     ! do not calculate energies
-        if (xc_isgga()) then
           do ipoint = 1, mesh
             call xc_calc(rho(ipoint)/abohr3, rhopp(ipoint,1,1)/abohr5, rhop(ipoint,:)/abohr4, rhopp(ipoint,:,:)/abohr5, &
               &          eexc(ipoint), uxc(ipoint), dexcrho, dexcsigma, duxcrho, duxcsigma, duxclapl, duxccross)
             eexc(ipoint) = eexc(ipoint)/ryd
             uxc(ipoint) = uxc(ipoint)/ryd
           end do
-        else
-          do ipoint = 1, mesh
-            call xc_calc(rho(ipoint)/abohr3, eexc(ipoint), uxc(ipoint), dexcrho, duxcrho)
-            eexc(ipoint) = eexc(ipoint)/ryd
-            uxc(ipoint) = uxc(ipoint)/ryd
-          end do
-        end if
-        if (ienergy == 1) then
-          exc = 0.0_dp
-          do ipoint = 1, mesh
-            exc = exc + dr*r(ipoint)**2*rho(ipoint)*eexc(ipoint)
-          end do
-        end if
         call get_vee (mesh, dr, sigma, vee)
 
 ! We do not have wave functions at this point. So do the first iteration with
@@ -333,12 +258,6 @@
 ! integral (0,infinity) PNL**2 dR =1.
 !
 ! The result of PNL for orbital issh is stored in psi0, and later put into psi.
-        !write (*,*) ' *--------------------* '
-        !write (*,*) ' | START OF ITERATION | '
-        !write (*,*) ' *--------------------* '
-        !write (*,*) '  '
-        !write (*,200)
-        !write (*,201)
 
         eold = 0.0_dp
         do iteration = 1, max_iterations  ! ::::::: SCF LOOP ::::::::
@@ -350,14 +269,8 @@
 
 ! put potential in v
 ! Note that the factor of 2 is conversion from Hartree units to Rydberg units.
-          if (ioptionpp .ne. 12) then
 !            v = 2.0_dp*(vc + vl(issh,:)) + vee + uxc
             v = 2.0_dp*(vc + vl(issh,:)) + vee + uxc + vXe(issh,:)
-          else
-!           v = 2.0_dp*(vc + vl(issh,:)) + vee + uxc + exmix*vexx(issh,:)
-           v = 2.0_dp*(vc + vl(issh,:)) + vee + uxc + exmix*vexx(issh,:)     &
-      &         + vXe(issh,:)
-          end if
 
 ! Solve Schroedinger equation for potential v
           psi0 = psi(issh,:)
@@ -402,37 +315,20 @@
          rhopp(mesh,1,1) = 2.0_dp*rhopp(mesh-1,1,1) - rhopp(mesh-2,1,1)
 
          ienergy = 1     ! calculate energies
-         if (xc_isgga()) then
            do ipoint = 1, mesh
              call xc_calc(rho(ipoint)/abohr3, rhopp(ipoint,1,1)/abohr5, rhop(ipoint,:)/abohr4, rhopp(ipoint,:,:)/abohr5, &
                &          eexc(ipoint), uxc(ipoint), dexcrho, dexcsigma, duxcrho, duxcsigma, duxclapl, duxccross)
              eexc(ipoint) = eexc(ipoint)/ryd
              uxc(ipoint) = uxc(ipoint)/ryd
            end do
-         else
-           do ipoint = 1, mesh
-             call xc_calc(rho(ipoint)/abohr3, eexc(ipoint), uxc(ipoint), dexcrho, duxcrho)
-             eexc(ipoint) = eexc(ipoint)/ryd
-             uxc(ipoint) = uxc(ipoint)/ryd
-           end do
-         end if
-         if (ienergy == 1) then
            exc = 0.0_dp
            do ipoint = 1, mesh
              exc = exc + dr*r(ipoint)**2*rho(ipoint)*eexc(ipoint)
            end do
-         end if
          call get_vee (mesh, dr, sigma, vee)
 
 ! The xc energy is in units of 4*pi, convert back.
          exc = 4.0_dp*pi*exc
-
-     !     if (ioptionpp .eq. 12) then
-     !      do issh = 1, nssh
-     !       call ExxPot (mesh, nssh, mesh_psirc(issh), dr, r, Rall, lam,      &
-     ! &                  issh, 1, nssh, xocc_ion, cgcoeff, vexx)
-     !      end do
-     !     end if
 
 ! Calculate the total energy:  Etot=sum(eigenval)-1/2*Vee-1/4*Vxc
 ! (Minus sign to convert binding energies into real energies)
@@ -514,53 +410,15 @@
          enew = abs(etot) + abs(ebs)
          difference = abs((enew - eold)/enew)
 
-         !write (*,202) iteration, etot, ebs, eee, exc, difference
          if (difference .le. tolerance_scf) exit
          eold = enew
         end do  ! :::::::::::::::: END OF SCF LOOP :::::::::::::::::::::
 ! *****************************************************************************
 
-        do issh = 1, nssh
-         !write (*,300) lam(issh), xocc_ion(issh), eigenvalue(issh)
-        end do
-
         if (difference .gt. tolerance_scf) then
-         !write (*,*) '  '
-         !write (*,*) ' No self consistency after maximum iterations = ',    &
-!     &   max_iterations
-         stop
+	 call utils_log(UTILS_LOG_ERROR, "self-consistency not reached (DMOL)")   
+         error stop 1
         end if
-
-        !write (*,*) '  '
-        !write (*,*) ' Terms in the sum of eigenvalues: '
-        !write (*,*) '  '
-        !write (*,*) '  in Rydbergs:'
-        total = terms(1) + terms(2) + terms(3) + terms(4)
-        !write (*,*) '  '
-        !write (*,*) '  vnl      = ', terms(1)
-        !write (*,*) '  uxc      = ', terms(2)
-        !write (*,*) '  vc + vh  = ', terms(3)
-        !write (*,*) '  kinetic  = ', terms(4)
-        !write (*,*) '  total    = ', total
-        !write (*,*) '  '
-
-        terms = terms*ryd
-        !write (*,*) '  in eV:'
-        total = terms(1) + terms(2) + terms(3) + terms(4)
-        !write (*,*) '  '
-        !write (*,*) '  vnl      = ', terms(1)
-        !write (*,*) '  uxc      = ', terms(2)
-        !write (*,*) '  vc + vh  = ', terms(3)
-        !write (*,*) '  kinetic  = ', terms(4)
-        !write (*,*) '  total    = ', total
-        !write (*,*) '  '
-
-! Now write out wavefunction
-        !write (*,*) ' This program writes out the following data files: '
-        !write (*,*) '  '
-        !write (*,*) '  '
-        !write (*,*) ' s.wf [p.wf...]  u_s(r) [u_p...] r=100 points '
-        !write (*,*) '  '
 
 ! ***************************************************************************
 !       O R T H O G O N A L I Z E
@@ -592,7 +450,6 @@
 
 ! Check normalization
          integral = 0.0_dp
-         !write (*,*) '  '
          do ipoint = 1, mesh_new
           integral =                                                         &
            integral + rmult(ipoint)*psi_new(issh,ipoint)**2
@@ -600,23 +457,17 @@
          psi_new(issh,1:mesh_new) = psi_new(issh,1:mesh_new)/sqrt(integral)
 
          integral = 0.0_dp
-         !write (*,*) '  '
          do ipoint = 1, mesh_new
           integral =                                                         &
            integral + rmult(ipoint)*psi_new(issh,ipoint)**2
          end do
-         !write (*,*) ' Checking normalization for issh = ', issh
-         !write (*,*) ' integral = ', integral
 
 ! Check orthoganalization
          integral = 0.0_dp
-         !write (*,*) '  '
          do ipoint = 1, mesh_new
           integral =                                                         &
            integral + rmult(ipoint)*psi_new(issh,ipoint)*psi_gs(issh,ipoint)
          end do
-         !write (*,*) ' Checking orthogonalization for issh = ', issh
-         !write (*,*) ' integral = ', integral
         end do
 
 ! ***************************************************************************
@@ -634,13 +485,6 @@
         do issh = 1, nssh
          mesh_new = mesh_psirc(issh)
          l = lam(issh)
-         if(sav(issh)) open (unit = 14, file = trim(outpath)//trim(filename_ewf(issh)), status = 'unknown')
-         if(sav(issh)) write(14,101) filename_ewf(issh)
-         if(sav(issh)) write(14,102) nznuc, atomname
-         if(sav(issh)) write(14,103) mesh_new
-         zero = 0.0_dp
-         if(sav(issh)) write(14,104) rcutoff_psirc(issh), rc_max, zero
-         if(sav(issh)) write(14,105) lam(issh)
 
 ! Find (approximately) the value at r=0
          xx(2) = r(2)*abohr
@@ -659,40 +503,19 @@
          xx(mesh_new) = r(mesh_new)*abohr
          yy(mesh_new) = 0.0_dp
 
-         inum = idint(real(mesh_new)/4.0_dp)
-         iremainder = mesh_new - (inum*4)
-
-         do jpoint = 1, mesh_new - iremainder,4
-          if(sav(issh)) write(14,400) yy(jpoint), yy(jpoint+1), yy(jpoint+2), yy(jpoint+3)
-         end do
-
-         if (iremainder .eq. 1) then
-          if(sav(issh)) write(14,400) yy(mesh_new)
-         else if (iremainder .eq. 2) then
-          if(sav(issh)) write(14,400) yy(mesh_new-1), yy(mesh_new)
-         else if (iremainder .eq. 3) then
-          if(sav(issh)) write(14,400) yy(mesh_new-2), yy(mesh_new-1), yy(mesh_new)
-         end if
-         if(sav(issh)) close (unit = 14)
-
-! Write out the wavefunctions for plotting purposes.
-!dani.         if (l .eq. 0) open (unit = 17, file = 'sstate1', status = 'unknown')
-!dani.         if (l .eq. 1) open (unit = 17, file = 'pstate1', status = 'unknown')
-!dani.         if (l .eq. 2) open (unit = 17, file = 'dstate1', status = 'unknown')
-!dani.         if (l .eq. 3) open (unit = 17, file = 'fstate1', status = 'unknown')
-!dani.         do ipoint = 1, mesh_new
-!dani.          write (17,401) r(ipoint), yy(ipoint)
-!dani.         end do
-!dani.         close (unit = 17)
+	 if (sav(issh)) then
+	   io = utils_open(trim(outpath)//trim(utils_itos(nznuc, lpad=3))//"_"//lnames(l)//".ewf", "w")
+	   write (io, "('# Z, l = ',i3,2x,i2)") nznuc, l
+	   write (io, "('# q = ',f14.6)") 0.0_dp
+	   write (io, "('# n = ',i8)") mesh_new
+	   do jpoint = 1, mesh_new
+	     write (io, "(2ES16.8)") xx(jpoint), yy(jpoint)
+	   end do
+	   close(io)
+	 end if
         end do
         deallocate (xx)
         deallocate (yy)
-      !dani.JOM
-      !    call vnn_excite
-
-        !write (*,*) ' Bye from RCATMS_DMOL! '
-        !write (*,*) '  '
-
 
 ! Deallocate Arrays
 ! ===========================================================================

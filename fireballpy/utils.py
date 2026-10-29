@@ -18,7 +18,6 @@ from tqdm import tqdm
 
 from fireballpy import __version__ as __fb_version__
 
-
 ENV_FB_HOME = "FIREBALL_HOME"
 ENV_XDG_CACHE_HOME = "XDG_CACHE_HOME"
 DEFAULT_CACHE_DIR = "~/.cache"
@@ -27,10 +26,8 @@ TIMESTR = '%a, %d %b %Y %H:%M:%S %Z'
 SHA256SUMS = 'https://fireball.ftmc.uam.es/fireballpy/sha256sums_fireballpy.txt'
 
 ANGULAR_MOMENTUM = {'s': 0, 'p': 1, 'd': 2, 'f': 3}
-ANGULAR_MOMENTUM_REV = {v: k for k, v in ANGULAR_MOMENTUM.items()}
 
 _quiet = False
-
 
 #######################################
 # UTIL FUNCTIONS FOR DOWNLOADING FDATAS
@@ -204,21 +201,3 @@ def get_data_from_url(url: str, name: str, filetype: str) -> str:
     tarpath, tarname = os.path.split(dst)
     extract_tar(tarname, tarpath, strtime)
     return dst[:-7]
-
-
-def read_wf(path: str | Path) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
-    with open(path, 'r') as fp:
-        raw = fp.read().splitlines()
-    rcutoff = float(raw[3].split()[0].strip())
-    y = np.array([x for row in map(lambda s: s.replace('D', 'E').split(), raw[5:]) for x in row], dtype=np.float64)
-    x = np.arange(y.size)*rcutoff/y.size
-    return x, y
-
-
-def read_wf_info(path: str | Path) -> tuple[int, int, float]:
-    with open(path, 'r') as fp:
-        raw = fp.read().splitlines()
-    z = int(raw[1].split()[0].strip())
-    rcutoff = float(raw[3].split()[0].strip())
-    l = int(raw[4].strip())
-    return z, l, rcutoff

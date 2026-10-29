@@ -253,7 +253,7 @@ contains
       end do
       if (exists) cycle
       do i = 1, size(fnames)
-	call utils_log(UTILS_LOG_INFO, "  - "//trim(fnames(i)))
+        call utils_log(UTILS_LOG_INFO, "  - "//trim(fnames(i)))
       end do
       call twocenter_integrate(interaction, ispec, jspec, issph, answer)
       call twocenter_write(interaction, ispec, jspec, issph, fnames, answer)
@@ -459,7 +459,7 @@ contains
     dz = (zmax - zmin)/real(TWOCENTER_NPOINTS_D - 1, kind=dp)
     do i = 1, size(fnames)
       io = utils_open(fnames(i), "w")
-      write (io, "('# Z1, Z2 = ',i2,', ',i2)") wf_atoms(ispec)%get_nz(), wf_atoms(jspec)%get_nz()
+      write (io, "('# Z1, Z2 = ',i3,', ',i3)") wf_atoms(ispec)%get_nz(), wf_atoms(jspec)%get_nz()
       write (io, "('# Rc1, Rc2 = ',f14.6,', ',f14.6)") rcut1, rcut2
       if (interaction == TWOCENTER_VPP) then
         write (io, "('# npp = ',i2)") pp_atoms(jspec)%get_nshells()
@@ -467,11 +467,11 @@ contains
       end if
       if (interaction == TWOCENTER_VXC) then
         write (io, "('# nsh1, nsh2 = ',i2,', ',i2)") wf_atoms(ispec)%get_nshells(), wf_atoms(jspec)%get_nshells()
-        write (io, "('# qref1 = ',10ES16.8)") (wf_atoms(ispec)%get_ref_charge(ish), ish = 1, wf_atoms(ispec)%get_nshells())
-        write (io, "('# qref2 = ',10ES16.8)") (wf_atoms(jspec)%get_ref_charge(ish), ish = 1, wf_atoms(jspec)%get_nshells())
+        write (io, "('# qref1 = ',10f14.6)") (wf_atoms(ispec)%get_ref_charge(ish), ish = 1, wf_atoms(ispec)%get_nshells())
+        write (io, "('# qref2 = ',10f14.6)") (wf_atoms(jspec)%get_ref_charge(ish), ish = 1, wf_atoms(jspec)%get_nshells())
       end if
       if (index_max == 0) then
-      	write (io, "('# z')")
+        write (io, "('# z')")
         close (io)
         return
       end if

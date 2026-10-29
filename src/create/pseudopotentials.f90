@@ -44,191 +44,170 @@
 ! Cyra Roldán Piñero
 ! ==============================================================================
 module pseudopotentials
-  use, intrinsic :: iso_fortran_env, only: dp => real64
-  use, intrinsic :: ieee_arithmetic, only: ieee_signaling_nan, ieee_value
-  use :: constants, only: abohr
-  use :: math, only: math_interp_t, math_interp_new
-  use :: utils, only: utils_open
-  implicit none
+use, intrinsic :: iso_fortran_env, only: dp => real64
+use, intrinsic :: ieee_arithmetic, only: ieee_signaling_nan, ieee_value
+use :: constants, only: abohr, PATH_LEN
+use :: math, only: math_interp_t, math_interp_new
+use :: utils, only: utils_open, utils_log, UTILS_LOG_ERROR
+use :: input, only: input_t
+implicit none
+private
+
+public :: pp_atoms, pp_init, pp_end
+
+type, extends(math_interp_t) :: pp_orbital_t
   private
+  integer :: l
+  real(dp) :: rcut, cl
+end type pp_orbital_t
 
-  public :: pp_atoms, pp_init, pp_end
+type :: pp_atom_t
+  private
+  integer :: nz, nshells
+  real(dp) :: rcut
+  type(pp_orbital_t), allocatable :: pps(:)
+contains
+  private
+  procedure, public :: get_nz => pp_atom_nz
+  procedure, public :: get_nshells => pp_atom_nshells
+  procedure, public :: get_angular_momentum => pp_atom_angular_momentum
+  procedure, public :: get_rcut => pp_atom_rcut
+  procedure, public :: get_cl => pp_atom_cl
+  procedure, public :: get_vpp => pp_atom_vpp
+  procedure :: end => pp_atom_end
+end type pp_atom_t
 
-  type, extends(math_interp_t) :: pp_orbital_t
-    private
-    integer :: l
-    real(dp) :: rcut, cl
-  end type pp_orbital_t
-
-  type :: pp_atom_t
-    private
-    integer :: nz, nshells, iexc
-    real(dp) :: rcut
-    type(pp_orbital_t), allocatable :: pps(:)
-  contains
-    private
-    procedure, public :: get_nz => pp_atom_nz
-    procedure, public :: get_nshells => pp_atom_nshells
-    procedure, public :: get_angular_momentum => pp_atom_angular_momentum
-    procedure, public :: get_iexc => pp_atom_iexc
-    procedure, public :: get_rcut => pp_atom_rcut
-    procedure, public :: get_cl => pp_atom_cl
-    procedure, public :: get_vpp => pp_atom_vpp
-    procedure :: end => pp_atom_end
-  end type pp_atom_t
-
-  type(pp_atom_t), allocatable :: pp_atoms(:)
+type(pp_atom_t), allocatable :: pp_atoms(:)
 
 contains
 
-  subroutine pp_init()
-    integer :: i, j, io, io2, nspec, nz
-    character(80) :: inname
-    character(1000) :: fpath
+subroutine pp_init(inp)
+  type(input_t), intent(in) :: inp
+  integer :: i
+  character(PATH_LEN) :: fpath
 
-    io = utils_open("create.input", "r")
-    read (io, *) nspec
-    allocate(pp_atoms(nspec))
-    do i = 1, nspec
-      read (io, *) inname
-      io2 = utils_open(inname, "r")
-      read (io2, *)
-      read (io2, *) nz
-      read (io2, *)
-      read (io2, *) fpath
-      read (io2, *)
-      read (io2, *)
-      close (io2)
-      pp_atoms(i) = pp_new_atom(nz, fpath)
-      if (pp_atoms(i)%iexc /= pp_atoms(1)%iexc) error stop
-    end do
-    close (io)
-  end subroutine pp_init
+  allocate(pp_atoms(size(inp%species)))
+  do i = 1, size(inp%species)
+    fpath = trim(inp%folder)//trim(inp%species(i)%ppfile)
+    pp_atoms(i) = pp_new_atom(inp%species(i)%znuc, fpath)
+  end do
+end subroutine pp_init
 
-  type(pp_atom_t) function pp_new_atom(nz, fpath)
-    integer, intent(in) :: nz
-    character(1000), intent(in) :: fpath
-    integer :: i, ish, io, iexc, np, l, nshells
-    real(dp) :: rcut, cl
-    real(dp), allocatable :: r(:), vpp(:)
-    type(pp_orbital_t), allocatable :: pps(:)
-    io = utils_open(fpath, "r")
-    do i = 1, 14
-      read (io, *)
-    end do
-    read (io, *) iexc
-    read (io, *) nshells
-    do i = 1, 3
-      read (io, *)
-    end do
-    read (io, *) rcut
-    read (io, *) np
+type(pp_atom_t) function pp_new_atom(nz, fpath)
+  integer, intent(in) :: nz
+  character(PATH_LEN), intent(in) :: fpath
+  integer :: i, ish, io, np, l, nsh
+  real(dp) :: rcut, cl
+  real(dp), allocatable :: r(:), vpp(:)
+  type(pp_orbital_t), allocatable :: pps(:)
+  io = utils_open(fpath, "r", skip=15)
+  read (io, *) nsh
+  do i = 1, 3
+    read (io, *)
+  end do
+  read (io, *) rcut
+  read (io, *) np
+  do i = 1, np
+    read (io, *)
+  end do
+  do ish = 1, nsh
+    read (io, "(12x,i5)") np
     do i = 1, np
       read (io, *)
     end do
-    do ish = 1, nshells
-      read (io, "(12x,i5)") np
-      do i = 1, np
-        read (io, *)
-      end do
+  end do
+  allocate(pps(nsh))
+  do ish = 1, nsh
+    read (io, "(3x,i1,8x,i5,4x,f14.7)") l, np, cl
+    if (allocated(r)) deallocate(r)
+    if (allocated(vpp)) deallocate(vpp)
+    allocate(r(np), vpp(np))
+    do i = 1, np
+      read (io, *) r(i), vpp(i)
     end do
-    allocate(pps(nshells))
-    do ish = 1, nshells
-      read (io, "(3x,i1,8x,i5,4x,f14.7)") l, np, cl
-      if (allocated(r)) deallocate(r)
-      if (allocated(vpp)) deallocate(vpp)
-      allocate(r(np), vpp(np))
-      do i = 1, np
-        read (io, *) r(i), vpp(i)
-      end do
-      pps(ish) = pp_new_orbital(l, rcut, cl, r, vpp)
-    end do
-    close (io)
-    pp_new_atom = pp_atom_t(nz=nz, nshells=nshells, iexc=iexc, rcut=rcut, pps=pps)
-  end function pp_new_atom
+    pps(ish) = pp_new_orbital(l, rcut, cl, r, vpp)
+  end do
+  close (io)
+  pp_new_atom = pp_atom_t(nz=nz, nshells=nsh, rcut=rcut, pps=pps)
+end function pp_new_atom
 
-  type(pp_orbital_t) function pp_new_orbital(l, rcut, cl, r, vpp)
-    integer, intent(in) :: l
-    real(dp), intent(in) :: rcut, cl
-    real(dp), intent(in) :: r(:), vpp(:)
-    type(math_interp_t) :: fr
-    fr = math_interp_new(r, vpp, rval=0.0_dp)
-    pp_new_orbital = pp_orbital_t(l=l, rcut=rcut, cl=cl, math_interp_t=fr)
-  end function pp_new_orbital
+type(pp_orbital_t) function pp_new_orbital(l, rcut, cl, r, vpp)
+  integer, intent(in) :: l
+  real(dp), intent(in) :: rcut, cl
+  real(dp), intent(in) :: r(:), vpp(:)
+  type(math_interp_t) :: fr
+  fr = math_interp_new(r, vpp, rval=0.0_dp)
+  pp_new_orbital = pp_orbital_t(l=l, rcut=rcut, cl=cl, math_interp_t=fr)
+end function pp_new_orbital
 
-  pure integer function pp_atom_nz(this)
-    class(pp_atom_t), intent(in) :: this
-    pp_atom_nz = this%nz
-  end function pp_atom_nz
+pure integer function pp_atom_nz(this)
+  class(pp_atom_t), intent(in) :: this
+  pp_atom_nz = this%nz
+end function pp_atom_nz
 
-  pure integer function pp_atom_nshells(this)
-    class(pp_atom_t), intent(in) :: this
-    pp_atom_nshells = this%nshells
-  end function pp_atom_nshells
+pure integer function pp_atom_nshells(this)
+  class(pp_atom_t), intent(in) :: this
+  pp_atom_nshells = this%nshells
+end function pp_atom_nshells
 
-  pure integer function pp_atom_angular_momentum(this, ish)
-    class(pp_atom_t), intent(in) :: this
-    integer, intent(in) :: ish
+pure integer function pp_atom_angular_momentum(this, ish)
+  class(pp_atom_t), intent(in) :: this
+  integer, intent(in) :: ish
+  if (ish < 1 .or. ish > this%nshells) then
+    pp_atom_angular_momentum = -1
+    return
+  end if
+  pp_atom_angular_momentum = this%pps(ish)%l
+end function pp_atom_angular_momentum
+
+pure real(dp) function pp_atom_rcut(this, ish)
+  class(pp_atom_t), intent(in) :: this
+  integer, intent(in), optional :: ish
+  if (present(ish)) then
     if (ish < 1 .or. ish > this%nshells) then
-      pp_atom_angular_momentum = -1
+      pp_atom_rcut = ieee_value(pp_atom_rcut, ieee_signaling_nan)
       return
     end if
-    pp_atom_angular_momentum = this%pps(ish)%l
-  end function pp_atom_angular_momentum
+    pp_atom_rcut = this%pps(ish)%rcut
+  else
+    pp_atom_rcut = this%rcut
+  end if
+end function pp_atom_rcut
 
-  pure integer function pp_atom_iexc(this)
-    class(pp_atom_t), intent(in) :: this
-    pp_atom_iexc = this%iexc
-  end function pp_atom_iexc
+pure real(dp) function pp_atom_cl(this, ish)
+  class(pp_atom_t), intent(in) :: this
+  integer, intent(in) :: ish
+  if (ish < 1 .or. ish > this%nshells) then
+    pp_atom_cl = ieee_value(pp_atom_cl, ieee_signaling_nan)
+    return
+  end if
+  pp_atom_cl = this%pps(ish)%cl
+end function pp_atom_cl
 
-  pure real(dp) function pp_atom_rcut(this, ish)
-    class(pp_atom_t), intent(in) :: this
-    integer, intent(in), optional :: ish
-    if (present(ish)) then
-      if (ish < 1 .or. ish > this%nshells) then
-        pp_atom_rcut = ieee_value(pp_atom_rcut, ieee_signaling_nan)
-        return
-      end if
-      pp_atom_rcut = this%pps(ish)%rcut
-    else
-      pp_atom_rcut = this%rcut
-    end if
-  end function pp_atom_rcut
+pure real(dp) function pp_atom_vpp(this, ish, r, order)
+  class(pp_atom_t), intent(in) :: this
+  integer, intent(in) :: ish
+  real(dp), intent(in) :: r
+  integer, intent(in), optional :: order
+  pp_atom_vpp = this%pps(ish)%f(r, order=order)
+end function pp_atom_vpp
 
-  pure real(dp) function pp_atom_cl(this, ish)
-    class(pp_atom_t), intent(in) :: this
-    integer, intent(in) :: ish
-    if (ish < 1 .or. ish > this%nshells) then
-      pp_atom_cl = ieee_value(pp_atom_cl, ieee_signaling_nan)
-      return
-    end if
-    pp_atom_cl = this%pps(ish)%cl
-  end function pp_atom_cl
+subroutine pp_atom_end(this)
+  class(pp_atom_t), intent(inout) :: this
+  integer :: ish
+  do ish = 1, this%nshells
+    call this%pps(ish)%end()
+  end do
+  deallocate(this%pps)
+end subroutine pp_atom_end
 
-  pure real(dp) function pp_atom_vpp(this, ish, r, order)
-    class(pp_atom_t), intent(in) :: this
-    integer, intent(in) :: ish
-    real(dp), intent(in) :: r
-    integer, intent(in), optional :: order
-    pp_atom_vpp = this%pps(ish)%f(r, order=order)
-  end function pp_atom_vpp
-
-  subroutine pp_atom_end(this)
-    class(pp_atom_t), intent(inout) :: this
-    integer :: ish
-    do ish = 1, this%nshells
-      call this%pps(ish)%end()
-    end do
-    deallocate(this%pps)
-  end subroutine pp_atom_end
-
-  subroutine pp_end()
-    integer :: nspec, ispec
-    nspec = size(pp_atoms)
-    do ispec = 1, nspec
-      call pp_atoms(ispec)%end()
-    end do
-    deallocate(pp_atoms)
-  end subroutine pp_end
+subroutine pp_end()
+  integer :: nspec, ispec
+  nspec = size(pp_atoms)
+  do ispec = 1, nspec
+    call pp_atoms(ispec)%end()
+  end do
+  deallocate(pp_atoms)
+end subroutine pp_end
 
 end module pseudopotentials

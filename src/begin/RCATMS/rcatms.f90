@@ -61,16 +61,14 @@
         use, intrinsic :: iso_fortran_env, only: dp => real64
         use begin_input
         use constants
+	use :: utils, only: utils_open, utils_itos, utils_log, UTILS_LOG_ERROR  
         use :: xc, only: xc_init, xc_end, xc_calc, xc_isgga
         implicit none
 
 ! Local Parameters and Data Declaration
 ! ===========================================================================
-! Get mesh about 10,000
-!        integer, parameter :: mesh = 11188
-! Get mesh about 900
-        integer, parameter :: mesh = 1001
-        integer, parameter :: max_iterations = 120
+        integer, parameter :: mesh = 2049
+        integer, parameter :: max_iterations = 500
 
 ! Local Variable Declaration and Description
 ! ===========================================================================
@@ -81,7 +79,7 @@
         integer iremainder
         integer iteration
         integer issh
-        integer k
+        integer k, io
         integer l, l1, l2
         integer mesh_new
 
@@ -152,28 +150,6 @@
 
 ! Procedure
 ! ===========================================================================
-        !write (*,*) '  '
-        !write (*,*) '  '
-        !write (*,*) ' *--------------------------------------------------* '
-        !write (*,*) ' |           STARTING SUBROUTINE RCATMS             | '
-        !write (*,*) ' *--------------------------------------------------* '
-        !write (*,*) '  '
-        !write (*,*) ' You are currently in subroutine rcatm.f. This program '
-        !write (*,*) ' finds the wavefunctions and total energy of a pseudo- '
-        !write (*,*) ' atom under the condition that the wavefunction fits '
-        !write (*,*) ' inside a sphere of radius Rc. Such a wavefunction is '
-        !write (*,*) ' called a FIREBALL and satisfies the boundary condition '
-        !write (*,*) ' that PSI(Rc) = 0.0_dp. This program uses rydberg units '
-        !write (*,*) ' for the energy and Bohr radii for distance. '
-        !write (*,*) '  '
-        !write (*,*) ' You have a fireball radius Rc = '
-        !write (*,100) rcutoff
-        !write (*,*) ' The variables nznuc and nzval are the atomic number '
-        !write (*,*) ' and the number of valence electrons, respectively. '
-        !write (*,*) ' (e.g. 14, 4 for Si) '
-        !write (*,*) ' You have nznuc = ', nznuc
-        !write (*,*) ' You have nzval = ', nzval
-        !write (*,*) '  '
 
 ! Initialize the wavefunctions and the exact exchange potential.
         psi = 0.0_dp
@@ -212,90 +188,10 @@
          rcutoff_psirc(issh) = real(mesh_psirc(issh) - 1)*dr
         end do
 
-
-
-        !write (*,*) '  '
-        !write (*,*) ' Number of points in mesh = ', mesh
-        !write (*,*) ' r(mesh) = ', r(mesh), ' must = rc_max = ', rc_max
-        if (abs(r(mesh) - rc_max) .gt. 1.0e-6_dp)                              &
-     &   stop ' bad agreement between r(mesh) and rc '
-
-        !write (*,*) '  '
-        !write (*,*) ' We average the output and input charge densities at each '
-        !write (*,*) ' iteration as: '
-        !write (*,*) ' RHO(next iteration) = (1-BETA)*RHO(out) + BETA*RHO(in) '
-        !write (*,*) ' BETA = 0.5 is almost always the best choice.'
-        !write (*,*) ' You have BETA = ', beta
-        !write (*,*) '  '
-
-        !write (*,*) ' Tolerance checks closeness to self-consistentcy. It is '
-        !write (*,*) ' the average difference between the old and new Etot and '
-        !write (*,*) ' sum of eigenvalues, divided by the new average. '
-        !write (*,*) ' The standard tolerance is 1.0e-5_dp. '
-        !write (*,*) ' You have a tolerance of ', tolerance
-        !write (*,*) '  '
-
 ! Determine the non-local pseudopotential.
         xnz = real(nzval)
-!        call pp (ppfile, nssh, mesh, xnz, r, vc, vl, ioptionpp, exmix)
         call pp (0, mesh, r, vc, vl, ioptionpp, exmix)
-        !write (*,*) ' Leaving pp subroutine  '
-
-        if (ioptionpp .ne. ioption) then
-         !write (*,*) ' The exchange-correlation potential option in your '
-         !write (*,*) ' pseudopotential file does not match the option chosen '
-         !write (*,*) ' by running initial.x! Are you positive that you want '
-         !write (*,*) ' to proceed? Enter 1-yes, 0-no. '
-         read (*,*) ioptionpp
-         if (ioptionpp .eq. 0) then
-          !write (*,*) ' You have chosen to stop! '
-          stop
-         end if
-        end if
-
-        ! fhi98PP iexc -> libXC ids; keep in sync with src/create/create.f90
-        if (ioption == 3) then
-          call xc_init([1, 9])          ! LDA  Slater X + Perdew-Zunger C
-        else if (ioption == 6) then
-          call xc_init([101, 130])      ! GGA  Perdew-Burke-Ernzerhof
-        else if (ioption == 9) then
-          call xc_init([106, 131])      ! GGA  Becke 88 X + Lee-Yang-Parr C
-        else
-          write (*, "(a,i0,a)") "iexc = ", ioption, " is not mapped to libXC yet; &
-            &see the table in src/create/create.f90"
-          error stop 1
-        end if
-
-        !write (*,*) ' The number of shells is - 1 for s, 2 for s and p, or '
-        !write (*,*) ' 3 for s, p, d. '
-        !write (*,*) ' You are using nssh = ', nssh
-        !write (*,*) '  '
-        !write (*,*) ' The parameters for your different states are: '
-        !write (*,*) ' lam = 0 for s , 1 for p , 2 for d, 3 for f'
-        !write (*,*) ' xocc = # of electrons in the shell '
-        !write (*,*) ' a0 = hydrogenic orbital radius guess '
-
-        do issh = 1, nssh
-         !write (*,*) '  '
-         !write (*,*) ' lam, xocc, a0 for state# ', issh
-         !write (*,*) ' l = ', lam(issh)
-         !write (*,*) ' # electrons = ', xocc(issh)
-         !write (*,*) ' Wavefunction guess is hydrogenic with effective '
-         !write (*,*) ' Bohr radius a0 = ', a0(issh)
-         !write (*,*) '  '
-        end do
-
-        !write (*,*) ' This program will write out data files containing the '
-        !write (*,*) ' s, p, d, or f wavefunctions. File-name convention: '
-        !write (*,*) ' The name begins with the chemical symbol Z (e.g. 014 for '
-        !write (*,*) ' Si or 006 for C), this is then followed by the value for '
-        !write (*,*) ' Rc (for example, 500 for 5.00), and finally it is '
-        !write (*,*) ' appended by .wf#, where # is the shell number '
-        !write (*,*) ' (not l quantum number). An example for Si is 014_500.wf1 '
-        !write (*,*) '  '
-        !write (*,*) ' You have chosen: '
-        !write (*,101) filename_wf
-        !write (*,*) '  '
+	call xc_init(exc_names, exc_weights)
 
 ! create additional X-potential to optimize pseudoatomic w.f.
         vX = 0.0_dp
@@ -314,20 +210,16 @@
                  endif
               end do ! enddo ipoint
            enddo ! enddo  issh
-! write vX        
-           do ipoint = 1, mesh
-!              write (100,*) r(ipoint),(vX(issh,ipoint),issh=1,nssh)
-           enddo
         endif ! if(ioptim)
 
 ! Construct approximate starting potential. We do this by forming hydrogenic
-! wavefunctions using an effective bohr radius a0(m).
+! wavefunctions using an effective bohr radius a0_eff(m).
         sigma = 0.0_dp
         do issh = 1, nssh
          l = lam(issh)
          do ipoint = 1, mesh - 1
           if (r(ipoint) .lt. rcutoff_psirc(issh)) then
-           psi0(ipoint) = r(ipoint)**(l+1)*exp(-r(ipoint)/a0(issh))
+           psi0(ipoint) = r(ipoint)**(l+1)*exp(-r(ipoint)/a0_eff(issh))
           else
            psi0(ipoint) = 0.0_dp
           end if
@@ -340,11 +232,6 @@
          psi(issh,:) = psi0/xnorm
          sigma = sigma + xocc(issh)*psi(issh,:)**2
         end do
-
-! Check that int[0,rc] sig(r) dr = z
-        difference = abs(dr*sum(sigma) - real(nzval))
-!dani.        if (difference .gt. tolerance)                                       &
-!dani.     &   stop ' Check: Sum of charge density - not equal to nzval '
 
 ! Now find rho dependent potentials, vee and uxc.
 ! The subroutine get_uxc depends on the actual density rho, calculate rho
@@ -368,27 +255,12 @@
         rhopp(mesh,1,1) = 2.0_dp*rhopp(mesh-1,1,1) - rhopp(mesh-2,1,1)
 
         ienergy = 0     ! do not calculate energies
-        if (xc_isgga()) then
           do ipoint = 1, mesh
             call xc_calc(rho(ipoint)/abohr3, rhopp(ipoint,1,1)/abohr5, rhop(ipoint,:)/abohr4, rhopp(ipoint,:,:)/abohr5, &
               &          eexc(ipoint), uxc(ipoint), dexcrho, dexcsigma, duxcrho, duxcsigma, duxclapl, duxccross)
             eexc(ipoint) = eexc(ipoint)/ryd
             uxc(ipoint) = uxc(ipoint)/ryd
           end do
-        else
-          do ipoint = 1, mesh
-            call xc_calc(rho(ipoint)/abohr3, eexc(ipoint), uxc(ipoint), dexcrho, duxcrho)
-            eexc(ipoint) = eexc(ipoint)/ryd
-            uxc(ipoint) = uxc(ipoint)/ryd
-          end do
-        end if
-        if (ienergy == 1) then
-          exc = 0.0_dp
-          do ipoint = 1, mesh
-            exc = exc + dr*r(ipoint)**2*rho(ipoint)*eexc(ipoint)
-          end do
-        end if
-        !write (*,*) ' call get_vee '
         call get_vee (mesh, dr, sigma, vee)
 
 ! We do not have wave functions at this point. So do the first iteration with
@@ -407,13 +279,6 @@
 ! integral (0,infinity) PNL**2 dR =1.
 !
 ! The result of PNL for orbital issh is stored in psi0, and later put into psi.
-        !write (*,*) ' *--------------------* '
-        !write (*,*) ' | START OF ITERATION | '
-        !write (*,*) ' *--------------------* '
-        !write (*,*) '  '
-        !write (*,200)
-        !write (*,201)
-
         eold = 0.0_dp
         do iteration = 1, max_iterations  ! ::::::: SCF LOOP ::::::::
          sigma_old = sigma
@@ -423,14 +288,9 @@
 
 ! put potential in v
 ! Note that the factor of 2 is conversion from Hartree units to Rydberg units.
-          if (ioptionpp .ne. 12) then
 !           v = 2.0_dp*(vc + vl(issh,:)) + vee + uxc
            v = 2.0_dp*(vc + vl(issh,:)) + vee + uxc + vX(issh,:)
-          else
-!           v = 2.0_dp*(vc + vl(issh,:)) + vee + uxc + exmix*vexx(issh,:)
-           v = 2.0_dp*(vc + vl(issh,:)) + vee + uxc + exmix*vexx(issh,:)    &
-     &           + vX(issh,:)
-          end if
+
 
 ! Solve Schroedinger equation for potential v
           psi0 = psi(issh,:)
@@ -475,42 +335,22 @@
          rhopp(mesh,1,1) = 2.0_dp*rhopp(mesh-1,1,1) - rhopp(mesh-2,1,1)
 
          ienergy = 1     ! calculate energies
-         if (xc_isgga()) then
            do ipoint = 1, mesh
             call xc_calc(rho(ipoint)/abohr3, rhopp(ipoint,1,1)/abohr5, rhop(ipoint,:)/abohr4, rhopp(ipoint,:,:)/abohr5, &
               &          eexc(ipoint), uxc(ipoint), dexcrho, dexcsigma, duxcrho, duxcsigma, duxclapl, duxccross)
              eexc(ipoint) = eexc(ipoint)/ryd
              uxc(ipoint) = uxc(ipoint)/ryd
            end do
-         else
-           do ipoint = 1, mesh
-             call xc_calc(rho(ipoint)/abohr3, eexc(ipoint), uxc(ipoint), dexcrho, duxcrho)
-             eexc(ipoint) = eexc(ipoint)/ryd
-             uxc(ipoint) = uxc(ipoint)/ryd
-           end do
-         end if
-         if (ienergy == 1) then
            exc = 0.0_dp
            do ipoint = 1, mesh
              exc = exc + dr*r(ipoint)**2*rho(ipoint)*eexc(ipoint)
            end do
-         end if
          call get_vee (mesh, dr, sigma, vee)
 
 ! The xc energy is in units of 4*pi, convert back.
          exc = 4.0_dp*pi*exc
 
-     !     if (ioptionpp .eq. 12) then
-     !      do issh = 1, nssh
-     !       call ExxPot (mesh, nssh, mesh_psirc(issh), dr, r, Rall, lam,      &
-     ! &                  issh, 1, nssh, xocc, cgcoeff, vexx)
-     !      end do
-     !     end if
-
-! Calculate the total energy:  Etot=sum(eigenval)-1/2*Vee-1/4*Vxc
-! (Minus sign to convert binding energies into real energies)
-! Sum over the eigenvalues:
-         ebs = dot_product(xocc,eigenvalue)
+	 ebs = dot_product(xocc,eigenvalue)
 
 ! Evaluate the double counted electron-electron repulsion and the exchange-
 ! correlation energy.
@@ -594,54 +434,19 @@
         end do  ! :::::::::::::::: END OF SCF LOOP :::::::::::::::::::::
 ! *****************************************************************************
 
-        do issh = 1, nssh
-         !write (*,300) lam(issh), xocc(issh), eigenvalue(issh)
-        end do
-
         if (difference .gt. tolerance_scf) then
-         !write (*,*) '  '
-         !write (*,*) ' No self consistency after maximum iterations = ',    &
-     !&   max_iterations
-         stop
+	  call utils_log(UTILS_LOG_ERROR, "self-consistency not reached")
+	  error stop 1
         end if
-
-        !write (*,*) '  '
-        !write (*,*) ' Terms in the sum of eigenvalues: '
-        !write (*,*) '  '
-        !write (*,*) '  in Rydbergs:'
-        total = terms(1) + terms(2) + terms(3) + terms(4)
-        !write (*,*) '  '
-        !write (*,*) '  vnl      = ', terms(1)
-        !write (*,*) '  uxc      = ', terms(2)
-        !write (*,*) '  vc + vh  = ', terms(3)
-        !write (*,*) '  kinetic  = ', terms(4)
-        !write (*,*) '  total    = ', total
-        !write (*,*) '  '
-
-        terms = terms*ryd
-        !write (*,*) '  in eV:'
-        total = terms(1) + terms(2) + terms(3) + terms(4)
-        !write (*,*) '  '
-        !write (*,*) '  vnl      = ', terms(1)
-        !write (*,*) '  uxc      = ', terms(2)
-        !write (*,*) '  vc + vh  = ', terms(3)
-        !write (*,*) '  kinetic  = ', terms(4)
-        !write (*,*) '  total    = ', total
-        !write (*,*) '  '
 
 ! ***************************************************************************
 !       W R I T E    O U T    W A V E F U N C T I O N S
 ! ***************************************************************************
 !JOM
-! Do not write WFs if nexcite = 2 !
+! Do not write WFs if nexcite = 3 !
 ! ***************************************************************************
 !JOM
 	if (nexcite .ne. 3) then
-
-         !write (*,*) ' This program writes out the following data files: '
-         !write (*,*) '  '
-         !write (*,*) ' s.wf [p.wf...]  u_s(r) [u_p...] r=100 points '
-         !write (*,*) '  '
 
 ! Write wavefunction onto outputfile (named FILENAME)
 ! First convert to angstrom units :    r   ---> r    /  (0.529177249)
@@ -653,15 +458,6 @@
          do issh = 1, nssh
           mesh_new = mesh_psirc(issh)
           l = lam(issh)
-          if(sav(issh)) open (unit = 14, file = trim(outpath)//trim(filename_wf(issh)), status = 'unknown')
-          if(sav(issh)) write(14,101) filename_wf(issh)
-          if(sav(issh)) write(14,102) nznuc, atomname
-          if(sav(issh)) write(14,103) mesh_new
-! warnning !!
-! this charge will be read by readpsi subroutine and it will be used in 
-! vnn subroutine to generate neutral atomic potential
-          if(sav(issh)) write(14,104) rcutoff_psirc(issh), rc_max, xocc0(issh)
-          if(sav(issh)) write(14,105) lam(issh)
 
 ! Find (approximately) the value at r=0
           xx(2) = r(2)*abohr
@@ -680,46 +476,22 @@
           xx(mesh_new) = r(mesh_new)*abohr
           yy(mesh_new) = 0.0_dp
 
-          inum = idint(real(mesh_new)/4.0_dp)
-          iremainder = mesh_new - (inum*4)
+	  if (sav(issh)) then
+	    io = utils_open(trim(outpath)//trim(utils_itos(nznuc, lpad=3))//"_"//lnames(l)//".wf", "w")
+	    write (io, "('# Z, l = ',i3,2x,i2)") nznuc, l
+	    write (io, "('# q = ',f14.6)") xocc0(issh)
+	    write (io, "('# n = ',i8)") mesh_new
+	    do jpoint = 1, mesh_new
+	      write (io, "(2ES16.8)") xx(jpoint), yy(jpoint)
+	    end do
+	    close(io)
+	  end if
 
-          do jpoint = 1, mesh_new - iremainder,4
-           if(sav(issh)) write(14,400) yy(jpoint), yy(jpoint+1), yy(jpoint+2), yy(jpoint+3)
-          end do
-
-          if (iremainder .eq. 1) then
-           if(sav(issh)) write(14,400) yy(mesh_new)
-          else if (iremainder .eq. 2) then
-           if(sav(issh)) write(14,400) yy(mesh_new-1), yy(mesh_new)
-          else if (iremainder .eq. 3) then
-           if(sav(issh)) write(14,400) yy(mesh_new-2), yy(mesh_new-1), yy(mesh_new)
-          end if
-          if(sav(issh)) close (unit = 14)
-
-! Write out the wavefunctions for plotting purposes.
-!dani.          if (l .eq. 0) open (unit = 17, file = 'sstate0', status = 'unknown')
-!dani.          if (l .eq. 1) open (unit = 17, file = 'pstate0', status = 'unknown')
-!dani.          if (l .eq. 2) open (unit = 17, file = 'dstate0', status = 'unknown')
-!dani.          if (l .eq. 3) open (unit = 17, file = 'fstate0', status = 'unknown')
-
-!dani.          do ipoint = 1, mesh_new
-!dani.           write (17,401) r(ipoint), yy(ipoint)
-!JOM-test 
-!           write (17,401) r(ipoint), psi(issh,ipoint)
-!dani.          end do
-!dani.          close (unit = 17)
          end do
          deallocate (xx)
          deallocate (yy)
 !JOM
 	end if
-
-!JOM
-!dani.JOM
-      !  if (nexcite .ne. 3) then
-      !   call vnn ()
-      !  end if
-
 
 ! If the option to do excited states was chosen then call this routine
         if (nexcite .eq. 1) then
@@ -730,10 +502,6 @@
         else if (nexcite .eq. 3) then
          call rcatms_GSM (mesh, mesh_psirc, rc_max, rcutoff_psirc, r, psi)
         end if
-
-        !write (*,*) ' Bye from RCATMS! '
-        !write (*,*) '  '
-
 
 ! Deallocate Arrays
 ! ===========================================================================
@@ -748,23 +516,4 @@
         deallocate (vna_local)
         deallocate (vX)
         call xc_end()
-
-! Format Statements
-! ===========================================================================
-100     format (2x, 4f6.2)
-101     format (2x, 4(2x,a11))
-102     format (2x, i5, 2x, a11)
-103     format (2x, i8)
-104     format (2x, 2(2x,f7.4), 2x, f7.2)
-105     format (2x, i3)
-200     format (2x, ' iteration ', 2x, ' e(tot) ', 2x, ' eigenvalue ', 3x, &
-     &          ' u(e-e) ', 6x, ' u(xc) ', 4x, ' tolerance ')
-201     format (2x, 75('='))
-202     format (5x, i3, 5x, 1e11.4, 4(2x,e11.5))
-300     format (2x, ' l = ', i1, ' contains ', f6.3, ' electrons --- ' ,   &
-     &              ' eigenvalue = ', f12.7)
-400     format (4d18.10)
-401     format (2x, f6.3, 2x, f12.6)
-
-        return
         end

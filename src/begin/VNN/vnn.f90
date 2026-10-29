@@ -50,7 +50,8 @@
         use constants
         use pp_storage
         use, intrinsic :: iso_fortran_env, only: dp => real64
-        implicit none
+	use :: utils, only: utils_open, utils_itos
+	implicit none
 
 ! Argument Declaration and Description
 ! ===========================================================================
@@ -59,9 +60,9 @@
 ! Local Parameters and Data Declaration
 ! ===========================================================================
 ! grid sizes
-        integer, parameter :: nrr = 399
-        integer, parameter :: nrrp = 401
-        integer, parameter :: mesh_rcatms = 1001
+        integer, parameter :: nrr = 2049
+        integer, parameter :: nrrp = 2047
+        integer, parameter :: mesh_rcatms = 2049
 ! Local Variable Declaration and Description
 ! ===========================================================================
         integer ipoint
@@ -69,7 +70,7 @@
         integer irp
         integer issh
         integer itenth
-        integer l
+        integer l, io
         integer mesh
 
         integer, dimension (:), allocatable :: npoints_vnn
@@ -106,6 +107,7 @@
         real(kind=dp), dimension (:,:), allocatable :: vvrho
         real(kind=dp), dimension (:), allocatable :: xnocc
         real(kind=dp), dimension (nrr) :: xrr
+	character(len=9), dimension(:), allocatable :: filename_wf
 
 ! Allocate Arrays
 ! ===========================================================================
@@ -117,89 +119,35 @@
         allocate (vvrho(nssh,nrr))
         allocate (xnocc(nssh))
         allocate (vl(nssh,mesh_rcatms))
-
+	allocate (filename_wf(nssh))
+	  
 ! Procedure
 ! ===========================================================================
 ! Initialize some constants
-        !write (*,*) '  '
-        !write (*,*) '  '
-        !write (*,*) '  *------------------------------------------------*'
-        !write (*,*) '  |            Starting subroutine vnn             |'
-        !write (*,*) '  *------------------------------------------------*'
-        !write (*,*) '  '
-        !write (*,*) '  Atomic number = ', nznuc
-        !write (*,*) '  '
+
 !-------dani.JOM 
  call pp (0, mesh_rcatms, r, vc, vl, ioptionpp, exmix)
 !------------------	
 
-
-	
-        !write (*,*) ' This program will read in data files containing the '
-        !write (*,*) ' wavefunctions. These files were created by the rcatms.f '
-        !write (*,*) ' subroutine. The file names should be according to our '
-        !write (*,*) ' convention - '
-        !write (*,*) ' 1. Begin with the chemical number (Z) (e.g. 14 for Si)'
-        !write (*,*) ' which should be followed by the value for rc.'
-        !write (*,*) ' 2. The extension should be .wf0, .wf1, .wf2, depending '
-        !write (*,*) ' on whether the file is s, p or d. '
-        !write (*,*) '  '
-        !write (*,*) ' An example is 014_500.wf2 which is a wavefunction file '
-        !write (*,*) ' for the d-orbital of Silicon and the wavefunction has '
-        !write (*,*) ' a maximum cutoff of 5.00 Bohr. '
-        !write (*,*) '  '
-
-        !write (*,*) ' We read the wavefunctions from: '
-        do issh = 1, nssh
-         !write (*,100) filename_wf(issh)
-        end do
-
-        !write (*,*) '  '
-        !write (*,*) ' Furthermore, the program will write out a data file'
-        !write (*,*) ' containing the (non)-neutral atom (local) potential.'
-        !write (*,*) ' Its name should according to our convention - '
-        !write (*,*) ' 1. Begin with the chemical number (Z) (e.g. 14 for Si)'
-        !write (*,*) ' which should be followed by the value for rc.'
-        !write (*,*) ' 2. Signify to which shell the potential bedps. '
-        !write (*,*) ' 3. The extension should be _s.na, _p.na, _d.na, or _f.na '
-        !write (*,*) '  '
-        !write (*,*) ' An example is 014_500_s.na which is the s-shell '
-        !write (*,*) ' non-neutral atom potential file for Silicon with a '
-        !write (*,*) ' maximum cutoff of 5.00 Bohr.'
-        !write (*,*) '  '
-        !write (*,*) ' We write the non-neutral atom potential to: '
-        do issh = 0, nssh
-         !write (*,100) filename_na(issh)
-        end do
-        !write (*,*) '  '
-
 ! Read in the wavefunctions
-! First get the maximum mesh size from all of the wavefuntion files
-        call get_wfmesh_size (nssh, filename_wf, mesh)
-        allocate (rr(nssh,mesh))
-        allocate (psi_vnn(nssh,mesh))
+	do issh = 1, nssh
+	  l = lam(issh)
+	  filename_wf(issh) = trim(utils_itos(nznuc, lpad=3))//"_"//lnames(l)//".wf "
+	end do
+        allocate (rr(nssh,mesh_rcatms))
+        allocate (psi_vnn(nssh,mesh_rcatms))
         call readpsi (nssh, filename_wf, mesh, npoints_vnn, rrc,        &
      &                drr, xnocc, rr, psi_vnn)
 
-        rc_max_vnn = -1.0_dp
+	rc_max_vnn = -1.0_dp
         do issh = 1, nssh
          rc_max_vnn = max(rc_max_vnn,rrc(issh))
         end do
-        rc_max_vnn = rc_max_vnn*0.529177249_dp
-
-!        xnz = 0.0_dp
-!        do issh = 1, nssh
-!         xnz = xnz + xnocc(issh)
-!        end do
+        rc_max_vnn = rc_max_vnn*abohr
 
 
 ! *****************************************************************************
 ! first set up vna matrix
-        !write (*,*) '  '
-        !write (*,*) ' Setting up V_na matrix. '
-        !write (*,*) '   '
-        !write (*,*) ' Write out the potential at 10 points:'
-        !write (*,*) ' ====================================='
         dr = rc_max_vnn/real(nrr - 1)
         r_vnn = - dr
 
@@ -258,61 +206,35 @@
 
          vvrho(:,ir) = vrho
          xrr(ir) = r_vnn
-
-! Write out 10 values
-         itenth = int(float(nrr)/10.0_dp)
-         if (mod(ir,itenth) .eq. 1) then
-          !write (*,*) '  '
-          !write (*,200) ir, xrr(ir), vneut(ir)
-          do issh = 1, nssh
-           !write (*,201) issh - 1, vvrho(issh,ir)
-          end do
-         end if
         end do
 
 ! Write out the information to the files
-        !write (*,*) ' '
-        !write (*,*) ' Finished setting up V_na matrix. '
-        !write (*,*) ' Now write values on the following data files: '
 
         do issh = 0, nssh
-         !write (*,100) filename_na(issh)
-         open (unit = 66, file = trim(outpath)//trim(filename_na(issh)),  status = 'unknown')
-         write (66,101) filename_na(issh)
-         write (66,*) nznuc
-
-         if (issh .eq. 0) write (66,*) rc_max_vnn/0.529177249_dp
-         if (issh .ne. 0) write (66,*) rcutoff(issh)
-         write (66,*) nrr
-         if (issh .eq. 0) write (66,*) etotatom
-
-         do ipoint = 1, nrr
-          if (issh .eq. 0) write (66,300) xrr(ipoint), vneut(ipoint)
-          if (issh .ne. 0) write (66,300) xrr(ipoint), vvrho(issh,ipoint)
-         end do
-         close (unit = 66)
-
-
-! For plotting purposes
-!         l = -99
-!dani.         if (issh .eq. 0) open (unit = 48, file = 'NA_plot', status = 'unknown')
-!dani.         if (issh .ge. 1) l = lam(issh)
-!dani.         if (l .eq. 0) open (unit = 48, file = 'NA_splot', status = 'unknown')
-!dani.         if (l .eq. 1) open (unit = 48, file = 'NA_pplot', status = 'unknown')
-!dani.         if (l .eq. 2) open (unit = 48, file = 'NA_dplot', status = 'unknown')
-!dani.         if (l .eq. 3) open (unit = 48, file = 'NA_fplot', status = 'unknown')
-!dani.         do ipoint = 1, nrr
-!dani.          if (issh .eq. 0) write (48,301) xrr(ipoint), vneut(ipoint)
-!dani.          if (issh .ne. 0) write (48,301) xrr(ipoint), vvrho(issh,ipoint)
-!dani.         end do
-!dani.         close (unit = 48)
+	  if (issh == 0) then
+	    io = utils_open(trim(outpath)//trim(utils_itos(nznuc, lpad=3))//".na0", "w")
+	    write (io, "('# Z = ',i3)") nznuc
+	  else
+	    l = lam(issh)
+	    io = utils_open(trim(outpath)//trim(utils_itos(nznuc, lpad=3))//"_"//lnames(l)//".na", "w")
+	    write (io, "('# Z, l = ',i3,2x,i2)") nznuc, l
+	  end if
+	  write (io, "('# n = ',i8)") nrr
+	  if (issh == 0) then
+	    do ipoint = 1, nrr
+	      write (io, "(2ES16.8)") xrr(ipoint), vneut(ipoint)
+	    end do
+	  else
+	    do ipoint = 1, nrr
+	      write (io, "(2ES16.8)") xrr(ipoint), vvrho(issh,ipoint)
+	    end do
+	  end if
+	  close(io)
         end do
 
 ! If the option to calculate excited states is chosen then call this routine
 !dani.JOM 
-         if (nexcite .eq. 1 .or. nexcite .eq. 2) then
-         call vnn_excite
-         end if
+         if (nexcite .eq. 1 .or. nexcite .eq. 2) call vnn_excite()
 
 
 ! Deallocate Arrays
@@ -327,15 +249,5 @@
         deallocate (vvrho)
         deallocate (xnocc)
         deallocate (vl)
-
-! Format Statements
-! ===========================================================================
-100     format (2x, a11)
-101     format (a11)
-200     format (2x, ' ir = ', i4, 2x, ' r = ', f9.5, 2x, ' V_na = ', d16.5)
-201     format (22x, ' Vvrho(issh = ', i1, ') = ', d16.5)
-300     format (2d24.16)
-301     format (2x, f6.3, 2x, f12.6)
-
-        return
+	deallocate (filename_wf)
         end

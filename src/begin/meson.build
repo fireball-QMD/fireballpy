@@ -20,11 +20,8 @@ rcatms_srcs = [
 ]
 
 vnn_srcs = [
-  'get_ewfmesh_size.f90',
-  'get_wfmesh_size.f90',
   'psiofr.f90',
   'readpsi.f90',
-  'readpsi_excite.f90',
   'vnn.f90',
   'vnn_excite.f90',
 ]

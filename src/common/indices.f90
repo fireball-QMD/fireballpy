@@ -1,5 +1,5 @@
 module indices
-  use :: constants, only: snames, pnames, dnames, fnames
+  use :: constants, only: lnames, snames, pnames, dnames, fnames
   implicit none
   private
   public :: indices_onecenter_set, indices_twocenter_set
@@ -234,11 +234,15 @@ contains
     end select
   end function indices_get_power_y
 
-  pure character(32) function indices_get_name(l, m, omit_suffix)
+  pure character(INDICES_NAMES_LEN) function indices_get_name(l, m, omit_suffix)
     integer, intent(in) :: l, m
     logical, intent(in), optional :: omit_suffix
     if (m < -l .or. m > l) then
       indices_get_name = ""
+      return
+    end if
+    if (present(omit_suffix)) then
+      if (omit_suffix) indices_get_name = lnames(l)
       return
     end if
     select case (l)
@@ -253,9 +257,6 @@ contains
     case default
       indices_get_name = " "
     end select
-    if (present(omit_suffix)) then
-      if (omit_suffix) indices_get_name = indices_get_name(1:1)
-    end if
   end function indices_get_name
 
 end module indices

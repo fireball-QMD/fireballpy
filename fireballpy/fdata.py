@@ -1,8 +1,8 @@
 from __future__ import annotations
 from copy import deepcopy
-from enum import StrEnum
+from enum import Enum
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any
 
 import json
 import sys
@@ -13,21 +13,27 @@ else:
 
 import numpy as np
 
-from fireballpy.utils import get_data_from_url, read_wf, read_wf_info, ANGULAR_MOMENTUM_REV
+from ase.data import atomic_numbers
+
+from fireballpy import __version__ as __fb_version__
+from fireballpy._errors import type_check
+from fireballpy.utils import get_data_from_url
 from fireballpy.atoms import AtomSystem
 from fireballpy.options import ChargesMethod
+from fireballpy.basis.fdata import XC_NAMES_LEN
+from fireballpy._fireball import loadfdata_from_path, set_fdata_info
 
-_loaded_fdata: tuple[str, set[str]] = ("", set(""))
-_fdatas: dict[str, Any] | None = None
+_loaded_fdata: tuple[str, list[str]] = ("", [""])
+_fdatas: dict[str, Any] = {}
 
 def _load_db() -> None:
     global _fdatas
-    if _fdatas is not None:
+    if _fdatas:
         return
-    with open(Path(__file__) / "fdata.toml", "rb") as fp:
+    with (Path(__file__) / "fdata.toml").open('rb') as fp:
         _fdatas = tomllib.load(fp)
 
-class FData(StrEnum):
+class FData(Enum):
     BIOLOGY = "biology"
     BIOLOGY_EXTENDED = "biology_extended"
     CHON = "CHON"
@@ -36,10 +42,11 @@ class FData(StrEnum):
 
 def available_fdatas() -> list[str]:
     _load_db()
-    global _fdatas
-    for i, k in enumerate(FData):
-        if "correction" in _fdatas[k]:
-            keys[i] += f" ({_fdatas[k]["correction"]["kind"].upper()} available)"
+    keys = []
+    for k in FData:
+        keys.append(k.value)
+        if "correction" in _fdatas[k.value]:
+            keys[-1] += f" ({_fdatas[k.value]['correction']['kind'].upper()} available)"
     return keys
 
 class FDataFiles:
@@ -61,7 +68,7 @@ class FDataFiles:
     ----------
     name : str
         Name of the provided FData.
-    path : str
+    path : pathlib.Path
         Path to the FData.
 
     Methods
@@ -80,8 +87,7 @@ class FDataFiles:
     def _get_db_fdata(self, fdata: FData) -> None:
         _load_db()
         global _fdatas
-        current = _fdatas[fdata.value]
-        self.species: set[str] = set(current["species"])
+        current: dict[str, Any] = _fdatas[fdata.value]
         self.charges_method = ChargesMethod[current["charges_method"].upper()]
         self.corr: dict[str, Any] = current.get("correction", {})
         self.path = Path(get_data_from_url(current["url"], fdata.value, "FData"))
@@ -92,26 +98,67 @@ class FDataFiles:
         else:
             self.path = Path(fdata)
             self.charges_method = None
-            self.corr = {}
+            self.corr: dict[str, Any] = {}
+        self.path = self.path.absolute()
 
-        with open(self.path / "info.json", "r") as fp:
+        with (self.path / "info.json").open('r') as fp:
             self.info: dict[str, Any] = json.load(fp)
 
-        self.species_available = set(self.info["elements"].keys())
+        _species: list[tuple[str, int]] = sorted([(sp["symbol"], sp["znuc"]) for sp in self.info["species"]],
+                                                 key=lambda x: x[1])
+        self.species_available = [x[0] for x in _species]
         if atomsystem is None:
             self.species_present = self.species_available
         else:
-            self.species_present = atomsystem.species
-            if self.species_present > self.species_available:
+            self.species_present = sorted(list(atomsystem.species), key=lambda x: atomic_numbers[x])
+            if not set(self.species_present) <= set(self.species_available):
                 raise ValueError("provided FData does not have all required species")
-            
-    def load_fdata(self) -> None:
+
+    def _set_fdata_info(self) -> None:
+        """Hand the FData description over to the Fortran side."""
+        species: list[dict[str, Any]] = self.info["species"]
+        znuc = np.ascontiguousarray([sp["znuc"] for sp in species], dtype=np.int32)
+        nssh = np.ascontiguousarray([len(sp["angular_momentum"]) for sp in species], dtype=np.int32)
+        nsshpp = np.ascontiguousarray([len(sp["pseudopotential"]["angular_momentum"]) for sp in species], dtype=np.int32)
+        nspec = np.int32(len(species))
+        nsh = np.max(nssh)
+        lssh = np.zeros((nspec, nsh), dtype=np.int32, order='C')
+        rcutoff = np.zeros((nspec, nsh), dtype=np.float64, order='C')
+        qneutral = np.zeros((nspec, nsh), dtype=np.float64, order='C')
+        qrefxc = np.zeros((nspec, nsh), dtype=np.float64, order='C')
+        lsshpp = np.zeros((nspec, nsh), dtype=np.int32, order='C')
+        rcpp = np.zeros(nspec, dtype=np.float64, order='C')
+        cl_pp = np.zeros((nspec, nsh), dtype=np.float64, order='C')
+        for i, sp in enumerate(species):
+            rcpp[i] = sp["pseudopotential"]["rcutoff"]
+            for j in range(nssh[i]):
+                lssh[i, j] = sp["angular_momentum"][j]
+                rcutoff[i, j] = sp["rcutoff"][j]
+                qneutral[i, j] = sp["qneutral"][j]
+                qrefxc[i, j] = sp["qrefxc"][j]
+            for j in range(nsshpp[i]):
+                lsshpp[i, j] = sp["pseudopotential"]["angular_momentum"][j]
+                cl_pp[i, j] = sp["pseudopotential"]["cl"][j]
+        exc_names: list[str] = [name.ljust(XC_NAMES_LEN) for name in self.info["xc"]["names"]]
+        exc_weights = np.ascontiguousarray(self.info["xc"]["weights"], dtype=np.float64)
+        set_fdata_info(znuc, nssh, nsshpp, lssh.T, lsshpp.T, rcutoff.T, qneutral.T, qrefxc.T,
+                       rcpp, cl_pp.T, exc_names, exc_weights)
+        self.nshells = {int(z): int(n) for z, n in zip(znuc, nssh)}
+        self.norbitals = {int(z): int(np.sum([2*lssh[i, j] + 1 for j in range(nssh[i])])) for i, z in enumerate(znuc)}
+
+    def load_fdata(self, lazy: bool = True) -> None:
         """Set Fortran module variables and load the FData into memory.
         """
+        if lazy:
+            self.species = self.species_present
+        else:
+            self.species = self.species_available
         global _loaded_fdata
-        load_tuple = (self.path, self.species_present)
+        load_tuple = (str(self.path), self.species)
         if load_tuple != _loaded_fdata:
-            load_fdata()
+            self._set_fdata_info()
+            loadfdata_from_path(str(self.path / "_")[:-1])
+            _loaded_fdata = deepcopy(load_tuple)
 
     def get_charges_method(self) -> ChargesMethod:
         """Get the optimal charge method for autoconsistency.

@@ -14,7 +14,7 @@ fdata_srcs = [
   'readdata_3c.f90',
   'readheader_3c.f90',
   'setterp_2d.f90',
-  'fdata_load.f90',
+  'load_fdata.f90',
 ]
 system_srcs = [
   'kspace_gamma.f90',
