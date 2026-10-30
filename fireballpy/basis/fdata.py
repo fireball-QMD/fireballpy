@@ -546,23 +546,25 @@ def basis(folder: Annotated[pathlib.Path, Parameter(validator=Path(exists=True, 
         raise_err(TypeError("'--exc' and  '--exc-weights' have different lengths"))
     if exc_charges is None:
         refchs = [[float(el.xocc0[i]) for i in range(el.norbs)] for el in els]
+        for i, el in enumerate(els):
+            if el.exnum == ExcitedEnum.NODE or el.exnum == ExcitedEnum.DMOL:
+                refchs[i] += [0.0 for _ in range(el.norbs)]
     else:
-        split_charges = list(map(str.strip, exc_charges))
+        split_charges = list(x.strip() for x in exc_charges)
         refchs: list[list[float]] = []
         for el in els:
             if el.symbol not in split_charges:
                 refchs.append([float(el.xocc0[i]) for i in range(el.norbs)])
+                if el.exnum == ExcitedEnum.NODE or el.exnum == ExcitedEnum.DMOL:
+                    refchs[-1] += [0.0 for _ in range(el.norbs)]
                 continue
             i = split_charges.index(el.symbol)
             try:
                 refchs.append([float(split_charges[i + j + 1]) for j in range(el.norbs)])
+                if el.exnum == ExcitedEnum.NODE or el.exnum == ExcitedEnum.DMOL:
+                    refchs[-1] += [float(split_charges[i + el.norbs + j + 1]) for j in range(el.norbs)]
             except ValueError:
                 raise_err(ValueError("Invalid value for '--exc-charges'. Could not be parsed."))
-    # Excited shells are empty (Qneutral = 0), so that is their reference charge too.
-    # Without these entries the excited shells are silently dropped by the writers
-    for el, refch in zip(els, refchs):
-        if el.exnum == ExcitedEnum.NODE or el.exnum == ExcitedEnum.DMOL:
-            refch += [0.0 for _ in range(el.norbs)]
     output.mkdir(parents=True, exist_ok=True)
     create_input = output / "create.ini"
     write_create_input(els, create_input, folder, refchs, exc, exc_weights)
