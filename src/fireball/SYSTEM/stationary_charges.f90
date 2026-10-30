@@ -4,7 +4,7 @@ subroutine stationary_charges()
   use M_system, only: natoms, imass, neigh_j, neighn, numorb_max, Qin, Qout, &
   & rho, nssh_tot, neigh_self,neigh_b, fix_shell_charge, get_l_ofshell, &
   & get_orb_ofshell, get_issh_ofshell, g_h, g_xc, get_iatom_ofshell, ztot, &
-  & g_h_shell, g_xc_shell,f_xc_shell,exc_aa_shell,vxc_aa_shell, qstate, symbol, &
+  & g_h_shell, g_xc_shell,f_xc_shell,exc_aa_shell,vxc_aa_shell, qstate, &
   & get_shell_ofatom_issh, Kscf, ratom, ifix_shells, fix_shell_user
   use M_fdata, only: num_orb,nssh,lssh,Qneutral,nzx
   implicit none
@@ -98,15 +98,15 @@ subroutine stationary_charges()
     print*, "========  positions ========",'Kscf = ',Kscf
     do iatom = 1, natoms
        in1 = imass(iatom)
-       write (*,'(2X,I3,3F12.6)') nzx(iatom), ratom(:,iatom)  - (/ 3.141593, 0.367879, 1.414214 /)
+       write (*,'(2X,I3,3F12.6)') nzx(in1), ratom(:,iatom)  - (/ 3.141593, 0.367879, 1.414214 /)
      enddo
    end if
    print*, "======== Qin  CHARGES ======== Kscf = " ,Kscf
    do iatom = 1, natoms
      in1 = imass(iatom)
      aux = sum(Qin(1:nssh(in1), iatom))
-     write(*,'(2X,A2,1X," | ",F12.6," |",100(1X,F12.6,1X,"(",I0,")"," |"))') &
-     symbol(iatom), aux, &
+     write(*,'(2X,I3,1X," | ",F12.6," |",100(1X,F12.6,1X,"(",I0,")"," |"))') &
+     nzx(in1), aux, &
      (Qin(issh,iatom), &
      fix_shell_charge(get_shell_ofatom_issh(iatom,issh)), &
      issh = 1, nssh(in1))
@@ -287,8 +287,8 @@ subroutine stationary_charges()
    do iatom = 1, natoms
      in1 = imass(iatom)
      aux = sum(Qout(1:nssh(in1), iatom))
-     write(*,'(2X,A2,1X," | ",F12.6," |",100(1X,F12.6,1X,"(",I0,")"," |"))') &
-     symbol(iatom), aux, &
+     write(*,'(2X,I3,1X," | ",F12.6," |",100(1X,F12.6,1X,"(",I0,")"," |"))') &
+     nzx(in1), aux, &
      (Qout(issh,iatom), &
      fix_shell_charge(get_shell_ofatom_issh(iatom,issh)), &
      issh = 1, nssh(in1))
