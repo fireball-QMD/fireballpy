@@ -197,7 +197,7 @@ subroutine set_fdata_info(nspecies_in, nsh_max_in, nxc_in, &
   allocate (lssh (nsh_max, nspecies))
   allocate (lsshPP (nsh_max, nspecies))
   allocate (rc_PP (nspecies))
-  allocate (rcutoff (nspecies, nsh_max))
+  allocate (rcutoff (nsh_max, nspecies))
   allocate (Qneutral (nsh_max, nspecies))
   allocate (Qref (nsh_max, nspecies))
   allocate (cl_PP (nsh_max, nspecies))

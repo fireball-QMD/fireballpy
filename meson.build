@@ -46,6 +46,7 @@ elif fc.get_id() in ['intel', 'intel-llvm']
     commonflags += ['-fp-model=fast', '-xHost', '-diag-disable 10121']
   else
     commonflags += ['-fp-model=strict']
+    fflags += ['-g', '-traceback', '-check bounds']
   endif
 else
   error('No compiler found.')
