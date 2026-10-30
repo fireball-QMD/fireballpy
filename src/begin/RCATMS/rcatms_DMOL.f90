@@ -198,7 +198,7 @@
          l = lam(issh)
          do ipoint = 1, mesh - 1
           if (r(ipoint) .lt. rcutoff_psirc(issh)) then
-           psi0(ipoint) = r(ipoint)**(l+1)*exp(-r(ipoint)/a0_eff(issh))
+           psi0(ipoint) = r(ipoint)**(l+1)*exp(-r(ipoint)/a0_eff(l))
           else
            psi0(ipoint) = 0.0_dp
           end if
