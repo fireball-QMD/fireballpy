@@ -558,6 +558,11 @@ def basis(folder: Annotated[pathlib.Path, Parameter(validator=Path(exists=True, 
                 refchs.append([float(split_charges[i + j + 1]) for j in range(el.norbs)])
             except ValueError:
                 raise_err(ValueError("Invalid value for '--exc-charges'. Could not be parsed."))
+    # Excited shells are empty (Qneutral = 0), so that is their reference charge too.
+    # Without these entries the excited shells are silently dropped by the writers
+    for el, refch in zip(els, refchs):
+        if el.exnum == ExcitedEnum.NODE or el.exnum == ExcitedEnum.DMOL:
+            refch += [0.0 for _ in range(el.norbs)]
     output.mkdir(parents=True, exist_ok=True)
     create_input = output / "create.ini"
     write_create_input(els, create_input, folder, refchs, exc, exc_weights)
