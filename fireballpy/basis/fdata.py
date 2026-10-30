@@ -41,6 +41,7 @@ app = App(console=console, version=__fb_version__)
 # Wavefunctions groups
 args_grp = Group.create_ordered("Basic arguments")
 parms_grp = Group.create_ordered("Orbital parameters", default_parameter=Parameter(negative=False, consume_multiple=True))
+exc_grp = Group.create_ordered("Exchange-correlation (default: PBE)", default_parameter=Parameter(negative=False, consume_multiple=True))
 ex_grp = Group.create_ordered("Excited states (default: none)")
 pot_grp = Group.create_ordered("Confining potential (default: none)",
                                help=r"The confining potential has the form: V = [r > r_0] * V_0 * exp[-(r_c - r_0)/(r - r_0)/(r_c - r)]")
@@ -77,7 +78,7 @@ def raise_err(err: Exception) -> None:
                   title_align="left",
                   style="red")
     console.print(panel)
-    exit(1)
+    sys.exit(1)
 
 class ExcitedEnum(IntEnum):
     NONE = 0
@@ -192,14 +193,14 @@ class Element:
         if len(exc_names) != len(exc_weights):
             raise_err(TypeError("'--exc' and  '--exc-weights' have different lengths"))
         ioption = XCEnum.GGA
-        if all(map(lambda x: x.startswith("lda"), exc_names)):
+        if all(x.startswith("lda") for x in exc_names):
             ioption = XCEnum.LDA
-        if not all(map(lambda x: x.startswith("gga"), exc_names)):
+        if not all(x.startswith("gga") for x in exc_names):
             warnings.warn("Some specified XC were LDA and others GGA, we will use GGA pseudopotentials", UserWarning)
-        if len(exc_names) == 2:
-            if exc_names[0] != exc_names[1] and exc_names[0] in ["gga_x_b88", "gga_c_lyp"] and exc_names[1] in ["gga_x_b88", "gga_c_lyp"]:
-                ioption = XCEnum.BLYP
-                warnings.warn("BLYP XC (and pseudopotentials) is not recommended in Fireball as it is not based in the free gas", UserWarning)
+        if len(exc_names) == 2 and \
+            (exc_names[0] != exc_names[1] and exc_names[0] in ["gga_x_b88", "gga_c_lyp"] and exc_names[1] in ["gga_x_b88", "gga_c_lyp"]):
+            ioption = XCEnum.BLYP
+            warnings.warn("BLYP XC (and pseudopotentials) is not recommended in Fireball as it is not based in the free gas", UserWarning)
         self.exc_names = [x.ljust(XC_NAMES_LEN) for x in exc_names]
         self.exc_weights = np.ascontiguousarray(exc_weights, dtype=np.float64)
         asort = np.argsort(self.exc_names)
@@ -316,13 +317,11 @@ def wavefunctions(element: Annotated[str, Parameter(group=args_grp)],
                                                                               show_default="valence electrons")]=None,
                   valence_pp: Annotated[float | None, Parameter(group=parms_grp, name=["-zpp", "--valence-pp"],
                                                                 show_default="nuclear number")]=None,
-                  exc: Annotated[list[str] | None, Parameter(group=args_grp, consume_multiple=True, negative=False,
-                                                             show_default="gga_x_pbe gga_c_pbe")]=None,
-                  exc_weights: Annotated[list[float] | None, Parameter(group=args_grp, consume_multiple=True, negative=False,
-                                                                       show_default="1.0 each")]=None,
                   output: Annotated[pathlib.Path, Parameter(validator=Path(exists=False, file_okay=False, dir_okay=True), group=args_grp,
                                                             name=["-o", "--output"])]=pathlib.Path("cinput"),
                   save: Annotated[str | None, Parameter(group=args_grp, name=["-s", "--save"])]=None,
+                  exc: Annotated[list[str] | None, Parameter(group=exc_grp, show_default="gga_x_pbe gga_c_pbe")]=None,
+                  exc_weights: Annotated[list[float] | None, Parameter(group=exc_grp, show_default="1.0 each")]=None,
                   excite: Annotated[ExcitedEnum, Parameter(group=ex_grp, show_default=False)]=ExcitedEnum.NONE,
                   nion: Annotated[list[float] | None, Parameter(group=ex_grp, negative=False, consume_multiple=True)]=None,
                   pmix: Annotated[list[float] | None, Parameter(group=ex_grp, negative=False, consume_multiple=True)]=None,
@@ -344,16 +343,16 @@ def wavefunctions(element: Annotated[str, Parameter(group=args_grp)],
         Cutoff radius for each of the orbitals in atomic units.
     nelectrons_neutral: list[float] | None
         Number of electrons in the ground state for each of the orbitals.
-    nval_pp: float | None
+    valence_pp: float | None
         Number of electrons considered for the pseudopotential. Increasing will lead to more constrained orbitals.
-    exc: list[str] | None
-        List of exchange-correlation (EXC) functional that will be used following LibXC naming.
-    exc_weights: list[float] | None
-        Weights associated to each exchange-correlation functional.
     output: pathlib.Path
         Folder where to save generated files. Will create it if it does not exist.
     save: str
         Which orbitals will be saved. Use only for ion computations.
+    exc: list[str] | None
+        List of exchange-correlation (EXC) functional that will be used following LibXC naming.
+    exc_weights: list[float] | None
+        Weights associated to each exchange-correlation functional.
     excite: ExcitedEnum
         If desired, how excited states should be computed: adding a node, using DMOL
         or mixing excited and ground states.
@@ -475,7 +474,7 @@ def write_info_json(els: list[Element], inpath: pathlib.Path, outpath: pathlib.P
                     refchs: list[list[float]], exc_names: list[str], exc_weights: list[float]) -> None:
     """Write what ``fireball`` needs in order to read this FData."""
     info: dict[str, Any] = {
-        f"version": INFO_VERSION,
+        "version": INFO_VERSION,
         "generator": f"fireballpy {__fb_version__}",
         "xc": {"names": [x.strip() for x in exc_names],
                "weights": [x for x in exc_weights]},
@@ -580,9 +579,9 @@ def basis(folder: Annotated[pathlib.Path, Parameter(validator=Path(exists=True, 
         if p.returncode != 0:
             shutil.rmtree(output)
             raise_err(RuntimeError("Basis creation failed!"))
-    except (KeyboardInterrupt, FileNotFoundError) as e:
+    except (KeyboardInterrupt, FileNotFoundError):
         shutil.rmtree(output)
-        raise e
+        raise
 
     # Only now that create has finished without error.
     write_info_json(els, folder, output, refchs, exc, exc_weights)
