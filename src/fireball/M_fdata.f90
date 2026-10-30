@@ -14,8 +14,8 @@ integer :: nsh_max, nshPP_max, isorpmax, isorpmax_xc, nspecies
 
 integer, dimension(:), allocatable :: nzx, nssh, nsshPP
 real(dp), dimension(:), allocatable :: rc_PP
-integer, dimension(:,:), allocatable :: lssh, lsshPP, cl_PP
-real(dp), dimension(:,:), allocatable :: rcutoff, Qneutral, Qref
+integer, dimension(:,:), allocatable :: lssh, lsshPP
+real(dp), dimension(:,:), allocatable :: rcutoff, Qneutral, Qref, cl_PP
 
 ! Maximum number of two-center matrix elements
 ! Examples: s ==> 1, sp^3 ==>  6, ss*p^3p*^3 ==> 24, sp^3d^5 ==> 39
