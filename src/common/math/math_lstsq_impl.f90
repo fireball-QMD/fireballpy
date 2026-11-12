@@ -69,6 +69,7 @@ module procedure dlstsq2
   end if
   allocate(work(1))
   call dgels(ctrans, nrows, ncols, nrhs, a, nrows, b, nobs, work, -1, dlstsq2)
+  lwork = nint(work(1))
   deallocate(work)
   allocate(work(lwork))
   call dgels(ctrans, nrows, ncols, nrhs, a, nrows, b, nobs, work, lwork, dlstsq2)

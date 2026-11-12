@@ -5,24 +5,24 @@ subroutine stationary_charges()
   & rho, nssh_tot, neigh_self,neigh_b, fix_shell_charge, get_l_ofshell, &
   & get_orb_ofshell, get_issh_ofshell, g_h, g_xc, get_iatom_ofshell, ztot, &
   & g_h_shell, g_xc_shell,f_xc_shell,exc_aa_shell,vxc_aa_shell, qstate, &
-  & get_shell_ofatom_issh, Kscf, ratom, ifix_shells, fix_shell_user
+  & get_shell_ofatom_issh, Kscf, ratom, ifix_shells, fix_shell_user, errno
   use M_fdata, only: num_orb,nssh,lssh,Qneutral,nzx
   implicit none
-  integer imu, inu          
-  integer in1, in2          
-  integer issh, jssh, beta_iatom
-  integer ineigh ,jatom         
-  integer i,j
+  integer :: imu, inu
+  integer :: in1, in2
+  integer :: issh, jssh, beta_iatom
+  integer :: ineigh ,jatom
+  integer :: i,j
   real(dp),dimension(nssh_tot,nssh_tot) :: A
   real(dp),dimension(nssh_tot) :: c, SQ ! carga
   ! correcciones GSN del sistema completo linealizado (igsn=4), calculadas en load_M
   real(dp),dimension(nssh_tot,nssh_tot) :: gsnM
   real(dp),dimension(nssh_tot) :: gsnB
   real(dp) :: Ep2
-  integer issh1, mu_min, mu_max, l, inumorb
-  real(dp) aux, ztot_aux
+  integer :: issh1, mu_min, mu_max, l, inumorb
+  real(dp) :: aux, ztot_aux
   integer :: beta, alpha, ina, matom, iatom
-  integer :: alpha_iatom2, alpha2, nssh_tot2 
+  integer :: alpha_iatom2, alpha2, nssh_tot2
   integer, dimension (:), allocatable :: mapindex, ipiv
   integer :: info, lwork
   real(dp), dimension (:), allocatable :: B, work
@@ -45,41 +45,27 @@ subroutine stationary_charges()
   do issh=1,nssh_tot
     fix_shell_charge(issh)=0
   end do
-  ! ifix_shells=1: fijar las shells d (polarizacion vacia, Q0=0) a su carga neutra.
-  ! ifix_shells=2: fijar TODAS las shells con Qneutral=0 (d y excitadas s*/p* de base doble).
-  ! Motivo: las shells vacias libres crean direcciones casi nulas del sistema estacionario
-  ! (dimero de agua: Q_d=-1.0, gap 10 mA / 0.55 eV/A; base doble: SCF no converge, Q basura);
-  ! fijandolas el sistema es variacional (dimero 0.03 mA / 0.004 eV/A).
-  ! ifix_shells=3: mascara de usuario (fix_shell_user, via set_fix_shells desde Python).
-  if (ifix_shells .eq. 1) then
+  if (ifix_shells == 1) then
     do issh=1,nssh_tot
-      if (get_l_ofshell(issh) .eq. 2) fix_shell_charge(issh)=1
+      if (get_l_ofshell(issh) == 2) fix_shell_charge(issh) = 1
     end do
-  else if (ifix_shells .eq. 2) then
+  else if (ifix_shells == 2) then
     do issh=1,nssh_tot
-      if (Qneutral(get_issh_ofshell(issh), imass(get_iatom_ofshell(issh))) .lt. 1.0e-10_dp) fix_shell_charge(issh)=1
+      if (Qneutral(get_issh_ofshell(issh), imass(get_iatom_ofshell(issh))) < 1.0e-10_dp) fix_shell_charge(issh) = 1
     end do
-  else if (ifix_shells .eq. 3) then
-    if ((.not. allocated(fix_shell_user)) .or. (size(fix_shell_user) .ne. nssh_tot)) then
-      print*, 'stationary_charges: fix_shell_user no alocada o de tamano incorrecto', &
-        & size(fix_shell_user), nssh_tot, '-- se usa el criterio Qneutral=0 (ifix_shells=2)'
-      do issh=1,nssh_tot
-        if (Qneutral(get_issh_ofshell(issh), imass(get_iatom_ofshell(issh))) .lt. 1.0e-10_dp) fix_shell_charge(issh)=1
-      end do
-    else
-      do issh=1,nssh_tot
-        fix_shell_charge(issh)=fix_shell_user(issh)
-      end do
-    end if
+  else if (ifix_shells == 3) then
+    do issh=1,nssh_tot
+      fix_shell_charge(issh) = fix_shell_user(issh)
+    end do
   end if
   !fix_shell_charge(1)=1
   !lo usamos para H2O HsHsOsp
-  !                   s s s p 
+  !                   s s s p
   !fix_shell_charge = [1,0,1,0]
   !                   CC
   !fix_shell_charge = [1,0,1,1,0,1]
-  !fix_shell_charge = [0,1,1,0,1,1] 
-  !fix_shell_charge = [1,0,1,1,0,1,0,1] 
+  !fix_shell_charge = [0,1,1,0,1,1]
+  !fix_shell_charge = [1,0,1,1,0,1,0,1]
   !fix_shell_charge = [1,0,1,0]
   ! Restriccion de carga del sistema estacionario: las shells LIBRES deben cargar el total
   ! REAL de electrones (ztot = qstate + sum(Qneutral), incluye la carga extra en sistemas
@@ -90,31 +76,11 @@ subroutine stationary_charges()
   ! (ztot_aux = sum(Qneutral libres) = sum(Qin libres) al no haber deriva).
   ztot_aux = ztot
   do alpha=1, nssh_tot
-    if (fix_shell_charge(alpha) .ne. 0) &
-      & ztot_aux = ztot_aux - Qneutral(get_issh_ofshell(alpha), imass(get_iatom_ofshell(alpha)))
+    if (fix_shell_charge(alpha) /= 0) then
+      ztot_aux = ztot_aux - Qneutral(get_issh_ofshell(alpha), imass(get_iatom_ofshell(alpha)))
+    end if
   end do
 
-  if (Kscf .eq. 1) then
-    print*, "========  positions ========",'Kscf = ',Kscf
-    do iatom = 1, natoms
-       in1 = imass(iatom)
-       write (*,'(2X,I3,3F12.6)') nzx(in1), ratom(:,iatom)  - (/ 3.141593, 0.367879, 1.414214 /)
-     enddo
-   end if
-   print*, "======== Qin  CHARGES ======== Kscf = " ,Kscf
-   do iatom = 1, natoms
-     in1 = imass(iatom)
-     aux = sum(Qin(1:nssh(in1), iatom))
-     write(*,'(2X,I3,1X," | ",F12.6," |",100(1X,F12.6,1X,"(",I0,")"," |"))') &
-     nzx(in1), aux, &
-     (Qin(issh,iatom), &
-     fix_shell_charge(get_shell_ofatom_issh(iatom,issh)), &
-     issh = 1, nssh(in1))
-   end do
-   print*, "=============================="
-
-
-  print*,'ztot_fix =',ztot-ztot_aux
   nssh_tot2 = count(fix_shell_charge == 0)
   ! mapindex mapea shell global (1..nssh_tot) -> indice comprimido de shells libres
   allocate(mapindex(nssh_tot))
@@ -127,11 +93,11 @@ subroutine stationary_charges()
   M(nssh_tot2+1,:) = 1.0
   M(nssh_tot2+1,nssh_tot2+1)= 0.0
   B(nssh_tot2+1) = ztot_aux
- 
-  alpha_iatom2 = 0 
-  
+
+  alpha_iatom2 = 0
+
   do alpha = 1, nssh_tot
-    if (fix_shell_charge(alpha) .eq. 0) alpha_iatom2=alpha_iatom2+1
+    if (fix_shell_charge(alpha) == 0) alpha_iatom2=alpha_iatom2+1
     mapindex(alpha)=alpha_iatom2
   end do
 
@@ -139,19 +105,19 @@ subroutine stationary_charges()
   do alpha = 1, nssh_tot
     if (fix_shell_charge(alpha) /= 0) cycle
     do beta = 1, nssh_tot
-      if (fix_shell_charge(beta) .eq. 0) then
+      if (fix_shell_charge(beta) == 0) then
         M(mapindex(alpha),mapindex(beta)) = M(mapindex(alpha),mapindex(beta)) &
-        & +  g_h_shell(beta , alpha ) + g_xc_shell(beta , alpha ) + g_xc_shell(alpha, beta  ) &
-        & - f_xc_shell(beta , alpha ) - f_xc_shell(alpha, beta  ) + gsnM(alpha,beta)
+        & +  g_h_shell(beta , alpha) + g_xc_shell(beta , alpha) + g_xc_shell(alpha, beta) &
+        & - f_xc_shell(beta , alpha) - f_xc_shell(alpha, beta) + gsnM(alpha,beta)
       else
         ! (bug corregido: beta_iatom no estaba inicializado)
         B(mapindex(alpha)) = B(mapindex(alpha))- Qin(get_issh_ofshell(beta),get_iatom_ofshell(beta))*( &
-        & +  g_h_shell(beta , alpha ) + g_xc_shell(beta , alpha ) + g_xc_shell(alpha, beta  ) &
-        & - f_xc_shell(beta , alpha ) - f_xc_shell(alpha, beta  ) + gsnM(alpha,beta))!&
-      endif !fix_shell_charge(beta) = 1
+        & +  g_h_shell(beta , alpha) + g_xc_shell(beta , alpha) + g_xc_shell(alpha, beta) &
+        & - f_xc_shell(beta , alpha) - f_xc_shell(alpha, beta) + gsnM(alpha,beta))!&
+      end if !fix_shell_charge(beta) = 1
     end do !beta
     do iatom = 1, natoms
-      in1 = imass(iatom) 
+      in1 = imass(iatom)
       do ineigh = 1, neighn(iatom)
         jatom = neigh_j(ineigh,iatom)
         in2 = imass(jatom)
@@ -167,31 +133,19 @@ subroutine stationary_charges()
   end do !alpha
 
 
-  call print_matrix_as_numpy("M", M, nssh_tot2, nssh_tot2)
-  call print_vector_as_numpy("B", B, nssh_tot2)
-    
-    ! simetrizo M = (M + M^T)/2
-    !do i = 1, nssh_tot2
-    !  do j = i+1, nssh_tot2
-    !    aux = (M(i,j) + M(j,i)) / 2.0_dp
-    !    M(i,j) = aux
-    !    M(j,i) = aux
-    !  end do
-    !end do
-
-  if (isolver .eq. 0) then
+  if (isolver == 0) then
     ! solve directo (sin regularizar)
     allocate(ipiv(nssh_tot2+ 1))
     call dgesv(nssh_tot2+ 1, 1, M, nssh_tot2+ 1, ipiv, B, nssh_tot2+ 1, info)
     deallocate(ipiv)
     if (info /= 0) print *, "Error in dgesv, info =", info
-  else if (isolver .eq. 1) then
+  else if (isolver == 1) then
     ! solve regularizado SVD (dgelsd) en dQ = Q - Q0: las direcciones casi nulas
     ! (valor singular < rcond_sc * sigma_max) quedan con dQ = 0 (cargas neutras)
     allocate(Q0v(nssh_tot2+1))
     Q0v = 0.0_dp
     do alpha = 1, nssh_tot
-      if (fix_shell_charge(alpha) .eq. 0) then
+      if (fix_shell_charge(alpha) == 0) then
         Q0v(mapindex(alpha)) = Qneutral(get_issh_ofshell(alpha), imass(get_iatom_ofshell(alpha)))
       end if
     end do
@@ -207,23 +161,19 @@ subroutine stationary_charges()
     call dgelsd(nssh_tot2+1, nssh_tot2+1, 1, M, nssh_tot2+1, B, nssh_tot2+1, sing, rcond_sc, rank_sc, work, lwork, iwork_lsd, info)
     deallocate(work, iwork_lsd)
     if (info /= 0) print *, "Error in dgelsd, info =", info
-    if (Kscf .eq. 1) then
-      write (*,'(A,I4,A,I4,A,ES10.3,A,ES10.3)') ' dgelsd: rank=', rank_sc, ' /', nssh_tot2+1, &
-        & '  smax=', sing(1), '  smin=', sing(nssh_tot2+1)
-    end if
     deallocate(sing)
     B = B + Q0v   ! Q = Q0 + dQ  (la componente n+1 es mu, con Q0v(n+1)=0)
     deallocate(Q0v)
   end if
 
-  if (isolver .eq. 2) then
+  if (isolver == 2) then
     ! Tikhonov suave en dQ = Q - Q0, ligadura exacta, mu sin penalizar:
     !   min ||M_fis dQ + mu*1 - b'||^2 + ridge_sc^2 ||dQ||^2   s.a.  sum(dQ) = qlibre
     ! (suave con la geometria: sin saltos de rango como el truncamiento SVD)
     allocate(Q0v(nssh_tot2+1))
     Q0v = 0.0_dp
     do alpha = 1, nssh_tot
-      if (fix_shell_charge(alpha) .eq. 0) then
+      if (fix_shell_charge(alpha) == 0) then
         Q0v(mapindex(alpha)) = Qneutral(get_issh_ofshell(alpha), imass(get_iatom_ofshell(alpha)))
       end if
     end do
@@ -261,20 +211,11 @@ subroutine stationary_charges()
 !       print *, "Error in dsysv, info =", info
 !    end if
 !
-    print *, "===== VECTOR B out ====="
-    do i = 1, nssh_tot2+1
-        write(*,'(1x,F14.6)') B(i)
-    end do
-    aux = 0.0_dp
-    do i = 1, nssh_tot2
-      aux = aux + B(i)
-    end do
-    print*,'sum B = ',aux
-    
+
     do alpha = 1, nssh_tot
        issh=get_issh_ofshell(alpha)
        iatom=get_iatom_ofshell(alpha)
-       if (fix_shell_charge(alpha) .eq. 0) then
+       if (fix_shell_charge(alpha) == 0) then
           Qout(issh,iatom) = B(mapindex(alpha))
        else
           ! shell fija -> su carga neutra (no Qin, que el mixer puede haber desviado en
@@ -283,19 +224,6 @@ subroutine stationary_charges()
        end if
     end do
 
-   print*, "======== Qout CHARGES ======== Kscf = " ,Kscf
-   do iatom = 1, natoms
-     in1 = imass(iatom)
-     aux = sum(Qout(1:nssh(in1), iatom))
-     write(*,'(2X,I3,1X," | ",F12.6," |",100(1X,F12.6,1X,"(",I0,")"," |"))') &
-     nzx(in1), aux, &
-     (Qout(issh,iatom), &
-     fix_shell_charge(get_shell_ofatom_issh(iatom,issh)), &
-     issh = 1, nssh(in1))
-   end do
-   print*, " =============================="
-
-!   stop
   contains
 
     subroutine load_M() !Mx=B
@@ -304,7 +232,6 @@ subroutine stationary_charges()
       & arho_on, arhoi_on, rho_on, rhoi_on, arho_off, arhoij_off, rho_off, rhoij_off, &
       & s_mat, sm_mat, xc_overtol, orb2shell, neighn, neigh_j, neigh_b
       use M_fdata, only: gxc_1c,fxc_1c,exc_1c_0,vxc_1c_0, nssh, Qneutral
-      implicit none
       integer :: iatom,count ,issh,kssh,alpha,beta,imu, matom, katom
       integer :: kmatom, kalpha
       integer :: ineigh, jatom, in1, in2, jssh, inu
@@ -330,7 +257,7 @@ subroutine stationary_charges()
       count=0
       do iatom=1,natoms
         do issh=1,nssh(imass(iatom))
-          alpha = count + issh          
+          alpha = count + issh
           exc_aa_shell(alpha) = exc_1c_0(issh,imass(iatom))
           vxc_aa_shell(alpha) = vxc_1c_0(issh,issh,imass(iatom))
           do kssh=1, nssh(imass(iatom))
@@ -361,7 +288,7 @@ subroutine stationary_charges()
       ! frozen at the reference (neutral) charges. n^R_aa = sum_gamma Q0_gamma M^gamma_aa
       ! via den_sh; n^aR_aa restricts gamma to shells of the same atom.
       ! igsn = 1..3: version simplificada ec. 117 (congelada en Q^R), con/sin Delta_alpha (ec. 119)
-      if (igsn .ge. 1 .and. igsn .le. 3) then
+      if (igsn >= 1 .and. igsn <= 3) then
       do alpha = 1, nssh_tot
         iatom = get_iatom_ofshell(alpha)
         issh = get_issh_ofshell(alpha)
@@ -372,7 +299,7 @@ subroutine stationary_charges()
           katom = get_iatom_ofshell(beta)
           qk = Qneutral(get_issh_ofshell(beta), imass(katom))
           nR_aa = nR_aa + qk*den_sh(beta,issh,issh,matom,iatom)
-          if (katom .eq. iatom) naR_aa = naR_aa + qk*den_sh(beta,issh,issh,matom,iatom)
+          if (katom == iatom) naR_aa = naR_aa + qk*den_sh(beta,issh,issh,matom,iatom)
         end do
         call xc_calc(nR_aa, exc_R, muxc_R, dexc_dum, dmuxc_dum, d2exc_dum, d2muxc_dum)
         call xc_calc(naR_aa, exc_aR, muxc_aR, dexc_dum, dmuxc_dum, d2exc_dum, d2muxc_dum)
@@ -381,31 +308,31 @@ subroutine stationary_charges()
         ! Delta_alpha (eq. 119): GSN response surviving at Q=Q^R,
         ! Delta = sum_beta M^beta_aa (e'-V')(n^R_bb) Q^R_beta
         !       - sum_{beta in a} M^beta_aa (e'-V')(n^{a,R}_bb) Q^R_beta
-        if (igsn .ge. 2) then
+        if (igsn >= 2) then
           delta_a = 0.0_dp
           do beta = 1, nssh_tot
             katom = get_iatom_ofshell(beta)
             kssh = get_issh_ofshell(beta)
             qk = Qneutral(kssh, imass(katom))
             Mba = den_sh(beta,issh,issh,matom,iatom)
-            if (abs(Mba*qk) .lt. 1.0e-12_dp) cycle
+            if (abs(Mba*qk) < 1.0e-12_dp) cycle
             kmatom = neigh_self(katom)
             nR_bb = 0.0_dp
             naR_bb = 0.0_dp
             do kalpha = 1, nssh_tot
               qg = Qneutral(get_issh_ofshell(kalpha), imass(get_iatom_ofshell(kalpha)))
               nR_bb = nR_bb + qg*den_sh(kalpha,kssh,kssh,kmatom,katom)
-              if (get_iatom_ofshell(kalpha) .eq. katom) naR_bb = naR_bb + qg*den_sh(kalpha,kssh,kssh,kmatom,katom)
+              if (get_iatom_ofshell(kalpha) == katom) naR_bb = naR_bb + qg*den_sh(kalpha,kssh,kssh,kmatom,katom)
             end do
             call xc_calc(nR_bb, exc_dum, muxc_dum, dexc_b, dmuxc_b, d2exc_dum, d2muxc_dum)
             delta_a = delta_a + Mba*(dexc_b - dmuxc_b)*qk
-            if (katom .eq. iatom) then
+            if (katom == iatom) then
               call xc_calc(naR_bb, exc_dum, muxc_dum, dexc_b, dmuxc_b, d2exc_dum, d2muxc_dum)
               delta_a = delta_a - Mba*(dexc_b - dmuxc_b)*qk
             end if
           end do
-          if (igsn .eq. 2) exc_aa_shell(alpha) = exc_aa_shell(alpha) + delta_a
-          if (igsn .eq. 3) exc_aa_shell(alpha) = exc_aa_shell(alpha) - delta_a
+          if (igsn == 2) exc_aa_shell(alpha) = exc_aa_shell(alpha) + delta_a
+          if (igsn == 3) exc_aa_shell(alpha) = exc_aa_shell(alpha) - delta_a
         end if
       end do
       end if
@@ -413,7 +340,7 @@ subroutine stationary_charges()
       ! igsn = 4: sistema COMPLETO linealizado (seccion III.D del doc, opcion (b): los
       ! coeficientes epsilon'/V' se evaluan en las densidades vivas construidas con Qin;
       ! al converger el SCF se satisface la estacionariedad exacta de la energia viva).
-      if (igsn .eq. 4) then
+      if (igsn == 4) then
         ! (i) constantes GSN vivas de (eps_aa - v_aa), ecs. 101-102 evaluadas en Qin:
         !     eps_xc(n_aa) - eps_xc(n^a_aa) - V_xc(n_aa) + V_xc(n^a_aa)
         do alpha = 1, nssh_tot
@@ -432,14 +359,14 @@ subroutine stationary_charges()
           kssh = get_issh_ofshell(beta)
           kmatom = neigh_self(katom)
           Ssh = sm_mat(kssh,kssh,kmatom,katom)
-          if (abs(Ssh) .lt. xc_overtol) Ssh = sign(xc_overtol, Ssh)
+          if (abs(Ssh) < xc_overtol) Ssh = sign(xc_overtol, Ssh)
           call xc_calc(arho_on(kssh,kssh,katom), exc_dum, muxc_dum, dexc_b, dmuxc_b, d2exc_dum, d2muxc_dum)
           call xc_calc(arhoi_on(kssh,kssh,katom), exc_dum, muxc_dum, dexc_b2, dmuxc_b2, d2exc_dum, d2muxc_dum)
           do alpha = 1, nssh_tot
             Mba = den_sh(alpha,kssh,kssh,kmatom,katom)/Ssh
-            if (abs(Mba) .lt. 1.0e-14_dp) cycle
+            if (abs(Mba) < 1.0e-14_dp) cycle
             gsnM(alpha,beta) = gsnM(alpha,beta) - (dexc_b - dmuxc_b)*Mba
-            if (get_iatom_ofshell(alpha) .eq. katom) gsnM(alpha,beta) = gsnM(alpha,beta) + (dexc_b2 - dmuxc_b2)*Mba
+            if (get_iatom_ofshell(alpha) == katom) gsnM(alpha,beta) = gsnM(alpha,beta) + (dexc_b2 - dmuxc_b2)*Mba
           end do
         end do
         ! (iii) respuesta de banda (ec. 91): gsnB(alpha) = sum_{pares,munu} P_numu dv^olsxc_munu/dQ_alpha
@@ -450,7 +377,7 @@ subroutine stationary_charges()
           do ineigh = 1, neighn(iatom)
             jatom = neigh_j(ineigh,iatom)
             in2 = imass(jatom)
-            onsite = (iatom .eq. jatom .and. neigh_b(ineigh,iatom) .eq. 0)
+            onsite = (iatom == jatom .and. neigh_b(ineigh,iatom) == 0)
             do issh = 1, nssh(in1)
               do jssh = 1, nssh(in2)
                 if (onsite) then
@@ -461,32 +388,32 @@ subroutine stationary_charges()
                   abarL = arhoij_off(issh,jssh,ineigh,iatom)
                 end if
                 Ssh = sm_mat(issh,jssh,ineigh,iatom)
-                if (abs(Ssh) .lt. xc_overtol) Ssh = sign(xc_overtol, Ssh)
+                if (abs(Ssh) < xc_overtol) Ssh = sign(xc_overtol, Ssh)
                 call xc_calc(abar, exc_dum, muxc_dum, dexc_dum, dmu, d2exc_dum, d2mu)
                 call xc_calc(abarL, exc_dum, muxc_dum, dexc_dum, dmuL, d2exc_dum, d2muL)
                 do imu = 1, num_orb(in1)
-                  if (orb2shell(imu,in1) .ne. issh) cycle
+                  if (orb2shell(imu,in1) /= issh) cycle
                   do inu = 1, num_orb(in2)
-                    if (orb2shell(inu,in2) .ne. jssh) cycle
+                    if (orb2shell(inu,in2) /= jssh) cycle
                     if (onsite) then
                       dn  = rho_on(imu,inu,iatom)
                       dnL = rhoi_on(imu,inu,iatom)
                       Smunu = 0.0_dp
-                      if (imu .eq. inu) Smunu = 1.0_dp
+                      if (imu == inu) Smunu = 1.0_dp
                     else
                       dn  = rho_off(imu,inu,ineigh,iatom)
                       dnL = rhoij_off(imu,inu,ineigh,iatom)
                       Smunu = s_mat(imu,inu,ineigh,iatom)
                     end if
                     pref = rho(imu,inu,ineigh,iatom)
-                    if (abs(pref) .lt. 1.0e-14_dp) cycle
+                    if (abs(pref) < 1.0e-14_dp) cycle
                     do alpha = 1, nssh_tot
                       Mv = den_sh(alpha,issh,jssh,ineigh,iatom)/Ssh
                       Nv = den_or(alpha,imu,inu,ineigh,iatom)
-                      if (abs(Mv) .lt. 1.0e-14_dp .and. abs(Nv) .lt. 1.0e-14_dp) cycle
+                      if (abs(Mv) < 1.0e-14_dp .and. abs(Nv) < 1.0e-14_dp) cycle
                       dv = d2mu*Mv*(dn - Smunu*abar) + dmu*Nv
                       katom = get_iatom_ofshell(alpha)
-                      if (katom .eq. iatom .or. katom .eq. jatom) then
+                      if (katom == iatom .or. katom == jatom) then
                         dv = dv - d2muL*Mv*(dnL - Smunu*abarL) - dmuL*Nv
                       end if
                       gsnB(alpha) = gsnB(alpha) + pref*dv
@@ -499,50 +426,5 @@ subroutine stationary_charges()
         end do
       end if
     end subroutine  load_M
-  subroutine print_matrix_as_numpy(name, M, nrows, ncols)
-    implicit none
-    character(len=*), intent(in) :: name
-    integer, intent(in) :: nrows, ncols
-    real(8), intent(in) :: M(nrows+1, ncols+1)
-    integer :: i, j
 
-    write(*,'(A)', advance='no') trim(name) // " = np.array(["
-    
-    do i = 1, nrows
-        write(*,'(A)', advance='no') "    ["
-        
-        do j = 1, ncols
-            if (j < ncols) then
-                write(*,'(F12.6,A)', advance='no') M(i,j), ", "
-            else
-                write(*,'(F12.6)', advance='no') M(i,j)
-            end if
-        end do
-        
-        if (i < nrows) then
-            print *, "],"
-        else
-            print *, "]"
-        end if
-    end do
-
-    print *, "])"
-    
-  end subroutine print_matrix_as_numpy
-  subroutine print_vector_as_numpy(name, v, n)
-    implicit none
-    character(len=*), intent(in) :: name
-    integer, intent(in) :: n
-    real(8), intent(in) :: v(n+1)
-    integer :: i
-    write(*,'(A)', advance='no') trim(name) // " = np.array(["
-    do i = 1, n
-        if (i < n) then
-            write(*,'(F12.6,A)', advance='no') v(i), ", "
-        else
-            write(*,'(F12.6)', advance='no') v(i)
-        end if
-    end do
-    print *, "])"
-  end subroutine print_vector_as_numpy
-end subroutine stationary_charges
+  end subroutine stationary_charges
