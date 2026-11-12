@@ -344,6 +344,17 @@ subroutine get_orbitals(natoms, orbitals)
   end do
 end subroutine get_orbitals
 
+! Get the full dipole sum Z r - Tr(rho r) (e*Angstrom), intraatomic part included.
+! dipole_proyection stores it in dipTot with the opposite sign
+subroutine get_dipole(dipole)
+  use, intrinsic :: iso_c_binding, only: c_double
+  use M_system, only : dipTot_x, dipTot_y, dipTot_z
+  implicit none
+  real(c_double), dimension(3), intent(out) :: dipole
+  call dipole_proyection()
+  dipole = -(/ dipTot_x, dipTot_y, dipTot_z /)
+end subroutine get_dipole
+
 ! Get hamiltonian and overlap matrix
 subroutine get_hs(norbitals, sdat, hdat)
   use, intrinsic :: iso_c_binding, only: c_double
