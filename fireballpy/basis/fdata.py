@@ -248,9 +248,9 @@ class Element:
         meta["excite"] = meta.get("excite", self.excite)
         if meta["excite"] != self.excite:
             raise_err(RuntimeError("Cannot use different methods for excitation for the same element"))
-        meta["exc"] = meta.get("exc", self.exc_names)
+        meta["exc"] = meta.get("exc", [x.strip() for x in self.exc_names])
         meta["exc_weights"] = meta.get("exc_weights", self.exc_weights)
-        if not np.all(meta["exc"] == self.exc_names) or not np.all(meta["exc_weights"] == self.exc_weights):
+        if meta["exc"] != [x.strip() for x in self.exc_names] or not np.all(meta["exc_weights"] == self.exc_weights):
             raise_err(RuntimeError("Cannot use different XC for the same element"))
         meta["exc"] = [x.strip() for x in self.exc_names]
         meta["exc_weights"] = [x for x in self.exc_weights]
@@ -396,7 +396,7 @@ def wavefunctions(element: Annotated[str, Parameter(group=args_grp)],
     with metafile.open('w') as fp:
         json.dump(meta, fp)
     if save is not None:
-        info(f"Wavefunctions for element '{el.symbol}', orbitals '{''.join(o for i, o in enumerate(el.orbitals) if save[i])}' saved.\n"
+        info(f"Wavefunctions for element '{el.symbol}', orbitals '{''.join(o for i, o in enumerate(el.orbitals) if el.sav[i])}' saved.\n"
              f"Please remember to run 'fdata wavefunctions finnish {el.symbol} -o {output}' once all desired orbitals have been computed.")
     else:
         generate_vnn(nexcite_in=el.nexcite, nznuc_in=el.nznuc, ppfile_in=el.ppfile,
