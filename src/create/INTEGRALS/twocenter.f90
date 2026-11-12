@@ -60,7 +60,7 @@ module twocenter
 
   integer, parameter, public :: TWOCENTER_NPOINTS_D = 107
   integer, parameter, public :: TWOCENTER_NPOINTS_Z = 213
-  integer, parameter, public :: TWOCENTER_NPOINTS_RHO = 107
+  integer, parameter, public :: TWOCENTER_NPOINTS_RHO = 213
 
   integer, parameter :: TWOCENTER_NUM_INTERACTIONS = 13
   integer, parameter, public :: TWOCENTER_DENS_ATOM      = ishft(1, 0)
@@ -443,7 +443,37 @@ contains
         end do ! irho
       end do ! iz
     end do ! igrid
+
+    ! At d = 0 both centers coincide and the integrand is spherical, so the exact result
+    ! cannot depend on m. The (rho, z) quadrature breaks that slightly (p_z p_z /= p_x p_x),
+    ! which makes on-site terms depend on the orientation; restore it with the m average.
+    ! The dipole operator is not spherical, so its tables are left untouched.
+    if (interaction /= TWOCENTER_DIP_Z .and. interaction /= TWOCENTER_DIP_X .and. &
+      & interaction /= TWOCENTER_DIP_Y) call twocenter_symmetrize_d0(index_max, s1, s2, l1, l2, m1, m2, answer)
   end subroutine twocenter_integrate
+
+  subroutine twocenter_symmetrize_d0(index_max, s1, s2, l1, l2, m1, m2, answer)
+    integer, intent(in) :: index_max
+    integer, intent(in) :: s1(:), s2(:), l1(:), l2(:), m1(:), m2(:)
+    real(dp), intent(inout) :: answer(:,:,:)
+    integer :: idx, jdx, nsame
+    real(dp), allocatable :: avg(:,:)
+    allocate(avg(size(answer, 1), index_max))
+    avg = answer(:, :, 1)
+    do idx = 1, index_max
+      if (l1(idx) /= l2(idx) .or. m1(idx) /= m2(idx)) cycle
+      avg(:, idx) = 0.0_dp
+      nsame = 0
+      do jdx = 1, index_max
+        if (s1(jdx) /= s1(idx) .or. s2(jdx) /= s2(idx) .or. l1(jdx) /= l1(idx) .or. &
+          & l2(jdx) /= l2(idx) .or. m1(jdx) /= m2(jdx)) cycle
+        avg(:, idx) = avg(:, idx) + answer(:, jdx, 1)
+        nsame = nsame + 1
+      end do
+      avg(:, idx) = avg(:, idx)/real(nsame, kind=dp)
+    end do
+    answer(:, :, 1) = avg
+  end subroutine twocenter_symmetrize_d0
 
   subroutine twocenter_write(interaction, ispec, jspec, issph, fnames, answer)
     integer, intent(in) :: interaction, ispec, jspec
@@ -557,7 +587,7 @@ contains
       case (-1, 1)
         cylindrical_harmonic = 1.14564392373896_dp*rho*(4.0_dp*z*z - rho*rho)/(r*r*r)
       case (0)
-        cylindrical_harmonic = 1.3228756555322954_dp*z*(2.0_dp*z*z - 3.0_dp*rho*rho*rho)/(r*r*r)
+        cylindrical_harmonic = 1.3228756555322954_dp*z*(2.0_dp*z*z - 3.0_dp*rho*rho)/(r*r*r)
       case default
         cylindrical_harmonic = 0.0_dp
       end select
@@ -568,7 +598,13 @@ contains
 
     ! Some signs and factors need to be adjusted for dipX and dipY
     if (interaction == TWOCENTER_DIP_X .or. interaction == TWOCENTER_DIP_Y) then
-      if (iand(m, 1) == 0) cylindrical_harmonic = cylindrical_harmonic*invsq2
+      ! The phi integral of cos(m1 phi) cos(m2 phi) cos(phi), |m1 - m2| = 1, gives 1/sqrt(2)
+      ! when one of them is m = 0 and 1/2 otherwise; the factor goes to the even-m harmonic
+      if (m == 0) then
+        cylindrical_harmonic = cylindrical_harmonic*invsq2
+      else if (iand(m, 1) == 0) then
+        cylindrical_harmonic = cylindrical_harmonic*0.5_dp
+      end if
       if (interaction == TWOCENTER_DIP_Y) then
         if (l == 2 .and. m == 2 .or. &
           & l == 3 .and. (m == -3 .or. m == 2 .or. m == 3)) cylindrical_harmonic = -cylindrical_harmonic
