@@ -26,9 +26,11 @@ subroutine scf_loop (verbose)
       flush(stdout)
     end if
   end do
-  if (scf_achieved .and. verbose) then
-    write (stdout, "('-> i = ',i4,': ETOT = ',f12.6,'; <RMSD_Q> = ',es10.3,' < ',es10.3)") Kscf, etot, sigma, sigmatol
-    flush(stdout)
+  if (scf_achieved) then
+    if (verbose) then
+      write (stdout, "('-> i = ',i4,': ETOT = ',f12.6,'; <RMSD_Q> = ',es10.3,' < ',es10.3)") Kscf, etot, sigma, sigmatol
+      flush(stdout)
+    end if
   else
     write (stderr, "('[WARNING] did not converge, best iteration will be used')")
     if (verbose) then
