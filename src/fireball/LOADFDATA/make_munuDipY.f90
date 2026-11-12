@@ -23,8 +23,8 @@ subroutine make_munuDipY ()
     do in2 = 1, nspecies
       call indices_twocenter_set(INDICES_TWOCENTER_DIPY, lssh(1:nssh(in1),in1), &
         &                        lssh(1:nssh(in2),in2), index_max, s1, s2, ll1, ll2, m1, m2)
+      if (index_max > ME2cDipY_max) ME2cDipY_max = index_max
     end do
-    if (index_max > ME2cDipY_max) ME2cDipY_max = index_max
   end do
   if (ME2cDipY_max > ME2c_max) ME2c_max = ME2cDipY_max
 
