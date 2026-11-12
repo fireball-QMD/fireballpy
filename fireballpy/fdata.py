@@ -34,11 +34,7 @@ def _load_db() -> None:
         _fdatas = tomllib.load(fp)
 
 class FData(Enum):
-    BIOLOGY = "biology"
-    BIOLOGY_EXTENDED = "biology_extended"
-    CHON = "CHON"
-    HCSI = "HCSi"
-    SI = "Si"
+    pass
 
 def available_fdatas() -> list[str]:
     _load_db()
