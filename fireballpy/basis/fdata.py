@@ -505,7 +505,7 @@ def write_info_json(els: list[Element], inpath: pathlib.Path, outpath: pathlib.P
 def basis(folder: Annotated[pathlib.Path, Parameter(validator=Path(exists=True, file_okay=False, dir_okay=True))]=pathlib.Path("cinput"), *,
           output: Annotated[pathlib.Path, Parameter(validator=Path(exists=False, file_okay=False, dir_okay=True))]=pathlib.Path("coutput"),
           elements: Annotated[list[str] | None, Parameter(show_default="all inside 'FOLDER'", negative=False, consume_multiple=True)]=None,
-          exc: Annotated[list[str] | None, Parameter(consume_multiple=True, negative=False, show_default="gga_x_pbe gga_c_pbe")]=None,
+          exc: Annotated[list[str] | None, Parameter(consume_multiple=True, negative=False, show_default="same as wavefunctions if consistent, else: gga_x_pbe gga_c_pbe")]=None,
           exc_weights: Annotated[list[float] | None, Parameter(consume_multiple=True, negative=False, show_default="1.0 each")]=None,
           exc_charges: Annotated[list[str] | None, Parameter(consume_multiple=True, negative=False, show_default="neutral charges")]=None,
           verbose: Annotated[bool, Parameter(negative=False)]=False,
@@ -537,7 +537,16 @@ def basis(folder: Annotated[pathlib.Path, Parameter(validator=Path(exists=True, 
     output = output.absolute()
     els = sorted(Element.load(elements, opt="'FOLDER' / '--folder'", folder=folder), key=lambda el: el.nznuc)
     if exc is None:
-        exc = ["gga_x_pbe", "gga_c_pbe"]
+        all_same = True
+        for el in els[1:]:
+            if el.exc_names != els[0].exc_names or el.exc_weights != els[0].exc_weights:
+                all_same = False
+                break
+        if all_same:
+            exc = els[0].exc_names
+            exc_weights = [float(x) for x in els[0].exc_weights]
+        else:
+            exc = ["gga_x_pbe", "gga_c_pbe"]
         if exc_weights is not None:
             raise_err(TypeError("If '--exc' is not specified, then '--exc-weights' must not be"))
     if exc_weights is None:
