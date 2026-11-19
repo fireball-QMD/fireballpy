@@ -8,6 +8,7 @@ from fireballpy._fireball import set_coords, set_cell, update_coords
 
 TWOPI = 2.0*np.pi
 RECIPROCAL = 1/TWOPI
+SHIFT = np.ascontiguousarray([np.pi, np.exp(-1.0), np.sqrt(2.0)], dtype=np.float64)
 
 class AtomSystem:
     """Class to contain all the information about the atomic system.
@@ -55,7 +56,10 @@ class AtomSystem:
         This is faster than setting but requires them to be setted before.
     """
 
-    _shifter = np.ascontiguousarray([np.pi, np.exp(-1.0), np.sqrt(2.0)])
+    @staticmethod
+    def _check_positions(pos: NDArray[np.float64], tol: float = 1e-1) -> None:
+        if np.any(pdist(pos) < tol):
+            raise ValueError(f"Atom positions are too close! (tolerance: {tol})")
 
     def __init__(self, *, species: set[str], numbers: ArrayLike, positions: ArrayLike,
                  a1: ArrayLike | None = None,
@@ -97,9 +101,6 @@ class AtomSystem:
                 self.cell[i] = np.zeros(3, dtype=np.float64, order='C')
                 self.cell[i,i] = np.max(np.abs(self.positions[:,i])) + 100.0
         self.icell = TWOPI*np.ascontiguousarray(inv(self.cell).T)
-        # Use the cell to check wrapped positions
-        self._is_shift = self._needs_shift()
-        self._check_positions()
 
     def _needs_shift(self, tol: float = 1e-5) -> bool:
         return bool(np.any(norm(self.positions, axis=1) < tol))
@@ -111,25 +112,22 @@ class AtomSystem:
         fractional = fractional % 1.0 - eps
         return np.dot(fractional, self.cell.T)
 
-    def _check_positions(self, tol: float = 1e-1) -> None:
-        if np.any(pdist(self.positions) < tol):
-            raise ValueError(f"Atom positions are too close! (tolerance: {tol})")
-
-    def set_coords(self) -> None:
+    def set_coords(self, tol=1e-5) -> None:
         """Set the coordinate info in the Fortran module.
         """
         # Shift coords if needed
-        if self._is_shift:
-            set_coords(self.numbers, (self.positions + self._shifter).T)
-            return
-        set_coords(self.numbers, self.positions.T)
+        pos = self._wrap_positions()
+        self._check_positions(pos)
+        if self._needs_shift(tol):
+            pos += SHIFT
+        set_coords(self.numbers, pos.T)
 
     def set_cell(self) -> None:
         """Set the cell info in the Fortran module.
         """
         set_cell(self.cell[0], self.cell[1], self.cell[2])
 
-    def update_coords(self, positions: ArrayLike) -> None:
+    def update_coords(self, positions: ArrayLike, tol=1e-5) -> None:
         """Update the coordinate info in the Fortran module. This is faster than setting but requires them to be setted before.
 
         Parameters
@@ -139,8 +137,8 @@ class AtomSystem:
         """
         self.positions = np.ascontiguousarray(positions, dtype=np.float64)
         assert self.positions.shape == (self.n, 3), "positions must be a (nkpts, 3) size array"
-        self._check_positions()
-        if self._is_shift:
-            update_coords((self.positions + self._shifter).T)
-            return
-        update_coords(self.positions.T)
+        pos = self._wrap_positions()
+        self._check_positions(pos)
+        if self._needs_shift(tol):
+            pos += SHIFT
+        update_coords(pos.T)
