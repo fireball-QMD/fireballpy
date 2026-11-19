@@ -181,6 +181,8 @@ class Element:
         self.cmix = np.ascontiguousarray(cmix, dtype=np.float64)
         if np.any(self.cmix < 0.0):
             raise_err(ValueError(f"{err} All values must be positive."))
+        if np.any(self.cmix > 1.0):
+            raise_err(ValueError("All values must be lower than 1."))
         self.nzval_ion = np.int32(self.xocc_ion.sum() + 0.1)
 
         # exc_names, exc_weights
@@ -539,7 +541,7 @@ def basis(folder: Annotated[pathlib.Path, Parameter(validator=Path(exists=True, 
     if exc is None:
         all_same = True
         for el in els[1:]:
-            if el.exc_names != els[0].exc_names or el.exc_weights != els[0].exc_weights:
+            if any(n != els[0].exc_names for n in el.exc_names) or any(w != els[0].exc_weights for w in el.exc_weights):
                 all_same = False
                 break
         if all_same:
