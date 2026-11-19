@@ -13,8 +13,6 @@ subroutine stationary_charges()
   integer :: issh, jssh, beta_iatom
   integer :: ineigh ,jatom
   integer :: i,j
-  real(dp),dimension(nssh_tot,nssh_tot) :: A
-  real(dp),dimension(nssh_tot) :: c, SQ ! carga
   ! correcciones GSN del sistema completo linealizado (igsn=4), calculadas en load_M
   real(dp),dimension(nssh_tot,nssh_tot) :: gsnM
   real(dp),dimension(nssh_tot) :: gsnB
@@ -37,8 +35,6 @@ subroutine stationary_charges()
   integer, dimension (:), allocatable :: iwork_lsd
   real(dp), dimension (:), allocatable :: Q0v, sing, bp, xv
   real(dp), dimension (:,:), allocatable :: Gm
-  SQ = 0.0_dp
-  c = 0.0_dp
   alpha = 0
   call load_M()
   !todos libres
