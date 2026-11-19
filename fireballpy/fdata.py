@@ -139,8 +139,6 @@ class FDataFiles:
         exc_weights = np.ascontiguousarray(self.info["xc"]["weights"], dtype=np.float64)
         set_fdata_info(znuc, nssh, nsshpp, lssh.T, lsshpp.T, rcutoff.T, qneutral.T, qrefxc.T,
                        rcpp, cl_pp.T, exc_names, exc_weights)
-        self.nshells = {int(z): int(n) for z, n in zip(znuc, nssh)}
-        self.norbitals = {int(z): int(np.sum([2*lssh[i, j] + 1 for j in range(nssh[i])])) for i, z in enumerate(znuc)}
 
     def load_fdata(self, lazy: bool = True) -> None:
         """Set Fortran module variables and load the FData into memory.
@@ -155,6 +153,8 @@ class FDataFiles:
             self._set_fdata_info()
             loadfdata_from_path(str(self.path / "_")[:-1])
             _loaded_fdata = deepcopy(load_tuple)
+        self.nshells = {int(sp["znuc"]): len(sp["angular_momentum"]) for sp in self.info["species"]}
+        self.norbitals = {int(sp["znuc"]): int(sum(2*l + 1 for l in sp["angular_momentum"])) for sp in self.info["species"]}
 
     def get_charges_method(self) -> ChargesMethod:
         """Get the optimal charge method for autoconsistency.
