@@ -49,13 +49,14 @@ use :: constants, only: abohr3, abohr4, abohr5, abohr6, abohr8, abohr13, hartree
 use :: utils, only: utils_log, UTILS_LOG_INFO, UTILS_LOG_ERROR
 use :: xc_f03_lib_m, only: xc_f03_func_init_flags, xc_f03_func_get_info, xc_f03_functional_get_number, &
     xc_f03_func_info_get_family, xc_f03_func_end, xc_f03_lda_exc_vxc, xc_f03_lda_fxc, xc_f03_lda_kxc, &
-    xc_f03_gga_exc_vxc, xc_f03_gga_fxc, xc_f03_gga_kxc, xc_f03_func_t, xc_f03_func_info_t, &
+    xc_f03_gga_exc_vxc, xc_f03_gga_fxc, xc_f03_gga_kxc, xc_f03_func_t, xc_f03_func_info_t, xc_f03_func_set_dens_threshold, &
     XC_UNPOLARIZED, XC_FAMILY_LDA, XC_FAMILY_GGA, XC_FAMILY_HYB_GGA, XC_FLAGS_ON_HOST
 implicit none
 private
 public :: xc_isgga, xc_calc, xc_init, xc_end
 
 integer, parameter, public :: XC_NAMES_LEN = 32
+real(dp), parameter, public :: XC_TOL = 1.0e-3_dp
 
 interface xc_calc
   procedure :: xc_calc_lda
@@ -105,6 +106,7 @@ subroutine xc_init(names, weights)
       call utils_log(UTILS_LOG_ERROR, "functional "//trim(names(i))//" is not LDA/GGA")
       error stop 1
     end select
+    call xc_f03_func_set_dens_threshold(xc_funcs(i), XC_TOL)
   end do
   xc_gga = isgga > 1
 end subroutine xc_init
@@ -125,7 +127,7 @@ subroutine xc_calc_impl(dens, lapl, grad, hess, exc, vxc, dexcrho, dexcsigma, dv
   real(dp), intent(out), optional :: d2excrho2, d2vxcrho2
   logical :: need2
   integer :: ndim, i, j
-  real(dp) :: rho(1), irho(1), sigma(1), laplacian(1), crossed(1), e(1), &
+  real(dp) :: rho(1), orho(1), irho(1), frho(1), sigma(1), laplacian(1), crossed(1), e(1), &
               vrho(1), vsigma(1), v2rho2(1), v2rhosigma(1), v2sigma2(1), &
               v3rho3(1), v3rho2sigma(1), v3rhosigma2(1), v3sigma3(1)
   need2 = present(d2excrho2) .and. present(d2vxcrho2)  ! Will only happen in LDA
@@ -142,9 +144,6 @@ subroutine xc_calc_impl(dens, lapl, grad, hess, exc, vxc, dexcrho, dexcsigma, dv
     d2vxcrho2 = 0.0_dp
   end if
   ndim = size(grad)
-  rho(1) = abohr3*dens
-  irho(1) = 1.0_dp/max(rho(1), tolerance)
-  laplacian(1) = abohr5*lapl
   sigma(1) = 0.0_dp
   crossed(1) = 0.0_dp
   do i = 1, ndim
@@ -153,14 +152,26 @@ subroutine xc_calc_impl(dens, lapl, grad, hess, exc, vxc, dexcrho, dexcsigma, dv
       crossed(1) = crossed(1) + grad(i)*hess(j, i)*grad(j)
     end do
   end do
+  rho(1) = abohr3*sqrt(dens*dens + XC_TOL*XC_TOL)
+  orho(1) = abohr3*dens
+  irho(1) = 1.0_dp/rho(1)
+  frho = orho*irho
   sigma(1) = abohr8*sigma(1)
+  laplacian(1) = abohr5*lapl
   crossed(1) = abohr13*crossed(1)
   do i = 1, nxc
     select case (xc_family(i))
     case (XC_FAMILY_LDA)
       call xc_f03_lda_exc_vxc(xc_funcs(i), 1_int64, rho, e, vrho)
       call xc_f03_lda_fxc(xc_funcs(i), 1_int64, rho, v2rho2)
-      if (need2) call xc_f03_lda_kxc(xc_funcs(i), 1_int64, rho, v3rho3)
+      if (need2) then
+        call xc_f03_lda_kxc(xc_funcs(i), 1_int64, rho, v3rho3)
+        v3rho3 = v3rho3*frho + &
+          v2rho2*(-2.0_dp*frho*irho + irho - frho*irho + frho*irho) + &
+          vrho*(2.0_dp*frho*irho*irho + frho*irho*irho - frho*irho*irho)
+      end if
+      v2rho2 = v2rho2*frho + vrho*(irho - frho*irho)
+      vrho = vrho*frho
       exc = exc + xc_weights(i)*e(1)
       vxc = vxc + xc_weights(i)*vrho(1)
       dexcrho = dexcrho + xc_weights(i)*irho(1)*(vrho(1) - e(1))
@@ -169,6 +180,14 @@ subroutine xc_calc_impl(dens, lapl, grad, hess, exc, vxc, dexcrho, dexcsigma, dv
       call xc_f03_gga_exc_vxc(xc_funcs(i), 1_int64, rho, sigma, e, vrho, vsigma)
       call xc_f03_gga_fxc(xc_funcs(i), 1_int64, rho, sigma, v2rho2, v2rhosigma, v2sigma2)
       call xc_f03_gga_kxc(xc_funcs(i), 1_int64, rho, sigma, v3rho3, v3rho2sigma, v3rhosigma2, v3sigma3)
+      v3rho3 = v3rho3*frho + &
+        v2rho2*(-2.0_dp*frho*irho + irho - frho*irho + frho*irho) + &
+        vrho*(2.0_dp*frho*irho*irho + frho*irho*irho - frho*irho*irho)
+      v3rho2sigma = v3rho2sigma*frho + v2rhosigma*(irho - frho*irho)
+      v3rhosigma2 = v3rhosigma2*frho
+      v2rho2 = v2rho2*frho + vrho*(irho - frho*irho)
+      v2rhosigma = v2rhosigma*frho
+      vrho = vrho*frho
       exc = exc + xc_weights(i)*e(1)
       vxc = vxc + xc_weights(i)*(vrho(1) - 2.0_dp*(vsigma(1)*laplacian(1) + &
                                                    v2rhosigma(1)*sigma(1) + &
