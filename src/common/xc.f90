@@ -153,9 +153,9 @@ subroutine xc_calc_impl(dens, lapl, grad, hess, exc, vxc, dexcrho, dexcsigma, dv
     end do
   end do
   rho(1) = abohr3*sqrt(dens*dens + XC_TOL*XC_TOL)
-  !orho(1) = abohr3*dens
+  ! orho(1) = abohr3*dens
   irho(1) = 1.0_dp/rho(1)
-  frho = orho*irho
+  ! frho = orho*irho
   sigma(1) = abohr8*sigma(1)
   laplacian(1) = abohr5*lapl
   crossed(1) = abohr13*crossed(1)
