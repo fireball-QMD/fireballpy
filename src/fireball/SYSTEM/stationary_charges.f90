@@ -20,10 +20,10 @@ subroutine stationary_charges()
   real(dp),dimension(nssh_tot) :: gsnB
   real(dp) :: Ep2
   integer :: issh1, mu_min, mu_max, l, inumorb
-  real(dp) :: aux, ztot_aux
+  real(dp) :: aux, ztot_aux, rmunu
   integer :: beta, alpha, ina, matom, iatom
   integer :: alpha_iatom2, alpha2, nssh_tot2
-  integer, dimension (:), allocatable :: mapindex, ipiv
+  integer, dimension (:), allocatable :: mapindex, ipiv, freelist
   integer :: info, lwork
   real(dp), dimension (:), allocatable :: B, work
   real(dp), dimension (:,:), allocatable :: M
@@ -116,19 +116,31 @@ subroutine stationary_charges()
         & - f_xc_shell(beta , alpha) - f_xc_shell(alpha, beta) + gsnM(alpha,beta))!&
       end if !fix_shell_charge(beta) = 1
     end do !beta
-    do iatom = 1, natoms
-      in1 = imass(iatom)
-      do ineigh = 1, neighn(iatom)
-        jatom = neigh_j(ineigh,iatom)
-        in2 = imass(jatom)
-        do imu = 1, num_orb(in1)
-          do inu = 1, num_orb(in2)
+  end do !alpha
+  allocate(freelist(nssh_tot2))
+  do alpha = 1, nssh_tot
+    if (fix_shell_charge(alpha) == 0) freelist(mapindex(alpha)) = alpha
+  end do
+  do iatom = 1, natoms
+    in1 = imass(iatom)
+    do ineigh = 1, neighn(iatom)
+      jatom = neigh_j(ineigh,iatom)
+      in2 = imass(jatom)
+      do imu = 1, num_orb(in1)
+        do inu = 1, num_orb(in2)
+          rmunu = rho(imu,inu,ineigh,iatom)
+          do i = 1, nssh_tot2
+            alpha = freelist(i)
             aux = g_h(alpha,imu,inu,ineigh,iatom) + g_xc(alpha,imu,inu,ineigh,iatom)
-            B(mapindex(alpha)) = B(mapindex(alpha)) +  rho(imu,inu,ineigh,iatom)*aux
-          end do ! inu
-        end do ! imu
-      end do ! ineigh
-    end do ! iatom
+            B(i) = B(i) + rmunu*aux
+          end do
+        end do ! inu
+      end do ! imu
+    end do ! ineigh
+  end do ! iatom
+  deallocate(freelist)
+  do alpha = 1, nssh_tot
+    if (fix_shell_charge(alpha) /= 0) cycle
     B(mapindex(alpha)) = B(mapindex(alpha)) + exc_aa_shell(alpha) - vxc_aa_shell(alpha) + gsnB(alpha)
   end do !alpha
 
