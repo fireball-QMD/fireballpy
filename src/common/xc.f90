@@ -127,9 +127,9 @@ subroutine xc_calc_impl(dens, lapl, grad, hess, exc, vxc, dexcrho, dexcsigma, dv
   real(dp), intent(out), optional :: d2excrho2, d2vxcrho2
   logical :: need2
   integer :: ndim, i, j
-  real(dp) :: rho(1), orho(1), irho(1), frho(1), sigma(1), laplacian(1), crossed(1), e(1), &
+  real(dp) :: rho(1), irho(1), frho(1), sigma(1), laplacian(1), crossed(1), e(1), &
               vrho(1), vsigma(1), v2rho2(1), v2rhosigma(1), v2sigma2(1), &
-              v3rho3(1), v3rho2sigma(1), v3rhosigma2(1), v3sigma3(1)
+              v3rho3(1), v3rho2sigma(1), v3rhosigma2(1), v3sigma3(1) !, orho(1)
   need2 = present(d2excrho2) .and. present(d2vxcrho2)  ! Will only happen in LDA
   exc = 0.0_dp
   vxc = 0.0_dp
@@ -153,7 +153,7 @@ subroutine xc_calc_impl(dens, lapl, grad, hess, exc, vxc, dexcrho, dexcsigma, dv
     end do
   end do
   rho(1) = abohr3*sqrt(dens*dens + XC_TOL*XC_TOL)
-  orho(1) = abohr3*dens
+  !orho(1) = abohr3*dens
   irho(1) = 1.0_dp/rho(1)
   frho = orho*irho
   sigma(1) = abohr8*sigma(1)
@@ -166,12 +166,12 @@ subroutine xc_calc_impl(dens, lapl, grad, hess, exc, vxc, dexcrho, dexcsigma, dv
       call xc_f03_lda_fxc(xc_funcs(i), 1_int64, rho, v2rho2)
       if (need2) then
         call xc_f03_lda_kxc(xc_funcs(i), 1_int64, rho, v3rho3)
-        v3rho3 = v3rho3*frho + &
-          v2rho2*(-2.0_dp*frho*irho + irho - frho*irho + frho*irho) + &
-          vrho*(2.0_dp*frho*irho*irho + frho*irho*irho - frho*irho*irho)
+        !  v3rho3 = v3rho3*frho + &
+        !    v2rho2*(-2.0_dp*frho*irho + irho - frho*irho + frho*irho) + &
+        !    vrho*(2.0_dp*frho*irho*irho + frho*irho*irho - frho*irho*irho)
       end if
-      v2rho2 = v2rho2*frho + vrho*(irho - frho*irho)
-      vrho = vrho*frho
+      ! v2rho2 = v2rho2*frho + vrho*(irho - frho*irho)
+      ! vrho = vrho*frho
       exc = exc + xc_weights(i)*e(1)
       vxc = vxc + xc_weights(i)*vrho(1)
       dexcrho = dexcrho + xc_weights(i)*irho(1)*(vrho(1) - e(1))
@@ -180,14 +180,14 @@ subroutine xc_calc_impl(dens, lapl, grad, hess, exc, vxc, dexcrho, dexcsigma, dv
       call xc_f03_gga_exc_vxc(xc_funcs(i), 1_int64, rho, sigma, e, vrho, vsigma)
       call xc_f03_gga_fxc(xc_funcs(i), 1_int64, rho, sigma, v2rho2, v2rhosigma, v2sigma2)
       call xc_f03_gga_kxc(xc_funcs(i), 1_int64, rho, sigma, v3rho3, v3rho2sigma, v3rhosigma2, v3sigma3)
-      v3rho3 = v3rho3*frho + &
-        v2rho2*(-2.0_dp*frho*irho + irho - frho*irho + frho*irho) + &
-        vrho*(2.0_dp*frho*irho*irho + frho*irho*irho - frho*irho*irho)
-      v3rho2sigma = v3rho2sigma*frho + v2rhosigma*(irho - frho*irho)
-      v3rhosigma2 = v3rhosigma2*frho
-      v2rho2 = v2rho2*frho + vrho*(irho - frho*irho)
-      v2rhosigma = v2rhosigma*frho
-      vrho = vrho*frho
+      ! v3rho3 = v3rho3*frho + &
+      !   v2rho2*(-2.0_dp*frho*irho + irho - frho*irho + frho*irho) + &
+      !   vrho*(2.0_dp*frho*irho*irho + frho*irho*irho - frho*irho*irho)
+      ! v3rho2sigma = v3rho2sigma*frho + v2rhosigma*(irho - frho*irho)
+      ! v3rhosigma2 = v3rhosigma2*frho
+      ! v2rho2 = v2rho2*frho + vrho*(irho - frho*irho)
+      ! v2rhosigma = v2rhosigma*frho
+      ! vrho = vrho*frho
       exc = exc + xc_weights(i)*e(1)
       vxc = vxc + xc_weights(i)*(vrho(1) - 2.0_dp*(vsigma(1)*laplacian(1) + &
                                                    v2rhosigma(1)*sigma(1) + &
