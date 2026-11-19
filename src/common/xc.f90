@@ -56,7 +56,7 @@ private
 public :: xc_isgga, xc_calc, xc_init, xc_end
 
 integer, parameter, public :: XC_NAMES_LEN = 32
-real(dp), parameter, public :: XC_TOL = 1.0e-3_dp
+real(dp), parameter, public :: XC_TOL = 1.0e-5_dp
 
 interface xc_calc
   procedure :: xc_calc_lda
