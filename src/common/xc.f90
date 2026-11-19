@@ -106,7 +106,7 @@ subroutine xc_init(names, weights)
       call utils_log(UTILS_LOG_ERROR, "functional "//trim(names(i))//" is not LDA/GGA")
       error stop 1
     end select
-    call xc_f03_func_set_dens_threshold(xc_funcs(i), XC_TOL)
+    call xc_f03_func_set_dens_threshold(xc_funcs(i), XC_TOL*abohr3)
   end do
   xc_gga = isgga > 1
 end subroutine xc_init
