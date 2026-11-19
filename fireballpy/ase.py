@@ -1,6 +1,7 @@
 from __future__ import annotations
 from pathlib import Path
 from typing import SupportsFloat
+import os
 import warnings
 
 import numpy as np
@@ -15,8 +16,9 @@ from fireballpy.options import DipoleMethod
 
 from fireballpy._fireball import set_qmmm, update_qmmm, get_qmmm_forces
 
+_fb_owner = os.getpid()
 
-class Fireball(Calculator, BaseFireball):
+class Fireball(Calculator):
     """Python implementation of Fireball DFT code compatible with ASE API.
 
     The idea of this DFT code is to make use of precomputed integrals of
@@ -93,7 +95,7 @@ class Fireball(Calculator, BaseFireball):
         +---------------------+----------------------+--------------------------------------------------------------------------+
         | ``fix_shells``      | ``FixShellsMethod``, | Shells fixed to their neutral charge by                                  |
         |                     | ``ArrayLike[int]``   | ``charges_method=STATIONARY_CHARGES``. ``AUTO``/``None`` (default):      |
-        |                     | or ``None``          | shells with zero neutral charge; ``ONLYD'``: only l=2 shells; ``NONE``:  |
+        |                     | or ``None``          | shells with zero neutral charge; ``ONLYD``: only l=2 shells; ``NONE``:  |
         |                     |                      | all free; or a 0/1 mask per shell in global shell order                  |
         |                     |                      | (shells of atom 1, then atom 2, ...).                                    |
         +---------------------+----------------------+--------------------------------------------------------------------------+
@@ -116,6 +118,8 @@ class Fireball(Calculator, BaseFireball):
         Obtain the number of shells considered.
     get_shell_charges()
         Obtain the charges of each shell.
+    embed(q_p, rc=0.1, rc2=1e200, width=1.0):
+        Return the point charge embeding.
     fix_charges()
         Fix shell charges
     unfix_charges()
@@ -133,17 +137,22 @@ class Fireball(Calculator, BaseFireball):
                    <https://doi.org/10.1002/pssb.201147259>`_
 
     """
-    _valid_kwargs = {'gamma': None, 'charges_method': None,
-                     'dipole_method': DipoleMethod.IMPROVED, 'total_charge': 0, 'fix_charges': False,
-                     'correction': None, 'initial_charges': None, 'mixer_kws': None,
-                     'fix_shells': None}
+    _valid_kwargs = {"gamma": None,
+                     "charges_method": None,
+                     "dipole_method": DipoleMethod.IMPROVED,
+                     "total_charge": 0,
+                     "fix_charges": False,
+                     "correction": None,
+                     "initial_charges": None,
+                     "mixer_kws": None,
+                     "fix_shells": None}
 
-    implemented_properties = ['energy', 'free_energy', 'forces', 'charges']
+    implemented_properties = ["energy", "free_energy", "forces", "charges"]
 
-    calc_properties = ['shell_charges', 'fermi_level', 'eigenvalues',
-                       'ibz_kpoints', 'kpoint_weights']
+    calc_properties = ["shell_charges", "fermi_level", "eigenvalues",
+                       "ibz_kpoints", "kpoint_weights"]
 
-    ignored_changes = set(['initial_magmoms'])
+    ignored_changes = set(["initial_magmoms"])
 
     def __init__(self, fdata: str | Path | FData, *,
                  lazy: bool = True,
@@ -151,7 +160,7 @@ class Fireball(Calculator, BaseFireball):
                  kpts: ArrayLike | SupportsFloat = (1, 1, 1),
                  **kwargs) -> None:
         Calculator.__init__(self, **kwargs)
-        self._fb_started = False
+        self.fireball: BaseFireball | None = None
         self.nspin = 1
         self.fdata = fdata
         self.lazy = lazy
@@ -163,12 +172,12 @@ class Fireball(Calculator, BaseFireball):
         # We just check the most basic thing and pray the user is not mad about it.
         for k in kwargs:
             if k not in self._valid_kwargs:
-                raise ValueError(f"Parameter ``{k}`` not recognised.")
+                raise ValueError(f"Parameter '{k}' not recognised.")
         self._kwargs = {}
         for k in self._valid_kwargs:
             self._kwargs[k] = kwargs.get(k, self._valid_kwargs[k])
-        self.gamma = bool(self._kwargs.pop('gamma'))
-        self.isfix_charges = bool(self._kwargs.pop('fix_charges'))
+        self.gamma = bool(self._kwargs.pop("gamma"))
+        self.isfix_charges = bool(self._kwargs.pop("fix_charges"))
 
     def get_eigenvalues(self, kpt=0, spin=0) -> NDArray[np.float64]:
         """Get the eigenvalues of the hamiltonian in electronvolts.
@@ -192,10 +201,14 @@ class Fireball(Calculator, BaseFireball):
             If any computation has been done and eigenvalues were not yet computed.
         IndexError
             If the an out-of-bounds k-point index is requested.
+        NotImplementedError
+            If ``spin != 0`` is requested.
         """
-        if not self._fb_started:
-            raise PropertyNotPresent('eigenvalues')
-        return self.eigenvalues[kpt]
+        if self.fireball is None:
+            raise PropertyNotPresent("eigenvalues")
+        if spin != 0:
+            raise NotImplementedError("Only 'spin=0' is supported")
+        return self.fireball.eigenvalues[kpt]
 
     def get_eigenvectors(self, kpt=0, spin=0) -> NDArray[np.float64] | NDArray[np.complex128]:
         """Get the coefficients for each wave function.
@@ -220,10 +233,14 @@ class Fireball(Calculator, BaseFireball):
             If any computation has been done and eigenvectors were not yet computed.
         IndexError
             If the an out-of-bounds k-point index is requested.
+        NotImplementedError
+            If ``spin != 0`` is requested.
         """
-        if not self._fb_started:
-            raise PropertyNotPresent('eigenvectors')
-        return self.eigenvectors[kpt] if not self.kpoints.isgamma else np.real(self.eigenvectors[kpt])
+        if self.fireball is None:
+            raise PropertyNotPresent("eigenvectors")
+        if spin != 0:
+            raise NotImplementedError("Only 'spin=0' is supported")
+        return self.fireball.eigenvectors[kpt] if not self.fireball.kpoints.isgamma else np.real(self.fireball.eigenvectors[kpt])
 
     def get_fermi_level(self) -> float:
         """Get the Fermi level in electronvolts.
@@ -238,9 +255,9 @@ class Fireball(Calculator, BaseFireball):
         PropertyNotPresent
             If any computation has been done and the Fermi level was not yet computed.
         """
-        if not self._fb_started:
-            raise PropertyNotPresent('fermi_level')
-        return self.fermi_level
+        if self.fireball is None:
+            raise PropertyNotPresent("fermi_level")
+        return self.fireball.fermi_level
 
     def get_ibz_k_points(self) -> NDArray[np.float64]:
         """Get the k-points used for computation.
@@ -256,10 +273,10 @@ class Fireball(Calculator, BaseFireball):
         PropertyNotPresent
             If any computation has been done and k-points were not yet computed.
         """
-        if not self._fb_started:
-            raise PropertyNotPresent('ibz_kpoints')
-        self.results.update({'ibz_kpoints': self.kpoints.coords})
-        return self.kpoints.coords
+        if self.fireball is None:
+            raise PropertyNotPresent("ibz_kpoints")
+        self.results.update({"ibz_kpoints": self.fireball.kpoints.coords})
+        return self.fireball.kpoints.coords
 
     def get_k_point_weights(self) -> NDArray[np.float64]:
         """Get the weights of the k-points used for computation.
@@ -275,10 +292,10 @@ class Fireball(Calculator, BaseFireball):
         PropertyNotPresent
             If the any computation has been done and k-point weights were not yet computed.
         """
-        if not self._fb_started:
-            raise PropertyNotPresent('kpoint_weights')
-        self.results.update({'kpoint_weights': self.kpoints.weights})
-        return self.kpoints.weights
+        if self.fireball is None:
+            raise PropertyNotPresent("kpoint_weights")
+        self.results.update({"kpoint_weights": self.fireball.kpoints.weights})
+        return self.fireball.kpoints.weights
 
     def get_number_of_bands(self) -> int:
         """Get the number of bands.
@@ -293,9 +310,9 @@ class Fireball(Calculator, BaseFireball):
         PropertyNotPresent
             If the any computation has been done and the number of bands is not yet computed.
         """
-        if not self._fb_started:
-            raise PropertyNotPresent('shell_charges')
-        return int(self.nbands)
+        if self.fireball is None:
+            raise PropertyNotPresent("shell_charges")
+        return int(self.fireball.nbands)
 
     def get_number_of_shells(self) -> int:
         """Get the number of shells.
@@ -310,9 +327,9 @@ class Fireball(Calculator, BaseFireball):
         PropertyNotPresent
             If the any computation has been done and the number of shells is not yet computed.
         """
-        if not self._fb_started:
-            raise PropertyNotPresent('shell_charges')
-        return self.maxshells
+        if self.fireball is None:
+            raise PropertyNotPresent("shell_charges")
+        return self.fireball.maxshells
 
     def get_number_of_spins(self) -> int:
         """Get the number of spins.
@@ -338,9 +355,9 @@ class Fireball(Calculator, BaseFireball):
         PropertyNotPresent
             If the any computation has been done and the shell charges are not yet computed.
         """
-        if not self._fb_started:
-            raise PropertyNotPresent('shell_charges')
-        return self.shell_charges
+        if self.fireball is None:
+            raise PropertyNotPresent("shell_charges")
+        return self.fireball.shell_charges
 
     def fix_charges(self) -> None:
         """Fix shell charges for following computations
@@ -355,39 +372,56 @@ class Fireball(Calculator, BaseFireball):
     def embed(self, q_p, rc=0.1, rc2=1e200, width=1.0) -> PointChargePotential:
         return PointChargePotential(q_p, rc=rc, rc2=rc2, width=width)
 
-    def calculate(self, atoms=None, properties=['energy'],
-                  system_changes=all_changes) -> None:
-        Calculator.calculate(self, atoms, properties, system_changes)
-        assert atoms is not None
-
-        # If the atoms change we reinit BaseFireball
-        if 'numbers' in system_changes:
-            atomsystem = AtomSystem(species=set(atoms.get_chemical_symbols()),
+    def _init_system(self, atoms, initial_charges=None) -> BaseFireball:
+        atomsystem = AtomSystem(species=set(atoms.get_chemical_symbols()),
                                     numbers=atoms.get_atomic_numbers(),
                                     positions=atoms.get_positions(),
                                     a1=atoms.cell[0], a2=atoms.cell[1], a3=atoms.cell[2])
-            fdatafiles = FDataFiles(fdata=self.fdata, atomsystem=atomsystem)
-            kpoints = KPoints(kpts=self.kpts, atomsystem=atomsystem, gamma=self.gamma)
-            BaseFireball.__init__(self, atomsystem=atomsystem, fdatafiles=fdatafiles, kpoints=kpoints,
-                                  verbose=self.verbose, lazy=self.lazy, **self._kwargs)
-            self._fb_started = True
+        fdatafiles = FDataFiles(fdata=self.fdata,
+                                atomsystem=atomsystem)
+        kpoints = KPoints(kpts=self.kpts,
+                          atomsystem=atomsystem,
+                          gamma=self.gamma)
+        kwargs = self._kwargs
+        if initial_charges is not None:
+            kwargs["initial_charges"] = initial_charges
+        return BaseFireball(atomsystem=atomsystem,
+                            fdatafiles=fdatafiles,
+                            kpoints=kpoints,
+                            verbose=self.verbose,
+                            lazy=self.lazy,
+                            **kwargs)
 
-        # If positions change we just need to update them not repeat anything else
-        elif 'positions' in system_changes:
-            self.update_coords(atoms.get_positions())
+    def calculate(self, atoms=None, properties=["energy"], system_changes=all_changes) -> None:
+        Calculator.calculate(self, atoms, properties, system_changes)
+        assert atoms is not None
+
+        global _fb_owner
+        if "numbers" in system_changes:
+            self.fireball = self._init_system(atoms)
+        elif "cell" in system_changes:
+            assert self.fireball is not None
+            self.fireball = self._init_system(atoms, self.fireball.shell_charges)
+        elif _fb_owner != os.getpid():
+            self.fireball = self._init_system(atoms)
+            _fb_owner = os.getpid()
+        elif "positions" in system_changes:
+            assert self.fireball is not None
+            self.fireball.update_coords(atoms.get_positions())
 
         # Compute energy, fermi_level, eigenvalues, charges and shell_charges always
-        self.run_scf(self.isfix_charges)
-        self.results.update({'energy': self.energy,
-                             'free_energy': self.energy,
-                             'fermi_level': self.fermi_level,
-                             'charges': self.charges,
-                             'shell_charges': self.shell_charges,
-                             'eigenvalues': self.eigenvalues})
+        assert self.fireball is not None
+        self.fireball.run_scf(self.isfix_charges)
+        self.results.update({"energy": self.fireball.energy,
+                             "free_energy": self.fireball.energy,
+                             "fermi_level": self.fireball.fermi_level,
+                             "charges": self.fireball.charges,
+                             "shell_charges": self.fireball.shell_charges,
+                             "eigenvalues": self.fireball.eigenvalues})
 
-        if 'forces' in properties:
-            self.calc_forces(self.isfix_charges)
-            self.results.update({'forces': self.forces})
+        if "forces" in properties:
+            self.fireball.calc_forces(self.isfix_charges)
+            self.results.update({"forces": self.fireball.forces})
 
 
 class PointChargePotential:
@@ -431,10 +465,10 @@ class PointChargePotential:
             self.set_positions(positions)
 
         if np.abs(self.charges).max() < 1e-14:
-            warnings.warn('No charges!')
+            warnings.warn("No charges!")
         if self.rc < 0.0 and self.rc2 < np.inf:
-            warnings.warn('Long range cutoff chosen but will not be applied\
-                           for negative inner cutoff values!')
+            warnings.warn("Long range cutoff chosen but will not be applied\
+                           for negative inner cutoff values!")
 
     def set_positions(self, positions, **kwargs) -> None:
         """Update positions."""
@@ -450,6 +484,6 @@ class PointChargePotential:
 
     def get_forces(self, calc: Fireball) -> NDArray[np.float64]:
         """Calculate forces from QM charge density on point-charges."""
-        forces = np.zeros((self.n, 3), dtype=np.float64, order='C')
+        forces = np.zeros((self.n, 3), dtype=np.float64, order="C")
         get_qmmm_forces(forces.T)
         return forces

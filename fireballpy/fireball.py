@@ -229,7 +229,7 @@ class BaseFireball:
         else:
             self.initial_charges = np.zeros((self.natoms, self.maxshells), dtype=np.float64, order='C')
             get_initial_charges(self.initial_charges.T)
-        self.shell_charges = self.initial_charges.copy()
+        self.shell_charges = deepcopy(self.initial_charges)
 
     def _alloc_arrays(self) -> None:
         self.charges = np.ascontiguousarray(self.natoms * [0.0], dtype=np.float64)
@@ -310,7 +310,7 @@ def fbobj_from_obj(fbobj: BaseFireball | None, atoms: Atoms | None) -> BaseFireb
         return fbobj
     if atoms is not None:
         type_check(atoms, Atoms, 'atoms')
-        if not hasattr(atoms, 'calc') or not isinstance(atoms.calc, BaseFireball):
+        if not hasattr(atoms, 'calc') or not hasattr(atoms.calc, 'fireball') or atoms.calc.fireball is None:
             raise ValueError("ASE calculator for parameter ``atoms`` must be ``Fireball``.")
-        return atoms.calc
+        return atoms.calc.fireball
     raise RuntimeError("Fireball-providing inputs could not be identified.")
