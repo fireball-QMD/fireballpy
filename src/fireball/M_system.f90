@@ -211,7 +211,6 @@ module M_system
   real(dp), dimension (:, :, :, :), allocatable :: vca
   real(dp), dimension (:, :, :, :), allocatable :: ewaldlr
   real(dp), dimension (:, :, :, :), allocatable :: h_mat
-  real(dp), dimension (:, :, :, :), allocatable :: h_mat0   ! h^0_{mu nu}: H a cargas neutras (Kscf=1, dQ=0)
   real(dp), dimension (:, :, :, :), allocatable :: t_mat
   real(dp), dimension (:, :, :, :), allocatable :: vna
   real(dp), dimension (:, :, :, :), allocatable :: ewaldqmmm
@@ -298,9 +297,6 @@ module M_system
   real(dp), dimension (:,:,:,:), allocatable :: vxc_ca0
   ! integrales de Coulomb 2c por par de vecinos (assemble_usr), congeladas en Kscf=1
   real(dp), dimension (:,:,:,:), allocatable :: coulomb_mat
-  real(dp), dimension (:,:,:,:,:), allocatable :: f_xc
-  real(dp), dimension (:,:,:,:), allocatable :: exc_aa
-  real(dp), dimension (:,:,:,:), allocatable :: vxc_aa
   real(dp), dimension (:,:), allocatable :: g_h_shell
   real(dp), dimension (:,:), allocatable :: g_xc_shell  
   real(dp), dimension (:,:), allocatable :: f_xc_shell

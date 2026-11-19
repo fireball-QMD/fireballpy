@@ -1,7 +1,7 @@
 fdata_folder = 'LOADFDATA'
 system_folder = 'SYSTEM'
 
-modules_fireball_srcs = ['M_constants.f90', 'M_fdata.f90', 'M_system.f90']
+modules_fireball_srcs = ['M_constants.f90', 'M_fdata.f90', 'M_system.f90', 'M_pairzero.f90']
 fdata_srcs = [
   'make_munuDipX.f90',
   'make_munu.f90',

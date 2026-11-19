@@ -4,6 +4,7 @@ subroutine assemble_xc_1c ()
   use M_system, only: natoms, neigh_self, imass, numorb_max, &
                     etotxc_1c, Uexc_1c, Umuxc_1c, vxc_1c, g_xc, Kscf
   use M_fdata, only: num_orb
+  use M_pairzero, only: zero_pair_orb, zero_pair_sh
   implicit none
  
   integer iatom
@@ -18,7 +19,7 @@ subroutine assemble_xc_1c ()
   Uexc_1c = 0.0_dp
   Umuxc_1c = 0.0_dp
   vxc_1c = 0.0_dp
-  if (Kscf .eq. 1) g_xc = 0.0_dp
+  if (Kscf .eq. 1) call zero_pair_orb(g_xc)
   do iatom = 1, natoms
    matom = neigh_self(iatom)
    in1 = imass(iatom)

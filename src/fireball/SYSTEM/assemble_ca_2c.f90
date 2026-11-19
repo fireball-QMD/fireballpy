@@ -5,6 +5,7 @@ subroutine assemble_ca_2c ()
   use M_system, only: smt_elect, natoms, ratom, imass, ewaldsr, dip, neigh_b, neigh_j, neighn, neigh_self, &
     & numorb_max, Qin, s_mat, vca, xl, g_h, get_shell_ofatom_issh, kscf, iqout
   use M_fdata, only: nssh, num_orb, rcutoff, Qneutral, lssh, TWOCENTER_VNA_L, TWOCENTER_VNA_R, TWOCENTER_VNA_A
+  use M_pairzero, only: zero_pair_orb, zero_pair_sh
   implicit none
   integer iatom
   integer icount
@@ -58,7 +59,7 @@ subroutine assemble_ca_2c ()
   vca = 0.0_dp
   ewaldsr = 0.0_dp
   if (Kscf .eq. 1) then
-    g_h  = 0.0_dp
+    call zero_pair_orb(g_h)
   end if
   do iatom = 1, natoms
     matom = neigh_self(iatom)
