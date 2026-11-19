@@ -581,8 +581,6 @@ subroutine allocate_system ()
   allocate (den_or(nssh_tot,numorb_max,numorb_max,neigh_max,natoms))
   if (allocated(den_sh)) deallocate(den_sh)
   allocate (den_sh(nssh_tot,nsh_max,nsh_max,neigh_max,natoms))
-  den_or = 0.0_dp
-  den_sh = 0.0_dp
   if (allocated(denij_or)) deallocate(denij_or)
   allocate (denij_or(nssh_tot,numorb_max,numorb_max,neigh_max,natoms))
   if (allocated(denij_sh)) deallocate(denij_sh)
@@ -595,8 +593,6 @@ subroutine allocate_system ()
   allocate (vxc_ca0(numorb_max,numorb_max,neigh_max,natoms))
   if (allocated(coulomb_mat)) deallocate(coulomb_mat)
   allocate (coulomb_mat(nsh_max,nsh_max,neigh_max,natoms))
-  denij_or = 0.0_dp
-  denij_sh = 0.0_dp
   deni_or = 0.0_dp
   deni_sh = 0.0_dp
   vxc_ca0 = 0.0_dp

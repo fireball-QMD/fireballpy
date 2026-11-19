@@ -14,6 +14,7 @@ subroutine average_ca_rho (imode)
     & neigh_self, get_shell_ofatom_issh, nssh_tot, get_issh_ofshell, get_iatom_ofshell
   use M_fdata, only: nssh, num_orb, nsh_max, TWOCENTER_OVERLAPS, TWOCENTER_DEN_L, TWOCENTER_DEN_R, TWOCENTER_DEN_A, &
     & TWOCENTER_DENS_L, TWOCENTER_DENS_R, TWOCENTER_DENS_A
+  use M_pairzero, only: zero_pair_orb, zero_pair_sh
   implicit none
   integer, intent(in) :: imode
   integer iatom
@@ -86,10 +87,10 @@ subroutine average_ca_rho (imode)
   if (Kscf .eq. 1 .and. iforce .eq. 1) spm_mat = 0.0_dp
   ! N^gamma_munu and M^gamma_alphabeta are charge-independent: fill only at Kscf=1
   if (Kscf .eq. 1) then
-    den_or = 0.0_dp
-    den_sh = 0.0_dp
-    denij_or = 0.0_dp
-    denij_sh = 0.0_dp
+    call zero_pair_orb(den_or)
+    call zero_pair_sh(den_sh)
+    call zero_pair_orb(denij_or)
+    call zero_pair_sh(denij_sh)
     deni_or = 0.0_dp
     deni_sh = 0.0_dp
   end if

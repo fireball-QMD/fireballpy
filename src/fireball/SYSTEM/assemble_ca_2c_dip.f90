@@ -5,6 +5,7 @@ subroutine assemble_ca_2c_dip ()
   use M_system, only: smt_elect, natoms, ratom, imass, ewaldsr, neigh_b, neigh_j, neighn, neigh_self, numorb_max, Qin, &
     & s_mat, vca, dipc, xl,  g_h, get_shell_ofatom_issh, Kscf, iqout
   use M_fdata, only: nssh,rcutoff,Qneutral,num_orb, TWOCENTER_VNA_A, TWOCENTER_VNA_L, TWOCENTER_VNA_R
+  use M_pairzero, only: zero_pair_orb, zero_pair_sh
   implicit none
   integer iatom
   integer imu
@@ -47,7 +48,7 @@ subroutine assemble_ca_2c_dip ()
   vca = 0.0_dp
   ewaldsr = 0.0_dp
   if (Kscf .eq. 1) then
-    g_h  = 0.0_dp
+    call zero_pair_orb(g_h)
   end if
   do iatom = 1,natoms
     matom = neigh_self(iatom)
