@@ -36,6 +36,7 @@ module M_system
   real(dp) :: sigmatol = 1.0e-8_dp
   real(dp) :: sigmabest
   real(dp) :: w02 = 0.0_dp
+  real(dp) :: xc_smooth = 1.0e-3_dp
   logical :: scf_achieved = .false.
  
   integer :: natoms

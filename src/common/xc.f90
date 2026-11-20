@@ -56,15 +56,15 @@ private
 public :: xc_isgga, xc_calc, xc_init, xc_end
 
 integer, parameter, public :: XC_NAMES_LEN = 32
-real(dp), parameter, public :: XC_TOL = 1.0e-5_dp
 
 interface xc_calc
   procedure :: xc_calc_lda
   procedure :: xc_calc_gga
 end interface xc_calc
 
-logical :: xc_gga  ! We force either all LDA or all GGA
+logical :: xc_gga, xc_reg
 integer :: nxc
+real(dp) :: xc_delta
 integer, allocatable :: xc_family(:)
 real(dp), allocatable :: xc_weights(:)
 type(xc_f03_func_t), allocatable :: xc_funcs(:)
@@ -75,9 +75,10 @@ pure logical function xc_isgga()
   xc_isgga = xc_gga
 end function xc_isgga
 
-subroutine xc_init(names, weights)
+subroutine xc_init(names, weights, reg_tol)
   character(XC_NAMES_LEN), allocatable, intent(in) :: names(:)
   real(dp), intent(in) :: weights(:)
+  real(dp), intent(in), optional :: reg_tol
   integer :: i, iexc, isgga
   type(xc_f03_func_info_t) :: info
   nxc = size(names)
@@ -89,6 +90,14 @@ subroutine xc_init(names, weights)
   if (size(weights) /= nxc) then
     call utils_log(UTILS_LOG_ERROR, "XC size(weights) /= size(names)")
     error stop 1
+  end if
+
+  if (present(reg_tol)) then
+    xc_reg = .true.
+    xc_delta = reg_tol
+  else
+    xc_reg = .false.
+    xc_delta = 0.0_dp
   end if
 
   isgga = 0
@@ -106,7 +115,9 @@ subroutine xc_init(names, weights)
       call utils_log(UTILS_LOG_ERROR, "functional "//trim(names(i))//" is not LDA/GGA")
       error stop 1
     end select
-    call xc_f03_func_set_dens_threshold(xc_funcs(i), XC_TOL*abohr3)
+    if (xc_reg) then
+      call xc_f03_func_set_dens_threshold(xc_funcs(i), xc_delta*abohr3)
+    end if
   end do
   xc_gga = isgga > 1
 end subroutine xc_init
@@ -127,9 +138,10 @@ subroutine xc_calc_impl(dens, lapl, grad, hess, exc, vxc, dexcrho, dexcsigma, dv
   real(dp), intent(out), optional :: d2excrho2, d2vxcrho2
   logical :: need2
   integer :: ndim, i, j
-  real(dp) :: rho(1), irho(1), frho(1), sigma(1), laplacian(1), crossed(1), e(1), &
+  real(dp) :: fr, fd, fr2, fd2, fr3
+  real(dp) :: rho(1), irho(1), sigma(1), laplacian(1), crossed(1), e(1), &
               vrho(1), vsigma(1), v2rho2(1), v2rhosigma(1), v2sigma2(1), &
-              v3rho3(1), v3rho2sigma(1), v3rhosigma2(1), v3sigma3(1) !, orho(1)
+              v3rho3(1), v3rho2sigma(1), v3rhosigma2(1), v3sigma3(1)
   need2 = present(d2excrho2) .and. present(d2vxcrho2)  ! Will only happen in LDA
   exc = 0.0_dp
   vxc = 0.0_dp
@@ -152,13 +164,18 @@ subroutine xc_calc_impl(dens, lapl, grad, hess, exc, vxc, dexcrho, dexcsigma, dv
       crossed(1) = crossed(1) + grad(i)*hess(j, i)*grad(j)
     end do
   end do
-  rho(1) = abohr3*sqrt(dens*dens + XC_TOL*XC_TOL)
-  ! orho(1) = abohr3*dens
+  rho(1) = abohr3*sqrt(dens*dens + xc_delta*xc_delta)
   irho(1) = 1.0_dp/rho(1)
-  ! frho = orho*irho
   sigma(1) = abohr8*sigma(1)
   laplacian(1) = abohr5*lapl
   crossed(1) = abohr13*crossed(1)
+  if (xc_reg) then
+    fr = abohr3*dens*irho(1)
+    fd = abohr3*xc_delta*irho(1)
+    fr2 = fr*fr
+    fd2 = fd*fd
+    fr3 = fr*fr2
+  end if
   do i = 1, nxc
     select case (xc_family(i))
     case (XC_FAMILY_LDA)
@@ -166,12 +183,14 @@ subroutine xc_calc_impl(dens, lapl, grad, hess, exc, vxc, dexcrho, dexcsigma, dv
       call xc_f03_lda_fxc(xc_funcs(i), 1_int64, rho, v2rho2)
       if (need2) then
         call xc_f03_lda_kxc(xc_funcs(i), 1_int64, rho, v3rho3)
-        !  v3rho3 = v3rho3*frho + &
-        !    v2rho2*(-2.0_dp*frho*irho + irho - frho*irho + frho*irho) + &
-        !    vrho*(2.0_dp*frho*irho*irho + frho*irho*irho - frho*irho*irho)
+        if (xc_reg) v3rho3 = v3rho3*fr3 + &
+                             irho(1)*(v2rho2*fr*(2.0_dp - 2.0_dp*fr2 + fd2) - &
+                                      irho(1)*3.0_dp*vrho*fr*fd2)
       end if
-      ! v2rho2 = v2rho2*frho + vrho*(irho - frho*irho)
-      ! vrho = vrho*frho
+      if (xc_reg) then
+        v2rho2 = v2rho2*fr2 + irho(1)*vrho*fd2
+        vrho = vrho*fr
+      end if
       exc = exc + xc_weights(i)*e(1)
       vxc = vxc + xc_weights(i)*vrho(1)
       dexcrho = dexcrho + xc_weights(i)*irho(1)*(vrho(1) - e(1))
@@ -180,14 +199,16 @@ subroutine xc_calc_impl(dens, lapl, grad, hess, exc, vxc, dexcrho, dexcsigma, dv
       call xc_f03_gga_exc_vxc(xc_funcs(i), 1_int64, rho, sigma, e, vrho, vsigma)
       call xc_f03_gga_fxc(xc_funcs(i), 1_int64, rho, sigma, v2rho2, v2rhosigma, v2sigma2)
       call xc_f03_gga_kxc(xc_funcs(i), 1_int64, rho, sigma, v3rho3, v3rho2sigma, v3rhosigma2, v3sigma3)
-      ! v3rho3 = v3rho3*frho + &
-      !   v2rho2*(-2.0_dp*frho*irho + irho - frho*irho + frho*irho) + &
-      !   vrho*(2.0_dp*frho*irho*irho + frho*irho*irho - frho*irho*irho)
-      ! v3rho2sigma = v3rho2sigma*frho + v2rhosigma*(irho - frho*irho)
-      ! v3rhosigma2 = v3rhosigma2*frho
-      ! v2rho2 = v2rho2*frho + vrho*(irho - frho*irho)
-      ! v2rhosigma = v2rhosigma*frho
-      ! vrho = vrho*frho
+      if (xc_reg) then
+        v3rho3 = v3rho3*fr3 + &
+            irho(1)*(v2rho2*fr*(2.0_dp - 2.0_dp*fr2 + fd2) - &
+            irho(1)*3.0_dp*vrho*fr*fd2)
+        v2rho2 = v2rho2*fr2 + irho(1)*vrho*fd2
+        vrho = vrho*fr
+        v3rho2sigma = v3rho2sigma*fr2 + irho(1)*v2rhosigma*fd2
+        v2rhosigma = v2rhosigma*fr
+        v3rhosigma2 = v3rhosigma2*fr
+      end if
       exc = exc + xc_weights(i)*e(1)
       vxc = vxc + xc_weights(i)*(vrho(1) - 2.0_dp*(vsigma(1)*laplacian(1) + &
                                                    v2rhosigma(1)*sigma(1) + &

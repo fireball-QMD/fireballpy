@@ -2,9 +2,9 @@ subroutine getforces ()
   use, intrinsic :: iso_fortran_env, only: dp => real64
   use xc, only: xc_init, xc_end
   use M_fdata, only: exc_names, exc_weights
-  use M_system, only: idipole, iqmmm, flrew_qmmm
+  use M_system, only: idipole, iqmmm, flrew_qmmm, xc_smooth
   implicit none
-  call xc_init(exc_names, exc_weights)
+  call xc_init(exc_names, exc_weights, reg_tol=xc_smooth)
   call get_ewald(1) ! iforce=1
   call assemble_usr(1) ! iforce=1
   call Dassemble_2c()
