@@ -1,7 +1,7 @@
 from __future__ import annotations
 from pathlib import Path
 from typing import SupportsFloat
-import os
+import time
 import warnings
 
 import numpy as np
@@ -16,7 +16,7 @@ from fireballpy.options import DipoleMethod
 
 from fireballpy._fireball import set_qmmm, update_qmmm, get_qmmm_forces
 
-_fb_owner = os.getpid()
+_fb_owner: None | int = time.time_ns()
 
 class Fireball(Calculator):
     """Python implementation of Fireball DFT code compatible with ASE API.
@@ -160,6 +160,7 @@ class Fireball(Calculator):
                  kpts: ArrayLike | SupportsFloat = (1, 1, 1),
                  **kwargs) -> None:
         Calculator.__init__(self, **kwargs)
+        self._init_time = time.time_ns()
         self.fireball: BaseFireball | None = None
         self.nspin = 1
         self.fdata = fdata
@@ -402,12 +403,12 @@ class Fireball(Calculator):
         elif "cell" in system_changes:
             assert self.fireball is not None
             self.fireball = self._init_system(atoms, self.fireball.shell_charges)
-        elif _fb_owner != os.getpid():
+        elif _fb_owner is None or _fb_owner != self._init_time:
             self.fireball = self._init_system(atoms)
-            _fb_owner = os.getpid()
         elif "positions" in system_changes:
             assert self.fireball is not None
             self.fireball.update_coords(atoms.get_positions())
+        _fb_owner = self._init_time
 
         # Compute energy, fermi_level, eigenvalues, charges and shell_charges always
         assert self.fireball is not None
