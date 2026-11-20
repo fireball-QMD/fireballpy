@@ -1,13 +1,14 @@
 from __future__ import annotations
+from copy import deepcopy
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
-from scipy.linalg import norm, inv
+from scipy.linalg import norm, solve
 from scipy.spatial.distance import pdist
 
 from fireballpy._fireball import set_coords, set_cell, update_coords
 
 TWOPI = 2.0*np.pi
-RECIPROCAL = 1/TWOPI
+RECIPROCAL = 1.0/TWOPI
 SHIFT = np.ascontiguousarray([np.pi, np.exp(-1.0), np.sqrt(2.0)], dtype=np.float64)
 
 class AtomSystem:
@@ -100,26 +101,29 @@ class AtomSystem:
             if not p:
                 self.cell[i] = np.zeros(3, dtype=np.float64, order='C')
                 self.cell[i,i] = np.max(np.abs(self.positions[:,i])) + 100.0
-        self.icell = TWOPI*np.ascontiguousarray(inv(self.cell).T)
+        self.icell: NDArray[np.float64] = TWOPI*solve(self.cell, np.eye(3), transposed=True)
 
     def _needs_shift(self, tol: float = 1e-5) -> bool:
         return bool(np.any(norm(self.positions, axis=1) < tol))
 
-    def _wrap_positions(self, eps: float = 1e-5) -> NDArray[np.float64]:
+    def _fireball_positions(self, tol: float = 1e-5) -> NDArray[np.float64]:
+        pos = deepcopy(self.positions)
+        if self._needs_shift(tol):
+            pos[:,0] += SHIFT[0]
+            pos[:,1] += SHIFT[1]
+            pos[:,2] += SHIFT[2]
         if not self.isperiodic:
-            return self.positions
-        fractional = RECIPROCAL*np.dot(self.positions, self.icell) + eps
-        fractional = fractional % 1.0 - eps
-        return np.dot(fractional, self.cell.T)
+            return pos
+        fractional: NDArray[np.float64] = RECIPROCAL*np.dot(self.positions, self.icell.T)
+        fractional[:, self.pbc] -= np.floor(fractional[:, self.pbc])
+        return np.dot(fractional, self.cell)
 
     def set_coords(self, tol=1e-5) -> None:
         """Set the coordinate info in the Fortran module.
         """
         # Shift coords if needed
-        pos = self._wrap_positions()
+        pos = self._fireball_positions(tol)
         self._check_positions(pos)
-        if self._needs_shift(tol):
-            pos += SHIFT
         set_coords(self.numbers, pos.T)
 
     def set_cell(self) -> None:
@@ -136,9 +140,7 @@ class AtomSystem:
             A natoms x 3 array with the positions of each atom in angstroms.
         """
         self.positions = np.ascontiguousarray(positions, dtype=np.float64)
-        assert self.positions.shape == (self.n, 3), "positions must be a (nkpts, 3) size array"
-        pos = self._wrap_positions()
+        assert self.positions.shape == (self.n, 3), "positions must be a (natoms, 3) size array"
+        pos = self._fireball_positions(tol)
         self._check_positions(pos)
-        if self._needs_shift(tol):
-            pos += SHIFT
         update_coords(pos.T)
