@@ -138,8 +138,8 @@ subroutine xc_calc_impl(dens, lapl, grad, hess, exc, vxc, dexcrho, dexcsigma, dv
   real(dp), intent(out), optional :: d2excrho2, d2vxcrho2
   logical :: need2
   integer :: ndim, i, j
-  real(dp) :: fr, fd, fr2, fd2, fr3
-  real(dp) :: rho(1), irho(1), sigma(1), laplacian(1), crossed(1), e(1), &
+  real(dp) :: irho, indens, invdens
+  real(dp) :: rho(1), sigma(1), laplacian(1), crossed(1), e(1), &
               vrho(1), vsigma(1), v2rho2(1), v2rhosigma(1), v2sigma2(1), &
               v3rho3(1), v3rho2sigma(1), v3rhosigma2(1), v3sigma3(1)
   need2 = present(d2excrho2) .and. present(d2vxcrho2)  ! Will only happen in LDA
@@ -164,57 +164,36 @@ subroutine xc_calc_impl(dens, lapl, grad, hess, exc, vxc, dexcrho, dexcsigma, dv
       crossed(1) = crossed(1) + grad(i)*hess(j, i)*grad(j)
     end do
   end do
-  rho(1) = abohr3*sqrt(dens*dens + xc_delta*xc_delta)
-  irho(1) = 1.0_dp/rho(1)
+  if (xc_reg) then
+    indens = sqrt(dens*dens + xc_delta*xc_delta)
+  else
+    indens = dens
+  end if
+  rho(1) = abohr3*indens
   sigma(1) = abohr8*sigma(1)
   laplacian(1) = abohr5*lapl
   crossed(1) = abohr13*crossed(1)
-  if (xc_reg) then
-    fr = abohr3*dens*irho(1)
-    fd = abohr3*xc_delta*irho(1)
-    fr2 = fr*fr
-    fd2 = fd*fd
-    fr3 = fr*fr2
-  end if
+  irho = 1.0_dp/rho(1)
   do i = 1, nxc
     select case (xc_family(i))
     case (XC_FAMILY_LDA)
       call xc_f03_lda_exc_vxc(xc_funcs(i), 1_int64, rho, e, vrho)
       call xc_f03_lda_fxc(xc_funcs(i), 1_int64, rho, v2rho2)
-      if (need2) then
-        call xc_f03_lda_kxc(xc_funcs(i), 1_int64, rho, v3rho3)
-        if (xc_reg) v3rho3 = v3rho3*fr3 + &
-                             irho(1)*(v2rho2*fr*(2.0_dp - 2.0_dp*fr2 + fd2) - &
-                                      irho(1)*3.0_dp*vrho*fr*fd2)
-      end if
-      if (xc_reg) then
-        v2rho2 = v2rho2*fr2 + irho(1)*vrho*fd2
-        vrho = vrho*fr
-      end if
+      if (need2) call xc_f03_lda_kxc(xc_funcs(i), 1_int64, rho, v3rho3)
       exc = exc + xc_weights(i)*e(1)
       vxc = vxc + xc_weights(i)*vrho(1)
-      dexcrho = dexcrho + xc_weights(i)*irho(1)*(vrho(1) - e(1))
+      dexcrho = dexcrho + xc_weights(i)*irho*(vrho(1) - e(1))
       dvxcrho = dvxcrho + xc_weights(i)*v2rho2(1)
     case (XC_FAMILY_GGA, XC_FAMILY_HYB_GGA)
       call xc_f03_gga_exc_vxc(xc_funcs(i), 1_int64, rho, sigma, e, vrho, vsigma)
       call xc_f03_gga_fxc(xc_funcs(i), 1_int64, rho, sigma, v2rho2, v2rhosigma, v2sigma2)
       call xc_f03_gga_kxc(xc_funcs(i), 1_int64, rho, sigma, v3rho3, v3rho2sigma, v3rhosigma2, v3sigma3)
-      if (xc_reg) then
-        v3rho3 = v3rho3*fr3 + &
-            irho(1)*(v2rho2*fr*(2.0_dp - 2.0_dp*fr2 + fd2) - &
-            irho(1)*3.0_dp*vrho*fr*fd2)
-        v2rho2 = v2rho2*fr2 + irho(1)*vrho*fd2
-        vrho = vrho*fr
-        v3rho2sigma = v3rho2sigma*fr2 + irho(1)*v2rhosigma*fd2
-        v2rhosigma = v2rhosigma*fr
-        v3rhosigma2 = v3rhosigma2*fr
-      end if
       exc = exc + xc_weights(i)*e(1)
       vxc = vxc + xc_weights(i)*(vrho(1) - 2.0_dp*(vsigma(1)*laplacian(1) + &
                                                    v2rhosigma(1)*sigma(1) + &
                                                    2.0_dp*v2sigma2(1)*crossed(1)))
-      dexcrho = dexcrho + xc_weights(i)*irho(1)*(vrho(1) - e(1))
-      dexcsigma = dexcsigma + xc_weights(i)*irho(1)*vsigma(1)
+      dexcrho = dexcrho + xc_weights(i)*irho*(vrho(1) - e(1))
+      dexcsigma = dexcsigma + xc_weights(i)*irho*vsigma(1)
       dvxcrho = dvxcrho + xc_weights(i)*(v2rho2(1) - 2.0_dp*(v2rhosigma(1)*laplacian(1) + &
                                                              v3rho2sigma(1)*sigma(1) + &
                                                              2.0_dp*v3rhosigma2(1)*crossed(1)))
@@ -237,8 +216,13 @@ subroutine xc_calc_impl(dens, lapl, grad, hess, exc, vxc, dexcrho, dexcsigma, dv
   dvxclapl = dvxclapl*hartree*abohr5
   dvxccross = dvxccross*hartree*abohr13
   if (need2) then
-    d2excrho2 = irho(1)*(dvxcrho - 2.0_dp*dexcrho)*abohr3
+    d2excrho2 = irho*(dvxcrho - 2.0_dp*dexcrho)*abohr3
     d2vxcrho2 = d2vxcrho2*hartree*abohr6
+  end if
+  if (xc_reg) then
+    invdens = 1.0_dp/indens
+    if (need2) d2vxcrho2 = invdens*invdens*(d2vxcrho2*dens*dens + invdens*dvxcrho*xc_delta*xc_delta)
+    dvxcrho = dvxcrho*dens*invdens
   end if
 end subroutine xc_calc_impl
 
