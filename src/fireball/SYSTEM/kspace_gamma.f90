@@ -13,10 +13,11 @@ subroutine kspace_gamma ()
   & jatom, jmu, jnu, mbeta, mineig, lm
   real(dp), dimension (norbitals) :: eigen
   real(dp), dimension (:), allocatable :: ww, work
-  real(dp), dimension (norbitals, norbitals) :: yyyy, zzzz
+  real(dp), dimension (:, :), allocatable :: yyyy, zzzz
   real(dp), dimension (:, :), allocatable :: xxxx
   integer :: lwork, info
   ikpoint = 1
+  allocate (yyyy(norbitals, norbitals), zzzz(norbitals, norbitals))
   yyyy = a0
 
   if ((Kscf == 1) .and. (iqout == 3)) then
@@ -123,19 +124,10 @@ subroutine kspace_gamma ()
       errno = -info
       return
     end if
-    mineig = 0
-    do imu = 1, norbitals
-      if (eigen(imu) < overtol) then
-        mineig = imu
-        exit
-      end if
-    end do
-    mineig = mineig + 1
+    mineig = count(eigen(1:norbitals) < overtol) + 1
     norbitals_new = norbitals + 1 - mineig
     if ((norbitals_new /= norbitals) .and. ((iqout == 1) .or. (iqout == 3))) then
-      ! errno = 13
-      ! return
-      eigen(norbitals_new:norbitals) = eigen(norbitals_new:norbitals) + overtol
+      eigen(1:mineig-1) = overtol
       norbitals_new = norbitals
     end if
     allocate(xxxx(norbitals, norbitals_new))

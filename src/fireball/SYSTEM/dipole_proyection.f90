@@ -1,25 +1,21 @@
 subroutine dipole_proyection()
   use, intrinsic :: iso_fortran_env, only: dp => real64
-  use M_system, only: natoms, ratom, imass, neigh_max, Q0_TOT, neigh_b, neigh_j, neighn, neigh_self, Qin, Qout, dip_x, &
-    & dipQout_x, dipTot_x, dipIntra_x, dip_res_x, dipQin_x, dipRes_x, dip_y, dipQout_y, dipTot_y, dipIntra_y, dip_res_y, dipQin_y, &
-    & dipRes_y, dip_z, dipQout_z, dipTot_z, dipIntra_z, dip_res_z, dipQin_z, dipRes_z, dip_tot, dip_proy, dipQin_tot, dipTot_tot, &
-    & dipIntra_tot, dipQout_tot, dip_res_tot, dipRes_tot, dq_DP, rho, s_mat, dipc, xl
-  use M_fdata, only: num_orb,nssh,Qneutral
+  use M_system, only: natoms, ratom, imass, neigh_max, neigh_b, neigh_j, neighn, neigh_self, dq_DP, rho, s_mat, dipc, xl, &
+    & Q0_TOT, dipTot_x, dipTot_y, dipTot_z
+  use M_fdata, only: num_orb
   implicit none
-  real(dp), parameter ::  Debye = 0.208194_dp
   real(dp), parameter ::  klambda = 1.4_dp
   integer iatom
   integer imu
   integer in1, in2
   integer ineigh
   integer inu
-  integer issh
   integer jatom
   integer mbeta
-  real(dp)      Qtot, Qtot1, Qtot2
-  real(dp), dimension(3) :: r1,r2,Rbc,u21
+  real(dp) dip_x, dip_y, dip_z, dip_proy
+  real(dp), dimension(3) :: r1,r2,u21,Rbc
   real(dp), dimension(3) :: rmedio, raux
-  real(dp)      w_suma  
+  real(dp)      w_suma
   real(dp), dimension(3,3) :: bwrr, bwrr_inv, u_bwrr, ut_bwrr, v_bwrr, vt_bwrr, zero_bwrr
   real(dp), dimension (natoms) :: c_k
   real(dp), dimension (neigh_max) :: w_k
@@ -32,106 +28,40 @@ subroutine dipole_proyection()
   integer :: info
   real(dp), dimension(3) :: s_bwrr
   real(dp), dimension(15) :: dummy
-  do iatom = 1, natoms
-    Q0_TOT(iatom) = 0
-    in1 = imass(iatom)
-    do issh = 1, nssh(in1)
-      Q0_TOT(iatom) = Q0_TOT(iatom) + Qneutral(issh,in1)
-    end do
-  end do
-  dip_x=0.0_dp
-  dip_y=0.0_dp
-  dip_z=0.0_dp
-  do iatom = 1, natoms
-    Qtot=-Q0_TOT(iatom)
-    in1 = imass(iatom)
-    do issh = 1,nssh(in1)
-      Qtot = Qtot+Qout(issh,iatom)
-    end do
-    dip_x = dip_x+Qtot*ratom(1,iatom)
-    dip_y = dip_y+Qtot*ratom(2,iatom)
-    dip_z = dip_z+Qtot*ratom(3,iatom)      
-  enddo !end do iatom = 1,natoms
-  dip_tot      = sqrt (dip_x**2 + dip_y**2 + dip_z**2 )    
-  dipQin_x    = dip_x
-  dipQin_y    = dip_y
-  dipQin_z    = dip_z
-  dipQin_tot = dip_tot
   dip_x = 0.0_dp
   dip_y = 0.0_dp
   dip_z = 0.0_dp
   do iatom = 1, natoms
-    in1 = imass(iatom)
     r1(:) = ratom(:,iatom)
-    do issh = 1,nssh(in1)
-     Qtot = Qtot+Qin(issh,iatom)
-    end do !end do issh = 1,nssh(in1)
     dip_x = dip_x-Q0_TOT(iatom)*r1(1)
-    dip_y = dip_y-Q0_TOT(iatom)*r1(2)    
+    dip_y = dip_y-Q0_TOT(iatom)*r1(2)
     dip_z = dip_z-Q0_TOT(iatom)*r1(3)
-  end do !end do iatom = 1,natoms
+  end do
   do iatom = 1, natoms
     in1 = imass(iatom)
-    r1(:) = ratom(:,iatom)    
+    r1(:) = ratom(:,iatom)
     do ineigh = 1,neighn(iatom)
       mbeta = neigh_b(ineigh,iatom)
       jatom = neigh_j(ineigh,iatom)
       r2(:) = ratom(:,jatom) + xl(:,mbeta)
-      in2 = imass(jatom)      
+      in2 = imass(jatom)
       Rbc(:)=(r1(:)+r2(:))/2.0_dp
-      u21(:)=(r2(:)-r1(:))/(sqrt((r2(1)-r1(1))**2+(r2(2)-r1(2))**2+(r2(3)-r1(3))**2))
       do imu = 1,num_orb(in1)
         do inu = 1,num_orb(in2)
           dip_x = dip_x + rho(imu,inu,ineigh,iatom)*(dipc(1,imu,inu,ineigh,iatom) + Rbc(1)*s_mat(imu,inu,ineigh,iatom))
           dip_y = dip_y + rho(imu,inu,ineigh,iatom)*(dipc(2,imu,inu,ineigh,iatom) + Rbc(2)*s_mat(imu,inu,ineigh,iatom))
           dip_z = dip_z + rho(imu,inu,ineigh,iatom)*(dipc(3,imu,inu,ineigh,iatom) + Rbc(3)*s_mat(imu,inu,ineigh,iatom))
-        end do !end do inu
-      end do !end do imu
-    end do !end ineigh = 1,natoms
-  end do ! end do iatom = 1,natoms
-  dip_tot = sqrt (dip_x**2 + dip_y**2 + dip_z**2 )
-  dipTot_x    = dip_x
-  dipTot_y    = dip_y
-  dipTot_z    = dip_z
-  dipTot_tot = dip_tot
-  ! save the intraatomic dipole
-  dip_x = 0.0_dp
-  dip_y = 0.0_dp
-  dip_z = 0.0_dp      
+        end do
+      end do
+    end do
+  end do
+  dipTot_x = dip_x
+  dipTot_y = dip_y
+  dipTot_z = dip_z
   do iatom = 1, natoms
-    in1 = imass(iatom)
-    r1(:) = ratom(:,iatom)
-    do ineigh = 1,neighn(iatom)
-      mbeta = neigh_b(ineigh,iatom)
-      jatom = neigh_j(ineigh,iatom)
-      r2(:) = ratom(:,jatom) + xl(:,mbeta)
-      in2 = imass(jatom)
-      Rbc(:)=(r1(:)+r2(:))/2.0_dp
-      u21(:)=(r2(:)-r1(:))/(sqrt((r2(1)-r1(1))**2+(r2(2)-r1(2))**2+(r2(3)-r1(3))**2))
-      do imu = 1,num_orb(in1)
-        do inu = 1,num_orb(in2)
-          if ((iatom .eq. jatom) .and. (imu .ne. inu)) then
-            dip_x = dip_x + rho(imu,inu,ineigh,iatom)*(dipc(1,imu,inu,ineigh,iatom) + Rbc(1)*s_mat(imu,inu,ineigh,iatom))
-            dip_y = dip_y + rho(imu,inu,ineigh,iatom)*(dipc(2,imu,inu,ineigh,iatom) + Rbc(2)*s_mat(imu,inu,ineigh,iatom))
-            dip_z = dip_z + rho(imu,inu,ineigh,iatom)*(dipc(3,imu,inu,ineigh,iatom) + Rbc(3)*s_mat(imu,inu,ineigh,iatom))
-          end if !end if
-        end do !end do inu
-      end do !end do imu
-    end do !end ineigh = 1,natoms
-  end do ! end do iatom = 1,natoms
-  dip_tot = sqrt (dip_x**2 + dip_y**2 + dip_z**2 )
-  dipIntra_x    = dip_x
-  dipIntra_y    = dip_y
-  dipIntra_z    = dip_z
-  dipIntra_tot = dip_tot
-  !DIP RES = DIP_TOT - PROY
-  dip_res_x = 0.0_dp
-  dip_res_y = 0.0_dp
-  dip_res_z = 0.0_dp
-  do iatom = 1, natoms
-    dip_res_x = 0.0_dp
-    dip_res_y = 0.0_dp
-    dip_res_z = 0.0_dp
+    dip_x = 0.0_dp
+    dip_y = 0.0_dp
+    dip_z = 0.0_dp
     in1 = imass(iatom)
     r1(:) = ratom(:,iatom)    
     do ineigh = 1,neighn(iatom)
@@ -139,63 +69,42 @@ subroutine dipole_proyection()
       jatom = neigh_j(ineigh,iatom)
       r2(:) = ratom(:,jatom) + xl(:,mbeta)
       in2 = imass(jatom)
-      Rbc(:)=(r1(:)+r2(:))/2.0_dp
       do imu = 1,num_orb(in1)
         do inu = 1,num_orb(in2)
-          if (iatom .ne. jatom) then !.or. imu .eq. inu) then
+          if ((iatom .ne. jatom) .or. (mbeta .ne. 0)) then
             u21(:)=(r2(:)-r1(:))/(sqrt((r2(1)-r1(1))**2+(r2(2)-r1(2))**2+(r2(3)-r1(3))**2))
             dip_proy = dipc(1,imu,inu,ineigh,iatom)*u21(1) + dipc(2,imu,inu,ineigh,iatom)*u21(2) + dipc(3,imu,inu,ineigh,iatom)*u21(3)
-            dip_res_x = dip_res_x + rho(imu,inu,ineigh,iatom)*(dipc(1,imu,inu,ineigh,iatom) - dip_proy*u21(1))
-            dip_res_y = dip_res_y + rho(imu,inu,ineigh,iatom)*(dipc(2,imu,inu,ineigh,iatom) - dip_proy*u21(2))
-            dip_res_z = dip_res_z + rho(imu,inu,ineigh,iatom)*(dipc(3,imu,inu,ineigh,iatom) - dip_proy*u21(3))
-          end if !end if
-        end do !end do inu
-      end do !end do imu
-    end do !end ineigh = 1,natoms
-    dip_res_tot = sqrt (dip_res_x**2 + dip_res_y**2 + dip_res_z**2 )
-    dipRes_x = dipRes_x + dip_res_x
-    dipRes_y = dipRes_y + dip_res_y
-    dipRes_z = dipRes_z + dip_res_z
-    res_dip(1,iatom) = dip_res_x
-    res_dip(2,iatom) = dip_res_y
-    res_dip(3,iatom) = dip_res_z
-  end do ! end do iatom = 1,natoms
-  dipRes_tot = sqrt (dipRes_x**2 + dipRes_y**2 + dipRes_z**2 ) 
+            dip_x = dip_x + rho(imu,inu,ineigh,iatom)*(dipc(1,imu,inu,ineigh,iatom) - dip_proy*u21(1))
+            dip_y = dip_y + rho(imu,inu,ineigh,iatom)*(dipc(2,imu,inu,ineigh,iatom) - dip_proy*u21(2))
+            dip_z = dip_z + rho(imu,inu,ineigh,iatom)*(dipc(3,imu,inu,ineigh,iatom) - dip_proy*u21(3))
+          end if
+        end do
+      end do
+    end do
+    res_dip(1,iatom) = dip_x
+    res_dip(2,iatom) = dip_y
+    res_dip(3,iatom) = dip_z
+  end do
   do iatom = 1, natoms
     dip_x = 0.0_dp
     dip_y = 0.0_dp
     dip_z = 0.0_dp
     in1 = imass(iatom)
     r1(:) = ratom(:,iatom)
-    Qtot=0.0_dp
-    Qtot1=0.0_dp
-    do issh = 1,nssh(in1)
-      Qtot1 = Qtot1+Qin(issh,iatom)
-    end do !end do issh = 1,nssh(in1)
-    Qtot=0.0_dp
-    Qtot2=0.0_dp
-    do issh = 1,nssh(in1)
-      Qtot2 = Qtot2+Qout(issh,iatom)
-    end do !end do issh = 1,nssh(in1)
-    jatom=iatom
-    ineigh=neigh_self(iatom)
-    in2=in1
-    r2(:)=r1(:)
-    Rbc(:)=(r1(:)+r2(:))/2.0_dp
+    ineigh = neigh_self(iatom)
     do imu = 1,num_orb(in1)
-      do inu = 1,num_orb(in2)
-        if ( (imu .ne. inu)) then
-          dip_x = dip_x + rho(imu,inu,ineigh,iatom)*(dipc(1,imu,inu,ineigh,iatom) + Rbc(1)*s_mat(imu,inu,ineigh,iatom))
-          dip_y = dip_y + rho(imu,inu,ineigh,iatom)*(dipc(2,imu,inu,ineigh,iatom) + Rbc(2)*s_mat(imu,inu,ineigh,iatom))
-          dip_z = dip_z + rho(imu,inu,ineigh,iatom)*(dipc(3,imu,inu,ineigh,iatom) + Rbc(3)*s_mat(imu,inu,ineigh,iatom))
-        end if !end if
-      end do !end do inu
-    end do !end do imu
-    intra_dip(1,iatom) = dip_x + res_dip(1,iatom)!/Debye
-    intra_dip(2,iatom) = dip_y + res_dip(2,iatom)!/Debye
-    intra_dip(3,iatom) = dip_z + res_dip(3,iatom)!/Debye
-    dip_tot = sqrt (dip_x**2 + dip_y**2 + dip_z**2 )
-  end do !end do iatom = 1,natoms
+      do inu = 1,num_orb(in1)
+        if (imu .ne. inu) then
+          dip_x = dip_x + rho(imu,inu,ineigh,iatom)*(dipc(1,imu,inu,ineigh,iatom) + r1(1)*s_mat(imu,inu,ineigh,iatom))
+          dip_y = dip_y + rho(imu,inu,ineigh,iatom)*(dipc(2,imu,inu,ineigh,iatom) + r1(2)*s_mat(imu,inu,ineigh,iatom))
+          dip_z = dip_z + rho(imu,inu,ineigh,iatom)*(dipc(3,imu,inu,ineigh,iatom) + r1(3)*s_mat(imu,inu,ineigh,iatom))
+        end if
+      end do
+    end do
+    intra_dip(1,iatom) = dip_x + res_dip(1,iatom)
+    intra_dip(2,iatom) = dip_y + res_dip(2,iatom)
+    intra_dip(3,iatom) = dip_z + res_dip(3,iatom)
+  end do
   dq_DP = 0.0_dp
   do iatom = 1, natoms
     in1 = imass(iatom)
@@ -250,31 +159,6 @@ subroutine dipole_proyection()
       dq_DP(jatom) = dq_DP(jatom) + c_k(jatom)
     end do
   end do ! end do iatom = 1,natoms
-  do iatom = 1, natoms
-    Q0_TOT(iatom) = 0
-    in1 = imass(iatom)
-    do issh = 1, nssh(in1)
-      Q0_TOT(iatom) = Q0_TOT(iatom) + Qneutral(issh,in1)
-    end do
-  end do
-  dip_x = 0.0_dp
-  dip_y = 0.0_dp
-  dip_z = 0.0_dp
-  do iatom = 1, natoms
-    Qtot=-Q0_TOT(iatom)+dq_DP(iatom)
-    in1 = imass(iatom)
-    do imu = 1,nssh(in1)
-      Qtot = Qtot+Qout(imu,iatom)
-    end do
-    dip_x = dip_x+Qtot*ratom(1,iatom)
-    dip_y = dip_y+Qtot*ratom(2,iatom)
-    dip_z = dip_z+Qtot*ratom(3,iatom)
-  end do !end do iatom = 1,natoms
-  dip_tot = sqrt (dip_x**2 + dip_y**2 + dip_z**2 )    
-  dipQout_x    = dip_x
-  dipQout_y    = dip_y
-  dipQout_z    = dip_z
-  dipQout_tot = dip_tot
 end subroutine dipole_proyection
 
 function get_min_parabola(x1,x2,x3,y1,y2,y3)

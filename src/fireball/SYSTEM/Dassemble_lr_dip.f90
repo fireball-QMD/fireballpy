@@ -1,6 +1,6 @@
 subroutine Dassemble_lr_dip ()
   use, intrinsic :: iso_fortran_env, only: dp => real64
-  use M_constants, only: eq2
+  use M_constants, only: eq2, bc_near
   use M_system, only: natoms, ratom, imass, neigh_self, neigh_pair_a1, neigh_pair_a2, neigh_pair_n1, neigh_pair_n2, &
     & numorb_max, tot_pairs, sp_mat, dippc, Qin, rho, s_mat, dipc, flrew
   use M_fdata, only: nssh, Qneutral,num_orb
@@ -67,7 +67,7 @@ subroutine Dassemble_lr_dip ()
         r21(:) = r2(:) - r1(:)
         rnabc(:) = rna(:) - (r1(:) + r21(:)/2.0_dp)
         x = sqrt(rnabc(1)**2 + rnabc(2)**2 + rnabc(3)**2)
-        if (x .lt. 1.0e-05_dp) then
+        if (x .lt. bc_near) then
           emnpl = 0.0_dp
           demnplA = 0.0_dp
           demnplB = 0.0_dp
@@ -91,7 +91,7 @@ subroutine Dassemble_lr_dip ()
               end do 
             end do  !imu
           end do   !inu
-        end if   ! (x .lt. 1.0e-05_dp)
+        end if   ! (x .lt. bc_near)
       end if  ! end if if ((dist13 .lt. 1.0e-5_dp) .or. (dist23 .lt.1.0e-5_dp)) 
     end do     ! end do ialp = 1, natoms
   end do !end do ipair 
@@ -120,7 +120,7 @@ subroutine Dassemble_lr_dip ()
         r21(:) = r2(:) - r1(:)
         rnabc(:) = rna(:) - (r1(:) + r21(:)/2.0_dp)
         x = sqrt(rnabc(1)**2 + rnabc(2)**2 + rnabc(3)**2)
-        if (x .lt. 1.0e-05_dp) then
+        if (x .lt. bc_near) then
           emnpl = 0.0_dp
           demnplA = 0.0_dp
           demnplB = 0.0_dp
@@ -144,7 +144,7 @@ subroutine Dassemble_lr_dip ()
               end do 
             end do  
           end do   
-        end if   !(x .lt. 1.0e-05_dp)
+        end if   !(x .lt. bc_near)
       end if  !end if if ((dist13 .lt. 1.0e-5_dp) .or. (dist23 .lt.1.0e-5_dp)) 
     end do !ialp 
   end do !iatom 

@@ -1,3 +1,4 @@
+import numpy as np
 import dftd3.interface as d3i
 
 from fireballpy._errors import type_check
@@ -50,13 +51,17 @@ class Correction:
         subclass = subclass_map[kind]
         return super(cls, subclass).__new__(subclass)
 
+    @staticmethod
+    def _lattice(atomsystem: AtomSystem) -> np.ndarray | None:
+        return atomsystem.cell/Bohr if atomsystem.isperiodic else None
+
     def update_coords(self, atomsystem: AtomSystem) -> None:
-        self.disp.update(atomsystem.positions/Bohr)  # type: ignore
+        self.disp.update(atomsystem.positions/Bohr, self._lattice(atomsystem))  # type: ignore
 
     def correct(self) -> None:
         self.res = self.disp.get_dispersion(param=self.dpar, grad=True)  # type: ignore
-        self.res['energy'] *= Hartree
-        self.res['gradient'] *= Hartree/Bohr
+        self.energy = float(self.res['energy'])*Hartree
+        self.forces = -np.ascontiguousarray(self.res['gradient'])*Hartree/Bohr
 
 
 class _DFTD3Correction(Correction):
@@ -99,7 +104,9 @@ class _DFTD3Correction(Correction):
         """
         try:
             self.disp = d3i.DispersionModel(atomsystem.numbers,
-                                            atomsystem.positions/Bohr)
+                                            atomsystem.positions/Bohr,
+                                            lattice=self._lattice(atomsystem),
+                                            periodic=atomsystem.pbc if atomsystem.isperiodic else None)
         except RuntimeError:
             raise ValueError("Cannot construct dispersion model for dftd3")
 

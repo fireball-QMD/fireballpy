@@ -182,10 +182,7 @@ module M_system
   real(dp), dimension (:), allocatable :: QLowdin_TOT
   real(dp), dimension (:), allocatable :: QMulliken_TOT
   real(dp), allocatable, dimension(:,:) :: qaux
-  real(dp) :: dip_x, dipQout_x, dipTot_x, dipProy_x, dipIntra_x, dip_res_x, dipQin_x, dipRes_x
-  real(dp) :: dip_y, dipQout_y, dipTot_y, dipProy_y, dipIntra_y, dip_res_y, dipQin_y, dipRes_y
-  real(dp) :: dip_z, dipQout_z, dipTot_z, dipProy_z, dipIntra_z, dip_res_z, dipQin_z, dipRes_z
-  real(dp) :: dip_tot, dip_proy, dipQin_tot, dipTot_tot, dipIntra_tot, dipQout_tot, dip_res_tot, dipRes_tot 
+  real(dp) :: dipTot_x, dipTot_y, dipTot_z
   real(dp), dimension (:), allocatable :: dq_DP
 
   !interaccions

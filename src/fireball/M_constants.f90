@@ -20,6 +20,7 @@ module M_constants
 
   real(dp), parameter :: kconvert = 11604.49558_dp
   real(dp), parameter :: pi = 3.141592653589793238462_dp
+  real(dp), parameter :: bc_near = 1.0e-2_dp
   real(dp), parameter :: spin = 2.0_dp
 
   ! Gear algorithm constants_fireball

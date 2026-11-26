@@ -185,6 +185,7 @@ subroutine get_ewald (iauxforce)
   do iatom = 1, natoms
    ewald(iatom,iatom) = ewald(iatom,iatom) - 2.0_dp*kappa/sqrt(pi)
   end do
+  if (icluster .eq. 0) ewald = ewald - pi/(volcel*kappa**2)
   if (iauxforce .eq. 1) fewald = fewald1 + fewald2
   return
 end subroutine get_ewald

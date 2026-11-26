@@ -14,7 +14,7 @@ subroutine stationary_charges()
   integer :: ineigh ,jatom
   integer :: i,j
   ! correcciones GSN del sistema completo linealizado (igsn=4), calculadas en load_M
-  real(dp),dimension(nssh_tot,nssh_tot) :: gsnM
+  real(dp),dimension(:,:),allocatable :: gsnM
   real(dp),dimension(nssh_tot) :: gsnB
   real(dp) :: Ep2
   integer :: issh1, mu_min, mu_max, l, inumorb
@@ -36,6 +36,7 @@ subroutine stationary_charges()
   real(dp), dimension (:), allocatable :: Q0v, sing, bp, xv
   real(dp), dimension (:,:), allocatable :: Gm
   alpha = 0
+  allocate(gsnM(nssh_tot,nssh_tot))
   call load_M()
   !todos libres
   do issh=1,nssh_tot
@@ -396,7 +397,7 @@ subroutine stationary_charges()
                   abarL = arhoij_off(issh,jssh,ineigh,iatom)
                 end if
                 Ssh = sm_mat(issh,jssh,ineigh,iatom)
-                if (abs(Ssh) < xc_overtol) Ssh = sign(xc_overtol, Ssh)
+                if (.not. onsite) Ssh = sqrt(Ssh*Ssh + xc_overtol*xc_overtol)
                 call xc_calc(abar, exc_dum, muxc_dum, dexc_dum, dmu, d2exc_dum, d2mu)
                 call xc_calc(abarL, exc_dum, muxc_dum, dexc_dum, dmuL, d2exc_dum, d2muL)
                 do imu = 1, num_orb(in1)

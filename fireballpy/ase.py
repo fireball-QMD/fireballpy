@@ -28,6 +28,9 @@ class Fireball(Calculator):
     This class has been designed with the idea of being used as part of
     `ASE's API <https://wiki.fysik.dtu.dk/ase/>`_.
     As such, it needs to be attached to a valid :class:`ase.Atoms` object.
+    The periodicity is taken from ``atoms.pbc``: the cell vectors along the directions
+    with ``pbc=False`` are ignored, so an :class:`ase.Atoms` object with a cell and
+    ``pbc=False`` is computed as a cluster.
 
     For a detailed tutorial on how to use this class please look at
     the :ref:`FireballPy User Guide <user_guide>`.
@@ -377,7 +380,9 @@ class Fireball(Calculator):
         atomsystem = AtomSystem(species=set(atoms.get_chemical_symbols()),
                                     numbers=atoms.get_atomic_numbers(),
                                     positions=atoms.get_positions(),
-                                    a1=atoms.cell[0], a2=atoms.cell[1], a3=atoms.cell[2])
+                                    a1=atoms.cell[0] if atoms.pbc[0] else None,
+                                    a2=atoms.cell[1] if atoms.pbc[1] else None,
+                                    a3=atoms.cell[2] if atoms.pbc[2] else None)
         fdatafiles = FDataFiles(fdata=self.fdata,
                                 atomsystem=atomsystem)
         kpoints = KPoints(kpts=self.kpts,
@@ -400,7 +405,7 @@ class Fireball(Calculator):
         global _fb_owner
         if "numbers" in system_changes:
             self.fireball = self._init_system(atoms)
-        elif "cell" in system_changes:
+        elif "cell" in system_changes or "pbc" in system_changes:
             assert self.fireball is not None
             self.fireball = self._init_system(atoms, self.fireball.shell_charges)
         elif _fb_owner is None or _fb_owner != self._init_time:

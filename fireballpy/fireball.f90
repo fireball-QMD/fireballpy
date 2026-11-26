@@ -258,7 +258,7 @@ end subroutine get_initial_charges
 ! Compute the SCF loop
 subroutine scf(natoms, nshell, nkpts, norbitals, &
   &            verbose, fix_charges, shell_charges, eigenvalues, eigenvectors, &
-  &            nbands, converged, errno_out, energy, fermi_level, charges)
+  &            converged, nbands, errno_out, energy, fermi_level, charges)
   use, intrinsic :: iso_c_binding, only: c_double, c_double_complex
   use M_system, only: errno, scf_achieved, etot, efermi, eigen_k, Qin, imass, ifixcharge, icluster, &
     & igamma, bbnkre, bbnkim, norbitals_new

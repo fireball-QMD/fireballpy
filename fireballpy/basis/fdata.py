@@ -539,18 +539,20 @@ def basis(folder: Annotated[pathlib.Path, Parameter(validator=Path(exists=True, 
     output = output.absolute()
     els = sorted(Element.load(elements, opt="'FOLDER' / '--folder'", folder=folder), key=lambda el: el.nznuc)
     if exc is None:
+        if exc_weights is not None:
+            raise_err(TypeError("If '--exc' is not specified, then '--exc-weights' must not be"))
         all_same = True
         for el in els[1:]:
-            if any(n != els[0].exc_names for n in el.exc_names) or any(w != els[0].exc_weights for w in el.exc_weights):
+            if el.exc_names != els[0].exc_names or not np.array_equal(el.exc_weights, els[0].exc_weights):
                 all_same = False
                 break
         if all_same:
-            exc = els[0].exc_names
+            exc = [x.strip() for x in els[0].exc_names]
             exc_weights = [float(x) for x in els[0].exc_weights]
         else:
+            warnings.warn("The wavefunctions of the elements use different XC functionals, "
+                          "using the default gga_x_pbe gga_c_pbe", UserWarning)
             exc = ["gga_x_pbe", "gga_c_pbe"]
-        if exc_weights is not None:
-            raise_err(TypeError("If '--exc' is not specified, then '--exc-weights' must not be"))
     if exc_weights is None:
         exc_weights = [1.0 for _ in exc]
     if len(exc) != len(exc_weights):

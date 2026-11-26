@@ -1,6 +1,6 @@
 subroutine assemble_ca_3c_dip ()
   use, intrinsic :: iso_fortran_env, only: dp => real64
-  use M_constants, only: eq2
+  use M_constants, only: eq2, bc_near
   use M_system, only: smt_elect, natoms, ratom, imass, neigh_max, ewaldsr, neigh_b, neigh_j, neighn, neigh_comb, neigh_comj, &
     & neigh_comm, neigh_comn, neigh_back, neigh_self, numorb_max, Qin, s_mat, vca, dipc, xl, g_h, get_shell_ofatom_issh, kscf, iqout
 
@@ -151,7 +151,7 @@ subroutine assemble_ca_3c_dip ()
         call smoother (distance_23, rend2, smt_elect, stn_temp2, dstn_temp)
         stn1 = stn_temp1*stn_temp2
         stn2 = 1.0_dp - stn1
-        if (x .lt. 1.0e-05_dp) then
+        if (x .lt. bc_near) then
           emnpl = 0.0_dp
           emnpl_noq = 0.0_dp
         else
@@ -171,7 +171,7 @@ subroutine assemble_ca_3c_dip ()
               ewaldsr(inu,imu,jneigh,jatom) = ewaldsr(imu,inu,mneigh,iatom)
             end do
           end do
-        end if    ! end if (x .lt. 1.0e-05_dp)  
+        end if    ! end if (x .lt. bc_near)  
         bcca = 0.0_dp
         do isorp = 1, nssh(indna)
           interaction = 1

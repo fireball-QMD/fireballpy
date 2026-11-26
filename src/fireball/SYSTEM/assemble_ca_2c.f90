@@ -102,6 +102,7 @@ subroutine assemble_ca_2c ()
       stn1 = 1.0_dp
       stn2 = 0.0_dp
       emnpl = 0.0_dp
+      emnpl_noq = 0.0_dp
       if (y .gt. 1.0e-4_dp) then
         icount_sav = 0
         do issh = 1, nssh(in1)

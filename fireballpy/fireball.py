@@ -267,6 +267,7 @@ class BaseFireball:
             self.scf_computed = True
             if self.correction:
                 self._correction.correct()
+                self.energy += self._correction.energy
 
     def calc_forces(self, fix_charges: bool = False) -> None:
         """Check if SCF is computed, execute the loop if not,
@@ -284,6 +285,8 @@ class BaseFireball:
             fb_errno = calc_forces(self.forces.T)
             if fb_errno != 0:
                 raise_fb_error(fb_errno)
+            if self.correction:
+                self.forces += self._correction.forces
             self.forces_computed = True
 
     def update_coords(self, positions: ArrayLike) -> None:

@@ -34,6 +34,8 @@ subroutine Dassemble_ca_3c ()
   real(dp) dq3
   real(dp) dstn_temp1
   real(dp) dstn_temp2
+  real(dp) s13
+  real(dp) s23
   real(dp) dterm
   real(dp) dxn
   real(dp) rcutoff_ialp
@@ -153,9 +155,11 @@ subroutine Dassemble_ca_3c ()
       do jssh = 1, nssh(in2)
        rend1 = rcutoff_i + rcutoff_ialp
        rend2 = rcutoff_j + rcutoff_ialp
-       call smoother (distance13, rend1, smt_elect, stn_temp1, dstn_temp1)
-       call smoother (distance23, rend2, smt_elect, stn_temp2, dstn_temp2)
-       stn_temp1 = stn_temp1*stn_temp2
+       call smoother (distance13, rend1, smt_elect, s13, dstn_temp1)
+       call smoother (distance23, rend2, smt_elect, s23, dstn_temp2)
+       stn_temp1 = s13*s23
+       dstn_temp1 = dstn_temp1*s23
+       dstn_temp2 = s13*dstn_temp2
        stn_temp2 = 1.0_dp - stn_temp1
        do inu = 1, lssh(issh,in1)*2 + 1
         icount = icount_sav + inu
@@ -175,8 +179,8 @@ subroutine Dassemble_ca_3c ()
      dstnC = 0.0_dp
      do inu = 1, num_orb(in2)
       do imu = 1, num_orb(in1)
-       dstnB(:,imu,inu) = - dstn1(imu,inu)*stn2(imu,inu)*rhatA1(:)
-       dstnC(:,imu,inu) = - stn1(imu,inu)*dstn2(imu,inu)*rhatA2(:)
+       dstnB(:,imu,inu) = - dstn1(imu,inu)*rhatA1(:)
+       dstnC(:,imu,inu) = - dstn2(imu,inu)*rhatA2(:)
       end do
      end do
      dstnA = - dstnB - dstnC

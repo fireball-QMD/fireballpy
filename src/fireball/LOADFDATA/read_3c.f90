@@ -37,11 +37,6 @@ subroutine read_3c (interaction)
     allocate (hy_bcna(0:maxtype, nspecies**3))
     allocate (x3cmax_bcna(0:maxtype, nspecies**3))
     allocate (y3cmax_bcna(0:maxtype, nspecies**3))
-    bcna_01 = 0.0_dp
-    bcna_02 = 0.0_dp
-    bcna_03 = 0.0_dp
-    bcna_04 = 0.0_dp
-    bcna_05 = 0.0_dp
     numx3c_bcna = 0
     numy3c_bcna = 0
     x3cmax_bcna = 0.0_dp
@@ -92,11 +87,6 @@ subroutine read_3c (interaction)
     allocate (hy_den3(0:maxtype, nspecies**3))
     allocate (x3cmax_den3(0:maxtype, nspecies**3))
     allocate (y3cmax_den3(0:maxtype, nspecies**3))
-    den3_01 = 0.0_dp
-    den3_02 = 0.0_dp
-    den3_03 = 0.0_dp
-    den3_04 = 0.0_dp
-    den3_05 = 0.0_dp
     numx3c_den3 = 0
     numy3c_den3 = 0
     x3cmax_den3 = 0.0_dp
@@ -113,11 +103,6 @@ subroutine read_3c (interaction)
     allocate (den3S_03(numXmax, numYmax, ME3c_max, 0:maxtype, nspecies**3))
     allocate (den3S_04(numXmax, numYmax, ME3c_max, 0:maxtype, nspecies**3))
     allocate (den3S_05(numXmax, numYmax, ME3c_max, 0:maxtype, nspecies**3))
-    den3S_01 = 0.0_dp
-    den3S_02 = 0.0_dp
-    den3S_03 = 0.0_dp
-    den3S_04 = 0.0_dp
-    den3S_05 = 0.0_dp
   end if
 
   do in1 = 1, nspecies

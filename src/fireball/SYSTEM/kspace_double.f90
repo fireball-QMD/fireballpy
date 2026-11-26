@@ -18,9 +18,10 @@ subroutine kspace_dp (ikpoint, sks)
   real(dp), dimension(3*norbitals-2) :: rwork
   real(dp), dimension (:), allocatable :: ww
   complex(dp), dimension (:), allocatable :: work
-  complex(dp), dimension (norbitals, norbitals) :: yyyy, zzzz
+  complex(dp), dimension (:, :), allocatable :: yyyy, zzzz
   complex(dp), dimension (:, :), allocatable :: xxxx
   integer :: lwork, info
+  allocate (yyyy(norbitals, norbitals), zzzz(norbitals, norbitals))
   yyyy = a0
 
   if ((Kscf .eq. 1) .and. (iqout .eq. 3)) then
@@ -137,19 +138,10 @@ subroutine kspace_dp (ikpoint, sks)
       errno = -info
       return
     end if
-    mineig = 0
-    do imu = 1, norbitals
-      if (eigen(imu) .lt. overtol) then
-        mineig = imu
-        exit
-      end if
-    end do
-    mineig = mineig + 1
+    mineig = count(eigen(1:norbitals) .lt. overtol) + 1
     norbitals_new = norbitals + 1 - mineig
     if ((norbitals_new .ne. norbitals) .and. ((iqout .eq. 1) .or. (iqout .eq. 3))) then
-      ! errno = 13
-      ! return
-      eigen(norbitals_new:norbitals) = eigen(norbitals_new:norbitals) + overtol
+      eigen(1:mineig-1) = overtol
       norbitals_new = norbitals
     end if
     allocate(xxxx(norbitals, norbitals_new))

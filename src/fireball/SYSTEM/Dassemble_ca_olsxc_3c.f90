@@ -39,6 +39,8 @@ subroutine Dassemble_ca_olsxc_3c ()
   real(dp) d2exc
   real(dp) sx
   real(dp) sm
+  real(dp) st
+  real(dp) dst
   real(dp) rho_av
   real(dp), dimension (3, 3, 3) :: depsA
   real(dp), dimension (3, 3, 3) :: depsB
@@ -149,16 +151,11 @@ subroutine Dassemble_ca_olsxc_3c ()
         do issh = 1, nssh(in1)
           do jssh = 1, nssh(in2)
             sm = sm_mat(issh,jssh,mneigh,iatom)
-            if (abs(sm) .lt. xc_overtol) then
-              if(sm .gt. 0.0_dp) then
-                sm = xc_overtol
-              else
-                sm = -1.0_dp*xc_overtol
-              endif
-            endif
+            st = sqrt(sm*sm + xc_overtol*xc_overtol)
+            dst = sm/st
             spm(:) = spm_mat(:,issh,jssh,mneigh,iatom)
-            avrhop_b (:,issh,jssh) = avrhop_b (:,issh,jssh) + (sm*rhop_3cb(:,issh,jssh) - rho_3c(issh,jssh)*spm(:))/(sm*sm)
-            avrhop_c (:,issh,jssh) = avrhop_c (:,issh,jssh) + (sm*rhop_3cc(:,issh,jssh) + rho_3c(issh,jssh)*spm(:))/(sm*sm)
+            avrhop_b (:,issh,jssh) = avrhop_b (:,issh,jssh) + (st*rhop_3cb(:,issh,jssh) - rho_3c(issh,jssh)*dst*spm(:))/(st*st)
+            avrhop_c (:,issh,jssh) = avrhop_c (:,issh,jssh) + (st*rhop_3cc(:,issh,jssh) + rho_3c(issh,jssh)*dst*spm(:))/(st*st)
           end do
         end do
         n1 = 0

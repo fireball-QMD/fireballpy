@@ -1,6 +1,6 @@
 subroutine Dassemble_ca_3c_dip () 
   use, intrinsic :: iso_fortran_env, only: dp => real64
-  use M_constants, only: eq2
+  use M_constants, only: eq2, bc_near
   use M_system, only: smt_elect, natoms, ratom, imass, neigh_comb, neigh_comj, neigh_comm, neigh_comn, numorb_max, sp_mat, &
     & dippc, Qin, rho, s_mat, dipc, xl, f3caa, f3cab, f3cac
   use M_fdata, only: nssh,rcutoff,Qneutral,num_orb,nspecies
@@ -150,10 +150,10 @@ subroutine Dassemble_ca_3c_dip ()
         stn2 = 1.0_dp - stn1
         dstnB = 0.0_dp
         dstnC = 0.0_dp
-        dstnB(:) = - dstn1*stn2*rhatA1(:)
-        dstnC(:) = - stn1*dstn2*rhatA2(:)
+        dstnB(:) = - dstn1*stn_temp2*rhatA1(:)
+        dstnC(:) = - stn_temp1*dstn2*rhatA2(:)
         dstnA = - dstnB - dstnC
-        if (x .lt. 1.0e-05_dp) then
+        if (x .lt. bc_near) then
           emnpl = 0.0_dp
           demnplA = 0.0_dp
           demnplB = 0.0_dp

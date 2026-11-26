@@ -221,7 +221,9 @@ subroutine xc_calc_impl(dens, lapl, grad, hess, exc, vxc, dexcrho, dexcsigma, dv
   end if
   if (xc_reg) then
     invdens = 1.0_dp/indens
+    if (need2) d2excrho2 = invdens*invdens*(d2excrho2*dens*dens + invdens*dexcrho*xc_delta*xc_delta)
     if (need2) d2vxcrho2 = invdens*invdens*(d2vxcrho2*dens*dens + invdens*dvxcrho*xc_delta*xc_delta)
+    dexcrho = dexcrho*dens*invdens
     dvxcrho = dvxcrho*dens*invdens
   end if
 end subroutine xc_calc_impl

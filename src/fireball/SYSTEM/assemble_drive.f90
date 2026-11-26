@@ -7,12 +7,16 @@ subroutine assemble_drive()
   if (Kscf .eq. 1) then
 
     call neighbors()
+    if (errno .ne. 0) return
     call neighborsPP()
+    if (errno .ne. 0) return
     call num_neigh_tot ()
     !call initneighbors ()
     call backnay ()
+    if (errno .ne. 0) return
     call neighbors_pairs()
     call common_neighbors ()
+    if (errno .ne. 0) return
     call common_neighborsPP ()
     if (errno .ne. 0) return
     kforce = 0

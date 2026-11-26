@@ -45,8 +45,9 @@ subroutine neighborsPP ()
   real(dp), dimension (3) :: vec1, vec2, vec3, vec
   logical flag
 
-  neighPP_j = 0.0_dp
-  neighPP_b  = 0.0_dp
+  neighPP_j = 0
+  neighPP_b = 0
+  neighPPn = 0
 
   !   LIST nPP
   ! First we'are going to build nPP list of neighbors. The list includes all

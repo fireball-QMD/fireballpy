@@ -68,6 +68,7 @@ subroutine average_ca_rho (imode)
   real(dp), dimension (3) :: sighat
   real(dp), dimension (nsh_max, nsh_max) :: sm
   real(dp), dimension (3, nsh_max, nsh_max) :: spm
+  real(dp) :: st, dst
   !
   real(dp) rho_modified
 
@@ -477,18 +478,13 @@ subroutine average_ca_rho (imode)
      
         do issh = 1, nssh(in1)
           do jssh = 1, nssh(in2)
-            if (abs(sm(issh,jssh)) .lt. xc_overtol) then
-              if (sm(issh,jssh) .gt. 0.0_dp) then
-                sm(issh,jssh) =  xc_overtol
-              else
-                sm(issh,jssh) =  -1.0_dp*xc_overtol
-              endif
-            endif
-            arhoij_off(issh,jssh,ineigh,iatom) =  arhoij_off(issh,jssh,ineigh,iatom) +  rhom_2c(issh,jssh)/sm(issh,jssh)
-            arhopij_off(:,issh,jssh,ineigh,iatom) = arhopij_off(:,issh,jssh,ineigh,iatom)  + (rhomp_2c(:,issh,jssh)*sm(issh,jssh) - rhom_2c(issh,jssh)*spm(:,issh,jssh)) /(sm(issh,jssh)*sm(issh,jssh))
-            rho_modified=rhom_3c(issh,jssh,ineigh,iatom)/sm(issh,jssh)
-            arho_off(issh,jssh,ineigh,iatom) =  arho_off(issh,jssh,ineigh,iatom)  + rhom_2c(issh,jssh)/sm(issh,jssh) + rho_modified
-            arhop_off(:,issh,jssh,ineigh,iatom) = arhop_off(:,issh,jssh,ineigh,iatom) + (rhomp_2c(:,issh,jssh)*sm(issh,jssh) - rhom_2c(issh,jssh)*spm(:,issh,jssh)) /(sm(issh,jssh)*sm(issh,jssh))
+            st = sqrt(sm(issh,jssh)**2 + xc_overtol**2)
+            dst = sm(issh,jssh)/st
+            arhoij_off(issh,jssh,ineigh,iatom) =  arhoij_off(issh,jssh,ineigh,iatom) +  rhom_2c(issh,jssh)/st
+            arhopij_off(:,issh,jssh,ineigh,iatom) = arhopij_off(:,issh,jssh,ineigh,iatom)  + (rhomp_2c(:,issh,jssh)*st - rhom_2c(issh,jssh)*dst*spm(:,issh,jssh)) /(st*st)
+            rho_modified=rhom_3c(issh,jssh,ineigh,iatom)/st
+            arho_off(issh,jssh,ineigh,iatom) =  arho_off(issh,jssh,ineigh,iatom)  + rhom_2c(issh,jssh)/st + rho_modified
+            arhop_off(:,issh,jssh,ineigh,iatom) = arhop_off(:,issh,jssh,ineigh,iatom) + (rhomp_2c(:,issh,jssh)*st - rhom_2c(issh,jssh)*dst*spm(:,issh,jssh)) /(st*st)
           end do   
         end do   
       end if
@@ -616,13 +612,7 @@ contains
         do kjssh = 1, nssh(kin2)
           do kissh = 1, nssh(kin1)
             smval = sm_mat(kissh,kjssh,kineigh,kiatom)
-            if (abs(smval) .lt. xc_overtol) then
-            if (smval .gt. 0.0_dp) then
-              smval = xc_overtol
-            else
-              smval = -xc_overtol
-            end if
-          end if
+            smval = sqrt(smval**2 + xc_overtol**2)
             arho_off(kissh,kjssh,kineigh,kiatom) = dot_product(den_sh(:,kissh,kjssh,kineigh,kiatom), Qg)/smval
             arhoij_off(kissh,kjssh,kineigh,kiatom) = dot_product(denij_sh(:,kissh,kjssh,kineigh,kiatom), Qg)/smval
           end do
